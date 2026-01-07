@@ -14,7 +14,8 @@ const useRequestHelper = () => {
     // En développement local, utiliser directement le backend
     // Les rewrites Next.js ne fonctionnent pas pour les requêtes client-side (Axios)
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      return `http://localhost:5000${url}`;
+      console.log("http://localhost:${process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST}${url}", process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST);
+      return `${process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST}${url}`;
     }
     
     // En production, utiliser le préfixe /api (sera proxifié par nginx ou autre)

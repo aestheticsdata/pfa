@@ -1,6 +1,5 @@
 const dbConnection = require('../../../db/dbinitmysql');
-const sharp = require('sharp-m1');
-//const sharp = require('sharp'); // uncomment for Debian
+const sharp = require('sharp');
 const { access, unlink } = require('fs').promises;
 const { constants } = require('fs');
 const getImage = require('./helpers/getImage');

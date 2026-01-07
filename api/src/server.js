@@ -38,7 +38,7 @@ app.use('/statistics', require('./routes/api/statistics'));
 
 app.use(errorHandlerMiddleware);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 6100;
 
 const server = app.listen(port, () => console.log(`Server started on port ${port}`));
 server.headersTimeout = 15_000;

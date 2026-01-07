@@ -34,7 +34,7 @@ echo "📋 Current status:"
 pm2 list
 
 echo ""
-echo "✅ API running on http://localhost:5000"
+echo "✅ API running on http://localhost:6100"
 echo "✅ Next.js client running on http://localhost:3000"
 echo "💡 Press Ctrl+C to stop both services"
 
