@@ -41,3 +41,6 @@ ecosystem.config.js
 .idea/pfa-next.iml
 .idea/vcs.xml
 .idea/inspectionProfiles/Project_Default.xml
+
+.vscode/
+
