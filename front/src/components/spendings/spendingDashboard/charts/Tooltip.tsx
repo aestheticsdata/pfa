@@ -11,7 +11,7 @@ interface TooltipProps {
 const Tooltip = ({ tooltipPos, categoryInfos }: TooltipProps) => {
   return (
     <div
-      className="flex flex-col absolute w-[100px] h-[50px] bg-grey1 rounded border-2 border-white text-xs"
+      className="flex flex-col absolute w-[100px] h-[50px] bg-grey1 rounded-sm border-2 border-white text-xs"
       style={{
         left: tooltipPos.x + 20 + 'px',
         top: tooltipPos.y - 50 + 'px',

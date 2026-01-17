@@ -65,7 +65,7 @@ const DatePickerWrapper = () => {
       className="flex flex-col items-start bg-grey3 relative m-1"
     >
       <div
-        className="text-datePickerWrapper bg-datePickerWrapperBackground rounded px-2 select-none cursor-pointer hover:brightness-125"
+        className="text-datePickerWrapper bg-datePickerWrapperBackground rounded-sm px-2 select-none cursor-pointer hover:brightness-125"
         onClick={toggleCalendar}
       >
         {selectedDays.length > 0 ? (
@@ -80,7 +80,7 @@ const DatePickerWrapper = () => {
         )}
       </div>
         {isCalendarVisible && (
-          <div className="absolute top-8 p-4 rounded drop-shadow-2xl bg-blueNavy">
+          <div className="absolute top-8 p-4 rounded-sm drop-shadow-2xl bg-blueNavy">
             <DayPicker
               initialMonth={selectedDays[0]}
               locale="fr"

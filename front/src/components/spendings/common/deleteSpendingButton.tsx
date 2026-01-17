@@ -8,7 +8,7 @@ const DeleteSpendingButton = ({ spending, recurringType, hideConfirm }) => {
 
   return (
     <button
-      className="border border-grey1 bg-grey0 px-0.5 rounded hover:bg-grey1 hover:text-white"
+      className="border border-grey1 bg-grey0 px-0.5 rounded-sm hover:bg-grey1 hover:text-white"
       onClick={
         () => {
           recurringType ?

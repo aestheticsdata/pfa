@@ -11,7 +11,7 @@ const Content = ({ handleclosefromchild, content }: ContentProps) => {
       <div
         onClick={() => { handleclosefromchild && handleclosefromchild() }}
         role="menu"
-        className="flex flex-col items-end bg-grey2 p-1.5 rounded shadow-login shadow-grey2"
+        className="flex flex-col items-end bg-grey2 p-1.5 rounded-sm shadow-login shadow-grey2"
       >
         <ul className="flex flex-col">{ content }</ul>
       </div>

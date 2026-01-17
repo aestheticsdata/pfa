@@ -8,7 +8,7 @@ const MonthlyCharts = () => {
   const { to } = useDatePickerWrapperStore();
   return (
     to && (
-      <div className="flex flex-col items-center bg-grey0 rounded w-[340px] h-[265px] gap-y-2">
+      <div className="flex flex-col items-center bg-grey0 rounded-sm w-[340px] h-[265px] gap-y-2">
         <Charts
           title={dashboardText.dashboard.monthlyCharts.headerTitle}
           periodType={MONTHLY}

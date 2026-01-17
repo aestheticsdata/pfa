@@ -51,7 +51,7 @@ const CategoryItem = ({ category }) => {
 
   const confirmDeletePopin = (item, deleteCallback) => {
     return (
-      <div className="flex justify-between items-center bg-warningDeleteBackground p-1 rounded">
+      <div className="flex justify-between items-center bg-warningDeleteBackground p-1 rounded-sm">
         <div className="text-xs text-warningDelete font-bold">
           Confirmer la suppression ?
         </div>
@@ -86,7 +86,7 @@ const CategoryItem = ({ category }) => {
 
         <input
           type="text"
-          className="rounded px-2"
+          className="rounded-sm px-2"
           value={singleCategory.name}
           onChange={(ev) => setSingleCategory({...singleCategory, name: ev.target.value})}
           onKeyPress={(keypressEvent) => { keypressEvent.code === 'Enter' && commitEditing() }}
@@ -94,7 +94,7 @@ const CategoryItem = ({ category }) => {
 
         <input
           type="color"
-          className="rounded bg-transparent cursor-pointer hover:shadow-login"
+          className="rounded-sm bg-transparent cursor-pointer hover:shadow-login"
           value={singleCategory.color}
           onChange={(ev) => setSingleCategory({...singleCategory, color: ev.target.value})}
         />
@@ -152,7 +152,7 @@ const CategoryItem = ({ category }) => {
   }
 
   return (
-    <div className="w-[350px] hover:shadow-categories hover:rounded p-1 transition-colors ease-linear duration-100">
+    <div className="w-[350px] hover:shadow-categories hover:rounded-sm p-1 transition-colors ease-linear duration-100">
       { getCategoryContainer() }
     </div>
   );

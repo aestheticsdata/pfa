@@ -36,7 +36,7 @@ const Button = ({
         border
         px-2
         cursor-pointer
-        outline-none
+        outline-hidden
         disabled:cursor-not-allowed
         disabled:opacity-50
         disabled:shadow-none

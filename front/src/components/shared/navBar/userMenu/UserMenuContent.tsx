@@ -21,7 +21,7 @@ const UserMenuContent = ({ handleclosefromchild, listItems }: UserMenuContentPro
     <li
       key={item.id}
       onClick={() => item.callback && item.callback()}
-      className="hover:bg-grey0 hover:rounded p-1 text-menuItem hover:text-blueNavy"
+      className="hover:bg-grey0 hover:rounded-sm p-1 text-menuItem hover:text-blueNavy"
     >
       <div className="flex items-center space-x-2">
         <div>

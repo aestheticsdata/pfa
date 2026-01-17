@@ -22,7 +22,7 @@ const NavBar = () => {
   }, []);
 
   const getActivePath = (route: string) =>
-    route === pathname ? "bg-spendingItemHover rounded text-blueNavy" : "";
+    route === pathname ? "bg-spendingItemHover rounded-sm text-blueNavy" : "";
 
   const getLinkItem = (route: { path: string; label: string }) => {
     // Désactiver le prefetch pour les routes qui causent des erreurs 403 ou Mixed Content
@@ -36,7 +36,7 @@ const NavBar = () => {
         prefetch={!shouldDisablePrefetch}
         className={`outline-hidden p-1 ${getActivePath(
           route.path
-        )} hover:cursor-pointer hover:bg-spendingItemHover hover:text-blueNavy hover:rounded`}
+        )} hover:cursor-pointer hover:bg-spendingItemHover hover:text-blueNavy hover:rounded-sm`}
       >
         {route.label}
       </Link>

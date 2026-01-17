@@ -26,7 +26,7 @@ const PFABarCharts = ({ data, year }) => {
         <YAxis />
         <Tooltip
           labelFormatter={label => `${label} ${year}`}
-          labelClassName="bg-gray-200 p-1 rounded font-semibold"
+          labelClassName="bg-gray-200 p-1 rounded-sm font-semibold"
           formatter={(value: number) => `${value} €`}
           offset={7}
           contentStyle={{

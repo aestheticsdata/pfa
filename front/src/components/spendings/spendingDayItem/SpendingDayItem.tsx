@@ -175,7 +175,7 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
               onClick={() => {setSelectedCategory(null)}}
             >
               {spendingsByDaySorted.length > 0 ?
-                <div className="bg-grey4 text-white hover:bg-grey2 cursor-pointer text-tiny uppercase rounded border px-1">{spendingsText.dayItem.filterResetLabel}</div>
+                <div className="bg-grey4 text-white hover:bg-grey2 cursor-pointer text-tiny uppercase rounded-sm border px-1">{spendingsText.dayItem.filterResetLabel}</div>
                 :
                 <div className="h-3"></div>
               }

@@ -44,7 +44,7 @@ const SharedLoginForm = ({
                   name="email"
                   placeholder="email"
                   className="w-11/12 border-b border-b-formsGlobalColor bg-transparent px-2 text-xl placeholder-grey2
-                  outline-none focus:border-b-2"
+                  outline-hidden focus:border-b-2"
                   // validate={validateEmail}
                 />
                 {errors.email && <div>{errors.email}</div>}
@@ -57,7 +57,7 @@ const SharedLoginForm = ({
                   name="password"
                   placeholder="password"
                   className="w-full border-b border-b-formsGlobalColor bg-transparent px-2 text-xl placeholder-grey2
-                  outline-none focus:border-b-2"
+                  outline-hidden focus:border-b-2"
                   // validate={validatePassword}
                 />
                 {errors.password && <div>{errors.password}</div>}
@@ -86,7 +86,7 @@ const SharedLoginForm = ({
               disabled={isSubmitting || errors.email || errors.password}
               className="h-8 w-11/12 rounded border border-formsGlobalColor bg-grey01alpha text-2xl
                 font-medium uppercase text-formsGlobalColor transition-all hover:text-formsGlobalColorHover
-                hover:shadow-login focus:outline-none"
+                hover:shadow-login focus:outline-hidden"
             >
               {buttonTitle}
             </button>
