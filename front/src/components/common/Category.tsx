@@ -26,7 +26,7 @@ const CategoryComponent = ({ item, customCss = "", isDynamic = false, isClicked 
 
   return (
     <div
-      className={`relative flex items-center px-0.5 rounded ${isDynamic ? "text-tiny" : "text-xxs"} uppercase ${customCss}`}
+      className={`relative flex items-center px-0.5 rounded-sm ${isDynamic ? "text-tiny" : "text-xxs"} uppercase ${customCss}`}
       style={{
         // border: `1px solid ${item.categoryColor}`,
         // borderRadius: "4px",

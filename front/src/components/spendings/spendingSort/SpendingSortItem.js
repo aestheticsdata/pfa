@@ -7,7 +7,7 @@ const SpendingSortItem = ({ name, onClickSort }) => {
 
   return (
     <div
-      className="px-1 space-x-1 border border-sortbutton rounded hover:text-sortButtonHover hover:cursor-pointer"
+      className="px-1 space-x-1 border border-sortbutton rounded-sm hover:text-sortButtonHover hover:cursor-pointer"
       onClick={() => onClickSort(name)}
     >
       <span>

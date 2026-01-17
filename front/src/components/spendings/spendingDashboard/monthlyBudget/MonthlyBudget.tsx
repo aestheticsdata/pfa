@@ -41,20 +41,20 @@ const MonthlyBudget = () => {
 
   return (
     to && (
-      <div className="flex flex-col shrink-0 items-center bg-grey0 rounded w-[180px] h-[265px] gap-y-2">
+      <div className="flex flex-col shrink-0 items-center bg-grey0 rounded-sm w-[180px] h-[265px] gap-y-2">
 
         <div className="flex flex-col items-center text-xs font-bold border-b border-b-black w-5/6 py-2">
           <div className="uppercase">{format(to, "MMMM", { locale: fr })}</div>
           <div className="year">{getYear(to)}</div>
         </div>
 
-        <div className="flex flex-col w-11/12 items-center text-xs bg-initialAmountAlpha justify-around h-12 rounded">
+        <div className="flex flex-col w-11/12 items-center text-xs bg-initialAmountAlpha justify-around h-12 rounded-sm">
           <div className="uppercase">{monthlyText.dashboard.monthlyBudget.initialAmount}</div>
           <div
             className={`${!isInputVisible ? "visible" : "hidden"}`}
             onClick={() => {setIsInputVisible(true)}}
           >
-            <div className="text-initialAmount font-bold hover:bg-initialAmountHover hover:cursor-pointer hover:rounded hover:px-1">
+            <div className="text-initialAmount font-bold hover:bg-initialAmountHover hover:cursor-pointer hover:rounded-sm hover:px-1">
               {dashboard?.data?.initialAmount ?? 0} €
             </div>
           </div>
@@ -78,7 +78,7 @@ const MonthlyBudget = () => {
           }
         </div>
 
-        <div className={`flex flex-col w-11/12 rounded items-center text-xs h-12 justify-around ${remaining >= 0 ? "bg-remainingAmountAlpha" : "bg-generalWarningBackground"}`}>
+        <div className={`flex flex-col w-11/12 rounded-sm items-center text-xs h-12 justify-around ${remaining >= 0 ? "bg-remainingAmountAlpha" : "bg-generalWarningBackground"}`}>
           <div className="uppercase text-xs">
             {monthlyText.dashboard.monthlyBudget.remaining}
           </div>
@@ -99,9 +99,9 @@ const MonthlyBudget = () => {
               <div className={`text-tiny font-bold self-start ${monthlyTotalPercentage === 100 ? "text-red-500" : "text-blue-500"}`}>
                 {`${monthlyTotalPercentage}%`} {monthlyText.dashboard.monthlyBudget.percentLabel}
               </div>
-              <div className="w-full bg-grey1 rounded mb-2">
+              <div className="w-full bg-grey1 rounded-sm mb-2">
                 <div
-                  className={`h-[10px] ${monthlyTotalPercentage === 100 ? "rounded bg-red-500" : "rounded-l bg-blue-500"}`}
+                  className={`h-[10px] ${monthlyTotalPercentage === 100 ? "rounded-sm bg-red-500" : "rounded-l bg-blue-500"}`}
                   style={{
                     width: `${monthlyTotalPercentage}%`,
                     transition: "width 0.4s ease-out",

@@ -52,7 +52,7 @@ const SpendingItem = ({
       }
       {
         !isDeleteConfirmVisible ?
-          <div className={`flex justify-between w-[460px] rounded ${isHover && "bg-spendingItemHover"} transition-colors ease-linear duration-200 ${!isRecurring && "mx-4"}`}>
+          <div className={`flex justify-between w-[460px] rounded-sm ${isHover && "bg-spendingItemHover"} transition-colors ease-linear duration-200 ${!isRecurring && "mx-4"}`}>
 
             <div className={`flex items-center ${!isRecurring ? "w-1/3" : "w-1/2"} text-sm font-ubuntu whitespace-nowrap overflow-hidden overflow-y-auto`} title={spending.label}>
               {spending.label.length > 20 ? `${spending.label.slice(0,20)}...` : spending.label}

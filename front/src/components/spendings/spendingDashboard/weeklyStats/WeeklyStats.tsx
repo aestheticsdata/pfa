@@ -70,7 +70,7 @@ const WeeklyStats = () => {
   }, [setFocus, isInputVisible]);
 
   return (
-    <div className="flex flex-col shrink-0 items-center w-[320px] h-[265px] bg-black text-white rounded gap-y-3 text-xs">
+    <div className="flex flex-col shrink-0 items-center w-[320px] h-[265px] bg-black text-white rounded-sm gap-y-3 text-xs">
       <WidgetHeader
         title={spendingsText.dashboard.weeklyStats.headerTitle}
         periodType={WEEKLY}
@@ -84,7 +84,7 @@ const WeeklyStats = () => {
           className={`${!isInputVisible ? "visible" : "hidden"}`}
           onClick={() => {dashboard?.data?.initialAmount && setIsInputVisible(true)}}
         >
-          <div className={`text-initialAmountWeekly font-bold px-1 ${dashboard?.data?.initialAmount ? "hover:bg-initialAmountHover hover:text-spendingActionHover hover:cursor-pointer hover:rounded" : "cursor-not-allowed"}`}>
+          <div className={`text-initialAmountWeekly font-bold px-1 ${dashboard?.data?.initialAmount ? "hover:bg-initialAmountHover hover:text-spendingActionHover hover:cursor-pointer hover:rounded-sm" : "cursor-not-allowed"}`}>
             {initialCeiling ?? 0} €
           </div>
         </div>
@@ -113,7 +113,7 @@ const WeeklyStats = () => {
               return (
                 <div
                   key={i}
-                  className={`flex justify-between items-center ${isCurrentWeek(weeklySlices[i], from) && "font-bold bg-grey3 rounded"}`}
+                  className={`flex justify-between items-center ${isCurrentWeek(weeklySlices[i], from) && "font-bold bg-grey3 rounded-sm"}`}
                 >
                   {isCurrentWeek(weeklySlices[i], from)}
                   <div className="flex w-4/12 gap-x-2">
@@ -141,7 +141,7 @@ const WeeklyStats = () => {
                     <div>
                       {
                         ceilingDiff > 0 ?
-                          <div className={`${ceilingDiff > CEILING_WARN_LIMIT ? "text-ceilingExcess bg-generalWarningBackground px-1 rounded": "text-ceilingWarn"}`}>
+                          <div className={`${ceilingDiff > CEILING_WARN_LIMIT ? "text-ceilingExcess bg-generalWarningBackground px-1 rounded-sm": "text-ceilingWarn"}`}>
                             +
                             {Number(ceilingDiff).toFixed(2)} €
                           </div>

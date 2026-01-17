@@ -18,11 +18,11 @@ const SpendingItemHeader = ({ date, recurringType, isToday, addSpending, addSpen
       {(!!date || recurringType) && (
         !recurringType
           ?
-          <div className={`flex w-full font-poppins uppercase ${isToday ? "bg-datePickerWrapper" : "bg-grey01"} text-blueNavy justify-center font-bold text-sm items-center rounded w-5/6 h-6`}>
+          <div className={`flex w-full font-poppins uppercase ${isToday ? "bg-datePickerWrapper" : "bg-grey01"} text-blueNavy justify-center font-bold text-sm items-center rounded-sm w-5/6 h-6`}>
             <div>{format(date, "dd MMM yyyy", { locale: fr })}</div>
           </div>
           :
-          <div className="flex text-grey2 uppercase justify-center items-center font-bold text-sm bg-grey0 rounded w-5/6">
+          <div className="flex text-grey2 uppercase justify-center items-center font-bold text-sm bg-grey0 rounded-sm w-5/6">
             {spendingsText.dayItem.recurringTitle}
           </div>
       )

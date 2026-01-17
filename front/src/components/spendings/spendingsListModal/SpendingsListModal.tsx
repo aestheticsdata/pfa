@@ -100,7 +100,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
       return (
         <div
           key={i}
-          className="rounded border-2 border-grey1 pb-1 m-4 text-sm bg-gray-100"
+          className="rounded-sm border-2 border-grey1 pb-1 m-4 text-sm bg-gray-100"
         >
           {periodType === MONTHLY ? (
             <div
@@ -138,7 +138,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                       <div>{spendingsListModalTexts.cumulativeTotal}</div>
                       <FontAwesomeIcon icon={faChartSimple}/>
                     </div>
-                    <div className="flex w-full justify-end pr-1 rounded p-0.5 bg-gray-500 text-white">
+                    <div className="flex w-full justify-end pr-1 rounded-sm p-0.5 bg-gray-500 text-white">
                       {cumulativeTotal.toFixed(1)} €
                     </div>
                     <div className="text-slate-700">{spendingsListModalTexts.monthPercentage} {((cumulativeTotal / total) * 100).toFixed(0)}%</div>
@@ -161,7 +161,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                 
                 <div className="flex justify-between text-slate-700 w-full">
                   <div className="flex items-center space-x-2">
-                    <div className="bg-slate-400 w-1.5 h-1.5 rounded-full flex-shrink-0" />
+                    <div className="bg-slate-400 w-1.5 h-1.5 rounded-full shrink-0" />
                     <span className="text-slate-700">{spending.label}</span>
                   </div>
                 
@@ -208,12 +208,12 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
 
   return (
     <div className="fixed flex justify-center items-center z-50 left-0 right-0 top-0 bottom-0 bg-invoiceFileModalBackground">
-      <div ref={ref} className="absolute flex flex-col w-[700px] h-[520px] bg-grey0 rounded">
+      <div ref={ref} className="absolute flex flex-col w-[700px] h-[520px] bg-grey0 rounded-sm">
 
         <div className="flex flex-row items-center px-4 border-b border-b-grey3 h-[50px] pb-2">
           
           <div className="flex flex-row items-center space-x-6 flex-1 min-w-0">
-            <div className="flex-shrink-0 whitespace-nowrap">
+            <div className="shrink-0 whitespace-nowrap">
               {categoryInfos?.category ?
                 <CategoryComponent item={categoryInfos} customCss="px-6" />
                 :
@@ -223,7 +223,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
             
           </div>
           
-          <div className="flex flex-row space-x-2 uppercase text-sm flex-shrink-0">
+          <div className="flex flex-row space-x-2 uppercase text-sm shrink-0">
             <div>{spendingsListModalTexts.total} :</div>
             <div className="font-bold">{total} €</div>
           </div>
@@ -231,9 +231,9 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
         </div>
 
         <div className="flex flex-row space-x-2 border-b border-b-grey3 px-2 py-2 items-center">
-          <div className="flex-shrink-0">{spendingsListModalTexts.filter} :</div>
+          <div className="shrink-0">{spendingsListModalTexts.filter} :</div>
           <input
-            className="bg-white focus:shadow-login border-gray-400 border outline-none h-8 rounded p-1 text-sm flex-1 min-w-0"
+            className="bg-white focus:shadow-login border-gray-400 border outline-hidden h-8 rounded-sm p-1 text-sm flex-1 min-w-0"
             value={searchTerm}
             onChange={e => setsearchTerm(e.target.value)}
           />

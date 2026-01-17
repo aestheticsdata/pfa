@@ -142,7 +142,7 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
     <div className="fixed flex justify-center items-center z-50 left-0 right-0 top-0 bottom-0 bg-invoiceFileModalBackground">
       <div
         ref={ref}
-        className="absolute w-[500px] h-[420px] bg-grey0 rounded overflow-hidden"
+        className="absolute w-[500px] h-[420px] bg-grey0 rounded-sm overflow-hidden"
       >
         {
           isClickOnThumbnail ?
@@ -187,7 +187,7 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
                   unoptimized
                 />
                 :
-                <div className="flex justify-center items-center border-2 border-grey1 rounded w-3/4 h-3/4 text-3xl font-extralight">
+                <div className="flex justify-center items-center border-2 border-grey1 rounded-sm w-3/4 h-3/4 text-3xl font-extralight">
                   <div className="no-invoice-label">
                     {invoiceModalTexts.noInvoice}
                   </div>
@@ -207,8 +207,8 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
               isProgress ?
                 <div className="flex flex-col space-y-2 w-[250px]">
                   <div className="relative text-grey2 font-semibold" style={{left: `${progressValue*2.5}px`}}>{progressValue} %</div>
-                  <div className="rounded h-2.5 bg-white">
-                    <div className="bg-grey1 h-2.5 rounded" style={{width: `${progressValue*2.5}px`}}></div>
+                  <div className="rounded-sm h-2.5 bg-white">
+                    <div className="bg-grey1 h-2.5 rounded-sm" style={{width: `${progressValue*2.5}px`}}></div>
                   </div>
                 </div>
                 :

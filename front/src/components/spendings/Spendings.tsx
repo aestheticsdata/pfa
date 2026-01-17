@@ -39,7 +39,7 @@ const Spendings = () => {
       {month &&
         <>
           <SpendingDashboard month={month} />
-          <div className={`flex justify-center w-full ${isBlurActive && "blur-sm"}`}>
+          <div className={`flex justify-center w-full ${isBlurActive && "blur-xs"}`}>
             <div className="flex flex-wrap justify-start mt-36 md:mt-96 md:pl-1 w-full md:w-11/12 space-y-2">
             {/*<div className="grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-8 mt-36 md:mt-96">*/}
               {spendingsByWeek?.map((spending: any, i: number) =>
