@@ -1,6 +1,6 @@
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { ConfigService } from "@nestjs/config";
-import { AppConfig } from "../../config/app.config";
+import { AppConfig } from "@config/app.config";
 
 export const LEGACY_PROXY = "LEGACY_PROXY";
 
