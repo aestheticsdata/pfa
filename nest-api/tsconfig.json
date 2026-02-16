@@ -16,7 +16,8 @@
     "baseUrl": "./",
     "paths": {
       "@config/*": ["src/config/*"],
-      "@infrastructure/*": ["src/infrastructure/*"]
+      "@infrastructure/*": ["src/infrastructure/*"],
+      "@users/*": ["src/users/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

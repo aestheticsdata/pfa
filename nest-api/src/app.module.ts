@@ -4,12 +4,16 @@ import { AppController } from "./app.controller";
 import appConfig from "@config/app.config";
 import { validate } from "@config/env.validation";
 import { LegacyProxyProvider } from "@infrastructure/proxy/legacy-proxy.provider";
+import { PrismaModule } from "./prisma/prisma.module";
+import { UsersModule } from "@users/users.module";
 
 @Module({
   imports: [
+    PrismaModule,
+    UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV ?? "development"}`,
+      envFilePath: ".env",
       validate,
       load: [appConfig],
     }),

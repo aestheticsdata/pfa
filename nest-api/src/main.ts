@@ -1,5 +1,6 @@
 import { NestFactory } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
+import { ValidationPipe } from "@nestjs/common";
 import { Request, Response, NextFunction } from "express";
 import { AppModule } from "./app.module";
 import { AppConfig } from "@config/app.config";
@@ -8,7 +9,8 @@ import { LEGACY_PROXY } from "@infrastructure/proxy/legacy-proxy.provider";
 // Prefixes still served by the legacy Express API.
 // Remove a prefix from this list once its routes are migrated to NestJS.
 const LEGACY_PREFIXES = [
-  "/users",
+  "/users/add",
+  "/users/resetpassword",
   "/categories",
   "/spendings",
   "/recurrings",
@@ -20,6 +22,8 @@ const LEGACY_PREFIXES = [
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors();
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   const configService = app.get(ConfigService);
   const appConfig = configService.getOrThrow<AppConfig>("app");

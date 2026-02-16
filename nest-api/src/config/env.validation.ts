@@ -1,5 +1,5 @@
 import { plainToInstance } from "class-transformer";
-import { IsNumberString, validateSync, ValidationError } from "class-validator";
+import { IsNumberString, IsString, validateSync, ValidationError } from "class-validator";
 
 class EnvironmentVariables {
   @IsNumberString()
@@ -7,6 +7,9 @@ class EnvironmentVariables {
 
   @IsNumberString()
   LEGACY_API_PORT: string;
+
+  @IsString()
+  JWT_SECRET: string;
 }
 
 export function validate(config: Record<string, unknown>): EnvironmentVariables {
