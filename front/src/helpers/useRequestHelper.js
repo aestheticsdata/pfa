@@ -11,14 +11,10 @@ const useRequestHelper = () => {
   const router = useRouter();
 
   const getRequestURL = (url) => {
-    // En développement local, utiliser directement le backend
-    // Les rewrites Next.js ne fonctionnent pas pour les requêtes client-side (Axios)
+    // Same URL structure in dev and prod: always use /api prefix.
     if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      console.log("http://localhost:${process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST}${url}", process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST);
-      return `${process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST}${url}`;
+      return `${process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST}/api${url}`;
     }
-    
-    // En production, utiliser le préfixe /api (sera proxifié par nginx ou autre)
     return `/api${url}`;
   };
 

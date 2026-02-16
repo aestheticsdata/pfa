@@ -15,6 +15,7 @@ export const LegacyProxyProvider = {
     return createProxyMiddleware({
       target: appConfig.legacyApiUrl,
       changeOrigin: true,
+      pathRewrite: { "^/api": "" },
     });
   },
   inject: [ConfigService],
