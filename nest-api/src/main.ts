@@ -30,6 +30,7 @@ async function bootstrap() {
   app.setGlobalPrefix("api");
 
   app.use("/api", (req: Request, res: Response, next: NextFunction) => {
+    console.log(req.method, req.originalUrl);
     if (LEGACY_PREFIXES.some((prefix) => req.path.startsWith(prefix))) {
       proxy(req, res, next);
       return;
