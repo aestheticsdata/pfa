@@ -17,7 +17,8 @@
     "paths": {
       "@config/*": ["src/config/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
-      "@users/*": ["src/users/*"]
+      "@users/*": ["src/users/*"],
+      "@spendings/*": ["src/spendings/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

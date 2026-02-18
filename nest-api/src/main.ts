@@ -5,20 +5,34 @@ import { Request, Response, NextFunction } from "express";
 import { AppModule } from "./app.module";
 import { AppConfig } from "@config/app.config";
 import { LEGACY_PROXY } from "@infrastructure/proxy/legacy-proxy.provider";
+import { formatRouteLog } from "@infrastructure/logger";
 
 // Prefixes still served by the legacy Express API.
 // Remove a prefix from this list once its routes are migrated to NestJS.
-const LEGACY_PREFIXES = [
+// Use { path, except: { method } } to exclude specific methods (handled by Nest).
+const LEGACY_PREFIXES: (string | { path: string; except: { method: string } })[] = [
   "/users/add",
   "/users/resetpassword",
   "/categories",
-  "/spendings",
+  { path: "/spendings", except: { method: "GET" } },
   "/recurrings",
   "/dashboard",
   "/monthlystats",
   "/weeklystats",
   "/statistics",
 ];
+
+function shouldProxyToLegacy(path: string, method: string): boolean {
+  return LEGACY_PREFIXES.some((entry) => {
+    const prefix = typeof entry === "string" ? entry : entry.path;
+    if (!path.startsWith(prefix)) return false;
+    // Exclude only when path matches exactly (e.g. GET /spendings list)
+    if (typeof entry === "object" && entry.except?.method === method && path === prefix) {
+      return false;
+    }
+    return true;
+  });
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -34,8 +48,10 @@ async function bootstrap() {
   app.setGlobalPrefix("api");
 
   app.use("/api", (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.method, req.originalUrl);
-    if (LEGACY_PREFIXES.some((prefix) => req.path.startsWith(prefix))) {
+    const target = shouldProxyToLegacy(req.path, req.method) ? "Express" : "Nest";
+    const url = req.originalUrl ?? req.url ?? req.path ?? "";
+    console.log(formatRouteLog(req.method, url, target));
+    if (target === "Express") {
       proxy(req, res, next);
       return;
     }

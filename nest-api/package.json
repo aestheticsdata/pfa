@@ -12,7 +12,7 @@
     "start": "nest start",
     "start:dev": "NODE_ENV=development nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node -r tsconfig-paths/register dist/main.js",
+    "start:prod": "node -r tsconfig-paths/register dist/src/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -77,7 +77,8 @@
     "moduleNameMapper": {
       "^@config/(.*)$": "<rootDir>/config/$1",
       "^@infrastructure/(.*)$": "<rootDir>/infrastructure/$1",
-      "^@users/(.*)$": "<rootDir>/users/$1"
+      "^@users/(.*)$": "<rootDir>/users/$1",
+      "^@spendings/(.*)$": "<rootDir>/spendings/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

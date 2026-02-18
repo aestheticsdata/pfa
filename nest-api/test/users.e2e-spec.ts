@@ -1,8 +1,9 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import request from "supertest";
-import { App } from "supertest/types";
 import { AppModule } from "../src/app.module";
+
+type SupertestApp = Parameters<typeof request>[0];
 
 interface SignInResponseBody {
   token: string;
@@ -19,7 +20,7 @@ interface SignInResponseBody {
  * - POST /api/users/resetpassword - TODO
  */
 describe("UsersController (e2e)", () => {
-  let app: INestApplication<App>;
+  let app: INestApplication;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -38,7 +39,7 @@ describe("UsersController (e2e)", () => {
 
   describe("POST /api/users (sign-in)", () => {
     it("should return token and user on valid credentials", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as SupertestApp)
         .post("/api/users")
         .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
         .expect(200)
@@ -57,25 +58,31 @@ describe("UsersController (e2e)", () => {
     });
 
     it("should return 401 on invalid password", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as SupertestApp)
         .post("/api/users")
         .send({ email: "e2e-test@test.com", password: "wrong-password" })
         .expect(401);
     });
 
     it("should return 401 on non-existent user", () => {
-      return request(app.getHttpServer())
+      return request(app.getHttpServer() as SupertestApp)
         .post("/api/users")
         .send({ email: "nonexistent@test.com", password: "any-password" })
         .expect(401);
     });
 
     it("should return 400 when email is missing", () => {
-      return request(app.getHttpServer()).post("/api/users").send({ password: "e2e-test-password" }).expect(400);
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/users")
+        .send({ password: "e2e-test-password" })
+        .expect(400);
     });
 
     it("should return 400 when password is missing", () => {
-      return request(app.getHttpServer()).post("/api/users").send({ email: "e2e-test@test.com" }).expect(400);
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/users")
+        .send({ email: "e2e-test@test.com" })
+        .expect(400);
     });
   });
 });
