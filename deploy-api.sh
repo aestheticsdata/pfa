@@ -174,6 +174,9 @@ EOF
     --exclude="node_modules" \
     --exclude="dist" \
     --exclude=".DS_Store" \
+    --exclude="prisma.config.js" \
+    --exclude="prisma.config.js.map" \
+    --exclude="prisma.config.d.ts" \
     "$SCRIPT_DIR/nest-api/" \
     "$REMOTE_USER_HOST":"$NEST_RELEASE_REMOTE/"
 

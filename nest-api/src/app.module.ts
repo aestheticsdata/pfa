@@ -6,11 +6,13 @@ import { validate } from "@config/env.validation";
 import { LegacyProxyProvider } from "@infrastructure/proxy/legacy-proxy.provider";
 import { PrismaModule } from "./prisma/prisma.module";
 import { UsersModule } from "@users/users.module";
+import { SpendingsModule } from "@spendings/spendings.module";
 
 @Module({
   imports: [
     PrismaModule,
     UsersModule,
+    SpendingsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ".env",

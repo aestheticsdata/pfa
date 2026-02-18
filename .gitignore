@@ -1,5 +1,6 @@
 # dependencies
 **/node_modules
+.pnpm-store
 /.pnp
 .pnp.js
 
@@ -9,6 +10,11 @@
 /coverage
 /.next
 /out
+
+# Prisma generated config (from prisma.config.ts)
+**/prisma.config.js
+**/prisma.config.js.map
+**/prisma.config.d.ts
 
 # env
 **/.env

@@ -10,10 +10,11 @@ datasource db {
 }
 
 model Categories {
-  ID     String  @id @db.Char(36)
-  userID String? @db.Char(36)
-  name   String  @db.VarChar(20)
-  color  String  @db.VarChar(20)
+  ID        String     @id @db.Char(36)
+  userID    String?    @db.Char(36)
+  name      String     @db.VarChar(20)
+  color     String     @db.VarChar(20)
+  spendings Spendings[]
 }
 
 model Dashboards {
@@ -38,15 +39,16 @@ model Recurrings {
 }
 
 model Spendings {
-  ID          String   @id @db.Char(36)
-  userID      String   @db.Char(36)
-  date        DateTime @db.Date
-  itemType    String   @db.VarChar(11)
-  label       String   @db.VarChar(100)
-  amount      Decimal  @db.Decimal(6, 2)
-  categoryID  String?  @db.Char(36)
-  currency    String?  @db.VarChar(3)
-  invoicefile String?  @db.VarChar(255)
+  ID         String      @id @db.Char(36)
+  userID     String      @db.Char(36)
+  date       DateTime    @db.Date
+  itemType   String      @db.VarChar(11)
+  label      String      @db.VarChar(100)
+  amount     Decimal     @db.Decimal(6, 2)
+  categoryID String?     @db.Char(36)
+  currency   String?     @db.VarChar(3)
+  invoicefile String?    @db.VarChar(255)
+  category   Categories? @relation(fields: [categoryID], references: [ID])
 }
 
 model Users {
