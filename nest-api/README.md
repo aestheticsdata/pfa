@@ -42,3 +42,10 @@ The E2E tests require a dedicated test user in your local database. Create it on
 | Password | `e2e-test-password`   |
 
 **Do not modify or delete this user** — it is used by `test/users.e2e-spec.ts`.
+
+## Production deployment
+
+- `prebuild` runs `prisma generate` automatically before each build
+- Ensure `ecosystem.config.js` has `DATABASE_URL` and `JWT_SECRET` for `pfa-nest-api`
+- **`DATABASE_URL`** is loaded from `nest-api/.env`
+- Deploy via root `./deploy-api.sh` (deploys both Nest and Express)

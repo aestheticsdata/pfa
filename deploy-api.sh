@@ -20,6 +20,20 @@ NEST_RELEASES_DIR="$API_ROOT/nest-api-releases"
 # Local project dir (script location = repo root)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Load DATABASE_URL from nest-api/.env (required for prisma generate during Nest build)
+NEST_ENV="$SCRIPT_DIR/nest-api/.env"
+if [ -f "$NEST_ENV" ]; then
+  set -a
+  # shellcheck source=/dev/null
+  source "$NEST_ENV"
+  set +a
+fi
+if [ -z "${DATABASE_URL:-}" ]; then
+  echo "❌ ERROR: DATABASE_URL is not set. Required for Nest/Prisma build." >&2
+  echo "   Add it to nest-api/.env or run: export DATABASE_URL='mysql://...'" >&2
+  exit 1
+fi
+
 ######################################
 # Utility functions
 ######################################
@@ -193,6 +207,15 @@ if [ ! -d "$EXPRESS_RELEASE_REMOTE" ] || [ ! -d "$NEST_RELEASE_REMOTE" ]; then
   exit 1
 fi
 
+if [ ! -f "$EXPRESS_RELEASE_REMOTE/package.json" ]; then
+  echo "❌ ERROR: Express release is empty (no package.json in $EXPRESS_RELEASE_REMOTE)" >&2
+  exit 1
+fi
+if [ ! -f "$NEST_RELEASE_REMOTE/package.json" ]; then
+  echo "❌ ERROR: Nest release is empty (no package.json in $NEST_RELEASE_REMOTE)" >&2
+  exit 1
+fi
+
 rm -rf "$EXPRESS_BACKUP_DIR" "$NEST_BACKUP_DIR"
 
 if [ -d "$EXPRESS_DIR" ]; then
@@ -219,6 +242,7 @@ EOF
     EXPRESS_DIR="$EXPRESS_DIR" \
     NEST_DIR="$NEST_DIR" \
     API_ROOT="$API_ROOT" \
+    DATABASE_URL="$DATABASE_URL" \
     'bash -s' << 'EOF'
 set -Eeuo pipefail
 
@@ -234,10 +258,11 @@ cd "$EXPRESS_DIR"
 rm -rf node_modules
 pnpm install
 
-# Nest: install + build
+# Nest: install + build (DATABASE_URL needed for prisma generate)
 cd "$NEST_DIR"
 rm -rf node_modules dist
 pnpm install
+export DATABASE_URL
 pnpm build
 
 # Start or reload both apps with pm2

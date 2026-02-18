@@ -9,8 +9,18 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     if (!url) {
       throw new Error("DATABASE_URL is required");
     }
-    const connectionUrl = url.replace(/^mysql:\/\//, "mariadb://");
-    const adapter = new PrismaMariaDb(connectionUrl);
+
+    const parsed = new URL(url);
+    const adapter = new PrismaMariaDb({
+      host: parsed.hostname,
+      port: parseInt(parsed.port || "3306", 10),
+      user: decodeURIComponent(parsed.username),
+      password: decodeURIComponent(parsed.password),
+      database: parsed.pathname.replace("/", ""),
+      connectionLimit: 10,
+      allowPublicKeyRetrieval: true,
+    });
+
     super({ adapter });
   }
 
