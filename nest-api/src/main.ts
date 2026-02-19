@@ -9,12 +9,13 @@ import { formatRouteLog } from "@infrastructure/logger";
 
 // Prefixes still served by the legacy Express API.
 // Remove a prefix from this list once its routes are migrated to NestJS.
-// Use { path, except: { method } } to exclude specific methods (handled by Nest).
-const LEGACY_PREFIXES: (string | { path: string; except: { method: string } })[] = [
+// Use { path, except: { method, pathPrefix? } } to exclude (pathPrefix = match by prefix, else exact).
+const LEGACY_PREFIXES: (string | { path: string; except: { method: string; pathPrefix?: boolean } })[] = [
   "/users/add",
   "/users/resetpassword",
   "/categories",
   { path: "/spendings", except: { method: "GET" } },
+  { path: "/spendings/upload", except: { method: "GET", pathPrefix: true } },
   "/recurrings",
   "/dashboard",
   "/monthlystats",
@@ -23,14 +24,23 @@ const LEGACY_PREFIXES: (string | { path: string; except: { method: string } })[]
 ];
 
 function shouldProxyToLegacy(path: string, method: string): boolean {
+  // First: if any entry says "don't proxy" (except matches), use Nest
+  const shouldNotProxy = LEGACY_PREFIXES.some((entry) => {
+    if (typeof entry === "string") return false;
+    const prefix = entry.path;
+    if (!path.startsWith(prefix)) return false;
+    if (entry.except?.method === method) {
+      const pathMatches = entry.except.pathPrefix ? path.startsWith(prefix) : path === prefix;
+      if (pathMatches) return true;
+    }
+    return false;
+  });
+  if (shouldNotProxy) return false;
+
+  // Second: if any prefix matches, proxy to Express
   return LEGACY_PREFIXES.some((entry) => {
     const prefix = typeof entry === "string" ? entry : entry.path;
-    if (!path.startsWith(prefix)) return false;
-    // Exclude only when path matches exactly (e.g. GET /spendings list)
-    if (typeof entry === "object" && entry.except?.method === method && path === prefix) {
-      return false;
-    }
-    return true;
+    return path.startsWith(prefix);
   });
 }
 
@@ -48,7 +58,8 @@ async function bootstrap() {
   app.setGlobalPrefix("api");
 
   app.use("/api", (req: Request, res: Response, next: NextFunction) => {
-    const target = shouldProxyToLegacy(req.path, req.method) ? "Express" : "Nest";
+    const path = req.path.startsWith("/api") ? req.path.slice(4) || "/" : req.path;
+    const target = shouldProxyToLegacy(path, req.method) ? "Express" : "Nest";
     const url = req.originalUrl ?? req.url ?? req.path ?? "";
     console.log(formatRouteLog(req.method, url, target));
     if (target === "Express") {
