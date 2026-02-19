@@ -1,10 +1,24 @@
-import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from "@nestjs/common";
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Query,
+  Res,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 import { SpendingsService } from "@spendings/spendings.service";
 import { CreateSpendingDto } from "@spendings/dto/create-spending.dto";
 import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
 import { JwtAuthGuard } from "@spendings/guards/jwt-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { invoiceUploadOptions } from "@spendings/upload/upload.config";
 
 @Controller("spendings")
 @UseGuards(JwtAuthGuard)
@@ -19,6 +33,31 @@ export class SpendingsController {
   @Post()
   async createSpending(@Body() dto: CreateSpendingDto, @GetUserId() userID: string) {
     return this.spendingsService.createSpending(dto, userID);
+  }
+
+  @Post("upload")
+  @UseInterceptors(FileInterceptor("invoiceImageUpload", invoiceUploadOptions))
+  async uploadInvoiceImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() body: { spendingID: string; itemType: string },
+    @GetUserId() userID: string,
+    @Res() res: Response,
+  ) {
+    if (!file) {
+      throw new BadRequestException("No file uploaded");
+    }
+    if (!body.spendingID || !body.itemType) {
+      throw new BadRequestException("spendingID and itemType are required");
+    }
+    const result = await this.spendingsService.uploadInvoiceImage(
+      file.path,
+      file.filename,
+      body.spendingID,
+      userID,
+      body.itemType,
+    );
+    res.status(200).setHeader("Content-Type", result.contentType);
+    return res.send(result.data);
   }
 
   @Get("upload/:id")
