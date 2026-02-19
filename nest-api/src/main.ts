@@ -15,7 +15,7 @@ const LEGACY_PREFIXES: (string | { path: string; except: { methods: string[]; pa
   "/users/resetpassword",
   "/categories",
   { path: "/spendings", except: { methods: ["GET", "POST"] } },
-  { path: "/spendings/upload", except: { methods: ["GET"], pathPrefix: true } },
+  { path: "/spendings/upload", except: { methods: ["GET", "POST"], pathPrefix: true } },
   "/recurrings",
   "/dashboard",
   "/monthlystats",

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import request from "supertest";
+import { join } from "path";
 import { AppModule } from "../src/app.module";
 
 type SupertestApp = Parameters<typeof request>[0];
@@ -22,10 +23,7 @@ interface SpendingItem {
   categoryColor: string | null;
 }
 
-// Optional: set E2E_SPENDING_ID_WITH_INVOICE in .env to a spending ID that has an invoice for the
-// e2e-test user. When set, the GET /upload/:id test asserts the image data URL case. Otherwise we
-// only test 200 with null. TODO: Add beforeAll setup to create a spending with invoice instead.
-const SPENDING_ID_WITH_INVOICE = process.env.E2E_SPENDING_ID_WITH_INVOICE;
+const FIXTURE_IMAGE = join(__dirname, "fixtures", "galaxy.jpg");
 
 function todayISO(): string {
   return new Date().toISOString().split("T")[0];
@@ -39,9 +37,6 @@ function randomCategoryName(): string {
 /**
  * E2E tests for spendings routes.
  * Test user: e2e-test@test.com / e2e-test-password (must exist in local DB)
- *
- * GET /upload/:id — To assert the image case (data URL), set E2E_SPENDING_ID_WITH_INVOICE
- * in .env to a spending ID that has an invoice for the e2e-test user.
  */
 describe("SpendingsController (e2e)", () => {
   let app: INestApplication;
@@ -118,25 +113,107 @@ describe("SpendingsController (e2e)", () => {
     });
   });
 
+  describe("POST /api/spendings/upload", () => {
+    let uploadSpendingID: string;
+
+    beforeAll(async () => {
+      await request(app.getHttpServer() as SupertestApp)
+        .post("/api/spendings")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          date: todayISO(),
+          label: "e2e-upload-test",
+          amount: 5,
+          currency: "EUR",
+        })
+        .expect(201);
+
+      const listRes = await request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+        .set("Authorization", `Bearer ${authToken}`);
+      const spendings = listRes.body as SpendingItem[];
+      const found = spendings.find((s) => s.label === "e2e-upload-test");
+      uploadSpendingID = found!.ID;
+    }, 15000);
+
+    it("should upload, resize and return image as base64", async () => {
+      const res = await request(app.getHttpServer() as SupertestApp)
+        .post("/api/spendings/upload")
+        .set("Authorization", `Bearer ${authToken}`)
+        .field("spendingID", uploadSpendingID)
+        .field("itemType", "spending")
+        .field("date", todayISO())
+        .field("label", "e2e-upload-test")
+        .attach("invoiceImageUpload", FIXTURE_IMAGE);
+
+      expect(res.status).toBe(200);
+      const body = res.text ?? (Buffer.isBuffer(res.body) ? res.body.toString() : String(res.body));
+      expect(body).toMatch(/^data:image\/\w+;base64,/);
+    });
+
+    it("should be retrievable via GET /upload/:id after upload", async () => {
+      const res = await request(app.getHttpServer() as SupertestApp)
+        .get(`/api/spendings/upload/${uploadSpendingID}`)
+        .query({ itemType: "spending" })
+        .set("Authorization", `Bearer ${authToken}`);
+
+      expect(res.status).toBe(200);
+      const body = res.text ?? (Buffer.isBuffer(res.body) ? res.body.toString() : String(res.body));
+      expect(body).toMatch(/^data:image\/\w+;base64,/);
+    });
+
+    it("should return 400 when no file is attached", async () => {
+      const res = await request(app.getHttpServer() as SupertestApp)
+        .post("/api/spendings/upload")
+        .set("Authorization", `Bearer ${authToken}`)
+        .field("spendingID", uploadSpendingID)
+        .field("itemType", "spending")
+        .field("date", todayISO())
+        .field("label", "e2e-upload-test");
+
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 when spendingID is missing", async () => {
+      const res = await request(app.getHttpServer() as SupertestApp)
+        .post("/api/spendings/upload")
+        .set("Authorization", `Bearer ${authToken}`)
+        .field("itemType", "spending")
+        .field("date", todayISO())
+        .field("label", "e2e-upload-test")
+        .attach("invoiceImageUpload", FIXTURE_IMAGE);
+
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 401 without Authorization header", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/spendings/upload")
+        .field("spendingID", "fake-id")
+        .field("itemType", "spending")
+        .expect(401);
+    });
+
+    it("should return 401 with invalid token", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/spendings/upload")
+        .set("Authorization", "Bearer invalid-token")
+        .field("spendingID", "fake-id")
+        .field("itemType", "spending")
+        .expect(401);
+    });
+  });
+
   describe("GET /api/spendings/upload/:id", () => {
-    // TODO: Add a beforeAll setup that creates a spending with an invoice for the e2e-test user
-    // (insert DB row with invoicefile, copy a fixture image to invoicesUpload/{userID}/).
-    // Without this, we only test 200 with null; we cannot assert the image data URL case.
-    // Alternatively, set E2E_SPENDING_ID_WITH_INVOICE in .env when a spending with invoice exists.
-    it("should return 200 with image data URL or null with valid token", async () => {
-      let spendingID: string;
-      if (SPENDING_ID_WITH_INVOICE) {
-        spendingID = SPENDING_ID_WITH_INVOICE;
-      } else {
-        const from = "2020-01-01";
-        const to = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-        const listRes = await request(app.getHttpServer() as SupertestApp)
-          .get("/api/spendings")
-          .query({ from, to })
-          .set("Authorization", `Bearer ${authToken}`);
-        const spendings = listRes.body as SpendingItem[];
-        spendingID = spendings.length > 0 ? spendings[0].ID : "00000000-0000-0000-0000-000000000000";
-      }
+    it("should return 200 with null when spending has no invoice", async () => {
+      const listRes = await request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+        .set("Authorization", `Bearer ${authToken}`);
+      const spendings = listRes.body as SpendingItem[];
+      const withoutInvoice = spendings.find((s) => s.label === "e2e-spending-no-category");
+      const spendingID = withoutInvoice?.ID ?? "00000000-0000-0000-0000-000000000000";
 
       const res = await request(app.getHttpServer() as SupertestApp)
         .get(`/api/spendings/upload/${spendingID}`)
@@ -144,14 +221,6 @@ describe("SpendingsController (e2e)", () => {
         .set("Authorization", `Bearer ${authToken}`);
 
       expect(res.status).toBe(200);
-      const body = res.body ?? res.text;
-      if (SPENDING_ID_WITH_INVOICE) {
-        expect(body).not.toBeNull();
-        expect(typeof body).toBe("string");
-        expect(body).toMatch(/^data:image\/\w+;base64,/);
-      } else if (body != null && body !== "null" && typeof body === "string") {
-        expect(body).toMatch(/^data:image\/\w+;base64,/);
-      }
     });
 
     it("should return 401 without Authorization header", () => {

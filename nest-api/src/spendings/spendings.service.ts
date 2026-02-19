@@ -1,8 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "crypto";
+import { access, unlink } from "fs/promises";
+import { constants } from "fs";
 import { readFile } from "fs/promises";
 import { join } from "path";
+import sharp from "sharp";
 import { AppConfig } from "@config/app.config";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -124,5 +127,50 @@ export class SpendingsService {
       category: category?.name ?? null,
       categoryColor: category?.color ?? null,
     }));
+  }
+
+  async uploadInvoiceImage(
+    filepath: string,
+    filename: string,
+    spendingID: string,
+    userID: string,
+    itemType: string,
+  ): Promise<{ data: string; contentType: string }> {
+    sharp.cache(false);
+
+    await access(filepath, constants.F_OK);
+
+    const imageMetadata = await sharp(filepath).metadata();
+    const biggerSide = (imageMetadata.width ?? 0) > (imageMetadata.height ?? 0) ? "width" : "height";
+    const biggerSideSize = biggerSide === "width" ? 1125 : 1500;
+
+    const parts = filepath.split(".");
+    const fileExtension = parts.pop() ?? "jpg";
+    const resizedPathAndFilename = parts.join(".") + "-r.";
+    const outputPath = resizedPathAndFilename + fileExtension;
+
+    await sharp(filepath)
+      .resize({
+        fit: sharp.fit.contain,
+        [biggerSide]: biggerSideSize,
+      })
+      .toFile(outputPath);
+
+    await unlink(filepath);
+
+    const resizedFilename = filename.slice(0, filename.search(/\./)) + "-r." + fileExtension;
+
+    if (itemType === "spending") {
+      await this.prisma.spendings.updateMany({
+        where: { ID: spendingID, userID },
+        data: { invoicefile: resizedFilename },
+      });
+    }
+
+    const result = await this.getInvoiceImage(spendingID, userID, itemType);
+    if (!result) {
+      throw new Error("Failed to read uploaded image");
+    }
+    return result;
   }
 }
