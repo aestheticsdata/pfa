@@ -366,4 +366,62 @@ describe("SpendingsController (e2e)", () => {
         .expect(400);
     });
   });
+
+  describe("PUT /api/spendings/:id", () => {
+    let updateSpendingID: string;
+
+    beforeAll(async () => {
+      await request(app.getHttpServer() as SupertestApp)
+        .post("/api/spendings")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          date: todayISO(),
+          label: "e2e-update-test",
+          amount: 50,
+          currency: "EUR",
+        })
+        .expect(201);
+
+      const listRes = await request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+        .set("Authorization", `Bearer ${authToken}`);
+      const found = (listRes.body as SpendingItem[]).find((s) => s.label === "e2e-update-test");
+      updateSpendingID = found!.ID;
+    }, 15000);
+
+    it("should update label and amount", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .put(`/api/spendings/${updateSpendingID}`)
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({ label: "e2e-update-test-updated", amount: 99 })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual({ success: true });
+        });
+    });
+
+    it("should return 401 without Authorization header", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .put(`/api/spendings/${updateSpendingID}`)
+        .send({ label: "test", amount: 10 })
+        .expect(401);
+    });
+
+    it("should return 401 with invalid token", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .put(`/api/spendings/${updateSpendingID}`)
+        .set("Authorization", "Bearer invalid-token")
+        .send({ label: "test", amount: 10 })
+        .expect(401);
+    });
+
+    it("should return 404 for non-existent spending", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .put("/api/spendings/00000000-0000-0000-0000-000000000000")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({ label: "test", amount: 10 })
+        .expect(404);
+    });
+  });
 });

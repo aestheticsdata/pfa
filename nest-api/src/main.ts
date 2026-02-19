@@ -24,6 +24,11 @@ const LEGACY_PREFIXES: (string | { path: string; except: { methods: string[]; pa
 ];
 
 function shouldProxyToLegacy(path: string, method: string): boolean {
+  // PUT /spendings/:id → Nest (but NOT PUT /spendings/upload which is still Express)
+  if (method === "PUT" && /^\/spendings\/(?!upload\b)/.test(path)) {
+    return false;
+  }
+
   // First: if any entry says "don't proxy" (except matches), use Nest
   const shouldNotProxy = LEGACY_PREFIXES.some((entry) => {
     if (typeof entry === "string") return false;

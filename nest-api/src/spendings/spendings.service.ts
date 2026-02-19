@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "crypto";
 import { access, unlink } from "fs/promises";
@@ -108,6 +108,82 @@ export class SpendingsService {
     });
 
     return "new spending added";
+  }
+
+  async updateSpending(
+    spendingID: string,
+    userID: string,
+    dto: {
+      label: string;
+      amount: number;
+      category?: { ID?: string | null; name?: string; color?: string | null };
+    },
+  ): Promise<{ success: boolean }> {
+    const categoryID = dto.category?.ID ?? null;
+    const { name, color } = dto.category ?? {};
+
+    const spending = await this.prisma.spendings.findFirst({
+      where: { ID: spendingID, userID },
+      select: { categoryID: true },
+    });
+
+    if (!spending) {
+      throw new NotFoundException("Spending not found");
+    }
+
+    const createNewCategoryAndUpdate = async (categoryName: string, categoryColor: string) => {
+      const existingCategory = await this.prisma.categories.findFirst({
+        where: { userID, name: categoryName },
+      });
+      let newCategoryID: string;
+      if (existingCategory) {
+        newCategoryID = existingCategory.ID;
+      } else {
+        newCategoryID = randomUUID();
+        await this.prisma.categories.create({
+          data: {
+            ID: newCategoryID,
+            userID,
+            name: categoryName,
+            color: categoryColor,
+          },
+        });
+      }
+      await this.prisma.spendings.updateMany({
+        where: { ID: spendingID, userID },
+        data: { label: dto.label, amount: dto.amount, categoryID: newCategoryID },
+      });
+    };
+
+    if (categoryID !== null && spending.categoryID !== categoryID) {
+      const categoryExists = await this.prisma.categories.findFirst({
+        where: { ID: categoryID },
+      });
+      if (categoryExists) {
+        await this.prisma.spendings.updateMany({
+          where: { ID: spendingID, userID },
+          data: { label: dto.label, amount: dto.amount, categoryID },
+        });
+      } else if (name && color) {
+        await createNewCategoryAndUpdate(name, color);
+      }
+    } else if (categoryID === null) {
+      if (color && name) {
+        await createNewCategoryAndUpdate(name, color);
+      } else {
+        await this.prisma.spendings.updateMany({
+          where: { ID: spendingID, userID },
+          data: { label: dto.label, amount: dto.amount, categoryID: null },
+        });
+      }
+    } else {
+      await this.prisma.spendings.updateMany({
+        where: { ID: spendingID, userID },
+        data: { label: dto.label, amount: dto.amount },
+      });
+    }
+
+    return { success: true };
   }
 
   async getSpendings(from: string, to: string, userID: string) {

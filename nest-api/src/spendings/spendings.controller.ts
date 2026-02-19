@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Post,
+  Put,
   Query,
   Res,
   UploadedFile,
@@ -15,6 +16,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import type { Response } from "express";
 import { SpendingsService } from "@spendings/spendings.service";
 import { CreateSpendingDto } from "@spendings/dto/create-spending.dto";
+import { UpdateSpendingDto } from "@spendings/dto/update-spending.dto";
 import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
 import { JwtAuthGuard } from "@spendings/guards/jwt-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
@@ -33,6 +35,11 @@ export class SpendingsController {
   @Post()
   async createSpending(@Body() dto: CreateSpendingDto, @GetUserId() userID: string) {
     return this.spendingsService.createSpending(dto, userID);
+  }
+
+  @Put(":id")
+  async updateSpending(@Param("id") id: string, @Body() dto: UpdateSpendingDto, @GetUserId() userID: string) {
+    return this.spendingsService.updateSpending(id, userID, dto);
   }
 
   @Post("upload")
