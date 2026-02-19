@@ -1,6 +1,7 @@
-import { Controller, Get, Param, Query, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from "@nestjs/common";
 import type { Response } from "express";
 import { SpendingsService } from "@spendings/spendings.service";
+import { CreateSpendingDto } from "@spendings/dto/create-spending.dto";
 import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
 import { JwtAuthGuard } from "@spendings/guards/jwt-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
@@ -13,6 +14,11 @@ export class SpendingsController {
   @Get()
   async getSpendings(@Query() query: SpendingsQueryDto, @GetUserId() userID: string) {
     return this.spendingsService.getSpendings(query.from, query.to, userID);
+  }
+
+  @Post()
+  async createSpending(@Body() dto: CreateSpendingDto, @GetUserId() userID: string) {
+    return this.spendingsService.createSpending(dto, userID);
   }
 
   @Get("upload/:id")

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { randomUUID } from "crypto";
 import { readFile } from "fs/promises";
 import { join } from "path";
 import { AppConfig } from "@config/app.config";
@@ -49,6 +50,61 @@ export class SpendingsService {
       return row?.invoicefile ?? null;
     }
     return null;
+  }
+
+  async createSpending(
+    dto: {
+      date: string;
+      label: string;
+      amount: number;
+      category?: { ID?: string | null; name?: string; color?: string | null };
+      currency: string;
+    },
+    userID: string,
+  ): Promise<string> {
+    let categoryID: string | null = null;
+
+    const category = dto.category;
+    if (category?.ID) {
+      categoryID = category.ID;
+    } else if (category?.ID === null && category?.color != null && category?.name) {
+      const existingCategory = await this.prisma.categories.findFirst({
+        where: {
+          userID,
+          name: category.name,
+        },
+      });
+      if (existingCategory) {
+        categoryID = existingCategory.ID;
+      } else {
+        const newCategoryID = randomUUID();
+        await this.prisma.categories.create({
+          data: {
+            ID: newCategoryID,
+            userID,
+            name: category.name,
+            color: category.color,
+          },
+        });
+        categoryID = newCategoryID;
+      }
+    }
+
+    const spendingID = randomUUID();
+    await this.prisma.spendings.create({
+      data: {
+        ID: spendingID,
+        userID,
+        date: new Date(dto.date),
+        label: dto.label,
+        amount: dto.amount,
+        categoryID,
+        currency: dto.currency,
+        itemType: "spending",
+      },
+    });
+
+    return "new spending added";
   }
 
   async getSpendings(from: string, to: string, userID: string) {

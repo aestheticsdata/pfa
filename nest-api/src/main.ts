@@ -9,13 +9,13 @@ import { formatRouteLog } from "@infrastructure/logger";
 
 // Prefixes still served by the legacy Express API.
 // Remove a prefix from this list once its routes are migrated to NestJS.
-// Use { path, except: { method, pathPrefix? } } to exclude (pathPrefix = match by prefix, else exact).
-const LEGACY_PREFIXES: (string | { path: string; except: { method: string; pathPrefix?: boolean } })[] = [
+// Use { path, except: { methods, pathPrefix? } } to exclude (pathPrefix = match by prefix, else exact).
+const LEGACY_PREFIXES: (string | { path: string; except: { methods: string[]; pathPrefix?: boolean } })[] = [
   "/users/add",
   "/users/resetpassword",
   "/categories",
-  { path: "/spendings", except: { method: "GET" } },
-  { path: "/spendings/upload", except: { method: "GET", pathPrefix: true } },
+  { path: "/spendings", except: { methods: ["GET", "POST"] } },
+  { path: "/spendings/upload", except: { methods: ["GET"], pathPrefix: true } },
   "/recurrings",
   "/dashboard",
   "/monthlystats",
@@ -29,7 +29,7 @@ function shouldProxyToLegacy(path: string, method: string): boolean {
     if (typeof entry === "string") return false;
     const prefix = entry.path;
     if (!path.startsWith(prefix)) return false;
-    if (entry.except?.method === method) {
+    if (entry.except?.methods?.includes(method)) {
       const pathMatches = entry.except.pathPrefix ? path.startsWith(prefix) : path === prefix;
       if (pathMatches) return true;
     }

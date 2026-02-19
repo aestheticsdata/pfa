@@ -41,7 +41,9 @@ The E2E tests require a dedicated test user in your local database. Create it on
 | Email    | `e2e-test@test.com`   |
 | Password | `e2e-test-password`   |
 
-**Do not modify or delete this user** — it is used by `test/users.e2e-spec.ts`.
+**Do not modify or delete this user** — it is used by `test/users.e2e-spec.ts` and `test/spendings.e2e-spec.ts`.
+
+Optional: `E2E_SPENDING_ID_WITH_INVOICE` — ID of a spending with an invoice for the e2e-test user. When set, the GET image test asserts the image case (data URL), otherwise it accepts any 200 response.
 
 ## Production deployment
 
