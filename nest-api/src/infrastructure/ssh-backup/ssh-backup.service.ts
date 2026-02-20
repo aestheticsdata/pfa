@@ -48,7 +48,7 @@ export class SshBackupService implements OnModuleDestroy {
     try {
       await new Promise<void>((resolve, reject) => {
         sftp.unlink(remotePath, (err) => {
-          if (err && (err as NodeJS.ErrnoException).code === "2") {
+          if (err && (err as { code?: number | string }).code == 2) {
             this.logger.warn(`Backup file not found (already deleted?): ${remotePath}`);
             resolve();
             return;
@@ -57,6 +57,17 @@ export class SshBackupService implements OnModuleDestroy {
         });
       });
       this.logger.log(`Backup delete OK: ${remotePath}`);
+    } finally {
+      sftp.end();
+    }
+  }
+
+  async fileExists(remotePath: string): Promise<boolean> {
+    const sftp = await this.connect();
+    try {
+      return await new Promise<boolean>((resolve) => {
+        sftp.stat(remotePath, (err) => resolve(!err));
+      });
     } finally {
       sftp.end();
     }
@@ -105,7 +116,7 @@ export class SshBackupService implements OnModuleDestroy {
         this.mkdirRecursive(sftp, parent)
           .then(() => {
             sftp.mkdir(dir, (mkdirErr) => {
-              if (mkdirErr && (mkdirErr as NodeJS.ErrnoException).code !== "4") {
+              if (mkdirErr && (mkdirErr as { code?: number | string }).code != 4) {
                 reject(mkdirErr);
                 return;
               }
