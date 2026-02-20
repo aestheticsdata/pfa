@@ -209,6 +209,39 @@ export class SpendingsService {
     }));
   }
 
+  async getSpendingsCharts(from: string, to: string, userID: string) {
+    const grouped = await this.prisma.spendings.groupBy({
+      by: ["categoryID"],
+      where: {
+        userID,
+        date: { gte: new Date(from), lte: new Date(to) },
+      },
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+    });
+
+    const categoryIDs = grouped.map((g) => g.categoryID).filter((id): id is string => id !== null);
+
+    const categories =
+      categoryIDs.length > 0
+        ? await this.prisma.categories.findMany({
+            where: { ID: { in: categoryIDs } },
+            select: { ID: true, name: true, color: true },
+          })
+        : [];
+
+    const categoryMap = new Map(categories.map((c) => [c.ID, c]));
+
+    return grouped.map((g) => {
+      const cat = g.categoryID ? categoryMap.get(g.categoryID) : null;
+      return {
+        value: g._sum.amount,
+        category: cat?.name ?? null,
+        categoryColor: cat?.color ?? null,
+      };
+    });
+  }
+
   async deleteSpending(spendingID: string, userID: string): Promise<{ success: boolean }> {
     const deleted = await this.prisma.spendings.deleteMany({
       where: { ID: spendingID, userID },

@@ -39,6 +39,13 @@ export class SpendingsController {
     return this.spendingsService.createSpending(dto, userID);
   }
 
+  @Get("charts")
+  async getSpendingsCharts(@Query() query: SpendingsQueryDto, @GetUserId() userID: string) {
+    const result: { value: unknown; category: string | null; categoryColor: string | null }[] =
+      await this.spendingsService.getSpendingsCharts(query.from, query.to, userID);
+    return result;
+  }
+
   @Put("upload")
   async deleteInvoiceImage(@Body() dto: DeleteInvoiceImageDto, @GetUserId() userID: string): Promise<{ msg: string }> {
     const result: { msg: string } = await this.spendingsService.deleteInvoiceImage(

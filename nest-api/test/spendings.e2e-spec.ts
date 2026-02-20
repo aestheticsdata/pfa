@@ -62,11 +62,60 @@ describe("SpendingsController (e2e)", () => {
     await app.close();
   });
 
+  describe("GET /api/spendings/charts", () => {
+    it("should return 200 and array of chart data with valid token", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings/charts")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+        .set("Authorization", `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(Array.isArray(res.body)).toBe(true);
+          (res.body as { value: string; category: string | null; categoryColor: string | null }[]).forEach((item) => {
+            expect(item).toHaveProperty("value");
+            expect(item).toHaveProperty("category");
+            expect(item).toHaveProperty("categoryColor");
+          });
+        });
+    });
+
+    it("should return 401 without Authorization header", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings/charts")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+        .expect(401);
+    });
+
+    it("should return 401 with invalid token", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings/charts")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+        .set("Authorization", "Bearer invalid-token")
+        .expect(401);
+    });
+
+    it("should return 400 when from is missing", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings/charts")
+        .query({ to: "2030-12-31" })
+        .set("Authorization", `Bearer ${authToken}`)
+        .expect(400);
+    });
+
+    it("should return 400 when to is missing", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings/charts")
+        .query({ from: "2020-01-01" })
+        .set("Authorization", `Bearer ${authToken}`)
+        .expect(400);
+    });
+  });
+
   describe("GET /api/spendings", () => {
     it("should return 200 and array of spendings with valid token", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings")
-        .query({ from: "2024-01-01", to: "2024-12-31" })
+        .query({ from: "2020-01-01", to: "2030-12-31" })
         .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
@@ -84,14 +133,14 @@ describe("SpendingsController (e2e)", () => {
     it("should return 401 without Authorization header", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings")
-        .query({ from: "2024-01-01", to: "2024-12-31" })
+        .query({ from: "2020-01-01", to: "2030-12-31" })
         .expect(401);
     });
 
     it("should return 401 with invalid token", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings")
-        .query({ from: "2024-01-01", to: "2024-12-31" })
+        .query({ from: "2020-01-01", to: "2030-12-31" })
         .set("Authorization", "Bearer invalid-token")
         .expect(401);
     });
@@ -99,7 +148,7 @@ describe("SpendingsController (e2e)", () => {
     it("should return 400 when from is missing", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings")
-        .query({ to: "2024-12-31" })
+        .query({ to: "2030-12-31" })
         .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
@@ -107,7 +156,7 @@ describe("SpendingsController (e2e)", () => {
     it("should return 400 when to is missing", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings")
-        .query({ from: "2024-01-01" })
+        .query({ from: "2020-01-01" })
         .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
