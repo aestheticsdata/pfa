@@ -424,4 +424,65 @@ describe("SpendingsController (e2e)", () => {
         .expect(404);
     });
   });
+
+  describe("DELETE /api/spendings/:id", () => {
+    let deleteSpendingID: string;
+
+    beforeAll(async () => {
+      await request(app.getHttpServer() as SupertestApp)
+        .post("/api/spendings")
+        .set("Authorization", `Bearer ${authToken}`)
+        .send({
+          date: todayISO(),
+          label: "e2e-delete-test",
+          amount: 77,
+          currency: "EUR",
+        })
+        .expect(201);
+
+      const listRes = await request(app.getHttpServer() as SupertestApp)
+        .get("/api/spendings")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+        .set("Authorization", `Bearer ${authToken}`);
+      const found = (listRes.body as SpendingItem[]).find((s) => s.label === "e2e-delete-test");
+      deleteSpendingID = found!.ID;
+    }, 15000);
+
+    it("should delete spending and return success", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .delete(`/api/spendings/${deleteSpendingID}`)
+        .set("Authorization", `Bearer ${authToken}`)
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual({ success: true });
+        });
+    });
+
+    it("should return 404 when deleting already deleted spending", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .delete(`/api/spendings/${deleteSpendingID}`)
+        .set("Authorization", `Bearer ${authToken}`)
+        .expect(404);
+    });
+
+    it("should return 404 for non-existent spending", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .delete("/api/spendings/00000000-0000-0000-0000-000000000000")
+        .set("Authorization", `Bearer ${authToken}`)
+        .expect(404);
+    });
+
+    it("should return 401 without Authorization header", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .delete("/api/spendings/00000000-0000-0000-0000-000000000000")
+        .expect(401);
+    });
+
+    it("should return 401 with invalid token", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .delete("/api/spendings/00000000-0000-0000-0000-000000000000")
+        .set("Authorization", "Bearer invalid-token")
+        .expect(401);
+    });
+  });
 });

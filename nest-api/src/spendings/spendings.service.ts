@@ -209,6 +209,18 @@ export class SpendingsService {
     }));
   }
 
+  async deleteSpending(spendingID: string, userID: string): Promise<{ success: boolean }> {
+    const deleted = await this.prisma.spendings.deleteMany({
+      where: { ID: spendingID, userID },
+    });
+
+    if (deleted.count === 0) {
+      throw new NotFoundException("Spending not found");
+    }
+
+    return { success: true };
+  }
+
   async deleteInvoiceImage(
     spendingID: string,
     userID: string,
