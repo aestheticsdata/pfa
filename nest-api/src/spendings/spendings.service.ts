@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "crypto";
 import { access, unlink } from "fs/promises";
@@ -7,13 +7,17 @@ import { readFile } from "fs/promises";
 import { join } from "path";
 import sharp from "sharp";
 import { AppConfig } from "@config/app.config";
+import { SshBackupService } from "@infrastructure/ssh-backup/ssh-backup.service";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class SpendingsService {
+  private readonly logger = new Logger(SpendingsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly sshBackup: SshBackupService,
   ) {}
 
   async getInvoiceImage(
@@ -205,6 +209,29 @@ export class SpendingsService {
     }));
   }
 
+  async deleteInvoiceImage(
+    spendingID: string,
+    userID: string,
+    itemType: string,
+    invoicefile: string,
+  ): Promise<{ msg: string }> {
+    const invoicesPath = this.configService.getOrThrow<AppConfig>("app").invoicesPath;
+    const filePath = join(invoicesPath, userID, invoicefile);
+
+    await unlink(filePath);
+
+    if (itemType === "spending") {
+      await this.prisma.spendings.updateMany({
+        where: { ID: spendingID, userID },
+        data: { invoicefile: null },
+      });
+    }
+
+    this.backupDelete(userID, invoicefile);
+
+    return { msg: "INVOICE_IMAGE_DELETED" };
+  }
+
   async uploadInvoiceImage(
     filepath: string,
     filename: string,
@@ -243,10 +270,28 @@ export class SpendingsService {
       });
     }
 
+    this.backupCopy(outputPath, userID, resizedFilename);
+
     const result = await this.getInvoiceImage(spendingID, userID, itemType);
     if (!result) {
       throw new Error("Failed to read uploaded image");
     }
     return result;
+  }
+
+  private backupCopy(localPath: string, userID: string, filename: string): void {
+    if (!this.sshBackup.enabled) return;
+    const remotePath = `${this.sshBackup.backupInvoicesPath}${userID}/${filename}`;
+    this.sshBackup.copyFile(localPath, remotePath).catch((err: Error) => {
+      this.logger.error(`SSH backup copy failed for ${remotePath}: ${err.message}`);
+    });
+  }
+
+  private backupDelete(userID: string, filename: string): void {
+    if (!this.sshBackup.enabled) return;
+    const remotePath = `${this.sshBackup.backupInvoicesPath}${userID}/${filename}`;
+    this.sshBackup.deleteFile(remotePath).catch((err: Error) => {
+      this.logger.error(`SSH backup delete failed for ${remotePath}: ${err.message}`);
+    });
   }
 }

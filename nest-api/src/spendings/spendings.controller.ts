@@ -17,6 +17,7 @@ import type { Response } from "express";
 import { SpendingsService } from "@spendings/spendings.service";
 import { CreateSpendingDto } from "@spendings/dto/create-spending.dto";
 import { UpdateSpendingDto } from "@spendings/dto/update-spending.dto";
+import { DeleteInvoiceImageDto } from "@spendings/dto/delete-invoice-image.dto";
 import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
 import { JwtAuthGuard } from "@spendings/guards/jwt-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
@@ -35,6 +36,17 @@ export class SpendingsController {
   @Post()
   async createSpending(@Body() dto: CreateSpendingDto, @GetUserId() userID: string) {
     return this.spendingsService.createSpending(dto, userID);
+  }
+
+  @Put("upload")
+  async deleteInvoiceImage(@Body() dto: DeleteInvoiceImageDto, @GetUserId() userID: string): Promise<{ msg: string }> {
+    const result: { msg: string } = await this.spendingsService.deleteInvoiceImage(
+      dto.ID,
+      userID,
+      dto.itemType,
+      dto.invoicefile,
+    );
+    return result;
   }
 
   @Put(":id")
