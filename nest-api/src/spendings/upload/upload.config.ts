@@ -7,29 +7,23 @@ import { format } from "date-fns";
 const DATE_FORMAT = "yyyy-MM-dd";
 
 function getInvoicesPath(): string {
-  return (
-    process.env.PFA_INVOICES_IMAGES_PATH ??
-    join(process.cwd(), "invoicesUpload")
-  );
+  return process.env.PFA_INVOICES_IMAGES_PATH ?? join(process.cwd(), "invoicesUpload");
 }
 
 const stringToHyphen = (s: string) => s.replaceAll(" ", "-");
 
 export const invoiceUploadOptions = {
   storage: diskStorage({
-    destination: async (req, _file, cb) => {
+    destination: (req, _file, cb) => {
       const userID = (req as Request & { user?: { id: string } }).user?.id;
       if (!userID) {
         cb(new Error("User not authenticated"), "");
         return;
       }
       const userDir = join(getInvoicesPath(), userID);
-      try {
-        await mkdir(userDir, { recursive: true });
-        cb(null, userDir);
-      } catch (err) {
-        cb(err as Error, "");
-      }
+      mkdir(userDir, { recursive: true })
+        .then(() => cb(null, userDir))
+        .catch((err) => cb(err as Error, ""));
     },
     filename: (req, file, cb) => {
       const body = (req as Request & { body: Record<string, string> }).body;
