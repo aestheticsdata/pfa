@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Post,
@@ -52,6 +53,11 @@ export class SpendingsController {
   @Put(":id")
   async updateSpending(@Param("id") id: string, @Body() dto: UpdateSpendingDto, @GetUserId() userID: string) {
     return this.spendingsService.updateSpending(id, userID, dto);
+  }
+
+  @Delete(":id")
+  async deleteSpending(@Param("id") id: string, @GetUserId() userID: string) {
+    return this.spendingsService.deleteSpending(id, userID);
   }
 
   @Post("upload")
