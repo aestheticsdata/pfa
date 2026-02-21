@@ -6,8 +6,11 @@ import { AppModule } from "./app.module";
 import { AppConfig } from "@config/app.config";
 import { formatRouteLog } from "@infrastructure/logger";
 
+import type { Application } from "express";
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  (app.getHttpAdapter().getInstance() as Application).set("trust proxy", 1);
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
@@ -18,7 +21,10 @@ async function bootstrap() {
 
   app.use("/api", (req: Request, _res: Response, next: NextFunction) => {
     const url = req.originalUrl ?? req.url ?? req.path ?? "";
-    console.log(formatRouteLog(req.method, url, "Nest"));
+    const ip =
+      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ?? req.ip ?? req.socket?.remoteAddress ?? "?";
+    const userAgent = (req.headers["user-agent"] ?? "unknown").slice(0, 60);
+    console.log(formatRouteLog(req.method, url, "Nest", { ip, userAgent }));
     next();
   });
 
