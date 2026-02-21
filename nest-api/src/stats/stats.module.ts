@@ -1,11 +1,11 @@
 import { Module } from "@nestjs/common";
 import { StatsService } from "@stats/stats.service";
-import { WeeklyStatsController, MonthlyStatsController } from "@stats/stats.controller";
+import { WeeklyStatsController, MonthlyStatsController, StatisticsController } from "@stats/stats.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 
 @Module({
   imports: [PrismaModule],
-  controllers: [WeeklyStatsController, MonthlyStatsController],
+  controllers: [WeeklyStatsController, MonthlyStatsController, StatisticsController],
   providers: [StatsService],
 })
 export class StatsModule {}
