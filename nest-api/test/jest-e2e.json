@@ -17,6 +17,7 @@
     "^@spendings/(.*)$": "<rootDir>/src/spendings/$1",
     "^@recurrings/(.*)$": "<rootDir>/src/recurrings/$1",
     "^@dashboard/(.*)$": "<rootDir>/src/dashboard/$1",
-    "^@stats/(.*)$": "<rootDir>/src/stats/$1"
+    "^@stats/(.*)$": "<rootDir>/src/stats/$1",
+    "^@categories/(.*)$": "<rootDir>/src/categories/$1"
   }
 }

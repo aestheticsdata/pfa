@@ -1,13 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import {
-  endOfMonth,
-  format,
-  getDay,
-  getDaysInMonth,
-  getMonth,
-  getYear,
-  startOfMonth,
-} from "date-fns";
+import { endOfMonth, format, getDay, getDaysInMonth, getMonth, getYear, startOfMonth } from "date-fns";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -33,10 +25,7 @@ export class StatsService {
     return this.makeRange(spendings, startDate);
   }
 
-  private makeRange(
-    monthSpending: { date: Date; amount: { toString: () => string } }[],
-    startDate: Date,
-  ): number[] {
+  private makeRange(monthSpending: { date: Date; amount: { toString: () => string } }[], startDate: Date): number[] {
     const ranges: number[] = [];
     const dayNumberFromMonthStart = getDay(startDate);
     const firstSlice = 7 - dayNumberFromMonthStart;
@@ -46,8 +35,7 @@ export class StatsService {
     for (let i = 0; i < numberOfFullWeeks; i += 1) {
       ranges.push(7);
     }
-    const remainingNumberOfDays =
-      numberOfDaysInMonth - (firstSlice + 7 * numberOfFullWeeks);
+    const remainingNumberOfDays = numberOfDaysInMonth - (firstSlice + 7 * numberOfFullWeeks);
     if (remainingNumberOfDays !== 0) {
       ranges.push(remainingNumberOfDays);
     }
@@ -58,19 +46,10 @@ export class StatsService {
       totalsByWeek[slice_i] = 0;
       let tempTotal = 0;
       for (let day_of_slice_i = 0; day_of_slice_i < ranges[slice_i]; day_of_slice_i += 1) {
-        const targetDate = new Date(
-          getYear(startDate),
-          getMonth(startDate),
-          day_of_slice_i + 1 + dayShifter,
-        );
+        const targetDate = new Date(getYear(startDate), getMonth(startDate), day_of_slice_i + 1 + dayShifter);
         const targetStr = format(targetDate, "yyyy-MM-dd");
-        const spendingByDay = monthSpending.filter(
-          (o) => format(o.date, "yyyy-MM-dd") === targetStr,
-        );
-        tempTotal = spendingByDay.reduce(
-          (acc, curr) => acc + Number(curr.amount.toString()),
-          0,
-        );
+        const spendingByDay = monthSpending.filter((o) => format(o.date, "yyyy-MM-dd") === targetStr);
+        tempTotal = spendingByDay.reduce((acc, curr) => acc + Number(curr.amount.toString()), 0);
         if (spendingByDay.length !== 0) {
           totalsByWeek[slice_i] += tempTotal;
         }

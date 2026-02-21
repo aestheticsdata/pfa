@@ -11,10 +11,7 @@ export class WeeklyStatsController {
   constructor(private readonly statsService: StatsService) {}
 
   @Get()
-  async getWeeklyStats(
-    @Query() query: WeeklyStatsQueryDto,
-    @GetUserId() userID: string,
-  ) {
+  async getWeeklyStats(@Query() query: WeeklyStatsQueryDto, @GetUserId() userID: string) {
     return this.statsService.getWeeklyStats(query.start, userID);
   }
 }
@@ -25,10 +22,7 @@ export class MonthlyStatsController {
   constructor(private readonly statsService: StatsService) {}
 
   @Get()
-  async getMonthlyStats(
-    @Query() query: MonthlyStatsQueryDto,
-    @GetUserId() userID: string,
-  ) {
+  async getMonthlyStats(@Query() query: MonthlyStatsQueryDto, @GetUserId() userID: string) {
     return this.statsService.getMonthlyStats(query.from, userID);
   }
 }
