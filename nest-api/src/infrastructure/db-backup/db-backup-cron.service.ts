@@ -42,7 +42,7 @@ export class DbBackupCronService {
       );
       const remotePath = `${config.remoteBackupPath}pfadump.sql`;
       await this.sshBackup.copyFile(dumpFile, remotePath);
-      this.logger.log("mysqlDump completed successfully");
+      this.logger.log(`DB backup completed → ${remotePath}`);
     } catch (err) {
       this.logger.error(`mysqlDump failed: ${(err as Error).message}`);
     }
