@@ -16,7 +16,7 @@ interface SignInResponseBody {
  *
  * Routes covered (as they are migrated to Nest):
  * - POST /api/users (sign-in)
- * - POST /api/users/add (create user) - TODO
+ * - POST /api/users/add (create user)
  * - POST /api/users/resetpassword - TODO
  */
 describe("UsersController (e2e)", () => {
@@ -82,6 +82,68 @@ describe("UsersController (e2e)", () => {
       return request(app.getHttpServer() as SupertestApp)
         .post("/api/users")
         .send({ email: "e2e-test@test.com" })
+        .expect(400);
+    });
+  });
+
+  describe("POST /api/users/add", () => {
+    const uniqueEmail = () => `e2e-add-${Date.now()}-${Math.random().toString(36).slice(2)}@test.com`;
+
+    it("should create user and return 201 with token and user", () => {
+      const email = uniqueEmail();
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/users/add")
+        .send({
+          name: "E2E Add User",
+          email,
+          password: "secure-password-123",
+          baseCurrency: "EUR",
+          language: "fr",
+        })
+        .expect(201)
+        .expect((res) => {
+          const body = res.body as SignInResponseBody;
+          expect(body).toHaveProperty("token");
+          expect(typeof body.token).toBe("string");
+          expect(body).toHaveProperty("user");
+          expect(body.user).toMatchObject({
+            email,
+            name: "E2E Add User",
+            id: expect.any(String),
+            baseCurrency: "EUR",
+          });
+        });
+    });
+
+    it("should return 409 when email already exists", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/users/add")
+        .send({
+          name: "Duplicate",
+          email: "e2e-test@test.com",
+          password: "any-password",
+        })
+        .expect(409);
+    });
+
+    it("should return 400 when name is missing", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/users/add")
+        .send({ email: uniqueEmail(), password: "password" })
+        .expect(400);
+    });
+
+    it("should return 400 when email is missing", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/users/add")
+        .send({ name: "Test", password: "password" })
+        .expect(400);
+    });
+
+    it("should return 400 when password is missing", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/users/add")
+        .send({ name: "Test", email: uniqueEmail() })
         .expect(400);
     });
   });
