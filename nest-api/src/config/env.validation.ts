@@ -23,5 +23,5 @@ export function validate(config: Record<string, unknown>): EnvironmentVariables 
   if (errors.length > 0) {
     throw new Error(`Config validation error: ${errors.toString()}`);
   }
-  return validatedConfig as EnvironmentVariables;
+  return validatedConfig;
 }
