@@ -18,7 +18,9 @@
       "@config/*": ["src/config/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
       "@users/*": ["src/users/*"],
-      "@spendings/*": ["src/spendings/*"]
+      "@spendings/*": ["src/spendings/*"],
+      "@dashboard/*": ["src/dashboard/*"],
+      "@recurrings/*": ["src/recurrings/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

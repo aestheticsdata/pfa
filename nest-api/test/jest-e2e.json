@@ -9,6 +9,7 @@
     "^@infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",
     "^@users/(.*)$": "<rootDir>/src/users/$1",
     "^@spendings/(.*)$": "<rootDir>/src/spendings/$1",
-    "^@recurrings/(.*)$": "<rootDir>/src/recurrings/$1"
+    "^@recurrings/(.*)$": "<rootDir>/src/recurrings/$1",
+    "^@dashboard/(.*)$": "<rootDir>/src/dashboard/$1"
   }
 }

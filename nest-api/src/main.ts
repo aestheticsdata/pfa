@@ -14,7 +14,6 @@ const LEGACY_PREFIXES: (string | { path: string; except: { methods: string[]; pa
   "/users/add",
   "/users/resetpassword",
   "/categories",
-  "/dashboard",
   "/monthlystats",
   "/weeklystats",
   "/statistics",
