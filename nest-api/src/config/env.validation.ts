@@ -5,9 +5,6 @@ class EnvironmentVariables {
   @IsNumberString()
   PORT: string;
 
-  @IsNumberString()
-  LEGACY_API_PORT: string;
-
   @IsString()
   JWT_SECRET: string;
 }
