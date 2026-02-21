@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
-import { endOfMonth, format, getDay, getDaysInMonth, getMonth, getYear, startOfMonth } from "date-fns";
+import { endOfMonth, format, getDay, getDaysInMonth, getMonth, getYear, parse, startOfMonth } from "date-fns";
+import { fr } from "date-fns/locale";
 import { PrismaService } from "../prisma/prisma.service";
+
+import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
 
 @Injectable()
 export class StatsService {
@@ -96,5 +99,102 @@ export class StatsService {
     };
 
     return { spendingsSum, recurringsSum };
+  }
+
+  async getStatistics(categoryIDs: string[], years: string[], userID: string): Promise<StatisticsResponse> {
+    const yearNumbers = years.map((y) => parseInt(y, 10));
+    const startDate = new Date(Math.min(...yearNumbers), 0, 1);
+    const endDate = new Date(Math.max(...yearNumbers), 11, 31);
+
+    const userCategories = await this.prisma.categories.findMany({
+      where: { ID: { in: categoryIDs }, OR: [{ userID }, { userID: null }] },
+      select: { ID: true, name: true, color: true },
+    });
+    const allowedCategoryIds = new Set(userCategories.map((c) => c.ID));
+    const filteredCategoryIDs = categoryIDs.filter((id) => allowedCategoryIds.has(id));
+    if (filteredCategoryIDs.length === 0) {
+      return { colors: {}, data: {} };
+    }
+
+    const spendings = await this.prisma.spendings.findMany({
+      where: {
+        userID,
+        categoryID: { in: filteredCategoryIDs },
+        date: {
+          gte: startDate,
+          lte: endDate,
+        },
+      },
+      include: {
+        category: true,
+      },
+    });
+
+    const output: StatisticsResponse = { colors: {}, data: {} };
+    const categoryTemplate: Record<string, number> = {};
+
+    for (const cat of userCategories) {
+      const categoryName = cat.name.toLowerCase();
+      output.colors[categoryName] = cat.color;
+      categoryTemplate[categoryName] = 0;
+    }
+
+    const monthTotals: Map<string, { year: number; month: string; totals: Record<string, number> }> = new Map();
+    const monthOrder = [
+      "janv.",
+      "févr.",
+      "mars",
+      "avr.",
+      "mai",
+      "juin",
+      "juil.",
+      "août",
+      "sept.",
+      "oct.",
+      "nov.",
+      "déc.",
+    ];
+
+    for (const row of spendings) {
+      if (!row.category || !yearNumbers.includes(getYear(row.date))) continue;
+      const date = row.date;
+      const year = getYear(date);
+      const monthKey = format(date, "yyyy-MM");
+      const monthLabel = format(parse(monthKey, "yyyy-MM", new Date()), "MMM", { locale: fr });
+      const categoryName = row.category.name.toLowerCase();
+
+      const key = `${year}-${monthLabel}`;
+      if (!monthTotals.has(key)) {
+        monthTotals.set(key, {
+          year,
+          month: monthLabel,
+          totals: { ...categoryTemplate },
+        });
+      }
+      const entry = monthTotals.get(key)!;
+      const amount = Number(row.amount.toString());
+      entry.totals[categoryName] = (entry.totals[categoryName] ?? 0) + amount;
+    }
+
+    const sortedKeys = Array.from(monthTotals.keys()).sort((a, b) => {
+      const [yearA, monthA] = a.split("-");
+      const [yearB, monthB] = b.split("-");
+      if (yearA !== yearB) return parseInt(yearA, 10) - parseInt(yearB, 10);
+      return monthOrder.indexOf(monthA) - monthOrder.indexOf(monthB);
+    });
+
+    for (const key of sortedKeys) {
+      const entry = monthTotals.get(key)!;
+      const yearStr = String(entry.year);
+      if (!output.data[yearStr]) {
+        output.data[yearStr] = [];
+      }
+      output.data[yearStr].push({
+        month: entry.month,
+        ...entry.totals,
+      });
+    }
+
+    return output;
   }
 }
