@@ -5,6 +5,9 @@ import { PrismaService } from "../prisma/prisma.service";
 
 import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
 
+/** Rounds to 2 decimal places to avoid JS float precision issues. */
+const roundCurrency = (n: number): number => Math.round(n);
+
 @Injectable()
 export class StatsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -54,7 +57,7 @@ export class StatsService {
         const spendingByDay = monthSpending.filter((o) => format(o.date, "yyyy-MM-dd") === targetStr);
         tempTotal = spendingByDay.reduce((acc, curr) => acc + Number(curr.amount.toString()), 0);
         if (spendingByDay.length !== 0) {
-          totalsByWeek[slice_i] += tempTotal;
+          totalsByWeek[slice_i] = roundCurrency((totalsByWeek[slice_i] ?? 0) + tempTotal);
         }
       }
       dayShifter += ranges[slice_i];
@@ -189,9 +192,12 @@ export class StatsService {
       if (!output.data[yearStr]) {
         output.data[yearStr] = [];
       }
+      const roundedTotals = Object.fromEntries(
+        Object.entries(entry.totals).map(([k, v]) => [k, roundCurrency(v)]),
+      );
       output.data[yearStr].push({
         month: entry.month,
-        ...entry.totals,
+        ...roundedTotals,
       });
     }
 
