@@ -1,8 +1,10 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, ConflictException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { randomUUID } from "crypto";
 import { AppConfig } from "@config/app.config";
 import { PrismaService } from "../prisma/prisma.service";
 import type { Users } from "../../generated/prisma/client";
+import type { AddUserDto } from "./dto/add-user.dto";
 import * as bcrypt from "bcryptjs";
 import * as jwt from "jsonwebtoken";
 
@@ -38,6 +40,38 @@ export class UsersService {
       throw new UnauthorizedException("Invalid credentials");
     }
 
+    return this.buildSignInResponse(user);
+  }
+
+  async addUser(dto: AddUserDto): Promise<SignInResponse> {
+    const existing = await this.prisma.users.findUnique({
+      where: { email: dto.email },
+    });
+    if (existing) {
+      throw new ConflictException("Email already exists");
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const id = randomUUID();
+    const baseCurrency = dto.baseCurrency ?? "EUR";
+    const language = dto.language ?? "fr";
+    const registerDate = dto.registerDate ? new Date(dto.registerDate) : new Date();
+
+    await this.prisma.users.create({
+      data: {
+        ID: id,
+        name: dto.name,
+        email: dto.email,
+        password: hashedPassword,
+        baseCurrency,
+        language,
+        registerDate,
+      },
+    });
+
+    const user = await this.prisma.users.findUniqueOrThrow({
+      where: { ID: id },
+    });
     return this.buildSignInResponse(user);
   }
 

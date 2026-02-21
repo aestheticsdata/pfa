@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { endOfMonth } from "date-fns";
 import startOfMonth from "date-fns/startOfMonth";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { getWeekRange, getWeekDays } from "@components/datePickerWrapper/helpers";
 import useDashboard from "@components/spendings/services/useDashboard";
 import SpendingDashboard from "@components/spendings/spendingDashboard/SpendingDashboard";
 import useSpendings from "@components/spendings/services/useSpendings";
@@ -17,7 +18,20 @@ const Spendings = () => {
   const { isBlurActive } = useBlur();
 
   const [month, setMonth] = useState<MonthRange>();
-  const { from, to, range } = useDatePickerWrapperStore();
+  const { from, to, range, setFrom, setTo, setRange } = useDatePickerWrapperStore();
+
+  // Initialize date range when landing on spendings (e.g. after signup) before DatePickerWrapper mounts.
+  // Fixes: can't edit weekly ceiling / monthly amount until page refresh.
+  useEffect(() => {
+    if (!from) {
+      const now = new Date();
+      const weekRange = getWeekRange(now);
+      const dateRange = getWeekDays(weekRange.from, now);
+      setFrom(weekRange.from);
+      setTo(weekRange.to);
+      setRange(dateRange);
+    }
+  }, [from, setFrom, setTo, setRange]);
 
   const { spendingsByWeek, spendingsByMonth, isLoading: isSpendingsLoading } = useSpendings();
 

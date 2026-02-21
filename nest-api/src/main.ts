@@ -11,7 +11,6 @@ import { formatRouteLog } from "@infrastructure/logger";
 // Remove a prefix from this list once its routes are migrated to NestJS.
 // Use { path, except: { methods, pathPrefix? } } to exclude (pathPrefix = match by prefix, else exact).
 const LEGACY_PREFIXES: (string | { path: string; except: { methods: string[]; pathPrefix?: boolean } })[] = [
-  "/users/add",
   "/users/resetpassword",
 ];
 
