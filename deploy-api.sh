@@ -10,11 +10,8 @@ REMOTE_USER_HOST="debian@ks-b"
 API_ROOT="/var/www/pfa"
 
 # Paths on the server
-EXPRESS_DIR="$API_ROOT/apiserver"
 NEST_DIR="$API_ROOT/nest-api"
-EXPRESS_BACKUP_DIR="$API_ROOT/apiserver.bak"
 NEST_BACKUP_DIR="$API_ROOT/nest-api.bak"
-EXPRESS_RELEASES_DIR="$API_ROOT/apiserver-releases"
 NEST_RELEASES_DIR="$API_ROOT/nest-api-releases"
 
 # Local project dir (script location = repo root)
@@ -45,9 +42,7 @@ log() {
 # Remote rollback helper (used by manual and auto rollback)
 remote_rollback() {
   ssh "$REMOTE_USER_HOST" \
-    EXPRESS_DIR="$EXPRESS_DIR" \
     NEST_DIR="$NEST_DIR" \
-    EXPRESS_BACKUP_DIR="$EXPRESS_BACKUP_DIR" \
     NEST_BACKUP_DIR="$NEST_BACKUP_DIR" \
     API_ROOT="$API_ROOT" \
     'bash -s' << 'EOF'
@@ -55,13 +50,12 @@ set -Eeuo pipefail
 
 cd "$API_ROOT"
 
-if [ ! -d "$EXPRESS_BACKUP_DIR" ] || [ ! -d "$NEST_BACKUP_DIR" ]; then
-  echo "❌ ERROR: Backup directories not found" >&2
+if [ ! -d "$NEST_BACKUP_DIR" ]; then
+  echo "❌ ERROR: Backup directory not found" >&2
   exit 1
 fi
 
-rm -rf "$EXPRESS_DIR" "$NEST_DIR"
-mv "$EXPRESS_BACKUP_DIR" "$EXPRESS_DIR"
+rm -rf "$NEST_DIR"
 mv "$NEST_BACKUP_DIR" "$NEST_DIR"
 
 echo "✅ API rollback done on server (restored from backup)"
@@ -89,7 +83,6 @@ deploy() {
   TIMESTAMP=$(date +'%Y%m%d-%H%M%S')
 
   local RELEASE_NAME="release-${TIMESTAMP}-${GIT_BRANCH}-${GIT_HASH}"
-  local EXPRESS_RELEASE_REMOTE="$EXPRESS_RELEASES_DIR/$RELEASE_NAME"
   local NEST_RELEASE_REMOTE="$NEST_RELEASES_DIR/$RELEASE_NAME"
   local SWITCH_DONE="false"
 
@@ -127,41 +120,23 @@ EOF
   trap 'on_error $LINENO' ERR
 
   ######################################
-  # Remote: prepare release directories
+  # Remote: prepare release directory
   ######################################
-  log "➡️  Preparing release directories on server"
+  log "➡️  Preparing release directory on server"
 
   ssh "$REMOTE_USER_HOST" \
-    EXPRESS_RELEASES_DIR="$EXPRESS_RELEASES_DIR" \
     NEST_RELEASES_DIR="$NEST_RELEASES_DIR" \
-    EXPRESS_RELEASE_REMOTE="$EXPRESS_RELEASE_REMOTE" \
     NEST_RELEASE_REMOTE="$NEST_RELEASE_REMOTE" \
     API_ROOT="$API_ROOT" \
     'bash -s' << 'EOF'
 set -Eeuo pipefail
 
 mkdir -p "$API_ROOT"
-mkdir -p "$EXPRESS_RELEASES_DIR"
 mkdir -p "$NEST_RELEASES_DIR"
 
-rm -rf "$EXPRESS_RELEASE_REMOTE" "$NEST_RELEASE_REMOTE"
-mkdir -p "$EXPRESS_RELEASE_REMOTE"
+rm -rf "$NEST_RELEASE_REMOTE"
 mkdir -p "$NEST_RELEASE_REMOTE"
 EOF
-
-  ######################################
-  # Rsync Express API
-  ######################################
-  log "➡️  Syncing Express API source to release directory (rsync)"
-
-  rsync -az \
-    --delete \
-    --exclude=".git" \
-    --exclude="node_modules" \
-    --exclude=".DS_Store" \
-    --exclude="deploy-api.sh" \
-    "$SCRIPT_DIR/api/" \
-    "$REMOTE_USER_HOST":"$EXPRESS_RELEASE_REMOTE/"
 
   ######################################
   # Rsync Nest API
@@ -193,11 +168,8 @@ EOF
   log "➡️  Performing atomic API release switch with backup"
 
   ssh "$REMOTE_USER_HOST" \
-    EXPRESS_DIR="$EXPRESS_DIR" \
     NEST_DIR="$NEST_DIR" \
-    EXPRESS_BACKUP_DIR="$EXPRESS_BACKUP_DIR" \
     NEST_BACKUP_DIR="$NEST_BACKUP_DIR" \
-    EXPRESS_RELEASE_REMOTE="$EXPRESS_RELEASE_REMOTE" \
     NEST_RELEASE_REMOTE="$NEST_RELEASE_REMOTE" \
     API_ROOT="$API_ROOT" \
     'bash -s' << 'EOF'
@@ -205,30 +177,22 @@ set -Eeuo pipefail
 
 cd "$API_ROOT"
 
-if [ ! -d "$EXPRESS_RELEASE_REMOTE" ] || [ ! -d "$NEST_RELEASE_REMOTE" ]; then
-  echo "❌ ERROR: Release directories do not exist" >&2
+if [ ! -d "$NEST_RELEASE_REMOTE" ]; then
+  echo "❌ ERROR: Release directory does not exist" >&2
   exit 1
 fi
 
-if [ ! -f "$EXPRESS_RELEASE_REMOTE/package.json" ]; then
-  echo "❌ ERROR: Express release is empty (no package.json in $EXPRESS_RELEASE_REMOTE)" >&2
-  exit 1
-fi
 if [ ! -f "$NEST_RELEASE_REMOTE/package.json" ]; then
   echo "❌ ERROR: Nest release is empty (no package.json in $NEST_RELEASE_REMOTE)" >&2
   exit 1
 fi
 
-rm -rf "$EXPRESS_BACKUP_DIR" "$NEST_BACKUP_DIR"
+rm -rf "$NEST_BACKUP_DIR"
 
-if [ -d "$EXPRESS_DIR" ]; then
-  mv "$EXPRESS_DIR" "$EXPRESS_BACKUP_DIR"
-fi
 if [ -d "$NEST_DIR" ]; then
   mv "$NEST_DIR" "$NEST_BACKUP_DIR"
 fi
 
-mv "$EXPRESS_RELEASE_REMOTE" "$EXPRESS_DIR"
 mv "$NEST_RELEASE_REMOTE" "$NEST_DIR"
 
 echo "✅ New API release activated"
@@ -242,7 +206,6 @@ EOF
   log "➡️  Installing dependencies and building on server"
 
   ssh "$REMOTE_USER_HOST" \
-    EXPRESS_DIR="$EXPRESS_DIR" \
     NEST_DIR="$NEST_DIR" \
     API_ROOT="$API_ROOT" \
     DATABASE_URL="$DATABASE_URL" \
@@ -256,11 +219,6 @@ if ! command -v pnpm >/dev/null 2>&1; then
   exit 1
 fi
 
-# Express: install only
-cd "$EXPRESS_DIR"
-rm -rf node_modules
-pnpm install
-
 # Nest: install + build (DATABASE_URL needed for prisma generate)
 cd "$NEST_DIR"
 rm -rf node_modules dist
@@ -268,7 +226,7 @@ pnpm install
 export DATABASE_URL
 pnpm build
 
-# Start or reload both apps with pm2
+# Start or reload Nest with pm2
 cd "$API_ROOT"
 pm2 reload ecosystem.config.js --env production 2>/dev/null || pm2 start ecosystem.config.js --env production
 EOF
@@ -276,8 +234,8 @@ EOF
   trap - ERR
 
   log "✅ API deployment completed successfully"
-  log "ℹ️  Nest API (port 6100) + Express legacy (port 6101) are running"
-  log "ℹ️  Previous version is available in: $EXPRESS_BACKUP_DIR and $NEST_BACKUP_DIR"
+  log "ℹ️  Nest API (port 6100) is running"
+  log "ℹ️  Previous version is available in: $NEST_BACKUP_DIR"
   log "ℹ️  You can manually rollback with: ./deploy-api.sh rollback"
 }
 

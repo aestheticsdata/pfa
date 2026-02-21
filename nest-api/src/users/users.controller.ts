@@ -21,4 +21,12 @@ export class UsersController {
     const result: Promise<SignInResponse> = this.usersService.addUser(dto);
     return result;
   }
+
+  @Post("resetpassword")
+  @HttpCode(HttpStatus.NOT_IMPLEMENTED)
+  resetPassword(): { error: string } {
+    return {
+      error: "Cette fonctionnalité est temporairement désactivée.",
+    };
+  }
 }
