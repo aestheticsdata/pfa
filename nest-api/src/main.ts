@@ -13,7 +13,6 @@ import { formatRouteLog } from "@infrastructure/logger";
 const LEGACY_PREFIXES: (string | { path: string; except: { methods: string[]; pathPrefix?: boolean } })[] = [
   "/users/add",
   "/users/resetpassword",
-  "/categories",
   "/statistics",
 ];
 

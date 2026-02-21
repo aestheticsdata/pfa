@@ -12,6 +12,7 @@ import { SpendingsModule } from "@spendings/spendings.module";
 import { RecurringsModule } from "@recurrings/recurrings.module";
 import { DashboardModule } from "@dashboard/dashboard.module";
 import { StatsModule } from "@stats/stats.module";
+import { CategoriesModule } from "@categories/categories.module";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { StatsModule } from "@stats/stats.module";
     RecurringsModule,
     DashboardModule,
     StatsModule,
+    CategoriesModule,
     SshBackupModule,
     ConfigModule.forRoot({
       isGlobal: true,
