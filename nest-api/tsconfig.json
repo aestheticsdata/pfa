@@ -15,12 +15,27 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@config/*": ["src/config/*"],
-      "@infrastructure/*": ["src/infrastructure/*"],
-      "@users/*": ["src/users/*"],
-      "@spendings/*": ["src/spendings/*"],
-      "@dashboard/*": ["src/dashboard/*"],
-      "@recurrings/*": ["src/recurrings/*"]
+      "@config/*": [
+        "src/config/*"
+      ],
+      "@infrastructure/*": [
+        "src/infrastructure/*"
+      ],
+      "@users/*": [
+        "src/users/*"
+      ],
+      "@spendings/*": [
+        "src/spendings/*"
+      ],
+      "@dashboard/*": [
+        "src/dashboard/*"
+      ],
+      "@recurrings/*": [
+        "src/recurrings/*"
+      ],
+      "@stats/*": [
+        "src/stats/*"
+      ]
     },
     "incremental": true,
     "skipLibCheck": true,
