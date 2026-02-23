@@ -6,7 +6,7 @@ class EnvironmentVariables {
   PORT: string;
 
   @IsString()
-  JWT_SECRET: string;
+  SESSION_SECRET: string;
 }
 
 export function validate(config: Record<string, unknown>): EnvironmentVariables {

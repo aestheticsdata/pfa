@@ -1,13 +1,13 @@
 import { Body, Controller, Delete, Get, Param, Put, UseGuards } from "@nestjs/common";
 import { CategoriesService } from "@categories/categories.service";
 import { UpdateCategoryDto } from "@categories/dto/update-category.dto";
-import { JwtAuthGuard } from "@spendings/guards/jwt-auth.guard";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
 import type { Categories } from "../../generated/prisma/client";
 
 @Controller("categories")
-@UseGuards(JwtAuthGuard)
+@UseGuards(SessionAuthGuard)
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 

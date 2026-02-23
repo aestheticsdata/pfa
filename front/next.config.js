@@ -3,6 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   // output: 'export' uniquement pour les builds de production (pas en dev)
   ...(process.env.NODE_ENV !== 'development' && { output: 'export' }),
+  trailingSlash: true,
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if

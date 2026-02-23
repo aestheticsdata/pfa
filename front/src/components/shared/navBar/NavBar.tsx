@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
-import { useAuthStore } from "@auth/store/authStore";
+import { useUserStore } from "@auth/store/userStore";
 import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
 import useGlobalStore from "@components/shared/globalStore";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
@@ -12,7 +12,7 @@ import { ROUTES } from "@components/shared/config/constants";
 
 const NavBar = () => {
   const [client, setClient] = useState(false);
-  const token = useAuthStore((state) => state.token);
+  const user = useUserStore((state) => state.user);
   const { isCalendarVisible } = useGlobalStore();
   const router = useRouter();
   const pathname = usePathname();
@@ -43,7 +43,7 @@ const NavBar = () => {
     );
   };
 
-  const isLogged = client ? !!token : false;
+  const isLogged = client ? !!user : false;
 
   return (
     <div

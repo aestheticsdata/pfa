@@ -4,11 +4,11 @@ import { DashboardService } from "@dashboard/dashboard.service";
 import { DashboardQueryDto } from "@dashboard/dto/dashboard-query.dto";
 import { CreateDashboardDto } from "@dashboard/dto/create-dashboard.dto";
 import { UpdateDashboardDto } from "@dashboard/dto/update-dashboard.dto";
-import { JwtAuthGuard } from "@spendings/guards/jwt-auth.guard";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
 @Controller("dashboard")
-@UseGuards(JwtAuthGuard)
+@UseGuards(SessionAuthGuard)
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

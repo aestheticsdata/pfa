@@ -1,7 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { useUserStore } from "@auth/store/userStore";
-import { useAuthStore } from "@auth/store/authStore";
 import {
   QUERY_KEYS,
   QUERY_OPTIONS,
@@ -12,7 +11,6 @@ const useCategories = () => {
   const { privateRequest } = useRequestHelper();
   const user = useUserStore((state) => state.user);
   const userID = user?.id;
-  const token = useAuthStore((state) => state.token);
   const queryClient = useQueryClient();
 
   const invalidation = async () => {
@@ -31,7 +29,7 @@ const useCategories = () => {
   };
   const { data: categories } = useQuery(QUERY_KEYS.CATEGORIES, getCategoriesService, {
       retry: 2, // Retry 2 fois en cas d'erreur
-      enabled: !!userID && !!token, // Attendre que userID ET token soient disponibles
+      enabled: !!userID,
       ...QUERY_OPTIONS,
     });
 

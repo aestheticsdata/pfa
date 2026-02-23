@@ -1,37 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@auth/store/authStore";
+import { useEffect, useRef, useState } from "react";
+import { useUserStore } from "@auth/store/userStore";
+import axios from "axios";
+import dynamic from "next/dynamic";
+
+const LoginPage = dynamic(() => import("@app/login/page"), { ssr: false });
+
+function getApiBase() {
+  if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    return process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST ?? "";
+  }
+  return "";
+}
 
 export default function Auth({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-  const pfaToken = useAuthStore((state) => state.token);
-  const [isMounted, setIsMounted] = useState(false);
-
-  // S'assurer qu'on est côté client avant de vérifier le token
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  const user = useUserStore((state) => state.user);
+  const setUser = useUserStore((state) => state.setUser);
+  const [checked, setChecked] = useState(!!user);
+  const didCheck = useRef(false);
 
   useEffect(() => {
-    // Seulement rediriger si le token n'existe pas et qu'on est monté côté client
-    if (isMounted && !pfaToken) {
-      router.push("/login");
-    }
-  }, [pfaToken, router, isMounted]);
+    if (user || checked || didCheck.current) return;
+    didCheck.current = true;
 
-  // Pendant l'hydratation, toujours afficher les enfants pour éviter le mismatch
-  // La vérification se fera dans le useEffect
-  if (!isMounted) {
+    axios
+      .get(`${getApiBase()}/api/users/me`, { withCredentials: true })
+      .then((res) => {
+        if (res.data?.user) {
+          setUser(res.data.user);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setChecked(true));
+  }, [user, checked, setUser]);
+
+  if (user) {
     return <>{children}</>;
   }
 
-  // Si pas de token après le montage, ne rien afficher (la redirection est en cours)
-  if (!pfaToken) {
+  if (!checked) {
     return null;
   }
 
-  return <>{children}</>;
+  return <LoginPage />;
 }
-

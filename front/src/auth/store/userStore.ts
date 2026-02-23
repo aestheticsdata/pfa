@@ -15,12 +15,10 @@ interface UserStore {
 
 export const useUserStore = create<UserStore>(
   persist(
-    (set, _) => ({
-      user: null,
-      setUser: (u: User | null) => set({ user: u }),
+    (set) => ({
+      user: null as User | null,
+      setUser: (u) => set({ user: u }),
     }),
-    {
-      name: "pfa-user",
-    }
+    { name: "pfa-user" }
   )
 );

@@ -1,7 +1,7 @@
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { JwtPayload } from "@spendings/guards/jwt-auth.guard";
+import { SessionUser } from "@spendings/guards/session-auth.guard";
 
 export const GetUserId = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
-  const request = ctx.switchToHttp().getRequest<{ user: JwtPayload }>();
+  const request = ctx.switchToHttp().getRequest<{ user: SessionUser }>();
   return request.user.id;
 });

@@ -1,15 +1,10 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { join } from "path";
-import { AppModule } from "../src/app.module";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
-
-interface SignInResponseBody {
-  token: string;
-  user: { id: string };
-}
+type Agent = ReturnType<typeof request.agent>;
 
 interface SpendingItem {
   ID: string;
@@ -37,25 +32,19 @@ function randomCategoryName(): string {
 /**
  * E2E tests for spendings routes.
  * Test user: e2e-test@test.com / e2e-test-password (must exist in local DB)
+ * Requires Redis to be running.
  */
 describe("SpendingsController (e2e)", () => {
   let app: INestApplication;
-  let authToken: string;
+  let agent: Agent;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    app.setGlobalPrefix("api");
-    await app.init();
-
-    const signInRes = await request(app.getHttpServer() as SupertestApp)
+    app = await createE2eApp();
+    agent = request.agent(app.getHttpServer() as SupertestApp);
+    await agent
       .post("/api/users")
-      .send({ email: "e2e-test@test.com", password: "e2e-test-password" });
-    authToken = (signInRes.body as SignInResponseBody).token;
+      .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
+      .expect(200);
   }, 15000);
 
   afterAll(async () => {
@@ -63,11 +52,10 @@ describe("SpendingsController (e2e)", () => {
   });
 
   describe("GET /api/spendings/charts", () => {
-    it("should return 200 and array of chart data with valid token", () => {
-      return request(app.getHttpServer() as SupertestApp)
+    it("should return 200 and array of chart data with valid session", () => {
+      return agent
         .get("/api/spendings/charts")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -79,44 +67,41 @@ describe("SpendingsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings/charts")
         .query({ from: "2020-01-01", to: "2030-12-31" })
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings/charts")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .expect(401);
     });
 
     it("should return 400 when from is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/spendings/charts")
         .query({ to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
 
     it("should return 400 when to is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/spendings/charts")
         .query({ from: "2020-01-01" })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
   });
 
   describe("GET /api/spendings", () => {
     it("should return 200 and array of spendings with valid token", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -130,34 +115,32 @@ describe("SpendingsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .expect(401);
     });
 
     it("should return 400 when from is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/spendings")
         .query({ to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
 
     it("should return 400 when to is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/spendings")
         .query({ from: "2020-01-01" })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
   });
@@ -166,9 +149,8 @@ describe("SpendingsController (e2e)", () => {
     let uploadSpendingID: string;
 
     beforeAll(async () => {
-      await request(app.getHttpServer() as SupertestApp)
+      await agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           date: todayISO(),
           label: "e2e-upload-test",
@@ -177,19 +159,18 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await request(app.getHttpServer() as SupertestApp)
+      const listRes = await agent
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`);
+;
       const spendings = listRes.body as SpendingItem[];
       const found = spendings.find((s) => s.label === "e2e-upload-test");
       uploadSpendingID = found!.ID;
     }, 15000);
 
     it("should upload, resize and return image as base64", async () => {
-      const res = await request(app.getHttpServer() as SupertestApp)
+      const res = await agent
         .post("/api/spendings/upload")
-        .set("Authorization", `Bearer ${authToken}`)
         .field("spendingID", uploadSpendingID)
         .field("itemType", "spending")
         .field("date", todayISO())
@@ -202,10 +183,10 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should be retrievable via GET /upload/:id after upload", async () => {
-      const res = await request(app.getHttpServer() as SupertestApp)
+      const res = await agent
         .get(`/api/spendings/upload/${uploadSpendingID}`)
         .query({ itemType: "spending" })
-        .set("Authorization", `Bearer ${authToken}`);
+;
 
       expect(res.status).toBe(200);
       const body = res.text ?? (Buffer.isBuffer(res.body) ? res.body.toString() : String(res.body));
@@ -213,9 +194,8 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should return 400 when no file is attached", async () => {
-      const res = await request(app.getHttpServer() as SupertestApp)
+      const res = await agent
         .post("/api/spendings/upload")
-        .set("Authorization", `Bearer ${authToken}`)
         .field("spendingID", uploadSpendingID)
         .field("itemType", "spending")
         .field("date", todayISO())
@@ -225,9 +205,8 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should return 400 when spendingID is missing", async () => {
-      const res = await request(app.getHttpServer() as SupertestApp)
+      const res = await agent
         .post("/api/spendings/upload")
-        .set("Authorization", `Bearer ${authToken}`)
         .field("itemType", "spending")
         .field("date", todayISO())
         .field("label", "e2e-upload-test")
@@ -236,7 +215,7 @@ describe("SpendingsController (e2e)", () => {
       expect(res.status).toBe(400);
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .post("/api/spendings/upload")
         .field("spendingID", "fake-id")
@@ -244,10 +223,10 @@ describe("SpendingsController (e2e)", () => {
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .post("/api/spendings/upload")
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .field("spendingID", "fake-id")
         .field("itemType", "spending")
         .expect(401);
@@ -256,41 +235,40 @@ describe("SpendingsController (e2e)", () => {
 
   describe("GET /api/spendings/upload/:id", () => {
     it("should return 200 with null when spending has no invoice", async () => {
-      const listRes = await request(app.getHttpServer() as SupertestApp)
+      const listRes = await agent
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`);
+;
       const spendings = listRes.body as SpendingItem[];
       const withoutInvoice = spendings.find((s) => s.label === "e2e-spending-no-category");
       const spendingID = withoutInvoice?.ID ?? "00000000-0000-0000-0000-000000000000";
 
-      const res = await request(app.getHttpServer() as SupertestApp)
+      const res = await agent
         .get(`/api/spendings/upload/${spendingID}`)
         .query({ itemType: "spending" })
-        .set("Authorization", `Bearer ${authToken}`);
+;
 
       expect(res.status).toBe(200);
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings/upload/00000000-0000-0000-0000-000000000000")
         .query({ itemType: "spending" })
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/spendings/upload/00000000-0000-0000-0000-000000000000")
         .query({ itemType: "spending" })
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .expect(401);
     });
 
     it("should return 400 when itemType is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/spendings/upload/00000000-0000-0000-0000-000000000000")
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
   });
@@ -304,19 +282,18 @@ describe("SpendingsController (e2e)", () => {
     };
 
     beforeAll(async () => {
-      const listRes = await request(app.getHttpServer() as SupertestApp)
+      const listRes = await agent
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`);
+;
       const spendings = listRes.body as SpendingItem[];
       const withCategory = spendings.find((s) => s.categoryID != null);
       if (withCategory) existingCategoryID = withCategory.categoryID;
     });
 
     it("should create spending without category", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           date: todayISO(),
           label: "e2e-spending-no-category",
@@ -328,9 +305,8 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should create spending with new category", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           date: todayISO(),
           label: "e2e-spending-new-cat",
@@ -344,9 +320,8 @@ describe("SpendingsController (e2e)", () => {
 
     it("should create spending with existing category", () => {
       expect(existingCategoryID).not.toBeNull();
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           date: todayISO(),
           label: "e2e-spending-existing-cat",
@@ -358,7 +333,7 @@ describe("SpendingsController (e2e)", () => {
         .expect(assertSuccess);
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .post("/api/spendings")
         .send({
@@ -370,10 +345,10 @@ describe("SpendingsController (e2e)", () => {
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .post("/api/spendings")
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .send({
           date: todayISO(),
           label: "test",
@@ -384,33 +359,29 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should return 400 when date is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ label: "test", amount: 10, currency: "EUR" })
         .expect(400);
     });
 
     it("should return 400 when label is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ date: todayISO(), amount: 10, currency: "EUR" })
         .expect(400);
     });
 
     it("should return 400 when amount is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ date: todayISO(), label: "test", currency: "EUR" })
         .expect(400);
     });
 
     it("should return 400 when currency is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ date: todayISO(), label: "test", amount: 10 })
         .expect(400);
     });
@@ -420,9 +391,8 @@ describe("SpendingsController (e2e)", () => {
     let updateSpendingID: string;
 
     beforeAll(async () => {
-      await request(app.getHttpServer() as SupertestApp)
+      await agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           date: todayISO(),
           label: "e2e-update-test",
@@ -431,18 +401,17 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await request(app.getHttpServer() as SupertestApp)
+      const listRes = await agent
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`);
+;
       const found = (listRes.body as SpendingItem[]).find((s) => s.label === "e2e-update-test");
       updateSpendingID = found!.ID;
     }, 15000);
 
     it("should update label and amount", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .put(`/api/spendings/${updateSpendingID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ label: "e2e-update-test-updated", amount: 99 })
         .expect(200)
         .expect((res) => {
@@ -450,25 +419,24 @@ describe("SpendingsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .put(`/api/spendings/${updateSpendingID}`)
         .send({ label: "test", amount: 10 })
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .put(`/api/spendings/${updateSpendingID}`)
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .send({ label: "test", amount: 10 })
         .expect(401);
     });
 
     it("should return 404 for non-existent spending", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .put("/api/spendings/00000000-0000-0000-0000-000000000000")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ label: "test", amount: 10 })
         .expect(404);
     });
@@ -478,9 +446,8 @@ describe("SpendingsController (e2e)", () => {
     let deleteSpendingID: string;
 
     beforeAll(async () => {
-      await request(app.getHttpServer() as SupertestApp)
+      await agent
         .post("/api/spendings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           date: todayISO(),
           label: "e2e-delete-test",
@@ -489,18 +456,17 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await request(app.getHttpServer() as SupertestApp)
+      const listRes = await agent
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-        .set("Authorization", `Bearer ${authToken}`);
+;
       const found = (listRes.body as SpendingItem[]).find((s) => s.label === "e2e-delete-test");
       deleteSpendingID = found!.ID;
     }, 15000);
 
     it("should delete spending and return success", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .delete(`/api/spendings/${deleteSpendingID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toEqual({ success: true });
@@ -508,29 +474,27 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should return 404 when deleting already deleted spending", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .delete(`/api/spendings/${deleteSpendingID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(404);
     });
 
     it("should return 404 for non-existent spending", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .delete("/api/spendings/00000000-0000-0000-0000-000000000000")
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(404);
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .delete("/api/spendings/00000000-0000-0000-0000-000000000000")
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .delete("/api/spendings/00000000-0000-0000-0000-000000000000")
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .expect(401);
     });
   });

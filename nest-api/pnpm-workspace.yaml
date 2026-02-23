@@ -1,6 +1,8 @@
 onlyBuiltDependencies:
   - '@nestjs/core'
   - '@prisma/engines'
+  - cpu-features
   - prisma
   - sharp
+  - ssh2
   - unrs-resolver

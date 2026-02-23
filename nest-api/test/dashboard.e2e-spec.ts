@@ -1,14 +1,9 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { AppModule } from "../src/app.module";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
-
-interface SignInResponseBody {
-  token: string;
-  user: { id: string };
-}
+type Agent = ReturnType<typeof request.agent>;
 
 interface DashboardItem {
   ID: string;
@@ -35,25 +30,19 @@ function lastDayOfMonth(date: Date): string {
 /**
  * E2E tests for dashboard routes.
  * Test user: e2e-test@test.com / e2e-test-password (must exist in local DB)
+ * Requires Redis to be running.
  */
 describe("DashboardController (e2e)", () => {
   let app: INestApplication;
-  let authToken: string;
+  let agent: Agent;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    app.setGlobalPrefix("api");
-    await app.init();
-
-    const signInRes = await request(app.getHttpServer() as SupertestApp)
+    app = await createE2eApp();
+    agent = request.agent(app.getHttpServer() as SupertestApp);
+    await agent
       .post("/api/users")
-      .send({ email: "e2e-test@test.com", password: "e2e-test-password" });
-    authToken = (signInRes.body as SignInResponseBody).token;
+      .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
+      .expect(200);
   }, 15000);
 
   afterAll(async () => {
@@ -65,35 +54,33 @@ describe("DashboardController (e2e)", () => {
     const start = firstDayOfMonth(farPastMonth);
 
     it("should return 200 and null when no dashboard exists", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/dashboard")
         .query({ start })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toBeNull();
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/dashboard")
         .query({ start })
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/dashboard")
         .query({ start })
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .expect(401);
     });
 
     it("should return 400 when start is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/dashboard")
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
   });
@@ -104,9 +91,8 @@ describe("DashboardController (e2e)", () => {
     const end = lastDayOfMonth(now);
 
     it("should create dashboard and return insertId/ID", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/dashboard")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           start,
           end,
@@ -122,7 +108,7 @@ describe("DashboardController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .post("/api/dashboard")
         .send({ start, end, amount: 100 })
@@ -130,17 +116,15 @@ describe("DashboardController (e2e)", () => {
     });
 
     it("should return 400 when amount is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/dashboard")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ start, end })
         .expect(400);
     });
 
     it("should return 400 when start is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/dashboard")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ end, amount: 100 })
         .expect(400);
     });
@@ -152,18 +136,16 @@ describe("DashboardController (e2e)", () => {
     const end = lastDayOfMonth(nextMonth);
 
     beforeAll(async () => {
-      await request(app.getHttpServer() as SupertestApp)
+      await agent
         .post("/api/dashboard")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ start, end, amount: 2000 })
         .expect(201);
     }, 15000);
 
     it("should return dashboard with initialAmount and initialCeiling", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/dashboard")
         .query({ start })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).not.toBeNull();
@@ -188,9 +170,8 @@ describe("DashboardController (e2e)", () => {
       const start = firstDayOfMonth(now);
       const end = lastDayOfMonth(now);
 
-      const createRes = await request(app.getHttpServer() as SupertestApp)
+      const createRes = await agent
         .post("/api/dashboard")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ start, end, amount: 3000 })
         .expect(201);
 
@@ -198,38 +179,34 @@ describe("DashboardController (e2e)", () => {
     }, 15000);
 
     it("should update amount", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .put(`/api/dashboard/${dashboardID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ amount: 3500 })
         .expect(200);
     });
 
     it("should update ceiling", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .put(`/api/dashboard/${dashboardID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ ceiling: 500 })
         .expect(200);
     });
 
     it("should update both amount and ceiling", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .put(`/api/dashboard/${dashboardID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ amount: 4000, ceiling: 600 })
         .expect(200);
     });
 
     it("should return 404 for non-existent dashboard", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .put("/api/dashboard/00000000-0000-0000-0000-000000000000")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ amount: 100 })
         .expect(404);
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .put(`/api/dashboard/${dashboardID}`)
         .send({ amount: 100 })

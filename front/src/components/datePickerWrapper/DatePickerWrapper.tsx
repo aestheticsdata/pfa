@@ -25,9 +25,7 @@ const DatePickerWrapper = () => {
   const searchParams = useSearchParams();
   const ref = useRef<HTMLDivElement>(null);
   
-  // Mémoriser la valeur de currentDate pour éviter les re-renders inutiles
-  // Utiliser searchParams.toString() pour obtenir une représentation stable
-  const currentDate = useMemo(() => searchParams.get("currentDate"), [searchParams.toString()]);
+  const currentDate = searchParams.get("currentDate");
 
   const daysAreSelected = selectedDays.length > 0;
 
@@ -48,15 +46,12 @@ const DatePickerWrapper = () => {
   useEffect(() => {
     if (currentDate) {
       const date = new Date(currentDate as string);
-      // Vérifier si la date a vraiment changé pour éviter les boucles infinies
       if (selectedDays.length === 0 || selectedDays[0].getTime() !== date.getTime()) {
-        handleDayChange(date);
+        handleDayChange(date, false);
       }
     } else if (selectedDays.length === 0) {
-      // Seulement si aucune date n'est sélectionnée
-      handleDayChange(new Date());
+      handleDayChange(new Date(), false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentDate]);
 
   return (
@@ -91,7 +86,7 @@ const DatePickerWrapper = () => {
               showWeekNumbers={false}
               showOutsideDays={false}
               modifiers={modifiers}
-              onDayClick={handleDayChange}
+              onDayClick={(day) => handleDayChange(day)}
               onDayMouseEnter={handleDayEnter}
               onDayMouseLeave={handleDayLeave}
               onWeekClick={() => {}}

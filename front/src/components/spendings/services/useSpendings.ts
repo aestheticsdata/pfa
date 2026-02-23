@@ -7,7 +7,6 @@ import endOfMonth from "date-fns/endOfMonth";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { useUserStore } from "@auth/store/userStore";
-import { useAuthStore } from "@auth/store/authStore";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 
@@ -20,7 +19,6 @@ const useSpendings = () => {
   const { privateRequest } = useRequestHelper();
   const user = useUserStore((state) => state.user);
   const userID = user?.id;
-  const token = useAuthStore((state) => state.token);
   const { from, to, range } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
 
@@ -70,7 +68,7 @@ const useSpendings = () => {
     // Spendings mounts before DatePickerWrapper, causing from to be undefined and
     // hence this query to fail
     // so enable below
-    enabled: !!from && !!userID && !!token,
+    enabled: !!from && !!userID,
     ...QUERY_OPTIONS,
   });
 

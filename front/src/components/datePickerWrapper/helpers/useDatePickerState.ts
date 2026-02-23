@@ -36,11 +36,10 @@ const useDatePickerState = () => {
     setIsCalendarVisible(false);
   };
 
-  const handleDayChange = (date: Date) => {
+  const handleDayChange = (date: Date, updateUrl = true) => {
     const dateISO = formatISO(date, { representation: "date" });
-    if (pathname === "/") {
+    if (updateUrl && pathname === "/") {
       const currentDateInUrl = searchParams.get("currentDate");
-      // Ne faire router.push que si la date a vraiment changé
       if (currentDateInUrl !== dateISO) {
         const params = new URLSearchParams(searchParams.toString());
         params.set("currentDate", dateISO);

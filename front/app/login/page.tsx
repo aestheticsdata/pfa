@@ -13,8 +13,10 @@ export default function Login() {
   const { setCredentials } = useCredentials();
 
   const onSubmit = async (values: LoginValues) => {
-    const { token, user } = await loginService(values.email!, values.password!);
-    await setCredentials(token, user);
+    const result = await loginService(values.email!, values.password!);
+    if (result?.user) {
+      await setCredentials(result.user);
+    }
   };
 
   return (
