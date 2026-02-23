@@ -1,9 +1,10 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Req } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from "@nestjs/common";
 import type { Request } from "express";
 import { UsersService } from "@users/users.service";
 import { SignInDto } from "@users/dto/sign-in.dto";
 import { AddUserDto } from "@users/dto/add-user.dto";
 import { RedisService } from "@redis/redis.service";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 
 import type { SignInResponse } from "@users/users.service";
 
@@ -13,6 +14,13 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly redisService: RedisService,
   ) {}
+
+  @Get("me")
+  @UseGuards(SessionAuthGuard)
+  async me(@Req() req: Request): Promise<SignInResponse> {
+    const userId = (req as Request & { user: { id: string } }).user.id;
+    return this.usersService.findById(userId);
+  }
 
   @Post()
   @HttpCode(HttpStatus.OK)

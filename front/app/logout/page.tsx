@@ -1,18 +1,20 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useQueryClient } from "react-query";
 import { useUserStore } from "@auth/store/userStore";
 import useRequestHelper from "@helpers/useRequestHelper";
 
 export default function Logout() {
-  const router = useRouter();
   const queryClient = useQueryClient();
-  const userStore = useUserStore();
+  const setUser = useUserStore((state) => state.setUser);
   const { request } = useRequestHelper();
+  const didLogout = useRef(false);
 
   useEffect(() => {
+    if (didLogout.current) return;
+    didLogout.current = true;
+
     const doLogout = async () => {
       try {
         await request("/users/logout", { method: "POST" });
@@ -20,20 +22,16 @@ export default function Logout() {
         // Session may already be expired
       } finally {
         queryClient.clear();
-        userStore.setUser(null);
-        router.replace("/login");
-        setTimeout(() => {
-          window.location.href = "/login";
-        }, 100);
+        setUser(null);
+        window.location.href = "/";
       }
     };
     doLogout();
-  }, []);
+  }, [queryClient, setUser, request]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-grey1">
-      <div>Déconnexion en cours...</div>
+      <div className="font-ubuntu text-gray-500">Déconnexion en cours...</div>
     </div>
   );
 }
-

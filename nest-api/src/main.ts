@@ -24,6 +24,9 @@ async function bootstrap() {
     ttl: SESSION_TTL_SECONDS,
   });
 
+  // Cookie secure: en prod sans HTTPS, mettre COOKIE_SECURE=false dans .env
+  const cookieSecure = process.env.COOKIE_SECURE !== "false" && process.env.NODE_ENV === "production";
+
   app.use(
     session({
       name: "pfa.sid",
@@ -31,9 +34,10 @@ async function bootstrap() {
       secret: process.env.SESSION_SECRET as string,
       resave: false,
       saveUninitialized: false,
+      proxy: true, // requis pour cookie Secure derrière reverse proxy
       cookie: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
+        secure: cookieSecure,
         sameSite: "lax",
         maxAge: SESSION_TTL_SECONDS * 1000,
       },

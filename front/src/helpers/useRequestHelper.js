@@ -28,6 +28,7 @@ const useRequestHelper = () => {
     }
 
     const axiosInstance = axios.create({
+      withCredentials: true,
       ...config,
     });
 
@@ -35,7 +36,7 @@ const useRequestHelper = () => {
       (response) => response,
       (err) => {
         if (err.response?.status === 401) {
-          router.push("/logout");
+          useUserStore.getState().setUser(null);
         }
         return Promise.reject(err);
       }

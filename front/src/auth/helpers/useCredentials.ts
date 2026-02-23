@@ -1,15 +1,17 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useUserStore } from "@auth/store/userStore";
 
 const useCredentials = () => {
-  const router = useRouter();
-  const userStore = useUserStore();
+  const setUser = useUserStore((state) => state.setUser);
+  const pathname = usePathname();
 
-  const setCredentials = async (user: { id: string; name: string; email: string; baseCurrency: string; language: string | null }) => {
-    userStore.setUser({ ...user, language: user.language ?? "en" });
-    await router.push("/");
+  const setCredentials = (user: { id: string; name: string; email: string; baseCurrency: string; language: string | null }) => {
+    setUser({ ...user, language: user.language ?? "en" });
+    if (pathname !== "/") {
+      window.location.href = "/";
+    }
   };
 
   return {
