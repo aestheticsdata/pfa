@@ -1,14 +1,9 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { AppModule } from "../src/app.module";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
-
-interface SignInResponseBody {
-  token: string;
-  user: { id: string };
-}
+type Agent = ReturnType<typeof request.agent>;
 
 interface RecurringItem {
   ID: string;
@@ -32,25 +27,19 @@ function lastDayOfMonth(date: Date): string {
 /**
  * E2E tests for recurrings routes.
  * Test user: e2e-test@test.com / e2e-test-password (must exist in local DB)
+ * Requires Redis to be running.
  */
 describe("RecurringsController (e2e)", () => {
   let app: INestApplication;
-  let authToken: string;
+  let agent: Agent;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    app.setGlobalPrefix("api");
-    await app.init();
-
-    const signInRes = await request(app.getHttpServer() as SupertestApp)
+    app = await createE2eApp();
+    agent = request.agent(app.getHttpServer() as SupertestApp);
+    await agent
       .post("/api/users")
-      .send({ email: "e2e-test@test.com", password: "e2e-test-password" });
-    authToken = (signInRes.body as SignInResponseBody).token;
+      .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
+      .expect(200);
   }, 15000);
 
   afterAll(async () => {
@@ -60,10 +49,9 @@ describe("RecurringsController (e2e)", () => {
   describe("GET /api/recurrings", () => {
     it("should return 200 and array of recurrings with valid token", () => {
       const start = firstDayOfMonth(new Date());
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/recurrings")
         .query({ start })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -77,25 +65,24 @@ describe("RecurringsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/recurrings")
         .query({ start: firstDayOfMonth(new Date()) })
         .expect(401);
     });
 
-    it("should return 401 with invalid token", () => {
+    it("should return 401 with invalid session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/recurrings")
         .query({ start: firstDayOfMonth(new Date()) })
-        .set("Authorization", "Bearer invalid-token")
+        .set("Cookie", "pfa.sid=invalid-session-id")
         .expect(401);
     });
 
     it("should return 400 when start is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/recurrings")
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
   });
@@ -106,9 +93,8 @@ describe("RecurringsController (e2e)", () => {
     const end = lastDayOfMonth(now);
 
     it("should create recurring and return success", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/recurrings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           start,
           end,
@@ -122,7 +108,7 @@ describe("RecurringsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .post("/api/recurrings")
         .send({ start, end, label: "test", amount: 10, currency: "EUR" })
@@ -130,17 +116,15 @@ describe("RecurringsController (e2e)", () => {
     });
 
     it("should return 400 when label is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/recurrings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ start, end, amount: 10, currency: "EUR" })
         .expect(400);
     });
 
     it("should return 400 when amount is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/recurrings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ start, end, label: "test", currency: "EUR" })
         .expect(400);
     });
@@ -154,9 +138,8 @@ describe("RecurringsController (e2e)", () => {
       const start = firstDayOfMonth(now);
       const end = lastDayOfMonth(now);
 
-      await request(app.getHttpServer() as SupertestApp)
+      await agent
         .post("/api/recurrings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           start,
           end,
@@ -166,18 +149,16 @@ describe("RecurringsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await request(app.getHttpServer() as SupertestApp)
+      const listRes = await agent
         .get("/api/recurrings")
-        .query({ start })
-        .set("Authorization", `Bearer ${authToken}`);
+        .query({ start });
       const found = (listRes.body as RecurringItem[]).find((r) => r.label === "e2e-update-recurring");
       updateRecurringID = found!.ID;
     }, 15000);
 
     it("should update label and amount", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .put(`/api/recurrings/${updateRecurringID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ label: "e2e-update-recurring-updated", amount: 99 })
         .expect(200)
         .expect((res) => {
@@ -186,9 +167,8 @@ describe("RecurringsController (e2e)", () => {
     });
 
     it("should return 404 for non-existent recurring", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .put("/api/recurrings/00000000-0000-0000-0000-000000000000")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({ label: "test", amount: 10 })
         .expect(404);
     });
@@ -202,9 +182,8 @@ describe("RecurringsController (e2e)", () => {
       const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
       const previousMonthStart = firstDayOfMonth(prevMonth);
 
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .post("/api/recurrings/copy")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           dates: {
             start: currentStart,
@@ -218,7 +197,7 @@ describe("RecurringsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       const now = new Date();
       const currentStart = firstDayOfMonth(now);
       const currentEnd = lastDayOfMonth(now);
@@ -242,9 +221,8 @@ describe("RecurringsController (e2e)", () => {
       const start = firstDayOfMonth(now);
       const end = lastDayOfMonth(now);
 
-      await request(app.getHttpServer() as SupertestApp)
+      await agent
         .post("/api/recurrings")
-        .set("Authorization", `Bearer ${authToken}`)
         .send({
           start,
           end,
@@ -254,18 +232,16 @@ describe("RecurringsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await request(app.getHttpServer() as SupertestApp)
+      const listRes = await agent
         .get("/api/recurrings")
-        .query({ start })
-        .set("Authorization", `Bearer ${authToken}`);
+        .query({ start });
       const found = (listRes.body as RecurringItem[]).find((r) => r.label === "e2e-delete-recurring");
       deleteRecurringID = found!.ID;
     }, 15000);
 
     it("should delete recurring and return success", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .delete(`/api/recurrings/${deleteRecurringID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(res.body).toEqual({ success: true });
@@ -273,16 +249,14 @@ describe("RecurringsController (e2e)", () => {
     });
 
     it("should return 404 when deleting already deleted recurring", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .delete(`/api/recurrings/${deleteRecurringID}`)
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(404);
     });
 
     it("should return 404 for non-existent recurring", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .delete("/api/recurrings/00000000-0000-0000-0000-000000000000")
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(404);
     });
   });

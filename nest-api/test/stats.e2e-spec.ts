@@ -1,16 +1,11 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { randomUUID } from "crypto";
-import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/prisma/prisma.service";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
-
-interface SignInResponseBody {
-  token: string;
-  user: { id: string };
-}
+type Agent = ReturnType<typeof request.agent>;
 
 function firstDayOfMonth(date: Date): string {
   return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split("T")[0];
@@ -28,28 +23,22 @@ function generateYearRange(startYear: number): string {
 /**
  * E2E tests for weeklystats, monthlystats and statistics routes.
  * Test user: e2e-test@test.com / e2e-test-password (must exist in local DB)
+ * Requires Redis to be running.
  */
 describe("StatsController (e2e)", () => {
   let app: INestApplication;
-  let authToken: string;
+  let agent: Agent;
   let userId: string;
   let categoryID: string;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
-    app.setGlobalPrefix("api");
-    await app.init();
-
-    const signInRes = await request(app.getHttpServer() as SupertestApp)
+    app = await createE2eApp();
+    agent = request.agent(app.getHttpServer() as SupertestApp);
+    const signInRes = await agent
       .post("/api/users")
-      .send({ email: "e2e-test@test.com", password: "e2e-test-password" });
-    authToken = (signInRes.body as SignInResponseBody).token;
-    userId = (signInRes.body as SignInResponseBody).user.id;
+      .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
+      .expect(200);
+    userId = (signInRes.body as { user: { id: string } }).user.id;
 
     const prisma = app.get(PrismaService);
     const category = await prisma.categories.create({
@@ -74,10 +63,9 @@ describe("StatsController (e2e)", () => {
     const start = firstDayOfMonth(now);
 
     it("should return 200 and array of weekly totals", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/weeklystats")
         .query({ start })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           expect(Array.isArray(res.body)).toBe(true);
@@ -87,7 +75,7 @@ describe("StatsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/weeklystats")
         .query({ start })
@@ -95,9 +83,8 @@ describe("StatsController (e2e)", () => {
     });
 
     it("should return 400 when start is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/weeklystats")
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
   });
@@ -107,10 +94,9 @@ describe("StatsController (e2e)", () => {
     const from = firstDayOfMonth(now);
 
     it("should return 200 and spendingsSum/recurringsSum", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/monthlystats")
         .query({ from })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           const body = res.body as {
@@ -126,7 +112,7 @@ describe("StatsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/monthlystats")
         .query({ from })
@@ -134,9 +120,8 @@ describe("StatsController (e2e)", () => {
     });
 
     it("should return 400 when from is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/monthlystats")
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
   });
@@ -145,10 +130,9 @@ describe("StatsController (e2e)", () => {
     const years = generateYearRange(new Date().getFullYear() - 1);
 
     it("should return 200 and colors/data structure", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/statistics")
         .query({ categories: categoryID, years })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(200)
         .expect((res) => {
           const body = res.body as { colors: Record<string, string>; data: Record<string, unknown> };
@@ -159,7 +143,7 @@ describe("StatsController (e2e)", () => {
         });
     });
 
-    it("should return 401 without Authorization header", () => {
+    it("should return 401 without session cookie", () => {
       return request(app.getHttpServer() as SupertestApp)
         .get("/api/statistics")
         .query({ categories: categoryID, years })
@@ -167,18 +151,16 @@ describe("StatsController (e2e)", () => {
     });
 
     it("should return 400 when categories is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/statistics")
         .query({ years })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
 
     it("should return 400 when years is missing", () => {
-      return request(app.getHttpServer() as SupertestApp)
+      return agent
         .get("/api/statistics")
         .query({ categories: categoryID })
-        .set("Authorization", `Bearer ${authToken}`)
         .expect(400);
     });
   });

@@ -89,10 +89,10 @@ const Charts = ({ title, periodType }: ChartsProps) => {
         <div className="flex flex-col gap-y-1">
         {
           maxv !== 0 && charts &&
-            charts.data.map((category: CategoryProps) => {
+            charts.data.map((category: CategoryProps, index: number) => {
               return (
                 <div
-                  key={`cat-${category.category}`}
+                  key={`cat-${category.category ?? "uncategorized"}-${index}`}
                   className="flex items-center gap-x-1"
                   onClick={() => {
                     setIsInvoiceModalVisible(!isInvoiceModalVisible);

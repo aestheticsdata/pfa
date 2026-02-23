@@ -19,7 +19,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "NODE_OPTIONS='--experimental-vm-modules' jest --config ./test/jest-e2e.json",
+    "test:e2e": "bash test/launch-redis-for-tests.sh && NODE_OPTIONS='--experimental-vm-modules' jest --config ./test/jest-e2e.json --runInBand",
+    "test:e2e:debug": "bash test/launch-redis-for-tests.sh && NODE_OPTIONS='--experimental-vm-modules' jest --config ./test/jest-e2e.json --runInBand --detectOpenHandles",
     "test:ssh": "export $(grep -v '^#' .env.ssh-test | xargs) && jest --config ./test/jest-e2e.json --testRegex='ssh-backup\\.integration\\.ts$'"
   },
   "dependencies": {
