@@ -192,9 +192,7 @@ export class StatsService {
       if (!output.data[yearStr]) {
         output.data[yearStr] = [];
       }
-      const roundedTotals = Object.fromEntries(
-        Object.entries(entry.totals).map(([k, v]) => [k, roundCurrency(v)]),
-      );
+      const roundedTotals = Object.fromEntries(Object.entries(entry.totals).map(([k, v]) => [k, roundCurrency(v)]));
       output.data[yearStr].push({
         month: entry.month,
         ...roundedTotals,

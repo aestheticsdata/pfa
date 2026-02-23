@@ -1,15 +1,11 @@
 import { Injectable, UnauthorizedException, ConflictException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "crypto";
-import { AppConfig } from "@config/app.config";
 import { PrismaService } from "../prisma/prisma.service";
 import type { Users } from "../../generated/prisma/client";
 import type { AddUserDto } from "./dto/add-user.dto";
 import * as bcrypt from "bcryptjs";
-import * as jwt from "jsonwebtoken";
 
 export interface SignInResponse {
-  token: string;
   user: {
     id: string;
     name: string;
@@ -21,10 +17,7 @@ export interface SignInResponse {
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly prisma: PrismaService,
-    private readonly config: ConfigService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async signIn(email: string, password: string): Promise<SignInResponse> {
     const user = await this.prisma.users.findUnique({
@@ -76,14 +69,11 @@ export class UsersService {
   }
 
   /**
-   * Builds the sign-in response (token + user).
+   * Builds the sign-in response (user only; session is set via cookie).
    * Reusable for sign-in and add-user (auto sign-in after registration).
    */
   buildSignInResponse(user: Users): SignInResponse {
-    const { jwtSecret } = this.config.getOrThrow<AppConfig>("app");
-    const token = jwt.sign({ id: user.ID }, jwtSecret, { expiresIn: "10h" });
     return {
-      token,
       user: {
         id: user.ID,
         name: user.name,

@@ -4,7 +4,6 @@ import startOfMonth from "date-fns/startOfMonth";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { useUserStore } from "@auth/store/userStore";
-import { useAuthStore } from "@auth/store/authStore";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 
@@ -30,7 +29,6 @@ const useReccurings = () => {
   const { privateRequest } = useRequestHelper();
   const user = useUserStore((state) => state.user);
   const userID = user?.id;
-  const token = useAuthStore((state) => state.token);
   const { from } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
   const [recurrings, setRecurrings] = useState();
@@ -55,7 +53,7 @@ const useReccurings = () => {
 
   const { data, isLoading } = useQuery([QUERY_KEYS.RECURRINGS, monthBeginning], getRecurrings, {
     retry: false,
-    enabled: !!from && !!userID && !!token,
+    enabled: !!from && !!userID,
     ...QUERY_OPTIONS,
   });
 

@@ -17,6 +17,7 @@
     "paths": {
       "@config/*": ["src/config/*"],
       "@infrastructure/*": ["src/infrastructure/*"],
+      "@redis/*": ["src/redis/*"],
       "@users/*": ["src/users/*"],
       "@spendings/*": ["src/spendings/*"],
       "@dashboard/*": ["src/dashboard/*"],

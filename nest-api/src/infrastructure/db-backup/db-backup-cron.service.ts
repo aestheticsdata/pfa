@@ -27,7 +27,9 @@ export class DbBackupCronService {
     }
 
     if (!config.dbUser || !config.dbPassword || !config.dbName || !config.dumpPath || !config.remoteBackupPath) {
-      this.logger.warn("DB backup skipped: missing config (DB_USER, DB_PASSWORD, DB, PFA_DUMP_PATH, PFA_BACKUP_SERVER_PATH)");
+      this.logger.warn(
+        "DB backup skipped: missing config (DB_USER, DB_PASSWORD, DB, PFA_DUMP_PATH, PFA_BACKUP_SERVER_PATH)",
+      );
       return;
     }
 
@@ -37,9 +39,7 @@ export class DbBackupCronService {
 
     try {
       await mkdir(config.dumpPath, { recursive: true });
-      await execAsync(
-        `mysqldump -u${config.dbUser} -p${config.dbPassword} ${config.dbName} > ${dumpFile}`,
-      );
+      await execAsync(`mysqldump -u${config.dbUser} -p${config.dbPassword} ${config.dbName} > ${dumpFile}`);
       const remotePath = `${config.remoteBackupPath}pfadump.sql`;
       await this.sshBackup.copyFile(dumpFile, remotePath);
       this.logger.log(`DB backup completed → ${remotePath}`);

@@ -1,11 +1,14 @@
 "use client";
 
 import axios from "axios";
-import _ from "lodash";
-import Swal from "sweetalert2";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "@auth/store/authStore";
 
+// Set the default withCredentials to true for all axios requests
+// This is necessary for the session cookie to be sent to the server
+axios.defaults.withCredentials = true;
+
+import _ from "lodash";
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@auth/store/userStore";
 
 const useRequestHelper = () => {
   const router = useRouter();
@@ -19,31 +22,19 @@ const useRequestHelper = () => {
   };
 
   const privateRequest = (url, options, config) => {
-    // Lire le token à chaque appel pour avoir la valeur la plus récente
-    const token = useAuthStore.getState().token;
-
-    // Ne pas faire de requête si le token n'est pas disponible
-    // Les vérifications enabled dans les hooks devraient empêcher cela,
-    // mais c'est une sécurité supplémentaire
-    if (!token) {
-      return Promise.reject(new Error("Token not available"));
+    const user = useUserStore.getState().user;
+    if (!user) {
+      return Promise.reject(new Error("User not logged in"));
     }
 
-    const tokenBearer = {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    };
-
     const axiosInstance = axios.create({
-      headers: tokenBearer.headers,
       ...config,
     });
 
     axiosInstance.interceptors.response.use(
       (response) => response,
       (err) => {
-        if (err.response?.status === 401) { 
+        if (err.response?.status === 401) {
           router.push("/logout");
         }
         return Promise.reject(err);
@@ -51,7 +42,7 @@ const useRequestHelper = () => {
     );
 
     const requestURL = getRequestURL(url);
-    return axiosInstance(requestURL, _.merge(options, tokenBearer));
+    return axiosInstance(requestURL, _.merge(options, {}));
   };
 
   const request = (url, options) => {

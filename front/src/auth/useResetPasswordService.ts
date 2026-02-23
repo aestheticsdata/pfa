@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useAuthStore } from "@auth/store/authStore";
 import { useUserStore } from "@auth/store/userStore";
 
 import type { AxiosError } from "axios";
@@ -12,7 +11,6 @@ const useResetPasswordService = () => {
   const { request } = useRequestHelper();
   const router = useRouter();
   const userStore = useUserStore();
-  const authStore = useAuthStore();
 
   const resetPasswordService = async (email: string) => {
     try {
@@ -34,7 +32,6 @@ const useResetPasswordService = () => {
         showConfirmButton: false,
         timer: 3000,
         didClose: () => {
-          authStore.setToken(null);
           userStore.setUser(null);
           router.push("/login");
         },

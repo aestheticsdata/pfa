@@ -3,34 +3,32 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useQueryClient } from "react-query";
-import { useAuthStore } from "@auth/store/authStore";
 import { useUserStore } from "@auth/store/userStore";
+import useRequestHelper from "@helpers/useRequestHelper";
 
 export default function Logout() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const authStore = useAuthStore();
   const userStore = useUserStore();
+  const { request } = useRequestHelper();
 
   useEffect(() => {
-    // Nettoyer le cache React Query
-    queryClient.clear();
-    
-    // Nettoyer les stores
-    authStore.setToken(null);
-    userStore.setUser(null);
-    
-    // Utiliser replace pour éviter d'ajouter une entrée dans l'historique
-    // et forcer la navigation
-    router.replace("/login");
-    
-    // Fallback au cas où router.replace ne fonctionnerait pas
-    const timeout = setTimeout(() => {
-      window.location.href = "/login";
-    }, 100);
-    
-    return () => clearTimeout(timeout);
-  }, []); // Tableau de dépendances vide pour s'exécuter une seule fois
+    const doLogout = async () => {
+      try {
+        await request("/users/logout", { method: "POST" });
+      } catch {
+        // Session may already be expired
+      } finally {
+        queryClient.clear();
+        userStore.setUser(null);
+        router.replace("/login");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 100);
+      }
+    };
+    doLogout();
+  }, []);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-grey1">

@@ -1,23 +1,20 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@auth/store/authStore";
 import { useUserStore } from "@auth/store/userStore";
 
 const useCredentials = () => {
   const router = useRouter();
-  const authStore = useAuthStore();
   const userStore = useUserStore();
 
-  const setCredentials = async (token: any, user: any) => {
-    authStore.setToken(token);
-    userStore.setUser(user);
+  const setCredentials = async (user: { id: string; name: string; email: string; baseCurrency: string; language: string | null }) => {
+    userStore.setUser({ ...user, language: user.language ?? "en" });
     await router.push("/");
   };
 
   return {
     setCredentials,
   };
-}
+};
 
 export default useCredentials;

@@ -12,8 +12,10 @@ export default function SignUp() {
   const { setCredentials } = useCredentials();
 
   const onSubmit = async (values: LoginValues) => {
-    const { token, user } = await signupService(values);
-    await setCredentials(token, user);
+    const result = await signupService(values);
+    if (result?.user) {
+      await setCredentials(result.user);
+    }
   };
 
   return (

@@ -20,12 +20,12 @@ import { CreateSpendingDto } from "@spendings/dto/create-spending.dto";
 import { UpdateSpendingDto } from "@spendings/dto/update-spending.dto";
 import { DeleteInvoiceImageDto } from "@spendings/dto/delete-invoice-image.dto";
 import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
-import { JwtAuthGuard } from "@spendings/guards/jwt-auth.guard";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { invoiceUploadOptions } from "@spendings/upload/upload.config";
 
 @Controller("spendings")
-@UseGuards(JwtAuthGuard)
+@UseGuards(SessionAuthGuard)
 export class SpendingsController {
   constructor(private readonly spendingsService: SpendingsService) {}
 

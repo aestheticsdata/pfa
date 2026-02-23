@@ -4,7 +4,6 @@ import startOfMonth from "date-fns/startOfMonth";
 import endOfMonth from "date-fns/endOfMonth";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { useUserStore } from "@auth/store/userStore";
-import { useAuthStore } from "@auth/store/authStore";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
@@ -15,7 +14,6 @@ const useCharts = (periodType: string) => {
   const { from, to } = useDatePickerWrapperStore();
   const user = useUserStore((state) => state.user);
   const userID = user?.id;
-  const token = useAuthStore((state) => state.token);
   const [startDate, setStartDate] = useState<Date | null>();
   const [endDate, setEndDate] = useState<Date | null>();
 
@@ -35,7 +33,7 @@ const useCharts = (periodType: string) => {
 
   return useQuery([QUERY_KEYS.CHARTS, startDate, endDate], getCharts, {
     retry: false,
-    enabled: !!startDate && !!userID && !!token,
+    enabled: !!startDate && !!userID,
     ...QUERY_OPTIONS,
   });
 };

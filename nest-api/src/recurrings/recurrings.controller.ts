@@ -16,11 +16,11 @@ import { CreateRecurringDto } from "@recurrings/dto/create-recurring.dto";
 import { UpdateRecurringDto } from "@recurrings/dto/update-recurring.dto";
 import { RecurringsQueryDto } from "@recurrings/dto/recurrings-query.dto";
 import { CopyRecurringsDto } from "@recurrings/dto/copy-recurrings.dto";
-import { JwtAuthGuard } from "@spendings/guards/jwt-auth.guard";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
 @Controller("recurrings")
-@UseGuards(JwtAuthGuard)
+@UseGuards(SessionAuthGuard)
 export class RecurringsController {
   constructor(private readonly recurringsService: RecurringsService) {}
 
