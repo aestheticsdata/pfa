@@ -34,6 +34,7 @@ async function bootstrap() {
       secret: process.env.SESSION_SECRET as string,
       resave: false,
       saveUninitialized: false,
+      rolling: true,
       proxy: true, // requis pour cookie Secure derrière reverse proxy
       cookie: {
         httpOnly: true,

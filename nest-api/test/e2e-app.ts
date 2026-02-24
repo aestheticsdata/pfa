@@ -32,6 +32,8 @@ export async function createE2eApp(): Promise<INestApplication> {
       secret: process.env.SESSION_SECRET ?? "e2e-test-secret",
       resave: false,
       saveUninitialized: false,
+      rolling: true,
+      proxy: true,
       cookie: {
         httpOnly: true,
         secure: false,
