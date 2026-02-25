@@ -68,6 +68,16 @@ export class UsersService {
     return this.buildSignInResponse(user);
   }
 
+  async findById(userId: string): Promise<SignInResponse> {
+    const user = await this.prisma.users.findUnique({
+      where: { ID: userId },
+    });
+    if (!user) {
+      throw new UnauthorizedException("User not found");
+    }
+    return this.buildSignInResponse(user);
+  }
+
   /**
    * Builds the sign-in response (user only; session is set via cookie).
    * Reusable for sign-in and add-user (auto sign-in after registration).

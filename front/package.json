@@ -4,6 +4,7 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
+    "build:static": "NEXT_OUTPUT_MODE=export next build",
     "deploy-kimsufi": "next build",
     "start": "next start",
     "lint": "eslint ."
