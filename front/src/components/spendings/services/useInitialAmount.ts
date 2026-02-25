@@ -11,14 +11,19 @@ const useInitialAmount = () => {
   const user = useUserStore((state) => state.user);
   const userID = user?.id;
   const { from } = useDatePickerWrapperStore();
-  const monthBeginning = startOfMonth(from!);
+  const monthBeginning = from ? startOfMonth(from) : null;
 
   const getInitialAmount = async () => {
+    if (!from || !userID) {
+      throw new Error("Missing date range or user for monthlystats query");
+    }
+
     try {
-      const monthlyStats = await privateRequest(`/monthlystats?userID=${userID}&from=${startOfMonth(from!)}`);
+      const monthlyStats = await privateRequest(`/monthlystats?userID=${userID}&from=${startOfMonth(from)}`);
       return monthlyStats.data;
     } catch (e) {
       console.log("get initial amount error : ", e);
+      throw e;
     }
   };
 
