@@ -1,8 +1,10 @@
+const isStaticExport = process.env.NEXT_OUTPUT_MODE === 'export';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // output: 'export' uniquement pour les builds de production (pas en dev)
-  ...(process.env.NODE_ENV !== 'development' && { output: 'export' }),
+  // Static export is now opt-in (NEXT_OUTPUT_MODE=export).
+  ...(isStaticExport && { output: 'export' }),
   trailingSlash: true,
   typescript: {
     // !! WARN !!
