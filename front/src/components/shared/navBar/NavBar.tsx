@@ -1,25 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
-import { useUserStore } from "@auth/store/userStore";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@auth/context/AuthContext";
 import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
 import useGlobalStore from "@components/shared/globalStore";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
 import { ROUTES } from "@components/shared/config/constants";
 
 const NavBar = () => {
-  const [client, setClient] = useState(false);
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const { isCalendarVisible } = useGlobalStore();
-  const router = useRouter();
   const pathname = usePathname();
-
-  useEffect(() => {
-    setClient(true);
-  }, []);
 
   const getActivePath = (route: string) =>
     route === pathname ? "bg-spendingItemHover rounded-sm text-blueNavy" : "";
@@ -27,7 +20,7 @@ const NavBar = () => {
   const getLinkItem = (route: { path: string; label: string }) => {
     // Désactiver le prefetch pour les routes qui causent des erreurs 403 ou Mixed Content
     // avec l'export statique de Next.js (routes protégées et certaines routes publiques)
-    const routesWithoutPrefetch = ['/', '/statistics', '/categories', '/about', '/signup', '/login', '/forgotPassword'];
+    const routesWithoutPrefetch = ["/", "/statistics", "/categories", "/about", "/signup", "/login", "/forgotPassword"];
     const shouldDisablePrefetch = routesWithoutPrefetch.includes(route.path);
     
     return (
@@ -43,7 +36,7 @@ const NavBar = () => {
     );
   };
 
-  const isLogged = client ? !!user : false;
+  const isLogged = !!user;
 
   return (
     <div

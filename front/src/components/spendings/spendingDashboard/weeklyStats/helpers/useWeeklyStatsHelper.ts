@@ -6,7 +6,7 @@ import getDate from "date-fns/getDate";
 
 const useWeeklyStatsHelper = () => {
   const makeRange = (from: any) => {
-    const ranges = [];
+    const ranges: number[] = [];
     const startDate = startOfMonth(from);
     const dayNumberFromMonthStart = getDay(startDate); // Sunday is 0
     const firstSlice = 7 - dayNumberFromMonthStart;
@@ -22,18 +22,18 @@ const useWeeklyStatsHelper = () => {
     return ranges;
   }
 
-  const getSliceDates = (idx: number, ranges: string[]) => {
-    const getSumDays = (i: number) => ranges.slice(0, i + 1).reduce((acc: string, curr: string) => acc + curr);
+  const getSliceDates = (idx: number, ranges: number[]) => {
+    const getSumDays = (i: number) => ranges.slice(0, i + 1).reduce((acc, curr) => acc + curr, 0);
     const sliceStart = idx === 0 ? 1 : getSumDays(idx - 1) + 1;
     const sliceEnd = getSumDays(idx);
 
     return sliceStart === sliceEnd ? sliceStart : `${sliceStart} - ${sliceEnd}`;
   }
 
-  const makeSlices = (ranges: any[]) => ranges.reduce((acc: string[], curr, idx, arr) => {
+  const makeSlices = (ranges: number[]) => ranges.reduce((acc: Array<string | number>, _curr, idx, arr) => {
     acc.push(getSliceDates(idx, arr));
     return acc;
-  }, []);
+  }, [] as Array<string | number>);
 
   const isCurrentWeek = (slice: string | number, from: any) => {
     return typeof slice === 'string' ?

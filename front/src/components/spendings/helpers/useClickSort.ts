@@ -9,15 +9,15 @@ import {
 import type { SpendingCompoundType } from "@components/spendings/types";
 
 const useClickSort = () => {
-  const [spendingsByDaySorted, setSpendingsByDaySorted] = useState<SpendingCompoundType>([] as unknown as SpendingCompoundType);
-  const [sortOrder, setSortOrder] = useState('asc');
+  const [spendingsByDaySorted, setSpendingsByDaySorted] = useState<any>([] as unknown as SpendingCompoundType);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
 
-  const onClickSort = (name) => {
-    let tempArr = [];
+  const onClickSort = (name: string) => {
+    let tempArr: any[] = [];
 
     // array of spending use [].total and [].date, lodash orderBy remove these two keys
     let preserveArrayKeys = (() => {
-      const keys = Object.keys(spendingsByDaySorted).filter(k => isNaN(parseInt(k)));
+      const keys = Object.keys(spendingsByDaySorted).filter((k) => isNaN(parseInt(k, 10)));
       return keys.map(k => ({ [k]: spendingsByDaySorted[k] }));
     })();
     ///////////////////////////////////////////////////////////////////////////////////
@@ -38,8 +38,8 @@ const useClickSort = () => {
 
     // array of spending use [].total and [].date, lodash orderBy remove these two keys
     for (const i of preserveArrayKeys) {
-      let tempObjKey = Object.keys(i);
-      tempArr[tempObjKey] = i[tempObjKey];
+      const tempObjKey = Object.keys(i)[0];
+      tempArr[tempObjKey as unknown as number] = (i as Record<string, unknown>)[tempObjKey];
     }
     ///////////////////////////////////////////////////////////////////////////////////
 

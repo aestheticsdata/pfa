@@ -1,19 +1,19 @@
-import { cloneElement, useState, useRef} from 'react';
+import { cloneElement, useRef, useState } from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleUp, faAngleDown} from '@fortawesome/free-solid-svg-icons';
-import useOnClickOutside from 'use-onclickoutside';
+import useOnClickOutside from "use-onclickoutside";
 
 import type { Dropdown } from "./types";
 
 
 const DropDown = ({ children, displayCaret = true }: Dropdown) => {
   const [isOpen, setIsOpen] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement | null>(null);
 
   const toggleDropdown = () => { setIsOpen(!isOpen) };
 
   const handleClickOutside = () => { setIsOpen(false) };
-  useOnClickOutside(ref, handleClickOutside);
+  useOnClickOutside(ref as any, handleClickOutside);
 
   const close = () => { setIsOpen(false) };
 
@@ -45,8 +45,7 @@ const DropDown = ({ children, displayCaret = true }: Dropdown) => {
           null
         }
       </div>
-      <div>
-      </div>
+      <div></div>
     </div>
   )
 }

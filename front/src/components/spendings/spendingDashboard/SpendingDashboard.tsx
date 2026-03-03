@@ -3,7 +3,7 @@ import MonthlyBudget from '@components/spendings/spendingDashboard/monthlyBudget
 import WeeklyStats from "@components/spendings/spendingDashboard/weeklyStats/WeeklyStats";
 import WeeklyCharts from "@components/spendings/spendingDashboard/weeklyCharts/WeeklyCharts";
 import MonthlyCharts from "@components/spendings/spendingDashboard/monthlyCharts/MonthlyCharts";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useBlur from "@components/common/helpers/blurHelper";
 
@@ -15,7 +15,7 @@ interface SpendingDashboardProps {
 
 const SpendingDashboard = ({ month }: SpendingDashboardProps) => {
   const { isBlurActive } = useBlur();
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const { recurrings, isLoading: isRecurringsLoading, deleteRecurring } = useReccurings();
 
   return (
@@ -38,4 +38,3 @@ const SpendingDashboard = ({ month }: SpendingDashboardProps) => {
 }
 
 export default SpendingDashboard;
-

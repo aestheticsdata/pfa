@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 import {
   QUERY_KEYS,
   QUERY_OPTIONS,
@@ -9,9 +9,11 @@ import {
 
 const useCategories = () => {
   const { privateRequest } = useRequestHelper();
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const userID = user?.id;
   const queryClient = useQueryClient();
+  type UpdateCategoryVariables = { singleCategory: any };
+  type DeleteCategoryVariables = { categoryID: string };
 
   const invalidation = async () => {
     await queryClient.invalidateQueries([QUERY_KEYS.CATEGORIES]);
@@ -44,7 +46,7 @@ const useCategories = () => {
       console.log(e);
     }
   };
-  const updateCategory = useMutation(({ singleCategory: category }) => {
+  const updateCategory = useMutation<unknown, unknown, UpdateCategoryVariables>(({ singleCategory: category }) => {
     return updateCategoryService(category);
   }, {
     onSuccess: async () => { await invalidation() },
@@ -56,7 +58,7 @@ const useCategories = () => {
       method: 'DELETE',
     });
   };
-  const deleteCategory = useMutation(({ categoryID }) => {
+  const deleteCategory = useMutation<unknown, unknown, DeleteCategoryVariables>(({ categoryID }) => {
     return deleteCategoryService(categoryID);
   }, {
     onSuccess: async () => { await invalidation() },
@@ -71,4 +73,3 @@ const useCategories = () => {
 }
 
 export default useCategories;
-

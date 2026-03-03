@@ -14,7 +14,7 @@ const nextConfig = {
     ignoreBuildErrors: true
   },
   // Les rewrites Next.js ne fonctionnent pas pour les requêtes client-side (Axios)
-  // Les requêtes API sont gérées directement dans useRequestHelper.js
+  // Les requêtes API sont gérées directement dans useRequestHelper.ts
   turbopack: {
     // Indicates to Next.js that the workspace root is this directory (pfa-client-next)
     // to avoid warnings about multiple lockfiles
