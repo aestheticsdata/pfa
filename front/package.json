@@ -39,7 +39,7 @@
     "sweetalert2": "^11.4.14",
     "use-onclickoutside": "^0.4.0",
     "zod": "^3.14.3",
-    "zustand": "^3.7.1"
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",

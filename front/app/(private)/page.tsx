@@ -1,15 +1,6 @@
-"use client";
-
-import { useEffect } from "react";
-import Spendings from "@components/spendings/Spendings";
-import useGlobalStore from "@components/shared/globalStore";
+import { redirect } from "next/navigation";
+import { buildDashboardPath } from "@helpers/dateRoute";
 
 export default function Home() {
-  const { setIsCalendarVisible } = useGlobalStore();
-
-  useEffect(() => {
-    setIsCalendarVisible(true);
-  }, [setIsCalendarVisible]);
-
-  return <Spendings />;
+  redirect(buildDashboardPath());
 }

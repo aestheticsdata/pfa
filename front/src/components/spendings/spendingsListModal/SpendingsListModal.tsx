@@ -17,6 +17,7 @@ import CategoryComponent from "@components/common/Category";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
 import texts from "@components/spendings/config/text";
+import { DASHBOARD_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
 
 import type { CategoryProps } from "@src/interfaces/category";
 import type { SpendingType } from "@components/spendings/types";
@@ -36,6 +37,11 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const normalizePath = (path: string): string => {
+    const normalized = path.replace(/\/+$/, "");
+    return normalized === "" ? "/" : normalized;
+  };
 
   useOnClickOutside(ref as React.RefObject<HTMLElement>, handleClickOutside);
 
@@ -107,12 +113,12 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
               className="cursor-pointer"
               onClick={() => {
                 const dateISO = formatISO(new Date(spendings[0]), { representation: "date" });
-                if (pathname === "/") {
+                if (normalizePath(pathname) === DASHBOARD_PATH) {
                   const params = new URLSearchParams(searchParams.toString());
-                  params.set("currentDate", dateISO);
-                  router.push(`/?${params.toString()}`);
+                  params.set(DATE_QUERY_PARAM, dateISO);
+                  router.push(`${DASHBOARD_PATH}?${params.toString()}`);
                 } else {
-                  router.push(`/?currentDate=${dateISO}`);
+                  router.push(`${DASHBOARD_PATH}?${DATE_QUERY_PARAM}=${dateISO}`);
                 }
                 handleClickOutside();
               }}
