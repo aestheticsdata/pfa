@@ -18,9 +18,10 @@ import { RecurringsQueryDto } from "@recurrings/dto/recurrings-query.dto";
 import { CopyRecurringsDto } from "@recurrings/dto/copy-recurrings.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("recurrings")
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, CsrfGuard)
 export class RecurringsController {
   constructor(private readonly recurringsService: RecurringsService) {}
 

@@ -23,9 +23,10 @@ import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { invoiceUploadOptions } from "@spendings/upload/upload.config";
+import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("spendings")
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, CsrfGuard)
 export class SpendingsController {
   constructor(private readonly spendingsService: SpendingsService) {}
 

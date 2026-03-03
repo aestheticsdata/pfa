@@ -3,6 +3,7 @@ import request from "supertest";
 import { randomUUID } from "crypto";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createE2eApp } from "./e2e-app";
+import { createAuthenticatedSession } from "./auth-session.helper";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;
@@ -33,12 +34,9 @@ describe("StatsController (e2e)", () => {
 
   beforeAll(async () => {
     app = await createE2eApp();
-    agent = request.agent(app.getHttpServer() as SupertestApp);
-    const signInRes = await agent
-      .post("/api/users")
-      .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
-      .expect(200);
-    userId = (signInRes.body as { user: { id: string } }).user.id;
+    const session = await createAuthenticatedSession(app.getHttpServer() as SupertestApp);
+    agent = session.agent;
+    userId = session.userId;
 
     const prisma = app.get(PrismaService);
     const category = await prisma.categories.create({
