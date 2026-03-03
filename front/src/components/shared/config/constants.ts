@@ -1,5 +1,5 @@
 export const ROUTES = {
-  spendings: {path: "/", label: "Dépenses"},
+  spendings: {path: "/dashboard", label: "Dépenses"},
   categories: {path: "/categories", label: "Catégories"},
   statistics: {path: "/statistics", label: "Statistiques"},
   login: {path: "/login", label: "Login"},

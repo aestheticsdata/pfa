@@ -2,6 +2,7 @@ import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { join } from "path";
 import { createE2eApp } from "./e2e-app";
+import { createAuthenticatedSession } from "./auth-session.helper";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;
@@ -40,11 +41,8 @@ describe("SpendingsController (e2e)", () => {
 
   beforeAll(async () => {
     app = await createE2eApp();
-    agent = request.agent(app.getHttpServer() as SupertestApp);
-    await agent
-      .post("/api/users")
-      .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
-      .expect(200);
+    const session = await createAuthenticatedSession(app.getHttpServer() as SupertestApp);
+    agent = session.agent;
   }, 15000);
 
   afterAll(async () => {

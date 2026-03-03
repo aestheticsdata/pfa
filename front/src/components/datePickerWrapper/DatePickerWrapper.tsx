@@ -9,6 +9,7 @@ import fr from "date-fns/locale/fr";
 import format from "date-fns/format";
 import { WEEKDAYS_LONG, WEEKDAYS_SHORT, MONTHS } from "./locale-fr";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
+import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
 
 const DatePickerWrapper = () => {
   const {
@@ -25,7 +26,7 @@ const DatePickerWrapper = () => {
   const searchParams = useSearchParams();
   const ref = useRef<HTMLDivElement>(null);
   
-  const currentDate = searchParams.get("currentDate");
+  const selectedDateParam = searchParams.get(DATE_QUERY_PARAM);
 
   const daysAreSelected = selectedDays.length > 0;
 
@@ -44,15 +45,16 @@ const DatePickerWrapper = () => {
   useOnClickOutside(ref as React.RefObject<HTMLElement>, handleClickOutside);
 
   useEffect(() => {
-    if (currentDate) {
-      const date = new Date(currentDate as string);
-      if (selectedDays.length === 0 || selectedDays[0].getTime() !== date.getTime()) {
+    if (selectedDateParam) {
+      const date = new Date(selectedDateParam);
+      if (!Number.isNaN(date.getTime())
+        && (selectedDays.length === 0 || selectedDays[0].getTime() !== date.getTime())) {
         handleDayChange(date, false);
       }
     } else if (selectedDays.length === 0) {
       handleDayChange(new Date(), false);
     }
-  }, [currentDate]);
+  }, [selectedDateParam]);
 
   return (
     <div

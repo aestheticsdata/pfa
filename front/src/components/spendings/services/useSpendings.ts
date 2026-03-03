@@ -6,7 +6,7 @@ import startOfMonth from "date-fns/startOfMonth";
 import endOfMonth from "date-fns/endOfMonth";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 
@@ -17,7 +17,7 @@ const useSpendings = () => {
   const [spendingsByWeek, setSpendingsByWeek] = useState<SpendingCompoundType[]>();
   const [spendingsByMonth, setSpendingsByMonth] = useState<SpendingCompoundType>();
   const { privateRequest } = useRequestHelper();
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const userID = user?.id;
   const { from, to, range } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
@@ -25,11 +25,11 @@ const useSpendings = () => {
   // transform an array of object into an array of array<Object> aggregated
   // by same date
   // const aggregateSpendingByDate = (spendings, range, exchangeRates, baseCurrency) => {
-  const aggregateSpendingByDate = (spendings: SpendingCompoundType, range): SpendingCompoundType[] => {
-    const tempArr = [];
+  const aggregateSpendingByDate = (spendings: SpendingCompoundType, range: Date[]): SpendingCompoundType[] => {
+    const tempArr: any = [];
     tempArr.total = 0;
     const spendingsPlaceholder = new Array(range.length).fill(tempArr);
-    const spendingsFinal = [...spendingsPlaceholder];
+    const spendingsFinal: any[] = [...spendingsPlaceholder];
 
     for (let j = 0, r = range.length; j < r; j += 1) {
       const arr: any = [];
@@ -101,13 +101,13 @@ const useSpendings = () => {
     onSuccess: () => { spendingsActionOnSuccess("effacée") }
   });
 
-  const createSpendingService = async (spending) => {
+  const createSpendingService = async (spending: any) => {
     return privateRequest("/spendings", {
       method: 'POST',
       data: spending,
     });
   }
-  const createSpending = useMutation((spending) => {
+  const createSpending = useMutation<unknown, unknown, any>((spending) => {
     return createSpendingService(spending);
   }, {
     onSuccess: () => { spendingsActionOnSuccess("créée") },
@@ -116,14 +116,14 @@ const useSpendings = () => {
     }
   });
 
-  const updateSpendingService = async (spending) => {
+  const updateSpendingService = async (spending: any) => {
     return privateRequest(`/spendings/${spending.id}`, {
       method: "PUT",
       data: spending,
     });
   };
 
-  const updateSpending = useMutation((spending) => {
+  const updateSpending = useMutation<unknown, unknown, any>((spending) => {
     return updateSpendingService(spending);
   }, {
     onSuccess: () => { spendingsActionOnSuccess("mise à jour") },
@@ -143,4 +143,3 @@ const useSpendings = () => {
 }
 
 export default useSpendings;
-

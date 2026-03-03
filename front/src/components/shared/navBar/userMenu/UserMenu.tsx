@@ -1,18 +1,34 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "react-query";
 import {
   faSignOutAlt,
   faKey,
 } from '@fortawesome/free-solid-svg-icons';
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
+import useRequestHelper from "@helpers/useRequestHelper";
 import Dropdown from '@components/common/dropdown/Dropdown';
 import UserMenuContent from './UserMenuContent';
 
 
 const UserMenu = () => {
-  const userStore = useUserStore();
+  const { user, clearAuth } = useAuth();
+  const queryClient = useQueryClient();
+  const { privateRequest } = useRequestHelper();
   const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await privateRequest("/users/logout", { method: "POST" });
+    } catch {
+      // Session may already be expired.
+    } finally {
+      queryClient.clear();
+      clearAuth();
+      window.location.replace("/login");
+    }
+  };
 
   const listItems = [
     {
@@ -25,14 +41,14 @@ const UserMenu = () => {
       id: "logout",
       label: "logout",
       icon: faSignOutAlt,
-      callback: () => router.push("/logout"),
+      callback: handleLogout,
     },
   ];
 
   return (
     <div className="mr-8 cursor-pointer bg-transparent">
       <Dropdown>
-        <span className="whitespace-nowrap block overflow-hidden text-ellipsis">{userStore.user?.email}</span>
+        <span className="whitespace-nowrap block overflow-hidden text-ellipsis">{user?.email}</span>
         <UserMenuContent listItems={listItems} />
       </Dropdown>
     </div>
@@ -40,4 +56,3 @@ const UserMenu = () => {
 };
 
 export default UserMenu;
-

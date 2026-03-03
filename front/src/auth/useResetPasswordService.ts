@@ -3,14 +3,14 @@
 import { useRouter } from "next/navigation";
 import Swal from "sweetalert2";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 
 import type { AxiosError } from "axios";
 
 const useResetPasswordService = () => {
   const { request } = useRequestHelper();
   const router = useRouter();
-  const userStore = useUserStore();
+  const { clearAuth } = useAuth();
 
   const resetPasswordService = async (email: string) => {
     try {
@@ -32,10 +32,10 @@ const useResetPasswordService = () => {
         showConfirmButton: false,
         timer: 3000,
         didClose: () => {
-          userStore.setUser(null);
+          clearAuth();
           router.push("/login");
         },
-      })
+      });
     } catch (err: unknown) {
       // @ts-ignore
       await Swal.fire({
@@ -49,11 +49,11 @@ const useResetPasswordService = () => {
         timer: 3000,
       });
     }
-  }
+  };
 
   return {
     resetPasswordService,
-  }
+  };
 };
 
 export default useResetPasswordService;

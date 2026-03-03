@@ -19,13 +19,13 @@ import useDashboard from "@components/spendings/services/useDashboard";
 
 interface SpendingDayItemProps {
   spendingsByDay: any;
-  deleteSpending: any;
+  deleteSpending?: any;
   isLoading: boolean;
   date?: Date;
-  user: any; // TODO
-  recurringType: boolean;
-  month: any;
-  total: number;
+  user?: any; // TODO
+  recurringType?: boolean;
+  month?: any;
+  total?: number;
 }
 
 
@@ -157,14 +157,14 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
                     key={(new Date()).getMilliseconds() + Math.trunc(Math.random()*1000000)}
                     className="cursor-pointer"
                     onClick={() => {
-                      if (!category) category = "none"
-                      setSelectedCategory(category);
+                      const nextCategory = category ?? "none";
+                      setSelectedCategory(nextCategory);
                     }}
                   >
                     <CategoryComponent
-                      item={{category, categoryColor: getCategoryColor(category) }}
-                      isDynamic={true}
-                      isClicked={selectedCategory === category}
+                      item={{category: category ?? "none", categoryColor: getCategoryColor(category) }}
+                      isDynamic
+                      isClicked={selectedCategory === (category ?? "none")}
                     />
                   </div>
                 )
@@ -202,4 +202,3 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
 };
 
 export default SpendingDayItem;
-

@@ -1,11 +1,11 @@
-import create from 'zustand';
+import { create } from "zustand";
 
 interface Blur {
   isBlurActive: boolean;
   toggleBlur: () => void;
 }
 
-const useBlur = create<Blur>((set) => ({
+const useBlur = create<Blur>()((set) => ({
   isBlurActive: false,
   toggleBlur: () => set((state) => ({ isBlurActive: !state.isBlurActive })),
 }));

@@ -1,5 +1,5 @@
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { useQuery } from "react-query";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
@@ -8,7 +8,7 @@ import startOfMonth from "date-fns/startOfMonth";
 
 const useInitialAmount = () => {
   const { privateRequest } = useRequestHelper();
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const userID = user?.id;
   const { from } = useDatePickerWrapperStore();
   const monthBeginning = from ? startOfMonth(from) : null;

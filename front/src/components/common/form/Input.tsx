@@ -1,13 +1,13 @@
-import type { FieldValue, UseFormRegister } from "react-hook-form";
+import type { FieldValues, Path, UseFormRegister } from "react-hook-form";
 
-interface InputProps<T> {
+interface InputProps<T extends FieldValues> {
   register: UseFormRegister<T>;
-  registerName: string;
+  registerName: Path<T>;
   defaultValue?: any;
   placeHolder: string;
 }
 
-const Input = ({ register, registerName, defaultValue, placeHolder }: InputProps<FieldValue<any>>) => {
+const Input = <T extends FieldValues>({ register, registerName, defaultValue, placeHolder }: InputProps<T>) => {
   return (
     <input
       autoComplete={registerName === "spendingAmount" ? "off": "on"}

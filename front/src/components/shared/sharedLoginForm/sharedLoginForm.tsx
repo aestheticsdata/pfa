@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import { Formik, Form, Field } from "formik";
+import { Field, Formik } from "formik";
 // import { validationHelper } from './helpers/validationHelper';
 import getSymbolFromCurrency from "currency-symbol-map";
 import currencyCodes from "@src/currency-codes.json";
@@ -35,8 +35,8 @@ const SharedLoginForm = ({
         // @ts-ignore
         onSubmit={onSubmit}
       >
-        {({ isSubmitting, errors }) => (
-          <Form className="flex w-full flex-col items-center space-y-8">
+        {({ isSubmitting, errors, handleSubmit }) => (
+          <form onSubmit={handleSubmit} className="flex w-full flex-col items-center space-y-8">
             {displayEmailField ? (
               <>
                 <Field
@@ -90,7 +90,7 @@ const SharedLoginForm = ({
             >
               {buttonTitle}
             </button>
-          </Form>
+          </form>
         )}
       </Formik>
     </div>

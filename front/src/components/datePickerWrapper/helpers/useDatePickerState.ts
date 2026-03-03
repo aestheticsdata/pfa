@@ -9,6 +9,7 @@ import {
 } from "@components/datePickerWrapper/helpers";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useBlur from "@components/common/helpers/blurHelper";
+import { DASHBOARD_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
 
 import type { Days, HoverRange } from "@components/datePickerWrapper/types";
 
@@ -24,7 +25,12 @@ const useDatePickerState = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { setFrom, setTo, setRange } = useDatePickerWrapperStore();
+  const { setFrom, setTo, setRange, setSelectedDateIso } = useDatePickerWrapperStore();
+
+  const normalizePath = (path: string): string => {
+    const normalized = path.replace(/\/+$/, "");
+    return normalized === "" ? "/" : normalized;
+  };
 
   const toggleCalendar = () => {
     toggleBlur();
@@ -38,12 +44,12 @@ const useDatePickerState = () => {
 
   const handleDayChange = (date: Date, updateUrl = true) => {
     const dateISO = formatISO(date, { representation: "date" });
-    if (updateUrl && pathname === "/") {
-      const currentDateInUrl = searchParams.get("currentDate");
-      if (currentDateInUrl !== dateISO) {
+    if (updateUrl && normalizePath(pathname) === DASHBOARD_PATH) {
+      const dateInUrl = searchParams.get(DATE_QUERY_PARAM);
+      if (dateInUrl !== dateISO) {
         const params = new URLSearchParams(searchParams.toString());
-        params.set("currentDate", dateISO);
-        router.push(`/?${params.toString()}`);
+        params.set(DATE_QUERY_PARAM, dateISO);
+        router.push(`${DASHBOARD_PATH}?${params.toString()}`);
       }
     }
 
@@ -53,6 +59,7 @@ const useDatePickerState = () => {
     setFrom(weekRange.from);
     setTo(weekRange.to);
     setRange(dateRange);
+    setSelectedDateIso(dateISO);
     setSelectedDays(dateRange);
 
     handleClickOutside();

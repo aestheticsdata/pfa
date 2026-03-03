@@ -6,9 +6,10 @@ import { CreateDashboardDto } from "@dashboard/dto/create-dashboard.dto";
 import { UpdateDashboardDto } from "@dashboard/dto/update-dashboard.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("dashboard")
-@UseGuards(SessionAuthGuard)
+@UseGuards(SessionAuthGuard, CsrfGuard)
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
 

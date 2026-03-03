@@ -25,9 +25,9 @@ const PFABarCharts = ({ data, year }) => {
         <XAxis dataKey="month" />
         <YAxis />
         <Tooltip
-          labelFormatter={label => `${label} ${year}`}
+          labelFormatter={(label: any) => `${label} ${year}`}
           labelClassName="bg-gray-200 p-1 rounded-sm font-semibold"
-          formatter={(value: number) => `${value} €`}
+          formatter={(value: any) => `${value} €`}
           offset={7}
           contentStyle={{
             fontSize: "0.8rem",
@@ -47,7 +47,7 @@ const PFABarCharts = ({ data, year }) => {
                 dataKey={key}
                 fill="#111"
                 position="top"
-                formatter={(label: number) => label > 0 ? `${label}€` : null}
+                formatter={(label: any) => Number(label) > 0 ? `${label}€` : ""}
                 fontSize="10px"
               />
             </Bar>

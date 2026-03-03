@@ -5,7 +5,7 @@ import startOfMonth from "date-fns/startOfMonth";
 import endOfMonth from "date-fns/endOfMonth";
 import useInitialAmount from "@components/spendings/services/useInitialAmount";
 import useRequestHelper from "@src/helpers/useRequestHelper";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 
@@ -32,10 +32,15 @@ interface UseDashboard {
   monthlyTotal: number,
 }
 
+interface DashboardMutationVariables {
+  dashboardID?: string;
+  initialAmount: string;
+}
+
 
 const useDashboard = (): UseDashboard => {
   const { privateRequest } = useRequestHelper();
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const userID = user?.id;
   const { from } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
@@ -90,7 +95,7 @@ const useDashboard = (): UseDashboard => {
     }
   }, [get.data, initialAmount]);
 
-  const mutation = useMutation(({ dashboardID, initialAmount }) => {
+  const mutation = useMutation<unknown, unknown, DashboardMutationVariables>(({ dashboardID, initialAmount }) => {
     if (dashboardID) {
       return updateInitialSalary(dashboardID, initialAmount);
     } else {
@@ -111,4 +116,3 @@ const useDashboard = (): UseDashboard => {
 };
 
 export default useDashboard;
-

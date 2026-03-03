@@ -10,7 +10,7 @@ import { TextField } from "@mui/material";
 import Button from "@components/common/form/Button";
 import Input from "@components/common/form/Input";
 import useCategories from "@components/spendings/services/useCategories";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 import useSpendings from "@components/spendings/services/useSpendings";
 import useReccurings from "@components/spendings/services/useReccurings";
 import AutocompleteItem from "@components/spendings/common/spendingModal/AutocompleteItem";
@@ -24,6 +24,13 @@ const spendingSchema = z.object({
 
 type SpendingForm = z.infer<typeof spendingSchema>;
 
+type CategoryOption = {
+  ID: string | null;
+  userID: string | null;
+  name: string;
+  color: string | null;
+};
+
 
 const SpendingModal = ({
    date,
@@ -33,7 +40,7 @@ const SpendingModal = ({
    isEditing,
    month,
  }) => {
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const { createSpending, updateSpending } = useSpendings();
   const {
     recurrings,
@@ -44,16 +51,16 @@ const SpendingModal = ({
   const { categories } = useCategories();
 
 
-  const initialEmptyCategoryState = {
+  const initialEmptyCategoryState: CategoryOption = {
     ID: null,
     userID: null,
     name: "",
     color: null
   };
-  let initialCategoryState = spending?.category ?
+  const initialCategoryState: CategoryOption = spending?.category ?
     {
       ID: spending.categoryID,
-      userID: user?.id,
+      userID: user?.id ?? null,
       name: spending.category,
       color: spending.categoryColor,
     }
@@ -72,10 +79,10 @@ const SpendingModal = ({
     name: "category",
     control,
     rules: { required: true },
-    defaultValue: "",
+    defaultValue: null as unknown as CategoryOption | null,
   });
 
-  const [selectedCategory, setselectedCategory] = useState(initialCategoryState);
+  const [selectedCategory, setselectedCategory] = useState<CategoryOption>(initialCategoryState);
 
   const getRandomHexColor = () => {
     let r = Math.floor(Math.random()*255).toString(16);
@@ -87,8 +94,8 @@ const SpendingModal = ({
     return `${r}${g}${b}`;
   };
 
-  const processCategory = (values: SpendingForm) => {
-    let tempCategory;
+  const processCategory = (values: SpendingForm): CategoryOption => {
+    let tempCategory: CategoryOption;
 
     if (!values.category) { // it's a category deletion
       tempCategory = {
@@ -101,7 +108,7 @@ const SpendingModal = ({
       tempCategory = {
         ID: null,
         userID: user?.id || null,
-        name: values.category,
+        name: String(values.category),
         color: `#${getRandomHexColor()}` // if there is a name, it's a new category, else it's a category deletion
       }
     } else {
@@ -160,7 +167,7 @@ const SpendingModal = ({
     closeModal();
   };
 
-  const handleAutocompleteChange = (value) => {
+  const handleAutocompleteChange = (value: CategoryOption | null) => {
     setselectedCategory(value ?? initialEmptyCategoryState);
   }
 
@@ -191,8 +198,8 @@ const SpendingModal = ({
           <Autocomplete
             {...field}
             freeSolo
-            isOptionEqualToValue={(option, value) => {
-                return option.ID === value.ID;
+            isOptionEqualToValue={(option: any, value: any) => {
+                return option?.ID === value?.ID;
               }
             }
             autoComplete={true}
@@ -200,9 +207,9 @@ const SpendingModal = ({
             classes={{
              root: "backgroundColor: yellow"
             }}
-            getOptionLabel={(option) => option.name ?? option}
-            options={categories?.data || []}
-            renderOption={(props, option) => {
+            getOptionLabel={(option: any) => (typeof option === "string" ? option : (option?.name ?? ""))}
+            options={(categories?.data || []) as any[]}
+            renderOption={(props, option: any) => {
               const { name, color } = option;
               return <AutocompleteItem key={name} props={props} color={color!} name={name} />;
             }}
@@ -217,8 +224,8 @@ const SpendingModal = ({
             )}
             value={selectedCategory}
             onChange={
-              (e, value) => {
-                setselectedCategory(value);
+              (_e, value: any) => {
+                handleAutocompleteChange(value as CategoryOption | null);
                 return field.onChange(value);
               }
             }
@@ -227,7 +234,7 @@ const SpendingModal = ({
         }
 
         {
-          recurringType && recurrings?.length === 0 && (
+          recurringType && recurrings.length === 0 && (
             <Button
               type="button"
               label="Copier les recurrings du mois précédent"

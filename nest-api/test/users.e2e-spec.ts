@@ -1,11 +1,13 @@
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { createE2eApp } from "./e2e-app";
+import { createAuthenticatedSession } from "./auth-session.helper";
 
 type SupertestApp = Parameters<typeof request>[0];
 
 interface SignInResponseBody {
   user: { id: string; name: string; email: string; baseCurrency: string };
+  csrfToken: string;
 }
 
 /**
@@ -39,6 +41,7 @@ describe("UsersController (e2e)", () => {
         .expect((res) => {
           const body = res.body as SignInResponseBody;
           expect(body).toHaveProperty("user");
+          expect(body).toHaveProperty("csrfToken");
           expect(body).not.toHaveProperty("token");
           expect(body.user).toMatchObject({
             email: "e2e-test@test.com",
@@ -46,6 +49,8 @@ describe("UsersController (e2e)", () => {
             id: expect.any(String),
             baseCurrency: expect.any(String),
           });
+          expect(typeof body.csrfToken).toBe("string");
+          expect(body.csrfToken.length).toBeGreaterThan(0);
 
           const setCookie = res.headers["set-cookie"];
           expect(setCookie).toBeDefined();
@@ -101,6 +106,7 @@ describe("UsersController (e2e)", () => {
         .expect((res) => {
           const body = res.body as SignInResponseBody;
           expect(body).toHaveProperty("user");
+          expect(body).toHaveProperty("csrfToken");
           expect(body).not.toHaveProperty("token");
           expect(body.user).toMatchObject({
             email,
@@ -108,6 +114,8 @@ describe("UsersController (e2e)", () => {
             id: expect.any(String),
             baseCurrency: "EUR",
           });
+          expect(typeof body.csrfToken).toBe("string");
+          expect(body.csrfToken.length).toBeGreaterThan(0);
 
           const setCookie = res.headers["set-cookie"];
           expect(setCookie).toBeDefined();
@@ -148,15 +156,39 @@ describe("UsersController (e2e)", () => {
     });
   });
 
+  describe("GET /api/users/csrf", () => {
+    it("should return 200 with csrf token when session exists", async () => {
+      const { agent } = await createAuthenticatedSession(app.getHttpServer() as SupertestApp);
+      return agent
+        .get("/api/users/csrf")
+        .expect(200)
+        .expect((res) => {
+          expect(typeof (res.body as { csrfToken: string }).csrfToken).toBe("string");
+          expect((res.body as { csrfToken: string }).csrfToken.length).toBeGreaterThan(0);
+        });
+    });
+
+    it("should return 401 without session", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .get("/api/users/csrf")
+        .expect(401);
+    });
+  });
+
   describe("POST /api/users/logout", () => {
     it("should return 200 and ok when session exists", async () => {
+      const { agent } = await createAuthenticatedSession(app.getHttpServer() as SupertestApp);
+      return agent.post("/api/users/logout").expect(200).expect({ ok: true });
+    });
+
+    it("should return 403 when session exists but csrf token is missing", async () => {
       const agent = request.agent(app.getHttpServer() as SupertestApp);
       await agent
         .post("/api/users")
         .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
         .expect(200);
 
-      return agent.post("/api/users/logout").expect(200).expect({ ok: true });
+      return agent.post("/api/users/logout").expect(403);
     });
 
     it("should return 200 even without session (no-op)", () => {

@@ -6,7 +6,7 @@ import useOnClickOutside from "use-onclickoutside";
 import Image from "next/image";
 import Button from "@components/common/form/Button";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 import InvoiceImageModal from './invoiceImageModal/InvoiceImageModal';
 import CategoryComponent from "@components/common/Category";
 import texts from "@components/spendings/config/text";
@@ -20,7 +20,7 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
   const { privateRequest } = useRequestHelper();
   const queryClient = useQueryClient();
   const { invoiceModal: invoiceModalTexts } = texts;
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const userID = user?.id;
   const fileSizeLimit = 32_097_152;
   const [invoicefile, setInvoicefile] = useState<string | File>("");
@@ -31,14 +31,14 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
   const [progressValue, setProgressValue] = useState(0);
   const [isProgress, setIsProgress] = useState(false);
   const [showConfirmDeleteImage, setShowConfirmDeleteImage] = useState(false);
-  const ref = useRef(null);
+  const ref = useRef<HTMLDivElement | null>(null);
   const onChange = (e) => { setInvoicefile(e.target.files[0]) };
 
   const handleClickOutsideCheckFullImage = () => {
     !isClickOnThumbnail && handleClickOutside();
   }
 
-  useOnClickOutside(ref, handleClickOutsideCheckFullImage);
+  useOnClickOutside(ref as any, handleClickOutsideCheckFullImage);
 
   const confirmDeleteImage = () => {
     setShowConfirmDeleteImage(true);
@@ -108,6 +108,12 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
 
   const onSubmit = () => {
     setIsFileTooBig(false);
+    if (!userID) {
+      return;
+    }
+    if (!(invoicefile instanceof File)) {
+      return;
+    }
     const formData = new FormData();
 
     // warning, userID must be appended before file
@@ -131,7 +137,7 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
     formData.append('spendingID', spending.ID);
     formData.append('invoiceImageUpload', invoicefile);
 
-    if ((invoicefile as File).size > fileSizeLimit) {
+    if (invoicefile.size > fileSizeLimit) {
       setIsFileTooBig(true);
     } else {
       uploadInvoiceImage(formData);

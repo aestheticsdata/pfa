@@ -1,16 +1,24 @@
 "use client";
 
-import { usePathname } from "next/navigation";
-import { useUserStore } from "@auth/store/userStore";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@auth/context/AuthContext";
+import { DASHBOARD_PATH, buildDashboardPath } from "@helpers/dateRoute";
+
+import type { AuthResponse } from "@auth/types";
 
 const useCredentials = () => {
-  const setUser = useUserStore((state) => state.setUser);
+  const router = useRouter();
   const pathname = usePathname();
+  const { setAuthState } = useAuth();
 
-  const setCredentials = (user: { id: string; name: string; email: string; baseCurrency: string; language: string | null }) => {
-    setUser({ ...user, language: user.language ?? "en" });
-    if (pathname !== "/") {
-      window.location.href = "/";
+  const setCredentials = (auth: AuthResponse) => {
+    const normalizedUser = {
+      ...auth.user,
+      language: auth.user.language ?? "en",
+    };
+    setAuthState(normalizedUser, auth.csrfToken);
+    if (!pathname.startsWith(DASHBOARD_PATH)) {
+      router.replace(buildDashboardPath());
     }
   };
 

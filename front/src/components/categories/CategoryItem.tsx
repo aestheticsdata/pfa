@@ -5,7 +5,6 @@ import CategoryComponent from "@components/common/Category";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import useCategories from "@components/spendings/services/useCategories";
-import categories from "@pages/categories";
 
 
 const CategoryItem = ({ category }) => {

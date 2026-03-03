@@ -1,38 +1,64 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter, usePathname } from "next/navigation";
-import { useUserStore } from "@auth/store/userStore";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "@auth/context/AuthContext";
 import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useGlobalStore from "@components/shared/globalStore";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
 import { ROUTES } from "@components/shared/config/constants";
+import {
+  DASHBOARD_PATH,
+  buildDashboardPath,
+  getTodayIsoDate,
+  isValidIsoDate,
+} from "@helpers/dateRoute";
 
 const NavBar = () => {
-  const [client, setClient] = useState(false);
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const { isCalendarVisible } = useGlobalStore();
-  const router = useRouter();
+  const { selectedDateIso } = useDatePickerWrapperStore();
   const pathname = usePathname();
+  const router = useRouter();
+  const isClientHydrated = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
 
-  useEffect(() => {
-    setClient(true);
-  }, []);
+  const normalizePath = (path: string): string => {
+    const normalized = path.replace(/\/+$/, "");
+    return normalized === "" ? "/" : normalized;
+  };
 
-  const getActivePath = (route: string) =>
-    route === pathname ? "bg-spendingItemHover rounded-sm text-blueNavy" : "";
+  const getActivePath = (routePath: string): string => {
+    const normalizedRoute = normalizePath(routePath);
+    const normalizedPathname = normalizePath(pathname);
+    const isRouteActive = normalizedPathname === normalizedRoute
+      || normalizedPathname.startsWith(`${normalizedRoute}/`);
+
+    return isRouteActive ? "bg-spendingItemHover rounded-sm text-blueNavy" : "";
+  };
 
   const getLinkItem = (route: { path: string; label: string }) => {
-    // Désactiver le prefetch pour les routes qui causent des erreurs 403 ou Mixed Content
-    // avec l'export statique de Next.js (routes protégées et certaines routes publiques)
-    const routesWithoutPrefetch = ['/', '/statistics', '/categories', '/about', '/signup', '/login', '/forgotPassword'];
+    // Disable prefetch for routes that cause 403 or Mixed Content errors
+    // with Next.js static export (protected routes and some public routes)
+    const routesWithoutPrefetch = ["/dashboard", "/statistics", "/categories", "/about", "/signup", "/login", "/forgotPassword"];
     const shouldDisablePrefetch = routesWithoutPrefetch.includes(route.path);
     
+    const storedDate = selectedDateIso ?? undefined;
+    const href = route.path === ROUTES.spendings.path
+      && isClientHydrated
+      && isValidIsoDate(storedDate)
+      ? buildDashboardPath(storedDate)
+      : route.path;
+
     return (
       <Link
-        href={route.path}
+        href={href}
         prefetch={!shouldDisablePrefetch}
         className={`outline-hidden p-1 ${getActivePath(
           route.path
@@ -43,7 +69,18 @@ const NavBar = () => {
     );
   };
 
-  const isLogged = client ? !!user : false;
+  const handleGoToToday = () => {
+    const today = getTodayIsoDate();
+    const normalizedPathname = normalizePath(pathname);
+
+    if (normalizedPathname === DASHBOARD_PATH && selectedDateIso === today) {
+      return;
+    }
+
+    router.push(buildDashboardPath(today));
+  };
+
+  const isLogged = !!user;
 
   return (
     <div
@@ -69,7 +106,18 @@ const NavBar = () => {
               {getLinkItem(ROUTES.categories)}
               {getLinkItem(ROUTES.statistics)}
             </div>
-            {isCalendarVisible && <DatePickerWrapper />}
+            {isCalendarVisible && (
+              <div className="flex items-center gap-2">
+                <DatePickerWrapper />
+                <button
+                  type="button"
+                  onClick={handleGoToToday}
+                  className="text-emerald-100 bg-datePickerWrapperBackground rounded-sm px-2  select-none cursor-pointer hover:brightness-125"
+                >
+                  Aujourd&apos;hui
+                </button>
+              </div>
+            )}
           </div>
           <div className="flex">
             <UserMenu />

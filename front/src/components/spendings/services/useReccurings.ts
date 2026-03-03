@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "react-query";
 import startOfMonth from "date-fns/startOfMonth";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useUserStore } from "@auth/store/userStore";
+import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 
@@ -21,17 +21,17 @@ interface Dates extends FormattedMonth {
 }
 
 interface CreateRecurring {
-  spendingEdited: Spending;
+  spendingEdited: any;
   formattedMonth: FormattedMonth;
 }
 
 const useReccurings = () => {
   const { privateRequest } = useRequestHelper();
-  const user = useUserStore((state) => state.user);
+  const { user } = useAuth();
   const userID = user?.id;
   const { from } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
-  const [recurrings, setRecurrings] = useState();
+  const [recurrings, setRecurrings] = useState<any[]>([]);
 
 
   const recurringsActionOnSuccess = async (message: string) => {
@@ -94,21 +94,21 @@ const useReccurings = () => {
     });
   };
 
-  const createRecurring = useMutation(({ spendingEdited, formattedMonth }: CreateRecurring) => {
+  const createRecurring = useMutation<unknown, unknown, CreateRecurring>(({ spendingEdited, formattedMonth }: CreateRecurring) => {
     return createRecurringService(spendingEdited, formattedMonth);
   }, {
     onSuccess: () => recurringsActionOnSuccess("créé"),
     onError: ((e) => {console.log("error creating recurring", e)}),
   });
 
-  const updateRecurringService = async (recurring) => {
+  const updateRecurringService = async (recurring: any) => {
     return privateRequest(`/recurrings/${recurring.id}`, {
       method: "PUT",
       data: recurring,
     });
   };
 
-  const updateRecurring = useMutation((recurring) => {
+  const updateRecurring = useMutation<unknown, unknown, any>((recurring) => {
     return updateRecurringService(recurring);
   }, {
     onSuccess: () => { recurringsActionOnSuccess("mis à jour") },
@@ -116,7 +116,7 @@ const useReccurings = () => {
     }
   });
 
-  const copyRecurrings = useMutation(({ userID, dates }: { userID: string, dates: Dates }) => {
+  const copyRecurrings = useMutation<unknown, unknown, { userID: string; dates: Dates }>(({ userID, dates }) => {
     return copyRecurringsService(userID, dates);
   }, {
     onSuccess: () =>  recurringsActionOnSuccess("créés"),
