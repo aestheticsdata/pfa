@@ -10,14 +10,24 @@ import useStatistics from "@components/statistics/services/useStatistics";
 import PFABarCharts from "@components/statistics/PFABarCharts";
 import PFALineCharts from "@components/statistics/PFALineCharts";
 import PFAResponsiveChartsContainer from "@components/statistics/PFAResponsiveChartsContainer";
+import type { StatisticsCategoryOption } from "@components/statistics/helpers/useStatisticsCategories";
 
+interface YearOption {
+  value: number;
+  label: number;
+}
+
+interface StatisticsFormValues {
+  categorySelector: StatisticsCategoryOption[];
+  yearSelector: YearOption;
+}
 
 const firstYearAvailable = 2018;
 
 const Statistics = () => {
-  const { categories } = useCategories();
+  const { categories, error: categoriesError } = useCategories();
   const categoriesMarshalled = useStatisticsCategories(categories);
-  const [initialCategories, setinitialCategories] = useState();
+  const [initialCategories, setInitialCategories] = useState<StatisticsCategoryOption[]>([]);
 
   const currentYear = new Date().getFullYear();
   const makeYearsOptions = () => {
@@ -28,13 +38,13 @@ const Statistics = () => {
     return years.map(year => ({ value: year, label: year }));
   };
 
-  const defaultYear = { value: currentYear, label: currentYear };
-  const [initialYear, setinitialYear] = useState<number | { value: number; label: number }>(defaultYear);
+  const defaultYear: YearOption = { value: currentYear, label: currentYear };
+  const [initialYear, setInitialYear] = useState<YearOption>(defaultYear);
 
-  const { control, watch } = useForm<any>({
+  const { control, watch } = useForm<StatisticsFormValues>({
     mode: "onChange",
     defaultValues: {
-      categories: [],
+      categorySelector: [],
       yearSelector: defaultYear,
     }
   });
@@ -42,11 +52,15 @@ const Statistics = () => {
   const categorySelectorWatcher = watch("categorySelector");
   const yearSelectorWatcher = watch("yearSelector");
 
-  const { isLoading: isStatisticsLoading, statistics } = useStatistics(categorySelectorWatcher, yearSelectorWatcher);
+  const { isLoading: isStatisticsLoading, statistics, error } = useStatistics(categorySelectorWatcher, yearSelectorWatcher);
 
-  const getYearValue = () => {
-    return typeof initialYear === 'object' && initialYear !== null ? initialYear.value : initialYear;
-  };
+  if (categoriesError) {
+    throw categoriesError;
+  }
+
+  if (error) {
+    throw error;
+  }
 
   return (
     <>
@@ -63,8 +77,10 @@ const Statistics = () => {
                 options={makeYearsOptions()}
                 value={initialYear}
                 onChange={(selectedYear) => {
-                  setinitialYear(selectedYear);
-                  field.onChange(selectedYear);
+                  if (selectedYear) {
+                    setInitialYear(selectedYear);
+                    field.onChange(selectedYear);
+                  }
                 }}
               />
             }
@@ -84,8 +100,9 @@ const Statistics = () => {
                       options={categoriesMarshalled}
                       value={initialCategories}
                       onChange={(selectedOptions) => {
-                        setinitialCategories(selectedOptions);
-                        field.onChange(selectedOptions);
+                        const options = (selectedOptions ? Array.from(selectedOptions) : []) as StatisticsCategoryOption[];
+                        setInitialCategories(options);
+                        field.onChange(options);
                       }}
                     />
                   }
@@ -97,11 +114,11 @@ const Statistics = () => {
 
         <div className="w-full flex flex-col lg:flex-row lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
           <PFAResponsiveChartsContainer>
-            <PFABarCharts data={statistics} year={getYearValue()} />
+            <PFABarCharts data={statistics ?? null} year={initialYear.value} />
           </PFAResponsiveChartsContainer>
 
           <PFAResponsiveChartsContainer>
-            <PFALineCharts data={statistics} year={getYearValue()} />
+            <PFALineCharts data={statistics ?? null} year={initialYear.value} />
           </PFAResponsiveChartsContainer>
         </div>
 

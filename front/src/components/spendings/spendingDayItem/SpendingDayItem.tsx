@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import format from 'date-fns/format';
 import { getDayOfYear, endOfMonth } from "date-fns";
-import fr from "date-fns/locale/fr";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import SpendingItemHeader from "@components/spendings/spendingDayItem/SpendingItemHeader";
 import useClickSort from "@components/spendings/helpers/useClickSort";
@@ -13,27 +9,27 @@ import SpendingSort from "@components/spendings/spendingSort/SpendingSort";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal"
 import type { AuthUser } from "@auth/types";
 
-import type { SpendingCompoundType, SpendingType } from "@components/spendings/types";
-import { dividerClasses } from "@mui/material";
+import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
+import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 import CategoryComponent from "@components/common/Category";
 import useDashboard from "@components/spendings/services/useDashboard";
 
 interface SpendingDayItemProps {
-  spendingsByDay: any;
-  deleteSpending?: any;
+  spendingsByDay: SpendingListItem[];
   isLoading: boolean;
   date?: Date;
   user?: AuthUser | null;
   recurringType?: boolean;
-  month?: any;
+  month?: MonthRange | null;
   total?: number;
 }
 
 
-const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recurringType = false, month = null }: SpendingDayItemProps) => {
+const SpendingDayItem = ({ spendingsByDay, isLoading, date, recurringType = false, month = null, total = 0 }: SpendingDayItemProps) => {
   const { remaining: remainingAmount } = useDashboard();
   const [todayCredits, setTodayCredits] = useState<number>(0);
   const [isToday, setIsToday] = useState(false);
+  const [displayTotal, setDisplayTotal] = useState<number>(total);
 
   useEffect(() => {
     if (date) {
@@ -56,35 +52,40 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
 
   useEffect(() => {
     setSpendingsByDaySorted(spendingsByDay);
-  }, [spendingsByDay]);
+    setDisplayTotal(total);
+  }, [spendingsByDay, setSpendingsByDaySorted, total]);
 
-  const getRecurringsTotal = (recurrings: SpendingCompoundType) => {
+  const getRecurringsTotal = (recurrings: SpendingListItem[]) => {
     if (recurrings?.length > 0) {
       return recurrings.reduce((acc, curr) => {
-        acc = acc + Number(curr.amount);
-        return acc;
+        return acc + Number(curr.amount);
       }, 0);
     }
+    return 0;
   }
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   useEffect(() => {
     if (selectedCategory) {
       const spendingsFilteredByCategory = spendingsByDay.filter(
-        (spending: SpendingType) => {
+        (spending) => {
+          if (!("category" in spending)) {
+            return false;
+          }
           if (spending.category === null && selectedCategory === "none") return true;
           return spending.category === selectedCategory;
         }
       );
-      const total = spendingsFilteredByCategory.length > 0 ? spendingsFilteredByCategory.reduce((acc, spending) => {
-        return Number(spending.amount) + acc;
+      const filteredTotal = spendingsFilteredByCategory.length > 0 ? spendingsFilteredByCategory.reduce((acc, spending) => {
+        return spending.amount + acc;
       }, 0) : 0;
-      spendingsFilteredByCategory.total = total.toFixed(2);
       setSpendingsByDaySorted(spendingsFilteredByCategory);
+      setDisplayTotal(filteredTotal);
     } else {
       setSpendingsByDaySorted(spendingsByDay);
+      setDisplayTotal(total);
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, setSpendingsByDaySorted, spendingsByDay, total]);
 
   const {
     isModalVisible,
@@ -97,8 +98,11 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
     editSpending,
   } = useSpendingDayItem();
 
-  const getCategories = (spendingsByDay) => Array.from(new Set(spendingsByDay.map((spending: SpendingType) => spending.category)))
-  const getCategoryColor = (category) => spendingsByDay?.filter((spending) => spending.category === category)[0].categoryColor || "#fff";
+  const categorySpendings = spendingsByDay.filter((spending): spending is SpendingItem => "category" in spending);
+  const getCategories = (items: SpendingItem[]) =>
+    Array.from(new Set(items.map((spending) => spending.category).filter((category): category is string | null => category !== undefined)));
+  const getCategoryColor = (category: string | null) =>
+    categorySpendings.find((spending) => spending.category === category)?.categoryColor ?? "#fff";
 
   return (
     <div
@@ -125,14 +129,14 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
           }
         </div>
         <SpendingItemHeader
-          date={date!}
+          date={date}
           recurringType={recurringType}
           isToday={isToday}
           addSpending={addSpending}
           addSpendingEnabled={addSpendingEnabled}
         />
         <div className={`flex ${recurringType || !isToday ? "justify-center" : "justify-between"} items-center font-poppins border-b border-b-grey3 mx-3`}>
-          {spendingsByDaySorted &&
+          {spendingsByDaySorted.length > 0 &&
             <div className="flex justify-center gap-x-2 text-md">
               <div className="uppercase">{spendingsText.dayItem.total}</div>
               <div className="total-amount font-bold">
@@ -140,7 +144,7 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
                   ?
                   <div>{Number(getRecurringsTotal(spendingsByDaySorted) || 0).toFixed(2)} €</div>
                   :
-                  <div>{Number(spendingsByDaySorted.total).toFixed(2)} €</div>
+                  <div>{Number(displayTotal).toFixed(2)} €</div>
                 }
               </div>
             </div>
@@ -154,12 +158,11 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
         {!recurringType &&
           <div className="flex overflow-y-auto max-h-7 bg-white space-x-2 border-b border-b-grey2 mx-3 py-1 justify-between">
             <div className="flex flex-row space-x-1">
-            {spendingsByDay &&
-              getCategories(spendingsByDay).map(
-                // @ts-ignore
+            {categorySpendings.length > 0 &&
+              getCategories(categorySpendings).map(
                 (category: string | null) =>
                   <div
-                    key={(new Date()).getMilliseconds() + Math.trunc(Math.random()*1000000)}
+                    key={category ?? "none"}
                     className="cursor-pointer"
                     onClick={() => {
                       const nextCategory = category ?? "none";
@@ -194,7 +197,6 @@ const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recu
         <div className="flex flex-col mt-2">
           <SpendingsListContainer
             spendingsByDaySorted={spendingsByDaySorted}
-            deleteSpending={deleteSpending}
             toggleAddSpending={toggleAddSpending}
             editSpending={editSpending}
             isLoading={isLoading}

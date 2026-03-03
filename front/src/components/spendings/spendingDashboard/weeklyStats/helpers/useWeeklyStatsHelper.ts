@@ -5,7 +5,7 @@ import getDate from "date-fns/getDate";
 
 
 const useWeeklyStatsHelper = () => {
-  const makeRange = (from: any) => {
+  const makeRange = (from: Date) => {
     const ranges: number[] = [];
     const startDate = startOfMonth(from);
     const dayNumberFromMonthStart = getDay(startDate); // Sunday is 0
@@ -35,7 +35,7 @@ const useWeeklyStatsHelper = () => {
     return acc;
   }, [] as Array<string | number>);
 
-  const isCurrentWeek = (slice: string | number, from: any) => {
+  const isCurrentWeek = (slice: string | number, from: Date) => {
     return typeof slice === 'string' ?
       +(slice.split(' - ')[0]) === getDate(from)
       :

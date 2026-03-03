@@ -5,14 +5,20 @@ import {
   QUERY_KEYS,
   QUERY_OPTIONS,
 } from "@components/spendings/config/constants";
+import {
+  CategoryListSchema,
+  UpdateCategoryPayloadSchema,
+} from "@src/schemas/categories";
 
+import type { AxiosError } from "axios";
+import type { UpdateCategoryPayload } from "@src/schemas/categories";
 
 const useCategories = () => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
   const queryClient = useQueryClient();
-  type UpdateCategoryVariables = { singleCategory: any };
+  type UpdateCategoryVariables = { singleCategory: UpdateCategoryPayload };
   type DeleteCategoryVariables = { categoryID: string };
 
   const invalidation = async () => {
@@ -23,37 +29,39 @@ const useCategories = () => {
 
   const getCategoriesService = async () => {
     try {
-      return privateRequest(`/categories?userID=${userID}`);
+      const response = await privateRequest(`/categories?userID=${userID}`);
+      return CategoryListSchema.parse(response.data);
     } catch (e) {
       console.log("get categories error : ", e);
       throw e; // Re-throw pour que React Query gère l'erreur correctement
     }
   };
-  const { data: categories } = useQuery(QUERY_KEYS.CATEGORIES, getCategoriesService, {
+  const { data: categories, error } = useQuery(QUERY_KEYS.CATEGORIES, getCategoriesService, {
       retry: 2, // Retry 2 fois en cas d'erreur
       enabled: !!userID,
       ...QUERY_OPTIONS,
     });
 
 
-  const updateCategoryService = async (category) => {
+  const updateCategoryService = async (category: UpdateCategoryPayload) => {
     try {
-      return privateRequest(`/categories/${category.ID}`, {
+      const payload = UpdateCategoryPayloadSchema.parse(category);
+      return privateRequest(`/categories/${payload.ID}`, {
         method: 'PUT',
-        data: category,
+        data: payload,
       })
     } catch (e) {
       console.log(e);
     }
   };
-  const updateCategory = useMutation<unknown, unknown, UpdateCategoryVariables>(({ singleCategory: category }) => {
+  const updateCategory = useMutation<unknown, AxiosError, UpdateCategoryVariables>(({ singleCategory: category }) => {
     return updateCategoryService(category);
   }, {
     onSuccess: async () => { await invalidation() },
     onError: ((e) => {console.log("error updating category", e)}),
   })
 
-  const deleteCategoryService = async (categoryID) => {
+  const deleteCategoryService = async (categoryID: string) => {
     return privateRequest(`/categories/${categoryID}`, {
       method: 'DELETE',
     });
@@ -67,6 +75,7 @@ const useCategories = () => {
 
   return {
     categories,
+    error,
     deleteCategory,
     updateCategory,
   }

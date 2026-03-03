@@ -11,7 +11,7 @@ import WidgetHeader from "@components/spendings/spendingDashboard/common/WidgetH
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { MONTHLY, WEEKLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
 
-import type { CategoryProps } from "@src/interfaces/category";
+import type { ChartsCategory } from "@src/schemas/stats";
 
 
 type periodType = typeof MONTHLY | typeof WEEKLY;
@@ -21,8 +21,8 @@ interface ChartsProps {
   periodType: periodType;
 }
 
-const getMaxValue = (data: CategoryProps[]) => Math.max(...data.map(category => +(category.value ?? 0)));
-const getTotal = (data: CategoryProps[]) => data.reduce((acc, curr) => acc + +(curr.value ?? 0), 0);
+const getMaxValue = (data: ChartsCategory[]) => Math.max(...data.map((category) => category.value));
+const getTotal = (data: ChartsCategory[]) => data.reduce((acc, curr) => acc + curr.value, 0);
 
 const widthOfContainer = 290; // 300 - (border width * 2)
 
@@ -31,14 +31,18 @@ const Charts = ({ title, periodType }: ChartsProps) => {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
   const [tooltipPos, setTooltipPos] = useState({x: 0, y: 0});
-  const [categoryInfos, setCategoryInfos] = useState<CategoryProps>();
-  const { data: charts } = useCharts(periodType);
+  const [categoryInfos, setCategoryInfos] = useState<ChartsCategory>();
+  const { data: charts, error } = useCharts(periodType);
 
-  const maxv = charts?.data && charts.data.length > 0 ? getMaxValue(charts.data) : 0;
-  const total = charts?.data && charts.data.length > 0 ? getTotal(charts.data) : 0;
+  if (error) {
+    throw error;
+  }
+
+  const maxv = charts && charts.length > 0 ? getMaxValue(charts) : 0;
+  const total = charts && charts.length > 0 ? getTotal(charts) : 0;
 
   // https://keyholesoftware.com/2022/07/13/cancel-a-react-modal-with-escape-key-or-external-click/
-  const handleEscKey = useCallback((event) => {
+  const handleEscKey = useCallback((event: KeyboardEvent) => {
     if (event.key === "Escape") {
       setIsInvoiceModalVisible(false);
     }
@@ -78,7 +82,7 @@ const Charts = ({ title, periodType }: ChartsProps) => {
       />
       <div className="flex w-full h-3/4 overflow-hidden overflow-y-auto">
         {
-          charts?.data.length === 0 && (
+          charts?.length === 0 && (
             <div className="flex justify-center items-center w-full h-full text-8xl text-grey01">
               <div>
                 <FontAwesomeIcon icon={faChartBar} />
@@ -89,7 +93,7 @@ const Charts = ({ title, periodType }: ChartsProps) => {
         <div className="flex flex-col gap-y-1">
         {
           maxv !== 0 && charts &&
-            charts.data.map((category: CategoryProps, index: number) => {
+            charts.map((category: ChartsCategory, index: number) => {
               return (
                 <div
                   key={`cat-${category.category ?? "uncategorized"}-${index}`}
@@ -136,4 +140,3 @@ const Charts = ({ title, periodType }: ChartsProps) => {
 }
 
 export default Charts;
-

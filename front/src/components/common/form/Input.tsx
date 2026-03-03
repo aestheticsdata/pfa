@@ -3,7 +3,7 @@ import type { FieldValues, Path, UseFormRegister } from "react-hook-form";
 interface InputProps<T extends FieldValues> {
   register: UseFormRegister<T>;
   registerName: Path<T>;
-  defaultValue?: any;
+  defaultValue?: string | number;
   placeHolder: string;
 }
 

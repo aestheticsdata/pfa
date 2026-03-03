@@ -1,0 +1,66 @@
+import { z } from "zod";
+
+const numberLikeSchema = z.preprocess(
+  (value) => (typeof value === "number" || typeof value === "string" ? value : NaN),
+  z.coerce.number().finite(),
+);
+
+export const SpendingCategoryInputSchema = z.object({
+  ID: z.string().nullable(),
+  userID: z.string().nullable(),
+  name: z.string(),
+  color: z.string().nullable(),
+});
+
+export type SpendingCategoryInput = z.infer<typeof SpendingCategoryInputSchema>;
+
+export const SpendingItemSchema = z.object({
+  ID: z.string(),
+  amount: numberLikeSchema,
+  category: z.string().nullable().optional(),
+  categoryColor: z.string().nullable().optional(),
+  categoryID: z.string().nullable().optional(),
+  currency: z.string().nullable().optional(),
+  date: z.string(),
+  invoicefile: z.string().nullable().optional(),
+  itemType: z.string(),
+  label: z.string(),
+  userID: z.string(),
+});
+
+export const SpendingListSchema = z.array(SpendingItemSchema);
+export type SpendingItem = z.infer<typeof SpendingItemSchema>;
+
+export const RecurringItemSchema = z.object({
+  ID: z.string(),
+  amount: numberLikeSchema,
+  currency: z.string().nullable().optional(),
+  dateFrom: z.string(),
+  dateTo: z.string(),
+  itemType: z.string(),
+  label: z.string(),
+  userID: z.string(),
+});
+
+export const RecurringListSchema = z.array(RecurringItemSchema);
+export type RecurringItem = z.infer<typeof RecurringItemSchema>;
+
+export const SpendingMutationPayloadSchema = z.object({
+  date: z.string().nullable().optional(),
+  label: z.string().min(1),
+  amount: numberLikeSchema,
+  category: SpendingCategoryInputSchema.nullable().optional(),
+  currency: z.string(),
+  userID: z.string(),
+  id: z.string().optional(),
+});
+
+export type SpendingMutationPayload = z.infer<typeof SpendingMutationPayloadSchema>;
+
+export const RecurringMutationPayloadSchema = z.object({
+  label: z.string().min(1),
+  amount: numberLikeSchema,
+  id: z.string().optional(),
+});
+
+export type RecurringMutationPayload = z.infer<typeof RecurringMutationPayloadSchema>;

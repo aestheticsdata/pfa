@@ -9,73 +9,76 @@ import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
+import {
+  SpendingListSchema,
+  SpendingMutationPayloadSchema,
+} from "@src/schemas/spendings";
 
-import type { SpendingCompoundType } from "@components/spendings/types";
-import type { Spending } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { AxiosError } from "axios";
+import type { SpendingDayGroup, SpendingItem } from "@components/spendings/types";
+import type { SpendingMutationPayload } from "@src/schemas/spendings";
+
+interface DeletableSpending {
+  ID: string;
+}
 
 const useSpendings = () => {
-  const [spendingsByWeek, setSpendingsByWeek] = useState<SpendingCompoundType[]>();
-  const [spendingsByMonth, setSpendingsByMonth] = useState<SpendingCompoundType>();
+  const [spendingsByWeek, setSpendingsByWeek] = useState<SpendingDayGroup[]>();
+  const [spendingsByMonth, setSpendingsByMonth] = useState<SpendingItem[]>();
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
   const { from, to, range } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
 
-  // transform an array of object into an array of array<Object> aggregated
-  // by same date
-  // const aggregateSpendingByDate = (spendings, range, exchangeRates, baseCurrency) => {
-  const aggregateSpendingByDate = (spendings: SpendingCompoundType, range: Date[]): SpendingCompoundType[] => {
-    const tempArr: any = [];
-    tempArr.total = 0;
-    const spendingsPlaceholder = new Array(range.length).fill(tempArr);
-    const spendingsFinal: any[] = [...spendingsPlaceholder];
+  const aggregateSpendingByDate = (spendings: SpendingItem[], dateRange: Date[]): SpendingDayGroup[] => {
+    const grouped = dateRange.map((currentDate) => ({
+      dayOfMonth: getDate(currentDate),
+      total: 0,
+      items: [] as SpendingItem[],
+    }));
 
-    for (let j = 0, r = range.length; j < r; j += 1) {
-      const arr: any = [];
-      arr.total = 0;
-      arr.date = getDate(range[j]);
-      spendingsFinal[j] = arr;
-    }
-
-    for (let i = 0, l = spendings.length; i < l; i += 1 ) {
-      for (let k = 0, ll = spendingsFinal.length; k < ll; k += 1) {
-        if (getDate(parseISO(spendings[i].date)) === spendingsFinal[k].date) {
-          spendingsFinal[k].push(spendings[i]);
-          spendingsFinal[k].total += parseFloat(spendings[i].amount);
-        }
+    for (const spending of spendings) {
+      const day = getDate(parseISO(spending.date));
+      const matchingGroup = grouped.find((entry) => entry.dayOfMonth === day);
+      if (matchingGroup) {
+        matchingGroup.items.push(spending);
+        matchingGroup.total += spending.amount;
       }
     }
 
-    return spendingsFinal;
+    return grouped;
   };
 
   const getSpendings = async () => {
-    try {
-      return privateRequest(
-        `/spendings?userID=${userID}&from=${startOfMonth(from!)}&to=${endOfMonth(to!)}`
-      );
-    } catch (e) {
-      console.log("get spendings error", e);
-    }
+    const response = await privateRequest(
+      `/spendings?userID=${userID}&from=${startOfMonth(from!)}&to=${endOfMonth(to!)}`
+    );
+    return SpendingListSchema.parse(response.data);
   };
 
-  const { data, isLoading } = useQuery([QUERY_KEYS.SPENDINGS_BY_MONTH, startOfMonth(from!), endOfMonth(to!)], getSpendings, {
-    retry: false,
-    // date store is available when coming from login because DatePicker
-    // mounts before Spendings
-    // but I don't know why when already logged in, and coming directly to spendings
-    // Spendings mounts before DatePickerWrapper, causing from to be undefined and
-    // hence this query to fail
-    // so enable below
-    enabled: !!from && !!userID,
-    ...QUERY_OPTIONS,
-  });
+  const { data, isLoading, error } = useQuery(
+    [QUERY_KEYS.SPENDINGS_BY_MONTH, startOfMonth(from!), endOfMonth(to!)],
+    getSpendings,
+    {
+      retry: false,
+      // date store is available when coming from login because DatePicker
+      // mounts before Spendings
+      // but I don't know why when already logged in, and coming directly to spendings
+      // Spendings mounts before DatePickerWrapper, causing from to be undefined and
+      // hence this query to fail
+      // so enable below
+      enabled: !!from && !!userID,
+      ...QUERY_OPTIONS,
+    }
+  );
 
   useEffect(() => {
-    if (data?.data) {
-      range && setSpendingsByWeek(aggregateSpendingByDate(data.data, range));
-      setSpendingsByMonth(data.data);
+    if (data) {
+      if (range) {
+        setSpendingsByWeek(aggregateSpendingByDate(data, range));
+      }
+      setSpendingsByMonth(data);
     }
   }, [data, range]);
 
@@ -91,23 +94,25 @@ const useSpendings = () => {
     await queryClient.invalidateQueries([QUERY_KEYS.CHARTS, monthBeginning]);
   }
 
-  const deleteSpendingService = async (spending: Spending) => {
+  const deleteSpendingService = async (spending: DeletableSpending) => {
     return privateRequest(`/spendings/${spending.ID}`, { method: "DELETE" });
   }
 
-  const deleteSpending = useMutation(({ spending }: { spending: Spending }) => {
+  const deleteSpending = useMutation(({ spending }: { spending: DeletableSpending }) => {
     return deleteSpendingService(spending);
   }, {
     onSuccess: () => { spendingsActionOnSuccess("effacée") }
   });
 
-  const createSpendingService = async (spending: any) => {
+  const createSpendingService = async (spending: SpendingMutationPayload) => {
+    const payload = SpendingMutationPayloadSchema.parse(spending);
     return privateRequest("/spendings", {
       method: 'POST',
-      data: spending,
+      data: payload,
     });
   }
-  const createSpending = useMutation<unknown, unknown, any>((spending) => {
+
+  const createSpending = useMutation<unknown, AxiosError, SpendingMutationPayload>((spending) => {
     return createSpendingService(spending);
   }, {
     onSuccess: () => { spendingsActionOnSuccess("créée") },
@@ -116,14 +121,15 @@ const useSpendings = () => {
     }
   });
 
-  const updateSpendingService = async (spending: any) => {
-    return privateRequest(`/spendings/${spending.id}`, {
+  const updateSpendingService = async (spending: SpendingMutationPayload) => {
+    const payload = SpendingMutationPayloadSchema.parse(spending);
+    return privateRequest(`/spendings/${payload.id}`, {
       method: "PUT",
-      data: spending,
+      data: payload,
     });
   };
 
-  const updateSpending = useMutation<unknown, unknown, any>((spending) => {
+  const updateSpending = useMutation<unknown, AxiosError, SpendingMutationPayload>((spending) => {
     return updateSpendingService(spending);
   }, {
     onSuccess: () => { spendingsActionOnSuccess("mise à jour") },
@@ -136,6 +142,7 @@ const useSpendings = () => {
     spendingsByWeek,
     spendingsByMonth,
     isLoading,
+    error,
     deleteSpending,
     createSpending,
     updateSpending,

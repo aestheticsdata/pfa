@@ -20,10 +20,10 @@ import texts from "@components/spendings/config/text";
 import { DASHBOARD_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
 
 import type { CategoryProps } from "@src/interfaces/category";
-import type { SpendingType } from "@components/spendings/types";
+import type { SpendingItem } from "@components/spendings/types";
 
 interface SpendingsListModalProps {
-  handleClickOutside: any;
+  handleClickOutside: () => void;
   periodType: string;
   categoryInfos: CategoryProps;
   total: number;
@@ -53,8 +53,8 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
     }
   }, []);
 
-  const groupByDate = (spendings: SpendingType[]): Record<string, SpendingType[]> => {
-    return spendings?.reduce((acc: Record<string, SpendingType[]>, curr) => {
+  const groupByDate = (spendings: SpendingItem[]): Record<string, SpendingItem[]> => {
+    return spendings?.reduce((acc: Record<string, SpendingItem[]>, curr) => {
       if (!acc[curr.date]) {
         acc[curr.date] = []
       }
@@ -64,7 +64,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
   }
 
   const displaySpendingsList = () => {
-    const getAllPreviousEntries = (currentIndex: number): SpendingType[] => {
+    const getAllPreviousEntries = (currentIndex: number): SpendingItem[] => {
       const normalizedSearchTerm = searchTerm.toLowerCase();
 
       if (periodType === MONTHLY && spendingsByMonth) {
@@ -76,11 +76,11 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
         const entries = Object.entries(grouped);
         return entries
           .slice(0, currentIndex + 1)
-          .reduce((acc: SpendingType[], [_, daySpendings]) => [...acc, ...daySpendings as SpendingType[]], []);
+          .reduce((acc: SpendingItem[], [_, daySpendings]) => [...acc, ...daySpendings as SpendingItem[]], []);
       } else if (spendingsByWeek) {
         const flattenedSpendings = spendingsByWeek
-          .filter(spending => spending.length > 0)
-          .flat()
+          .filter((spendingGroup) => spendingGroup.items.length > 0)
+          .flatMap((spendingGroup) => spendingGroup.items)
           .filter(spending =>
             spending.category === categoryInfos.category &&
             spending.label.toLowerCase().includes(normalizedSearchTerm)
@@ -89,16 +89,16 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
         const entries = Object.entries(grouped);
         return entries
           .slice(0, currentIndex + 1)
-          .reduce((acc: SpendingType[], [_, daySpendings]) => [...acc, ...daySpendings as SpendingType[]], []);
+          .reduce((acc: SpendingItem[], [_, daySpendings]) => [...acc, ...daySpendings as SpendingItem[]], []);
       }
       return [];
     };
 
-    const calculateDayTotal = (daySpendings: SpendingType[]): number => {
+    const calculateDayTotal = (daySpendings: SpendingItem[]): number => {
       return daySpendings.reduce((acc, spending) => acc + Number(spending.amount), 0);
     };
 
-    const spendingsList = (spendings: [string, SpendingType[]], i: number) => {
+    const spendingsList = (spendings: [string, SpendingItem[]], i: number) => {
       const dayTotal = calculateDayTotal(spendings[1]);
       const cumulativeTotal = getAllPreviousEntries(i)
         .reduce((acc, spending) => acc + Number(spending.amount), 0);
@@ -159,7 +159,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
           )}
 
           <div className="flex flex-col space-y-2 py-2">
-            {spendings[1].map((spending: SpendingType, j: number) => (
+            {spendings[1].map((spending: SpendingItem, j: number) => (
               <div
                 className="flex items-center space-x-2 text-sm px-2"
                 key={i + j}
@@ -202,8 +202,8 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
         Object.entries(
           groupByDate(
             spendingsByWeek
-              .filter((spending) => spending.length > 0)
-              .flat()
+              .filter((spendingGroup) => spendingGroup.items.length > 0)
+              .flatMap((spendingGroup) => spendingGroup.items)
               ?.filter((spending) => {
                 return (spending.category === categoryInfos.category) &&
                   spending.label.toLowerCase().includes(normalizedSearchTerm);

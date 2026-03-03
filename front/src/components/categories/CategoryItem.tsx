@@ -5,9 +5,13 @@ import CategoryComponent from "@components/common/Category";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import useCategories from "@components/spendings/services/useCategories";
+import type { Category } from "@src/schemas/categories";
 
+interface CategoryItemProps {
+  category: Category;
+}
 
-const CategoryItem = ({ category }) => {
+const CategoryItem = ({ category }: CategoryItemProps) => {
   const { deleteCategory, updateCategory } = useCategories();
   const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -27,7 +31,7 @@ const CategoryItem = ({ category }) => {
   //   }
   // }, [updateError]);
 
-  const deleteCallback = (categoryID) => {
+  const deleteCallback = (categoryID: string) => {
     deleteCategory.mutate({ categoryID });
     setIsDeleteConfirmVisible(false);
   };

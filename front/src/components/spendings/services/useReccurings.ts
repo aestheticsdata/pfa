@@ -6,8 +6,14 @@ import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
+import {
+  RecurringListSchema,
+  RecurringMutationPayloadSchema,
+  SpendingMutationPayloadSchema,
+} from "@src/schemas/spendings";
 
-import type { Spending } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { AxiosError } from "axios";
+import type { RecurringItem, SpendingMutationPayload } from "@src/schemas/spendings";
 
 
 interface FormattedMonth {
@@ -21,7 +27,7 @@ interface Dates extends FormattedMonth {
 }
 
 interface CreateRecurring {
-  spendingEdited: any;
+  spendingEdited: SpendingMutationPayload;
   formattedMonth: FormattedMonth;
 }
 
@@ -31,7 +37,7 @@ const useReccurings = () => {
   const userID = user?.id;
   const { from } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
-  const [recurrings, setRecurrings] = useState<any[]>([]);
+  const [recurrings, setRecurrings] = useState<RecurringItem[]>([]);
 
 
   const recurringsActionOnSuccess = async (message: string) => {
@@ -42,43 +48,43 @@ const useReccurings = () => {
   }
 
   const getRecurrings = async () => {
-    try {
-      return privateRequest(
-        `/recurrings?userID=${userID}&start=${startOfMonth(from!)}`
-      );
-    } catch (e) {
-      console.log("get recurrings error", e);
-    }
+    const response = await privateRequest(
+      `/recurrings?userID=${userID}&start=${startOfMonth(from!)}`
+    );
+    return RecurringListSchema.parse(response.data);
   }
 
-  const { data, isLoading } = useQuery([QUERY_KEYS.RECURRINGS, monthBeginning], getRecurrings, {
+  const { data, isLoading, error } = useQuery([QUERY_KEYS.RECURRINGS, monthBeginning], getRecurrings, {
     retry: false,
     enabled: !!from && !!userID,
     ...QUERY_OPTIONS,
   });
 
   useEffect(() => {
-    setRecurrings(data?.data);
+    if (data) {
+      setRecurrings(data);
+    }
   }, [data]);
 
   const queryClient = useQueryClient();
 
-  const deleteRecurringService = async (recurring: Spending) => {
+  const deleteRecurringService = async (recurring: DeletableRecurring) => {
     return privateRequest(`/recurrings/${recurring.ID}`, {method: "DELETE"});
   };
 
-  const deleteRecurring = useMutation(({ recurring }: { recurring: Spending }) => {
+  const deleteRecurring = useMutation(({ recurring }: { recurring: DeletableRecurring }) => {
     return deleteRecurringService(recurring);
   }, {
     onSuccess: () => recurringsActionOnSuccess("effacé"),
     onError: ((e) => {console.log("error deleting recurring", e)}),
   });
 
-  const createRecurringService = async (recurring: Spending, formattedMonth: any) => {
+  const createRecurringService = async (recurring: SpendingMutationPayload, formattedMonth: FormattedMonth) => {
+    const payload = SpendingMutationPayloadSchema.parse(recurring);
     return privateRequest("/recurrings", {
       method: "POST",
       data: {
-        ...recurring,
+        ...payload,
         ...formattedMonth,
       }
     });
@@ -94,21 +100,22 @@ const useReccurings = () => {
     });
   };
 
-  const createRecurring = useMutation<unknown, unknown, CreateRecurring>(({ spendingEdited, formattedMonth }: CreateRecurring) => {
+  const createRecurring = useMutation<unknown, AxiosError, CreateRecurring>(({ spendingEdited, formattedMonth }: CreateRecurring) => {
     return createRecurringService(spendingEdited, formattedMonth);
   }, {
     onSuccess: () => recurringsActionOnSuccess("créé"),
     onError: ((e) => {console.log("error creating recurring", e)}),
   });
 
-  const updateRecurringService = async (recurring: any) => {
+  const updateRecurringService = async (recurring: SpendingMutationPayload) => {
+    const payload = RecurringMutationPayloadSchema.parse(recurring);
     return privateRequest(`/recurrings/${recurring.id}`, {
       method: "PUT",
-      data: recurring,
+      data: payload,
     });
   };
 
-  const updateRecurring = useMutation<unknown, unknown, any>((recurring) => {
+  const updateRecurring = useMutation<unknown, AxiosError, SpendingMutationPayload>((recurring) => {
     return updateRecurringService(recurring);
   }, {
     onSuccess: () => { recurringsActionOnSuccess("mis à jour") },
@@ -127,6 +134,7 @@ const useReccurings = () => {
   return {
     recurrings,
     isLoading,
+    error,
     deleteRecurring,
     createRecurring,
     updateRecurring,
@@ -135,3 +143,6 @@ const useReccurings = () => {
 }
 
 export default useReccurings;
+interface DeletableRecurring {
+  ID: string;
+}

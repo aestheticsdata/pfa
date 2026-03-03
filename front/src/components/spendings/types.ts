@@ -1,48 +1,26 @@
 import { User } from "@src/interfaces/user";
+import type {
+  RecurringItem,
+  SpendingItem,
+} from "@src/schemas/spendings";
 
 export type Month =
   | { start: Date; end: Date; }
   | null;
 
+export type SpendingListItem = SpendingItem | RecurringItem;
+export type { SpendingItem, RecurringItem };
 
-export type ReccuringType = {
-  amount: number;
-  createdAt: string;
-  createdBy: string;
-  currency: string;
-  dateFrom: string;
-  dateTo: string;
-  itemType: string;
-  label: string;
-  updatedAt: string;
-  id?: number;
-};
+export interface SpendingDayGroup {
+  dayOfMonth: number;
+  total: number;
+  items: SpendingItem[];
+}
 
-export type SpendingType = {
-  amount: string;
-  catID: number;
-  category: string;
-  createdAt: string;
-  createdBy: string;
-  currency: string;
-  date: string;
-  itemType: string;
-  label: string;
-  updatedAt: string;
-  id?: number;
-};
-
-export type SpendingCompoundType = SpendingType[] & {
-  id: string;
-  date: number;
-  total : number
-};
-
-export type SpendingsType = Array<SpendingCompoundType>;
+export type SpendingsType = Array<SpendingDayGroup>;
 
 interface SpendingsPartial {
-  spendingsByDaySorted: SpendingCompoundType;
-  deleteSpending: (itemID: string, itemType: string) => void;
+  spendingsByDaySorted: SpendingListItem[];
   isLoading: boolean;
   recurringType?: boolean;
 }
@@ -50,12 +28,11 @@ interface SpendingsPartial {
 export interface SpendingDayItemType extends SpendingsPartial {
   user: User;
   month?: string | null;
-  date?: number | Date;
+  date?: Date;
   total?: number;
 }
 
 export interface SpendingsListContainerType extends SpendingsPartial {
   toggleAddSpending: () => void;
-  editSpending: (spending: SpendingCompoundType) => void;
+  editSpending: (spending: SpendingListItem) => void;
 }
-

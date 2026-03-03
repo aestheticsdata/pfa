@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
 
-const useStatisticsCategories = (categories) => {
-  const [statisticsCategories, setStatisticsCategories] = useState<any>([]);
+import type { Category } from "@src/schemas/categories";
+
+export interface StatisticsCategoryOption extends Category {
+  label: string;
+  value: string;
+}
+
+const useStatisticsCategories = (categories: Category[] | undefined) => {
+  const [statisticsCategories, setStatisticsCategories] = useState<StatisticsCategoryOption[]>([]);
 
   useEffect(() => {
-    if (categories && categories.data) {
-      const categoriesTmp = [...categories.data];
-
-      categoriesTmp.forEach((category) => {
-        category.label = category.name;
-        category.value = category.ID;
-      });
+    if (categories) {
+      const categoriesTmp = categories.map((category) => ({
+        ...category,
+        label: category.name,
+        value: category.ID,
+      }));
 
       categoriesTmp.sort((a, b) => a.label.localeCompare(b.label));
 

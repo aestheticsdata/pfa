@@ -10,6 +10,7 @@ import format from "date-fns/format";
 import { WEEKDAYS_LONG, WEEKDAYS_SHORT, MONTHS } from "./locale-fr";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
 import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
+import type { Modifiers } from "react-day-picker";
 
 const DatePickerWrapper = () => {
   const {
@@ -30,17 +31,20 @@ const DatePickerWrapper = () => {
 
   const daysAreSelected = selectedDays.length > 0;
 
-  const modifiers: any = {
-    hoverRange,
-    selectedRange: daysAreSelected && {
+  const modifiers: Partial<Modifiers> = {};
+  if (hoverRange) {
+    modifiers.hoverRange = hoverRange;
+    modifiers.hoverRangeStart = hoverRange.from;
+    modifiers.hoverRangeEnd = hoverRange.to;
+  }
+  if (daysAreSelected) {
+    modifiers.selectedRange = {
       from: selectedDays[0],
       to: selectedDays[selectedDays.length - 1],
-    },
-    hoverRangeStart: hoverRange && hoverRange.from,
-    hoverRangeEnd: hoverRange && hoverRange.to,
-    selectedRangeStart: daysAreSelected && selectedDays[0],
-    selectedRangeEnd: daysAreSelected && selectedDays[selectedDays.length - 1],
-  };
+    };
+    modifiers.selectedRangeStart = selectedDays[0];
+    modifiers.selectedRangeEnd = selectedDays[selectedDays.length - 1];
+  }
 
   useOnClickOutside(ref as React.RefObject<HTMLElement>, handleClickOutside);
 

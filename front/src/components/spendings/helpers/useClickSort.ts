@@ -6,45 +6,36 @@ import {
   SORT_BY_AMOUNT,
 } from "@components/spendings/helpers/sortConstants";
 
-import type { SpendingCompoundType } from "@components/spendings/types";
+import type { SpendingListItem } from "@components/spendings/types";
+
+type SortOrder = "asc" | "desc";
+type SortField = typeof SORT_BY_LABEL | typeof SORT_BY_CATEGORY | typeof SORT_BY_AMOUNT;
 
 const useClickSort = () => {
-  const [spendingsByDaySorted, setSpendingsByDaySorted] = useState<any>([] as unknown as SpendingCompoundType);
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [spendingsByDaySorted, setSpendingsByDaySorted] = useState<SpendingListItem[]>([]);
+  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
 
-  const onClickSort = (name: string) => {
-    let tempArr: any[] = [];
-
-    // array of spending use [].total and [].date, lodash orderBy remove these two keys
-    let preserveArrayKeys = (() => {
-      const keys = Object.keys(spendingsByDaySorted).filter((k) => isNaN(parseInt(k, 10)));
-      return keys.map(k => ({ [k]: spendingsByDaySorted[k] }));
-    })();
-    ///////////////////////////////////////////////////////////////////////////////////
-
-    setSortOrder('asc');
+  const onClickSort = (name: SortField) => {
+    let sorted: SpendingListItem[] = [];
 
     if (name === SORT_BY_LABEL) {
-      tempArr = _.orderBy(spendingsByDaySorted, o => o.label, [sortOrder]);
+      sorted = _.orderBy(spendingsByDaySorted, (entry) => entry.label, [sortOrder]);
     }
 
     if (name === SORT_BY_CATEGORY) {
-      tempArr = _.orderBy(spendingsByDaySorted, o => o.category, [sortOrder]);
+      sorted = _.orderBy(
+        spendingsByDaySorted,
+        (entry) => ("category" in entry ? entry.category : "") ?? "",
+        [sortOrder]
+      );
     }
 
     if (name === SORT_BY_AMOUNT) {
-      tempArr = _.orderBy(spendingsByDaySorted, o => parseFloat(o.amount), [sortOrder]);
+      sorted = _.orderBy(spendingsByDaySorted, (entry) => entry.amount, [sortOrder]);
     }
 
-    // array of spending use [].total and [].date, lodash orderBy remove these two keys
-    for (const i of preserveArrayKeys) {
-      const tempObjKey = Object.keys(i)[0];
-      tempArr[tempObjKey as unknown as number] = (i as Record<string, unknown>)[tempObjKey];
-    }
-    ///////////////////////////////////////////////////////////////////////////////////
-
-    setSpendingsByDaySorted(tempArr);
-    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    setSpendingsByDaySorted(sorted);
+    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
   };
 
   return {

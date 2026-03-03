@@ -4,6 +4,7 @@ import { faAngleUp, faAngleDown} from '@fortawesome/free-solid-svg-icons';
 import useOnClickOutside from "use-onclickoutside";
 
 import type { Dropdown } from "./types";
+import type { RefObject } from "react";
 
 
 const DropDown = ({ children, displayCaret = true }: Dropdown) => {
@@ -13,7 +14,7 @@ const DropDown = ({ children, displayCaret = true }: Dropdown) => {
   const toggleDropdown = () => { setIsOpen(!isOpen) };
 
   const handleClickOutside = () => { setIsOpen(false) };
-  useOnClickOutside(ref as any, handleClickOutside);
+  useOnClickOutside(ref as RefObject<HTMLElement>, handleClickOutside);
 
   const close = () => { setIsOpen(false) };
 

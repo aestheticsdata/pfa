@@ -5,15 +5,22 @@ import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import CategoryComponent from '@components/common/Category';
 // import cssSizes from "@src/css-sizes";
 import ConfirmDeletePopin from "@components/spendings/common/deleteSpendingPopin";
+import type { SpendingListItem } from "@components/spendings/types";
+
+interface SpendingItemProps {
+  spending: SpendingListItem;
+  editCallback: (spending: SpendingListItem) => void;
+  toggleAddSpending: () => void;
+  isRecurring?: boolean;
+}
 
 
 const SpendingItem = ({
   spending,
   editCallback,
-  deleteCallback,
   toggleAddSpending,
   isRecurring,
-}) => {
+}: SpendingItemProps) => {
   const [isHover, setIsHover] = useState(false);
   const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
@@ -59,11 +66,11 @@ const SpendingItem = ({
             </div>
 
             {!isRecurring && (
-              spending?.category ?
+              ("category" in spending && spending?.category) ?
                 <div className="flex justify-center items-center w-1/3">
                   <div className="w-3/4">
                     {spending?.category &&
-                      <CategoryComponent item={spending} />
+                      <CategoryComponent item={{ category: spending.category ?? null, categoryColor: spending.categoryColor ?? null }} />
                     }
                   </div>
                 </div>
@@ -73,7 +80,7 @@ const SpendingItem = ({
 
             <div className={`flex justify-around items-center ${!isRecurring ? "w-1/6" : "w-1/4"} text-grey1`}>
               <div
-                className={`cursor-pointer ${spending.invoicefile ? "text-invoiceImageIsPresent hover:text-invoiceImageIsPresentHover" : "hover:text-spendingActionHover"}`}
+                className={`cursor-pointer ${("invoicefile" in spending && spending.invoicefile) ? "text-invoiceImageIsPresent hover:text-invoiceImageIsPresentHover" : "hover:text-spendingActionHover"}`}
                 title="display invoice"
                 onClick={() => {setIsInvoiceModalVisible(!isInvoiceModalVisible)}}
               >
@@ -104,17 +111,13 @@ const SpendingItem = ({
 
           </div>
           :
-          <ConfirmDeletePopin spending={spending} recurringType={isRecurring} hideConfirm={hideConfirm} />
+          <ConfirmDeletePopin spending={spending} recurringType={Boolean(isRecurring)} hideConfirm={hideConfirm} />
       }
     </div>
   )
 }
 
 export default SpendingItem;
-
-
-
-
 
 
 

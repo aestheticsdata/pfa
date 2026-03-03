@@ -4,6 +4,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { useQuery } from "react-query";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import startOfMonth from "date-fns/startOfMonth";
+import { MonthlyStatsSchema } from "@src/schemas/dashboard";
 
 
 const useInitialAmount = () => {
@@ -20,7 +21,7 @@ const useInitialAmount = () => {
 
     try {
       const monthlyStats = await privateRequest(`/monthlystats?userID=${userID}&from=${startOfMonth(from)}`);
-      return monthlyStats.data;
+      return MonthlyStatsSchema.parse(monthlyStats.data);
     } catch (e) {
       console.log("get initial amount error : ", e);
       throw e;

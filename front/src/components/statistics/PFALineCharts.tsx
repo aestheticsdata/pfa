@@ -9,12 +9,19 @@ import {
   YAxis
 } from "recharts";
 
-const PFALineCharts = ({ data, year }) => {
-  const lineData = data?.data?.[year] ?? 0;
+import type { StatisticsResponse } from "@src/schemas/stats";
+
+interface PFALineChartsProps {
+  data: StatisticsResponse | null;
+  year: number;
+}
+
+const PFALineCharts = ({ data, year }: PFALineChartsProps) => {
+  const lineData = data?.data?.[String(year)] ?? [];
   const colors = data?.colors ?? {};
   const categories = Object.keys(colors).sort();
 
-  if (!lineData) {
+  if (lineData.length === 0) {
     return <div className="text-center text-sm text-gray-500">pas de données.</div>;
   }
   
@@ -25,9 +32,9 @@ const PFALineCharts = ({ data, year }) => {
         <XAxis dataKey="month" />
         <YAxis />
         <Tooltip
-          labelFormatter={label => `${label} ${year}`}
+          labelFormatter={(label: string | number) => `${label} ${year}`}
           labelClassName="bg-gray-200 p-1 rounded-sm font-semibold"
-          formatter={(value: number) => `${value} €`}
+          formatter={(value: number | string) => `${value} €`}
           offset={7}
           contentStyle={{
             fontSize: "0.8rem",

@@ -7,6 +7,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { ChartsCategoryListSchema } from "@src/schemas/stats";
 
 
 const useCharts = (periodType: string) => {
@@ -28,7 +29,8 @@ const useCharts = (periodType: string) => {
   }, [from, to]);
 
   const getCharts = async () => {
-    return privateRequest(`/spendings/charts?userID=${userID}&from=${startDate}&to=${endDate}`);
+    const response = await privateRequest(`/spendings/charts?userID=${userID}&from=${startDate}&to=${endDate}`);
+    return ChartsCategoryListSchema.parse(response.data);
   }
 
   return useQuery([QUERY_KEYS.CHARTS, startDate, endDate], getCharts, {

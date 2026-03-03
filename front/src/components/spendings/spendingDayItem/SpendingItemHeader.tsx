@@ -5,7 +5,7 @@ import { faPlusSquare } from "@fortawesome/free-solid-svg-icons";
 import spendingsText from "@components/spendings/config/text";
 
 interface SpendingItemHeaderProps {
-  date: Date;
+  date?: Date;
   recurringType: boolean;
   isToday: boolean;
   addSpending: () => void;
@@ -19,7 +19,7 @@ const SpendingItemHeader = ({ date, recurringType, isToday, addSpending, addSpen
         !recurringType
           ?
           <div className={`flex font-poppins uppercase ${isToday ? "bg-datePickerWrapper" : "bg-grey01"} text-blueNavy justify-center font-bold text-sm items-center rounded-sm w-5/6 h-6`}>
-            <div>{format(date, "dd MMM yyyy", { locale: fr })}</div>
+            <div>{date ? format(date, "dd MMM yyyy", { locale: fr }) : ""}</div>
           </div>
           :
           <div className="flex text-grey2 uppercase justify-center items-center font-bold text-sm bg-grey0 rounded-sm w-5/6">

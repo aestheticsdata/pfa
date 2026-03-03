@@ -1,10 +1,10 @@
-import { SpendingCompoundType } from "@components/spendings/types";
 import { useState } from "react";
+import type { SpendingListItem } from "@components/spendings/types";
 
 const useSpendingDayItem = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [addSpendingEnabled, setAddSpendingEnabled] = useState(true);
-  const [spending, setSpending] = useState({});
+  const [spending, setSpending] = useState<SpendingListItem | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
   const addSpending = () => {
@@ -15,7 +15,7 @@ const useSpendingDayItem = () => {
   const closeModal = () => {
     setIsModalVisible(false);
     setAddSpendingEnabled(true);
-    setSpending({});
+    setSpending(null);
     setIsEditing(false);
   };
 
@@ -23,7 +23,7 @@ const useSpendingDayItem = () => {
     setAddSpendingEnabled(!addSpendingEnabled);
   };
 
-  const editSpending = (spending: SpendingCompoundType) => {
+  const editSpending = (spending: SpendingListItem) => {
     setIsEditing(true);
     setIsModalVisible(true);
     setAddSpendingEnabled(false);
@@ -43,4 +43,3 @@ const useSpendingDayItem = () => {
 }
 
 export default useSpendingDayItem;
-

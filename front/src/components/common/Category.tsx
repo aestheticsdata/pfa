@@ -10,18 +10,20 @@ interface CategoryComponentProps {
 }
 
 const CategoryComponent = ({ item, customCss = "", isDynamic = false, isClicked = false }: CategoryComponentProps) => {
+  const resolvedColor = item.categoryColor ?? "#ffffff";
+
   const getBackgroundColor = () => {
     if (isDynamic && isClicked) {
-      return item.categoryColor;
+      return resolvedColor;
     } else if (isDynamic) {
-      return item.categoryColor;
+      return resolvedColor;
     } else {
       return "#efefef";
     }
   };
 
   const getTextColor = () => {
-    return isDynamic ? adjustFontColor(item.categoryColor) : "#000";
+    return isDynamic ? adjustFontColor(resolvedColor) : "#000";
   };
 
   return (
@@ -38,8 +40,8 @@ const CategoryComponent = ({ item, customCss = "", isDynamic = false, isClicked 
         <span
           className="absolute left-0 top-0 bottom-0"
           style={{
-            border: item.categoryColor,
-            backgroundColor: item.categoryColor,
+            border: resolvedColor,
+            backgroundColor: resolvedColor,
             width: "5px",
             borderTopLeftRadius: "inherit",
             borderBottomLeftRadius: "inherit",
