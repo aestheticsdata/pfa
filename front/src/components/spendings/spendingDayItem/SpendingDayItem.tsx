@@ -11,6 +11,7 @@ import spendingsText from "@components/spendings/config/text";
 import SpendingsListContainer from "@components/spendings/spendingsListContainer/SpendingListContainer";
 import SpendingSort from "@components/spendings/spendingSort/SpendingSort";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal"
+import type { AuthUser } from "@auth/types";
 
 import type { SpendingCompoundType, SpendingType } from "@components/spendings/types";
 import { dividerClasses } from "@mui/material";
@@ -22,7 +23,7 @@ interface SpendingDayItemProps {
   deleteSpending?: any;
   isLoading: boolean;
   date?: Date;
-  user?: any; // TODO
+  user?: AuthUser | null;
   recurringType?: boolean;
   month?: any;
   total?: number;
@@ -32,16 +33,20 @@ interface SpendingDayItemProps {
 const SpendingDayItem = ({ spendingsByDay, deleteSpending, isLoading, date, recurringType = false, month = null }: SpendingDayItemProps) => {
   const { remaining: remainingAmount } = useDashboard();
   const [todayCredits, setTodayCredits] = useState<number>(0);
-  const isToday = getDayOfYear(date!) === getDayOfYear(Date.now());
+  const [isToday, setIsToday] = useState(false);
 
   useEffect(() => {
-    if (remainingAmount) {
-      if (isToday) {
-        const remainingDays = (getDayOfYear(endOfMonth(Date.now())) -  getDayOfYear(Date.now())) + 1;
-        setTodayCredits(remainingAmount / remainingDays);
-      }
+    if (date) {
+      setIsToday(getDayOfYear(date) === getDayOfYear(Date.now()));
     }
-  }, [remainingAmount]);
+  }, [date]);
+
+  useEffect(() => {
+    if (remainingAmount && isToday) {
+      const remainingDays = (getDayOfYear(endOfMonth(Date.now())) - getDayOfYear(Date.now())) + 1;
+      setTodayCredits(remainingAmount / remainingDays);
+    }
+  }, [remainingAmount, isToday]);
 
   const {
     onClickSort,
