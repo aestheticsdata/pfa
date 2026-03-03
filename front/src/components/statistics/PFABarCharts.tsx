@@ -10,9 +10,16 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 
-const PFABarCharts = ({ data, year }) => {
-  const currentYearData = data?.data?.[year] ?? 0;
-  if (!currentYearData) {
+import type { StatisticsResponse } from "@src/schemas/stats";
+
+interface PFABarChartsProps {
+  data: StatisticsResponse | null;
+  year: number;
+}
+
+const PFABarCharts = ({ data, year }: PFABarChartsProps) => {
+  const currentYearData = data?.data?.[String(year)] ?? [];
+  if (currentYearData.length === 0) {
     return <div className="text-center text-sm text-gray-500">pas de données.</div>;
   }
 
@@ -25,9 +32,9 @@ const PFABarCharts = ({ data, year }) => {
         <XAxis dataKey="month" />
         <YAxis />
         <Tooltip
-          labelFormatter={(label: any) => `${label} ${year}`}
+          labelFormatter={(label: string | number) => `${label} ${year}`}
           labelClassName="bg-gray-200 p-1 rounded-sm font-semibold"
-          formatter={(value: any) => `${value} €`}
+          formatter={(value: number | string) => `${value} €`}
           offset={7}
           contentStyle={{
             fontSize: "0.8rem",
@@ -47,7 +54,7 @@ const PFABarCharts = ({ data, year }) => {
                 dataKey={key}
                 fill="#111"
                 position="top"
-                formatter={(label: any) => Number(label) > 0 ? `${label}€` : ""}
+                formatter={(label: number | string | boolean | null | undefined) => Number(label ?? 0) > 0 ? `${label}€` : ""}
                 fontSize="10px"
               />
             </Bar>

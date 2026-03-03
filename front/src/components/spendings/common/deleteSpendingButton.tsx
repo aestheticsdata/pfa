@@ -2,7 +2,18 @@ import commonTexts from "@components/common/config/text";
 import useSpendings from "@components/spendings/services/useSpendings";
 import useReccurings from "@components/spendings/services/useReccurings";
 
-const DeleteSpendingButton = ({ spending, recurringType, hideConfirm }) => {
+interface DeletableSpending {
+  ID: string;
+  itemType: string;
+}
+
+interface DeleteSpendingButtonProps {
+  spending: DeletableSpending;
+  recurringType: boolean;
+  hideConfirm: () => void;
+}
+
+const DeleteSpendingButton = ({ spending, recurringType, hideConfirm }: DeleteSpendingButtonProps) => {
   const { deleteSpending } = useSpendings();
   const { deleteRecurring } = useReccurings();
 

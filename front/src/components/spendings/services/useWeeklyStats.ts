@@ -6,6 +6,7 @@ import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constant
 import startOfMonth from "date-fns/startOfMonth";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { endOfMonth } from "date-fns";
+import { WeeklyStatsSchema } from "@src/schemas/dashboard";
 
 
 const useWeeklyStats = () => {
@@ -18,20 +19,21 @@ const useWeeklyStats = () => {
   const queryClient = useQueryClient();
 
   const getWeeklyStats = async () => {
-    try {
-      return privateRequest(`/weeklystats?userID=${userID}&start=${startOfMonth(from!)}`);
-    } catch (e) {
-      console.log("get weekly stats error : ", e);
-    }
+    const response = await privateRequest(`/weeklystats?userID=${userID}&start=${startOfMonth(from!)}`);
+    return WeeklyStatsSchema.parse(response.data);
   };
 
   const setInitialCeiling = async (ceiling: string) => {
+    if (!dashboard?.ID) {
+      return null;
+    }
+
     try {
-      return privateRequest(`/dashboard/${dashboard!.data.ID}`, {
+      return privateRequest(`/dashboard/${dashboard.ID}`, {
         method: "PUT",
         data: {
           userID,
-          ceiling,
+          ceiling: Number(ceiling),
           start: startOfMonth(from!),
           end: endOfMonth(from!),
         }
@@ -49,7 +51,7 @@ const useWeeklyStats = () => {
 
   const mutation = useMutation((ceiling: string) => setInitialCeiling(ceiling), {
     onSuccess: async () => {
-      await queryClient.invalidateQueries(["dashboard", startOfMonth(from!)]);
+      await queryClient.invalidateQueries([QUERY_KEYS.DASHBOARD, startOfMonth(from!)]);
     }
   });
 

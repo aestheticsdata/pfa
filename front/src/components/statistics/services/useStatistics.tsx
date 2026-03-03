@@ -1,7 +1,15 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { QUERY_OPTIONS } from "@components/spendings/config/constants";
+import { StatisticsResponseSchema } from "@src/schemas/stats";
+
+import type { StatisticsResponse } from "@src/schemas/stats";
+import type { Category } from "@src/schemas/categories";
+
+interface SelectOption {
+  value: number;
+  label: number;
+}
 
 const generateYearRange = (startYear: number) => {
   const currentYear = new Date().getFullYear();
@@ -12,34 +20,32 @@ const generateYearRange = (startYear: number) => {
   return years.join(',');
 }
 
-const useStatistics = (categories, yearSelectorWatcher) => {
+const useStatistics = (
+  categories: Category[] = [],
+  yearSelectorWatcher?: SelectOption,
+) => {
   const { privateRequest } = useRequestHelper();
-  const [ statistics, setStatistics ] = useState<any>([]);
-  const queryKey = ['statistics', yearSelectorWatcher?.value ?? "", ...categories?.map(category => category.ID) || ""];
+  const queryKey = ['statistics', yearSelectorWatcher?.value ?? "", ...(categories?.map((category) => category.ID) ?? [])];
 
-  const getStatistics = () => {
-    const categoryIds = categories.map(category => category.ID).join(',');
-    return privateRequest(`/statistics?years=${generateYearRange(yearSelectorWatcher.value)}&categories=${categoryIds}`);
+  const getStatistics = async (): Promise<StatisticsResponse> => {
+    const categoryIds = categories.map((category) => category.ID).join(',');
+    const response = await privateRequest(`/statistics?years=${generateYearRange(yearSelectorWatcher?.value ?? new Date().getFullYear())}&categories=${categoryIds}`);
+    return StatisticsResponseSchema.parse(response.data);
   };
 
-  const { data, isLoading } = useQuery(
+  const { data: statistics, isLoading, error } = useQuery(
     queryKey,
     getStatistics,
     {
       retry: true,
       ...QUERY_OPTIONS,
-      enabled: !!categories && !!yearSelectorWatcher,
+      enabled: categories.length > 0 && !!yearSelectorWatcher,
     });
-
-  useEffect(() => {
-    if (data?.data) {
-      setStatistics(data.data);
-    }
-  }, [data]);
 
   return {
     isLoading,
     statistics,
+    error,
   }
 }
 

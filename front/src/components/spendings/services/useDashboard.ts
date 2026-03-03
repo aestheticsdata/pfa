@@ -8,26 +8,16 @@ import useRequestHelper from "@src/helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
+import { DashboardResponseSchema } from "@src/schemas/dashboard";
 
-import type { UseQueryResult } from "react-query";
+import type { UseMutationResult, UseQueryResult } from "react-query";
+import type { AxiosError } from "axios";
+import type { DashboardResponse } from "@src/schemas/dashboard";
 
-
-export interface DashBoard {
-  ID: string;
-  dateFrom: string;
-  dateTo: string;
-  initialAmount: string;
-  initialCeiling: string;
-  userID: string;
-}
-
-export interface DashBoardData {
-  data: DashBoard;
-}
 
 interface UseDashboard {
-  get: UseQueryResult<DashBoardData>;
-  mutation: any;
+  get: UseQueryResult<DashboardResponse>;
+  mutation: UseMutationResult<unknown, AxiosError, DashboardMutationVariables>;
   remaining: number,
   monthlyTotal: number,
 }
@@ -50,9 +40,10 @@ const useDashboard = (): UseDashboard => {
   const [monthlyTotal, setMonthlyTotal] = useState<number>(0);
 
   const getDashboard = async () => {
-    return privateRequest(
+    const response = await privateRequest(
       `/dashboard?userID=${userID}&start=${startOfMonth(from!)}`
     );
+    return DashboardResponseSchema.parse(response.data);
   };
 
   const setInitialSalary = async (amount: string) => {
@@ -61,7 +52,7 @@ const useDashboard = (): UseDashboard => {
         method: 'POST',
         data: {
           userID,
-          amount,
+          amount: Number(amount),
           start: formatISO(startOfMonth(from!), { representation: "date" }),
           end: formatISO(endOfMonth(from!), { representation: "date" }),
         }
@@ -75,7 +66,7 @@ const useDashboard = (): UseDashboard => {
         method: 'PUT',
         data: {
           userID,
-          amount,
+          amount: Number(amount),
         },
       }
     )
@@ -88,14 +79,14 @@ const useDashboard = (): UseDashboard => {
   });
 
   useEffect(() => {
-    if (get.data?.data && initialAmount) {
-      const totalOfMonth: number = (Number(initialAmount.spendingsSum.amount) + Number(initialAmount.recurringsSum.amount));
+    if (get.data && initialAmount) {
+      const totalOfMonth: number = Number(initialAmount.spendingsSum.amount) + Number(initialAmount.recurringsSum.amount);
       setMonthlyTotal(Number(totalOfMonth.toFixed(2)));
-      setRemaining(Number((Number(get.data.data.initialAmount) - totalOfMonth).toFixed(2)));
+      setRemaining(Number((Number(get.data.initialAmount) - totalOfMonth).toFixed(2)));
     }
   }, [get.data, initialAmount]);
 
-  const mutation = useMutation<unknown, unknown, DashboardMutationVariables>(({ dashboardID, initialAmount }) => {
+  const mutation = useMutation<unknown, AxiosError, DashboardMutationVariables>(({ dashboardID, initialAmount }) => {
     if (dashboardID) {
       return updateInitialSalary(dashboardID, initialAmount);
     } else {
@@ -103,7 +94,7 @@ const useDashboard = (): UseDashboard => {
     }
   }, {
     onSuccess: async () => {
-      await queryClient.invalidateQueries(["dashboard", monthBeginning]);
+      await queryClient.invalidateQueries([QUERY_KEYS.DASHBOARD, monthBeginning]);
     }
   });
 

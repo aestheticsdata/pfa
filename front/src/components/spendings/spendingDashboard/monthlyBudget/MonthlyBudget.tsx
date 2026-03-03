@@ -15,16 +15,24 @@ interface InitialSalary {
 const MonthlyBudget = () => {
   const { to } = useDatePickerWrapperStore();
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
-  const { get : { data: dashboard }, mutation, remaining, monthlyTotal } = useDashboard();
-  const { data: initialAmount } = useInitialAmount();
+  const { get : { data: dashboard, error: dashboardError }, mutation, remaining, monthlyTotal } = useDashboard();
+  const { data: initialAmount, error: initialAmountError } = useInitialAmount();
   const { register, handleSubmit, setFocus, reset } = useForm<InitialSalary>();
   const [monthlyTotalPercentage, setMonthlyTotalPercentage] = useState<number>(0);
+
+  if (dashboardError) {
+    throw dashboardError;
+  }
+
+  if (initialAmountError) {
+    throw initialAmountError;
+  }
 
   useEffect(() => {
     if (dashboard && initialAmount) {
       reset();
-      if (dashboard.data?.initialAmount && monthlyTotal) {
-        const percentage = +(((monthlyTotal / +dashboard.data.initialAmount) * 100).toFixed(2));
+      if (dashboard.initialAmount && monthlyTotal) {
+        const percentage = +(((monthlyTotal / +dashboard.initialAmount) * 100).toFixed(2));
         setMonthlyTotalPercentage(Math.min(100, percentage));
       }
     }
@@ -32,7 +40,7 @@ const MonthlyBudget = () => {
 
   const onSubmit = (value: InitialSalary) => {
     setIsInputVisible(false);
-    mutation.mutate({dashboardID: dashboard?.data?.ID, initialAmount: value.initialAmount});
+    mutation.mutate({ dashboardID: dashboard?.ID, initialAmount: value.initialAmount });
   }
 
   useEffect(() => {
@@ -55,7 +63,7 @@ const MonthlyBudget = () => {
             onClick={() => {setIsInputVisible(true)}}
           >
             <div className="text-initialAmount font-bold hover:bg-initialAmountHover hover:cursor-pointer hover:rounded-sm hover:px-1">
-              {dashboard?.data?.initialAmount ?? 0} €
+              {dashboard?.initialAmount ?? 0} €
             </div>
           </div>
 
@@ -69,7 +77,7 @@ const MonthlyBudget = () => {
                   <input
                     className="w-10 outline-0 bg-transparent border-b border-b-black"
                     onKeyDown={(e: KeyboardEvent) => {e.key === "Escape" && setIsInputVisible(false)}}
-                    defaultValue={dashboard?.data?.initialAmount ?? 0}
+                    defaultValue={dashboard?.initialAmount ?? 0}
                     {...register("initialAmount")}
                   />
                 </form>

@@ -16,7 +16,11 @@ interface SpendingDashboardProps {
 const SpendingDashboard = ({ month }: SpendingDashboardProps) => {
   const { isBlurActive } = useBlur();
   const { user } = useAuth();
-  const { recurrings, isLoading: isRecurringsLoading, deleteRecurring } = useReccurings();
+  const { recurrings, isLoading: isRecurringsLoading, error } = useReccurings();
+
+  if (error) {
+    throw error;
+  }
 
   return (
     <div className={`hidden md:flex justify-around mt-14 items-center w-full h-72 bg-grey2 z-30 fixed ${isBlurActive && "blur-xs"}`}>
@@ -28,7 +32,6 @@ const SpendingDashboard = ({ month }: SpendingDashboardProps) => {
         spendingsByDay={recurrings}
         total={0}
         isLoading={isRecurringsLoading}
-        deleteSpending={deleteRecurring}
         user={user}
         recurringType
         month={month}

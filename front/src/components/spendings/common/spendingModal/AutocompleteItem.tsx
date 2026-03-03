@@ -1,25 +1,50 @@
 import adjustFontColor from "@components/shared/helpers/adjustColor";
+import type {
+  HTMLAttributes,
+  Key,
+  MouseEventHandler,
+} from "react";
+
+type AutocompleteRenderOptionProps = HTMLAttributes<HTMLLIElement> & {
+  key?: Key;
+};
 
 interface AutocompleteListProps {
-  props: any;
+  props: AutocompleteRenderOptionProps;
   color: string;
   name: string;
 }
 
 const AutocompleteItem = ({ props, color, name }: AutocompleteListProps) => {
-  const { key, ...restProps } = props;
+  const {
+    key: optionKey,
+    onMouseOver,
+    onMouseOut,
+    ...optionProps
+  } = props;
+
+  const handleMouseOver: MouseEventHandler<HTMLLIElement> = (event) => {
+    onMouseOver?.(event);
+    event.currentTarget.style.backgroundColor = "rgb(220, 220, 220)";
+  };
+
+  const handleMouseOut: MouseEventHandler<HTMLLIElement> = (event) => {
+    onMouseOut?.(event);
+    event.currentTarget.style.backgroundColor = "white";
+  };
+
   return (
-    <span
-      key={key}
-      {...restProps}
+    <li
+      key={optionKey}
+      {...optionProps}
       style={{
         display: "flex",
         justifyContent: "center",
         padding: "7px 0",
         backgroundColor: "white",
       }}
-      onMouseOver={(e) => {(e.currentTarget as HTMLInputElement).style.backgroundColor = "rgb(220, 220, 220)"}}
-      onMouseOut={(e) => {(e.currentTarget as HTMLInputElement).style.backgroundColor = "white"}}
+      onMouseOver={handleMouseOver}
+      onMouseOut={handleMouseOut}
     >
       <span
         style={{
@@ -37,7 +62,7 @@ const AutocompleteItem = ({ props, color, name }: AutocompleteListProps) => {
       >
         {name}
       </span>
-    </span>
+    </li>
   );
 };
 

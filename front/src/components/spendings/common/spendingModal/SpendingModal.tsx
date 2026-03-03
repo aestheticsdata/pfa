@@ -15,31 +15,37 @@ import useSpendings from "@components/spendings/services/useSpendings";
 import useReccurings from "@components/spendings/services/useReccurings";
 import AutocompleteItem from "@components/spendings/common/spendingModal/AutocompleteItem";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
+import { SpendingCategoryInputSchema } from "@src/schemas/spendings";
+import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
 
 const spendingSchema = z.object({
-  spendingLabel: z.string().nonempty(),
-  spendingAmount: z.string().nonempty(),
-  category: z.any(),
+  spendingLabel: z.string().min(1),
+  spendingAmount: z.string().min(1),
+  category: z.union([z.string(), SpendingCategoryInputSchema, z.null()]).optional(),
 });
 
 type SpendingForm = z.infer<typeof spendingSchema>;
+type CategoryOption = z.infer<typeof SpendingCategoryInputSchema>;
 
-type CategoryOption = {
-  ID: string | null;
-  userID: string | null;
-  name: string;
-  color: string | null;
-};
+interface SpendingModalProps {
+  date?: Date;
+  closeModal: () => void;
+  spending: SpendingListItem | null;
+  recurringType?: boolean;
+  isEditing: boolean;
+  month?: MonthRange | null;
+}
 
 
 const SpendingModal = ({
    date,
    closeModal,
    spending,
-   recurringType,
+   recurringType = false,
    isEditing,
-   month,
- }) => {
+   month = null,
+ }: SpendingModalProps) => {
   const { user } = useAuth();
   const { createSpending, updateSpending } = useSpendings();
   const {
@@ -48,7 +54,16 @@ const SpendingModal = ({
     updateRecurring,
     copyRecurrings,
   } = useReccurings();
-  const { categories } = useCategories();
+  const { categories, error: categoriesError } = useCategories();
+  if (categoriesError) {
+    throw categoriesError;
+  }
+  const categoryOptions: CategoryOption[] = (categories ?? []).map((category) => ({
+    ID: category.ID,
+    userID: category.userID,
+    name: category.name,
+    color: category.color,
+  }));
 
 
   const initialEmptyCategoryState: CategoryOption = {
@@ -57,12 +72,15 @@ const SpendingModal = ({
     name: "",
     color: null
   };
-  const initialCategoryState: CategoryOption = spending?.category ?
+  const isSpendingItem = (value: SpendingListItem | null): value is SpendingItem =>
+    !!value && "date" in value;
+
+  const initialCategoryState: CategoryOption = (isSpendingItem(spending) && spending.category) ?
     {
-      ID: spending.categoryID,
+      ID: spending.categoryID ?? null,
       userID: user?.id ?? null,
-      name: spending.category,
-      color: spending.categoryColor,
+      name: spending.category ?? "",
+      color: spending.categoryColor ?? null,
     }
     :
     initialEmptyCategoryState;
@@ -79,10 +97,10 @@ const SpendingModal = ({
     name: "category",
     control,
     rules: { required: true },
-    defaultValue: null as unknown as CategoryOption | null,
+    defaultValue: null,
   });
 
-  const [selectedCategory, setselectedCategory] = useState<CategoryOption>(initialCategoryState);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryOption>(initialCategoryState);
 
   const getRandomHexColor = () => {
     let r = Math.floor(Math.random()*255).toString(16);
@@ -138,11 +156,11 @@ const SpendingModal = ({
       date: date ? format(date, 'yyyy-MM-dd') : null,
       // ///////////////////////////////////////////////////
       label: values.spendingLabel,
-      amount: amountEvaluatedExpr,
+      amount: Number(amountEvaluatedExpr),
       category: processCategory(values),
       currency: user.baseCurrency,
       userID: user.id,
-      id: spending.ID,
+      id: spending?.ID,
     };
 
     if (isEditing) {
@@ -154,6 +172,9 @@ const SpendingModal = ({
       }
     } else {
       if (recurringType) {
+        if (!month) {
+          throw new Error("Missing month range for recurring spending modal");
+        }
         const formattedMonth = {
           start: format(month.start, 'yyyy-MM-dd'),
           end: format(month.end, 'yyyy-MM-dd'),
@@ -168,7 +189,7 @@ const SpendingModal = ({
   };
 
   const handleAutocompleteChange = (value: CategoryOption | null) => {
-    setselectedCategory(value ?? initialEmptyCategoryState);
+    setSelectedCategory(value ?? initialEmptyCategoryState);
   }
 
   return (
@@ -184,22 +205,25 @@ const SpendingModal = ({
         <Input
           placeHolder="label"
           register={register}
-          defaultValue={spending.label}
+          defaultValue={spending?.label}
           registerName="spendingLabel"
         />
         <Input
           placeHolder="montant"
           register={register}
-          defaultValue={spending.amount}
+          defaultValue={spending?.amount}
           registerName="spendingAmount"
         />
 
         {!recurringType &&
-          <Autocomplete
+          <Autocomplete<CategoryOption, false, false, true>
             {...field}
             freeSolo
-            isOptionEqualToValue={(option: any, value: any) => {
-                return option?.ID === value?.ID;
+            isOptionEqualToValue={(option, value) => {
+                if (typeof value === "string") {
+                  return option.name === value;
+                }
+                return option.ID === value?.ID;
               }
             }
             autoComplete={true}
@@ -207,11 +231,14 @@ const SpendingModal = ({
             classes={{
              root: "backgroundColor: yellow"
             }}
-            getOptionLabel={(option: any) => (typeof option === "string" ? option : (option?.name ?? ""))}
-            options={(categories?.data || []) as any[]}
-            renderOption={(props, option: any) => {
+            getOptionLabel={(option) => (typeof option === "string" ? option : (option?.name ?? ""))}
+            options={categoryOptions}
+            renderOption={(props, option) => {
+              if (typeof option === "string") {
+                return null;
+              }
               const { name, color } = option;
-              return <AutocompleteItem key={name} props={props} color={color!} name={name} />;
+              return <AutocompleteItem key={name} props={props} color={color ?? "#ffffff"} name={name} />;
             }}
             renderInput={(params) => (
               <TextField
@@ -224,7 +251,12 @@ const SpendingModal = ({
             )}
             value={selectedCategory}
             onChange={
-              (_e, value: any) => {
+              (_e, value) => {
+                if (typeof value === "string") {
+                  field.onChange(value);
+                  handleAutocompleteChange(initialEmptyCategoryState);
+                  return;
+                }
                 handleAutocompleteChange(value as CategoryOption | null);
                 return field.onChange(value);
               }
@@ -242,6 +274,9 @@ const SpendingModal = ({
                 if (!user) {
                   console.error("User is not available");
                   return;
+                }
+                if (!month) {
+                  throw new Error("Missing month range for recurring copy action");
                 }
                 closeModal();
                 copyRecurrings.mutate({ userID: user.id, dates: {

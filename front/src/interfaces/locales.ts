@@ -2,10 +2,10 @@ import localesDates from "@src/i18n/locales-dates";
 
 export type LangKeys = keyof typeof localesDates;
 
-// any should be replaced by Locale which is a date-fns type, but for a mysterious reason
-// it does not work, maybe a conflict with Locale type defined elsewhere
+// Locale from date-fns caused typing conflicts in this codebase.
+// Keep this object flexible but strongly avoid `any`.
 export interface LocaleObject {
-  [k: string]: any;
+  [k: string]: unknown;
   formatString: string;
 }
 

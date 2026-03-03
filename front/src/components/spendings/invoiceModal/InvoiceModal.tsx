@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { RefObject } from "react";
 import { useQueryClient } from "react-query";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
@@ -38,7 +39,7 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
     !isClickOnThumbnail && handleClickOutside();
   }
 
-  useOnClickOutside(ref as any, handleClickOutsideCheckFullImage);
+  useOnClickOutside(ref as RefObject<HTMLElement>, handleClickOutsideCheckFullImage);
 
   const confirmDeleteImage = () => {
     setShowConfirmDeleteImage(true);

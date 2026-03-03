@@ -1,11 +1,12 @@
 import { useRef } from "react";
+import type { RefObject } from "react";
 import Image from "next/image";
 import useOnClickOutside from 'use-onclickoutside';
 
 
 const InvoiceImageModal = ({ image, closeImage }) => {
   const ref = useRef<HTMLDivElement | null>(null);
-  useOnClickOutside(ref as any, closeImage);
+  useOnClickOutside(ref as RefObject<HTMLElement>, closeImage);
 
   return (
     <div className="fixed top-0 left-0 bottom-0 right-0 bg-grey2 z-10">

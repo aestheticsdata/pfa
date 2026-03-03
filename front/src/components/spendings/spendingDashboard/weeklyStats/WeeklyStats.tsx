@@ -25,16 +25,24 @@ const WeeklyStats = () => {
   const { makeSlices, makeRange, isCurrentWeek} = useWeeklyStatsHelper();
   const { from } = useDatePickerWrapperStore();
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
-  const { get: { data: weeklyStats }, mutation } = useWeeklyStats();
-  const { get: { data: dashboard } } = useDashboard();
+  const { get: { data: weeklyStats, error: weeklyStatsError }, mutation } = useWeeklyStats();
+  const { get: { data: dashboard, error: dashboardError } } = useDashboard();
   const { register, handleSubmit, setFocus, reset } = useForm<InitialCeiling>();
   const [initialCeiling, setInitialCeiling] = useState<number>(0);
-  const [weeklySlices, setWeeklySlices] = useState<any>();
+  const [weeklySlices, setWeeklySlices] = useState<Array<string | number>>([]);
   const [averageWeeklyStatsAmount, setAverageWeeklyStatsAmount] = useState(0);
   const CEILING_WARN_LIMIT = 50;
 
+  if (weeklyStatsError) {
+    throw weeklyStatsError;
+  }
+
+  if (dashboardError) {
+    throw dashboardError;
+  }
+
   useEffect(() => {
-    dashboard?.data ? setInitialCeiling(+dashboard?.data?.initialCeiling) : setInitialCeiling(0);
+    dashboard ? setInitialCeiling(+dashboard.initialCeiling) : setInitialCeiling(0);
   }, [dashboard]);
 
   useEffect(() => {
@@ -46,9 +54,9 @@ const WeeklyStats = () => {
   }, [from]);
 
   useEffect(() => {
-    if (weeklyStats?.data.length > 0) {
+    if (weeklyStats && weeklyStats.length > 0) {
       // filter(Boolean) removes 0 from array
-      const zeroedOutWeeklyStats = weeklyStats!.data.filter(Boolean);
+      const zeroedOutWeeklyStats = weeklyStats.filter(Boolean);
       setAverageWeeklyStatsAmount(
         accurateFixed(
           zeroedOutWeeklyStats
@@ -82,9 +90,9 @@ const WeeklyStats = () => {
 
         <div
           className={`${!isInputVisible ? "visible" : "hidden"}`}
-          onClick={() => {dashboard?.data?.initialAmount && setIsInputVisible(true)}}
+          onClick={() => {dashboard?.initialAmount && setIsInputVisible(true)}}
         >
-          <div className={`text-initialAmountWeekly font-bold px-1 ${dashboard?.data?.initialAmount ? "hover:bg-initialAmountHover hover:text-spendingActionHover hover:cursor-pointer hover:rounded-sm" : "cursor-not-allowed"}`}>
+          <div className={`text-initialAmountWeekly font-bold px-1 ${dashboard?.initialAmount ? "hover:bg-initialAmountHover hover:text-spendingActionHover hover:cursor-pointer hover:rounded-sm" : "cursor-not-allowed"}`}>
             {initialCeiling ?? 0} €
           </div>
         </div>
@@ -107,15 +115,15 @@ const WeeklyStats = () => {
 
       <div className="flex flex-col justify-center w-5/6 text-sm gap-y-1 h-1/2">
         {
-          weeklyStats?.data.length > 0 && weeklySlices?.length > 0 ?
-            weeklyStats!.data.map((weekSliceValue: number, i: number) => {
+          weeklyStats && weeklyStats.length > 0 && weeklySlices.length > 0 ?
+            weeklyStats.map((weekSliceValue: number, i: number) => {
               const ceilingDiff = weekSliceValue - initialCeiling;
               return (
                 <div
                   key={i}
-                  className={`flex justify-between items-center ${isCurrentWeek(weeklySlices[i], from) && "font-bold bg-grey3 rounded-sm"}`}
+                  className={`flex justify-between items-center ${from && isCurrentWeek(weeklySlices[i], from) && "font-bold bg-grey3 rounded-sm"}`}
                 >
-                  {isCurrentWeek(weeklySlices[i], from)}
+                  {from ? isCurrentWeek(weeklySlices[i], from) : false}
                   <div className="flex w-4/12 gap-x-2">
                     <div>{weeklySlices[i]}</div>
                     <div>:</div>
@@ -169,4 +177,3 @@ const WeeklyStats = () => {
 }
 
 export default WeeklyStats;
-

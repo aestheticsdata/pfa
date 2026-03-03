@@ -1,10 +1,10 @@
 export interface Spending {
   ID: string;
   amount: number;
-  category: string;
-  categoryColor: string;
-  categoryID: string;
-  currency: string;
+  category: string | null;
+  categoryColor: string | null;
+  categoryID: string | null;
+  currency: string | null;
   date: string;
   invoicefile: null | string;
   itemType: string;
