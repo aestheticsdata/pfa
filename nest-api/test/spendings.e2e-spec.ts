@@ -14,6 +14,7 @@ interface SpendingItem {
   itemType: string;
   label: string;
   amount: string;
+  invoicefile?: string | null;
   categoryID: string | null;
   category: string | null;
   categoryColor: string | null;
@@ -268,6 +269,97 @@ describe("SpendingsController (e2e)", () => {
       return agent
         .get("/api/spendings/upload/00000000-0000-0000-0000-000000000000")
         .expect(400);
+    });
+  });
+
+  describe("DELETE /api/spendings/upload", () => {
+    let spendingID: string;
+    let invoicefile: string;
+    const deleteInvoiceLabel = `e2e-delete-invoice-test-${Date.now()}`;
+
+    beforeAll(async () => {
+      await agent
+        .post("/api/spendings")
+        .send({
+          date: todayISO(),
+          label: deleteInvoiceLabel,
+          amount: 11,
+          currency: "EUR",
+        })
+        .expect(201);
+
+      const listRes = await agent
+        .get("/api/spendings")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+;
+      const created = (listRes.body as SpendingItem[]).find((s) => s.label === deleteInvoiceLabel);
+      spendingID = created!.ID;
+
+      await agent
+        .post("/api/spendings/upload")
+        .field("spendingID", spendingID)
+        .field("itemType", "spending")
+        .field("date", todayISO())
+        .field("label", deleteInvoiceLabel)
+        .attach("invoiceImageUpload", FIXTURE_IMAGE)
+        .expect(200);
+
+      const updatedListRes = await agent
+        .get("/api/spendings")
+        .query({ from: "2020-01-01", to: "2030-12-31" })
+;
+      const updated = (updatedListRes.body as SpendingItem[]).find((s) => s.ID === spendingID);
+      if (!updated?.invoicefile) {
+        throw new Error("Expected invoicefile to be set after upload");
+      }
+      invoicefile = updated.invoicefile;
+    }, 15000);
+
+    it("should delete invoice image and return success message", () => {
+      return agent
+        .delete("/api/spendings/upload")
+        .send({
+          ID: spendingID,
+          itemType: "spending",
+          invoicefile,
+        })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toEqual({ msg: "INVOICE_IMAGE_DELETED" });
+        });
+    });
+
+    it("should return 200 with null when image is deleted", () => {
+      return agent
+        .get(`/api/spendings/upload/${spendingID}`)
+        .query({ itemType: "spending" })
+        .expect(200)
+        .expect((res) => {
+          expect(res.body).toBeNull();
+        });
+    });
+
+    it("should return 401 without session cookie", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .delete("/api/spendings/upload")
+        .send({
+          ID: spendingID,
+          itemType: "spending",
+          invoicefile,
+        })
+        .expect(401);
+    });
+
+    it("should return 401 with invalid session cookie", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .delete("/api/spendings/upload")
+        .set("Cookie", "pfa.sid=invalid-session-id")
+        .send({
+          ID: spendingID,
+          itemType: "spending",
+          invoicefile,
+        })
+        .expect(401);
     });
   });
 

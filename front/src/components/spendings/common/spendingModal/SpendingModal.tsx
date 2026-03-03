@@ -143,11 +143,27 @@ const SpendingModal = ({
       return;
     }
 
+    const parsedValues = spendingSchema.safeParse(values);
+    if (!parsedValues.success) {
+      return;
+    }
+
     // https://github.com/bugwheels94/math-expression-evaluator
-    const mexp = new Mexp();
-    const lexed = mexp.lex(String(values.spendingAmount));
-    const postfixed = mexp.toPostfix(lexed);
-    const amountEvaluatedExpr = mexp.postfixEval(postfixed);
+    let amountEvaluatedExpr: number;
+    try {
+      const mexp = new Mexp();
+      const amountExpression = parsedValues.data.spendingAmount.trim();
+      const lexed = mexp.lex(amountExpression);
+      const postfixed = mexp.toPostfix(lexed);
+      amountEvaluatedExpr = mexp.postfixEval(postfixed);
+    } catch (error) {
+      console.error("Invalid amount expression", error);
+      return;
+    }
+
+    if (Number.isNaN(amountEvaluatedExpr)) {
+      return;
+    }
 
     const spendingEdited = {
       // this format date is required to avoid inconsistency
@@ -155,9 +171,9 @@ const SpendingModal = ({
       // see https://github.com/axios/axios/issues/567
       date: date ? format(date, 'yyyy-MM-dd') : null,
       // ///////////////////////////////////////////////////
-      label: values.spendingLabel,
+      label: parsedValues.data.spendingLabel,
       amount: Number(amountEvaluatedExpr),
-      category: processCategory(values),
+      category: processCategory(parsedValues.data),
       currency: user.baseCurrency,
       userID: user.id,
       id: spending?.ID,
@@ -266,7 +282,7 @@ const SpendingModal = ({
         }
 
         {
-          recurringType && recurrings.length === 0 && (
+          recurringType && (recurrings?.length ?? 0) === 0 && (
             <Button
               type="button"
               label="Copier les recurrings du mois précédent"

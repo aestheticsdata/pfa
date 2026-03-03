@@ -47,7 +47,7 @@ export class SpendingsController {
     return result;
   }
 
-  @Put("upload")
+  @Delete("upload")
   async deleteInvoiceImage(@Body() dto: DeleteInvoiceImageDto, @GetUserId() userID: string): Promise<{ msg: string }> {
     const result: { msg: string } = await this.spendingsService.deleteInvoiceImage(
       dto.ID,

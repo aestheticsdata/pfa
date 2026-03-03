@@ -22,7 +22,7 @@ router.get('/:id', checkToken, catchAsync(getSpendingController));
 router.post('/', checkToken, catchAsync(postSpendingController));
 router.post('/upload', [checkToken, uploadMiddleware.single('invoiceImageUpload')], catchAsync(postSpendingInvoiceUploadController));
 
-router.put('/upload', checkToken, catchAsync(deleteSpendingInvoiceImageController));
+router.delete('/upload', checkToken, catchAsync(deleteSpendingInvoiceImageController));
 router.put('/:id', checkToken, catchAsync(updateSpendingController));
 
 router.delete('/:id', checkToken, catchAsync(deleteSpendingController));

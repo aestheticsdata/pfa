@@ -49,7 +49,7 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
     try {
       setIsLoading(true);
       const res = await privateRequest('/spendings/upload', {
-        method: 'PUT',
+        method: 'DELETE',
         data: spending,
       })
       if (res?.data?.msg === 'INVOICE_IMAGE_DELETED') {
