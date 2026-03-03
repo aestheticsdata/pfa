@@ -3,6 +3,7 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@auth/context/AuthContext";
+import { ROUTES } from "@components/shared/config/constants";
 
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 
@@ -40,7 +41,7 @@ const useRequestHelper = () => {
   ): Promise<AxiosResponse> => {
     if (!user) {
       clearAuth();
-      router.replace("/login");
+      router.replace(ROUTES.login.path);
       throw new Error("User not logged in");
     }
 
@@ -91,7 +92,7 @@ const useRequestHelper = () => {
 
       if (status === 401) {
         clearAuth();
-        router.replace("/login");
+        router.replace(ROUTES.login.path);
       }
 
       throw error;

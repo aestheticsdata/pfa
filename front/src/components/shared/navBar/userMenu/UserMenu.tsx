@@ -9,6 +9,7 @@ import {
 import { useAuth } from "@auth/context/AuthContext";
 import useRequestHelper from "@helpers/useRequestHelper";
 import Dropdown from '@components/common/dropdown/Dropdown';
+import { ROUTES } from "@components/shared/config/constants";
 import UserMenuContent from './UserMenuContent';
 
 
@@ -26,7 +27,7 @@ const UserMenu = () => {
     } finally {
       queryClient.clear();
       clearAuth();
-      window.location.replace("/login");
+      window.location.replace(ROUTES.login.path);
     }
   };
 
@@ -35,7 +36,7 @@ const UserMenu = () => {
       id: "changepassword",
       label: "modifier le mot de passe",
       icon: faKey,
-      callback: () => router.push("/changepassword"),
+      callback: () => router.push(ROUTES.changePassword.path),
     },
     {
       id: "logout",

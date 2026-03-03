@@ -18,6 +18,16 @@ import {
 } from "@helpers/dateRoute";
 import text from "@src/components/shared/navBar/common/text";
 
+type NavRoute = {
+  path: string;
+  label: string;
+};
+
+const normalizePath = (path: string): string => {
+  const normalized = path.replace(/\/+$/, "");
+  return normalized === "" ? "/" : normalized;
+};
+
 const NavBar = () => {
   const { user } = useAuth();
   const { isCalendarVisible } = useGlobalStore();
@@ -30,11 +40,6 @@ const NavBar = () => {
     () => false,
   );
 
-  const normalizePath = (path: string): string => {
-    const normalized = path.replace(/\/+$/, "");
-    return normalized === "" ? "/" : normalized;
-  };
-
   const getActivePath = (routePath: string): string => {
     const normalizedRoute = normalizePath(routePath);
     const normalizedPathname = normalizePath(pathname);
@@ -44,12 +49,7 @@ const NavBar = () => {
     return isRouteActive ? "bg-spendingItemHover rounded-sm text-blueNavy" : "";
   };
 
-  const getLinkItem = (route: { path: string; label: string }) => {
-    // Disable prefetch for routes that cause 403 or Mixed Content errors
-    // with Next.js static export (protected routes and some public routes)
-    const routesWithoutPrefetch = ["/dashboard", "/statistics", "/categories", "/about", "/signup", "/login", "/forgotPassword"];
-    const shouldDisablePrefetch = routesWithoutPrefetch.includes(route.path);
-    
+  const getLinkItem = (route: NavRoute) => {
     const storedDate = selectedDateIso ?? undefined;
     const href = route.path === ROUTES.spendings.path
       && isClientHydrated
@@ -60,7 +60,6 @@ const NavBar = () => {
     return (
       <Link
         href={href}
-        prefetch={!shouldDisablePrefetch}
         className={`outline-hidden p-1 ${getActivePath(
           route.path
         )} hover:cursor-pointer hover:bg-spendingItemHover hover:text-blueNavy hover:rounded-sm`}
