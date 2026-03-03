@@ -16,6 +16,7 @@ import {
   getTodayIsoDate,
   isValidIsoDate,
 } from "@helpers/dateRoute";
+import text from "@src/components/shared/navBar/common/text";
 
 const NavBar = () => {
   const { user } = useAuth();
@@ -114,7 +115,7 @@ const NavBar = () => {
                   onClick={handleGoToToday}
                   className="text-emerald-100 bg-datePickerWrapperBackground rounded-sm px-2  select-none cursor-pointer hover:brightness-125"
                 >
-                  Aujourd&apos;hui
+                  {text.today}
                 </button>
               </div>
             )}
