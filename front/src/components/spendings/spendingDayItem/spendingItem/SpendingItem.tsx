@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPencilAlt, faTrashAlt, faFileInvoice } from '@fortawesome/free-solid-svg-icons';
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
@@ -27,10 +27,6 @@ const SpendingItem = ({
 
   // const isMobile = window.matchMedia(`(max-width: ${cssSizes.responsiveMaxWidth}px)`).matches;
   const isMobile = false;
-
-  useEffect(() => {
-    isMobile && setIsHover(true);
-  }, []);
 
   const onMouseOver = () => { !isMobile && setIsHover(true) };
   const onMouseLeave = () => { !isMobile && setIsHover(false) };
@@ -119,7 +115,6 @@ const SpendingItem = ({
 }
 
 export default SpendingItem;
-
 
 
 

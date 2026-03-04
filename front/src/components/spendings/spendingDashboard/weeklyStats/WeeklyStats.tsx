@@ -27,10 +27,7 @@ const WeeklyStats = () => {
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
   const { get: { data: weeklyStats, error: weeklyStatsError }, mutation } = useWeeklyStats();
   const { get: { data: dashboard, error: dashboardError } } = useDashboard();
-  const { register, handleSubmit, setFocus, reset } = useForm<InitialCeiling>();
-  const [initialCeiling, setInitialCeiling] = useState<number>(0);
-  const [weeklySlices, setWeeklySlices] = useState<Array<string | number>>([]);
-  const [averageWeeklyStatsAmount, setAverageWeeklyStatsAmount] = useState(0);
+  const { register, handleSubmit, setFocus } = useForm<InitialCeiling>();
   const CEILING_WARN_LIMIT = 50;
 
   if (weeklyStatsError) {
@@ -41,32 +38,17 @@ const WeeklyStats = () => {
     throw dashboardError;
   }
 
-  useEffect(() => {
-    dashboard ? setInitialCeiling(+dashboard.initialCeiling) : setInitialCeiling(0);
-  }, [dashboard]);
-
-  useEffect(() => {
-    reset();
-  }, [initialCeiling]);
-
-  useEffect(() => {
-    from && setWeeklySlices(makeSlices(makeRange(from)));
-  }, [from]);
-
-  useEffect(() => {
-    if (weeklyStats && weeklyStats.length > 0) {
-      // filter(Boolean) removes 0 from array
-      const zeroedOutWeeklyStats = weeklyStats.filter(Boolean);
-      setAverageWeeklyStatsAmount(
-        accurateFixed(
-          zeroedOutWeeklyStats
-            .reduce((acc: number, curr: number) => acc + curr, 0)
-          / zeroedOutWeeklyStats.length,
-          1
-        )
-      );
-    }
-  }, [weeklyStats]);
+  const initialCeiling = dashboard ? +dashboard.initialCeiling : 0;
+  const weeklySlices = from ? makeSlices(makeRange(from)) : [];
+  // filter(Boolean) removes 0 from array
+  const zeroedOutWeeklyStats = weeklyStats?.filter(Boolean) ?? [];
+  const averageWeeklyStatsAmount = zeroedOutWeeklyStats.length > 0
+    ? accurateFixed(
+      zeroedOutWeeklyStats.reduce((acc: number, curr: number) => acc + curr, 0)
+      / zeroedOutWeeklyStats.length,
+      1
+    )
+    : 0;
 
   const onSubmit = (value: InitialCeiling) => {
     setIsInputVisible(false);
@@ -74,7 +56,9 @@ const WeeklyStats = () => {
   }
 
   useEffect(() => {
-    initialCeiling && isInputVisible && setFocus("initialCeiling", { shouldSelect: true });
+    if (isInputVisible) {
+      setFocus("initialCeiling", { shouldSelect: true });
+    }
   }, [setFocus, isInputVisible]);
 
   return (
@@ -99,6 +83,7 @@ const WeeklyStats = () => {
 
         <div className={`${isInputVisible ? "visible" : "hidden"}`}>
           <form
+            key={initialCeiling}
             onBlur={() => setIsInputVisible(false)}
             onSubmit={handleSubmit(onSubmit)}
           >

@@ -5,7 +5,6 @@ import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
-import useInitialAmount from "@components/spendings/services/useInitialAmount";
 import monthlyText from "@components/spendings/config/text";
 
 interface InitialSalary {
@@ -16,27 +15,14 @@ const MonthlyBudget = () => {
   const { to } = useDatePickerWrapperStore();
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
   const { get : { data: dashboard, error: dashboardError }, mutation, remaining, monthlyTotal } = useDashboard();
-  const { data: initialAmount, error: initialAmountError } = useInitialAmount();
-  const { register, handleSubmit, setFocus, reset } = useForm<InitialSalary>();
-  const [monthlyTotalPercentage, setMonthlyTotalPercentage] = useState<number>(0);
+  const { register, handleSubmit, setFocus } = useForm<InitialSalary>();
+  const monthlyTotalPercentage = dashboard?.initialAmount
+    ? Math.min(100, +(((monthlyTotal / +dashboard.initialAmount) * 100).toFixed(2)))
+    : 0;
 
   if (dashboardError) {
     throw dashboardError;
   }
-
-  if (initialAmountError) {
-    throw initialAmountError;
-  }
-
-  useEffect(() => {
-    if (dashboard && initialAmount) {
-      reset();
-      if (dashboard.initialAmount && monthlyTotal) {
-        const percentage = +(((monthlyTotal / +dashboard.initialAmount) * 100).toFixed(2));
-        setMonthlyTotalPercentage(Math.min(100, percentage));
-      }
-    }
-  }, [dashboard, initialAmount, monthlyTotal]);
 
   const onSubmit = (value: InitialSalary) => {
     setIsInputVisible(false);
@@ -71,6 +57,7 @@ const MonthlyBudget = () => {
             dashboard && (
               <div className={`${isInputVisible ? "visible" : "hidden"}`}>
                 <form
+                  key={dashboard?.initialAmount ?? 0}
                   onBlur={() => setIsInputVisible(false)}
                   onSubmit={handleSubmit(onSubmit)}
                 >

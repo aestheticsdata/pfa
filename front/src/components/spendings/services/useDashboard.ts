@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import formatISO from "date-fns/formatISO";
 import startOfMonth from "date-fns/startOfMonth";
@@ -36,8 +35,6 @@ const useDashboard = (): UseDashboard => {
   const monthBeginning = startOfMonth(from!);
   const queryClient = useQueryClient();
   const { data: initialAmount } = useInitialAmount();
-  const [remaining, setRemaining] = useState<number>(0);
-  const [monthlyTotal, setMonthlyTotal] = useState<number>(0);
 
   const getDashboard = async () => {
     const response = await privateRequest(
@@ -78,13 +75,13 @@ const useDashboard = (): UseDashboard => {
     ...QUERY_OPTIONS,
   });
 
-  useEffect(() => {
-    if (get.data && initialAmount) {
-      const totalOfMonth: number = Number(initialAmount.spendingsSum.amount) + Number(initialAmount.recurringsSum.amount);
-      setMonthlyTotal(Number(totalOfMonth.toFixed(2)));
-      setRemaining(Number((Number(get.data.initialAmount) - totalOfMonth).toFixed(2)));
-    }
-  }, [get.data, initialAmount]);
+  const totalOfMonth = get.data && initialAmount
+    ? Number(initialAmount.spendingsSum.amount) + Number(initialAmount.recurringsSum.amount)
+    : 0;
+  const monthlyTotal = Number(totalOfMonth.toFixed(2));
+  const remaining = get.data
+    ? Number((Number(get.data.initialAmount) - totalOfMonth).toFixed(2))
+    : 0;
 
   const mutation = useMutation<unknown, AxiosError, DashboardMutationVariables>(({ dashboardID, initialAmount }) => {
     if (dashboardID) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { endOfMonth } from "date-fns";
 import startOfMonth from "date-fns/startOfMonth";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
@@ -15,8 +15,6 @@ import type { SpendingDayGroup } from "@components/spendings/types";
 
 const Spendings = () => {
   const { isBlurActive } = useBlur();
-
-  const [month, setMonth] = useState<MonthRange>();
   const { from, to, range, setFrom, setTo, setRange } = useDatePickerWrapperStore();
 
   // Initialize date range when landing on spendings (e.g. after signup) before DatePickerWrapper mounts.
@@ -33,15 +31,12 @@ const Spendings = () => {
   }, [from, setFrom, setTo, setRange]);
 
   const { spendingsByWeek, isLoading: isSpendingsLoading, error } = useSpendings();
-
-  useEffect(() => {
-    if (from && to) {
-      setMonth({
-        start: startOfMonth(from),
-        end: endOfMonth(to),
-      })
+  const month: MonthRange | null = from && to
+    ? {
+      start: startOfMonth(from),
+      end: endOfMonth(to),
     }
-  }, [from, to]);
+    : null;
 
   if (error) {
     throw error;

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import startOfMonth from "date-fns/startOfMonth";
 import { displayPopup } from "@helpers/swalHelper";
@@ -13,7 +12,7 @@ import {
 } from "@src/schemas/spendings";
 
 import type { AxiosError } from "axios";
-import type { RecurringItem, SpendingMutationPayload } from "@src/schemas/spendings";
+import type { SpendingMutationPayload } from "@src/schemas/spendings";
 
 
 interface FormattedMonth {
@@ -37,7 +36,6 @@ const useReccurings = () => {
   const userID = user?.id;
   const { from } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
-  const [recurrings, setRecurrings] = useState<RecurringItem[]>([]);
 
 
   const recurringsActionOnSuccess = async (message: string) => {
@@ -59,12 +57,6 @@ const useReccurings = () => {
     enabled: !!from && !!userID,
     ...QUERY_OPTIONS,
   });
-
-  useEffect(() => {
-    if (data) {
-      setRecurrings(data);
-    }
-  }, [data]);
 
   const queryClient = useQueryClient();
 
@@ -132,7 +124,7 @@ const useReccurings = () => {
   });
 
   return {
-    recurrings,
+    recurrings: data ?? [],
     isLoading,
     error,
     deleteRecurring,

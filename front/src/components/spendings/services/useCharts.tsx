@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useQuery } from "react-query";
 import startOfMonth from "date-fns/startOfMonth";
 import endOfMonth from "date-fns/endOfMonth";
@@ -15,18 +14,12 @@ const useCharts = (periodType: string) => {
   const { from, to } = useDatePickerWrapperStore();
   const { user } = useAuth();
   const userID = user?.id;
-  const [startDate, setStartDate] = useState<Date | null>();
-  const [endDate, setEndDate] = useState<Date | null>();
-
-  useEffect(() => {
-    if (periodType === MONTHLY) {
-      setStartDate(startOfMonth(from!));
-      setEndDate(endOfMonth(from!));
-    } else {
-      setStartDate(from);
-      setEndDate(to);
-    }
-  }, [from, to]);
+  const startDate = periodType === MONTHLY
+    ? (from ? startOfMonth(from) : undefined)
+    : from;
+  const endDate = periodType === MONTHLY
+    ? (from ? endOfMonth(from) : undefined)
+    : to;
 
   const getCharts = async () => {
     const response = await privateRequest(`/spendings/charts?userID=${userID}&from=${startDate}&to=${endDate}`);
@@ -35,7 +28,7 @@ const useCharts = (periodType: string) => {
 
   return useQuery([QUERY_KEYS.CHARTS, startDate, endDate], getCharts, {
     retry: false,
-    enabled: !!startDate && !!userID,
+    enabled: !!startDate && !!endDate && !!userID,
     ...QUERY_OPTIONS,
   });
 };

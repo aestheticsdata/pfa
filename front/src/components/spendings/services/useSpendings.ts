@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import getDate from "date-fns/getDate";
 import parseISO from "date-fns/parseISO";
@@ -23,13 +22,13 @@ interface DeletableSpending {
 }
 
 const useSpendings = () => {
-  const [spendingsByWeek, setSpendingsByWeek] = useState<SpendingDayGroup[]>();
-  const [spendingsByMonth, setSpendingsByMonth] = useState<SpendingItem[]>();
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
   const { from, to, range } = useDatePickerWrapperStore();
-  const monthBeginning = startOfMonth(from!);
+  const monthStart = from ? startOfMonth(from) : undefined;
+  const monthEnd = to ? endOfMonth(to) : undefined;
+  const monthBeginning = monthStart;
 
   const aggregateSpendingByDate = (spendings: SpendingItem[], dateRange: Date[]): SpendingDayGroup[] => {
     const grouped = dateRange.map((currentDate) => ({
@@ -51,14 +50,18 @@ const useSpendings = () => {
   };
 
   const getSpendings = async () => {
+    if (!monthStart || !monthEnd) {
+      return [];
+    }
+
     const response = await privateRequest(
-      `/spendings?userID=${userID}&from=${startOfMonth(from!)}&to=${endOfMonth(to!)}`
+      `/spendings?userID=${userID}&from=${monthStart}&to=${monthEnd}`
     );
     return SpendingListSchema.parse(response.data);
   };
 
   const { data, isLoading, error } = useQuery(
-    [QUERY_KEYS.SPENDINGS_BY_MONTH, startOfMonth(from!), endOfMonth(to!)],
+    [QUERY_KEYS.SPENDINGS_BY_MONTH, monthStart, monthEnd],
     getSpendings,
     {
       retry: false,
@@ -68,19 +71,15 @@ const useSpendings = () => {
       // Spendings mounts before DatePickerWrapper, causing from to be undefined and
       // hence this query to fail
       // so enable below
-      enabled: !!from && !!userID,
+      enabled: !!from && !!to && !!userID,
       ...QUERY_OPTIONS,
     }
   );
 
-  useEffect(() => {
-    if (data) {
-      if (range) {
-        setSpendingsByWeek(aggregateSpendingByDate(data, range));
-      }
-      setSpendingsByMonth(data);
-    }
-  }, [data, range]);
+  const spendingsByMonth = data;
+  const spendingsByWeek = data && range
+    ? aggregateSpendingByDate(data, range)
+    : undefined;
 
   const queryClient = useQueryClient();
 
