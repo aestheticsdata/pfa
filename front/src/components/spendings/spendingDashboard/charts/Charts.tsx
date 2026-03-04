@@ -1,7 +1,6 @@
 import {
   useEffect,
   useState,
-  useCallback,
 } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChartBar } from "@fortawesome/free-solid-svg-icons";
@@ -41,18 +40,18 @@ const Charts = ({ title, periodType }: ChartsProps) => {
   const maxv = charts && charts.length > 0 ? getMaxValue(charts) : 0;
   const total = charts && charts.length > 0 ? getTotal(charts) : 0;
 
-  // https://keyholesoftware.com/2022/07/13/cancel-a-react-modal-with-escape-key-or-external-click/
-  const handleEscKey = useCallback((event: KeyboardEvent) => {
-    if (event.key === "Escape") {
-      setIsInvoiceModalVisible(false);
-    }
-  }, []); // https://stackoverflow.com/questions/57294549/react-hook-usecallback-without-dependencies
   useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsInvoiceModalVisible(false);
+      }
+    };
+
     document.addEventListener("keyup", handleEscKey, false);
     return () => {
       document.removeEventListener("keyup", handleEscKey, false);
     };
-  });
+  }, []);
 
   const getWidth = (value: number) => {
     let width;

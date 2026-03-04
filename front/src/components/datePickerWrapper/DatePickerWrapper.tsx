@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import DayPicker from "react-day-picker";
 import "react-day-picker/lib/style.css";

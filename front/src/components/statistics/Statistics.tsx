@@ -5,12 +5,12 @@ import { useForm, Controller } from "react-hook-form";
 import Select from "react-select";
 import useCategories from "@components/spendings/services/useCategories";
 import { selectOptionsCSS } from "@components/common/form/selectOptionCSS";
-import useStatisticsCategories from "@components/statistics/helpers/useStatisticsCategories";
+import mapStatisticsCategories from "@components/statistics/helpers/mapStatisticsCategories";
 import useStatistics from "@components/statistics/services/useStatistics";
 import PFABarCharts from "@components/statistics/PFABarCharts";
 import PFALineCharts from "@components/statistics/PFALineCharts";
 import PFAResponsiveChartsContainer from "@components/statistics/PFAResponsiveChartsContainer";
-import type { StatisticsCategoryOption } from "@components/statistics/helpers/useStatisticsCategories";
+import type { StatisticsCategoryOption } from "@components/statistics/helpers/mapStatisticsCategories";
 
 interface YearOption {
   value: number;
@@ -26,22 +26,19 @@ const firstYearAvailable = 2018;
 
 const Statistics = () => {
   const { categories, error: categoriesError } = useCategories();
-  const categoriesMarshalled = useStatisticsCategories(categories);
+  const categoriesMarshalled = mapStatisticsCategories(categories);
   const [initialCategories, setInitialCategories] = useState<StatisticsCategoryOption[]>([]);
 
   const currentYear = new Date().getFullYear();
   const makeYearsOptions = () => {
-    const years = Array.from(
-      { length: currentYear - firstYearAvailable + 1 },
-      (_, i) => firstYearAvailable + i
-    );
+    const years = Array.from({ length: currentYear - firstYearAvailable + 1 }, (_, i) => currentYear - i);
     return years.map(year => ({ value: year, label: year }));
   };
 
   const defaultYear: YearOption = { value: currentYear, label: currentYear };
   const [initialYear, setInitialYear] = useState<YearOption>(defaultYear);
 
-  const { control, watch } = useForm<StatisticsFormValues>({
+  const { control } = useForm<StatisticsFormValues>({
     mode: "onChange",
     defaultValues: {
       categorySelector: [],
@@ -49,10 +46,7 @@ const Statistics = () => {
     }
   });
 
-  const categorySelectorWatcher = watch("categorySelector");
-  const yearSelectorWatcher = watch("yearSelector");
-
-  const { isLoading: isStatisticsLoading, statistics, error } = useStatistics(categorySelectorWatcher, yearSelectorWatcher);
+  const { isLoading: isStatisticsLoading, statistics, error } = useStatistics(initialCategories, initialYear);
 
   if (categoriesError) {
     throw categoriesError;

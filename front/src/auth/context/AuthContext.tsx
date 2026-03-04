@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 import type { AuthUser } from "@auth/types";
 
@@ -25,27 +25,24 @@ export const AuthProvider = ({ children, initialUser = null, initialCsrfToken = 
   const [user, setUser] = useState<AuthUser | null>(initialUser);
   const [csrfToken, setCsrfToken] = useState<string | null>(initialCsrfToken);
 
-  const setAuthState = useCallback((nextUser: AuthUser, nextCsrfToken: string | null) => {
+  const setAuthState = (nextUser: AuthUser, nextCsrfToken: string | null) => {
     setUser(nextUser);
     setCsrfToken(nextCsrfToken);
-  }, []);
+  };
 
-  const clearAuth = useCallback(() => {
+  const clearAuth = () => {
     setUser(null);
     setCsrfToken(null);
-  }, []);
+  };
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      user,
-      csrfToken,
-      setUser,
-      setCsrfToken,
-      setAuthState,
-      clearAuth,
-    }),
-    [clearAuth, csrfToken, setAuthState, user],
-  );
+  const value: AuthContextValue = {
+    user,
+    csrfToken,
+    setUser,
+    setCsrfToken,
+    setAuthState,
+    clearAuth,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
