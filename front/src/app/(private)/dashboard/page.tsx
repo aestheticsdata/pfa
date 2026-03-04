@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import DashboardPageClient from "./DashboardPageClient";
+import DashboardPageClient from "@components/dashboard/DashboardPageClient";
 import {
   DATE_QUERY_PARAM,
   buildDashboardPath,
