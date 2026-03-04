@@ -10,38 +10,55 @@ import type { SpendingListItem } from "@components/spendings/types";
 
 type SortOrder = "asc" | "desc";
 type SortField = typeof SORT_BY_LABEL | typeof SORT_BY_CATEGORY | typeof SORT_BY_AMOUNT;
+type SortState = {
+  field: SortField | null;
+  order: SortOrder;
+};
 
-const useClickSort = () => {
-  const [spendingsByDaySorted, setSpendingsByDaySorted] = useState<SpendingListItem[]>([]);
-  const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+const getSortedSpendings = (spendings: SpendingListItem[], { field, order }: SortState) => {
+  if (!field) {
+    return spendings;
+  }
+
+  if (field === SORT_BY_LABEL) {
+    return _.orderBy(spendings, (entry) => entry.label, [order]);
+  }
+
+  if (field === SORT_BY_CATEGORY) {
+    return _.orderBy(
+      spendings,
+      (entry) => ("category" in entry ? entry.category : "") ?? "",
+      [order]
+    );
+  }
+
+  return _.orderBy(spendings, (entry) => entry.amount, [order]);
+};
+
+const useClickSort = (spendings: SpendingListItem[]) => {
+  const [sortState, setSortState] = useState<SortState>({
+    field: null,
+    order: "asc",
+  });
 
   const onClickSort = (name: SortField) => {
-    let sorted: SpendingListItem[] = [];
+    setSortState((current) => {
+      if (current.field !== name) {
+        return { field: name, order: "asc" };
+      }
 
-    if (name === SORT_BY_LABEL) {
-      sorted = _.orderBy(spendingsByDaySorted, (entry) => entry.label, [sortOrder]);
-    }
-
-    if (name === SORT_BY_CATEGORY) {
-      sorted = _.orderBy(
-        spendingsByDaySorted,
-        (entry) => ("category" in entry ? entry.category : "") ?? "",
-        [sortOrder]
-      );
-    }
-
-    if (name === SORT_BY_AMOUNT) {
-      sorted = _.orderBy(spendingsByDaySorted, (entry) => entry.amount, [sortOrder]);
-    }
-
-    setSpendingsByDaySorted(sorted);
-    setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+      return {
+        field: name,
+        order: current.order === "asc" ? "desc" : "asc",
+      };
+    });
   };
+
+  const spendingsByDaySorted = getSortedSpendings(spendings, sortState);
 
   return {
     onClickSort,
     spendingsByDaySorted,
-    setSpendingsByDaySorted,
   };
 }
 

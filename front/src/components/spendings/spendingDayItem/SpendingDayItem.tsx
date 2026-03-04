@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { getDayOfYear, endOfMonth } from "date-fns";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import SpendingItemHeader from "@components/spendings/spendingDayItem/SpendingItemHeader";
@@ -27,33 +27,14 @@ interface SpendingDayItemProps {
 
 const SpendingDayItem = ({ spendingsByDay, isLoading, date, recurringType = false, month = null, total = 0 }: SpendingDayItemProps) => {
   const { remaining: remainingAmount } = useDashboard();
-  const [todayCredits, setTodayCredits] = useState<number>(0);
-  const [isToday, setIsToday] = useState(false);
-  const [displayTotal, setDisplayTotal] = useState<number>(total);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [today] = useState(() => Date.now());
+  const isToday = date
+    ? getDayOfYear(date) === getDayOfYear(today)
+    : false;
 
-  useEffect(() => {
-    if (date) {
-      setIsToday(getDayOfYear(date) === getDayOfYear(Date.now()));
-    }
-  }, [date]);
 
-  useEffect(() => {
-    if (remainingAmount && isToday) {
-      const remainingDays = (getDayOfYear(endOfMonth(Date.now())) - getDayOfYear(Date.now())) + 1;
-      setTodayCredits(remainingAmount / remainingDays);
-    }
-  }, [remainingAmount, isToday]);
-
-  const {
-    onClickSort,
-    spendingsByDaySorted,
-    setSpendingsByDaySorted,
-  } = useClickSort();
-
-  useEffect(() => {
-    setSpendingsByDaySorted(spendingsByDay);
-    setDisplayTotal(total);
-  }, [spendingsByDay, setSpendingsByDaySorted, total]);
+  const todayCredits = remainingAmount && isToday ? remainingAmount / (getDayOfYear(endOfMonth(today)) - getDayOfYear(today) + 1) : 0;
 
   const getRecurringsTotal = (recurrings: SpendingListItem[]) => {
     if (recurrings?.length > 0) {
@@ -64,28 +45,26 @@ const SpendingDayItem = ({ spendingsByDay, isLoading, date, recurringType = fals
     return 0;
   }
 
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  useEffect(() => {
-    if (selectedCategory) {
-      const spendingsFilteredByCategory = spendingsByDay.filter(
-        (spending) => {
-          if (!("category" in spending)) {
-            return false;
-          }
-          if (spending.category === null && selectedCategory === "none") return true;
-          return spending.category === selectedCategory;
-        }
-      );
-      const filteredTotal = spendingsFilteredByCategory.length > 0 ? spendingsFilteredByCategory.reduce((acc, spending) => {
-        return spending.amount + acc;
-      }, 0) : 0;
-      setSpendingsByDaySorted(spendingsFilteredByCategory);
-      setDisplayTotal(filteredTotal);
-    } else {
-      setSpendingsByDaySorted(spendingsByDay);
-      setDisplayTotal(total);
-    }
-  }, [selectedCategory, setSpendingsByDaySorted, spendingsByDay, total]);
+  const spendingsFilteredByCategory = selectedCategory
+    ? spendingsByDay.filter((spending) => {
+      if (!("category" in spending)) {
+        return false;
+      }
+      if (spending.category === null && selectedCategory === "none") {
+        return true;
+      }
+      return spending.category === selectedCategory;
+    })
+    : spendingsByDay;
+
+  const {
+    onClickSort,
+    spendingsByDaySorted,
+  } = useClickSort(spendingsFilteredByCategory);
+
+  const displayTotal = selectedCategory
+    ? spendingsFilteredByCategory.reduce((acc, spending) => acc + Number(spending.amount), 0)
+    : total;
 
   const {
     isModalVisible,
