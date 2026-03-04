@@ -19,11 +19,11 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@pages/*": [
-        "pages/*"
+      "@styles/*": [
+        "styles/*"
       ],
       "@app/*": [
-        "app/*"
+        "src/app/*"
       ],
       "@src/*": [
         "src/*"
