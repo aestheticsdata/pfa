@@ -20,6 +20,11 @@ interface SpendingItem {
   categoryColor: string | null;
 }
 
+interface AuthResponseBody {
+  user: { id: string };
+  csrfToken: string;
+}
+
 const FIXTURE_IMAGE = join(__dirname, "fixtures", "galaxy.jpg");
 
 function todayISO(): string {
@@ -39,11 +44,50 @@ function randomCategoryName(): string {
 describe("SpendingsController (e2e)", () => {
   let app: INestApplication;
   let agent: Agent;
+  let foreignCategoryID: string;
 
   beforeAll(async () => {
     app = await createE2eApp();
     const session = await createAuthenticatedSession(app.getHttpServer() as SupertestApp);
     agent = session.agent;
+
+    const otherAgent = request.agent(app.getHttpServer() as SupertestApp);
+    const otherUserEmail = `e2e-spendings-other-${Date.now()}-${Math.random().toString(36).slice(2)}@test.com`;
+    const signUpRes = await otherAgent
+      .post("/api/users/add")
+      .send({
+        name: "E2E Other",
+        email: otherUserEmail,
+        password: "secure-password-123",
+        baseCurrency: "EUR",
+        language: "fr",
+      })
+      .expect(201);
+
+    const signUpBody = signUpRes.body as AuthResponseBody;
+    otherAgent.set("x-csrf-token", signUpBody.csrfToken);
+
+    const foreignLabel = `e2e-foreign-category-seed-${Date.now()}`;
+    await otherAgent
+      .post("/api/spendings")
+      .send({
+        date: todayISO(),
+        label: foreignLabel,
+        amount: 1,
+        category: { ID: null, name: randomCategoryName(), color: "#123456" },
+        currency: "EUR",
+      })
+      .expect(201);
+
+    const foreignListRes = await otherAgent
+      .get("/api/spendings")
+      .query({ from: "2020-01-01", to: "2030-12-31" })
+      .expect(200);
+    const foreignSpending = (foreignListRes.body as SpendingItem[]).find((s) => s.label === foreignLabel);
+    if (!foreignSpending?.categoryID) {
+      throw new Error("Expected a categoryID for foreign test user spending");
+    }
+    foreignCategoryID = foreignSpending.categoryID;
   }, 15000);
 
   afterAll(async () => {
@@ -372,13 +416,28 @@ describe("SpendingsController (e2e)", () => {
     };
 
     beforeAll(async () => {
+      const seedLabel = `e2e-existing-category-seed-${Date.now()}`;
+      await agent
+        .post("/api/spendings")
+        .send({
+          date: todayISO(),
+          label: seedLabel,
+          amount: 1,
+          category: { ID: null, name: randomCategoryName(), color: "#00aa00" },
+          currency: "EUR",
+        })
+        .expect(201);
+
       const listRes = await agent
         .get("/api/spendings")
         .query({ from: "2020-01-01", to: "2030-12-31" })
-;
+        .expect(200);
       const spendings = listRes.body as SpendingItem[];
-      const withCategory = spendings.find((s) => s.categoryID != null);
-      if (withCategory) existingCategoryID = withCategory.categoryID;
+      const seeded = spendings.find((s) => s.label === seedLabel);
+      if (!seeded?.categoryID) {
+        throw new Error("Expected seeded spending to have a categoryID");
+      }
+      existingCategoryID = seeded.categoryID;
     });
 
     it("should create spending without category", () => {
@@ -421,6 +480,22 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201)
         .expect(assertSuccess);
+    });
+
+    it("should return 400 when category belongs to another user", () => {
+      return agent
+        .post("/api/spendings")
+        .send({
+          date: todayISO(),
+          label: "e2e-spending-foreign-cat",
+          amount: 31,
+          category: { ID: foreignCategoryID },
+          currency: "EUR",
+        })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.message).toBe("Invalid category ID");
+        });
     });
 
     it("should return 401 without session cookie", () => {
@@ -506,6 +581,20 @@ describe("SpendingsController (e2e)", () => {
         .expect(200)
         .expect((res) => {
           expect(res.body).toEqual({ success: true });
+        });
+    });
+
+    it("should return 400 when assigning category from another user", () => {
+      return agent
+        .put(`/api/spendings/${updateSpendingID}`)
+        .send({
+          label: "e2e-update-test-foreign-category",
+          amount: 101,
+          category: { ID: foreignCategoryID },
+        })
+        .expect(400)
+        .expect((res) => {
+          expect(res.body.message).toBe("Invalid category ID");
         });
     });
 

@@ -38,6 +38,20 @@ export class SpendingsService {
     return filePath;
   }
 
+  private async assertCategoryAccessible(categoryID: string, userID: string): Promise<void> {
+    const category = await this.prisma.categories.findFirst({
+      where: {
+        ID: categoryID,
+        OR: [{ userID }, { userID: null }],
+      },
+      select: { ID: true },
+    });
+
+    if (!category) {
+      throw new BadRequestException("Invalid category ID");
+    }
+  }
+
   async getInvoiceImage(
     spendingID: string,
     userID: string,
@@ -91,6 +105,7 @@ export class SpendingsService {
 
     const category = dto.category;
     if (category?.ID) {
+      await this.assertCategoryAccessible(category.ID, userID);
       categoryID = category.ID;
     } else if (category?.ID === null && category?.color != null && category?.name) {
       const existingCategory = await this.prisma.categories.findFirst({
@@ -178,17 +193,11 @@ export class SpendingsService {
     };
 
     if (categoryID !== null && spending.categoryID !== categoryID) {
-      const categoryExists = await this.prisma.categories.findFirst({
-        where: { ID: categoryID },
+      await this.assertCategoryAccessible(categoryID, userID);
+      await this.prisma.spendings.updateMany({
+        where: { ID: spendingID, userID },
+        data: { label: dto.label, amount: dto.amount, categoryID },
       });
-      if (categoryExists) {
-        await this.prisma.spendings.updateMany({
-          where: { ID: spendingID, userID },
-          data: { label: dto.label, amount: dto.amount, categoryID },
-        });
-      } else if (name && color) {
-        await createNewCategoryAndUpdate(name, color);
-      }
     } else if (categoryID === null) {
       if (color && name) {
         await createNewCategoryAndUpdate(name, color);
@@ -222,8 +231,8 @@ export class SpendingsService {
 
     return results.map(({ category, ...spending }) => ({
       ...spending,
-      category: category?.name ?? null,
-      categoryColor: category?.color ?? null,
+      category: category && (category.userID === userID || category.userID === null) ? category.name : null,
+      categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
     }));
   }
 
@@ -243,7 +252,10 @@ export class SpendingsService {
     const categories =
       categoryIDs.length > 0
         ? await this.prisma.categories.findMany({
-            where: { ID: { in: categoryIDs } },
+            where: {
+              ID: { in: categoryIDs },
+              OR: [{ userID }, { userID: null }],
+            },
             select: { ID: true, name: true, color: true },
           })
         : [];
