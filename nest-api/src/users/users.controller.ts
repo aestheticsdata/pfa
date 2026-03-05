@@ -68,7 +68,7 @@ export class UsersController {
     clearCsrfToken(req);
     return new Promise((resolve, reject) => {
       req.session.destroy((err) => {
-        if (err) reject(err);
+        if (err) reject(err instanceof Error ? err : new Error(String(err)));
         else {
           res.clearCookie("pfa.sid");
           resolve({ ok: true });
