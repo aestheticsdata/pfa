@@ -5,6 +5,6 @@ export class SignInDto {
   email: string;
 
   @IsString()
-  @MinLength(1, { message: "Password is required" })
+  @MinLength(3, { message: "Password must be at least 3 characters long" })
   password: string;
 }

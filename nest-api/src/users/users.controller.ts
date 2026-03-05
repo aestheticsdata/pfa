@@ -1,5 +1,5 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from "@nestjs/common";
-import type { Request } from "express";
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from "@nestjs/common";
+import type { Request, Response } from "express";
 import { UsersService } from "@users/users.service";
 import { SignInDto } from "@users/dto/sign-in.dto";
 import { AddUserDto } from "@users/dto/add-user.dto";
@@ -64,12 +64,15 @@ export class UsersController {
   @Post("logout")
   @HttpCode(HttpStatus.OK)
   @UseGuards(CsrfGuard)
-  async logout(@Req() req: Request): Promise<{ ok: boolean }> {
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response): Promise<{ ok: boolean }> {
     clearCsrfToken(req);
     return new Promise((resolve, reject) => {
       req.session.destroy((err) => {
         if (err) reject(err);
-        else resolve({ ok: true });
+        else {
+          res.clearCookie("pfa.sid");
+          resolve({ ok: true });
+        }
       });
     });
   }
