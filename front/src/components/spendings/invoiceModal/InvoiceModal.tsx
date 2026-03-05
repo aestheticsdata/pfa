@@ -27,13 +27,14 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
   const [invoicefile, setInvoicefile] = useState<string | File>("");
   const [invoiceImage, setInvoiceImage] = useState(null);
   const [isFileTooBig, setIsFileTooBig] = useState(false);
+  const [isInvalidFile, setIsInvalidFile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isClickOnThumbnail, setIsClickOnThumbnail] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [isProgress, setIsProgress] = useState(false);
   const [showConfirmDeleteImage, setShowConfirmDeleteImage] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
-  const onChange = (e) => { setInvoicefile(e.target.files[0]) };
+  const onChange = (e) => { setInvoicefile(e.target.files[0]); setIsInvalidFile(false); };
 
   const handleClickOutsideCheckFullImage = () => {
     !isClickOnThumbnail && handleClickOutside();
@@ -85,15 +86,26 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
       await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
       setIsLoading(false);
     } catch (e) {
-      console.log('error uploading image : ', e);
+      const message = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      if (message === "INVALID_IMAGE_FILE") {
+        setIsInvalidFile(true);
+        setInvoicefile("");
+      }
+      setIsProgress(false);
+      setIsLoading(false);
     }
   }
 
   const getInvoiceImage = async (spending) => {
-    setIsLoading(true);
-    const res = await privateRequest(`/spendings/upload/${spending.ID}?userID=${userID}&itemType=${spending.itemType}`);
-    setInvoiceImage(res.data);
-    setIsLoading(false);
+    try {
+      const res = await privateRequest(`/spendings/upload/${spending.ID}?userID=${userID}&itemType=${spending.itemType}`);
+      setInvoiceImage(res.data);
+    } catch (e) {
+      console.log("error getting image : ", e);
+      setInvoiceImage(null);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -109,6 +121,7 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
 
   const onSubmit = () => {
     setIsFileTooBig(false);
+    setIsInvalidFile(false);
     if (!userID) {
       return;
     }
@@ -210,6 +223,13 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
             )
           }
           {
+            isInvalidFile && (
+              <div className="text-red-500 text-sm font-medium">
+                {invoiceModalTexts.invalidFileType}
+              </div>
+            )
+          }
+          {
             isLoading ?
               isProgress ?
                 <div className="flex flex-col space-y-2 w-[250px]">
@@ -244,7 +264,7 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
                     type="file"
                     id="invoicefileinputid"
                     name="invoicefile"
-                    accept="image/jpeg"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
                     onChange={onChange}
                   />
                   <div className="flex flex-col mt-6 justify-center items-center h-[105px] w-full bg-grey0">

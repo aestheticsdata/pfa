@@ -1,14 +1,23 @@
-import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { randomUUID } from "crypto";
 import { access, unlink } from "fs/promises";
 import { constants } from "fs";
 import { readFile } from "fs/promises";
-import { join } from "path";
+import { resolve } from "path";
 import sharp from "sharp";
 import { AppConfig } from "@config/app.config";
 import { SshBackupService } from "@infrastructure/ssh-backup/ssh-backup.service";
+import { isValidImageFile } from "@spendings/upload/upload.config";
 import { PrismaService } from "../prisma/prisma.service";
+
+const MIME_BY_EXT: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+};
 
 @Injectable()
 export class SpendingsService {
@@ -20,6 +29,15 @@ export class SpendingsService {
     private readonly sshBackup: SshBackupService,
   ) {}
 
+  private safePath(base: string, userID: string, filename: string): string {
+    const userDir = resolve(base, userID);
+    const filePath = resolve(userDir, filename);
+    if (!filePath.startsWith(userDir + "/")) {
+      throw new BadRequestException("Invalid file path");
+    }
+    return filePath;
+  }
+
   async getInvoiceImage(
     spendingID: string,
     userID: string,
@@ -30,11 +48,11 @@ export class SpendingsService {
     const invoicefile = await this.getInvoiceFileName(spendingID, userID, itemType);
     if (!invoicefile) return null;
 
-    const filePath = join(invoicesPath, userID, invoicefile);
+    const filePath = this.safePath(invoicesPath, userID, invoicefile);
     const imageFile = await readFile(filePath);
     const base64Image = imageFile.toString("base64");
-    const ext = invoicefile.split(".").pop();
-    const contentType = `image/${ext}`;
+    const ext = (invoicefile.split(".").pop() ?? "").toLowerCase();
+    const contentType = MIME_BY_EXT[ext] ?? "image/jpeg";
     const data = `data:${contentType};base64,${base64Image}`;
 
     return { data, contentType };
@@ -261,7 +279,7 @@ export class SpendingsService {
     invoicefile: string,
   ): Promise<{ msg: string }> {
     const invoicesPath = this.configService.getOrThrow<AppConfig>("app").invoicesPath;
-    const filePath = join(invoicesPath, userID, invoicefile);
+    const filePath = this.safePath(invoicesPath, userID, invoicefile);
 
     await unlink(filePath);
 
@@ -287,6 +305,11 @@ export class SpendingsService {
     sharp.cache(false);
 
     await access(filepath, constants.F_OK);
+
+    if (!(await isValidImageFile(filepath))) {
+      await unlink(filepath);
+      throw new BadRequestException("INVALID_IMAGE_FILE");
+    }
 
     const imageMetadata = await sharp(filepath).metadata();
     const biggerSide = (imageMetadata.width ?? 0) > (imageMetadata.height ?? 0) ? "width" : "height";
