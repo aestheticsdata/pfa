@@ -54,9 +54,16 @@ export const invoiceUploadOptions = {
         .then(() => cb(null, userDir))
         .catch((err) => cb(err as Error, ""));
     },
-    filename: (req, file, cb) => {
-      const body = (req as Request & { body: Record<string, string> }).body;
-      const { itemType, date, dateFrom, label } = body;
+    filename: (
+      req: Express.Request,
+      file: Express.Multer.File,
+      cb: (error: Error | null, filename: string) => void,
+    ) => {
+      const body: Record<string, string> = (req as Request & { body: Record<string, string> }).body;
+      const itemType: string = body.itemType;
+      const date: string = body.date;
+      const dateFrom: string = body.dateFrom;
+      const label: string = body.label;
 
       let fileName = "";
       switch (itemType) {
