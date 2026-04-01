@@ -15,7 +15,7 @@ import useWeeklyStatsHelper from "@components/spendings/spendingDashboard/weekly
 import spendingsText from "@components/spendings/config/text";
 import Spinner from "@components/common/Spinner";
 
-import type { KeyboardEvent } from "react";
+import type { FocusEvent, KeyboardEvent } from "react";
 
 interface InitialCeiling {
   initialCeiling: string;
@@ -53,7 +53,17 @@ const WeeklyStats = () => {
   const onSubmit = (value: InitialCeiling) => {
     setIsInputVisible(false);
     mutation.mutate(value.initialCeiling);
-  }
+  };
+
+  const canEditWeeklyCeiling = dashboard != null;
+
+  const closeCeilingFormIfFocusLeft = (e: FocusEvent<HTMLFormElement>) => {
+    const next = e.relatedTarget as Node | null;
+    if (next && e.currentTarget.contains(next)) {
+      return;
+    }
+    setIsInputVisible(false);
+  };
 
   useEffect(() => {
     if (isInputVisible) {
@@ -74,9 +84,16 @@ const WeeklyStats = () => {
 
         <div
           className={`${!isInputVisible ? "visible" : "hidden"}`}
-          onClick={() => {dashboard?.initialAmount && setIsInputVisible(true)}}
+          onMouseDown={canEditWeeklyCeiling ? (e) => e.preventDefault() : undefined}
+          onClick={() => canEditWeeklyCeiling && setIsInputVisible(true)}
         >
-          <div className={`text-initialAmountWeekly font-bold px-1 ${dashboard?.initialAmount ? "hover:bg-initialAmountHover hover:text-spendingActionHover hover:cursor-pointer hover:rounded-sm" : "cursor-not-allowed"}`}>
+          <div
+            className={`text-initialAmountWeekly font-bold px-1 ${
+              canEditWeeklyCeiling
+                ? "hover:bg-initialAmountHover hover:text-spendingActionHover hover:cursor-pointer hover:rounded-sm"
+                : "cursor-not-allowed"
+            }`}
+          >
             {initialCeiling ?? 0} €
           </div>
         </div>
@@ -84,7 +101,7 @@ const WeeklyStats = () => {
         <div className={`${isInputVisible ? "visible" : "hidden"}`}>
           <form
             key={initialCeiling}
-            onBlur={() => setIsInputVisible(false)}
+            onBlur={closeCeilingFormIfFocusLeft}
             onSubmit={handleSubmit(onSubmit)}
           >
             <input

@@ -1,4 +1,5 @@
-import { KeyboardEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import type { FocusEvent, KeyboardEvent } from "react";
 import { useForm } from "react-hook-form";
 import getYear from "date-fns/getYear";
 import format from "date-fns/format";
@@ -27,7 +28,15 @@ const MonthlyBudget = () => {
   const onSubmit = (value: InitialSalary) => {
     setIsInputVisible(false);
     mutation.mutate({ dashboardID: dashboard?.ID, initialAmount: value.initialAmount });
-  }
+  };
+
+  const closeFormIfFocusLeft = (e: FocusEvent<HTMLFormElement>) => {
+    const next = e.relatedTarget as Node | null;
+    if (next && e.currentTarget.contains(next)) {
+      return;
+    }
+    setIsInputVisible(false);
+  };
 
   useEffect(() => {
     isInputVisible && setFocus("initialAmount", { shouldSelect: true });
@@ -46,31 +55,30 @@ const MonthlyBudget = () => {
           <div className="uppercase">{monthlyText.dashboard.monthlyBudget.initialAmount}</div>
           <div
             className={`${!isInputVisible ? "visible" : "hidden"}`}
-            onClick={() => {setIsInputVisible(true)}}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setIsInputVisible(true)}
           >
             <div className="text-initialAmount font-bold hover:bg-initialAmountHover hover:cursor-pointer hover:rounded-sm hover:px-1">
               {dashboard?.initialAmount ?? 0} €
             </div>
           </div>
 
-          {
-            dashboard && (
-              <div className={`${isInputVisible ? "visible" : "hidden"}`}>
-                <form
-                  key={dashboard?.initialAmount ?? 0}
-                  onBlur={() => setIsInputVisible(false)}
-                  onSubmit={handleSubmit(onSubmit)}
-                >
-                  <input
-                    className="w-10 outline-0 bg-transparent border-b border-b-black"
-                    onKeyDown={(e: KeyboardEvent) => {e.key === "Escape" && setIsInputVisible(false)}}
-                    defaultValue={dashboard?.initialAmount ?? 0}
-                    {...register("initialAmount")}
-                  />
-                </form>
-              </div>
-            )
-          }
+          <div className={`${isInputVisible ? "visible" : "hidden"}`}>
+            <form
+              key={dashboard?.ID ?? "new-month"}
+              onBlur={closeFormIfFocusLeft}
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              <input
+                className="w-10 outline-0 bg-transparent border-b border-b-black"
+                onKeyDown={(e: KeyboardEvent) => {
+                  e.key === "Escape" && setIsInputVisible(false);
+                }}
+                defaultValue={dashboard?.initialAmount ?? 0}
+                {...register("initialAmount")}
+              />
+            </form>
+          </div>
         </div>
 
         <div className={`flex flex-col w-11/12 rounded-sm items-center text-xs h-12 justify-around ${remaining >= 0 ? "bg-remainingAmountAlpha" : "bg-generalWarningBackground"}`}>
