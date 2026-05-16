@@ -13,10 +13,10 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="flex flex-col items-center w-96 space-y-8 mt-28 rounded-sm bg-linear-to-br from-teal-300 to-sky-500 py-3 font-smooch shadow-lg">
+    <div className="auth-card-gradient w-full max-w-md p-8 rounded-xl border border-gray-700/40 shadow-2xl">
       <SharedLoginForm
         onSubmit={onSubmit}
-        buttonTitle="ré-initialiser le password"
+        buttonTitle="Réinitialiser le mot de passe"
         displayEmailField
       />
     </div>

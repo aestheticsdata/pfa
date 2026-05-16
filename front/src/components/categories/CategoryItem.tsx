@@ -1,163 +1,208 @@
-import { useEffect, useState } from "react";
-import Swal from 'sweetalert2';
-import Button from "@components/common/form/Button";
-import CategoryComponent from "@components/common/Category";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPencilAlt, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+"use client";
+
+import { useState } from "react";
+import { Edit2, Trash2 } from "lucide-react";
 import useCategories from "@components/spendings/services/useCategories";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@components/ui/dialog";
+import { Input } from "@components/ui/input";
+import { Label } from "@components/ui/label";
+import { Button } from "@components/ui/button";
+import { cn } from "@lib/utils";
+
 import type { Category } from "@src/schemas/categories";
 
 interface CategoryItemProps {
   category: Category;
 }
 
+const PRESET_COLORS = [
+  "#10b981",
+  "#06b6d4",
+  "#3b82f6",
+  "#8b5cf6",
+  "#ec4899",
+  "#f59e0b",
+  "#fbbf24",
+  "#ef4444",
+  "#64748b",
+];
+
 const CategoryItem = ({ category }: CategoryItemProps) => {
   const { deleteCategory, updateCategory } = useCategories();
-  const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [singleCategory, setSingleCategory] = useState(category);
-  const initialCategory = {...category};
-  // const updateError = useSelector(state=>state.categoriesReducer);
-  // const updateErrorMessage = useSelector(state => state.categoriesReducer.errorMessage);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [draft, setDraft] = useState(category);
 
-  // useEffect(() => {
-  //   if (updateErrorMessage !== '' && updateError.ID === category.ID) {
-  //     setSingleCategory(initialCategory);
-  //     Swal.fire({
-  //       title: 'Error',
-  //       text: updateErrorMessage.errors[0].message,
-  //       confirmButtonText: 'close',
-  //     })
-  //   }
-  // }, [updateError]);
-
-  const deleteCallback = (categoryID: string) => {
-    deleteCategory.mutate({ categoryID });
-    setIsDeleteConfirmVisible(false);
+  const onDelete = () => {
+    deleteCategory.mutate({ categoryID: category.ID });
+    setIsDeleteOpen(false);
   };
 
-  const item = {
-    category: singleCategory.name,
-    categoryColor: singleCategory.color,
+  const onCommit = () => {
+    updateCategory.mutate({ singleCategory: draft });
+    setIsEditOpen(false);
   };
-
-  const cancelEditing = () => {
-    setIsEditing(false);
-    setSingleCategory(initialCategory);
-  }
-
-  const commitEditing = () => {
-    setIsEditing(false);
-    console.log("singleCategory", singleCategory);
-    updateCategory.mutate({ singleCategory });
-  }
-
-  const confirmDeletePopin = (item, deleteCallback) => {
-    return (
-      <div className="flex justify-between items-center bg-warningDeleteBackground p-1 rounded-sm">
-        <div className="text-xs text-warningDelete font-bold">
-          Confirmer la suppression ?
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            type="button"
-            label="Annuler"
-            fontSize="text-xxs"
-            hoverTextColor="hover:text-grey3"
-            onClick={() => setIsDeleteConfirmVisible(false)}
-          />
-          <Button
-            type="button"
-            label="Effacer"
-            fontSize="text-xxs"
-            hoverTextColor="hover:text-warningDelete"
-            onClick={
-              () => {
-                setIsDeleteConfirmVisible(false);
-                deleteCallback(item.ID);
-              }
-            }
-          />
-        </div>
-      </div>
-    );
-  };
-
-  const editCategoryPopin = () => {
-    return (
-      <div className="flex text-xs space-x-2">
-
-        <input
-          type="text"
-          className="rounded-sm px-2"
-          value={singleCategory.name}
-          onChange={(ev) => setSingleCategory({...singleCategory, name: ev.target.value})}
-          onKeyPress={(keypressEvent) => { keypressEvent.code === 'Enter' && commitEditing() }}
-        />
-
-        <input
-          type="color"
-          className="rounded-sm bg-transparent cursor-pointer hover:shadow-login"
-          value={singleCategory.color}
-          onChange={(ev) => setSingleCategory({...singleCategory, color: ev.target.value})}
-        />
-
-        <Button
-          type="button"
-          label="Annuler"
-          fontSize="text-xxs"
-          hoverTextColor="hover:text-white"
-          onClick={() => { cancelEditing() }}
-        />
-
-        <Button
-          type="button"
-          label="Modifier"
-          fontSize="text-xxs"
-          hoverTextColor="hover:text-white"
-          onClick={() => { commitEditing() }}
-        />
-
-      </div>
-    );
-  };
-
-  const actionsFragment = () => (
-    <div className="flex w-1/5 justify-around text-grey3">
-      <div
-        className="cursor-pointer hover:text-grey0"
-        onClick={() => {
-          setIsEditing(true);
-        }}
-      >
-        <FontAwesomeIcon icon={faPencilAlt} />
-      </div>
-      <div
-        className="cursor-pointer hover:text-grey0 transition-colors ease-linear duration-200"
-        onClick={() => { setIsDeleteConfirmVisible(true) }}
-      >
-        <FontAwesomeIcon icon={faTrashAlt} />
-      </div>
-    </div>
-  );
-
-  const getCategoryContainer = () => {
-    if (isDeleteConfirmVisible) return confirmDeletePopin(category, deleteCallback);
-    if (isEditing) return editCategoryPopin();
-    return (
-      <div className="flex justify-between items-center">
-        <div className="w-[120px]">
-          <CategoryComponent item={item} />
-        </div>
-        { actionsFragment() }
-      </div>
-    );
-  }
 
   return (
-    <div className="w-[350px] hover:shadow-categories hover:rounded-sm p-1 transition-colors ease-linear duration-100">
-      { getCategoryContainer() }
-    </div>
+    <>
+      <div className="group bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black rounded-lg border-2 border-gray-800/50 hover:border-cyan-500/50 transition-all p-3 flex items-center gap-3 shadow-xl">
+        <button
+          type="button"
+          onClick={() => {
+            setDraft(category);
+            setIsEditOpen(true);
+          }}
+          className="w-1 h-8 rounded-full flex-shrink-0 hover:w-2 transition-all"
+          style={{ backgroundColor: category.color ?? "#94a3b8" }}
+          aria-label="Modifier la couleur"
+        />
+
+        <div className="flex-1 min-w-0">
+          <div className="px-3 py-1.5 bg-gray-700/50 rounded text-gray-200 text-sm text-center truncate">
+            {category.name}
+          </div>
+        </div>
+
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={() => {
+              setDraft(category);
+              setIsEditOpen(true);
+            }}
+            className="w-7 h-7 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors"
+            aria-label="Modifier"
+          >
+            <Edit2 className="w-3.5 h-3.5 text-gray-300" />
+          </button>
+          <button
+            type="button"
+            onClick={() => setIsDeleteOpen(true)}
+            className="w-7 h-7 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors"
+            aria-label="Supprimer"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-gray-300 hover:text-white" />
+          </button>
+        </div>
+      </div>
+
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800 sm:max-w-[420px]">
+          <DialogHeader>
+            <DialogTitle className="text-gray-100">
+              Modifier la catégorie
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor={`name-${category.ID}`} className="text-gray-300">
+                Nom
+              </Label>
+              <Input
+                id={`name-${category.ID}`}
+                value={draft.name}
+                onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") onCommit();
+                }}
+                className="bg-[#0c0c0c] border-gray-700/50 text-gray-100 focus-visible:border-cyan-500"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label className="text-gray-300">Couleur</Label>
+              <div className="grid grid-cols-9 gap-2">
+                {PRESET_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setDraft({ ...draft, color })}
+                    className={cn(
+                      "w-7 h-7 rounded-md transition-transform",
+                      draft.color === color &&
+                        "ring-2 ring-offset-2 ring-offset-background ring-cyan-500 scale-110",
+                    )}
+                    style={{ backgroundColor: color }}
+                    aria-label={color}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <Label
+                  htmlFor={`color-${category.ID}`}
+                  className="text-gray-400 text-xs"
+                >
+                  Personnalisée
+                </Label>
+                <input
+                  id={`color-${category.ID}`}
+                  type="color"
+                  value={draft.color ?? "#94a3b8"}
+                  onChange={(e) =>
+                    setDraft({ ...draft, color: e.target.value })
+                  }
+                  className="w-10 h-8 rounded-md bg-transparent border border-gray-700/50 cursor-pointer"
+                />
+                <span className="text-gray-500 text-xs">{draft.color}</span>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2 sm:gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsEditOpen(false)}
+              className="border-gray-700/50 bg-[#0c0c0c] text-gray-200 hover:bg-[#151515]"
+            >
+              Annuler
+            </Button>
+            <Button type="button" variant="cyan" onClick={onCommit}>
+              Enregistrer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-gray-100">
+              Supprimer la catégorie {category.name} ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Cette action est irréversible. Les dépenses associées
+              n&apos;auront plus de catégorie.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-gray-700/50 bg-[#0c0c0c] text-gray-200 hover:bg-[#151515]">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onDelete}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 

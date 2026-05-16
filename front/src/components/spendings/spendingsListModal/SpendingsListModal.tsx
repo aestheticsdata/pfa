@@ -1,20 +1,21 @@
 "use client";
 
-import {
-  useEffect,
-  useRef, useState
-} from "react";
+import { useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import useOnClickOutside from "use-onclickoutside";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendarDay, faChartSimple, faCircle } from "@fortawesome/free-solid-svg-icons";
 import parseISO from "date-fns/parseISO";
 import formatISO from "date-fns/formatISO";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
-import Period from "@components/spendings/spendingDashboard/common/Period";
-import CategoryComponent from "@components/common/Category";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@components/ui/dialog";
+import { Input } from "@components/ui/input";
+import { Label } from "@components/ui/label";
 import useSpendings from "@components/spendings/services/useSpendings";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
 import texts from "@components/spendings/config/text";
 import { DASHBOARD_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
@@ -29,229 +30,239 @@ interface SpendingsListModalProps {
   total: number;
 }
 
-const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, total }: SpendingsListModalProps) => {
+const groupByDate = (
+  spendings: SpendingItem[],
+): Record<string, SpendingItem[]> => {
+  return spendings.reduce(
+    (acc: Record<string, SpendingItem[]>, curr) => {
+      if (!acc[curr.date]) acc[curr.date] = [];
+      acc[curr.date].push(curr);
+      return acc;
+    },
+    {},
+  );
+};
+
+const SpendingsListModal = ({
+  handleClickOutside: handleClickOutsideProp,
+  periodType,
+  categoryInfos,
+  total,
+}: SpendingsListModalProps) => {
+  const [open, setOpen] = useState(true);
+  const handleClickOutside = () => {
+    setOpen(false);
+    setTimeout(handleClickOutsideProp, 200);
+  };
   const { spendingsByWeek, spendingsByMonth } = useSpendings();
-  const ref = useRef<HTMLDivElement>(null);
-  const [searchTerm, setsearchTerm] = useState("");
+  const { from, to } = useDatePickerWrapperStore();
+  const [searchTerm, setSearchTerm] = useState("");
   const { spendingsListModal: spendingsListModalTexts } = texts;
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
+  const normalizedSearchTerm = searchTerm.toLowerCase();
+  const categoryColor = categoryInfos?.categoryColor ?? "#94a3b8";
 
   const normalizePath = (path: string): string => {
     const normalized = path.replace(/\/+$/, "");
     return normalized === "" ? "/" : normalized;
   };
 
-  useOnClickOutside(ref as React.RefObject<HTMLElement>, handleClickOutside);
+  const sourceItems: SpendingItem[] = (
+    periodType === MONTHLY
+      ? (spendingsByMonth ?? [])
+      : (spendingsByWeek ?? []).flatMap((g) => g.items)
+  ).filter(
+    (s) =>
+      s.category === categoryInfos.category &&
+      s.label.toLowerCase().includes(normalizedSearchTerm),
+  );
 
-  useEffect(() => {
-    // prevent scrolling on body when modal is open
-    document.body.style.overflowY = 'hidden';
-    return () => {
-      document.body.style.overflowY = 'auto';
-    }
-  }, []);
+  const grouped = groupByDate(sourceItems);
+  const groupedEntries = Object.entries(grouped);
 
-  const groupByDate = (spendings: SpendingItem[]): Record<string, SpendingItem[]> => {
-    return spendings?.reduce((acc: Record<string, SpendingItem[]>, curr) => {
-      if (!acc[curr.date]) {
-        acc[curr.date] = []
-      }
-      acc[curr.date].push(curr);
-      return acc;
-    }, {})
-  }
-
-  const displaySpendingsList = () => {
-    const getAllPreviousEntries = (currentIndex: number): SpendingItem[] => {
-      const normalizedSearchTerm = searchTerm.toLowerCase();
-
-      if (periodType === MONTHLY && spendingsByMonth) {
-        const filteredSpendings = spendingsByMonth.filter((spending) =>
-          spending.category === categoryInfos.category &&
-          spending.label.toLowerCase().includes(normalizedSearchTerm)
-        );
-        const grouped = groupByDate(filteredSpendings);
-        const entries = Object.entries(grouped);
-        return entries
-          .slice(0, currentIndex + 1)
-          .reduce((acc: SpendingItem[], [_, daySpendings]) => [...acc, ...daySpendings as SpendingItem[]], []);
-      } else if (spendingsByWeek) {
-        const flattenedSpendings = spendingsByWeek
-          .filter((spendingGroup) => spendingGroup.items.length > 0)
-          .flatMap((spendingGroup) => spendingGroup.items)
-          .filter(spending =>
-            spending.category === categoryInfos.category &&
-            spending.label.toLowerCase().includes(normalizedSearchTerm)
-          );
-        const grouped = groupByDate(flattenedSpendings);
-        const entries = Object.entries(grouped);
-        return entries
-          .slice(0, currentIndex + 1)
-          .reduce((acc: SpendingItem[], [_, daySpendings]) => [...acc, ...daySpendings as SpendingItem[]], []);
-      }
-      return [];
-    };
-
-    const calculateDayTotal = (daySpendings: SpendingItem[]): number => {
-      return daySpendings.reduce((acc, spending) => acc + Number(spending.amount), 0);
-    };
-
-    const spendingsList = (spendings: [string, SpendingItem[]], i: number) => {
-      const dayTotal = calculateDayTotal(spendings[1]);
-      const cumulativeTotal = getAllPreviousEntries(i)
-        .reduce((acc, spending) => acc + Number(spending.amount), 0);
-
-      return (
-        <div
-          key={i}
-          className="rounded-sm border-2 border-grey1 pb-1 m-4 text-sm bg-gray-100"
-        >
-          {periodType === MONTHLY ? (
-            <div
-              className="cursor-pointer"
-              onClick={() => {
-                const dateISO = formatISO(new Date(spendings[0]), { representation: "date" });
-                if (normalizePath(pathname) === DASHBOARD_PATH) {
-                  const params = new URLSearchParams(searchParams.toString());
-                  params.set(DATE_QUERY_PARAM, dateISO);
-                  router.push(`${DASHBOARD_PATH}?${params.toString()}`);
-                } else {
-                  router.push(`${DASHBOARD_PATH}?${DATE_QUERY_PARAM}=${dateISO}`);
-                }
-                handleClickOutside();
-              }}
-            >
-              <div className="flex justify-between font-medium bg-grey01 p-2 mb-1 text-grey3 hover:bg-grey1 transition-colors ease-linear duration-200">
-                <div className="uppercase">
-                  {format(parseISO(spendings[0]), "EEEE dd MMMM", { locale: fr })}
-                </div>
-                <div className="flex text-xxs space-x-6">
-
-                  <div className="flex flex-col items-end">
-
-                    <div className="flex items-center space-x-1">
-                      <div>{spendingsListModalTexts.dayTotal}</div>
-                      <FontAwesomeIcon icon={faCalendarDay}/>
-                    </div>
-
-                    <div className="flex items-start h-full text-sm">{dayTotal.toFixed(1)} €</div>
-                  </div>
-
-                  <div className="flex flex-col items-end pb-1 px-2">
-                    <div className="flex items-center space-x-1">
-                      <div>{spendingsListModalTexts.cumulativeTotal}</div>
-                      <FontAwesomeIcon icon={faChartSimple}/>
-                    </div>
-                    <div className="flex w-full justify-end pr-1 rounded-sm p-0.5 bg-gray-500 text-white">
-                      {cumulativeTotal.toFixed(1)} €
-                    </div>
-                    <div className="text-slate-700">{spendingsListModalTexts.monthPercentage} {((cumulativeTotal / total) * 100).toFixed(0)}%</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="uppercase font-medium bg-grey01 p-1 mb-1 text-grey3">
-              {format(parseISO(spendings[0]), "EEEE dd MMMM", {locale: fr})}
-            </div>
-          )}
-
-          <div className="flex flex-col space-y-2 py-2">
-            {spendings[1].map((spending: SpendingItem, j: number) => (
-              <div
-                className="flex items-center space-x-2 text-sm px-2"
-                key={i + j}
-              >
-                
-                <div className="flex justify-between text-slate-700 w-full">
-                  <div className="flex items-center space-x-2">
-                    <div className="bg-slate-400 w-1.5 h-1.5 rounded-full shrink-0" />
-                    <span className="text-slate-700">{spending.label}</span>
-                  </div>
-                
-                  <div>{Number(spending.amount).toFixed(2)} €</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+  const cumulativeAt = (idx: number): number =>
+    groupedEntries
+      .slice(0, idx + 1)
+      .reduce(
+        (acc, [, items]) =>
+          acc + items.reduce((a, s) => a + Number(s.amount), 0),
+        0,
       );
-    };
 
-    if (periodType === MONTHLY) {
-      const normalizedSearchTerm = searchTerm.toLowerCase();
+  const dayTotal = (items: SpendingItem[]) =>
+    items.reduce((acc, s) => acc + Number(s.amount), 0);
 
-      return spendingsByMonth &&
-        Object.entries(
-          groupByDate(
-            spendingsByMonth
-              .filter((spending) => {
-                return (spending.category === categoryInfos.category) &&
-                  spending.label.toLowerCase().includes(normalizedSearchTerm);
-              })))
-          .map((spendings, i) => {
-            return spendingsList(spendings, i)
-          })
-      }
-    else {
-      const normalizedSearchTerm = searchTerm.toLowerCase();
-
-      return spendingsByWeek &&
-        Object.entries(
-          groupByDate(
-            spendingsByWeek
-              .filter((spendingGroup) => spendingGroup.items.length > 0)
-              .flatMap((spendingGroup) => spendingGroup.items)
-              ?.filter((spending) => {
-                return (spending.category === categoryInfos.category) &&
-                  spending.label.toLowerCase().includes(normalizedSearchTerm);
-              })))
-          .map((spendings, i) => spendingsList(spendings, i))
-    }
-  }
+  const periodLabel =
+    from && to
+      ? periodType === MONTHLY
+        ? format(from, "MMMM yyyy", { locale: fr }).toUpperCase()
+        : `${format(from, "dd MMM yyyy", { locale: fr })} — ${format(
+            to,
+            "dd MMM yyyy",
+            { locale: fr },
+          )}`.toUpperCase()
+      : "";
 
   return (
-    <div className="fixed flex justify-center items-center z-50 left-0 right-0 top-0 bottom-0 bg-invoiceFileModalBackground">
-      <div ref={ref} className="absolute flex flex-col w-[700px] h-[520px] bg-grey0 rounded-sm">
-
-        <div className="flex flex-row items-center px-4 border-b border-b-grey3 h-[50px] pb-2">
-          
-          <div className="flex flex-row items-center space-x-6 flex-1 min-w-0">
-            <div className="shrink-0 whitespace-nowrap">
-              {categoryInfos?.category ?
-                <CategoryComponent item={categoryInfos} customCss="px-6" />
-                :
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClickOutside()}>
+      <DialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800 sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
+        <DialogHeader className="px-6 py-5 border-b border-gray-800/60 space-y-0">
+          <DialogTitle className="flex items-baseline gap-4 text-gray-100 flex-wrap pr-10">
+            <span
+              className="w-6 h-6 rounded shrink-0 self-center"
+              style={{ backgroundColor: categoryColor }}
+            />
+            <span className="text-lg font-medium">
+              {categoryInfos.category ??
                 spendingsListModalTexts.noCategoryLabel}
-            </div>
-            <Period periodType={periodType} />
-            
-          </div>
-          
-          <div className="flex flex-row space-x-2 uppercase text-sm shrink-0">
-            <div>{spendingsListModalTexts.total} :</div>
-            <div className="font-bold">{total} €</div>
-          </div>
-        
-        </div>
+            </span>
+            <span className="text-sm uppercase tracking-wider text-gray-400 font-normal">
+              Total :{" "}
+              <span className="text-gray-100 font-bold normal-case text-base">
+                {total.toFixed(2)} €
+              </span>
+            </span>
+            {periodLabel && (
+              <span className="text-sm uppercase tracking-wider text-gray-400 font-medium ml-auto">
+                {periodLabel}
+              </span>
+            )}
+          </DialogTitle>
+        </DialogHeader>
 
-        <div className="flex flex-row space-x-2 border-b border-b-grey3 px-2 py-2 items-center">
-          <div className="shrink-0">{spendingsListModalTexts.filter} :</div>
-          <input
-            className="bg-white focus:shadow-login border-gray-400 border outline-hidden h-8 rounded-sm p-1 text-sm flex-1 min-w-0"
+        <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-800/60">
+          <Label className="text-gray-400 text-sm shrink-0">
+            {spendingsListModalTexts.filter} :
+          </Label>
+          <Input
             value={searchTerm}
-            onChange={e => setsearchTerm(e.target.value)}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Rechercher..."
+            className="flex-1 bg-[#0c0c0c] border-gray-700/50 text-gray-200 placeholder:text-gray-500 focus-visible:border-cyan-500 focus-visible:ring-0"
           />
         </div>
 
-        <div className="flex flex-col overflow-y-auto h-[420px] pt-2">
-          {displaySpendingsList()}
-        </div>
+        <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-6 py-4">
+          {groupedEntries.length === 0 && (
+            <div className="text-center text-gray-500 text-sm py-8">
+              Aucune dépense pour cette catégorie.
+            </div>
+          )}
+          {groupedEntries.map(([date, items], i) => {
+            const dt = dayTotal(items);
+            const cumulative = cumulativeAt(i);
+            const pct = total > 0 ? (cumulative / total) * 100 : 0;
+            const isClickable = periodType === MONTHLY;
 
-      </div>
-    </div>
+            const headerInner = (
+              <>
+                <div className="text-gray-100 uppercase text-base font-bold tracking-wide">
+                  {format(parseISO(date), "EEEE dd MMMM", { locale: fr })}
+                </div>
+                <div className="flex gap-3 items-start">
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-gray-400 text-xs">
+                      {spendingsListModalTexts.dayTotal}
+                    </span>
+                    <span className="px-3 py-1.5 rounded-lg border border-gray-700/60 bg-[#1c1c1c] text-gray-100 text-sm font-bold tabular-nums shadow-inner">
+                      {dt.toFixed(2)} €
+                    </span>
+                  </div>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className="text-gray-400 text-xs">
+                      {spendingsListModalTexts.cumulativeTotal}
+                    </span>
+                    <span className="px-3 py-1.5 rounded-lg border border-gray-700/60 bg-[#1c1c1c] text-gray-100 text-sm font-bold tabular-nums shadow-inner">
+                      {cumulative.toFixed(2)} €
+                    </span>
+                    {periodType === MONTHLY && (
+                      <span
+                        className="text-[11px] font-medium"
+                        style={{ color: categoryColor }}
+                      >
+                        {pct.toFixed(0)}% du mois ({pct.toFixed(1)}%)
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </>
+            );
+
+            const onCardClick = () => {
+              const dateISO = formatISO(new Date(date), {
+                representation: "date",
+              });
+              const params = new URLSearchParams(searchParams.toString());
+              params.set(DATE_QUERY_PARAM, dateISO);
+              if (normalizePath(pathname) === DASHBOARD_PATH) {
+                router.push(`${DASHBOARD_PATH}?${params.toString()}`);
+              } else {
+                router.push(
+                  `${DASHBOARD_PATH}?${DATE_QUERY_PARAM}=${dateISO}`,
+                );
+              }
+              handleClickOutside();
+            };
+
+            const Wrapper = isClickable ? "button" : "div";
+            const wrapperProps = isClickable
+              ? {
+                  type: "button" as const,
+                  onClick: onCardClick,
+                }
+              : {};
+
+            return (
+              <Wrapper
+                key={date}
+                {...wrapperProps}
+                className={`group block w-full text-left bg-[#0c0c0c] rounded-xl border border-gray-800/50 overflow-hidden transition-colors ${
+                  isClickable
+                    ? "hover:border-cyan-400 cursor-pointer"
+                    : ""
+                }`}
+              >
+                <div
+                  className={`flex items-start justify-between gap-4 px-5 py-4 transition-colors ${
+                    isClickable ? "group-hover:bg-gray-800/30" : ""
+                  }`}
+                >
+                  {headerInner}
+                </div>
+
+                <div
+                  className={`flex flex-col px-5 py-3 gap-2.5 border-t border-gray-800/40 bg-[#141414] transition-colors ${
+                    isClickable ? "group-hover:bg-[#1a1a1a]" : ""
+                  }`}
+                >
+                  {items.map((spending) => (
+                    <div
+                      key={spending.ID}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <div className="flex items-center gap-2.5 text-gray-200">
+                        <span
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ backgroundColor: categoryColor }}
+                        />
+                        <span>{spending.label}</span>
+                      </div>
+                      <span className="text-gray-100 tabular-nums">
+                        {Number(spending.amount).toFixed(2)} €
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </Wrapper>
+            );
+          })}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
-}
+};
 
 export default SpendingsListModal;

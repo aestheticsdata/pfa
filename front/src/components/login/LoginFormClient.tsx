@@ -19,15 +19,19 @@ export default function LoginFormClient() {
   };
 
   return (
-    <div className="flex flex-col items-center w-96 space-y-8 mt-28 rounded-sm bg-linear-to-br from-teal-300 to-sky-500 py-3 font-smooch shadow-lg">
+    <div className="auth-card-gradient w-full max-w-md flex flex-col gap-6 p-8 rounded-xl border border-gray-700/40 shadow-2xl">
       <SharedLoginForm
         onSubmit={onSubmit}
-        buttonTitle="login"
+        buttonTitle="Se connecter"
         displayEmailField
         displayPasswordField
       />
-      <div className="text-formsGlobalColor hover:text-generalWarningBackground hover:underline">
-        <Link href="/forgotPassword" prefetch={false}>
+      <div className="text-center text-sm text-gray-400">
+        <Link
+          href="/forgotPassword"
+          prefetch={false}
+          className="hover:text-cyan-400 transition-colors"
+        >
           mot de passe oublié ?
         </Link>
       </div>

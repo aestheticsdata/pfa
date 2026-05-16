@@ -7,6 +7,7 @@ import "react-day-picker/lib/style.css";
 import useOnClickOutside from "use-onclickoutside";
 import fr from "date-fns/locale/fr";
 import format from "date-fns/format";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { WEEKDAYS_LONG, WEEKDAYS_SHORT, MONTHS } from "./locale-fr";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
 import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
@@ -26,7 +27,7 @@ const DatePickerWrapper = () => {
 
   const searchParams = useSearchParams();
   const ref = useRef<HTMLDivElement>(null);
-  
+
   const selectedDateParam = searchParams.get(DATE_QUERY_PARAM);
 
   const daysAreSelected = selectedDays.length > 0;
@@ -51,8 +52,11 @@ const DatePickerWrapper = () => {
   useEffect(() => {
     if (selectedDateParam) {
       const date = new Date(selectedDateParam);
-      if (!Number.isNaN(date.getTime())
-        && (selectedDays.length === 0 || selectedDays[0].getTime() !== date.getTime())) {
+      if (
+        !Number.isNaN(date.getTime())
+        && (selectedDays.length === 0
+          || selectedDays[0].getTime() !== date.getTime())
+      ) {
         handleDayChange(date, false);
       }
     } else if (selectedDays.length === 0) {
@@ -61,44 +65,43 @@ const DatePickerWrapper = () => {
   }, [selectedDateParam]);
 
   return (
-    <div
-      ref={ref}
-      className="flex flex-col items-start bg-grey3 relative m-1"
-    >
-      <div
-        className="text-datePickerWrapper bg-datePickerWrapperBackground rounded-sm px-2 select-none cursor-pointer hover:brightness-125"
+    <div ref={ref} className="relative">
+      <button
+        type="button"
         onClick={toggleCalendar}
+        className="px-4 py-2 bg-[#0c0c0c] border border-gray-700/50 rounded-lg hover:bg-[#151515] hover:cursor-pointer transition-colors flex items-center justify-center gap-2 text-gray-200 shadow-lg whitespace-nowrap text-sm select-none"
       >
+        <CalendarIcon className="w-4 h-4" />
         {selectedDays.length > 0 ? (
-          <div>
-            {format(selectedDays[0], "dd MMM yyyy", { locale: fr })} –{" "}
+          <span>
+            {format(selectedDays[0], "dd MMM yyyy", { locale: fr })} —{" "}
             {format(selectedDays[selectedDays.length - 1], "dd MMM yyyy", {
               locale: fr,
             })}
-          </div>
+          </span>
         ) : (
-          <div>dates</div>
+          <span>Sélectionner une période</span>
         )}
-      </div>
-        {isCalendarVisible && (
-          <div className="absolute top-8 p-4 rounded-sm drop-shadow-2xl bg-blueNavy">
-            <DayPicker
-              initialMonth={selectedDays[0]}
-              locale="fr"
-              months={MONTHS}
-              weekdaysLong={WEEKDAYS_LONG}
-              weekdaysShort={WEEKDAYS_SHORT}
-              selectedDays={selectedDays}
-              showWeekNumbers={false}
-              showOutsideDays={false}
-              modifiers={modifiers}
-              onDayClick={(day) => handleDayChange(day)}
-              onDayMouseEnter={handleDayEnter}
-              onDayMouseLeave={handleDayLeave}
-              onWeekClick={() => {}}
-            />
-          </div>
-        )}
+      </button>
+      {isCalendarVisible && (
+        <div className="absolute top-12 right-0 lg:right-auto p-4 rounded-xl drop-shadow-2xl bg-card border border-gray-800/50 shadow-2xl z-50">
+          <DayPicker
+            initialMonth={selectedDays[0]}
+            locale="fr"
+            months={MONTHS}
+            weekdaysLong={WEEKDAYS_LONG}
+            weekdaysShort={WEEKDAYS_SHORT}
+            selectedDays={selectedDays}
+            showWeekNumbers={false}
+            showOutsideDays={false}
+            modifiers={modifiers}
+            onDayClick={(day) => handleDayChange(day)}
+            onDayMouseEnter={handleDayEnter}
+            onDayMouseLeave={handleDayLeave}
+            onWeekClick={() => {}}
+          />
+        </div>
+      )}
     </div>
   );
 };

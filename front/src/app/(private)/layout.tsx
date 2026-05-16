@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import NavBar from "@components/shared/navBar/NavBar";
 import { AuthProvider } from "@auth/context/AuthContext";
 import { getServerSession } from "@auth/server/getServerSession";
+import { Toaster } from "@components/ui/sonner";
 
 export default async function PrivateLayout({
   children,
@@ -16,10 +17,13 @@ export default async function PrivateLayout({
 
   return (
     <AuthProvider initialUser={session.user} initialCsrfToken={session.csrfToken}>
-      <div className="flex min-h-screen w-full flex-col items-center bg-grey1">
+      <div className="flex min-h-screen w-full flex-col items-stretch bg-background">
         <NavBar />
-        <div className="w-full">{children}</div>
+        <main className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 py-6">
+          {children}
+        </main>
       </div>
+      <Toaster richColors closeButton position="bottom-right" />
     </AuthProvider>
   );
 }

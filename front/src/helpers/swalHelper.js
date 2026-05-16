@@ -1,15 +1,8 @@
-import Swal from 'sweetalert2';
+import { toast } from "sonner";
 
 export const displayPopup = (message) => {
-  Swal.fire({
-    title: message.title || '',
-    text: message.text || '',
-    icon: 'success',
-    timerProgressBar: true,
-    toast: true,
-    position: 'top-end',
-    showConfirmButton: false,
-    timer: 3000,
-    width: '300px',
+  toast.success(message.title || message.text || "", {
+    description: message.title ? message.text : undefined,
+    duration: 3000,
   });
 };

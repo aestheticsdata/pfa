@@ -1,28 +1,41 @@
-import { useRef } from "react";
-import type { RefObject } from "react";
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
-import useOnClickOutside from 'use-onclickoutside';
+import {
+  Dialog,
+  DialogContent,
+} from "@components/ui/dialog";
 
+interface InvoiceImageModalProps {
+  image: string;
+  closeImage: () => void;
+}
 
-const InvoiceImageModal = ({ image, closeImage }) => {
-  const ref = useRef<HTMLDivElement | null>(null);
-  useOnClickOutside(ref as RefObject<HTMLElement>, closeImage);
-
+const InvoiceImageModal = ({
+  image,
+  closeImage: closeImageProp,
+}: InvoiceImageModalProps) => {
+  const [open, setOpen] = useState(true);
+  const closeImage = () => {
+    setOpen(false);
+    setTimeout(closeImageProp, 200);
+  };
   return (
-    <div className="fixed top-0 left-0 bottom-0 right-0 bg-grey2 z-10">
-      <div className="absolute max-h-screen overflow-y-auto">
-        <div ref={ref}>
+    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && closeImage()}>
+      <DialogContent className="bg-[#0a0a0a] border-gray-800 max-w-[90vw] sm:max-w-3xl p-0 overflow-hidden">
+        <div className="max-h-[85vh] overflow-y-auto p-4 flex justify-center">
           <Image
             src={image}
             alt="invoice"
-            width={800}
-            height={600}
+            width={1000}
+            height={800}
             unoptimized
             className="max-w-full h-auto"
           />
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

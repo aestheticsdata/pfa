@@ -1,10 +1,12 @@
-import { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPencilAlt, faTrashAlt, faFileInvoice } from '@fortawesome/free-solid-svg-icons';
+"use client";
+
+import { useState } from "react";
+import { Edit2, Trash2, ImageIcon } from "lucide-react";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
-import CategoryComponent from '@components/common/Category';
-// import cssSizes from "@src/css-sizes";
-import ConfirmDeletePopin from "@components/spendings/common/deleteSpendingPopin";
+import useSpendings from "@components/spendings/services/useSpendings";
+import useReccurings from "@components/spendings/services/useReccurings";
+import { cn } from "@lib/utils";
+
 import type { SpendingListItem } from "@components/spendings/types";
 
 interface SpendingItemProps {
@@ -14,118 +16,143 @@ interface SpendingItemProps {
   isRecurring?: boolean;
 }
 
-
 const SpendingItem = ({
   spending,
   editCallback,
   toggleAddSpending,
   isRecurring,
 }: SpendingItemProps) => {
-  const [isHover, setIsHover] = useState(false);
   const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
+  const { deleteSpending } = useSpendings();
+  const { deleteRecurring } = useReccurings();
 
-  // const isMobile = window.matchMedia(`(max-width: ${cssSizes.responsiveMaxWidth}px)`).matches;
-  const isMobile = false;
-
-  const onMouseOver = () => { !isMobile && setIsHover(true) };
-  const onMouseLeave = () => { !isMobile && setIsHover(false) };
-  const openEditModal = () => editCallback(spending);
   const spendingLabel = spending.label ?? "";
+  const hasInvoice =
+    "invoicefile" in spending && Boolean(spending.invoicefile);
 
-  const hideConfirm = () => {
+  const onConfirmDelete = () => {
+    if (isRecurring) {
+      deleteRecurring.mutate({ recurring: spending });
+    } else {
+      deleteSpending.mutate({ spending });
+    }
     toggleAddSpending();
     setIsDeleteConfirmVisible(false);
-    setIsHover(false);
   };
 
+  const onCancelDelete = () => {
+    toggleAddSpending();
+    setIsDeleteConfirmVisible(false);
+  };
+
+  if (isDeleteConfirmVisible) {
+    return (
+      <div className="flex items-center gap-2 py-2 px-3 bg-red-900/20 border border-red-600/40 rounded">
+        <span className="text-gray-200 text-sm flex-1">
+          Supprimer cette dépense ?
+        </span>
+        <button
+          type="button"
+          onClick={onCancelDelete}
+          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors text-sm"
+        >
+          Annuler
+        </button>
+        <button
+          type="button"
+          onClick={onConfirmDelete}
+          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded transition-colors text-sm"
+        >
+          Confirmer
+        </button>
+      </div>
+    );
+  }
+
+  const category =
+    "category" in spending ? spending.category : null;
+  const categoryColor =
+    "categoryColor" in spending && spending.categoryColor
+      ? spending.categoryColor
+      : "#94a3b8";
+
   return (
-    <div
-      className="flex justify-center cursor-default select-none"
-      onMouseOver={onMouseOver}
-      onMouseLeave={onMouseLeave}
-    >
-      {
-        isInvoiceModalVisible ?
-          <InvoiceModal
-            handleClickOutside={() => { !isMobile && setIsHover(false); setIsInvoiceModalVisible(!isInvoiceModalVisible) }}
-            spending={spending}
-          />
-          :
-          null
-      }
-      {
-        !isDeleteConfirmVisible ?
-          <div className={`flex justify-between w-[460px] rounded-sm ${isHover && "bg-spendingItemHover"} transition-colors ease-linear duration-200 ${!isRecurring && "mx-4"}`}>
+    <>
+      {isInvoiceModalVisible && (
+        <InvoiceModal
+          handleClickOutside={() =>
+            setIsInvoiceModalVisible(!isInvoiceModalVisible)
+          }
+          spending={spending}
+        />
+      )}
+      <div className="group flex items-center gap-2 py-1.5 hover:bg-gray-800/40 rounded px-2 transition-colors">
+        <div className="flex gap-1">
+          <button
+            type="button"
+            onClick={() => setIsInvoiceModalVisible(true)}
+            className={cn(
+              "w-6 h-6 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer",
+              hasInvoice
+                ? "bg-emerald-700/80 hover:bg-emerald-600"
+                : "bg-gray-700/80 hover:bg-cyan-600",
+            )}
+            title="Facture"
+          >
+            <ImageIcon className="w-3 h-3 text-gray-200" />
+          </button>
+          <button
+            type="button"
+            onClick={() => editCallback(spending)}
+            className="w-6 h-6 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer"
+            title="Modifier"
+          >
+            <Edit2 className="w-3 h-3 text-gray-300" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              toggleAddSpending();
+              setIsDeleteConfirmVisible(true);
+            }}
+            className="w-6 h-6 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer"
+            title="Supprimer"
+          >
+            <Trash2 className="w-3 h-3 text-gray-300 group-hover:text-white" />
+          </button>
+        </div>
 
-            <div className={`flex items-center ${!isRecurring ? "w-1/3" : "w-1/2"} text-sm font-ubuntu whitespace-nowrap overflow-hidden overflow-y-auto`} title={spendingLabel}>
-              {spendingLabel.length > 20 ? `${spendingLabel.slice(0,20)}...` : spendingLabel}
-            </div>
+        <div
+          className="w-1 h-5 rounded-full flex-shrink-0"
+          style={{ backgroundColor: categoryColor }}
+        />
 
-            {!isRecurring && (
-              ("category" in spending && spending?.category) ?
-                <div className="flex justify-center items-center w-1/3">
-                  <div className="w-3/4">
-                    {spending?.category &&
-                      <CategoryComponent item={{ category: spending.category ?? null, categoryColor: spending.categoryColor ?? null }} />
-                    }
-                  </div>
-                </div>
-                :
-                <div className="flex w-1/3"></div>
-              )}
+        <span
+          className="text-gray-300 text-sm flex-1 min-w-0 truncate"
+          title={spendingLabel}
+        >
+          {spendingLabel}
+        </span>
 
-            <div className={`flex justify-around items-center ${!isRecurring ? "w-1/6" : "w-1/4"} text-grey1`}>
-              <div
-                className={`cursor-pointer ${("invoicefile" in spending && spending.invoicefile) ? "text-invoiceImageIsPresent hover:text-invoiceImageIsPresentHover" : "hover:text-spendingActionHover"}`}
-                title="display invoice"
-                onClick={() => {setIsInvoiceModalVisible(!isInvoiceModalVisible)}}
-              >
-                <FontAwesomeIcon icon={faFileInvoice} />
-              </div>
-              <div
-                className="cursor-pointer hover:text-spendingActionHover"
-                title="edit"
-                onClick={() => openEditModal()}
-              >
-                <FontAwesomeIcon icon={faPencilAlt} />
-              </div>
-              <div
-                className="cursor-pointer hover:text-spendingActionHover"
-                title="delete"
-                onClick={
-                  () => {
-                    toggleAddSpending();
-                    setIsDeleteConfirmVisible(true);
-                  }
-                }
-              >
-                <FontAwesomeIcon icon={faTrashAlt} />
-              </div>
-            </div>
+        {!isRecurring && category && (
+          <span
+            className="px-2 py-0.5 rounded text-[10px] uppercase flex-shrink-0 font-medium"
+            style={{
+              backgroundColor: categoryColor + "30",
+              color: categoryColor,
+            }}
+          >
+            {category}
+          </span>
+        )}
 
-            <div className={`flex justify-end ${!isRecurring ? "w-1/6" : "w-1/4"} text-sm items-center`}>{Number(spending.amount).toFixed(2)} €</div>
-
-          </div>
-          :
-          <ConfirmDeletePopin spending={spending} recurringType={Boolean(isRecurring)} hideConfirm={hideConfirm} />
-      }
-    </div>
-  )
-}
+        <span className="text-gray-100 text-sm flex-shrink-0 min-w-[70px] text-right tabular-nums">
+          {Number(spending.amount).toFixed(2)} €
+        </span>
+      </div>
+    </>
+  );
+};
 
 export default SpendingItem;
-
-
-
-
-
-
-
-
-
-
-
-
-
-

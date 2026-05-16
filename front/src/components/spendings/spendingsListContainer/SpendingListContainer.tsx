@@ -1,39 +1,50 @@
 import SpendingItem from "@components/spendings/spendingDayItem/spendingItem/SpendingItem";
-
-import type { SpendingsListContainerType } from "@components/spendings/types";
 import Spinner from "@components/common/Spinner";
 
+import type { SpendingsListContainerType } from "@components/spendings/types";
 
 const SpendingsListContainer = ({
   spendingsByDaySorted,
   toggleAddSpending,
   editSpending,
   isLoading,
-  recurringType
+  recurringType,
 }: SpendingsListContainerType) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[120px]">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!spendingsByDaySorted?.length) {
+    return (
+      <div className="flex justify-center items-center min-h-[80px] text-gray-500 text-xs">
+        Aucune dépense
+      </div>
+    );
+  }
+
   return (
-  <div className={`space-y-1 ${recurringType ? 'recurrings' : 'spendings'}-list-container overflow-auto ${recurringType ? "h-[150px] w-[390px] px-2" : "h-[210px]"}`}>
-    {
-      spendingsByDaySorted?.length > 0 ?
-        isLoading ?
-          <div className="flex justify-center items-center h-[220px]">
-            <Spinner />
-          </div>
-          :
-          spendingsByDaySorted.map((spending) => (
-              <SpendingItem
-                key={spending.ID}
-                spending={spending}
-                editCallback={editSpending}
-                toggleAddSpending={toggleAddSpending}
-                isRecurring={recurringType}
-              />
-            )
-          )
-        :
-        null
-    }
-  </div>
-)};
+    <div
+      className={
+        recurringType
+          ? "recurrings-list-container flex flex-col gap-1 overflow-y-auto overflow-x-hidden max-h-[180px]"
+          : "spendings-list-container flex flex-col gap-1 overflow-y-auto overflow-x-hidden max-h-[220px]"
+      }
+    >
+      {spendingsByDaySorted.map((spending) => (
+        <SpendingItem
+          key={spending.ID}
+          spending={spending}
+          editCallback={editSpending}
+          toggleAddSpending={toggleAddSpending}
+          isRecurring={recurringType}
+        />
+      ))}
+    </div>
+  );
+};
 
 export default SpendingsListContainer;

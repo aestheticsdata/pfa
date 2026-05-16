@@ -1,31 +1,65 @@
-import { useEffect, useRef, useState } from "react";
-import type { RefObject } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import type { ChangeEvent } from "react";
 import { useQueryClient } from "react-query";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileUpload } from "@fortawesome/free-solid-svg-icons";
-import useOnClickOutside from "use-onclickoutside";
+import { Upload, Trash2 } from "lucide-react";
 import Image from "next/image";
-import Button from "@components/common/form/Button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@components/ui/alert-dialog";
+import { Button } from "@components/ui/button";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
-import InvoiceImageModal from './invoiceImageModal/InvoiceImageModal';
-import CategoryComponent from "@components/common/Category";
+import InvoiceImageModal from "./invoiceImageModal/InvoiceImageModal";
 import texts from "@components/spendings/config/text";
 import Spinner from "@components/common/Spinner";
 import { QUERY_KEYS } from "@components/spendings/config/constants";
-import ConfirmDelete from "@components/common/confirmDelete";
-import DeleteInvoiceButton from "@components/spendings/invoiceModal/deleteInvoiceButton";
+import { cn } from "@lib/utils";
 
+import type { SpendingListItem } from "@components/spendings/types";
 
-const InvoiceModal = ({ handleClickOutside, spending }) => {
+interface InvoiceModalProps {
+  handleClickOutside: () => void;
+  spending: SpendingListItem & {
+    category?: string | null;
+    categoryColor?: string | null;
+    date?: string;
+    dateFrom?: string;
+  };
+}
+
+const FILE_SIZE_LIMIT = 32_097_152;
+
+const InvoiceModal = ({
+  handleClickOutside: handleClickOutsideProp,
+  spending,
+}: InvoiceModalProps) => {
+  const [open, setOpen] = useState(true);
+  const handleClickOutside = () => {
+    setOpen(false);
+    setTimeout(handleClickOutsideProp, 200);
+  };
   const { privateRequest } = useRequestHelper();
   const queryClient = useQueryClient();
   const { invoiceModal: invoiceModalTexts } = texts;
   const { user } = useAuth();
   const userID = user?.id;
-  const fileSizeLimit = 32_097_152;
-  const [invoicefile, setInvoicefile] = useState<string | File>("");
-  const [invoiceImage, setInvoiceImage] = useState(null);
+  const [invoicefile, setInvoicefile] = useState<File | "">("");
+  const [invoiceImage, setInvoiceImage] = useState<string | null>(null);
   const [isFileTooBig, setIsFileTooBig] = useState(false);
   const [isInvalidFile, setIsInvalidFile] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,60 +67,64 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
   const [progressValue, setProgressValue] = useState(0);
   const [isProgress, setIsProgress] = useState(false);
   const [showConfirmDeleteImage, setShowConfirmDeleteImage] = useState(false);
-  const ref = useRef<HTMLDivElement | null>(null);
-  const onChange = (e) => { setInvoicefile(e.target.files[0]); setIsInvalidFile(false); };
 
-  const handleClickOutsideCheckFullImage = () => {
-    !isClickOnThumbnail && handleClickOutside();
-  }
-
-  useOnClickOutside(ref as RefObject<HTMLElement>, handleClickOutsideCheckFullImage);
-
-  const confirmDeleteImage = () => {
-    setShowConfirmDeleteImage(true);
-  }
+  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setInvoicefile(file);
+      setIsInvalidFile(false);
+    }
+  };
 
   const deleteImage = async () => {
     try {
       setIsLoading(true);
-      const res = await privateRequest('/spendings/upload', {
-        method: 'DELETE',
+      const res = await privateRequest("/spendings/upload", {
+        method: "DELETE",
         data: spending,
-      })
-      if (res?.data?.msg === 'INVOICE_IMAGE_DELETED') {
+      });
+      if (
+        (res as { data?: { msg?: string } })?.data?.msg ===
+        "INVOICE_IMAGE_DELETED"
+      ) {
         setInvoiceImage(null);
-        setInvoicefile('');
+        setInvoicefile("");
         await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
         setIsLoading(false);
       }
     } catch (e) {
-      console.log('error deleting image : ', e);
+      console.log("error deleting image : ", e);
+      setIsLoading(false);
     }
-  }
+  };
 
-  const uploadInvoiceImage = async (payload) => {
+  const uploadInvoiceImage = async (payload: FormData) => {
     const config = {
-      onUploadProgress: (progressEvent) => {
-        const progressValue = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        setProgressValue(progressValue);
-        if (progressValue === 100) {
+      onUploadProgress: (progressEvent: ProgressEvent) => {
+        const value = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total,
+        );
+        setProgressValue(value);
+        if (value === 100) {
           setIsProgress(false);
           setProgressValue(0);
         }
-      }
+      },
     };
     try {
       setIsProgress(true);
       setIsLoading(true);
-      const uploadedImage = await privateRequest('/spendings/upload', {
-        method: 'POST',
-        data: payload,
-      }, config);
+      const uploadedImage = await privateRequest(
+        "/spendings/upload",
+        { method: "POST", data: payload },
+        config,
+      );
       setInvoiceImage(uploadedImage.data);
       await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
       setIsLoading(false);
     } catch (e) {
-      const message = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
+      const message = (e as { response?: { data?: { message?: string } } })
+        ?.response?.data?.message;
       if (message === "INVALID_IMAGE_FILE") {
         setIsInvalidFile(true);
         setInvoicefile("");
@@ -94,11 +132,13 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
       setIsProgress(false);
       setIsLoading(false);
     }
-  }
+  };
 
-  const getInvoiceImage = async (spending) => {
+  const getInvoiceImage = async () => {
     try {
-      const res = await privateRequest(`/spendings/upload/${spending.ID}?userID=${userID}&itemType=${spending.itemType}`);
+      const res = await privateRequest(
+        `/spendings/upload/${spending.ID}?userID=${userID}&itemType=${spending.itemType}`,
+      );
       setInvoiceImage(res.data);
     } catch (e) {
       console.log("error getting image : ", e);
@@ -106,158 +146,136 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    getInvoiceImage(spending);
-
-    // prevent scrolling on body when modal is open
-    document.body.style.overflowY = 'hidden';
-    return () => {
-      document.body.style.overflowY = 'auto';
-    }
+    getInvoiceImage();
   }, []);
-
 
   const onSubmit = () => {
     setIsFileTooBig(false);
     setIsInvalidFile(false);
-    if (!userID) {
-      return;
-    }
-    if (!(invoicefile instanceof File)) {
-      return;
-    }
-    const formData = new FormData();
+    if (!userID) return;
+    if (!(invoicefile instanceof File)) return;
 
-    // warning, userID must be appended before file
-    // see : https://stackoverflow.com/questions/39589022/node-js-multer-and-req-body-empty
-    formData.append('userID', userID);
+    const formData = new FormData();
+    formData.append("userID", userID);
 
     switch (spending.itemType) {
-      case 'recurring':
-        formData.append('itemType', 'recurring');
-        formData.append('dateFrom', spending.dateFrom);
+      case "recurring":
+        formData.append("itemType", "recurring");
+        if (spending.dateFrom) {
+          formData.append("dateFrom", spending.dateFrom);
+        }
         break;
-      case 'spending':
-        formData.append('itemType', 'spending');
-        formData.append('date', spending.date);
+      case "spending":
+        formData.append("itemType", "spending");
+        if (spending.date) {
+          formData.append("date", spending.date);
+        }
         break;
       default:
         break;
     }
 
-    formData.append('label', spending.label);
-    formData.append('spendingID', spending.ID);
-    formData.append('invoiceImageUpload', invoicefile);
+    formData.append("label", spending.label);
+    formData.append("spendingID", spending.ID);
+    formData.append("invoiceImageUpload", invoicefile);
 
-    if (invoicefile.size > fileSizeLimit) {
+    if (invoicefile.size > FILE_SIZE_LIMIT) {
       setIsFileTooBig(true);
     } else {
       uploadInvoiceImage(formData);
     }
   };
 
+  const category = "category" in spending ? spending.category : null;
+  const categoryColor =
+    "categoryColor" in spending && spending.categoryColor
+      ? spending.categoryColor
+      : "#94a3b8";
+
   return (
-    <div className="fixed flex justify-center items-center z-50 left-0 right-0 top-0 bottom-0 bg-invoiceFileModalBackground">
-      <div
-        ref={ref}
-        className="absolute w-[500px] h-[420px] bg-grey0 rounded-sm overflow-hidden"
-      >
-        {
-          isClickOnThumbnail ?
-            <InvoiceImageModal
-              image={invoiceImage}
-              closeImage={() => setIsClickOnThumbnail(!isClickOnThumbnail)}
-            />
-            :
-            null
-        }
-        <div className="flex justify-center items-center space-x-4 py-2 px-1 h-[40px] bg-grey01 border-b-2 border-b-grey1 font-medium">
-          <div
-            className="cursor-default max-w-[210px] overflow-hidden text-ellipsis whitespace-nowrap"
-            title={spending.label}
-          >
-            {spending.label}
-          </div>
-          <div className="w-1/4">
-            {spending?.category &&
-              <CategoryComponent item={spending} />
-            }
-          </div>
-          <div>
-            {Number(spending.amount).toFixed(2)} €
-          </div>
-        </div>
-        <div className="flex justify-center items-center h-[250px] border-b-2 border-grey1">
-          {
-            isLoading ?
-              <div className="flex justify-center items-center h-[220px]">
-               <Spinner />
+    <>
+      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClickOutside()}>
+        <DialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800 sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-gray-100">
+              <span className="truncate max-w-[260px]" title={spending.label}>
+                {spending.label}
+              </span>
+              {category && (
+                <span
+                  className="px-2 py-0.5 rounded text-[10px] uppercase font-medium"
+                  style={{
+                    backgroundColor: categoryColor + "30",
+                    color: categoryColor,
+                  }}
+                >
+                  {category}
+                </span>
+              )}
+              <span className="ml-auto text-cyan-400 text-sm tabular-nums">
+                {Number(spending.amount).toFixed(2)} €
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex justify-center items-center min-h-[200px] border border-gray-800/50 bg-[#0c0c0c] rounded-lg overflow-hidden">
+            {isLoading && !isProgress ? (
+              <Spinner />
+            ) : invoiceImage ? (
+              <Image
+                src={invoiceImage}
+                width={300}
+                height={250}
+                alt="invoice"
+                onClick={() => setIsClickOnThumbnail(true)}
+                className="cursor-pointer max-w-full max-h-full object-contain"
+                unoptimized
+              />
+            ) : (
+              <div className="text-gray-500 text-sm">
+                {invoiceModalTexts.noInvoice}
               </div>
-              :
-              invoiceImage ?
-                <Image
-                  src={invoiceImage}
-                  width={300}
-                  height={250}
-                  alt="invoice"
-                  onClick={() => {setIsClickOnThumbnail(!isClickOnThumbnail)}}
-                  className="cursor-pointer max-w-full max-h-full object-contain"
-                  unoptimized
-                />
-                :
-                <div className="flex justify-center items-center border-2 border-grey1 rounded-sm w-3/4 h-3/4 text-3xl font-extralight">
-                  <div className="no-invoice-label">
-                    {invoiceModalTexts.noInvoice}
-                  </div>
-                </div>
-          }
-        </div>
-        <div className="flex justify-center items-center flex-col h-[105px]">
-          {
-            isFileTooBig && (
-              <div className="file-too-big">
+            )}
+          </div>
+
+          <div className="flex flex-col gap-2 items-center">
+            {isFileTooBig && (
+              <p className="text-destructive text-sm">
                 {invoiceModalTexts.fileTooBig}
-              </div>
-            )
-          }
-          {
-            isInvalidFile && (
-              <div className="text-red-500 text-sm font-medium">
+              </p>
+            )}
+            {isInvalidFile && (
+              <p className="text-destructive text-sm">
                 {invoiceModalTexts.invalidFileType}
-              </div>
-            )
-          }
-          {
-            isLoading ?
-              isProgress ?
-                <div className="flex flex-col space-y-2 w-[250px]">
-                  <div className="relative text-grey2 font-semibold" style={{left: `${progressValue*2.5}px`}}>{progressValue} %</div>
-                  <div className="rounded-sm h-2.5 bg-white">
-                    <div className="bg-grey1 h-2.5 rounded-sm" style={{width: `${progressValue*2.5}px`}}></div>
-                  </div>
-                </div>
-                :
-                <div className="flex justify-center items-center h-[220px]">
-                 <Spinner />
-                </div>
-              :
-              invoiceImage ?
-                showConfirmDeleteImage ?
-                  <ConfirmDelete hideConfirm={() => { setShowConfirmDeleteImage(false) }}>
-                    <DeleteInvoiceButton
-                      hideConfirm={() => {setShowConfirmDeleteImage(false)}}
-                      deleteInvoice={deleteImage}
-                    />
-                  </ConfirmDelete>
-                  :
-                  <Button
-                    type="button"
-                    onClick={confirmDeleteImage}
-                    label={invoiceModalTexts.delete}
+              </p>
+            )}
+
+            {isProgress ? (
+              <div className="flex flex-col gap-2 w-full">
+                <span className="text-gray-300 text-xs text-right">
+                  {progressValue} %
+                </span>
+                <div className="h-2 bg-gray-800 rounded overflow-hidden">
+                  <div
+                    className="h-full bg-cyan-500 transition-all"
+                    style={{ width: `${progressValue}%` }}
                   />
-                :
+                </div>
+              </div>
+            ) : invoiceImage && !isLoading ? (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={() => setShowConfirmDeleteImage(true)}
+              >
+                <Trash2 className="w-4 h-4" />
+                {invoiceModalTexts.delete}
+              </Button>
+            ) : (
+              !isLoading && (
                 <>
                   <input
                     className="hidden"
@@ -267,48 +285,82 @@ const InvoiceModal = ({ handleClickOutside, spending }) => {
                     accept="image/jpeg,image/png,image/webp,image/gif"
                     onChange={onChange}
                   />
-                  <div className="flex flex-col mt-6 justify-center items-center h-[105px] w-full bg-grey0">
-                    <label htmlFor="invoicefileinputid" className="flex justify-center text-grey2 w-11/12">
-                      {
-                        invoicefile !== '' ?
-                          <div className="flex flex-col space-y-4 pt-2 relative font-semibold text-lg h-[105px]">
-                            <div>{(invoicefile as File).name}</div>
-                            {
-                              invoicefile && (
-                                <Button
-                                  type="submit"
-                                  onClick={onSubmit}
-                                  disabled={invoicefile === ''}
-                                  label={invoiceModalTexts.send}
-                                />
-                              )
-                            }
-                          </div>
-                          :
-                          <div className="w-[230px]">
-                            <div className="flex justify-center items-center">
-                              <div className="relative text-6xl hover:cursor-pointer hover:text-addSpendingHover">
-                                <FontAwesomeIcon icon={faFileUpload} />
-                              </div>
-                            </div>
-                            <div className="flex flex-col">
-                              <div className="flex justify-center font-semibold">
-                                {invoiceModalTexts.chooseFile}
-                              </div>
-                              <div className="flex justify-center text-xxs">
-                                {invoiceModalTexts.fileTypeWarning}
-                              </div>
-                            </div>
-                          </div>
-                      }
-                    </label>
-                  </div>
+                  <label
+                    htmlFor="invoicefileinputid"
+                    className={cn(
+                      "flex flex-col items-center justify-center gap-2 w-full p-6 border-2 border-dashed border-gray-700/50 rounded-lg cursor-pointer hover:border-cyan-600 hover:bg-[#0c0c0c] transition-colors text-gray-300",
+                    )}
+                  >
+                    {invoicefile !== "" ? (
+                      <>
+                        <span className="text-sm">
+                          {(invoicefile as File).name}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="cyan"
+                          onClick={onSubmit}
+                        >
+                          {invoiceModalTexts.send}
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-8 h-8 text-cyan-500" />
+                        <span className="font-medium text-gray-200">
+                          {invoiceModalTexts.chooseFile}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {invoiceModalTexts.fileTypeWarning}
+                        </span>
+                      </>
+                    )}
+                  </label>
                 </>
-          }
-        </div>
-      </div>
-    </div>
-  )
+              )
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {isClickOnThumbnail && invoiceImage && (
+        <InvoiceImageModal
+          image={invoiceImage}
+          closeImage={() => setIsClickOnThumbnail(false)}
+        />
+      )}
+
+      <AlertDialog
+        open={showConfirmDeleteImage}
+        onOpenChange={setShowConfirmDeleteImage}
+      >
+        <AlertDialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-gray-100">
+              Supprimer la facture ?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-400">
+              Cette action est irréversible.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-gray-700/50 bg-[#0c0c0c] text-gray-200 hover:bg-[#151515]">
+              Annuler
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                deleteImage();
+                setShowConfirmDeleteImage(false);
+              }}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              Supprimer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
+  );
 };
 
 export default InvoiceModal;

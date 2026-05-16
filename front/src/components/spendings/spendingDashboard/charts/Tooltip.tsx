@@ -1,41 +1,42 @@
+"use client";
+
 import adjustFontColor from "@components/shared/helpers/adjustColor";
 
 import type { ChartsCategory } from "@src/schemas/stats";
 
-
 interface TooltipProps {
-  tooltipPos: { x: number, y: number };
+  tooltipPos: { x: number; y: number };
   categoryInfos: ChartsCategory;
 }
 
 const Tooltip = ({ tooltipPos, categoryInfos }: TooltipProps) => {
+  const color = categoryInfos?.categoryColor ?? "#94a3b8";
   return (
     <div
-      className="flex flex-col absolute w-[100px] h-[50px] bg-grey1 rounded-sm border-2 border-white text-xs"
+      className="fixed flex flex-col w-[120px] rounded-lg border border-gray-800/50 bg-popover text-popover-foreground shadow-2xl text-xs overflow-hidden z-[80] pointer-events-none"
       style={{
-        left: tooltipPos.x + 20 + 'px',
-        top: tooltipPos.y - 50 + 'px',
+        left: tooltipPos.x + 16 + "px",
+        top: tooltipPos.y - 50 + "px",
       }}
     >
-      <div className="flex h-1/2 justify-center items-center text-white">
-        {
-          categoryInfos && (
-            <div>{Number(categoryInfos.value).toFixed(2)} €</div>
-          )
-        }
+      <div className="flex justify-center items-center px-2 py-1.5 text-gray-100">
+        {categoryInfos && (
+          <span>{Number(categoryInfos.value).toFixed(2)} €</span>
+        )}
       </div>
-      {
-        categoryInfos && (
-          <div
-            className={`flex h-1/2 justify-center items-center uppercase text-tiny font-bold ${adjustFontColor(categoryInfos.categoryColor ?? "#ffffff") === "#ffffff" ? "text-white" : "text-black"}`}
-            style={{backgroundColor: categoryInfos?.categoryColor ?? "#ffffff"}}
-          >
-            {categoryInfos?.category ?? "sans catégories"}
-          </div>
-        )
-      }
+      {categoryInfos && (
+        <div
+          className="flex justify-center items-center uppercase text-[10px] font-bold py-1"
+          style={{
+            backgroundColor: color,
+            color: adjustFontColor(color) === "#ffffff" ? "#ffffff" : "#000000",
+          }}
+        >
+          {categoryInfos?.category ?? "sans catégories"}
+        </div>
+      )}
     </div>
-  )
+  );
 };
 
 export default Tooltip;

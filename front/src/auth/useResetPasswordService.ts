@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Swal from "sweetalert2";
+import { toast } from "sonner";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 
@@ -19,34 +19,21 @@ const useResetPasswordService = () => {
         data: {
           email,
           subject: "PFA - changement de mot de passe",
-        }
-      });
-      // @ts-ignore
-      Swal.fire({
-        title: "Succès",
-        text: "un nouveau mot de passe vous a été envoyé",
-        type: "success",
-        icon: "success",
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
-        didClose: () => {
-          clearAuth();
-          router.push("/login");
         },
       });
+      toast.success("Un nouveau mot de passe vous a été envoyé", {
+        duration: 3000,
+      });
+      setTimeout(() => {
+        clearAuth();
+        router.push("/login");
+      }, 600);
     } catch (err: unknown) {
-      // @ts-ignore
-      await Swal.fire({
-        title: "le mot de passe n'a pas pu être ré-initialisé",
-        text: (err as AxiosError).response?.data.error ?? "",
-        type: "error",
-        icon: "warning",
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: 3000,
+      const description =
+        (err as AxiosError<{ error?: string }>).response?.data?.error ?? "";
+      toast.error("Le mot de passe n'a pas pu être ré-initialisé", {
+        description,
+        duration: 3000,
       });
     }
   };

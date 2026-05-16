@@ -1,15 +1,21 @@
 import type { ReactNode } from "react";
+import { SurfaceCard } from "@components/ui/surface-card";
 
 interface PFAResponsiveChartsContainerProps {
   children: ReactNode;
+  title?: string;
 }
 
-const PFAResponsiveChartsContainer = ({ children }: PFAResponsiveChartsContainerProps) => (
-  <div className="bg-[#adadad] p-4 rounded-sm w-full lg:w-1/2 h-[500px]">
-    <div className="h-full w-full">
-      {children}
-    </div>
-  </div>
+const PFAResponsiveChartsContainer = ({
+  children,
+  title,
+}: PFAResponsiveChartsContainerProps) => (
+  <SurfaceCard className="flex flex-col gap-3 w-full lg:w-1/2 p-6">
+    {title && (
+      <div className="text-gray-100 text-lg font-medium">{title}</div>
+    )}
+    <div className="h-[420px] w-full">{children}</div>
+  </SurfaceCard>
 );
 
 export default PFAResponsiveChartsContainer;

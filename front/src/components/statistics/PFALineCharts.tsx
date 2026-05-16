@@ -6,7 +6,7 @@ import {
   ResponsiveContainer,
   Tooltip,
   XAxis,
-  YAxis
+  YAxis,
 } from "recharts";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
@@ -22,27 +22,42 @@ const PFALineCharts = ({ data, year }: PFALineChartsProps) => {
   const categories = Object.keys(colors).sort();
 
   if (lineData.length === 0) {
-    return <div className="text-center text-sm text-gray-500">pas de données.</div>;
+    return (
+      <div className="flex h-full items-center justify-center text-sm text-gray-500">
+        pas de données
+      </div>
+    );
   }
-  
+
   return (
     <ResponsiveContainer width="100%" height="100%" minHeight={400} minWidth={0}>
-      <LineChart data={lineData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="month" />
-        <YAxis />
+      <LineChart
+        data={lineData}
+        margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+      >
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="rgb(55 65 81 / 0.5)"
+        />
+        <XAxis dataKey="month" tick={{ fill: "#9ca3af", fontSize: 11 }} />
+        <YAxis tick={{ fill: "#9ca3af", fontSize: 11 }} />
         <Tooltip
           labelFormatter={(label: string | number) => `${label} ${year}`}
-          labelClassName="bg-gray-200 p-1 rounded-sm font-semibold"
           formatter={(value: number | string) => `${value} €`}
           offset={7}
           contentStyle={{
+            background: "rgba(20, 20, 20, 0.95)",
+            border: "1px solid rgba(75, 85, 99, 0.5)",
+            borderRadius: "8px",
             fontSize: "0.8rem",
-            borderRadius: "5px",
+            color: "#e5e7eb",
           }}
+          labelStyle={{ color: "#e5e7eb", fontWeight: 600 }}
+          itemStyle={{ color: "#e5e7eb" }}
+          cursor={{ stroke: "rgba(6, 182, 212, 0.4)", strokeWidth: 1 }}
           animationDuration={200}
         />
-        <Legend />
+        <Legend wrapperStyle={{ fontSize: "0.75rem", color: "#d1d5db" }} />
         {categories.map((cat) => (
           <Line
             key={cat}

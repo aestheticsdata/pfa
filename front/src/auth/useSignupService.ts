@@ -1,7 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
 import useRequestHelper from "@helpers/useRequestHelper";
-import Swal from "sweetalert2";
 
 import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 import type { AuthResponse } from "@auth/types";
@@ -9,7 +9,9 @@ import type { AuthResponse } from "@auth/types";
 const useSignupService = () => {
   const { request } = useRequestHelper();
 
-  const signupService = async (user: LoginValues): Promise<AuthResponse | undefined> => {
+  const signupService = async (
+    user: LoginValues,
+  ): Promise<AuthResponse | undefined> => {
     const { email, password } = user;
     try {
       const res = await request("/users/add", {
@@ -24,12 +26,8 @@ const useSignupService = () => {
         },
       });
       return res.data as AuthResponse;
-    } catch (err) {
-      await Swal.fire({
-        title: "Erreur lors de la création de compte",
-        icon: "warning",
-        confirmButtonText: "fermer",
-      });
+    } catch {
+      toast.error("Erreur lors de la création de compte");
     }
   };
 

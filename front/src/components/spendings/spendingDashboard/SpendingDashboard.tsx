@@ -1,11 +1,10 @@
-import SpendingDayItem from '@components/spendings/spendingDayItem/SpendingDayItem';
-import MonthlyBudget from '@components/spendings/spendingDashboard/monthlyBudget/MonthlyBudget';
-import WeeklyStats from "@components/spendings/spendingDashboard/weeklyStats/WeeklyStats";
-import WeeklyCharts from "@components/spendings/spendingDashboard/weeklyCharts/WeeklyCharts";
-import MonthlyCharts from "@components/spendings/spendingDashboard/monthlyCharts/MonthlyCharts";
-import { useAuth } from "@auth/context/AuthContext";
-import useReccurings from "@components/spendings/services/useReccurings";
-import useBlur from "@components/common/helpers/blurHelper";
+"use client";
+
+import PeriodSummary from "@components/spendings/spendingDashboard/periodSummary/PeriodSummary";
+import GlobalSummary from "@components/spendings/spendingDashboard/globalSummary/GlobalSummary";
+import MonthlyChartCard from "@components/spendings/spendingDashboard/monthlyCharts/MonthlyChartCard";
+import WeeklyChartCard from "@components/spendings/spendingDashboard/weeklyCharts/WeeklyChartCard";
+import FixedExpensesPanel from "@components/spendings/spendingDashboard/fixedExpenses/FixedExpensesPanel";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 
@@ -14,30 +13,24 @@ interface SpendingDashboardProps {
 }
 
 const SpendingDashboard = ({ month }: SpendingDashboardProps) => {
-  const { isBlurActive } = useBlur();
-  const { user } = useAuth();
-  const { recurrings, isLoading: isRecurringsLoading, error } = useReccurings();
-
-  if (error) {
-    throw error;
-  }
-
   return (
-    <div className={`hidden md:flex justify-around mt-14 items-center w-full h-72 bg-grey2 z-30 fixed ${isBlurActive && "blur-xs"}`}>
-      <WeeklyStats />
-      <MonthlyBudget />
-      <MonthlyCharts />
-      <WeeklyCharts />
-      <SpendingDayItem
-        spendingsByDay={recurrings}
-        total={0}
-        isLoading={isRecurringsLoading}
-        user={user}
-        recurringType
-        month={month}
-      />
+    <div className="flex flex-col gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-4">
+          <PeriodSummary />
+        </div>
+        <div className="lg:col-span-5 flex flex-col gap-6">
+          <GlobalSummary />
+          <MonthlyChartCard />
+        </div>
+        <div className="lg:col-span-3">
+          <FixedExpensesPanel month={month} />
+        </div>
+      </div>
+
+      <WeeklyChartCard />
     </div>
-  )
-}
+  );
+};
 
 export default SpendingDashboard;

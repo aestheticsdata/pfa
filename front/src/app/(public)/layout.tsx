@@ -17,10 +17,15 @@ export default async function PublicLayout({
   }
 
   return (
-    <AuthProvider initialUser={session?.user ?? null} initialCsrfToken={session?.csrfToken ?? null}>
-      <div className="flex min-h-screen w-full flex-col items-center bg-grey1">
+    <AuthProvider
+      initialUser={session?.user ?? null}
+      initialCsrfToken={session?.csrfToken ?? null}
+    >
+      <div className="flex min-h-screen w-full flex-col items-stretch bg-background">
         <NavBar />
-        {children}
+        <main className="flex flex-1 w-full items-center justify-center px-4 py-12">
+          {children}
+        </main>
       </div>
     </AuthProvider>
   );

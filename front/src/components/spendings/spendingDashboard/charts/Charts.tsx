@@ -1,35 +1,30 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChartBar } from "@fortawesome/free-solid-svg-icons";
+"use client";
+
+import { useState, useEffect } from "react";
+import { BarChart3 } from "lucide-react";
 import useCharts from "@components/spendings/services/useCharts";
-import Tooltip from "@components/spendings/spendingDashboard/charts/Tooltip";
-import WidgetHeader from "@components/spendings/spendingDashboard/common/WidgetHeader";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
-import { MONTHLY, WEEKLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
+import {
+  MONTHLY,
+  WEEKLY,
+} from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
 
 import type { ChartsCategory } from "@src/schemas/stats";
-
 
 type periodType = typeof MONTHLY | typeof WEEKLY;
 
 interface ChartsProps {
-  title: string;
   periodType: periodType;
 }
 
-const getMaxValue = (data: ChartsCategory[]) => Math.max(...data.map((category) => category.value));
-const getTotal = (data: ChartsCategory[]) => data.reduce((acc, curr) => acc + curr.value, 0);
+const getMaxValue = (data: ChartsCategory[]) =>
+  Math.max(...data.map((category) => category.value));
+const getTotal = (data: ChartsCategory[]) =>
+  data.reduce((acc, curr) => acc + curr.value, 0);
 
-const widthOfContainer = 290; // 300 - (border width * 2)
-
-const Charts = ({ title, periodType }: ChartsProps) => {
+const Charts = ({ periodType }: ChartsProps) => {
   const [categoryTotal, setCategoryTotal] = useState(0);
-  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
-  const [tooltipPos, setTooltipPos] = useState({x: 0, y: 0});
   const [categoryInfos, setCategoryInfos] = useState<ChartsCategory>();
   const { data: charts, error } = useCharts(periodType);
 
@@ -53,89 +48,64 @@ const Charts = ({ title, periodType }: ChartsProps) => {
     };
   }, []);
 
-  const getWidth = (value: number) => {
-    let width;
-    if (maxv !== 0) {
-      width = (value * widthOfContainer) / maxv;
-    }
-    return width;
-  }
-
   return (
     <>
-      {
-        isInvoiceModalVisible && (
-          <SpendingsListModal
-            handleClickOutside={() => setIsInvoiceModalVisible(!isInvoiceModalVisible)}
-            periodType={periodType}
-            categoryInfos={categoryInfos!}
-            total={categoryTotal}
-          />
-        )
-
-      }
-      <WidgetHeader
-        title={title}
-        periodType={periodType}
-        center
-      />
-      <div className="flex w-full h-3/4 overflow-hidden overflow-y-auto">
-        {
-          charts?.length === 0 && (
-            <div className="flex justify-center items-center w-full h-full text-8xl text-grey01">
-              <div>
-                <FontAwesomeIcon icon={faChartBar} />
-              </div>
-            </div>
-          )
-        }
-        <div className="flex flex-col gap-y-1">
-        {
-          maxv !== 0 && charts &&
-            charts.map((category: ChartsCategory, index: number) => {
-              return (
-                <div
-                  key={`cat-${category.category ?? "uncategorized"}-${index}`}
-                  className="flex items-center gap-x-1"
-                  onClick={() => {
-                    setIsInvoiceModalVisible(!isInvoiceModalVisible);
-                    setCategoryTotal(category.value ?? 0);
-                  }}
-                >
-                  <div
-                    className="h-[15px] cursor-pointer"
-                    style={{
-                      width: getWidth(category.value ?? 0),
-                      backgroundColor: category.categoryColor ?? "#ffffff",
-                      borderTopRightRadius: "3px",
-                      borderBottomRightRadius: "3px",
-                    }}
-                    onMouseEnter={() => {setIsTooltipVisible(true)}}
-                    onMouseLeave={() => {setIsTooltipVisible(false)}}
-                    onMouseMove={e => {
-                      setTooltipPos({x: e.clientX, y: e.clientY});
-                      setCategoryInfos(category);
-                    }}
-                  />
-                  <div className="text-tiny">
-                    {Number(((category.value ?? 0) / total) * 100).toFixed(1)}%
+      {isInvoiceModalVisible && (
+        <SpendingsListModal
+          handleClickOutside={() =>
+            setIsInvoiceModalVisible(!isInvoiceModalVisible)
+          }
+          periodType={periodType}
+          categoryInfos={categoryInfos!}
+          total={categoryTotal}
+        />
+      )}
+      <div className="charts-categories-list flex flex-col gap-2 w-full max-h-[324px] overflow-y-auto pr-1">
+        {charts?.length === 0 && (
+          <div className="flex justify-center items-center w-full h-32 text-gray-600">
+            <BarChart3 className="w-16 h-16" />
+          </div>
+        )}
+        {maxv !== 0 &&
+          charts &&
+          charts.map((category: ChartsCategory, index: number) => {
+            const percent = (((category.value ?? 0) / total) * 100).toFixed(1);
+            const color = category.categoryColor ?? "#94a3b8";
+            return (
+              <div
+                key={`cat-${category.category ?? "uncategorized"}-${index}`}
+                className="flex items-center gap-3 cursor-pointer group"
+                onClick={() => {
+                  setIsInvoiceModalVisible(!isInvoiceModalVisible);
+                  setCategoryTotal(category.value ?? 0);
+                  setCategoryInfos(category);
+                }}
+              >
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-1 text-xs">
+                    <span className="text-gray-300 uppercase font-medium truncate transition-colors group-hover:text-gray-100">
+                      {category.category ?? "sans catégorie"}
+                    </span>
+                    <span className="text-gray-400 ml-2 shrink-0 transition-colors group-hover:text-gray-200">
+                      {percent}%
+                    </span>
+                  </div>
+                  <div className="h-2 bg-gray-800/60 rounded-full overflow-hidden transition-colors group-hover:bg-gray-700/80">
+                    <div
+                      className="h-full rounded-full transition-all group-hover:brightness-125 group-hover:saturate-150"
+                      style={{
+                        width: `${((category.value ?? 0) / maxv) * 100}%`,
+                        backgroundColor: color,
+                      }}
+                    />
                   </div>
                 </div>
-              )
-            })
-        }
-        </div>
-        {
-          isTooltipVisible && categoryInfos && (
-            <Tooltip
-              tooltipPos={tooltipPos}
-              categoryInfos={categoryInfos}
-            />
-          )
-        }
+              </div>
+            );
+          })}
       </div>
     </>
-  )
-}
+  );
+};
 
 export default Charts;

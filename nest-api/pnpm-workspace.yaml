@@ -1,3 +1,11 @@
+allowBuilds:
+  '@nestjs/core': true
+  '@prisma/engines': true
+  cpu-features: true
+  prisma: true
+  sharp: true
+  ssh2: true
+  unrs-resolver: true
 onlyBuiltDependencies:
   - '@nestjs/core'
   - '@prisma/engines'

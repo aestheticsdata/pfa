@@ -1,14 +1,17 @@
 "use client";
 
+import { toast } from "sonner";
 import useRequestHelper from "@helpers/useRequestHelper";
-import Swal from "sweetalert2";
 
 import type { AuthResponse } from "@auth/types";
 
 const useLoginService = () => {
   const { request } = useRequestHelper();
 
-  const loginService = async (email: string, password: string): Promise<AuthResponse | undefined> => {
+  const loginService = async (
+    email: string,
+    password: string,
+  ): Promise<AuthResponse | undefined> => {
     try {
       const result = await request("/users", {
         method: "POST",
@@ -19,10 +22,8 @@ const useLoginService = () => {
       });
       return result.data as AuthResponse;
     } catch (e) {
-      await Swal.fire({
-        title: `login error: ${e}`,
-        icon: "warning",
-        confirmButtonText: "fermer",
+      toast.error("Échec de connexion", {
+        description: String(e),
       });
     }
   };

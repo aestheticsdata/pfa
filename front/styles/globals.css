@@ -1,12 +1,86 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;700&family=Smooch+Sans:wght@100;200;500&family=Ubuntu:wght@300;400;500;700&display=swap')
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;400;500;600;700&family=Smooch+Sans:wght@100;200;500&family=Ubuntu:wght@300;400;500;700&display=swap')
 layer(base);
 
 @import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  --background: #ffffff;
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.60 0.20 200);
+  --primary-foreground: oklch(0.98 0 0);
+  --secondary: oklch(0.95 0.0058 264.53);
+  --secondary-foreground: #030213;
+  --muted: #ececf0;
+  --muted-foreground: #717182;
+  --accent: #e9ebef;
+  --accent-foreground: #030213;
+  --destructive: #d4183d;
+  --destructive-foreground: #ffffff;
+  --border: rgba(0, 0, 0, 0.1);
+  --input: transparent;
+  --input-background: #f3f3f5;
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.60 0.20 200);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.10 0.005 240);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.15 0.008 240);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.15 0.008 240);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.72 0.15 200);
+  --primary-foreground: oklch(0.15 0.008 240);
+  --secondary: oklch(0.22 0.01 240);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.22 0.01 240);
+  --muted-foreground: oklch(0.65 0 0);
+  --accent: oklch(0.22 0.01 240);
+  --accent-foreground: oklch(0.98 0 0);
+  --destructive: oklch(0.50 0.20 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.22 0.01 240);
+  --input: oklch(0.22 0.01 240);
+  --ring: oklch(0.55 0.15 200);
+  --chart-1: oklch(0.72 0.15 200);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.18 290);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.18 0.008 240);
+  --sidebar-foreground: oklch(0.98 0 0);
+  --sidebar-primary: oklch(0.72 0.15 200);
+  --sidebar-primary-foreground: oklch(0.10 0.005 240);
+  --sidebar-accent: oklch(0.22 0.01 240);
+  --sidebar-accent-foreground: oklch(0.98 0 0);
+  --sidebar-border: oklch(0.22 0.01 240);
+  --sidebar-ring: oklch(0.55 0.15 200);
+}
 
 @theme {
-  --shadow-login: 0 0 1px 1px rgb(10, 10, 10);
-  --shadow-spendingDaySelected: 0 0 1px 3px rgb(83, 255, 131);
-  --shadow-categories: 0 0 1px 2px rgb(255, 255, 255);
+  --shadow-cyan-glow: 0 0 20px rgba(6, 182, 212, 0.2);
 
   --text-xxs: 0.7rem;
   --text-tiny: 0.5rem;
@@ -14,61 +88,51 @@ layer(base);
   --font-smooch: Smooch Sans, sans-serif;
   --font-poppins: Poppins, sans-serif;
   --font-ubuntu: Ubuntu, sans-serif;
+}
 
-  --color-spendingDayBackground: rgb(255, 255, 255);
-  --color-grey0: rgb(227, 227, 227);
-  --color-grey01: rgb(200, 200, 200);
-  --color-grey01alpha: rgba(200, 200, 200, 0.1);
-  --color-grey1: rgb(161, 161, 161);
-  --color-grey2: rgb(110, 110, 110);
-  --color-grey3: rgb(60, 60, 60);
-  --color-grey4: rgb(40, 40, 40);
-  --color-formsGlobalColor: rgb(73, 73, 73);
-  --color-formsGlobalColorHover: rgb(12, 12, 12);
-  --color-blueNavy: rgb(59, 71, 85);
-  --color-calendarBackground: rgb(42, 42, 42);
-  --color-addSpending: rgb(26, 58, 12);
-  --color-menuItem: rgb(155, 220, 255);
-  --color-addSpendingHover: rgb(58, 172, 249);
-  --color-spendingItemHover: rgb(165, 236, 255);
-  --color-spendingActionHover: rgb(42, 112, 164);
-  --color-initialAmountWeekly: rgb(155, 220, 255);
-  --color-initialAmount: rgb(44, 129, 212);
-  --color-initialAmountAlpha: rgba(24, 109, 192, 0.1);
-  --color-initialAmountHover: rgb(248, 255, 38);
-  --color-remainingAmount: rgb(133, 136, 92);
-  --color-remainingAmountAlpha: rgba(133, 136, 92, 0.1);
-  --color-monthTotalAmount: rgb(255, 172, 10);
-  --color-monthTotalAmountAlpha: rgb(255, 172, 10, 0.1);
-  --color-warningDelete: rgb(247, 8, 8);
-  --color-generalWarning: rgb(247, 8, 8);
-  --color-generalWarningBackground: rgb(255, 255, 0);
-  --color-warningDeleteBackground: rgb(255, 235, 59);
-  --color-warningNoCurrenciesRates: rgb(255, 16, 14);
-  --color-generalOK: rgb(46, 179, 46);
-  --color-ceilingOK: rgb(46, 179, 46);
-  --color-ceilingWarn: rgb(250, 136, 73);
-  --color-ceilingExcess: rgb(247, 8, 8);
-  --color-datePickerWrapper: rgb(83, 255, 131);
-  --color-selectedSpendingDay: rgba(83, 255, 131, 0.3);
-  --color-datePickerWrapperBackground: rgb(74, 107, 109);
-  --color-categoryBorder: rgba(152, 152, 152, 0.5);
-  --color-sortbutton: rgb(199, 199, 199);
-  --color-sortButtonHover: rgb(7, 93, 193);
-  --color-sortButtonHoverActive: rgba(7, 93, 193, 0.2);
-  --color-invoiceImageIsPresent: rgb(4, 192, 86);
-  --color-invoiceImageIsPresentHover: rgb(13, 115, 58);
-  --color-invoiceFileModalBackground: rgba(110, 110, 110, 0.85);
-  --color-tooltipChartsBackground: rgba(29, 29, 29, 0.9);
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
 }
 
 /*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
+  Default border color — Tailwind CSS v4 changed it to `currentcolor`.
+  Pin to the shadcn `border` token so all bordered elements use it.
 */
 @layer base {
   *,
@@ -76,25 +140,68 @@ layer(base);
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
+    border-color: var(--color-border, currentcolor);
   }
 }
 
 @layer base {
-  html {
-    @apply bg-grey1;
+  * {
+    @apply outline-ring/50;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-poppins);
   }
 }
 
-
-/* hack to remove in Chrome, input colors */
-/* https://webagility.com/posts/the-ultimate-list-of-hacks-for-chromes-forced-yellow-background-on-autocompleted-inputs */
-/* https://stackoverflow.com/questions/34551637/css-webkit-transition-not-working-on-input-type */
-/* https://github.com/styled-components/styled-components/issues/492 */
+/* Webkit autofill yellow background fix */
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
   -webkit-transition-delay: 9999s;
 }
 
+/* Auth form card — subtle grey + blue gradient */
+.auth-card-gradient {
+  background:
+    radial-gradient(ellipse 90% 80% at 25% 0%, rgba(59, 130, 246, 0.18) 0%, transparent 60%),
+    linear-gradient(140deg, #1c2030 0%, #0f1219 55%, #14171f 100%);
+}
+
+/* Thin scrollbar for spending lists — stable gutter, no content shift */
+.spendings-list-container,
+.recurrings-list-container,
+.charts-categories-list {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(75, 85, 99, 0.55) transparent;
+}
+
+.spendings-list-container::-webkit-scrollbar,
+.recurrings-list-container::-webkit-scrollbar,
+.charts-categories-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.spendings-list-container::-webkit-scrollbar-track,
+.recurrings-list-container::-webkit-scrollbar-track,
+.charts-categories-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.spendings-list-container::-webkit-scrollbar-thumb,
+.recurrings-list-container::-webkit-scrollbar-thumb,
+.charts-categories-list::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 85, 99, 0.55);
+  border-radius: 3px;
+}
+
+.spendings-list-container::-webkit-scrollbar-thumb:hover,
+.recurrings-list-container::-webkit-scrollbar-thumb:hover,
+.charts-categories-list::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(107, 114, 128, 0.8);
+}
+
+/* react-day-picker legacy styles — to drop in Phase B after upgrade to v8 */
 .DayPicker {
   @apply text-sm!;
 }
@@ -115,31 +222,23 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 
 .DayPicker-Day--selectedRange {
   background-color: #fff7ba !important;
-  /*border-top-color: #FFEB3B;*/
-  /*border-bottom-color: #FFEB3B;*/
-  /*border-left-color: #fff7ba;*/
-  /*border-right-color: #fff7ba;*/
 }
 
 .DayPicker-Day--selectedRangeStart {
   background-color: #FFEB3B !important;
-  /*border-left: 1px solid #FFEB3B;*/
 }
 
 .DayPicker-Day--selectedRangeEnd {
   background-color: #FFEB3B !important;
-  /*border-right: 1px solid #FFEB3B;*/
 }
 
 .DayPicker-Day--selectedRange:not(.DayPicker-Day--outside).DayPicker-Day--selected,
 .DayPicker-Day--hoverRange:not(.DayPicker-Day--outside).DayPicker-Day--selected {
   border-radius: 5px !important;
-  /*border-radius: 0 !important;*/
   color: black !important;
 }
 .DayPicker-Day--hoverRange:hover {
   border-radius: 5px !important;
-  /*border-radius: 0 !important;*/
 }
 
 .transition-bar-enter {
