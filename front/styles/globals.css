@@ -152,6 +152,14 @@ layer(base);
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-poppins);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
   }
 }
 
