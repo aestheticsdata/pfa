@@ -23,8 +23,10 @@ const SpendingDashboard = ({ month }: SpendingDashboardProps) => {
           <GlobalSummary />
           <MonthlyChartCard />
         </div>
-        <div className="lg:col-span-3">
-          <FixedExpensesPanel month={month} />
+        <div className="lg:col-span-3 lg:relative">
+          <div className="lg:absolute lg:inset-0">
+            <FixedExpensesPanel month={month} />
+          </div>
         </div>
       </div>
 

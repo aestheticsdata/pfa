@@ -59,7 +59,7 @@ const FixedExpensesPanel = ({ month }: FixedExpensesPanelProps) => {
         </div>
       </div>
 
-      <div className="flex flex-col gap-1 overflow-y-auto pr-1">
+      <div className="recurrings-list-container flex flex-col gap-1 overflow-y-auto flex-1 min-h-0">
         {recurrings?.map((recurring) => {
           const isDeleting = pendingDelete === recurring.ID;
           if (isDeleting) {
