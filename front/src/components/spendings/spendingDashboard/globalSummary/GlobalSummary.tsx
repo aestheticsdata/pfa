@@ -68,7 +68,7 @@ const GlobalSummary = () => {
           <button
             type="button"
             onClick={() => setIsInputVisible(true)}
-            className="relative inline-flex items-center text-cyan-400 text-2xl sm:text-3xl lg:text-2xl xl:text-4xl font-light leading-none whitespace-nowrap hover:text-cyan-300 transition-colors cursor-pointer"
+            className="relative inline-flex items-center text-cyan-400 text-2xl sm:text-3xl lg:text-2xl xl:text-4xl leading-none whitespace-nowrap hover:text-cyan-300 transition-colors cursor-pointer"
             aria-label="Modifier le montant initial"
           >
             <span>{Math.round(initialAmount)} €</span>
@@ -98,7 +98,7 @@ const GlobalSummary = () => {
         <div className="text-gray-400 text-xs mb-2 uppercase tracking-wider whitespace-nowrap">
           {labels.total}
         </div>
-        <div className="text-gray-100 text-2xl sm:text-3xl lg:text-2xl xl:text-4xl font-light leading-none whitespace-nowrap">
+        <div className="text-gray-100 text-2xl sm:text-3xl lg:text-2xl xl:text-4xl leading-none whitespace-nowrap">
           {Math.round(monthlyTotal)} €
         </div>
       </div>
@@ -109,7 +109,7 @@ const GlobalSummary = () => {
         </div>
         <div
           className={cn(
-            "text-2xl sm:text-3xl lg:text-2xl xl:text-4xl font-bold leading-none whitespace-nowrap drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]",
+            "text-2xl sm:text-3xl lg:text-2xl xl:text-4xl font-semibold leading-none whitespace-nowrap drop-shadow-[0_0_15px_rgba(6,182,212,0.3)]",
             remainingColor,
           )}
         >

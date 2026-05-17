@@ -50,8 +50,8 @@ const FixedExpensesPanel = ({ month }: FixedExpensesPanelProps) => {
         </button>
       </div>
 
-      <div className="bg-gradient-to-br from-cyan-950/40 via-blue-950/30 to-[#0a0a14] border border-cyan-500/40 rounded-xl p-5 shadow-[inset_0_0_30px_rgba(6,182,212,0.08)] mb-4">
-        <div className="text-gray-200 text-sm font-medium">
+      <div className="bg-linear-to-br from-cyan-950/40 via-blue-950/30 to-[#0a0a14] border border-cyan-500/40 rounded-xl p-5 shadow-[inset_0_0_30px_rgba(6,182,212,0.08)] mb-4">
+        <div className="text-gray-200 font-medium">
           Total des dépenses fixes
         </div>
         <div className="text-cyan-400 text-3xl font-bold tracking-tight mt-1">

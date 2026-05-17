@@ -30,21 +30,16 @@ const CategoryComponent = ({ item, customCss = "", isDynamic = false, isClicked 
     <div
       className={`relative flex items-center px-0.5 rounded-sm ${isDynamic ? "text-tiny" : "text-xxs"} uppercase ${customCss}`}
       style={{
-        // border: `1px solid ${item.categoryColor}`,
-        // borderRadius: "4px",
         color: getTextColor(),
         backgroundColor: getBackgroundColor(),
       }}
     >
       {!isDynamic && (
         <span
-          className="absolute left-0 top-0 bottom-0"
+          className="absolute left-0 top-0 bottom-0 w-[5px] rounded-l-[inherit]"
           style={{
             border: resolvedColor,
             backgroundColor: resolvedColor,
-            width: "5px",
-            borderTopLeftRadius: "inherit",
-            borderBottomLeftRadius: "inherit",
           }}
         ></span>
       )}

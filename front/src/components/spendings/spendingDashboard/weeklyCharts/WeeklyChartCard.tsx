@@ -64,7 +64,7 @@ const WeeklyChartCard = () => {
             Aucune donnée pour cette période
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-3">
             {sortedCharts.map((cat, idx) => {
               const value = cat.value ?? 0;
               const percent = total > 0 ? (value / total) * 100 : 0;
