@@ -219,7 +219,7 @@ const SpendingsListModal = ({
               <Wrapper
                 key={date}
                 {...wrapperProps}
-                className={`group block w-full text-left bg-[#0c0c0c] rounded-xl border border-gray-800/50 overflow-hidden transition-colors ${
+                className={`group block w-full shrink-0 text-left bg-[#0c0c0c] rounded-xl border border-gray-800/50 overflow-hidden transition-colors ${
                   isClickable
                     ? "hover:border-cyan-400 cursor-pointer"
                     : ""
