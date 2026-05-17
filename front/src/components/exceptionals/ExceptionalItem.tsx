@@ -50,8 +50,30 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
         />
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-1 min-w-0">
-            <div className="text-gray-100 font-medium truncate">
-              {item.label}
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="text-gray-100 font-medium truncate">
+                {item.label}
+              </div>
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                <button
+                  type="button"
+                  onClick={() => onEdit(item)}
+                  className="w-7 h-7 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label="Modifier"
+                  title="Modifier"
+                >
+                  <Edit2 className="w-3.5 h-3.5 text-gray-300" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsDeleteOpen(true)}
+                  className="w-7 h-7 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors cursor-pointer"
+                  aria-label="Supprimer"
+                  title="Supprimer"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-gray-300 hover:text-white" />
+                </button>
+              </div>
             </div>
             <div className="text-gray-500 text-xs tabular-nums">
               {dateLabel}
@@ -86,26 +108,6 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
           </div>
         )}
 
-        <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
-            type="button"
-            onClick={() => onEdit(item)}
-            className="w-7 h-7 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors cursor-pointer"
-            aria-label="Modifier"
-            title="Modifier"
-          >
-            <Edit2 className="w-3.5 h-3.5 text-gray-300" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsDeleteOpen(true)}
-            className="w-7 h-7 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors cursor-pointer"
-            aria-label="Supprimer"
-            title="Supprimer"
-          >
-            <Trash2 className="w-3.5 h-3.5 text-gray-300 hover:text-white" />
-          </button>
-        </div>
       </SurfaceCard>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
