@@ -3,6 +3,7 @@ import { StatsService } from "@stats/stats.service";
 import { WeeklyStatsQueryDto } from "@stats/dto/weekly-stats-query.dto";
 import { MonthlyStatsQueryDto } from "@stats/dto/monthly-stats-query.dto";
 import { StatisticsQueryDto } from "@stats/dto/statistics-query.dto";
+import { RegularMonthlyAverageQueryDto } from "@stats/dto/regular-monthly-average-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
@@ -44,5 +45,16 @@ export class StatisticsController {
       .map((s) => s.trim())
       .filter(Boolean);
     return this.statsService.getStatistics(categoryIDs, years, userID);
+  }
+}
+
+@Controller("regular-monthly-average")
+@UseGuards(SessionAuthGuard)
+export class RegularMonthlyAverageController {
+  constructor(private readonly statsService: StatsService) {}
+
+  @Get()
+  async getRegularMonthlyAverage(@Query() query: RegularMonthlyAverageQueryDto, @GetUserId() userID: string) {
+    return this.statsService.getRegularMonthlyAverage(query.year, userID);
   }
 }

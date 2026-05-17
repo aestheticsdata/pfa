@@ -51,6 +51,20 @@ model Spendings {
   category   Categories? @relation(fields: [categoryID], references: [ID])
 }
 
+model Exceptionals {
+  ID            String   @id @db.Char(36)
+  userID        String   @db.Char(36)
+  date          DateTime @db.Date
+  itemType      String   @db.VarChar(11)
+  label         String   @db.VarChar(100)
+  description   String?  @db.VarChar(255)
+  amount        Decimal  @db.Decimal(10, 2)
+  currency      String?  @db.VarChar(3)
+  categoryName  String?  @db.VarChar(50)
+  categoryColor String?  @db.VarChar(20)
+  invoicefile   String?  @db.VarChar(255)
+}
+
 model Users {
   ID           String    @id @db.Char(36)
   name         String    @db.VarChar(20)

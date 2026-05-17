@@ -88,6 +88,13 @@ export class SpendingsService {
       });
       return row?.invoicefile ?? null;
     }
+    if (normalizedType === "exceptional") {
+      const row = await this.prisma.exceptionals.findFirst({
+        where: { ID: spendingID, userID },
+        select: { invoicefile: true },
+      });
+      return row?.invoicefile ?? null;
+    }
     return null;
   }
 
@@ -300,6 +307,11 @@ export class SpendingsService {
         where: { ID: spendingID, userID },
         data: { invoicefile: null },
       });
+    } else if (itemType === "exceptional") {
+      await this.prisma.exceptionals.updateMany({
+        where: { ID: spendingID, userID },
+        data: { invoicefile: null },
+      });
     }
 
     this.backupDelete(userID, invoicefile);
@@ -345,6 +357,11 @@ export class SpendingsService {
 
     if (itemType === "spending") {
       await this.prisma.spendings.updateMany({
+        where: { ID: spendingID, userID },
+        data: { invoicefile: resizedFilename },
+      });
+    } else if (itemType === "exceptional") {
+      await this.prisma.exceptionals.updateMany({
         where: { ID: spendingID, userID },
         data: { invoicefile: resizedFilename },
       });

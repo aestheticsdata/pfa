@@ -11,6 +11,8 @@ export const QUERY_KEYS = {
   CHARTS: "charts",
   WEEKLY_STATS: "weeklyStats",
   CATEGORIES: "categories",
+  EXCEPTIONALS: "exceptionals",
+  EXCEPTIONAL_YEARS: "exceptionalYears",
 };
 
 export const DATE_FORMAT = "yyyy-MM-dd";

@@ -16,6 +16,7 @@ import { RecurringsModule } from "@recurrings/recurrings.module";
 import { DashboardModule } from "@dashboard/dashboard.module";
 import { StatsModule } from "@stats/stats.module";
 import { CategoriesModule } from "@categories/categories.module";
+import { ExceptionalsModule } from "@exceptionals/exceptionals.module";
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { CategoriesModule } from "@categories/categories.module";
     DashboardModule,
     StatsModule,
     CategoriesModule,
+    ExceptionalsModule,
     SshBackupModule,
     DbBackupModule,
     ConfigModule.forRoot({

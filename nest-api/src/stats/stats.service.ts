@@ -65,6 +65,44 @@ export class StatsService {
     return totalsByWeek;
   }
 
+  async getRegularMonthlyAverage(yearStr: string, userID: string): Promise<{ monthlyAverage: number }> {
+    const year = parseInt(yearStr, 10);
+    if (Number.isNaN(year)) {
+      return { monthlyAverage: 0 };
+    }
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    if (year > currentYear) {
+      return { monthlyAverage: 0 };
+    }
+
+    const startDate = new Date(year, 0, 1);
+    const isCurrentYear = year === currentYear;
+    const endDate = isCurrentYear ? now : new Date(year, 11, 31);
+
+    const result = await this.prisma.spendings.aggregate({
+      where: {
+        userID,
+        date: { gte: startDate, lte: endDate },
+      },
+      _sum: { amount: true },
+    });
+
+    const total = Number(result._sum.amount ?? 0);
+    if (total === 0) {
+      return { monthlyAverage: 0 };
+    }
+
+    const msPerMonth = 1000 * 60 * 60 * 24 * (365.25 / 12);
+    const monthsElapsed = (endDate.getTime() - startDate.getTime()) / msPerMonth;
+    if (monthsElapsed <= 0) {
+      return { monthlyAverage: 0 };
+    }
+
+    return { monthlyAverage: total / monthsElapsed };
+  }
+
   async getMonthlyStats(
     from: string,
     userID: string,

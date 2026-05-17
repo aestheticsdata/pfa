@@ -9,6 +9,7 @@ import {
   LogIn,
   Menu,
   Receipt,
+  Sparkles,
   Tag,
   UserPlus,
   X,
@@ -38,6 +39,7 @@ type NavRoute = {
 
 const ROUTE_ICONS: Record<string, LucideIcon> = {
   [ROUTES.spendings.path]: Receipt,
+  [ROUTES.exceptionals.path]: Sparkles,
   [ROUTES.categories.path]: Tag,
   [ROUTES.statistics.path]: BarChart3,
   [ROUTES.login.path]: LogIn,
@@ -128,7 +130,7 @@ const NavBar = () => {
 
   const isLogged = !!user;
 
-  const loggedRoutes = [ROUTES.spendings, ROUTES.categories, ROUTES.statistics];
+  const loggedRoutes = [ROUTES.spendings, ROUTES.exceptionals, ROUTES.categories, ROUTES.statistics];
   const anonymousRoutes = [ROUTES.login, ROUTES.signup, ROUTES.about];
   const visibleRoutes = isLogged ? loggedRoutes : anonymousRoutes;
 

@@ -23,7 +23,8 @@
       "@dashboard/*": ["src/dashboard/*"],
       "@recurrings/*": ["src/recurrings/*"],
       "@stats/*": ["src/stats/*"],
-      "@categories/*": ["src/categories/*"]
+      "@categories/*": ["src/categories/*"],
+      "@exceptionals/*": ["src/exceptionals/*"]
     },
     "incremental": true,
     "skipLibCheck": true,

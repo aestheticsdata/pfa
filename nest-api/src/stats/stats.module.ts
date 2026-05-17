@@ -1,12 +1,22 @@
 import { Module } from "@nestjs/common";
 import { StatsService } from "@stats/stats.service";
-import { WeeklyStatsController, MonthlyStatsController, StatisticsController } from "@stats/stats.controller";
+import {
+  WeeklyStatsController,
+  MonthlyStatsController,
+  StatisticsController,
+  RegularMonthlyAverageController,
+} from "@stats/stats.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 
 @Module({
   imports: [PrismaModule],
-  controllers: [WeeklyStatsController, MonthlyStatsController, StatisticsController],
+  controllers: [
+    WeeklyStatsController,
+    MonthlyStatsController,
+    StatisticsController,
+    RegularMonthlyAverageController,
+  ],
   providers: [StatsService, SessionAuthGuard],
 })
 export class StatsModule {}
