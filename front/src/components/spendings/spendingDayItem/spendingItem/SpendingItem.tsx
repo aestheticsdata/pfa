@@ -88,41 +88,6 @@ const SpendingItem = ({
         />
       )}
       <div className="group flex items-center gap-2 py-1.5 hover:bg-gray-800/40 rounded px-2 transition-colors">
-        <div className="flex gap-1">
-          <button
-            type="button"
-            onClick={() => setIsInvoiceModalVisible(true)}
-            className={cn(
-              "w-6 h-6 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer",
-              hasInvoice
-                ? "bg-emerald-700/80 hover:bg-emerald-600"
-                : "bg-gray-700/80 hover:bg-cyan-600",
-            )}
-            title="Facture"
-          >
-            <ImageIcon className="w-3 h-3 text-gray-200" />
-          </button>
-          <button
-            type="button"
-            onClick={() => editCallback(spending)}
-            className="w-6 h-6 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer"
-            title="Modifier"
-          >
-            <Edit2 className="w-3 h-3 text-gray-300" />
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              toggleAddSpending();
-              setIsDeleteConfirmVisible(true);
-            }}
-            className="w-6 h-6 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer"
-            title="Supprimer"
-          >
-            <Trash2 className="w-3 h-3 text-gray-300 group-hover:text-white" />
-          </button>
-        </div>
-
         <div
           className="w-1 h-5 rounded-full flex-shrink-0"
           style={{ backgroundColor: categoryColor }}
@@ -146,6 +111,41 @@ const SpendingItem = ({
             {category}
           </span>
         )}
+
+        <div className="flex gap-1 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+          <button
+            type="button"
+            onClick={() => setIsInvoiceModalVisible(true)}
+            className={cn(
+              "w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer",
+              hasInvoice
+                ? "bg-emerald-700/80 hover:bg-emerald-600"
+                : "bg-gray-700/80 hover:bg-cyan-600",
+            )}
+            title="Facture"
+          >
+            <ImageIcon className="w-3 h-3 text-gray-200" />
+          </button>
+          <button
+            type="button"
+            onClick={() => editCallback(spending)}
+            className="w-6 h-6 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors cursor-pointer"
+            title="Modifier"
+          >
+            <Edit2 className="w-3 h-3 text-gray-300" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              toggleAddSpending();
+              setIsDeleteConfirmVisible(true);
+            }}
+            className="w-6 h-6 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors cursor-pointer"
+            title="Supprimer"
+          >
+            <Trash2 className="w-3 h-3 text-gray-300 group-hover:text-white" />
+          </button>
+        </div>
 
         <span className="text-gray-100 text-sm shrink-0 min-w-[70px] text-right tabular-nums">
           {Number(spending.amount).toFixed(2)} €

@@ -107,7 +107,7 @@ const SpendingDayItem = ({
       )}
     >
       {/* Header */}
-      <div className="bg-gradient-to-r from-gray-800/60 to-gray-800/40 px-4 py-2.5 border-b border-gray-700/50 shrink-0">
+      <div className="bg-linear-to-r from-gray-800/60 to-gray-800/40 px-4 py-2.5 border-b border-gray-700/50 shrink-0">
         <div className="flex items-center justify-between mb-2">
           <div
             className={cn(
@@ -148,7 +148,7 @@ const SpendingDayItem = ({
                   key={key}
                   onClick={() => setSelectedCategory(key)}
                   className={cn(
-                    "px-2 py-0.5 rounded text-[10px] uppercase font-medium transition-all border",
+                    "px-2 py-0.5 rounded text-[10px] uppercase font-medium transition-all border cursor-pointer",
                     isClicked
                       ? "border-transparent"
                       : "border-transparent opacity-70 hover:opacity-100",

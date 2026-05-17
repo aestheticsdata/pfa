@@ -26,7 +26,7 @@ const SortPill = ({
   <button
     type="button"
     onClick={onClick}
-    className="px-2 py-1 bg-gray-700/60 hover:bg-gray-600/80 rounded text-gray-300 text-xs transition-colors inline-flex items-center gap-1"
+    className="px-2 py-1 bg-gray-700/60 hover:bg-gray-600/80 rounded text-gray-300 text-xs transition-colors inline-flex items-center gap-1 cursor-pointer"
   >
     {label}
     <ArrowDownUp className="w-3 h-3" />
