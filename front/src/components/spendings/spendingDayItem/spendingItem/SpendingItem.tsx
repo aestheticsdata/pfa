@@ -137,9 +137,9 @@ const SpendingItem = ({
 
         {!isRecurring && category && (
           <span
-            className="px-2 py-0.5 rounded text-[10px] uppercase flex-shrink-0 font-medium"
+            className="px-2 py-0.5 rounded text-xs uppercase shrink-0 font-medium"
             style={{
-              backgroundColor: categoryColor + "30",
+              backgroundColor: `${categoryColor}30`,
               color: categoryColor,
             }}
           >
@@ -147,7 +147,7 @@ const SpendingItem = ({
           </span>
         )}
 
-        <span className="text-gray-100 text-sm flex-shrink-0 min-w-[70px] text-right tabular-nums">
+        <span className="text-gray-100 text-sm shrink-0 min-w-[70px] text-right tabular-nums">
           {Number(spending.amount).toFixed(2)} €
         </span>
       </div>

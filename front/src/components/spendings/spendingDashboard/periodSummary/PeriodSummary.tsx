@@ -98,10 +98,10 @@ const PeriodSummary = () => {
   return (
     <SurfaceCard padding="lg" className="h-full flex flex-col">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-gray-300 text-sm">Total par période</span>
+        <span className="text-gray-300 font-medium text-lg">Total par période</span>
         <CalendarIcon className="w-4 h-4 text-gray-500" />
       </div>
-      <div className="mb-2 text-sm text-gray-200">{rangeLabel}</div>
+      <div className="mb-2 text-gray-200">{rangeLabel}</div>
       <div className="flex items-baseline gap-3 mb-6 flex-wrap">
         <span className="text-gray-100 text-lg font-medium">
           {Number(periodTotal).toFixed(1)} €

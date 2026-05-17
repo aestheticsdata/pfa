@@ -98,7 +98,14 @@ const SpendingDayItem = ({
     "#94a3b8";
 
   return (
-    <div className="relative bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black rounded-lg border border-gray-800/50 overflow-hidden hover:border-gray-700/50 transition-all shadow-xl flex flex-col h-full">
+    <div
+      className={cn(
+        "relative bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black rounded-lg border overflow-hidden transition-all shadow-xl flex flex-col h-full",
+        isToday
+          ? "border-cyan-300"
+          : "border-gray-800/50 hover:border-gray-700/50",
+      )}
+    >
       {/* Header */}
       <div className="bg-gradient-to-r from-gray-800/60 to-gray-800/40 px-4 py-2.5 border-b border-gray-700/50 shrink-0">
         <div className="flex items-center justify-between mb-2">

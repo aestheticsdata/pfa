@@ -61,7 +61,7 @@ const GlobalSummary = () => {
       className="flex flex-col md:flex-row justify-between items-stretch gap-0"
     >
       <div className="w-full md:flex-1 text-center md:border-r border-gray-800/50 px-2 py-2 group">
-        <div className="text-gray-400 text-xs mb-2 uppercase tracking-wider whitespace-nowrap">
+        <div className="text-gray-400 font-medium text-base mb-2 uppercase tracking-wider whitespace-nowrap">
           {labels.initialAmount}
         </div>
         {!isInputVisible ? (
@@ -95,7 +95,7 @@ const GlobalSummary = () => {
       </div>
 
       <div className="w-full md:flex-1 text-center md:border-r border-gray-800/50 px-2 py-2">
-        <div className="text-gray-400 text-xs mb-2 uppercase tracking-wider whitespace-nowrap">
+        <div className="text-gray-400 font-medium text-base mb-2 uppercase tracking-wider whitespace-nowrap">
           {labels.total}
         </div>
         <div className="text-gray-100 text-2xl sm:text-3xl lg:text-2xl xl:text-4xl leading-none whitespace-nowrap">
@@ -104,7 +104,7 @@ const GlobalSummary = () => {
       </div>
 
       <div className="w-full md:flex-1 text-center px-2 py-2">
-        <div className="text-gray-400 text-xs mb-2 uppercase tracking-wider whitespace-nowrap">
+        <div className="text-gray-400 font-medium text-base mb-2 uppercase tracking-wider whitespace-nowrap">
           {labels.remaining}
         </div>
         <div
