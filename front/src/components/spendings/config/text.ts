@@ -16,7 +16,11 @@ const spendings = {
     },
     weeklyCharts: {
       headerTitle: "répartition hebdomadaire",
-    }
+    },
+    recurrings: {
+      show: "Afficher les récurrents",
+      hide: "Masquer les récurrents",
+    },
   },
   dayItem: {
     recurringTitle: "Dépenses fixes",

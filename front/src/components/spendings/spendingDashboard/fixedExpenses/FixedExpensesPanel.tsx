@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react";
+import { Plus, Edit2, Trash2, ImageIcon, ChevronDown } from "lucide-react";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import { SurfaceCard } from "@components/ui/surface-card";
+import spendingsText from "@components/spendings/config/text";
 import { cn } from "@lib/utils";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
@@ -28,6 +29,7 @@ const FixedExpensesPanel = ({ month }: FixedExpensesPanelProps) => {
   } = useSpendingDayItem();
   const [invoiceFor, setInvoiceFor] = useState<RecurringItem | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const [isListExpanded, setIsListExpanded] = useState(false);
 
   if (error) {
     throw error;
@@ -59,8 +61,39 @@ const FixedExpensesPanel = ({ month }: FixedExpensesPanelProps) => {
         </div>
       </div>
 
-      <div className="recurrings-list-container flex flex-col gap-1 overflow-y-auto flex-1 min-h-0">
-        {recurrings?.map((recurring) => {
+      <button
+        type="button"
+        onClick={() => setIsListExpanded((v) => !v)}
+        className="sm:hidden flex items-center w-full mb-2 px-4 py-3 rounded-lg border border-gray-700/70 bg-gray-900/30 text-sm text-gray-200 hover:bg-gray-800/40 transition-colors cursor-pointer"
+        aria-expanded={isListExpanded}
+        aria-controls="recurrings-list-collapse"
+      >
+        <span>
+          {isListExpanded
+            ? spendingsText.dashboard.recurrings.hide
+            : spendingsText.dashboard.recurrings.show}
+        </span>
+        <span className="ml-2 inline-flex items-center justify-center min-w-[24px] h-5 px-2 rounded-full bg-gray-700/70 text-xs text-gray-200 tabular-nums">
+          {recurrings?.length ?? 0}
+        </span>
+        <ChevronDown
+          className={cn(
+            "ml-auto w-4 h-4 text-gray-400 transition-transform duration-300",
+            isListExpanded && "rotate-180",
+          )}
+        />
+      </button>
+
+      <div
+        id="recurrings-list-collapse"
+        className={cn(
+          "grid transition-[grid-template-rows] duration-300 ease-out sm:block sm:flex-1 sm:min-h-0",
+          isListExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+        )}
+      >
+        <div className="overflow-hidden sm:overflow-visible sm:h-full">
+          <div className="recurrings-list-container flex flex-col gap-1 min-h-0 sm:h-full sm:overflow-y-auto">
+            {recurrings?.map((recurring) => {
           const isDeleting = pendingDelete === recurring.ID;
           if (isDeleting) {
             return (
@@ -140,11 +173,13 @@ const FixedExpensesPanel = ({ month }: FixedExpensesPanelProps) => {
             </div>
           );
         })}
-        {(!recurrings || recurrings.length === 0) && (
-          <div className="text-center text-gray-500 text-sm py-4">
-            Aucune dépense fixe pour ce mois.
+            {(!recurrings || recurrings.length === 0) && (
+              <div className="text-center text-gray-500 text-sm py-4">
+                Aucune dépense fixe pour ce mois.
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       {isModalVisible && (
