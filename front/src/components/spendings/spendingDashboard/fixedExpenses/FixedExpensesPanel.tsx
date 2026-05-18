@@ -95,14 +95,14 @@ const FixedExpensesPanel = ({ month }: FixedExpensesPanelProps) => {
           return (
             <div
               key={recurring.ID}
-              className="group flex items-center gap-2 py-1.5 hover:bg-gray-800/40 rounded px-2 transition-colors"
+              className="group grid items-center gap-x-2 gap-y-1 py-1.5 px-2 rounded hover:bg-gray-800/40 transition-colors grid-cols-[1fr_auto] sm:grid-cols-[auto_1fr_auto]"
             >
-              <div className="flex gap-1">
+              <div className="flex gap-1 col-start-2 row-start-2 justify-self-end sm:col-start-1 sm:row-start-1 sm:justify-self-start">
                 <button
                   type="button"
                   onClick={() => setInvoiceFor(recurring)}
                   className={cn(
-                    "w-6 h-6 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer",
+                    "w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer sm:opacity-60 sm:group-hover:opacity-100",
                     recurring.invoicefile
                       ? "bg-emerald-700/80 hover:bg-emerald-600"
                       : "bg-gray-700/80 hover:bg-cyan-600",
@@ -114,7 +114,7 @@ const FixedExpensesPanel = ({ month }: FixedExpensesPanelProps) => {
                 <button
                   type="button"
                   onClick={() => editSpending(recurring)}
-                  className="w-6 h-6 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer"
+                  className="w-6 h-6 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors cursor-pointer sm:opacity-60 sm:group-hover:opacity-100"
                   title="Modifier"
                 >
                   <Edit2 className="w-3 h-3 text-gray-300" />
@@ -122,19 +122,19 @@ const FixedExpensesPanel = ({ month }: FixedExpensesPanelProps) => {
                 <button
                   type="button"
                   onClick={() => setPendingDelete(recurring.ID)}
-                  className="w-6 h-6 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors opacity-60 group-hover:opacity-100 cursor-pointer"
+                  className="w-6 h-6 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors cursor-pointer sm:opacity-60 sm:group-hover:opacity-100"
                   title="Supprimer"
                 >
                   <Trash2 className="w-3 h-3 text-gray-300 group-hover:text-white" />
                 </button>
               </div>
               <span
-                className="text-gray-200 text-sm flex-1 min-w-0 truncate"
+                className="text-gray-200 text-sm min-w-0 truncate col-start-1 row-start-1 sm:col-start-2"
                 title={recurring.label}
               >
                 {recurring.label}
               </span>
-              <span className="text-gray-100 text-sm flex-shrink-0 min-w-[70px] text-right tabular-nums">
+              <span className="text-gray-100 text-sm min-w-[70px] text-right tabular-nums col-start-2 row-start-1 sm:col-start-3">
                 {Number(recurring.amount).toFixed(2)} €
               </span>
             </div>
