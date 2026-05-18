@@ -199,14 +199,14 @@ const InvoiceModal = ({
     <>
       <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClickOutside()}>
         <DialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800 sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-gray-100">
-              <span className="truncate max-w-[260px]" title={spending.label}>
+          <DialogHeader className="min-w-0">
+            <DialogTitle className="flex items-center gap-2 sm:gap-3 text-gray-100 pr-10 min-w-0">
+              <span className="truncate min-w-0 flex-1" title={spending.label}>
                 {spending.label}
               </span>
               {category && (
                 <span
-                  className="px-2 py-0.5 rounded text-[10px] uppercase font-medium"
+                  className="px-2 py-0.5 rounded text-[10px] uppercase font-medium shrink-0"
                   style={{
                     backgroundColor: categoryColor + "30",
                     color: categoryColor,
@@ -215,7 +215,7 @@ const InvoiceModal = ({
                   {category}
                 </span>
               )}
-              <span className="ml-auto text-cyan-400 text-sm tabular-nums">
+              <span className="text-cyan-400 text-sm tabular-nums shrink-0 whitespace-nowrap">
                 {Number(spending.amount).toFixed(2)} €
               </span>
             </DialogTitle>
