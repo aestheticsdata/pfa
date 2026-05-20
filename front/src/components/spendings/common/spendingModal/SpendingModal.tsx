@@ -306,6 +306,19 @@ const SpendingModal = ({
                     type="button"
                     role="combobox"
                     aria-expanded={comboboxOpen}
+                    onKeyDown={(e) => {
+                      if (
+                        !comboboxOpen &&
+                        e.key.length === 1 &&
+                        !e.ctrlKey &&
+                        !e.metaKey &&
+                        !e.altKey
+                      ) {
+                        e.preventDefault();
+                        setComboboxQuery(e.key);
+                        setComboboxOpen(true);
+                      }
+                    }}
                     className="flex items-center justify-between w-full px-3 py-2 bg-[#0c0c0c] border border-gray-700/50 rounded-md text-sm text-gray-200 hover:bg-[#151515] transition-colors"
                   >
                     {selectedCategory && selectedCategory.name ? (
