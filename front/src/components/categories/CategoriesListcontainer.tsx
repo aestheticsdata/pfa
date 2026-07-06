@@ -1,52 +1,160 @@
 "use client";
 
+import { useMemo, useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "@auth/context/AuthContext";
 import useCategories from "@components/spendings/services/useCategories";
 import CategoryItem from "@components/categories/CategoryItem";
+import CategoryFormModal from "@components/categories/CategoryFormModal";
 import Spinner from "@components/common/Spinner";
-import { SurfaceCard } from "@components/ui/surface-card";
+import { Button } from "@components/ui/button";
+import { mockCategoryUsage } from "@components/categories/helpers/mockCategoryStats";
 
 import type { Category } from "@src/schemas/categories";
 
+const isMock = (id: string) => id.startsWith("mock-");
+
 const CategoriesListcontainer = () => {
-  const { categories, error } = useCategories();
+  const { categories, error, updateCategory, deleteCategory } = useCategories();
+  const { user } = useAuth();
+
+  const [query, setQuery] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  // MOCK — standalone creation isn't persisted (no POST /categories). New
+  // categories live here locally until a create endpoint exists.
+  const [localCats, setLocalCats] = useState<Category[]>([]);
+
+  const allCats = useMemo<Category[]>(
+    () => [...(categories ?? []), ...localCats],
+    [categories, localCats],
+  );
+
+  const grandTotal = useMemo(
+    () =>
+      allCats.reduce((sum, c) => sum + mockCategoryUsage(c.name).total, 0),
+    [allCats],
+  );
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return [...allCats]
+      .sort((a, b) => a.name.localeCompare(b.name, "fr"))
+      .filter((c) => !q || c.name.toLowerCase().includes(q));
+  }, [allCats, query]);
 
   if (error) {
     throw error;
   }
 
-  return (
-    <div className="flex flex-col gap-6">
-      <SurfaceCard className="flex items-center justify-between flex-wrap gap-4 p-6">
-        <div className="flex items-center gap-4">
-          <div className="bg-gradient-to-br from-cyan-600 to-blue-600 rounded-xl px-6 py-4 shadow-lg shadow-cyan-500/10">
-            <div className="text-white/80 text-xs uppercase tracking-wider">
-              Total des catégories
-            </div>
-            <div className="text-white text-2xl font-bold tabular-nums">
-              {categories?.length ?? 0}
-            </div>
-          </div>
-          <p className="text-gray-400 text-sm hidden sm:block">
-            Gérez vos catégories de dépenses
-          </p>
-        </div>
-      </SurfaceCard>
+  const handleSave = (cat: Category, name: string, color: string) => {
+    if (isMock(cat.ID)) {
+      setLocalCats((prev) =>
+        prev.map((c) => (c.ID === cat.ID ? { ...c, name, color } : c)),
+      );
+      return;
+    }
+    updateCategory.mutate({
+      singleCategory: { ID: cat.ID, userID: cat.userID, name, color },
+    });
+  };
 
-      {!categories || categories.length === 0 ? (
-        <div className="flex justify-center py-8">
+  const handleDelete = (cat: Category) => {
+    if (isMock(cat.ID)) {
+      setLocalCats((prev) => prev.filter((c) => c.ID !== cat.ID));
+      return;
+    }
+    deleteCategory.mutate({ categoryID: cat.ID });
+  };
+
+  const handleCreate = (name: string, color: string) => {
+    // MOCK — local only, not sent to the API.
+    setLocalCats((prev) => [
+      ...prev,
+      { ID: `mock-${Date.now()}`, userID: user?.id ?? null, name, color },
+    ]);
+    toast.info("Catégorie créée en local (mock — non enregistrée)");
+  };
+
+  const isLoading = !categories && localCats.length === 0;
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <h1 className="text-[18px] font-semibold tracking-[-0.01em] text-ink">
+          Catégories
+        </h1>
+        <span className="num rounded-full border border-line-soft bg-bg-elev px-2.5 py-[3px] text-[12px] text-ink-3">
+          {allCats.length}
+        </span>
+
+        <span className="hidden flex-1 sm:block" />
+
+        <div className="relative order-10 w-full sm:order-none sm:w-[260px]">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-ink-4" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher une catégorie…"
+            className="w-full rounded-[6px] border border-line bg-bg-elev py-2 pl-8 pr-2.5 text-[13px] text-ink outline-none transition placeholder:text-ink-4 focus:border-accent-d"
+          />
+        </div>
+
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          onClick={() => setCreateOpen(true)}
+        >
+          <Plus className="size-3.5" strokeWidth={2.5} />
+          Nouvelle catégorie
+        </Button>
+      </div>
+
+      <p className="text-[12.5px] text-ink-4">
+        Gérer tes catégories · part et fréquence{" "}
+        <b className="font-medium text-ink-3">sur tout l&apos;historique</b>
+      </p>
+
+      {isLoading ? (
+        <div className="flex justify-center py-10">
           <Spinner />
         </div>
+      ) : visible.length === 0 ? (
+        <p className="py-6 text-[13px] text-ink-4">
+          Aucune catégorie ne correspond.
+        </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-          {[...categories]
-            .sort((c1: Category, c2: Category) =>
-              c1.name.localeCompare(c2.name),
-            )
-            .map((category: Category) => (
-              <CategoryItem key={category.ID} category={category} />
-            ))}
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(238px,1fr))] gap-3">
+          {visible.map((cat) => {
+            const { used, total } = mockCategoryUsage(cat.name);
+            const share = grandTotal > 0 ? (total / grandTotal) * 100 : 0;
+            const takenNames = allCats
+              .filter((c) => c.ID !== cat.ID)
+              .map((c) => c.name.toLowerCase());
+            return (
+              <CategoryItem
+                key={cat.ID}
+                category={cat}
+                used={used}
+                share={share}
+                takenNames={takenNames}
+                onSave={(name, color) => handleSave(cat, name, color)}
+                onDelete={() => handleDelete(cat)}
+              />
+            );
+          })}
         </div>
       )}
+
+      <CategoryFormModal
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        mode="create"
+        takenNames={allCats.map((c) => c.name.toLowerCase())}
+        onSubmit={handleCreate}
+      />
     </div>
   );
 };
