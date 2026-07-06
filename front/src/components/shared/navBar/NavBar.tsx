@@ -3,7 +3,15 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BarChart3, Menu, Receipt, Sparkles, Tag, X } from "lucide-react";
+import {
+  BarChart3,
+  LayoutDashboard,
+  Menu,
+  Receipt,
+  Sparkles,
+  Tag,
+  X,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@auth/context/AuthContext";
 import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
@@ -24,6 +32,7 @@ import text from "@src/components/shared/navBar/common/text";
 type NavRoute = { path: string; label: string };
 
 const NAV_ROUTES: NavRoute[] = [
+  ROUTES.dashboard,
   ROUTES.spendings,
   ROUTES.exceptionals,
   ROUTES.categories,
@@ -31,6 +40,7 @@ const NAV_ROUTES: NavRoute[] = [
 ];
 
 const ROUTE_ICONS: Record<string, LucideIcon> = {
+  [ROUTES.dashboard.path]: LayoutDashboard,
   [ROUTES.spendings.path]: Receipt,
   [ROUTES.exceptionals.path]: Sparkles,
   [ROUTES.categories.path]: Tag,
