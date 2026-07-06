@@ -1,4 +1,4 @@
-import NavBar from "@components/shared/navBar/NavBar";
+import AuthHeader from "@components/auth/AuthHeader";
 import { AuthProvider } from "@auth/context/AuthContext";
 import { getServerSession } from "@auth/server/getServerSession";
 
@@ -21,11 +21,15 @@ export default async function PublicLayout({
       initialUser={session?.user ?? null}
       initialCsrfToken={session?.csrfToken ?? null}
     >
-      <div className="flex min-h-screen w-full flex-col items-stretch bg-background">
-        <NavBar />
-        <main className="flex flex-1 w-full items-center justify-center px-4 py-12">
+      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background">
+        <div className="auth-grain" aria-hidden />
+        <AuthHeader />
+        <main className="relative z-[1] grid flex-1 place-items-center px-6 py-8">
           {children}
         </main>
+        <div className="relative z-[1] py-[18px] text-center font-mono text-[11px] text-ink-4">
+          pfa · 1991computer.com
+        </div>
       </div>
     </AuthProvider>
   );

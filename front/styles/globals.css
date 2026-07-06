@@ -45,38 +45,80 @@ layer(base);
 }
 
 .dark {
-  --background: oklch(0.10 0.005 240);
-  --foreground: oklch(0.98 0 0);
-  --card: oklch(0.15 0.008 240);
-  --card-foreground: oklch(0.98 0 0);
-  --popover: oklch(0.15 0.008 240);
-  --popover-foreground: oklch(0.98 0 0);
-  --primary: oklch(0.72 0.15 200);
-  --primary-foreground: oklch(0.15 0.008 240);
-  --secondary: oklch(0.22 0.01 240);
-  --secondary-foreground: oklch(0.98 0 0);
-  --muted: oklch(0.22 0.01 240);
-  --muted-foreground: oklch(0.65 0 0);
-  --accent: oklch(0.22 0.01 240);
-  --accent-foreground: oklch(0.98 0 0);
-  --destructive: oklch(0.50 0.20 25);
-  --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.22 0.01 240);
-  --input: oklch(0.22 0.01 240);
-  --ring: oklch(0.55 0.15 200);
-  --chart-1: oklch(0.72 0.15 200);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.18 290);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.18 0.008 240);
-  --sidebar-foreground: oklch(0.98 0 0);
-  --sidebar-primary: oklch(0.72 0.15 200);
-  --sidebar-primary-foreground: oklch(0.10 0.005 240);
-  --sidebar-accent: oklch(0.22 0.01 240);
-  --sidebar-accent-foreground: oklch(0.98 0 0);
-  --sidebar-border: oklch(0.22 0.01 240);
-  --sidebar-ring: oklch(0.55 0.15 200);
+  /* ============================================================
+     pfa design tokens — source of truth (pfa.css + pfa-glow.css,
+     glow overrides baked in). See design_handoff_pfa/.
+     ============================================================ */
+
+  /* Surfaces (bg → foreground) */
+  --bg:         oklch(0.14 0.042 234);
+  --bg-elev:    oklch(0.185 0.006 250);
+  --bg-hi:      oklch(0.215 0.007 250);
+  --bg-hover:   oklch(0.22 0.006 250);
+  --line:       oklch(0.27 0.008 250);
+  --line-soft:  oklch(0.20 0.006 250);
+
+  /* Ink (text) */
+  --ink:        oklch(0.975 0.004 250);
+  --ink-2:      oklch(0.78 0.005 250);
+  --ink-3:      oklch(0.62 0.006 250);
+  --ink-4:      oklch(0.47 0.006 250);
+  --ink-5:      oklch(0.30 0.006 250);
+
+  /* Accent + semantic (brand green is --accent-strong to avoid the
+     collision with shadcn's --accent, which is a hover surface) */
+  --accent-strong: oklch(0.84 0.14 148);
+  --accent-d:      oklch(0.55 0.10 148);
+  --accent-bg:     oklch(0.84 0.14 148 / 0.10);
+  --neg:           oklch(0.72 0.17 25);
+  --neg-bg:        oklch(0.72 0.17 25 / 0.12);
+  --exc:           oklch(0.70 0.13 240); /* achats exceptionnels (bleu calme) */
+  --exc-bg:        oklch(0.70 0.13 240 / 0.14);
+  --elec:          oklch(0.72 0.15 230); /* "aujourd'hui" */
+
+  /* Radii */
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+
+  /* ===== shadcn semantic tokens remapped onto the pfa palette ===== */
+  --background: var(--bg);
+  --foreground: var(--ink);
+  --card: var(--bg-elev);
+  --card-foreground: var(--ink);
+  --popover: var(--bg-elev);
+  --popover-foreground: var(--ink);
+  --primary: var(--accent-strong);
+  --primary-foreground: oklch(0.18 0.01 148);
+  --secondary: var(--bg-hi);
+  --secondary-foreground: var(--ink);
+  --muted: var(--bg-hi);
+  --muted-foreground: var(--ink-3);
+  --accent: var(--bg-hover);
+  --accent-foreground: var(--ink);
+  --destructive: var(--neg);
+  --destructive-foreground: oklch(0.15 0.01 25);
+  --border: var(--line);
+  --input: var(--line);
+  --input-background: var(--bg);
+  --ring: var(--accent-d);
+
+  --chart-1: var(--accent-strong);
+  --chart-2: oklch(0.82 0.13 175);
+  --chart-3: oklch(0.80 0.12 210);
+  --chart-4: var(--exc);
+  --chart-5: var(--neg);
+
+  --sidebar: var(--bg-elev);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--accent-strong);
+  --sidebar-primary-foreground: oklch(0.15 0.02 180);
+  --sidebar-accent: var(--bg-hover);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--line);
+  --sidebar-ring: var(--accent-d);
 }
 
 @theme {
@@ -128,6 +170,27 @@ layer(base);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+
+  /* pfa palette utilities (text-ink-3, bg-exc, border-line, …) */
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-ink-4: var(--ink-4);
+  --color-ink-5: var(--ink-5);
+  --color-bg-elev: var(--bg-elev);
+  --color-bg-hi: var(--bg-hi);
+  --color-bg-hover: var(--bg-hover);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-d: var(--accent-d);
+  --color-neg: var(--neg);
+  --color-exc: var(--exc);
+  --color-elec: var(--elec);
+
+  /* Geist (UI) + Geist Mono (numbers) via next/font */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
 
 /*
@@ -151,7 +214,9 @@ layer(base);
   html,
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-poppins);
+    font-family: var(--font-sans);
+    letter-spacing: -0.005em;
+    font-feature-settings: "ss01", "cv11";
     -webkit-user-select: none;
     user-select: none;
   }
@@ -168,11 +233,40 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   -webkit-transition-delay: 9999s;
 }
 
-/* Auth form card — subtle grey + blue gradient */
-.auth-card-gradient {
-  background:
-    radial-gradient(ellipse 90% 80% at 25% 0%, rgba(59, 130, 246, 0.18) 0%, transparent 60%),
-    linear-gradient(140deg, #1c2030 0%, #0f1219 55%, #14171f 100%);
+/* Every meaningful number → Geist Mono, tabular */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Logo — pulsed under-glow on the large "hero" variant */
+.pfa-logo-pulse {
+  filter: blur(3px);
+  opacity: 0.6;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pfa-logo-pulse {
+    animation: pfa-logo-pulse 3.2s ease-in-out infinite;
+  }
+}
+@keyframes pfa-logo-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.82;
+  }
+}
+
+/* Auth screens — faint fixed grain layer behind the card */
+.auth-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 /* Thin scrollbar for spending lists — stable gutter, no content shift */
