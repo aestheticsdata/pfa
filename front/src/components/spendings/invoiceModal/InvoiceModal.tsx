@@ -22,7 +22,7 @@ import {
 } from "@components/ui/alert-dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
-import InvoiceImageModal from "./invoiceImageModal/InvoiceImageModal";
+import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
 import texts from "@components/spendings/config/text";
 import Spinner from "@components/common/Spinner";
 import { QUERY_KEYS } from "@components/spendings/config/constants";
