@@ -5,20 +5,32 @@
 
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import getDate from "date-fns/getDate";
+import isSameMonth from "date-fns/isSameMonth";
+import isBefore from "date-fns/isBefore";
+import startOfMonth from "date-fns/startOfMonth";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { ProgressTrack } from "@components/dataviz";
 import { euro0 } from "@components/overview/format";
 import { cn } from "@lib/utils";
 
 const ForecastStrip = () => {
+  const { from } = useDatePickerWrapperStore();
   const {
     get: { data: dashboard },
     monthlyTotal,
   } = useDashboard();
   const budget = Number(dashboard?.initialAmount ?? 0);
   const now = new Date();
-  const dayOfMonth = getDate(now);
-  const daysInMonth = getDaysInMonth(now);
+  const monthRef = from ?? now;
+  const daysInMonth = getDaysInMonth(monthRef);
+  // day-of-month is relative to the VIEWED month: elapsed for the current month,
+  // the whole month for a past (complete) one, none for a future one.
+  const dayOfMonth = isSameMonth(monthRef, now)
+    ? getDate(now)
+    : isBefore(startOfMonth(monthRef), startOfMonth(now))
+      ? daysInMonth
+      : 0;
   const projection =
     dayOfMonth > 0 ? (monthlyTotal / dayOfMonth) * daysInMonth : monthlyTotal; // MOCK
   const spentPct = budget > 0 ? Math.round((monthlyTotal / budget) * 100) : 0;

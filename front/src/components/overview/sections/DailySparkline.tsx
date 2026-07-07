@@ -28,7 +28,9 @@ const DailySparkline = () => {
     const totals = new Array(daysInMonth + 1).fill(0) as number[];
     for (const s of spendingsByMonth ?? []) {
       const d = getDate(parseISO(s.date));
-      if (d >= 1 && d <= daysInMonth) totals[d] += Number(s.amount);
+      if (!Number.isNaN(d) && d >= 1 && d <= daysInMonth) {
+        totals[d] += Number(s.amount);
+      }
     }
     const realPts: LinePoint[] = [];
     for (let d = 1; d <= today; d += 1) realPts.push({ x: d, y: totals[d] });
