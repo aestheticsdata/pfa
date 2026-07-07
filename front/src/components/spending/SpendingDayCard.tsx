@@ -231,10 +231,10 @@ const SpendingDayCard = ({
         </button>
       </div>
 
-      {dailyBudget != null && (
+      {isToday && dailyBudget != null && (
         <div className="sp-day-budget">
           <span>Budget du jour maximum</span>
-          <span className="v">{Math.round(dailyBudget)} €</span>
+          <span className="v">{dailyBudget} €</span>
         </div>
       )}
 

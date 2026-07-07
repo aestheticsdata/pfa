@@ -3,20 +3,26 @@
 import { useEffect, useState } from "react";
 import type { FocusEvent, KeyboardEvent } from "react";
 import { useForm } from "react-hook-form";
-import { Pencil } from "lucide-react";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { Input } from "@components/ui/input";
-import { Donut } from "@components/dataviz";
-import { euro0, pct1 } from "@components/overview/format";
+import { Donut, useCountUp } from "@components/dataviz";
+import DailySparkline from "@components/overview/sections/DailySparkline";
+import EditGlyph from "@components/overview/EditGlyph";
+import { euro, euro0 } from "@components/overview/format";
 import { cn } from "@lib/utils";
 
 interface SalaryForm {
   initialAmount: string;
 }
 
-/** Hero — remaining budget + fixed/variable gauge + inline salary edit. */
+/** Hero — remaining budget + fixed/variable gauge + inline salary edit, with the
+ *  daily sparkline nested below (single card, per the mockup). */
 const BudgetHero = () => {
+  const { from } = useDatePickerWrapperStore();
   const {
     get: { data: dashboard, error },
     mutation,
@@ -37,6 +43,15 @@ const BudgetHero = () => {
   const usedPct =
     initialAmount > 0 ? Math.min(100, (monthlyTotal / initialAmount) * 100) : 0;
   const over = remaining < 0;
+
+  // count both figures up from 0 (mount, data load, month change)
+  const animatedPct = useCountUp(usedPct);
+  const animatedRemaining = useCountUp(Math.abs(remaining));
+
+  const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: fr });
+  // remount key → replays the donut grow-from-zero on month change
+  const monthKey = format(from ?? new Date(), "yyyy-MM");
+  const [amountInt, amountDec] = euro(animatedRemaining).split(",");
 
   const segments =
     initialAmount > 0
@@ -63,102 +78,115 @@ const BudgetHero = () => {
   }, [editing, setFocus]);
 
   return (
-    <section className="pfa-card flex flex-col gap-6 px-7 py-6 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-col gap-2">
-        <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-ink-3">
-          Budget restant
-        </span>
-        <div
-          className={cn(
-            "num text-[52px] font-medium leading-none tracking-[-0.025em]",
-            over ? "text-neg" : "text-ink",
-          )}
-        >
-          {euro0(remaining)}
-          <span className="text-[34px] font-normal text-ink-3"> €</span>
+    <section className="pfa-card flex flex-col px-7 py-6">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex flex-col">
+          <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-ink-3">
+            {monthLabel} — budget restant
+          </span>
+          <div
+            className={cn(
+              "num mt-3.5 text-[56px] font-medium leading-none tracking-[-0.025em]",
+              over ? "text-neg" : "text-ink",
+            )}
+          >
+            {over && "−"}
+            {amountInt}
+            <span className="text-[36px] font-normal text-ink-3">
+              ,{amountDec} €
+            </span>
+          </div>
+
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-ink-3">
+            {!editing ? (
+              <span className="inline-flex items-center gap-1.5">
+                sur
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="group inline-flex items-center gap-1 border-b border-dashed border-ink-4 pb-px leading-tight transition-colors hover:border-accent-strong"
+                  aria-label="Modifier le budget alloué"
+                  title="Modifier le montant initial"
+                >
+                  <span className="num text-ink-2">
+                    {euro0(initialAmount)} €
+                  </span>
+                  <EditGlyph className="size-[11px] text-ink-4 transition-colors group-hover:text-accent-strong" />
+                </button>
+                alloués
+              </span>
+            ) : (
+              <form
+                key={dashboard?.ID ?? "new-month"}
+                onBlur={closeIfLeft}
+                onSubmit={handleSubmit(onSubmit)}
+                className="inline-flex items-center gap-1.5"
+              >
+                sur
+                <Input
+                  defaultValue={initialAmount}
+                  className="num h-7 w-24 border-accent-d bg-background text-ink"
+                  onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                    if (e.key === "Escape") setEditing(false);
+                  }}
+                  autoFocus
+                  {...register("initialAmount")}
+                />
+                € alloués
+              </form>
+            )}
+
+            {initialAmount > 0 ? (
+              <>
+                <span className="text-ink-4">•</span>
+                <span className={over ? "text-neg" : "text-accent-strong"}>
+                  {over ? "↓ au-dessus du budget" : "↑ dans le budget"}
+                </span>
+                <span>au rythme actuel</span>
+              </>
+            ) : (
+              <>
+                <span className="text-ink-4">•</span>
+                <span className="text-accent-strong">Définis ton budget du mois</span>
+              </>
+            )}
+          </div>
         </div>
-        <div className="group mt-1 flex items-center gap-2 text-[13px] text-ink-3">
-          {!editing ? (
-            <button
-              type="button"
-              onClick={() => setEditing(true)}
-              className="inline-flex items-center gap-1.5 transition-colors hover:text-ink"
-              aria-label="Modifier le budget alloué"
-            >
-              sur{" "}
-              <span className="num text-ink-2">{euro0(initialAmount)} €</span>{" "}
-              alloués
-              <Pencil className="size-3 opacity-0 transition-opacity group-hover:opacity-100" />
-            </button>
-          ) : (
-            <form
-              key={dashboard?.ID ?? "new-month"}
-              onBlur={closeIfLeft}
-              onSubmit={handleSubmit(onSubmit)}
-              className="inline-flex items-center gap-1.5"
-            >
-              sur
-              <Input
-                defaultValue={initialAmount}
-                className="num h-7 w-24 border-accent-d bg-background text-ink"
-                onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-                  if (e.key === "Escape") setEditing(false);
-                }}
-                autoFocus
-                {...register("initialAmount")}
-              />
-              € alloués
-            </form>
-          )}
-        </div>
-        <div
-          className={cn(
-            "mt-1 text-[13px]",
-            over ? "text-neg" : "text-accent-strong",
-          )}
-        >
-          {initialAmount <= 0
-            ? "Définis ton budget du mois"
-            : over
-              ? `Dépassement de ${euro0(-remaining)} €`
-              : "Dans le budget"}
+
+        <div className="flex flex-col items-center gap-2 sm:items-end">
+          <Donut
+            key={monthKey}
+            segments={segments}
+            size={168}
+            thickness={7}
+            animate
+            ariaLabel="Répartition du budget consommé"
+          >
+            <div>
+              <div className="num text-[32px] font-medium leading-none tracking-[-0.02em] text-ink">
+                {Math.round(animatedPct)}
+                <span className="text-[18px] text-ink-3">%</span>
+              </div>
+              <div className="mt-0.5 text-[10px] uppercase tracking-[0.1em] text-ink-4">
+                utilisé
+              </div>
+            </div>
+          </Donut>
+          <div className="flex gap-4 text-[11px] text-ink-3">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="size-2 rounded-[2px] bg-[var(--accent-d)]" />
+              Fixes <span className="num text-ink-2">{euro0(fixed)}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="size-2 rounded-[2px] bg-accent-strong" />
+              Variables{" "}
+              <span className="num text-ink-2">{euro0(variable)}</span>
+            </span>
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-3">
-        <Donut
-          segments={segments}
-          size={168}
-          thickness={7}
-          ariaLabel="Répartition du budget consommé"
-        >
-          <div>
-            <div className="num text-[32px] font-medium leading-none tracking-[-0.02em] text-ink">
-              {Math.round(usedPct)}
-              <span className="text-[18px] text-ink-3">%</span>
-            </div>
-            <div className="mt-0.5 text-[10px] uppercase tracking-[0.1em] text-ink-4">
-              utilisé
-            </div>
-          </div>
-        </Donut>
-        <div className="flex gap-4 text-[11px] text-ink-3">
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-[2px] bg-[var(--accent-d)]" />
-            Fixes <span className="num text-ink-2">{euro0(fixed)} €</span>
-          </span>
-          <span className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-[2px] bg-accent-strong" />
-            Variables{" "}
-            <span className="num text-ink-2">{euro0(variable)} €</span>
-          </span>
-        </div>
-        {initialAmount > 0 && (
-          <div className="text-[11px] text-ink-4">
-            {pct1((monthlyTotal / initialAmount) * 100)}% de {euro0(initialAmount)} €
-          </div>
-        )}
-      </div>
+      <DailySparkline />
     </section>
   );
 };

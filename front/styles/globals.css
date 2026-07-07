@@ -259,6 +259,35 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   }
 }
 
+/* Dashboard "grow from zero" reveals (forecast bar + budget donut).
+   No animation-fill-mode: after the run the property reverts to its static
+   value (same as the keyframe target), so live data updates still show. */
+@keyframes pfa-donut-grow {
+  from {
+    stroke-dasharray: 0 var(--pfa-circ);
+  }
+  to {
+    stroke-dasharray: var(--pfa-dash) var(--pfa-gap);
+  }
+}
+/* left→right reveal of the daily curve (clip walks in from the right) */
+@keyframes pfa-draw-x {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pfa-anim-donut {
+    animation: pfa-donut-grow 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .pfa-anim-draw-x {
+    animation: pfa-draw-x 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
 /* ============================================================
    App chrome — signature "glow" surfaces (pfa-glow.css)
    ============================================================ */

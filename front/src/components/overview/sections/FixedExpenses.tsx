@@ -1,6 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import parseISO from "date-fns/parseISO";
+import getDate from "date-fns/getDate";
+import isSameMonth from "date-fns/isSameMonth";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
 import { ImageIcon, Pencil, Plus, Trash2 } from "lucide-react";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
@@ -20,7 +25,14 @@ interface FixedExpensesProps {
 const hasInvoice = (r: RecurringItem) =>
   Boolean((r as { invoicefile?: string | null }).invoicefile);
 
-/** Fixed expenses (recurrings) — total + list with create/edit/delete/invoice. */
+// échéance day-of-month = day of the recurring's dateFrom (best real proxy;
+// recurrings carry no dedicated charge-day field).
+const dayOf = (r: RecurringItem): number | null => {
+  const d = getDate(parseISO(r.dateFrom));
+  return Number.isNaN(d) ? null : d;
+};
+
+/** Fixed expenses (recurrings) — monthly/annualised totals + échéancier list. */
 const FixedExpenses = ({ month }: FixedExpensesProps) => {
   const { recurrings, deleteRecurring, error } = useReccurings();
   const {
@@ -36,32 +48,83 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
 
   if (error) throw error;
 
-  const list = recurrings ?? [];
+  const now = new Date();
+  const viewingCurrentMonth = isSameMonth(month.start, now);
+  const todayDay = getDate(now);
+
+  const list = [...(recurrings ?? [])].sort(
+    (a, b) => (dayOf(a) ?? 99) - (dayOf(b) ?? 99),
+  );
   const total = list.reduce((a, r) => a + Number(r.amount), 0);
+  const [totalInt, totalDec] = euro(total).split(",");
+  const [annualInt, annualDec] = euro(total * 12).split(",");
+
+  const upcoming = viewingCurrentMonth
+    ? list.filter((r) => {
+        const d = dayOf(r);
+        return d != null && d > todayDay;
+      })
+    : [];
+  const upcomingSum = upcoming.reduce((a, r) => a + Number(r.amount), 0);
 
   return (
     <section className="pfa-card flex h-full flex-col gap-4 px-6 py-5">
       <div className="flex items-start justify-between">
         <div>
-          <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
+          <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">
             Dépenses fixes
+          </h2>
+          <span className="text-xs text-ink-4">
+            {list.length} lignes · échéancier {format(month.start, "MMMM", { locale: fr })}
           </span>
-          <div className="num text-[26px] font-medium tracking-[-0.02em] text-ink">
-            {euro(total)} <span className="text-[17px] text-ink-3">€</span>
-          </div>
-          <div className="text-xs text-ink-3">≈ {euro(total * 12)} € / an</div>
         </div>
         <button
           type="button"
           onClick={addSpending}
           aria-label="Ajouter une dépense fixe"
-          className="grid size-8 place-items-center rounded-lg border border-line bg-bg-hi text-ink-2 transition-colors hover:border-accent-d hover:text-ink"
+          className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-bg-hi text-ink-2 transition-colors hover:border-accent-d hover:text-ink"
         >
           <Plus className="size-4" />
         </button>
       </div>
 
-      <div className="recurrings-list-container flex flex-1 flex-col gap-0.5 overflow-y-auto">
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
+            Mensuel
+          </div>
+          <div className="num text-[26px] font-medium tracking-[-0.02em] text-ink">
+            {totalInt}
+            <span className="text-[18px] text-ink-3">,{totalDec} €</span>
+          </div>
+        </div>
+        <div className="text-right">
+          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
+            Annualisé
+          </div>
+          <div className="num text-[18px] font-medium tracking-[-0.01em] text-ink-2">
+            {annualInt}
+            <span className="text-[14px] text-ink-3">,{annualDec} €</span>
+          </div>
+        </div>
+      </div>
+
+      {upcoming.length > 0 && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-line-soft bg-bg-hi px-3 py-2.5 text-xs text-ink-3">
+          <span>À venir d&apos;ici le {format(month.end, "d MMMM", { locale: fr })}</span>
+          <span className="text-ink-2">
+            <span className="num font-semibold text-accent-strong">
+              {upcoming.length}
+            </span>{" "}
+            prélèvements ·{" "}
+            <span className="num font-semibold text-accent-strong">
+              {euro(upcomingSum)} €
+            </span>
+          </span>
+        </div>
+      )}
+
+      <div className="recurrings-list-container flex flex-1 flex-col overflow-y-auto">
         {list.map((r) => {
           if (pendingDelete === r.ID) {
             return (
@@ -96,12 +159,15 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
               </div>
             );
           }
+          const day = dayOf(r);
+          const isUpcoming =
+            viewingCurrentMonth && day != null && day > todayDay;
           return (
             <div
               key={r.ID}
-              className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 rounded-md px-2 py-1.5 transition-colors hover:bg-bg-hi"
+              className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 border-b border-line-soft py-[9px] last:border-b-0"
             >
-              <span className="truncate text-sm text-ink" title={r.label}>
+              <span className="truncate text-[13px] text-ink" title={r.label}>
                 {r.label}
               </span>
               <span className="flex items-center gap-2">
@@ -136,7 +202,17 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                     <Trash2 className="size-3" />
                   </button>
                 </span>
-                <span className="num min-w-[64px] text-right text-sm text-ink">
+                {day != null && (
+                  <span
+                    className={cn(
+                      "num w-5 text-right text-[11px] tabular-nums",
+                      isUpcoming ? "text-accent-strong" : "text-ink-4",
+                    )}
+                  >
+                    {String(day).padStart(2, "0")}
+                  </span>
+                )}
+                <span className="num min-w-[76px] text-right text-[13px] font-medium text-ink">
                   {euro(r.amount)} €
                 </span>
               </span>

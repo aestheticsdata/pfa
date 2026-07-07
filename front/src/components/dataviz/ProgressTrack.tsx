@@ -1,5 +1,6 @@
 "use client";
 
+import useTween from "@components/dataviz/useTween";
 import { cn } from "@lib/utils";
 
 interface ProgressTrackProps {
@@ -15,6 +16,14 @@ interface ProgressTrackProps {
   height?: number;
   radius?: number;
   color?: string;
+  /** Render the fill as a left→right accent gradient at reduced opacity
+   *  (the forecast "réalisé" look) instead of a flat colour. */
+  gradient?: boolean;
+  /** Animate the segments. On mount / remount (via a `key`) they grow from zero;
+   *  on a live value change they ease from their current width to the new one. */
+  animate?: boolean;
+  /** Delay (seconds) before the animation starts — for staggering a list. */
+  animationDelay?: number;
   /** Fill colour for the portion beyond `ceiling`. */
   overColor?: string;
   trackColor?: string;
@@ -22,13 +31,18 @@ interface ProgressTrackProps {
   ariaLabel?: string;
 }
 
-const pct = (v: number, max: number) =>
-  `${Math.max(0, Math.min(100, (v / (max || 1)) * 100))}%`;
+const clampFrac = (v: number, max: number) =>
+  Math.max(0, Math.min(1, v / (max || 1)));
+const asPct = (f: number) => `${Math.max(0, f) * 100}%`;
 
 /**
  * Versatile horizontal track: a fill (that turns `overColor` past `ceiling`),
  * an optional striped projection, a ceiling tick and a "today" marker.
  * Covers both the forecast strip and the weekly-ceiling bars.
+ *
+ * Widths/positions are driven by `useTween`, so both the grow-from-zero on mount
+ * and the ease-from-current on a value change are one JS animation (no CSS
+ * transition that can silently fail to fire on an in-place update).
  */
 const ProgressTrack = ({
   value,
@@ -40,13 +54,25 @@ const ProgressTrack = ({
   height = 8,
   radius = 6,
   color = "var(--accent-strong)",
+  gradient = false,
+  animate = false,
+  animationDelay = 0,
   overColor = "var(--neg)",
   trackColor = "var(--bg-hi)",
   className,
   ariaLabel,
 }: ProgressTrackProps) => {
   const over = ceiling != null && value > ceiling;
-  const budgetPart = ceiling != null && value > ceiling ? ceiling : value;
+  const budgetPart = over && ceiling != null ? ceiling : value;
+  const hasProjection = projected != null && projected > value;
+
+  const delayMs = animationDelay * 1000;
+  // tween each fraction (0..1) toward its target; on remount all start at 0
+  const fBudget = useTween(clampFrac(budgetPart, max), animate, 650, delayMs);
+  const fValue = useTween(clampFrac(value, max), animate, 650, delayMs);
+  const fProjected = useTween(clampFrac(projected ?? 0, max), animate, 650, delayMs);
+  const fCeiling = useTween(clampFrac(ceiling ?? 0, max), animate, 650, delayMs);
+  const fMarker = useTween(clampFrac(marker ?? 0, max), animate, 650, delayMs);
 
   return (
     <div
@@ -59,12 +85,12 @@ const ProgressTrack = ({
         className="absolute inset-0 overflow-hidden"
         style={{ borderRadius: radius }}
       >
-        {projected != null && projected > value && (
+        {hasProjection && (
           <span
             className="absolute inset-y-0"
             style={{
-              left: pct(value, max),
-              width: `calc(${pct(projected, max)} - ${pct(value, max)})`,
+              left: asPct(fValue),
+              width: asPct(fProjected - fValue),
               background:
                 "repeating-linear-gradient(45deg, transparent 0 6px, var(--accent-bg) 6px 12px)",
               borderLeft: "1px solid var(--accent-d)",
@@ -74,14 +100,20 @@ const ProgressTrack = ({
         )}
         <span
           className="absolute inset-y-0 left-0"
-          style={{ width: pct(budgetPart, max), background: color, opacity: 0.92 }}
+          style={{
+            width: asPct(fBudget),
+            background: gradient
+              ? "linear-gradient(90deg, var(--accent-d), var(--accent-strong))"
+              : color,
+            opacity: gradient ? 0.45 : 0.92,
+          }}
         />
         {over && ceiling != null && (
           <span
             className="absolute inset-y-0"
             style={{
-              left: pct(ceiling, max),
-              width: `calc(${pct(value, max)} - ${pct(ceiling, max)})`,
+              left: asPct(fCeiling),
+              width: asPct(fValue - fCeiling),
               background: overColor,
               opacity: 0.95,
             }}
@@ -93,7 +125,7 @@ const ProgressTrack = ({
         <span
           className="absolute top-0 bottom-0"
           style={{
-            left: pct(ceiling, max),
+            left: asPct(fCeiling),
             width: 2,
             marginLeft: -1,
             background: "var(--ink-2)",
@@ -105,7 +137,7 @@ const ProgressTrack = ({
         <span
           className="absolute"
           style={{
-            left: pct(marker, max),
+            left: asPct(fMarker),
             top: -4,
             bottom: -4,
             width: 2,

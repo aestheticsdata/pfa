@@ -7,8 +7,12 @@ import { z } from "zod";
 import Mexp from "math-expression-evaluator";
 import subMonths from "date-fns/subMonths";
 import addDays from "date-fns/addDays";
+import addMonths from "date-fns/addMonths";
+import startOfMonth from "date-fns/startOfMonth";
+import endOfMonth from "date-fns/endOfMonth";
 import parseISO from "date-fns/parseISO";
 import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
 import {
   Check,
   ChevronLeft,
@@ -195,6 +199,12 @@ const SpendingModal = ({
   const asRecurring = recurringType || isRecurringToggle;
   const canToggleRecurring = !isEditing && !recurringType;
 
+  // Month a new recurring belongs to (its start/end window). Defaults to the
+  // viewed month; the user can step it in the modal.
+  const [recurringMonth, setRecurringMonth] = useState<Date>(() =>
+    month?.start ? startOfMonth(month.start) : startOfMonth(new Date()),
+  );
+
   // MOCK — receipt-at-creation is visual only: POST /spendings returns no ID and
   // /spendings/upload needs the spendingID, so the file can't be persisted at
   // creation. Local preview only; add the receipt after creation via the row's
@@ -231,7 +241,7 @@ const SpendingModal = ({
     handleSubmit,
     getValues,
     setValue,
-    formState: { errors, isSubmitting, isValid },
+    formState: { errors, isSubmitting },
   } = useForm<SpendingForm>({
     resolver: zodResolver(spendingSchema),
     mode: "onChange",
@@ -288,14 +298,30 @@ const SpendingModal = ({
       return;
     }
 
-    const categoryPayload: CategoryOption = selectedCategory
+    // Category resolution (legacy behaviour): an explicit pick wins; otherwise
+    // whatever was typed in the combobox becomes the category — an existing one
+    // if it matches, else a brand-new one created on the fly at submit. No
+    // separate "create category" step.
+    const trimmedQuery = comboboxQuery.trim();
+    const resolvedCategory: CategoryOption | null = selectedCategory
       ? selectedCategory
-      : {
-          ID: null,
-          userID: user.id,
-          name: "",
-          color: null,
-        };
+      : trimmedQuery
+        ? categoryOptions.find(
+            (c) => c.name.toLowerCase() === trimmedQuery.toLowerCase(),
+          ) ?? {
+            ID: null,
+            userID: user.id,
+            name: trimmedQuery,
+            color: getRandomHexColor(),
+          }
+        : null;
+
+    const categoryPayload: CategoryOption = resolvedCategory ?? {
+      ID: null,
+      userID: user.id,
+      name: "",
+      color: null,
+    };
 
     const spendingDateStr = !asRecurring
       ? values.spendingDate || format(new Date(), "yyyy-MM-dd")
@@ -322,12 +348,9 @@ const SpendingModal = ({
       }
     } else {
       if (asRecurring) {
-        if (!month) {
-          throw new Error("Missing month range for recurring spending modal");
-        }
         const formattedMonth = {
-          start: format(month.start, "yyyy-MM-dd"),
-          end: format(month.end, "yyyy-MM-dd"),
+          start: format(startOfMonth(recurringMonth), "yyyy-MM-dd"),
+          end: format(endOfMonth(recurringMonth), "yyyy-MM-dd"),
         };
         createRecurring.mutate({ spendingEdited, formattedMonth });
       } else {
@@ -400,6 +423,37 @@ const SpendingModal = ({
             </div>
           )}
 
+          {asRecurring && !isEditing && (
+            <div className="flex flex-col gap-2">
+              <Label className="text-[13px] text-ink-2">Mois</Label>
+              <div className="flex items-stretch overflow-hidden rounded-md border border-line bg-background focus-within:border-accent-d">
+                <button
+                  type="button"
+                  aria-label="Mois précédent"
+                  onClick={() =>
+                    setRecurringMonth((m) => startOfMonth(addMonths(m, -1)))
+                  }
+                  className="grid place-items-center border-r border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink"
+                >
+                  <ChevronLeft className="size-4" />
+                </button>
+                <span className="num flex flex-1 items-center justify-center py-2 text-sm capitalize text-ink">
+                  {format(recurringMonth, "MMMM yyyy", { locale: fr })}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Mois suivant"
+                  onClick={() =>
+                    setRecurringMonth((m) => startOfMonth(addMonths(m, 1)))
+                  }
+                  className="grid place-items-center border-l border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink"
+                >
+                  <ChevronRight className="size-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col gap-2">
             <Label htmlFor="spendingLabel" className="text-[13px] text-ink-2">
               Label
@@ -455,7 +509,33 @@ const SpendingModal = ({
           {!asRecurring && (
             <div className="flex flex-col gap-2">
               <Label className="text-[13px] text-ink-2">Catégorie</Label>
-              <Popover open={comboboxOpen} onOpenChange={setComboboxOpen} modal>
+              <Popover
+                open={comboboxOpen}
+                onOpenChange={(isOpen) => {
+                  // On close (click-away / Escape), commit whatever was typed as
+                  // the category — matching existing, else a new one — so the
+                  // user never has to click a "create" action.
+                  if (!isOpen) {
+                    const q = comboboxQuery.trim();
+                    if (q) {
+                      const match = categoryOptions.find(
+                        (c) => c.name.toLowerCase() === q.toLowerCase(),
+                      );
+                      setSelectedCategory(
+                        match ?? {
+                          ID: null,
+                          userID: user?.id ?? null,
+                          name: q,
+                          color: getRandomHexColor(),
+                        },
+                      );
+                      setComboboxQuery("");
+                    }
+                  }
+                  setComboboxOpen(isOpen);
+                }}
+                modal
+              >
                 <PopoverTrigger asChild>
                   <button
                     type="button"
@@ -504,31 +584,20 @@ const SpendingModal = ({
                 >
                   <Command className="bg-transparent">
                     <CommandInput
-                      placeholder="Rechercher ou créer…"
+                      placeholder="Rechercher ou saisir…"
                       value={comboboxQuery}
                       onValueChange={setComboboxQuery}
                       className="text-ink"
                     />
                     <CommandList>
-                      <CommandEmpty>
-                        {comboboxQuery.trim() ? (
-                          <button
-                            type="button"
-                            className="px-3 py-1 text-xs text-accent-strong hover:brightness-110"
-                            onClick={() => onCreateCategory(comboboxQuery.trim())}
-                          >
-                            Créer «&nbsp;{comboboxQuery.trim()}&nbsp;»
-                          </button>
-                        ) : (
-                          "Aucune catégorie."
-                        )}
-                      </CommandEmpty>
+                      <CommandEmpty>Aucune catégorie.</CommandEmpty>
                       <CommandGroup>
                         {selectedCategory && (
                           <CommandItem
                             value="__none"
                             onSelect={() => {
                               setSelectedCategory(null);
+                              setComboboxQuery("");
                               setComboboxOpen(false);
                             }}
                           >
@@ -541,6 +610,7 @@ const SpendingModal = ({
                             value={category.name}
                             onSelect={() => {
                               setSelectedCategory(category);
+                              setComboboxQuery("");
                               setComboboxOpen(false);
                             }}
                           >
@@ -559,12 +629,16 @@ const SpendingModal = ({
                           </CommandItem>
                         ))}
                         {comboboxQuery.trim() && !exactMatch && (
+                          // The typed value shown as a normal option — selecting
+                          // it (or just closing) uses it; it's persisted when the
+                          // spending is created. No explicit "create" step.
                           <CommandItem
-                            value={`__create-${comboboxQuery.trim()}`}
+                            value={`__new-${comboboxQuery.trim()}`}
                             onSelect={() => onCreateCategory(comboboxQuery.trim())}
                           >
-                            <span className="text-accent-strong">
-                              Créer «&nbsp;{comboboxQuery.trim()}&nbsp;»
+                            <span className="mr-1 size-2.5 rounded-[3px] bg-ink-4" />
+                            <span className="flex-1 capitalize">
+                              {comboboxQuery.trim()}
                             </span>
                           </CommandItem>
                         )}
@@ -723,25 +797,19 @@ const SpendingModal = ({
                   console.error("User is not available");
                   return;
                 }
-                if (!month) {
-                  throw new Error(
-                    "Missing month range for recurring copy action",
-                  );
-                }
+                const mStart = startOfMonth(recurringMonth);
+                const mEnd = endOfMonth(recurringMonth);
                 closeModal();
                 copyRecurrings.mutate({
                   userID: user.id,
                   dates: {
-                    start: format(month.start, DATE_FORMAT),
-                    end: format(month.end, DATE_FORMAT),
+                    start: format(mStart, DATE_FORMAT),
+                    end: format(mEnd, DATE_FORMAT),
                     previousMonthStart: format(
-                      subMonths(month.start, 1),
+                      subMonths(mStart, 1),
                       DATE_FORMAT,
                     ),
-                    previousMonthEnd: format(
-                      subMonths(month.end, 1),
-                      DATE_FORMAT,
-                    ),
+                    previousMonthEnd: format(subMonths(mEnd, 1), DATE_FORMAT),
                   },
                 });
               }}
@@ -761,11 +829,7 @@ const SpendingModal = ({
             >
               Annuler
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={isSubmitting || !isValid}
-            >
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
               {submitLabel}
             </Button>
           </DialogFooter>

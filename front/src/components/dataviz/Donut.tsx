@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@lib/utils";
 import { wedgePath } from "@components/dataviz/svg";
 
@@ -17,6 +17,9 @@ interface DonutProps {
   gap?: number;
   /** Round the ring segment ends. */
   rounded?: boolean;
+  /** Grow each ring segment from zero on mount (ring variant). Remount (via a
+   *  `key`) to replay — e.g. on a month change. */
+  animate?: boolean;
   trackColor?: string;
   /** Center overlay (e.g. a big % for a gauge). */
   children?: ReactNode;
@@ -38,6 +41,7 @@ const Donut = ({
   variant = "ring",
   gap = 0,
   rounded = false,
+  animate = false,
   trackColor = "var(--bg-hi)",
   children,
   className,
@@ -94,6 +98,16 @@ const Donut = ({
             strokeDasharray={`${a.dash} ${circumference - a.dash}`}
             strokeDashoffset={-a.offset}
             strokeLinecap={rounded ? "round" : "butt"}
+            className={animate ? "pfa-anim-donut" : undefined}
+            style={
+              animate
+                ? ({
+                    "--pfa-circ": circumference,
+                    "--pfa-dash": a.dash,
+                    "--pfa-gap": circumference - a.dash,
+                  } as CSSProperties)
+                : undefined
+            }
           />
         ))}
       </g>

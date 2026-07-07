@@ -1,14 +1,23 @@
 "use client";
 
-// MOCK — the insight framing + thresholds ("~16% slower", the category spike)
-// are placeholders that need real trend/business logic. "Reste à vivre" is
-// derived from the real remaining budget. See REFACTO_NOTES.md §6.
+// Partly MOCK — the pace framing ("~16% moins vite") and the category trend
+// ("+X% vs le mois dernier") are placeholders needing real 3-month / prior-month
+// history. The end-of-month conclusion, the top category name and "reste à vivre"
+// are derived from real data. See REFACTO_NOTES.md §6.
 
 import type { ReactNode } from "react";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import getDate from "date-fns/getDate";
+import isSameMonth from "date-fns/isSameMonth";
+import endOfMonth from "date-fns/endOfMonth";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
 import { TrendingUp, TriangleAlert, Wallet } from "lucide-react";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
+import useCharts from "@components/spendings/services/useCharts";
+import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
+import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
 import { euro0 } from "@components/overview/format";
 import { cn } from "@lib/utils";
 
@@ -23,9 +32,9 @@ const Insight = ({
   label: string;
   children: ReactNode;
 }) => (
-  <div className="flex items-start gap-3 px-5 py-4">
+  <div className="flex items-start gap-3 bg-[var(--bg)] px-[18px] py-3.5">
     <span
-      className={cn("mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg", tone)}
+      className={cn("mt-0.5 grid size-7 shrink-0 place-items-center rounded-[7px]", tone)}
     >
       {icon}
     </span>
@@ -39,37 +48,71 @@ const Insight = ({
 );
 
 const InsightsRibbon = () => {
-  const { remaining } = useDashboard();
+  const { from } = useDatePickerWrapperStore();
+  const {
+    remaining,
+    monthlyTotal,
+    get: { data: dashboard },
+  } = useDashboard();
+  const { data: charts } = useCharts(MONTHLY);
+
+  const budget = Number(dashboard?.initialAmount ?? 0);
   const now = new Date();
-  const daysLeft = Math.max(1, getDaysInMonth(now) - getDate(now) + 1);
-  const perDay = Math.max(0, Math.round(remaining / daysLeft));
+  const monthRef = from ?? now;
+  const daysInMonth = getDaysInMonth(monthRef);
+  const isThisMonth = isSameMonth(monthRef, now);
+  const dayOfMonth = isThisMonth ? getDate(now) : daysInMonth;
+  const projection =
+    dayOfMonth > 0 ? (monthlyTotal / dayOfMonth) * daysInMonth : monthlyTotal;
+  const underBudget = budget <= 0 || projection <= budget;
+  // same figure as the Dépenses "Budget du jour maximum" (shared helper)
+  const perDay = dailyRemainingBudget(
+    remaining,
+    isThisMonth ? now : endOfMonth(monthRef),
+  );
+  const topCategory = (charts ?? [])
+    .slice()
+    .sort((a, b) => b.value - a.value)[0]?.category;
+  const lastDayLabel = format(endOfMonth(monthRef), "d MMMM", { locale: fr });
 
   return (
-    <section className="pfa-card grid grid-cols-1 divide-y divide-line-soft sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+    <section className="grid grid-cols-1 gap-px overflow-hidden rounded-[10px] border border-line-soft bg-line-soft sm:grid-cols-3">
       <Insight
         tone="bg-accent-strong/10 text-accent-strong"
-        icon={<TrendingUp className="size-4" />}
+        icon={<TrendingUp className="size-3.5" />}
         label="Sur le rythme"
       >
-        {/* MOCK */}
-        <b className="font-semibold text-ink">~16% plus lent</b> que ta moyenne 3
-        mois
+        Tu consommes <b className="font-semibold text-ink">~16% moins vite</b>{" "}
+        {/* MOCK pace */}que ta moyenne 3 mois. À ce rythme, tu termines le mois{" "}
+        <b className="font-semibold text-ink">
+          {underBudget ? "sous ton budget" : "au-dessus de ton budget"}
+        </b>
+        .
       </Insight>
       <Insight
         tone="bg-neg/10 text-neg"
-        icon={<TriangleAlert className="size-4" />}
+        icon={<TriangleAlert className="size-3.5" />}
         label="Catégorie en hausse"
       >
-        {/* MOCK */}
-        <b className="font-semibold text-ink">Alimentation</b> +22% ce mois
+        {topCategory ? (
+          <>
+            <b className="font-semibold capitalize text-ink">{topCategory}</b> à{" "}
+            <b className="num font-semibold text-ink">+24%</b> {/* MOCK trend */}
+            vs le mois dernier.
+          </>
+        ) : (
+          "Aucune catégorie ce mois."
+        )}
       </Insight>
       <Insight
-        tone="bg-exc/10 text-exc"
-        icon={<Wallet className="size-4" />}
+        tone="bg-bg-hi text-ink-2"
+        icon={<Wallet className="size-3.5" />}
         label="Reste à vivre"
       >
-        <b className="font-semibold text-ink">{euro0(perDay)} €/j</b> sur{" "}
-        {daysLeft} j restants
+        Il te reste <b className="num font-semibold text-ink">{euro0(perDay)} €</b>
+        /jour à dépenser d&apos;ici le{" "}
+        <b className="font-semibold text-ink">{lastDayLabel}</b> pour rester dans
+        ton budget.
       </Insight>
     </section>
   );

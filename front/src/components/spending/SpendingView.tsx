@@ -18,6 +18,7 @@ import SpendingSummary from "@components/spending/SpendingSummary";
 import SpendingCategoryBreakdown from "@components/spending/SpendingCategoryBreakdown";
 import SpendingCategoryFilter from "@components/spending/SpendingCategoryFilter";
 import SpendingDayCard from "@components/spending/SpendingDayCard";
+import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
 import { mockAvgDailyDelta } from "@components/spending/helpers/mockSpending";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
@@ -51,7 +52,7 @@ const SpendingView = () => {
   useEnsureWeekRange();
 
   const { spendingsByWeek, isLoading, error } = useSpendings();
-  const { get: dashboardQuery } = useDashboard();
+  const { get: dashboardQuery, remaining } = useDashboard();
 
   const groups = useMemo<SpendingDayGroup[]>(
     () => spendingsByWeek ?? [],
@@ -111,8 +112,12 @@ const SpendingView = () => {
   };
 
   const weeklyCeiling = dashboardQuery.data?.initialCeiling ?? null;
-  const dailyBudget =
-    weeklyCeiling != null && weeklyCeiling > 0 ? weeklyCeiling / 7 : null;
+  // "Budget du jour maximum" — remaining monthly budget spread over the days left
+  // in the month (today included). Shared with the Dashboard "reste à vivre" so
+  // the two always match; only rendered on today's card (see SpendingDayCard).
+  const dailyBudget = dashboardQuery.data
+    ? dailyRemainingBudget(remaining, now)
+    : null;
 
   const grand = weekTotal || 1;
   const breakdownRows: BreakdownRow[] = categoryAgg.map((c) => ({

@@ -15,6 +15,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@auth/context/AuthContext";
 import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
+import MonthSelector from "@components/overview/MonthSelector";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useGlobalStore from "@components/shared/globalStore";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
@@ -84,6 +85,10 @@ const NavBar = () => {
     return np === nr || np.startsWith(`${nr}/`);
   };
 
+  // The Dashboard (/overview) drives a whole-MONTH period → header shows the
+  // month selector; every other private page keeps the weekly date-picker.
+  const isDashboard = isActiveRoute(ROUTES.dashboard.path);
+
   const hrefFor = (route: NavRoute): string => {
     const storedDate = selectedDateIso ?? undefined;
     return route.path === ROUTES.spendings.path
@@ -142,26 +147,46 @@ const NavBar = () => {
         </nav>
 
         <div className="ml-auto flex items-center gap-2.5">
-          {isCalendarVisible && (
-            <div className="hidden items-center gap-2 md:flex">
-              <DatePickerWrapper />
-              <button type="button" onClick={handleGoToToday} className={PERIOD_BTN}>
-                {text.today}
-              </button>
+          {isDashboard ? (
+            <div className="hidden items-center md:flex">
+              <MonthSelector />
             </div>
+          ) : (
+            isCalendarVisible && (
+              <div className="hidden items-center gap-2 md:flex">
+                <DatePickerWrapper />
+                <button
+                  type="button"
+                  onClick={handleGoToToday}
+                  className={PERIOD_BTN}
+                >
+                  {text.today}
+                </button>
+              </div>
+            )
           )}
           <UserMenu />
         </div>
 
-        {isCalendarVisible && (
-          <div className="flex w-full items-center gap-2 md:hidden">
-            <div className="flex-1">
-              <DatePickerWrapper />
-            </div>
-            <button type="button" onClick={handleGoToToday} className={PERIOD_BTN}>
-              {text.today}
-            </button>
+        {isDashboard ? (
+          <div className="w-full md:hidden">
+            <MonthSelector />
           </div>
+        ) : (
+          isCalendarVisible && (
+            <div className="flex w-full items-center gap-2 md:hidden">
+              <div className="flex-1">
+                <DatePickerWrapper />
+              </div>
+              <button
+                type="button"
+                onClick={handleGoToToday}
+                className={PERIOD_BTN}
+              >
+                {text.today}
+              </button>
+            </div>
+          )
         )}
       </header>
 
