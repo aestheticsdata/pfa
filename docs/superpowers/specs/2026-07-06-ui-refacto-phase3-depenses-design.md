@@ -24,7 +24,7 @@ Almost everything is already REAL (wired to the NestJS API): spendings CRUD (`/s
 
 ## Sub-phases
 
-- **3a — Structural split (this step):** extract the store-init into a hook (`useEnsureWeekRange`); `/dashboard` → new `DepensesView` (the day-cards section, unchanged styling for now); new `/overview` page → `SpendingDashboard`; add the "Dashboard" nav route. Pure refactor — verify it compiles and both routes load (user, logged-in).
+- **3a — Structural split (this step):** extract the store-init into a hook (`useEnsureWeekRange`); `/dashboard` → new `SpendingView` (the day-cards section, unchanged styling for now); new `/overview` page → `SpendingDashboard`; add the "Dashboard" nav route. Pure refactor — verify it compiles and both routes load (user, logged-in).
 - **3b — Dépenses visual redesign:** toolbar (search + mock export), 4-cell weekly summary, per-category breakdown pane, category filter chips (global), and the **new day-cards timeline** (glow cards, `--elec` "today" accent, per-day sort, transaction rows with hover actions + **inline delete confirmation**, day-budget footer, "+ ajouter" row). Reuses existing hooks/data.
 - **3c — Modals:** redesign the add/edit spending modal (date stepper, label suggestions, big amount, category combobox, "Récurrente"/"Reçu" toggles + inline receipt attach) and the receipt/invoice modal + full-screen lightbox. Wires to existing `SpendingModal` / `InvoiceModal` logic.
 
