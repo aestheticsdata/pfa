@@ -1,39 +1,43 @@
 "use client";
 
 import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import { endOfMonth } from "date-fns";
 import startOfMonth from "date-fns/startOfMonth";
+import addDays from "date-fns/addDays";
+import eachDayOfInterval from "date-fns/eachDayOfInterval";
 import useGlobalStore from "@components/shared/globalStore";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import useEnsureWeekRange from "@components/spendings/helpers/useEnsureWeekRange";
-import SpendingDashboard from "@components/spendings/spendingDashboard/SpendingDashboard";
-import { DATE_QUERY_PARAM, isValidIsoDate } from "@helpers/dateRoute";
+import OverviewDashboard from "@components/overview/OverviewDashboard";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 
 /**
- * Dashboard (monthly) page — the initial-salary / weekly-ceiling / category
- * charts / fixed-expenses block, split out of the former combined view. Kept in
- * its current styling until the Phase 5 redesign.
+ * Dashboard (monthly) page. Uses a MONTH selector — not the weekly date-picker
+ * (hidden here). Normalizes the shared date store to whole-month bounds so the
+ * monthly hooks read the right period.
  */
 export default function OverviewPageClient() {
   const { setIsCalendarVisible } = useGlobalStore();
-  const { from, to, setSelectedDateIso } = useDatePickerWrapperStore();
-  const searchParams = useSearchParams();
-
-  useEnsureWeekRange();
+  const { from, to, setFrom, setTo, setRange } = useDatePickerWrapperStore();
 
   useEffect(() => {
-    setIsCalendarVisible(true);
+    setIsCalendarVisible(false);
   }, [setIsCalendarVisible]);
 
   useEffect(() => {
-    const date = searchParams.get(DATE_QUERY_PARAM) ?? undefined;
-    if (isValidIsoDate(date)) {
-      setSelectedDateIso(date);
-    }
-  }, [searchParams, setSelectedDateIso]);
+    const alreadyMonth =
+      from &&
+      to &&
+      from.getTime() === startOfMonth(from).getTime() &&
+      to.getTime() === endOfMonth(from).getTime();
+    if (alreadyMonth) return;
+    const base = from ?? new Date();
+    const start = startOfMonth(base);
+    const end = endOfMonth(base);
+    setFrom(start);
+    setTo(end);
+    setRange(eachDayOfInterval({ start, end: addDays(start, 6) }));
+  }, [from, to, setFrom, setTo, setRange]);
 
   const month: MonthRange | null =
     from && to ? { start: startOfMonth(from), end: endOfMonth(to) } : null;
@@ -42,5 +46,5 @@ export default function OverviewPageClient() {
     return null;
   }
 
-  return <SpendingDashboard month={month} />;
+  return <OverviewDashboard month={month} />;
 }
