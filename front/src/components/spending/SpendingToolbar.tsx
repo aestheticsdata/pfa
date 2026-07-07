@@ -1,8 +1,7 @@
 "use client";
 
-import { toast } from "sonner";
-import { Download, Search } from "lucide-react";
-import { Button } from "@components/ui/button";
+import { Search } from "lucide-react";
+import ExportButton from "@components/shared/ExportButton";
 
 interface SpendingToolbarProps {
   search: string;
@@ -23,16 +22,7 @@ const SpendingToolbar = ({ search, onSearchChange }: SpendingToolbarProps) => (
     </div>
 
     <div className="ml-auto flex items-center gap-2.5">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        // MOCK — export not implemented yet
-        onClick={() => toast("Export à venir", { description: "Bientôt disponible." })}
-      >
-        <Download className="size-3.5" />
-        Exporter
-      </Button>
+      <ExportButton />
     </div>
   </div>
 );

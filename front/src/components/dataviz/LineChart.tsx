@@ -31,6 +31,10 @@ interface LineChartProps {
   dots?: SeriesDot[];
   /** Number of evenly-spaced horizontal grid lines. */
   gridLines?: number;
+  /** Number of evenly-spaced vertical grid lines (dashed). */
+  verticalGrid?: number;
+  /** Render grid lines dashed instead of solid. */
+  dashedGrid?: boolean;
   /**
    * Stable id prefix; when set, area fills use a vertical gradient. Must be
    * unique per mounted chart (avoids gradient-id collisions) and deterministic
@@ -54,6 +58,8 @@ const LineChart = ({
   markers = [],
   dots = [],
   gridLines = 0,
+  verticalGrid = 0,
+  dashedGrid = false,
   id,
   className,
   ariaLabel,
@@ -122,6 +128,28 @@ const LineChart = ({
             y2={y}
             stroke="var(--line-soft)"
             strokeWidth={1}
+            strokeDasharray={dashedGrid ? "3 4" : undefined}
+            vectorEffect="non-scaling-stroke"
+          />
+        );
+      })}
+
+      {Array.from({ length: verticalGrid }, (_, i) => {
+        const innerW = width - pad.left - pad.right;
+        const x =
+          verticalGrid === 1
+            ? pad.left + innerW / 2
+            : pad.left + (innerW * i) / (verticalGrid - 1);
+        return (
+          <line
+            key={`vgrid-${i}`}
+            x1={x}
+            x2={x}
+            y1={pad.top}
+            y2={height - pad.bottom}
+            stroke="var(--line-soft)"
+            strokeWidth={1}
+            strokeDasharray="3 4"
             vectorEffect="non-scaling-stroke"
           />
         );
