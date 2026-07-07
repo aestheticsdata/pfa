@@ -3,7 +3,8 @@
 import { useState } from "react";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
-import { Edit2, Trash2 } from "lucide-react";
+import { fr } from "date-fns/locale";
+import { Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,10 +15,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
-import { SurfaceCard } from "@components/ui/surface-card";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 
 import type { ExceptionalItem as ExceptionalItemType } from "@src/schemas/exceptionals";
+
+const FALLBACK_COLOR = "#94a3b8";
 
 interface ExceptionalItemProps {
   item: ExceptionalItemType;
@@ -29,12 +31,14 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
   const { deleteExceptional } = useExceptionals();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const accent = item.categoryColor ?? "#94a3b8";
-  const dateLabel = format(parseISO(item.date), "dd/MM/yyyy");
+  const accent = item.categoryColor ?? FALLBACK_COLOR;
+  const dateLabel = format(parseISO(item.date), "dd MMM", { locale: fr });
   const amount = Number(item.amount).toLocaleString("fr-FR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+  const budgetMonths =
+    monthlyAverage > 0 ? (Number(item.amount) / monthlyAverage).toFixed(1) : null;
 
   const onDelete = () => {
     deleteExceptional.mutate({ id: item.ID });
@@ -43,90 +47,80 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
 
   return (
     <>
-      <SurfaceCard padding="md" className="group relative pl-6">
-        <div
-          className="absolute top-3 bottom-3 left-3 w-1 rounded-full"
-          style={{ backgroundColor: accent }}
-        />
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex flex-col gap-1 min-w-0">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="text-gray-100 font-medium truncate">
-                {item.label}
-              </div>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                <button
-                  type="button"
-                  onClick={() => onEdit(item)}
-                  className="w-7 h-7 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors cursor-pointer"
-                  aria-label="Modifier"
-                  title="Modifier"
-                >
-                  <Edit2 className="w-3.5 h-3.5 text-gray-300" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsDeleteOpen(true)}
-                  className="w-7 h-7 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors cursor-pointer"
-                  aria-label="Supprimer"
-                  title="Supprimer"
-                >
-                  <Trash2 className="w-3.5 h-3.5 text-gray-300 hover:text-white" />
-                </button>
-              </div>
-            </div>
-            <div className="text-gray-500 text-xs tabular-nums">
-              {dateLabel}
-            </div>
-          </div>
-          <div className="flex flex-col items-end gap-1 shrink-0">
-            <div className="text-gray-100 text-lg font-semibold tabular-nums">
-              {amount} €
-            </div>
+      <div className="exc-item">
+        <span className="exc-date">{dateLabel}</span>
+
+        <div className="exc-main">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="exc-label truncate" title={item.label}>
+              {item.label}
+            </span>
             {item.categoryName && (
               <span
-                className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium"
+                className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
                 style={{
-                  backgroundColor: `${accent}33`,
                   color: accent,
-                  border: `1px solid ${accent}66`,
+                  backgroundColor: `${accent}22`,
+                  border: `1px solid ${accent}44`,
                 }}
               >
                 {item.categoryName}
               </span>
             )}
           </div>
+          {item.description && (
+            <span className="exc-impact truncate" title={item.description}>
+              {item.description}
+            </span>
+          )}
+          {budgetMonths && (
+            <span className="exc-impact">
+              ≈ <b>{budgetMonths}</b> mois de budget régulier
+            </span>
+          )}
         </div>
 
-        {item.description && (
-          <div className="mt-2 text-gray-400 text-sm">{item.description}</div>
-        )}
+        <span className="exc-amt">{amount} €</span>
 
-        {monthlyAverage > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-800/60 text-gray-500 text-xs">
-            Impact budget : {(Number(item.amount) / monthlyAverage).toFixed(1)} mois de budget régulier
-          </div>
-        )}
-
-      </SurfaceCard>
+        <span className="exc-acts">
+          <button
+            type="button"
+            className="exc-ic"
+            onClick={() => onEdit(item)}
+            aria-label="Modifier"
+            title="Modifier"
+          >
+            <Pencil className="size-3.5" />
+          </button>
+          <button
+            type="button"
+            className="exc-ic exc-ic-del"
+            onClick={() => setIsDeleteOpen(true)}
+            aria-label="Supprimer"
+            title="Supprimer"
+          >
+            <Trash2 className="size-3.5" />
+          </button>
+        </span>
+      </div>
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800">
+        <AlertDialogContent className="border-line bg-bg-elev">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-gray-100">
-              Supprimer {item.label} ?
+            <AlertDialogTitle className="text-ink">
+              Supprimer {item.label}&nbsp;?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-ink-3">
               Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-gray-700/50 bg-[#0c0c0c] text-gray-200 hover:bg-[#151515]">
+            <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-bg-hi">
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={onDelete}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer
             </AlertDialogAction>

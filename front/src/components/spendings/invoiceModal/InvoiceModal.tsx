@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { ChangeEvent } from "react";
 import { useQueryClient } from "react-query";
 import { Upload, Trash2 } from "lucide-react";
 import Image from "next/image";
@@ -21,7 +20,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
-import { Button } from "@components/ui/button";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 import InvoiceImageModal from "./invoiceImageModal/InvoiceImageModal";
@@ -43,6 +41,7 @@ interface InvoiceModalProps {
 }
 
 const FILE_SIZE_LIMIT = 32_097_152;
+const FALLBACK_COLOR = "#94a3b8";
 
 const InvoiceModal = ({
   handleClickOutside: handleClickOutsideProp,
@@ -58,7 +57,6 @@ const InvoiceModal = ({
   const { invoiceModal: invoiceModalTexts } = texts;
   const { user } = useAuth();
   const userID = user?.id;
-  const [invoicefile, setInvoicefile] = useState<File | "">("");
   const [invoiceImage, setInvoiceImage] = useState<string | null>(null);
   const [isFileTooBig, setIsFileTooBig] = useState(false);
   const [isInvalidFile, setIsInvalidFile] = useState(false);
@@ -66,15 +64,8 @@ const InvoiceModal = ({
   const [isClickOnThumbnail, setIsClickOnThumbnail] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [isProgress, setIsProgress] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const [showConfirmDeleteImage, setShowConfirmDeleteImage] = useState(false);
-
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setInvoicefile(file);
-      setIsInvalidFile(false);
-    }
-  };
 
   const deleteImage = async () => {
     try {
@@ -88,7 +79,6 @@ const InvoiceModal = ({
         "INVOICE_IMAGE_DELETED"
       ) {
         setInvoiceImage(null);
-        setInvoicefile("");
         await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
         setIsLoading(false);
       }
@@ -127,7 +117,6 @@ const InvoiceModal = ({
         ?.response?.data?.message;
       if (message === "INVALID_IMAGE_FILE") {
         setIsInvalidFile(true);
-        setInvoicefile("");
       }
       setIsProgress(false);
       setIsLoading(false);
@@ -152,11 +141,18 @@ const InvoiceModal = ({
     getInvoiceImage();
   }, []);
 
-  const onSubmit = () => {
+  const uploadFile = (file: File) => {
     setIsFileTooBig(false);
     setIsInvalidFile(false);
     if (!userID) return;
-    if (!(invoicefile instanceof File)) return;
+    if (!file.type.startsWith("image/")) {
+      setIsInvalidFile(true);
+      return;
+    }
+    if (file.size > FILE_SIZE_LIMIT) {
+      setIsFileTooBig(true);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("userID", userID);
@@ -180,12 +176,17 @@ const InvoiceModal = ({
 
     formData.append("label", spending.label);
     formData.append("spendingID", spending.ID);
-    formData.append("invoiceImageUpload", invoicefile);
+    formData.append("invoiceImageUpload", file);
 
-    if (invoicefile.size > FILE_SIZE_LIMIT) {
-      setIsFileTooBig(true);
-    } else {
-      uploadInvoiceImage(formData);
+    uploadInvoiceImage(formData);
+  };
+
+  const onDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      uploadFile(file);
     }
   };
 
@@ -193,132 +194,156 @@ const InvoiceModal = ({
   const categoryColor =
     "categoryColor" in spending && spending.categoryColor
       ? spending.categoryColor
-      : "#94a3b8";
+      : FALLBACK_COLOR;
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClickOutside()}>
-        <DialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800 sm:max-w-[500px]">
-          <DialogHeader className="min-w-0">
-            <DialogTitle className="flex items-center gap-2 sm:gap-3 text-gray-100 pr-10 min-w-0">
-              <span className="truncate min-w-0 flex-1" title={spending.label}>
-                {spending.label}
-              </span>
-              {category && (
-                <span
-                  className="px-2 py-0.5 rounded text-[10px] uppercase font-medium shrink-0"
-                  style={{
-                    backgroundColor: categoryColor + "30",
-                    color: categoryColor,
-                  }}
-                >
-                  {category}
-                </span>
-              )}
-              <span className="text-cyan-400 text-sm tabular-nums shrink-0 whitespace-nowrap">
-                {Number(spending.amount).toFixed(2)} €
-              </span>
+      <Dialog
+        open={open}
+        onOpenChange={(isOpen) => !isOpen && handleClickOutside()}
+      >
+        <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[600px]">
+          <DialogHeader className="flex-row items-center gap-3 space-y-0 px-[22px] pb-4 pt-5 text-left">
+            <DialogTitle
+              className="min-w-0 flex-1 truncate pr-8 text-[21px] font-semibold tracking-[-0.02em] text-ink"
+              title={spending.label}
+            >
+              {spending.label}
             </DialogTitle>
+            {category && (
+              <span
+                className="shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em]"
+                style={{
+                  backgroundColor: categoryColor + "30",
+                  color: categoryColor,
+                }}
+              >
+                {category}
+              </span>
+            )}
+            <span className="num shrink-0 whitespace-nowrap text-[19px] font-semibold tracking-[-0.02em] text-elec">
+              {Number(spending.amount).toFixed(2)} €
+            </span>
           </DialogHeader>
 
-          <div className="flex justify-center items-center min-h-[200px] border border-gray-800/50 bg-[#0c0c0c] rounded-lg overflow-hidden">
+          {/* #b3ada4 is the design's neutral tan backdrop behind receipt photos
+              (from .facture-stage.is-image) — intentionally a fixed value, not a
+              palette token. */}
+          <div
+            className={cn(
+              "mx-[22px] overflow-hidden rounded-[14px] border border-line",
+              invoiceImage ? "bg-[#b3ada4]" : "bg-background",
+            )}
+          >
             {isLoading && !isProgress ? (
-              <Spinner />
+              <div className="grid min-h-[300px] place-items-center">
+                <Spinner />
+              </div>
             ) : invoiceImage ? (
-              <Image
-                src={invoiceImage}
-                width={300}
-                height={250}
-                alt="invoice"
+              <button
+                type="button"
                 onClick={() => setIsClickOnThumbnail(true)}
-                className="cursor-pointer max-w-full max-h-full object-contain"
-                unoptimized
-              />
+                className="block w-full cursor-zoom-in"
+                aria-label="Agrandir la facture"
+              >
+                <Image
+                  src={invoiceImage}
+                  width={1000}
+                  height={800}
+                  alt="facture"
+                  className="block max-h-[460px] w-full object-contain"
+                  unoptimized
+                />
+              </button>
             ) : (
-              <div className="text-gray-500 text-sm">
+              <div className="grid min-h-[300px] place-items-center text-base tracking-[-0.01em] text-ink-4">
                 {invoiceModalTexts.noInvoice}
               </div>
             )}
           </div>
 
-          <div className="flex flex-col gap-2 items-center">
+          <div className="flex flex-col gap-2 px-[22px] pb-[22px] pt-[18px]">
             {isFileTooBig && (
-              <p className="text-destructive text-sm">
+              <p className="text-center text-sm text-neg">
                 {invoiceModalTexts.fileTooBig}
               </p>
             )}
             {isInvalidFile && (
-              <p className="text-destructive text-sm">
+              <p className="text-center text-sm text-neg">
                 {invoiceModalTexts.invalidFileType}
               </p>
             )}
 
             {isProgress ? (
-              <div className="flex flex-col gap-2 w-full">
-                <span className="text-gray-300 text-xs text-right">
+              <div className="flex flex-col gap-2">
+                <span className="num text-right text-xs text-ink-3">
                   {progressValue} %
                 </span>
-                <div className="h-2 bg-gray-800 rounded overflow-hidden">
+                <div className="h-2 overflow-hidden rounded bg-bg-hi">
                   <div
-                    className="h-full bg-cyan-500 transition-all"
+                    className="h-full bg-elec transition-all"
                     style={{ width: `${progressValue}%` }}
                   />
                 </div>
               </div>
             ) : invoiceImage && !isLoading ? (
-              <Button
+              <button
                 type="button"
-                variant="destructive"
                 onClick={() => setShowConfirmDeleteImage(true)}
+                className="inline-flex items-center justify-center gap-2.5 rounded-[10px] border border-[oklch(0.55_0.15_25)] bg-[oklch(0.47_0.14_25)] px-[18px] py-3.5 text-[15px] font-semibold text-[oklch(0.98_0.02_25)] transition-[filter] hover:brightness-110"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="size-4" />
                 {invoiceModalTexts.delete}
-              </Button>
-            ) : (
-              !isLoading && (
-                <>
-                  <input
-                    className="hidden"
-                    type="file"
-                    id="invoicefileinputid"
-                    name="invoicefile"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    onChange={onChange}
-                  />
-                  <label
-                    htmlFor="invoicefileinputid"
-                    className={cn(
-                      "flex flex-col items-center justify-center gap-2 w-full p-6 border-2 border-dashed border-gray-700/50 rounded-lg cursor-pointer hover:border-cyan-600 hover:bg-[#0c0c0c] transition-colors text-gray-300",
-                    )}
-                  >
-                    {invoicefile !== "" ? (
-                      <>
-                        <span className="text-sm">
-                          {(invoicefile as File).name}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="cyan"
-                          onClick={onSubmit}
-                        >
-                          {invoiceModalTexts.send}
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-8 h-8 text-cyan-500" />
-                        <span className="font-medium text-gray-200">
-                          {invoiceModalTexts.chooseFile}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {invoiceModalTexts.fileTypeWarning}
-                        </span>
-                      </>
-                    )}
-                  </label>
-                </>
-              )
-            )}
+              </button>
+            ) : !isLoading ? (
+              <>
+                <input
+                  className="hidden"
+                  type="file"
+                  id="invoicefileinputid"
+                  name="invoicefile"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      uploadFile(file);
+                    }
+                  }}
+                />
+                <label
+                  htmlFor="invoicefileinputid"
+                  onDragEnter={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragging(true);
+                  }}
+                  onDragLeave={(e) => {
+                    e.preventDefault();
+                    setIsDragging(false);
+                  }}
+                  onDrop={onDrop}
+                  className={cn(
+                    // children are pointer-events-none so drag events target the
+                    // label itself (no flicker when hovering child elements)
+                    "flex cursor-pointer flex-col items-center gap-1.5 rounded-[14px] border-[1.5px] border-dashed px-[22px] py-[30px] text-center transition-colors [&_*]:pointer-events-none",
+                    isDragging
+                      ? "border-elec bg-elec/[0.06]"
+                      : "border-line hover:border-elec hover:bg-elec/[0.06]",
+                  )}
+                >
+                  <Upload className="size-[30px] text-elec" />
+                  <span className="text-[17px] font-semibold text-ink">
+                    {invoiceModalTexts.chooseFile}
+                  </span>
+                  <span className="num text-[13px] text-ink-4">
+                    {invoiceModalTexts.fileTypeWarning}
+                  </span>
+                </label>
+              </>
+            ) : null}
           </div>
         </DialogContent>
       </Dialog>
@@ -334,17 +359,17 @@ const InvoiceModal = ({
         open={showConfirmDeleteImage}
         onOpenChange={setShowConfirmDeleteImage}
       >
-        <AlertDialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800">
+        <AlertDialogContent className="border-line bg-bg-elev">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-gray-100">
-              Supprimer la facture ?
+            <AlertDialogTitle className="text-ink">
+              Supprimer la facture&nbsp;?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-400">
+            <AlertDialogDescription className="text-ink-3">
               Cette action est irréversible.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-gray-700/50 bg-[#0c0c0c] text-gray-200 hover:bg-[#151515]">
+            <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-bg-hi">
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction
@@ -352,7 +377,7 @@ const InvoiceModal = ({
                 deleteImage();
                 setShowConfirmDeleteImage(false);
               }}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Supprimer
             </AlertDialogAction>

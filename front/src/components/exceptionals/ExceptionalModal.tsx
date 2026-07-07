@@ -30,6 +30,7 @@ import {
   CommandItem,
   CommandList,
 } from "@components/ui/command";
+import { cn } from "@lib/utils";
 import { useAuth } from "@auth/context/AuthContext";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 
@@ -54,6 +55,8 @@ interface ExceptionalModalProps {
   item: ExceptionalItem | null;
   existingCategories: CategoryOption[];
 }
+
+const FALLBACK_COLOR = "#94a3b8";
 
 const getRandomHexColor = () => {
   const r = Math.floor(Math.random() * 255)
@@ -83,10 +86,9 @@ const ExceptionalModal = ({
   const { createExceptional, updateExceptional } = useExceptionals();
   const isEditing = !!item;
 
-  const initialCategory: CategoryOption | null =
-    item?.categoryName
-      ? { name: item.categoryName, color: item.categoryColor ?? "#94a3b8" }
-      : null;
+  const initialCategory: CategoryOption | null = item?.categoryName
+    ? { name: item.categoryName, color: item.categoryColor ?? FALLBACK_COLOR }
+    : null;
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(
     initialCategory,
@@ -171,94 +173,105 @@ const ExceptionalModal = ({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && closeModal()}>
-      <DialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800 sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="text-gray-100">
-            {isEditing ? "Modifier" : "Ajouter"} une dépense exceptionnelle
+      <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[440px]">
+        <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-[22px] py-[18px] text-left">
+          <DialogTitle className="pr-8 text-[15px] font-semibold tracking-[-0.01em] text-ink">
+            {isEditing ? "Modifier l'achat exceptionnel" : "Nouvel achat exceptionnel"}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="exceptional-date" className="text-gray-300">
-              Date
-            </Label>
-            <Input
-              id="exceptional-date"
-              type="date"
-              className="bg-[#0c0c0c] border-gray-700/50 text-gray-100 focus-visible:border-cyan-500 [color-scheme:dark]"
-              {...register("date")}
-            />
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-[18px] px-[22px] py-[22px]"
+        >
+          <div className="grid grid-cols-2 gap-3.5">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="exceptional-date" className="text-[13px] text-ink-2">
+                Date
+              </Label>
+              <Input
+                id="exceptional-date"
+                type="date"
+                className="num border-line bg-background text-ink [color-scheme:dark] focus-visible:border-accent-d focus-visible:ring-0"
+                {...register("date")}
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="exceptional-amount" className="text-[13px] text-ink-2">
+                Montant (€)
+              </Label>
+              <Input
+                id="exceptional-amount"
+                inputMode="decimal"
+                placeholder="0,00"
+                className="num border-line bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
+                {...register("amount")}
+              />
+            </div>
           </div>
+          {errors.amount && (
+            <p className="-mt-3 text-xs text-neg">{errors.amount.message}</p>
+          )}
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="exceptional-label" className="text-gray-300">
+            <Label htmlFor="exceptional-label" className="text-[13px] text-ink-2">
               Label
             </Label>
             <Input
               id="exceptional-label"
-              placeholder="Ex: MacBook Pro"
-              className="bg-[#0c0c0c] border-gray-700/50 text-gray-100 placeholder:text-gray-500 focus-visible:border-cyan-500"
+              placeholder="Ex : Climatiseur mobile"
+              className="border-line bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
               {...register("label")}
             />
             {errors.label && (
-              <p className="text-xs text-destructive">{errors.label.message}</p>
+              <p className="text-xs text-neg">{errors.label.message}</p>
             )}
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="exceptional-amount" className="text-gray-300">
-              Montant (€)
-            </Label>
-            <Input
-              id="exceptional-amount"
-              placeholder="0.00"
-              className="bg-[#0c0c0c] border-gray-700/50 text-gray-100 placeholder:text-gray-500 focus-visible:border-cyan-500"
-              {...register("amount")}
-            />
-            {errors.amount && (
-              <p className="text-xs text-destructive">{errors.amount.message}</p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="exceptional-description" className="text-gray-300">
-              Description
+            <Label
+              htmlFor="exceptional-description"
+              className="text-[13px] text-ink-2"
+            >
+              Description <span className="text-ink-4">(optionnel)</span>
             </Label>
             <Input
               id="exceptional-description"
-              placeholder="Ex: Ordinateur portable pro"
-              className="bg-[#0c0c0c] border-gray-700/50 text-gray-100 placeholder:text-gray-500 focus-visible:border-cyan-500"
+              placeholder="Ex : Ordinateur portable pro"
+              className="border-line bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
               {...register("description")}
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-gray-300">Catégorie</Label>
+            <Label className="text-[13px] text-ink-2">Catégorie</Label>
             <Popover open={comboboxOpen} onOpenChange={setComboboxOpen} modal>
               <PopoverTrigger asChild>
                 <button
                   type="button"
                   role="combobox"
                   aria-expanded={comboboxOpen}
-                  className="flex items-center justify-between w-full px-3 py-2 bg-[#0c0c0c] border border-gray-700/50 rounded-md text-sm text-gray-200 hover:bg-[#151515] transition-colors"
+                  className={cn(
+                    "flex w-full items-center gap-2.5 rounded-md border bg-background px-3 py-2.5 text-left text-sm text-ink transition-colors hover:border-ink-4",
+                    comboboxOpen ? "border-accent-d" : "border-line",
+                  )}
                 >
                   {selectedCategory ? (
-                    <span className="inline-flex items-center gap-2">
+                    <>
                       <span
-                        className="w-2 h-2 rounded-full"
+                        className="size-2.5 shrink-0 rounded-[3px]"
                         style={{ backgroundColor: selectedCategory.color }}
                       />
-                      {selectedCategory.name}
-                    </span>
+                      <span className="capitalize">{selectedCategory.name}</span>
+                    </>
                   ) : (
-                    <span className="text-gray-500">Aucune</span>
+                    <span className="text-ink-4">Aucune</span>
                   )}
-                  <ChevronsUpDown className="w-4 h-4 opacity-50" />
+                  <ChevronsUpDown className="ml-auto size-4 shrink-0 text-ink-4" />
                 </button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-[--radix-popover-trigger-width] p-0 bg-[#0c0c0c] border-gray-700/50"
+                className="w-[--radix-popover-trigger-width] border-line bg-bg-elev p-0"
                 align="start"
               >
                 <Command className="bg-transparent">
@@ -266,17 +279,17 @@ const ExceptionalModal = ({
                     placeholder="Rechercher ou créer…"
                     value={comboboxQuery}
                     onValueChange={setComboboxQuery}
-                    className="text-gray-200"
+                    className="text-ink"
                   />
                   <CommandList>
                     <CommandEmpty>
                       {comboboxQuery.trim() ? (
                         <button
                           type="button"
-                          className="px-3 py-1 text-xs text-cyan-400 hover:text-cyan-300"
+                          className="px-3 py-1 text-xs text-accent-strong hover:brightness-110"
                           onClick={() => onCreateCategory(comboboxQuery.trim())}
                         >
-                          Créer “{comboboxQuery.trim()}”
+                          Créer «&nbsp;{comboboxQuery.trim()}&nbsp;»
                         </button>
                       ) : (
                         "Aucune catégorie."
@@ -291,9 +304,7 @@ const ExceptionalModal = ({
                             setComboboxOpen(false);
                           }}
                         >
-                          <span className="text-gray-500">
-                            Aucune catégorie
-                          </span>
+                          <span className="text-ink-4">Aucune catégorie</span>
                         </CommandItem>
                       )}
                       {categoryOptions.map((cat) => (
@@ -306,12 +317,12 @@ const ExceptionalModal = ({
                           }}
                         >
                           <span
-                            className="w-2 h-2 rounded-full mr-1"
+                            className="mr-1 size-2.5 rounded-[3px]"
                             style={{ backgroundColor: cat.color }}
                           />
-                          <span className="flex-1">{cat.name}</span>
+                          <span className="flex-1 capitalize">{cat.name}</span>
                           {selectedCategory?.name === cat.name && (
-                            <Check className="w-4 h-4" />
+                            <Check className="size-4 text-accent-strong" />
                           )}
                         </CommandItem>
                       ))}
@@ -320,8 +331,8 @@ const ExceptionalModal = ({
                           value={`__create-${comboboxQuery.trim()}`}
                           onSelect={() => onCreateCategory(comboboxQuery.trim())}
                         >
-                          <span className="text-cyan-400">
-                            Créer “{comboboxQuery.trim()}”
+                          <span className="text-accent-strong">
+                            Créer «&nbsp;{comboboxQuery.trim()}&nbsp;»
                           </span>
                         </CommandItem>
                       )}
@@ -332,17 +343,21 @@ const ExceptionalModal = ({
             </Popover>
           </div>
 
-          <DialogFooter className="gap-2 sm:gap-2">
+          <DialogFooter className="gap-2.5 border-t border-line-soft pt-4 sm:gap-2.5">
             <Button
               type="button"
               variant="outline"
               onClick={closeModal}
-              className="border-gray-700/50 bg-[#0c0c0c] text-gray-200 hover:bg-[#151515]"
+              className="border-line bg-background text-ink-2 hover:bg-bg-hi"
             >
               Annuler
             </Button>
-            <Button type="submit" variant="cyan" disabled={isSubmitting || !isValid}>
-              {isEditing ? "Mettre à jour" : "Ajouter"}
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSubmitting || !isValid}
+            >
+              {isEditing ? "Enregistrer" : "Ajouter"}
             </Button>
           </DialogFooter>
         </form>
