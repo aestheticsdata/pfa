@@ -1,6 +1,6 @@
 // pfa data-viz lib — pure SVG geometry helpers (no React, no side effects).
 
-import type { LinePoint } from "@components/dataviz/types";
+import type { LinePoint } from "@lib/dataviz/types";
 
 /** Angle in degrees (0 = 12 o'clock, clockwise) → point on a circle. */
 export const polarToCartesian = (

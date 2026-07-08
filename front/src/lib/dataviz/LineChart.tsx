@@ -7,9 +7,9 @@ import {
   linePath,
   linearScale,
   normalizePoints,
-} from "@components/dataviz/svg";
+} from "@lib/dataviz/svg";
 
-import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@components/dataviz/types";
+import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@lib/dataviz/types";
 
 interface Padding {
   top?: number;

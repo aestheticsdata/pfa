@@ -8,8 +8,8 @@ import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingIt
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import useDaySort, {
   type DaySortField,
-} from "@components/spending/helpers/useDaySort";
-import SpendingTxRow from "@components/spending/SpendingTxRow";
+} from "@components/spendings/view/helpers/useDaySort";
+import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
 import { cn } from "@lib/utils";
 
 import type { SpendingItem, SpendingListItem } from "@components/spendings/types";

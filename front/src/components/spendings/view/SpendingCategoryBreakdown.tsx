@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { mockCategoryTrend } from "@components/spending/helpers/mockSpending";
+import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
 import { cn } from "@lib/utils";
 
 export interface BreakdownRow {

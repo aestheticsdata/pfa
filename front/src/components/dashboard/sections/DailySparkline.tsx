@@ -14,10 +14,10 @@ import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useSpendings from "@components/spendings/services/useSpendings";
-import { LineChart } from "@components/dataviz";
-import { euro } from "@components/overview/format";
+import { LineChart } from "@lib/dataviz";
+import { euro } from "@components/dashboard/format";
 
-import type { LinePoint } from "@components/dataviz";
+import type { LinePoint } from "@lib/dataviz";
 
 const DailySparkline = () => {
   const { from } = useDatePickerWrapperStore();

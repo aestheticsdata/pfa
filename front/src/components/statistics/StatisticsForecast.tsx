@@ -7,11 +7,11 @@ import { useState } from "react";
 import getDayOfYear from "date-fns/getDayOfYear";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
-import { AnimatedNumber, ProgressTrack } from "@components/dataviz";
+import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
 import GlowCard from "@components/shared/GlowCard";
 import { yearTotal } from "@components/statistics/helpers/statisticsData";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
-import { euro, euro0 } from "@components/overview/format";
+import { euro, euro0 } from "@components/dashboard/format";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";

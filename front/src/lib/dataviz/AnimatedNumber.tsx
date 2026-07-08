@@ -1,6 +1,6 @@
 "use client";
 
-import useCountUp from "@components/dataviz/useCountUp";
+import useCountUp from "@lib/dataviz/useCountUp";
 import { cn } from "@lib/utils";
 
 import type { CSSProperties } from "react";

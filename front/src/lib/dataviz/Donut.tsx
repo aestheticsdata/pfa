@@ -2,9 +2,9 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@lib/utils";
-import { wedgePath } from "@components/dataviz/svg";
+import { wedgePath } from "@lib/dataviz/svg";
 
-import type { DonutSegment } from "@components/dataviz/types";
+import type { DonutSegment } from "@lib/dataviz/types";
 
 interface DonutProps {
   segments: DonutSegment[];

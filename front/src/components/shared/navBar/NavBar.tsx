@@ -15,15 +15,15 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@auth/context/AuthContext";
 import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
-import MonthSelector from "@components/overview/MonthSelector";
+import MonthSelector from "@components/dashboard/MonthSelector";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useGlobalStore from "@components/shared/globalStore";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
 import Logo from "@components/shared/brand/Logo";
 import { ROUTES } from "@components/shared/config/constants";
 import {
-  DASHBOARD_PATH,
-  buildDashboardPath,
+  SPENDINGS_PATH,
+  buildSpendingsPath,
   getTodayIsoDate,
   isValidIsoDate,
 } from "@helpers/dateRoute";
@@ -85,7 +85,7 @@ const NavBar = () => {
     return np === nr || np.startsWith(`${nr}/`);
   };
 
-  // The Dashboard (/overview) drives a whole-MONTH period → header shows the
+  // The Dashboard (/dashboard) drives a whole-MONTH period → header shows the
   // month selector; every other private page keeps the weekly date-picker.
   const isDashboard = isActiveRoute(ROUTES.dashboard.path);
 
@@ -94,16 +94,16 @@ const NavBar = () => {
     return route.path === ROUTES.spendings.path
       && isClientHydrated
       && isValidIsoDate(storedDate)
-      ? buildDashboardPath(storedDate)
+      ? buildSpendingsPath(storedDate)
       : route.path;
   };
 
   const handleGoToToday = () => {
     const today = getTodayIsoDate();
-    if (normalizePath(pathname) === DASHBOARD_PATH && selectedDateIso === today) {
+    if (normalizePath(pathname) === SPENDINGS_PATH && selectedDateIso === today) {
       return;
     }
-    router.push(buildDashboardPath(today));
+    router.push(buildSpendingsPath(today));
   };
 
   if (!user) return null;
@@ -174,14 +174,12 @@ const NavBar = () => {
           </div>
         ) : (
           isCalendarVisible && (
-            <div className="flex w-full items-center gap-2 md:hidden">
-              <div className="flex-1">
-                <DatePickerWrapper />
-              </div>
+            <div className="flex w-full flex-col gap-2 md:hidden">
+              <DatePickerWrapper />
               <button
                 type="button"
                 onClick={handleGoToToday}
-                className={PERIOD_BTN}
+                className={`${PERIOD_BTN} self-start`}
               >
                 {text.today}
               </button>

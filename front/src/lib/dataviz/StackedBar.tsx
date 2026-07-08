@@ -2,7 +2,7 @@
 
 import { cn } from "@lib/utils";
 
-import type { DonutSegment } from "@components/dataviz/types";
+import type { DonutSegment } from "@lib/dataviz/types";
 
 interface StackedBarProps {
   segments: DonutSegment[];

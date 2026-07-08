@@ -1,18 +1,18 @@
 "use client";
 
-import InsightsRibbon from "@components/overview/sections/InsightsRibbon";
-import ForecastStrip from "@components/overview/sections/ForecastStrip";
-import BudgetHero from "@components/overview/sections/BudgetHero";
-import WeeklyCeiling from "@components/overview/sections/WeeklyCeiling";
-import CategoryBreakdown from "@components/overview/sections/CategoryBreakdown";
-import FixedExpenses from "@components/overview/sections/FixedExpenses";
+import InsightsRibbon from "@components/dashboard/sections/InsightsRibbon";
+import ForecastStrip from "@components/dashboard/sections/ForecastStrip";
+import BudgetHero from "@components/dashboard/sections/BudgetHero";
+import WeeklyCeiling from "@components/dashboard/sections/WeeklyCeiling";
+import CategoryBreakdown from "@components/dashboard/sections/CategoryBreakdown";
+import FixedExpenses from "@components/dashboard/sections/FixedExpenses";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 
 // Layout mirrors design_handoff_pfa/designs/Dashboard 2026.html: the month
 // selector lives in the app header (NavBar), so no page title here. Two 8fr/4fr
 // rows; the daily sparkline is nested inside the BudgetHero card.
-const OverviewDashboard = ({ month }: { month: MonthRange }) => (
+const DashboardView = ({ month }: { month: MonthRange }) => (
   <div className="flex flex-col gap-4">
     <InsightsRibbon />
     <ForecastStrip />
@@ -29,4 +29,4 @@ const OverviewDashboard = ({ month }: { month: MonthRange }) => (
   </div>
 );
 
-export default OverviewDashboard;
+export default DashboardView;

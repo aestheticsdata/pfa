@@ -202,8 +202,8 @@ const InvoiceModal = ({
         open={open}
         onOpenChange={(isOpen) => !isOpen && handleClickOutside()}
       >
-        <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[600px]">
-          <DialogHeader className="flex-row items-center gap-3 space-y-0 px-[22px] pb-4 pt-5 text-left">
+        <DialogContent className="max-h-[92vh] gap-0 overflow-y-auto border-line bg-bg-elev p-0 sm:max-w-[600px]">
+          <DialogHeader className="flex-row items-center gap-3 space-y-0 pb-4 pl-[22px] pr-14 pt-5 text-left">
             <DialogTitle
               className="min-w-0 flex-1 truncate pr-8 text-[21px] font-semibold tracking-[-0.02em] text-ink"
               title={spending.label}
@@ -251,7 +251,7 @@ const InvoiceModal = ({
                   width={1000}
                   height={800}
                   alt="facture"
-                  className="block max-h-[460px] w-full object-contain"
+                  className="block max-h-[min(460px,60vh)] w-full object-contain"
                   unoptimized
                 />
               </button>

@@ -9,10 +9,10 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { Input } from "@components/ui/input";
-import { Donut, useCountUp } from "@components/dataviz";
-import DailySparkline from "@components/overview/sections/DailySparkline";
-import EditGlyph from "@components/overview/EditGlyph";
-import { euro, euro0 } from "@components/overview/format";
+import { Donut, useCountUp } from "@lib/dataviz";
+import DailySparkline from "@components/dashboard/sections/DailySparkline";
+import EditGlyph from "@components/dashboard/EditGlyph";
+import { euro, euro0 } from "@components/dashboard/format";
 import { cn } from "@lib/utils";
 
 interface SalaryForm {
@@ -86,13 +86,13 @@ const BudgetHero = () => {
           </span>
           <div
             className={cn(
-              "num mt-3.5 text-[56px] font-medium leading-none tracking-[-0.025em]",
+              "num mt-3.5 text-[40px] font-medium leading-none tracking-[-0.025em] sm:text-[56px]",
               over ? "text-neg" : "text-ink",
             )}
           >
             {over && "−"}
             {amountInt}
-            <span className="text-[36px] font-normal text-ink-3">
+            <span className="text-[26px] font-normal text-ink-3 sm:text-[36px]">
               ,{amountDec} €
             </span>
           </div>

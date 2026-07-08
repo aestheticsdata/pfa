@@ -18,7 +18,7 @@ import useSpendings from "@components/spendings/services/useSpendings";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { MONTHLY } from "@components/spendings/config/constants";
 import texts from "@components/spendings/config/text";
-import { DASHBOARD_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
+import { SPENDINGS_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
 
 import type { CategoryProps } from "@src/interfaces/category";
 import type { SpendingItem } from "@components/spendings/types";
@@ -197,11 +197,11 @@ const SpendingsListModal = ({
               });
               const params = new URLSearchParams(searchParams.toString());
               params.set(DATE_QUERY_PARAM, dateISO);
-              if (normalizePath(pathname) === DASHBOARD_PATH) {
-                router.push(`${DASHBOARD_PATH}?${params.toString()}`);
+              if (normalizePath(pathname) === SPENDINGS_PATH) {
+                router.push(`${SPENDINGS_PATH}?${params.toString()}`);
               } else {
                 router.push(
-                  `${DASHBOARD_PATH}?${DATE_QUERY_PARAM}=${dateISO}`,
+                  `${SPENDINGS_PATH}?${DATE_QUERY_PARAM}=${dateISO}`,
                 );
               }
               handleClickOutside();

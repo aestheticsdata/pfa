@@ -625,7 +625,9 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 }
 .sp-cat-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  /* min(400px, 100%) so a narrow phone gets ONE full-width column instead of a
+     forced 400px track overflowing to the right */
+  grid-template-columns: repeat(auto-fill, minmax(min(400px, 100%), 1fr));
   column-gap: 44px;
 }
 .sp-cat-row {
@@ -642,6 +644,43 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 }
 .sp-cat-row:hover {
   background: var(--bg-hi);
+}
+/* phones: two lines — swatch | name + amount / then % + trend under them */
+@media (max-width: 520px) {
+  .sp-cat-list {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+  .sp-cat-row {
+    grid-template-columns: 14px minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    row-gap: 3px;
+    column-gap: 10px;
+  }
+  .sp-cat-row > :nth-child(1) {
+    grid-row: 1 / span 2;
+    align-self: center;
+  }
+  .sp-cat-row > :nth-child(2) {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .sp-cat-row > :nth-child(4) {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .sp-cat-row > :nth-child(3) {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+    text-align: left;
+  }
+  .sp-cat-row > :nth-child(5) {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: end;
+  }
 }
 
 /* ---- Timeline grid ---- */
@@ -1111,6 +1150,14 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
     grid-area: 1 / 1;
     font-size: 15px;
   }
+  /* full label (up to 2 lines) for touch legibility — mockup Option A */
+  .sp-t-label .lbl-txt {
+    white-space: normal;
+    overflow: visible;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
   .sp-t-amt {
     grid-area: 1 / 2;
     align-self: center;
@@ -1118,6 +1165,13 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   .sp-t-tag {
     grid-area: 2 / 1;
     justify-self: start;
+  }
+  /* category as text-only meta under the label (no chip background) */
+  .sp-t-tag .sp-tag {
+    background: none;
+    border-color: transparent;
+    padding: 0;
+    font-size: 11px;
   }
   .sp-t-actions {
     position: static;

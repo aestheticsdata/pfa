@@ -11,7 +11,7 @@ import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
-import { euro } from "@components/overview/format";
+import { euro } from "@components/dashboard/format";
 import { cn } from "@lib/utils";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
@@ -171,7 +171,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                 {r.label}
               </span>
               <span className="flex items-center gap-2">
-                <span className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                <span className="flex gap-1 opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
                   <button
                     type="button"
                     onClick={() => setInvoiceFor(r)}

@@ -1,6 +1,6 @@
 "use client";
 
-import useTween from "@components/dataviz/useTween";
+import useTween from "@lib/dataviz/useTween";
 import { cn } from "@lib/utils";
 
 interface ProgressTrackProps {

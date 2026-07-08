@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "@auth/server/getServerSession";
-import { buildDashboardPath } from "@helpers/dateRoute";
+import { ROUTES } from "@components/shared/config/constants";
 import LoginFormClient from "@components/login/LoginFormClient";
 
 import type { AuthResponse } from "@auth/types";
@@ -14,7 +14,7 @@ export default async function LoginPage() {
   }
 
   if (session) {
-    redirect(buildDashboardPath());
+    redirect(ROUTES.dashboard.path);
   }
 
   return <LoginFormClient />;

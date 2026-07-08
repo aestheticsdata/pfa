@@ -17,7 +17,7 @@ import {
   exceptionalMonthly,
   exceptionalTotal,
 } from "@components/statistics/helpers/exceptionalsData";
-import { euro0 } from "@components/overview/format";
+import { euro0 } from "@components/dashboard/format";
 import { cn } from "@lib/utils";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
@@ -174,7 +174,7 @@ const StatisticsKpis = ({
   );
 
   return (
-    <section className="grid grid-cols-2 gap-4 min-[768px]:grid-cols-4">
+    <section className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 min-[768px]:grid-cols-4">
       <Card label={`Total dépensé ${year}`}>
         <Value amount={total} />
         <span className="text-[12px] text-ink-3">

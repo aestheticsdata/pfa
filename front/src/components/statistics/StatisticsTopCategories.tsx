@@ -2,7 +2,7 @@
 
 import { ChevronDown, ChevronUp } from "lucide-react";
 import GlowCard from "@components/shared/GlowCard";
-import { euro0 } from "@components/overview/format";
+import { euro0 } from "@components/dashboard/format";
 
 export interface TopCategoryRow {
   name: string;

@@ -10,7 +10,7 @@ import getDate from "date-fns/getDate";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import GlowCard from "@components/shared/GlowCard";
-import { euro } from "@components/overview/format";
+import { euro } from "@components/dashboard/format";
 
 import type { RecurringItem } from "@src/schemas/spendings";
 

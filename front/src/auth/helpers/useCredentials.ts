@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@auth/context/AuthContext";
-import { DASHBOARD_PATH, buildDashboardPath } from "@helpers/dateRoute";
+import { ROUTES } from "@components/shared/config/constants";
 
 import type { AuthResponse } from "@auth/types";
 
@@ -17,8 +17,8 @@ const useCredentials = () => {
       language: auth.user.language ?? "en",
     };
     setAuthState(normalizedUser, auth.csrfToken);
-    if (!pathname.startsWith(DASHBOARD_PATH)) {
-      router.replace(buildDashboardPath());
+    if (!pathname.startsWith(ROUTES.dashboard.path)) {
+      router.replace(ROUTES.dashboard.path);
     }
   };
 

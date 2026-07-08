@@ -8,8 +8,8 @@
 
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import { niceCeil, MONTHS_FR } from "@components/statistics/helpers/statisticsData";
-import { euro0 } from "@components/overview/format";
-import useElementWidth from "@components/dataviz/useElementWidth";
+import { euro0 } from "@components/dashboard/format";
+import useElementWidth from "@lib/dataviz/useElementWidth";
 import GlowCard from "@components/shared/GlowCard";
 
 interface StatisticsMonthlyChartProps {

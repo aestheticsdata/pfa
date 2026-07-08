@@ -13,18 +13,18 @@ import useEnsureWeekRange from "@components/spendings/helpers/useEnsureWeekRange
 import useSpendings from "@components/spendings/services/useSpendings";
 import useDashboard from "@components/spendings/services/useDashboard";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
-import SpendingToolbar from "@components/spending/SpendingToolbar";
-import SpendingSummary from "@components/spending/SpendingSummary";
-import SpendingCategoryBreakdown from "@components/spending/SpendingCategoryBreakdown";
-import SpendingCategoryFilter from "@components/spending/SpendingCategoryFilter";
-import SpendingDayCard from "@components/spending/SpendingDayCard";
+import SpendingToolbar from "@components/spendings/view/SpendingToolbar";
+import SpendingSummary from "@components/spendings/view/SpendingSummary";
+import SpendingCategoryBreakdown from "@components/spendings/view/SpendingCategoryBreakdown";
+import SpendingCategoryFilter from "@components/spendings/view/SpendingCategoryFilter";
+import SpendingDayCard from "@components/spendings/view/SpendingDayCard";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
-import { mockAvgDailyDelta } from "@components/spending/helpers/mockSpending";
+import { mockAvgDailyDelta } from "@components/spendings/view/helpers/mockSpending";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 import type { SpendingDayGroup } from "@components/spendings/types";
-import type { BreakdownRow } from "@components/spending/SpendingCategoryBreakdown";
-import type { FilterCategory } from "@components/spending/SpendingCategoryFilter";
+import type { BreakdownRow } from "@components/spendings/view/SpendingCategoryBreakdown";
+import type { FilterCategory } from "@components/spendings/view/SpendingCategoryFilter";
 
 const FALLBACK_COLOR = "#94a3b8";
 const UNCATEGORIZED_KEY = "none";

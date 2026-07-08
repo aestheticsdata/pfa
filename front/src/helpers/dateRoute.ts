@@ -1,7 +1,8 @@
 import formatISO from "date-fns/formatISO";
 
 export const DATE_QUERY_PARAM = "date";
-export const DASHBOARD_PATH = "/dashboard";
+// The Dépenses (weekly) page carries the selected week as a ?date= query param.
+export const SPENDINGS_PATH = "/spendings";
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -17,5 +18,5 @@ export const isValidIsoDate = (value?: string): value is string => {
   return !Number.isNaN(parsed.getTime());
 };
 
-export const buildDashboardPath = (date = getTodayIsoDate()): string =>
-  `${DASHBOARD_PATH}?${DATE_QUERY_PARAM}=${date}`;
+export const buildSpendingsPath = (date = getTodayIsoDate()): string =>
+  `${SPENDINGS_PATH}?${DATE_QUERY_PARAM}=${date}`;

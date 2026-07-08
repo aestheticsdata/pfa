@@ -13,9 +13,9 @@ import useDashboard from "@components/spendings/services/useDashboard";
 import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
 import useWeeklyStatsHelper from "@components/spendings/helpers/useWeeklyStatsHelper";
 import { Input } from "@components/ui/input";
-import { ProgressTrack } from "@components/dataviz";
-import EditGlyph from "@components/overview/EditGlyph";
-import { euro, euro0 } from "@components/overview/format";
+import { ProgressTrack } from "@lib/dataviz";
+import EditGlyph from "@components/dashboard/EditGlyph";
+import { euro, euro0 } from "@components/dashboard/format";
 import { cn } from "@lib/utils";
 
 interface CeilingForm {

@@ -2,7 +2,7 @@
 // contracts — so the lib stays reusable but ergonomic for pfa data.
 
 import type { ChartsCategory } from "@src/schemas/stats";
-import type { BarDatum, DonutSegment } from "@components/dataviz/types";
+import type { BarDatum, DonutSegment } from "@lib/dataviz/types";
 
 const FALLBACK_COLOR = "#94a3b8";
 

@@ -18,7 +18,7 @@ import useDashboard from "@components/spendings/services/useDashboard";
 import useCharts from "@components/spendings/services/useCharts";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
 import { MONTHLY } from "@components/spendings/config/constants";
-import { euro0 } from "@components/overview/format";
+import { euro0 } from "@components/dashboard/format";
 import { cn } from "@lib/utils";
 
 const Insight = ({

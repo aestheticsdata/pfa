@@ -13,8 +13,8 @@ import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
-import { AnimatedNumber, ProgressTrack } from "@components/dataviz";
-import { euro0 } from "@components/overview/format";
+import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
+import { euro0 } from "@components/dashboard/format";
 
 const ForecastStrip = () => {
   const { from } = useDatePickerWrapperStore();

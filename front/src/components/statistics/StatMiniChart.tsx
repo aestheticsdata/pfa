@@ -1,6 +1,6 @@
 "use client";
 
-import { areaPath, linePath, linearScale } from "@components/dataviz/svg";
+import { areaPath, linePath, linearScale } from "@lib/dataviz/svg";
 
 interface StatMiniChartProps {
   /** Stable, unique gradient id. */
