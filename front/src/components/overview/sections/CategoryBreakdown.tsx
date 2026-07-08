@@ -8,7 +8,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useCharts from "@components/spendings/services/useCharts";
 import useSpendings from "@components/spendings/services/useSpendings";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
-import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
+import { MONTHLY } from "@components/spendings/config/constants";
 import { StackedBar, categoriesToSegments } from "@components/dataviz";
 import { euro, pct1 } from "@components/overview/format";
 import { cn } from "@lib/utils";

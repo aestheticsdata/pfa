@@ -11,7 +11,7 @@ import format from "date-fns/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
-import useWeeklyStatsHelper from "@components/spendings/spendingDashboard/weeklyStats/helpers/useWeeklyStatsHelper";
+import useWeeklyStatsHelper from "@components/spendings/helpers/useWeeklyStatsHelper";
 import { Input } from "@components/ui/input";
 import { ProgressTrack } from "@components/dataviz";
 import EditGlyph from "@components/overview/EditGlyph";

@@ -16,7 +16,7 @@ import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import useSpendings from "@components/spendings/services/useSpendings";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
+import { MONTHLY } from "@components/spendings/config/constants";
 import texts from "@components/spendings/config/text";
 import { DASHBOARD_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
 

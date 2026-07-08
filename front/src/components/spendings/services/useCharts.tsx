@@ -4,10 +4,10 @@ import endOfMonth from "date-fns/endOfMonth";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 import {
+  MONTHLY,
   QUERY_KEYS,
   QUERY_OPTIONS,
 } from "@components/spendings/config/constants";
-import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { ChartsCategoryListSchema } from "@src/schemas/stats";
 

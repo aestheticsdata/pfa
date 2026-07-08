@@ -17,7 +17,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useCharts from "@components/spendings/services/useCharts";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
-import { MONTHLY } from "@components/spendings/spendingDashboard/common/widgetHeaderConstants";
+import { MONTHLY } from "@components/spendings/config/constants";
 import { euro0 } from "@components/overview/format";
 import { cn } from "@lib/utils";
 
