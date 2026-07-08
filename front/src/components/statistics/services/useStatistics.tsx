@@ -1,52 +1,50 @@
 import { useQuery } from "react-query";
 import useRequestHelper from "@src/helpers/useRequestHelper";
+import useCategories from "@components/spendings/services/useCategories";
 import { QUERY_OPTIONS } from "@components/spendings/config/constants";
 import { StatisticsResponseSchema } from "@src/schemas/stats";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
-import type { Category } from "@src/schemas/categories";
 
-interface SelectOption {
-  value: number;
-  label: number;
+interface UseStatisticsOptions {
+  years: number[];
 }
 
-const generateYearRange = (startYear: number) => {
-  const currentYear = new Date().getFullYear();
-  const years: number[] = [];
-  for (let year: number = startYear; year <= currentYear; year++) {
-    years.push(year);
-  }
-  return years.join(',');
-}
-
-const useStatistics = (
-  categories: Category[] = [],
-  yearSelectorWatcher?: SelectOption,
-) => {
+/**
+ * Fetches per-category monthly totals for the given years, across ALL of the
+ * user's categories in one request. The page derives every figure (totals,
+ * per-category series, year-over-year trends) from this single response, so the
+ * category picker filters client-side with no refetch.
+ */
+const useStatistics = ({ years }: UseStatisticsOptions) => {
   const { privateRequest } = useRequestHelper();
-  const queryKey = ['statistics', yearSelectorWatcher?.value ?? "", ...(categories?.map((category) => category.ID) ?? [])];
+  const { categories } = useCategories();
+  const categoryIds = (categories ?? []).map((category) => category.ID);
+
+  const sortedYears = [...years].sort((a, b) => a - b);
+  const yearsParam = sortedYears.join(",");
+  const queryKey = ["statistics", yearsParam, categoryIds.join(",")];
 
   const getStatistics = async (): Promise<StatisticsResponse> => {
-    const categoryIds = categories.map((category) => category.ID).join(',');
-    const response = await privateRequest(`/statistics?years=${generateYearRange(yearSelectorWatcher?.value ?? new Date().getFullYear())}&categories=${categoryIds}`);
+    const response = await privateRequest(
+      `/statistics?years=${yearsParam}&categories=${categoryIds.join(",")}`,
+    );
     return StatisticsResponseSchema.parse(response.data);
   };
 
-  const { data: statistics, isLoading, error } = useQuery(
-    queryKey,
-    getStatistics,
-    {
-      retry: true,
-      ...QUERY_OPTIONS,
-      enabled: categories.length > 0 && !!yearSelectorWatcher,
-    });
+  const { data, isLoading, error } = useQuery(queryKey, getStatistics, {
+    retry: true,
+    ...QUERY_OPTIONS,
+    enabled: categoryIds.length > 0 && sortedYears.length > 0,
+  });
 
   return {
+    statistics: data,
+    colors: data?.colors ?? {},
+    categories: categories ?? [],
     isLoading,
-    statistics,
     error,
-  }
-}
+  };
+};
 
 export default useStatistics;

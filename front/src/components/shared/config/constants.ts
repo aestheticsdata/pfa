@@ -1,5 +1,6 @@
 export const ROUTES = {
-  spendings: {path: "/dashboard", label: "Dépenses"},
+  dashboard: {path: "/dashboard", label: "Dashboard"},
+  spendings: {path: "/spendings", label: "Dépenses"},
   exceptionals: {path: "/exceptionals", label: "Exceptionnels"},
   categories: {path: "/categories", label: "Catégories"},
   statistics: {path: "/statistics", label: "Statistiques"},

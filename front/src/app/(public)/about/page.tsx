@@ -1,15 +1,34 @@
 "use client";
 
+import AuthCard from "@components/auth/AuthCard";
+import AuthBrand from "@components/auth/AuthBrand";
+
+const LEGAL = [
+  "Site hébergé chez OVH SAS",
+  "Siège social : 2 rue Kellermann — 59100 Roubaix — France",
+  "Code APE 2620Z",
+  "N° TVA : FR 22 424 761 419",
+];
+
 export default function About() {
   return (
-    <div className="auth-card-gradient w-full max-w-md p-8 rounded-xl border border-gray-700/40 shadow-2xl flex flex-col gap-4 text-gray-200">
-      <h2 className="text-xl font-medium text-gray-100">À propos</h2>
-      <ul className="space-y-2 text-sm text-gray-400">
-        <li>Site hébergé chez OVH SAS</li>
-        <li>Siège social : 2 rue Kellermann — 59100 Roubaix — France</li>
-        <li>Code APE 2620Z</li>
-        <li>N° TVA : FR 22 424 761 419</li>
+    <AuthCard>
+      <AuthBrand title="À propos" subtitle="Personal Finance Assistant" />
+
+      <ul className="flex flex-col gap-2.5 text-[13px] text-ink-2">
+        {LEGAL.map((line) => (
+          <li
+            key={line}
+            className="border-l-2 border-line pl-3 leading-relaxed"
+          >
+            {line}
+          </li>
+        ))}
       </ul>
-    </div>
+
+      <div className="mt-5 border-t border-white/[0.07] pt-[18px] text-center font-mono text-[12px] text-ink-4">
+        pfa · 1991computer.com
+      </div>
+    </AuthCard>
   );
 }

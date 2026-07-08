@@ -9,7 +9,7 @@ import {
 } from "@components/datePickerWrapper/helpers";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useBlur from "@components/common/helpers/blurHelper";
-import { DASHBOARD_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
+import { SPENDINGS_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
 
 import type { Days, HoverRange } from "@components/datePickerWrapper/types";
 
@@ -44,12 +44,12 @@ const useDatePickerState = () => {
 
   const handleDayChange = (date: Date, updateUrl = true) => {
     const dateISO = formatISO(date, { representation: "date" });
-    if (updateUrl && normalizePath(pathname) === DASHBOARD_PATH) {
+    if (updateUrl && normalizePath(pathname) === SPENDINGS_PATH) {
       const dateInUrl = searchParams.get(DATE_QUERY_PARAM);
       if (dateInUrl !== dateISO) {
         const params = new URLSearchParams(searchParams.toString());
         params.set(DATE_QUERY_PARAM, dateISO);
-        router.push(`${DASHBOARD_PATH}?${params.toString()}`);
+        router.push(`${SPENDINGS_PATH}?${params.toString()}`);
       }
     }
 

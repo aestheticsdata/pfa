@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import AuthCard from "@components/auth/AuthCard";
+import AuthBrand from "@components/auth/AuthBrand";
 import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
 import useLoginService from "@auth/useLoginService";
 import useCredentials from "@auth/helpers/useCredentials";
@@ -19,22 +21,39 @@ export default function LoginFormClient() {
   };
 
   return (
-    <div className="auth-card-gradient w-full max-w-md flex flex-col gap-6 p-8 rounded-xl border border-gray-700/40 shadow-2xl">
+    <AuthCard>
+      <AuthBrand
+        title="Personal Finance Assistant"
+        subtitle="Chaque euro à sa place."
+      />
+
       <SharedLoginForm
         onSubmit={onSubmit}
         buttonTitle="Se connecter"
         displayEmailField
         displayPasswordField
+        submitIcon
       />
-      <div className="text-center text-sm text-gray-400">
+
+      <div className="mt-4 text-center">
         <Link
           href="/forgotPassword"
           prefetch={false}
-          className="hover:text-cyan-400 transition-colors"
+          className="text-[12.5px] text-ink-3 transition-colors hover:text-ink"
         >
-          mot de passe oublié ?
+          Mot de passe oublié ?
         </Link>
       </div>
-    </div>
+
+      <div className="mt-5 flex justify-center gap-1.5 border-t border-white/[0.07] pt-[18px] text-[12.5px] text-ink-3">
+        Pas encore de compte ?{" "}
+        <Link
+          href="/signup"
+          className="font-medium text-[oklch(0.82_0.12_165)] hover:underline"
+        >
+          Créer un compte
+        </Link>
+      </div>
+    </AuthCard>
   );
 }

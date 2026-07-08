@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-} from "@components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@components/ui/dialog";
 
 interface InvoiceImageModalProps {
   image: string;
@@ -23,15 +20,16 @@ const InvoiceImageModal = ({
   };
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && closeImage()}>
-      <DialogContent className="bg-[#0a0a0a] border-gray-800 max-w-[90vw] sm:max-w-3xl p-0 overflow-hidden">
-        <div className="max-h-[85vh] overflow-y-auto p-4 flex justify-center">
+      <DialogContent className="w-auto max-w-none border-0 bg-transparent p-0 shadow-none">
+        <DialogTitle className="sr-only">Facture — aperçu</DialogTitle>
+        <div className="overflow-hidden rounded-xl border border-elec/30 shadow-[0_24px_80px_oklch(0_0_0/0.6)] leading-[0]">
           <Image
             src={image}
-            alt="invoice"
+            alt="facture"
             width={1000}
             height={800}
             unoptimized
-            className="max-w-full h-auto"
+            className="block max-h-[88vh] w-auto max-w-[min(88vw,860px)] object-contain"
           />
         </div>
       </DialogContent>

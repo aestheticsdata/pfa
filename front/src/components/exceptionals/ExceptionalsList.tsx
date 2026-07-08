@@ -21,7 +21,17 @@ interface ExceptionalsListProps {
   monthlyAverage: number;
 }
 
-const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListProps) => {
+const fmt = (v: number) =>
+  v.toLocaleString("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const ExceptionalsList = ({
+  items,
+  onEdit,
+  monthlyAverage,
+}: ExceptionalsListProps) => {
   const groups = useMemo<MonthGroup[]>(() => {
     const map = new Map<string, MonthGroup>();
     for (const item of items) {
@@ -41,28 +51,29 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
 
   if (groups.length === 0) {
     return (
-      <div className="text-center text-gray-500 text-sm py-12">
-        Aucune dépense exceptionnelle.
+      <div className="py-12 text-center text-[12.5px] text-ink-4">
+        Aucun achat exceptionnel.
       </div>
     );
   }
 
-  const fmt = (v: number) =>
-    v.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-[18px]">
       {groups.map((group) => (
-        <div key={group.key} className="flex flex-col gap-3">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-300 lowercase first-letter:uppercase">
+        <section key={group.key}>
+          <div className="flex items-baseline justify-between px-1 pb-2.5">
+            <h2 className="text-[15px] font-semibold capitalize tracking-[-0.01em] text-ink">
               {group.label}
-            </span>
-            <span className="text-gray-400 tabular-nums">
-              Total: {fmt(group.total)} €
+              <span className="ml-2 text-xs font-normal text-ink-4">
+                · {group.items.length} achat
+                {group.items.length > 1 ? "s" : ""}
+              </span>
+            </h2>
+            <span className="num text-sm text-ink-2">
+              Total <b className="font-medium text-ink">{fmt(group.total)} €</b>
             </span>
           </div>
-          <div className="flex flex-col gap-3">
+          <div className="overflow-hidden rounded-[14px] border border-line-soft bg-bg-elev">
             {group.items.map((item) => (
               <ExceptionalItem
                 key={item.ID}
@@ -72,7 +83,7 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
               />
             ))}
           </div>
-        </div>
+        </section>
       ))}
     </div>
   );

@@ -45,10 +45,16 @@ const spendings = {
   spendingsListModal: {
     total: "total",
     filter: "filtrer",
+    searchPlaceholder: "Rechercher…",
     noCategoryLabel: "sans catégorie",
     dayTotal: "Total jour",
     cumulativeTotal: "Total cumulé",
-    monthPercentage: "(% du mois)",
+    weekWord: "de la semaine",
+    monthWord: "du mois",
+    seeWeek: "Voir la semaine concernée",
+    noSpendings: "Aucune dépense pour cette catégorie.",
+    noMatch: "Aucune dépense ne correspond.",
+    close: "Fermer",
   },
 };
 

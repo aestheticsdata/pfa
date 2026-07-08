@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { buildDashboardPath } from "@helpers/dateRoute";
+import { ROUTES } from "@components/shared/config/constants";
 
 export default function Home() {
-  redirect(buildDashboardPath());
+  redirect(ROUTES.dashboard.path);
 }

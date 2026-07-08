@@ -9,5 +9,8 @@ export interface SharedLoginFormProps {
   buttonTitle: string;
   displayEmailField?: boolean;
   displayPasswordField?: boolean;
+  displayConfirmPasswordField?: boolean;
   displayCurrencyField?: boolean;
+  /** Show a trailing arrow on the submit button (login). */
+  submitIcon?: boolean;
 }

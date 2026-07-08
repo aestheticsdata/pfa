@@ -17,11 +17,11 @@ export default async function PrivateLayout({
 
   return (
     <AuthProvider initialUser={session.user} initialCsrfToken={session.csrfToken}>
-      <div className="flex min-h-screen w-full flex-col items-stretch bg-background">
-        <NavBar />
-        <main className="w-full max-w-[2000px] mx-auto px-4 sm:px-6 py-6">
-          {children}
-        </main>
+      <div className="min-h-screen w-full bg-background">
+        <div className="mx-auto w-full max-w-[2000px] px-4 pt-4 pb-16 sm:px-6 lg:px-8">
+          <NavBar />
+          <main>{children}</main>
+        </div>
       </div>
       <Toaster richColors closeButton position="bottom-right" />
     </AuthProvider>

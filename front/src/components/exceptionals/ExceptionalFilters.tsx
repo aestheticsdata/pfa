@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@components/ui/select";
+import { Plus } from "lucide-react";
+import { Button } from "@components/ui/button";
 import { cn } from "@lib/utils";
 
 interface CategoryChip {
@@ -16,12 +11,36 @@ interface CategoryChip {
 
 interface ExceptionalFiltersProps {
   years: number[];
-  selectedYear: number;
-  onSelectYear: (year: number) => void;
+  selectedYear: number | null;
+  onSelectYear: (year: number | null) => void;
   categories: CategoryChip[];
   activeCategory: string | null;
   onSelectCategory: (name: string | null) => void;
+  onAdd: () => void;
 }
+
+const YearChip = ({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className={cn(
+      "inline-flex items-center rounded-full border px-3 py-1 text-xs transition-colors",
+      active
+        ? "border-exc/60 bg-exc/10 text-exc"
+        : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
+    )}
+  >
+    {label}
+  </button>
+);
 
 const ExceptionalFilters = ({
   years,
@@ -30,68 +49,82 @@ const ExceptionalFilters = ({
   categories,
   activeCategory,
   onSelectCategory,
-}: ExceptionalFiltersProps) => {
-  return (
-    <div className="flex flex-wrap items-center gap-3">
-      <span className="text-gray-400 text-sm">Filtre :</span>
-      <Select
-        value={String(selectedYear)}
-        onValueChange={(v) => onSelectYear(Number(v))}
-      >
-        <SelectTrigger className="bg-[#0c0c0c] border-gray-700/50 text-gray-200 hover:bg-[#151515] min-w-[100px]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-[#0c0c0c] border-gray-700/50 text-gray-200">
-          {years.map((y) => (
-            <SelectItem key={y} value={String(y)}>
-              {y}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-
-      <button
-        type="button"
-        onClick={() => onSelectCategory(null)}
-        className={cn(
-          "px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer",
-          activeCategory === null
-            ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/20"
-            : "bg-[#0c0c0c] border border-gray-700/50 text-gray-300 hover:bg-[#151515]",
-        )}
-      >
-        Toutes
-      </button>
-
-      {categories.map((cat) => {
-        const active = activeCategory === cat.name;
-        return (
-          <button
-            key={cat.name}
-            type="button"
-            onClick={() => onSelectCategory(active ? null : cat.name)}
-            className={cn(
-              "px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer inline-flex items-center gap-2",
-              active
-                ? "text-white shadow-lg"
-                : "bg-[#0c0c0c] border border-gray-700/50 text-gray-300 hover:bg-[#151515]",
-            )}
-            style={
-              active
-                ? { backgroundColor: cat.color, boxShadow: `0 10px 25px -10px ${cat.color}` }
-                : undefined
-            }
-          >
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ backgroundColor: cat.color }}
-            />
-            {cat.name}
-          </button>
-        );
-      })}
+  onAdd,
+}: ExceptionalFiltersProps) => (
+  <div className="flex flex-col gap-3">
+    <div className="flex flex-wrap items-center gap-2.5">
+      <span className="mr-1 text-xs text-ink-3">Filtre :</span>
+      {years.map((y) => (
+        <YearChip
+          key={y}
+          active={selectedYear === y}
+          label={String(y)}
+          onClick={() => onSelectYear(y)}
+        />
+      ))}
+      <YearChip
+        active={selectedYear === null}
+        label="Toutes les années"
+        onClick={() => onSelectYear(null)}
+      />
+      <span className="grow" />
+      <Button type="button" variant="primary" size="sm" onClick={onAdd}>
+        <Plus className="size-3.5" />
+        Ajouter
+      </Button>
     </div>
-  );
-};
+
+    {categories.length > 0 && (
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.1em] text-ink-4">
+          Catégorie
+        </span>
+        <button
+          type="button"
+          onClick={() => onSelectCategory(null)}
+          className={cn(
+            "inline-flex items-center rounded-full border px-2.5 py-1 text-xs transition-colors",
+            activeCategory === null
+              ? "border-exc/60 bg-exc/10 text-exc"
+              : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
+          )}
+        >
+          Toutes
+        </button>
+        {categories.map((cat) => {
+          const active = activeCategory === cat.name;
+          return (
+            <button
+              key={cat.name}
+              type="button"
+              onClick={() => onSelectCategory(active ? null : cat.name)}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs capitalize transition-colors",
+                active
+                  ? "text-ink"
+                  : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
+              )}
+              style={
+                active
+                  ? {
+                      borderColor: cat.color,
+                      backgroundColor: `${cat.color}1f`,
+                      color: cat.color,
+                    }
+                  : undefined
+              }
+            >
+              <span
+                className="size-[7px] shrink-0 rounded-[2px]"
+                style={{ backgroundColor: cat.color }}
+              />
+              {cat.name}
+            </button>
+          );
+        })}
+      </div>
+    )}
+  </div>
+);
 
 export default ExceptionalFilters;

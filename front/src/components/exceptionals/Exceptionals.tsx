@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
 import useGlobalStore from "@components/shared/globalStore";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import useRegularMonthlyAverage from "@components/exceptionals/services/useRegularMonthlyAverage";
@@ -10,19 +9,25 @@ import ExceptionalFilters from "@components/exceptionals/ExceptionalFilters";
 import ExceptionalsList from "@components/exceptionals/ExceptionalsList";
 import ExceptionalModal from "@components/exceptionals/ExceptionalModal";
 import Spinner from "@components/common/Spinner";
-import { Button } from "@components/ui/button";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
 const Exceptionals = () => {
   const { setIsCalendarVisible } = useGlobalStore();
-  const [selectedYear, setSelectedYear] = useState<number>(() => new Date().getFullYear());
+  // Computed once per instance (stable across re-renders).
+  const [currentYear] = useState(() => new Date().getFullYear());
+  // null = "Toutes les années" (backend fetches all when no year param)
+  const [selectedYear, setSelectedYear] = useState<number | null>(currentYear);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ExceptionalItem | null>(null);
 
-  const { exceptionals, isLoading, error, years } = useExceptionals({ year: selectedYear });
-  const { data: monthlyAverageData } = useRegularMonthlyAverage(selectedYear);
+  const { exceptionals, isLoading, error, years } = useExceptionals({
+    year: selectedYear ?? undefined,
+  });
+  const { data: monthlyAverageData } = useRegularMonthlyAverage(
+    selectedYear ?? currentYear,
+  );
 
   useEffect(() => {
     setIsCalendarVisible(false);
@@ -45,10 +50,12 @@ const Exceptionals = () => {
 
   const yearsList = useMemo(() => {
     const set = new Set<number>(years);
-    set.add(selectedYear);
-    set.add(new Date().getFullYear());
+    set.add(currentYear);
+    if (selectedYear != null) {
+      set.add(selectedYear);
+    }
     return Array.from(set).sort((a, b) => b - a);
-  }, [years, selectedYear]);
+  }, [years, selectedYear, currentYear]);
 
   const handleAdd = () => {
     setEditing(null);
@@ -70,26 +77,25 @@ const Exceptionals = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <ExceptionalStatsCards items={exceptionals} year={selectedYear} />
+    <div className="flex flex-col gap-4">
+      <ExceptionalStatsCards
+        items={exceptionals}
+        year={selectedYear}
+        monthlyAverage={monthlyAverageData?.monthlyAverage ?? 0}
+      />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <ExceptionalFilters
-          years={yearsList}
-          selectedYear={selectedYear}
-          onSelectYear={setSelectedYear}
-          categories={availableCategories}
-          activeCategory={activeCategory}
-          onSelectCategory={setActiveCategory}
-        />
-        <Button variant="cyan" size="default" onClick={handleAdd}>
-          <Plus className="w-4 h-4" />
-          Ajouter
-        </Button>
-      </div>
+      <ExceptionalFilters
+        years={yearsList}
+        selectedYear={selectedYear}
+        onSelectYear={setSelectedYear}
+        categories={availableCategories}
+        activeCategory={activeCategory}
+        onSelectCategory={setActiveCategory}
+        onAdd={handleAdd}
+      />
 
       {isLoading ? (
-        <div className="flex justify-center py-8">
+        <div className="flex justify-center py-12">
           <Spinner />
         </div>
       ) : (

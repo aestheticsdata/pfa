@@ -1,5 +1,8 @@
 "use client";
 
+import Link from "next/link";
+import AuthCard from "@components/auth/AuthCard";
+import AuthBrand from "@components/auth/AuthBrand";
 import SharedLoginForm from "@components/shared/sharedLoginForm/sharedLoginForm";
 import useSignupService from "@auth/useSignupService";
 import useCredentials from "@auth/helpers/useCredentials";
@@ -18,13 +21,29 @@ export default function SignUp() {
   };
 
   return (
-    <div className="auth-card-gradient w-full max-w-md p-8 rounded-xl border border-gray-700/40 shadow-2xl">
+    <AuthCard>
+      <AuthBrand
+        title="Créer un compte"
+        subtitle="Chaque euro à sa place."
+      />
+
       <SharedLoginForm
         onSubmit={onSubmit}
         buttonTitle="Créer un compte"
         displayEmailField
         displayPasswordField
+        displayConfirmPasswordField
       />
-    </div>
+
+      <div className="mt-5 flex justify-center gap-1.5 border-t border-white/[0.07] pt-[18px] text-[12.5px] text-ink-3">
+        Déjà un compte ?{" "}
+        <Link
+          href="/login"
+          className="font-medium text-[oklch(0.82_0.12_165)] hover:underline"
+        >
+          Se connecter
+        </Link>
+      </div>
+    </AuthCard>
   );
 }

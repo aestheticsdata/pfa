@@ -3,14 +3,18 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import DayPicker from "react-day-picker";
-import "react-day-picker/lib/style.css";
+// NOTE: react-day-picker/lib/style.css is intentionally NOT imported — the pfa
+// "Capsule" styling in globals.css fully styles the DayPicker, and the lib CSS
+// (loaded after globals) would otherwise win and reintroduce the blue band,
+// triangle nav arrows and white hover box.
 import useOnClickOutside from "use-onclickoutside";
 import fr from "date-fns/locale/fr";
 import format from "date-fns/format";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 import { WEEKDAYS_LONG, WEEKDAYS_SHORT, MONTHS } from "./locale-fr";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
 import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
+import { cn } from "@lib/utils";
 import type { Modifiers } from "react-day-picker";
 
 const DatePickerWrapper = () => {
@@ -69,22 +73,34 @@ const DatePickerWrapper = () => {
       <button
         type="button"
         onClick={toggleCalendar}
-        className="px-4 py-2 bg-[#0c0c0c] border border-gray-700/50 rounded-lg hover:bg-[#151515] hover:cursor-pointer transition-colors flex items-center justify-center gap-2 text-gray-200 shadow-lg whitespace-nowrap text-sm select-none"
+        className={cn(
+          "inline-flex select-none items-center gap-2.5 whitespace-nowrap rounded-[10px] border px-3.5 py-2 text-sm text-gray-200 shadow-lg transition-colors hover:cursor-pointer",
+          isCalendarVisible
+            ? "border-accent-d bg-[#151515]"
+            : "border-gray-700/50 bg-[#0c0c0c] hover:border-gray-600 hover:bg-[#151515]",
+        )}
       >
-        <CalendarIcon className="w-4 h-4" />
+        <CalendarIcon className="size-4 shrink-0 text-gray-400" />
         {selectedDays.length > 0 ? (
-          <span>
-            {format(selectedDays[0], "dd MMM yyyy", { locale: fr })} —{" "}
+          <span className="num text-[13.5px] tracking-[-0.01em]">
+            {format(selectedDays[0], "dd MMM yyyy", { locale: fr })}
+            <span className="mx-[3px] text-gray-500">—</span>
             {format(selectedDays[selectedDays.length - 1], "dd MMM yyyy", {
               locale: fr,
             })}
           </span>
         ) : (
-          <span>Sélectionner une période</span>
+          <span className="text-[13.5px]">Sélectionner une période</span>
         )}
+        <ChevronDown
+          className={cn(
+            "size-3.5 shrink-0 text-gray-500 transition-transform",
+            isCalendarVisible && "rotate-180",
+          )}
+        />
       </button>
       {isCalendarVisible && (
-        <div className="absolute top-12 right-0 lg:right-auto p-4 rounded-xl drop-shadow-2xl bg-card border border-gray-800/50 shadow-2xl z-50">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-50 lg:right-auto">
           <DayPicker
             initialMonth={selectedDays[0]}
             locale="fr"
@@ -93,7 +109,7 @@ const DatePickerWrapper = () => {
             weekdaysShort={WEEKDAYS_SHORT}
             selectedDays={selectedDays}
             showWeekNumbers={false}
-            showOutsideDays={false}
+            showOutsideDays
             modifiers={modifiers}
             onDayClick={(day) => handleDayChange(day)}
             onDayMouseEnter={handleDayEnter}
