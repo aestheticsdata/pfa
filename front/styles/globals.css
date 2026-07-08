@@ -451,45 +451,131 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   background-color: rgba(107, 114, 128, 0.8);
 }
 
-/* react-day-picker legacy styles — to drop in Phase B after upgrade to v8 */
+/* ============================================================
+   react-day-picker v7 — pfa "Capsule" week selector.
+   Drop-in over react-day-picker/lib/style.css (see design_handoff
+   Calendrier DayPicker). Mockup var(--accent) = green → --accent-strong.
+   ============================================================ */
 .DayPicker {
-  @apply text-sm!;
+  --wk-accent: var(--accent-strong);
+  --wk-accent-soft: oklch(0.84 0.14 148 / 0.18);
+  --wk-on-accent: oklch(0.19 0.03 152); /* number on the end pastilles */
+  --wk-today: var(--elec);
+  --wk-hover: oklch(1 0 0 / 0.05); /* row-hover fill */
+  --wk-cell: 33px;
+  --wk-cap: 28px;
+  --wk-radius: 9px;
+
+  display: inline-block;
+  width: 276px;
+  margin: 0;
+  background: var(--bg-elev);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 12px 13px;
+  box-shadow:
+    0 20px 48px oklch(0 0 0 / 0.55),
+    inset 0 1px 0 oklch(1 0 0 / 0.05);
+  font-family: "Geist", system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+  user-select: none;
+}
+.DayPicker-wrapper { position: relative; padding: 0; outline: none; }
+.DayPicker-Months { display: block; }
+.DayPicker-Month { display: block; width: 100%; margin: 0; border-spacing: 0; }
+
+/* header : month caption */
+.DayPicker-Caption {
+  display: flex; align-items: center; min-height: 22px;
+  margin: 0 0 8px; padding: 0 2px; text-align: left;
+}
+.DayPicker-Caption > div {
+  font-size: 13px; font-weight: 500; letter-spacing: -0.01em; color: var(--ink);
 }
 
-.DayPicker-Month {
-  border-collapse: separate;
+/* nav ‹ › */
+.DayPicker-NavBar { position: static; }
+.DayPicker-NavButton {
+  position: absolute; top: -1px; margin: 0;
+  width: 26px; height: 26px; display: grid; place-items: center;
+  border-radius: 7px; background: none; box-shadow: none;
+  color: var(--ink-3); cursor: pointer; transition: background .12s, color .12s;
 }
-.DayPicker-WeekNumber {
-  outline: none;
+.DayPicker-NavButton:hover { background: var(--bg-hi); color: var(--ink); }
+.DayPicker-NavButton::before {
+  content: ""; width: 7px; height: 7px;
+  border-left: 2px solid currentColor; border-bottom: 2px solid currentColor;
 }
+.DayPicker-NavButton--prev { right: 32px; }
+.DayPicker-NavButton--prev::before { transform: translateX(2px) rotate(45deg); }
+.DayPicker-NavButton--next { right: 0; }
+.DayPicker-NavButton--next::before { transform: translateX(-2px) rotate(-135deg); }
+
+/* weekday column headers */
+.DayPicker-Weekdays { display: block; margin-bottom: 2px; }
+.DayPicker-WeekdaysRow { display: grid; grid-template-columns: repeat(7, 1fr); }
+.DayPicker-Weekday {
+  display: flex; align-items: center; justify-content: center;
+  padding: 2px 0 4px; color: var(--ink-4);
+}
+.DayPicker-Weekday abbr[title] {
+  text-decoration: none; border: 0; cursor: inherit;
+  font-size: 11.5px; font-weight: 500; color: inherit;
+}
+
+/* day grid */
+.DayPicker-Body { display: block; }
+.DayPicker-Week { display: grid; grid-template-columns: repeat(7, 1fr); }
+.DayPicker-Week + .DayPicker-Week { margin-top: 2px; }
 .DayPicker-Day {
-  outline: none;
-  border: 1px solid transparent;
+  position: relative; z-index: 0;
+  height: var(--wk-cell); margin: 0; padding: 0; border: 0; border-radius: 0;
+  display: grid; place-items: center;
+  font-family: "Geist Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums;
+  font-size: 13.5px; line-height: 1; color: var(--ink); cursor: pointer; transition: color .1s;
 }
-.DayPicker-Day--hoverRange {
-  background-color: #60605c !important;
+.DayPicker-Day::before, .DayPicker-Day::after {
+  content: ""; position: absolute; z-index: -1; pointer-events: none;
 }
-
-.DayPicker-Day--selectedRange {
-  background-color: #fff7ba !important;
-}
-
-.DayPicker-Day--selectedRangeStart {
-  background-color: #FFEB3B !important;
-}
-
-.DayPicker-Day--selectedRangeEnd {
-  background-color: #FFEB3B !important;
+/* neutralise the lib's default blue dot on selected days */
+.DayPicker .DayPicker-Day--selected:not(.DayPicker-Day--outside) {
+  background-color: transparent; color: var(--ink); border-radius: 0;
 }
 
-.DayPicker-Day--selectedRange:not(.DayPicker-Day--outside).DayPicker-Day--selected,
-.DayPicker-Day--hoverRange:not(.DayPicker-Day--outside).DayPicker-Day--selected {
-  border-radius: 5px !important;
-  color: black !important;
+/* selection — capsule band + end pastilles */
+.DayPicker-Day--selectedRange::before {
+  top: calc((var(--wk-cell) - var(--wk-cap)) / 2);
+  bottom: calc((var(--wk-cell) - var(--wk-cap)) / 2);
+  left: 0; right: 0; background: var(--wk-accent-soft);
 }
-.DayPicker-Day--hoverRange:hover {
-  border-radius: 5px !important;
+.DayPicker-Day--selectedRangeStart::before { left: 4px; border-radius: var(--wk-radius) 0 0 var(--wk-radius); }
+.DayPicker-Day--selectedRangeEnd::before { right: 4px; border-radius: 0 var(--wk-radius) var(--wk-radius) 0; }
+.DayPicker-Day--selectedRangeStart::after,
+.DayPicker-Day--selectedRangeEnd::after {
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: var(--wk-cap); height: var(--wk-cap); border-radius: 50%; background: var(--wk-accent);
 }
+.DayPicker .DayPicker-Day--selectedRangeStart,
+.DayPicker .DayPicker-Day--selectedRangeEnd { color: var(--wk-on-accent); font-weight: 600; }
+
+/* today — electric-blue numeral */
+.DayPicker .DayPicker-Day--today { color: var(--wk-today) !important; font-weight: 600; }
+
+/* hover — row fill + underlined cursor day */
+.DayPicker .DayPicker-Week:hover .DayPicker-Day { background: var(--wk-hover); border-radius: 0; }
+.DayPicker .DayPicker-Week:hover .DayPicker-Day:first-child { border-radius: 9px 0 0 9px; }
+.DayPicker .DayPicker-Week:hover .DayPicker-Day:last-child { border-radius: 0 9px 9px 0; }
+.DayPicker .DayPicker-Day:hover:not(.DayPicker-Day--outside):not(.DayPicker-Day--disabled) {
+  text-decoration: underline; text-decoration-color: var(--wk-accent);
+  text-decoration-thickness: 2px; text-underline-offset: 4px;
+}
+
+/* ancillary states */
+.DayPicker-Day--outside { color: var(--ink-5); cursor: default; }
+.DayPicker .DayPicker-Day--disabled { color: var(--ink-5); opacity: 0.5; cursor: not-allowed; }
+.DayPicker .DayPicker-Day--disabled::before,
+.DayPicker .DayPicker-Day--disabled::after { display: none; }
 
 .transition-bar-enter {
   opacity: 0.01;
