@@ -80,7 +80,7 @@ const CategoryBreakdown = () => {
                   key={`${c.category ?? "none"}-${i}`}
                   type="button"
                   onClick={() => setSelected(c)}
-                  className="grid grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line-soft px-1 py-3 text-left text-[13.5px] transition-colors last:border-b-0 hover:bg-bg-hi sm:grid-cols-[10px_minmax(0,1fr)_58px_84px_58px]"
+                  className="grid cursor-pointer grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line-soft px-1 py-3 text-left text-[13.5px] transition-colors last:border-b-0 hover:bg-bg-hi sm:grid-cols-[10px_minmax(0,1fr)_58px_84px_58px]"
                 >
                   <span
                     className="size-2 rounded-[2px]"

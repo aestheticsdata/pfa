@@ -1,22 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import parseISO from "date-fns/parseISO";
-import formatISO from "date-fns/formatISO";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@components/ui/dialog";
-import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import { ChevronRight, Search, X } from "lucide-react";
 import useSpendings from "@components/spendings/services/useSpendings";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { MONTHLY } from "@components/spendings/config/constants";
+import { MONTHLY, DATE_FORMAT } from "@components/spendings/config/constants";
 import texts from "@components/spendings/config/text";
 import { SPENDINGS_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
 
@@ -29,6 +22,14 @@ interface SpendingsListModalProps {
   categoryInfos: CategoryProps;
   total: number;
 }
+
+const FALLBACK_COLOR = "#94a3b8";
+
+const euro = (n: number) =>
+  Number(n).toLocaleString("fr-FR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 const groupByDate = (
   spendings: SpendingItem[],
@@ -43,225 +44,203 @@ const groupByDate = (
   );
 };
 
+/**
+ * "Détail catégorie" drill-down modal — shared by the Dashboard (monthly) and
+ * Dépenses (weekly) "Répartition par catégorie" widgets. Lists the clicked
+ * category's spendings grouped by day, with running cumulative totals. Each day
+ * card links back to the week that contains it. Design: `.catd-*` (faithful
+ * port of design_handoff_pfa/designs/assets/cat-detail.{js,css}).
+ */
 const SpendingsListModal = ({
-  handleClickOutside: handleClickOutsideProp,
+  handleClickOutside,
   periodType,
   categoryInfos,
   total,
 }: SpendingsListModalProps) => {
-  const [open, setOpen] = useState(true);
-  const handleClickOutside = () => {
-    setOpen(false);
-    setTimeout(handleClickOutsideProp, 200);
-  };
   const { spendingsByWeek, spendingsByMonth } = useSpendings();
   const { from, to } = useDatePickerWrapperStore();
   const [searchTerm, setSearchTerm] = useState("");
-  const { spendingsListModal: spendingsListModalTexts } = texts;
+  const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const normalizedSearchTerm = searchTerm.toLowerCase();
-  const categoryColor = categoryInfos?.categoryColor ?? "#94a3b8";
-
-  const normalizePath = (path: string): string => {
-    const normalized = path.replace(/\/+$/, "");
-    return normalized === "" ? "/" : normalized;
-  };
+  const { spendingsListModal: t } = texts;
+  const isMonthly = periodType === MONTHLY;
+  const pctWord = isMonthly ? t.monthWord : t.weekWord;
+  const categoryColor = categoryInfos?.categoryColor ?? FALLBACK_COLOR;
+  const targetCategory = categoryInfos.category ?? null;
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
   const sourceItems: SpendingItem[] = (
-    periodType === MONTHLY
+    isMonthly
       ? (spendingsByMonth ?? [])
       : (spendingsByWeek ?? []).flatMap((g) => g.items)
   ).filter(
     (s) =>
-      s.category === categoryInfos.category &&
+      (s.category ?? null) === targetCategory &&
       s.label.toLowerCase().includes(normalizedSearchTerm),
   );
 
   const grouped = groupByDate(sourceItems);
   const groupedEntries = Object.entries(grouped);
 
-  const cumulativeAt = (idx: number): number =>
-    groupedEntries
-      .slice(0, idx + 1)
-      .reduce(
-        (acc, [, items]) =>
-          acc + items.reduce((a, s) => a + Number(s.amount), 0),
-        0,
-      );
-
   const dayTotal = (items: SpendingItem[]) =>
     items.reduce((acc, s) => acc + Number(s.amount), 0);
 
-  const periodLabel =
-    from && to
-      ? periodType === MONTHLY
-        ? format(from, "MMMM yyyy", { locale: fr }).toUpperCase()
-        : `${format(from, "dd MMM yyyy", { locale: fr })} — ${format(
-            to,
-            "dd MMM yyyy",
-            { locale: fr },
-          )}`.toUpperCase()
+  const cumulativeAt = (idx: number): number =>
+    groupedEntries
+      .slice(0, idx + 1)
+      .reduce((acc, [, items]) => acc + dayTotal(items), 0);
+
+  const periodLabel = isMonthly
+    ? from
+      ? format(from, "MMMM yyyy", { locale: fr })
+      : ""
+    : from && to
+      ? `${format(from, "dd")} — ${format(to, "dd MMM yyyy", { locale: fr })}`
       : "";
 
+  // Click a day → jump to the Dépenses page on the week that contains it.
+  const goToDayWeek = (date: string) => {
+    const dateISO = format(parseISO(date), DATE_FORMAT);
+    const normalizedPath = pathname.replace(/\/+$/, "") || "/";
+    const params =
+      normalizedPath === SPENDINGS_PATH
+        ? new URLSearchParams(searchParams.toString())
+        : new URLSearchParams();
+    params.set(DATE_QUERY_PARAM, dateISO);
+    router.push(`${SPENDINGS_PATH}?${params.toString()}`);
+    handleClickOutside();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClickOutside()}>
-      <DialogContent className="bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black border-gray-800 sm:max-w-3xl max-h-[85vh] overflow-hidden flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 py-5 border-b border-gray-800/60 space-y-0">
-          <DialogTitle className="flex items-baseline gap-4 text-gray-100 flex-wrap pr-10">
-            <span
-              className="w-6 h-6 rounded shrink-0 self-center"
-              style={{ backgroundColor: categoryColor }}
-            />
-            <span className="text-lg font-medium">
-              {categoryInfos.category ??
-                spendingsListModalTexts.noCategoryLabel}
-            </span>
-            <span className="text-sm uppercase tracking-wider text-gray-400 font-normal">
-              Total :{" "}
-              <span className="text-gray-100 font-bold normal-case text-base">
-                {total.toFixed(2)} €
+    <DialogPrimitive.Root
+      open
+      onOpenChange={(isOpen) => {
+        if (!isOpen) handleClickOutside();
+      }}
+    >
+      <DialogPrimitive.Portal>
+        <DialogPrimitive.Overlay className="catd-backdrop" />
+        <div className="catd-viewport">
+          <DialogPrimitive.Content
+            className="catd"
+            aria-describedby={undefined}
+            onOpenAutoFocus={(e) => {
+              e.preventDefault();
+              searchRef.current?.focus({ preventScroll: true });
+            }}
+          >
+            <div className="catd-h">
+              <span
+                className="catd-swatch"
+                style={{ background: categoryColor }}
+              />
+              <DialogPrimitive.Title asChild>
+                <span className="catd-name">
+                  {categoryInfos.category ?? t.noCategoryLabel}
+                </span>
+              </DialogPrimitive.Title>
+              <span className="catd-total">
+                <span className="k">{t.total} :</span>
+                <span className="v">{euro(total)} €</span>
               </span>
-            </span>
-            {periodLabel && (
-              <span className="text-sm uppercase tracking-wider text-gray-400 font-medium ml-auto">
-                {periodLabel}
-              </span>
-            )}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-800/60">
-          <Label className="text-gray-400 text-sm shrink-0">
-            {spendingsListModalTexts.filter} :
-          </Label>
-          <Input
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Rechercher..."
-            className="flex-1 bg-[#0c0c0c] border-gray-700/50 text-gray-200 placeholder:text-gray-500 focus-visible:border-cyan-500 focus-visible:ring-0"
-          />
-        </div>
-
-        <div className="flex-1 overflow-y-auto flex flex-col gap-4 px-6 py-4">
-          {groupedEntries.length === 0 && (
-            <div className="text-center text-gray-500 text-sm py-8">
-              Aucune dépense pour cette catégorie.
+              <span className="catd-sp" />
+              {periodLabel && <span className="catd-period">{periodLabel}</span>}
+              <DialogPrimitive.Close className="catd-close" aria-label={t.close}>
+                <X size={13} strokeWidth={2.5} />
+              </DialogPrimitive.Close>
             </div>
-          )}
-          {groupedEntries.map(([date, items], i) => {
-            const dt = dayTotal(items);
-            const cumulative = cumulativeAt(i);
-            const pct = total > 0 ? (cumulative / total) * 100 : 0;
-            const isClickable = periodType === MONTHLY;
 
-            const headerInner = (
-              <>
-                <div className="text-gray-100 uppercase text-base font-bold tracking-wide">
-                  {format(parseISO(date), "EEEE dd MMMM", { locale: fr })}
+            <div className="catd-filter">
+              <span className="catd-filter-lbl">{t.filter} :</span>
+              <span className="catd-search">
+                <Search size={15} strokeWidth={2} />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={t.searchPlaceholder}
+                />
+              </span>
+            </div>
+
+            <div className="catd-body">
+              {groupedEntries.length === 0 ? (
+                <div className="catd-empty">
+                  {normalizedSearchTerm ? t.noMatch : t.noSpendings}
                 </div>
-                <div className="flex gap-3 items-start">
-                  <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-gray-400 text-xs">
-                      {spendingsListModalTexts.dayTotal}
-                    </span>
-                    <span className="px-3 py-1.5 rounded-lg border border-gray-700/60 bg-[#1c1c1c] text-gray-100 text-sm font-bold tabular-nums shadow-inner">
-                      {dt.toFixed(2)} €
-                    </span>
-                  </div>
-                  <div className="flex flex-col items-end gap-1.5">
-                    <span className="text-gray-400 text-xs">
-                      {spendingsListModalTexts.cumulativeTotal}
-                    </span>
-                    <span className="px-3 py-1.5 rounded-lg border border-gray-700/60 bg-[#1c1c1c] text-gray-100 text-sm font-bold tabular-nums shadow-inner">
-                      {cumulative.toFixed(2)} €
-                    </span>
-                    {periodType === MONTHLY && (
-                      <span
-                        className="text-[11px] font-medium"
-                        style={{ color: categoryColor }}
-                      >
-                        {pct.toFixed(0)}% du mois ({pct.toFixed(1)}%)
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </>
-            );
-
-            const onCardClick = () => {
-              const dateISO = formatISO(new Date(date), {
-                representation: "date",
-              });
-              const params = new URLSearchParams(searchParams.toString());
-              params.set(DATE_QUERY_PARAM, dateISO);
-              if (normalizePath(pathname) === SPENDINGS_PATH) {
-                router.push(`${SPENDINGS_PATH}?${params.toString()}`);
-              } else {
-                router.push(
-                  `${SPENDINGS_PATH}?${DATE_QUERY_PARAM}=${dateISO}`,
-                );
-              }
-              handleClickOutside();
-            };
-
-            const Wrapper = isClickable ? "button" : "div";
-            const wrapperProps = isClickable
-              ? {
-                  type: "button" as const,
-                  onClick: onCardClick,
-                }
-              : {};
-
-            return (
-              <Wrapper
-                key={date}
-                {...wrapperProps}
-                className={`group block w-full shrink-0 text-left bg-[#0c0c0c] rounded-xl border border-gray-800/50 overflow-hidden transition-colors ${
-                  isClickable
-                    ? "hover:border-cyan-400 cursor-pointer"
-                    : ""
-                }`}
-              >
-                <div
-                  className={`flex items-start justify-between gap-4 px-5 py-4 transition-colors ${
-                    isClickable ? "group-hover:bg-gray-800/30" : ""
-                  }`}
-                >
-                  {headerInner}
-                </div>
-
-                <div
-                  className={`flex flex-col px-5 py-3 gap-2.5 border-t border-gray-800/40 bg-[#141414] transition-colors ${
-                    isClickable ? "group-hover:bg-[#1a1a1a]" : ""
-                  }`}
-                >
-                  {items.map((spending) => (
-                    <div
-                      key={spending.ID}
-                      className="flex items-center justify-between text-sm"
+              ) : (
+                groupedEntries.map(([date, items], i) => {
+                  const cumulative = cumulativeAt(i);
+                  const pct = total > 0 ? (cumulative / total) * 100 : 0;
+                  return (
+                    <button
+                      key={date}
+                      type="button"
+                      className="catd-day"
+                      title={t.seeWeek}
+                      onClick={() => goToDayWeek(date)}
                     >
-                      <div className="flex items-center gap-2.5 text-gray-200">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full shrink-0"
-                          style={{ backgroundColor: categoryColor }}
-                        />
-                        <span>{spending.label}</span>
+                      <div className="catd-day-h">
+                        <div className="catd-day-title">
+                          {format(parseISO(date), "EEEE dd MMMM", {
+                            locale: fr,
+                          })}
+                          <ChevronRight
+                            className="chev"
+                            size={15}
+                            strokeWidth={2.5}
+                          />
+                        </div>
+                        <div className="catd-day-stats">
+                          <div className="catd-stat">
+                            <span className="k">{t.dayTotal}</span>
+                            <span className="v">
+                              {euro(dayTotal(items))}
+                              <span className="cur"> €</span>
+                            </span>
+                          </div>
+                          <div className="catd-stat">
+                            <span className="k">{t.cumulativeTotal}</span>
+                            <span className="v">
+                              {euro(cumulative)}
+                              <span className="cur"> €</span>
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <span className="text-gray-100 tabular-nums">
-                        {Number(spending.amount).toFixed(2)} €
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </Wrapper>
-            );
-          })}
+
+                      <div className="catd-day-pct">
+                        {Math.round(pct)}% {pctWord} ({pct.toFixed(1)}%)
+                      </div>
+
+                      <div className="catd-day-list">
+                        {items.map((spending) => (
+                          <div key={spending.ID} className="catd-exp">
+                            <span
+                              className="dot"
+                              style={{ background: categoryColor }}
+                            />
+                            <span className="l">{spending.label}</span>
+                            <span className="a">
+                              {euro(Number(spending.amount))}
+                              <span className="cur"> €</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </DialogPrimitive.Content>
         </div>
-      </DialogContent>
-    </Dialog>
+      </DialogPrimitive.Portal>
+    </DialogPrimitive.Root>
   );
 };
 

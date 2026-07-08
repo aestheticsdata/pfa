@@ -31,6 +31,7 @@ const UNCATEGORIZED_KEY = "none";
 
 interface CategoryAggregate {
   key: string;
+  category: string | null;
   name: string;
   color: string;
   count: number;
@@ -81,6 +82,7 @@ const SpendingView = () => {
         } else {
           map.set(key, {
             key,
+            category: tx.category ?? null,
             name: tx.category ?? "sans catégorie",
             color: tx.categoryColor || FALLBACK_COLOR,
             count: 1,

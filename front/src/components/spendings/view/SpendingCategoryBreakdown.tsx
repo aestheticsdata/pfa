@@ -1,11 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
+import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
+import { WEEKLY } from "@components/spendings/config/constants";
 import { cn } from "@lib/utils";
 
 export interface BreakdownRow {
   key: string;
+  category: string | null;
   name: string;
   color: string;
   count: number;
@@ -52,6 +56,8 @@ const SpendingCategoryBreakdown = ({
   rows,
   rangeLabel,
 }: SpendingCategoryBreakdownProps) => {
+  const [selected, setSelected] = useState<BreakdownRow | null>(null);
+
   if (rows.length === 0) {
     return null;
   }
@@ -76,7 +82,12 @@ const SpendingCategoryBreakdown = ({
 
       <div className="sp-cat-list">
         {rows.map((r) => (
-          <div key={r.key} className="sp-cat-row">
+          <button
+            key={r.key}
+            type="button"
+            onClick={() => setSelected(r)}
+            className="sp-cat-row w-full text-left"
+          >
             <span
               className="size-2 rounded-[2px]"
               style={{ background: r.color }}
@@ -94,9 +105,22 @@ const SpendingCategoryBreakdown = ({
               {formatAmount(r.total)} €
             </span>
             <Trend name={r.name} />
-          </div>
+          </button>
         ))}
       </div>
+
+      {selected && (
+        <SpendingsListModal
+          handleClickOutside={() => setSelected(null)}
+          periodType={WEEKLY}
+          categoryInfos={{
+            value: selected.total,
+            category: selected.category,
+            categoryColor: selected.color,
+          }}
+          total={selected.total}
+        />
+      )}
     </section>
   );
 };
