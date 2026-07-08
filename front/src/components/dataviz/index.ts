@@ -7,6 +7,7 @@ export { default as ProgressTrack } from "@components/dataviz/ProgressTrack";
 export { default as AnimatedNumber } from "@components/dataviz/AnimatedNumber";
 export { default as useCountUp } from "@components/dataviz/useCountUp";
 export { default as useTween } from "@components/dataviz/useTween";
+export { default as useElementWidth } from "@components/dataviz/useElementWidth";
 
 export {
   categoriesToSegments,

@@ -3,9 +3,24 @@
 import { useMemo, useState } from "react";
 import useStatistics from "@components/statistics/services/useStatistics";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
+import useDashboard from "@components/spendings/services/useDashboard";
+import useReccurings from "@components/spendings/services/useReccurings";
 import StatisticsFilters from "@components/statistics/StatisticsFilters";
 import StatisticsKpis from "@components/statistics/StatisticsKpis";
 import StatisticsForecast from "@components/statistics/StatisticsForecast";
+import StatisticsMonthlyChart from "@components/statistics/StatisticsMonthlyChart";
+import StatisticsCategoryChart from "@components/statistics/StatisticsCategoryChart";
+import StatisticsHeatmap from "@components/statistics/StatisticsHeatmap";
+import StatisticsTopCategories from "@components/statistics/StatisticsTopCategories";
+import StatisticsFixedExpenses from "@components/statistics/StatisticsFixedExpenses";
+import StatisticsDayOfWeek from "@components/statistics/StatisticsDayOfWeek";
+import {
+  categoryMonthly,
+  elapsedMonths,
+  monthlyTotals,
+  perCategoryTotals,
+} from "@components/statistics/helpers/statisticsData";
+import { exceptionalMonthly } from "@components/statistics/helpers/exceptionalsData";
 
 const MAX_CATEGORIES = 3;
 
@@ -37,6 +52,41 @@ const StatisticsView = () => {
   const { exceptionals: compareExceptionals } = useExceptionals({
     year: compareYear,
   });
+  const dashboard = useDashboard();
+  const { recurrings } = useReccurings();
+
+  const data = statistics?.data;
+  const colors = statistics?.colors ?? {};
+  const regularMonthly = monthlyTotals(data, selectedYear);
+  const excMonthly = exceptionalMonthly(exceptionals);
+  const compareMonthly = monthlyTotals(data, compareYear);
+  const monthlyBudget = dashboard.get.data
+    ? Number(dashboard.get.data.initialAmount) || null
+    : null;
+
+  const prevTotals = perCategoryTotals(data, colors, compareYear);
+  const prevByName = new Map(prevTotals.map((c) => [c.name, c.value]));
+  const topCategoryRows = perCategoryTotals(data, colors, selectedYear)
+    .slice(0, 8)
+    .map((c) => {
+      const prev = prevByName.get(c.name) ?? 0;
+      return {
+        name: c.name,
+        color: c.color,
+        value: c.value,
+        deltaPct: prev > 0 ? ((c.value - prev) / prev) * 100 : null,
+      };
+    });
+
+  const categorySeries = selectedCategoryIds
+    .map((id) => categories.find((c) => c.ID === id))
+    .filter((c): c is (typeof categories)[number] => Boolean(c))
+    .map((category) => ({
+      name: category.name,
+      color: statistics?.colors?.[category.name] ?? category.color,
+      monthly: categoryMonthly(data, selectedYear, category.name),
+    }));
+  const monthsCount = elapsedMonths(selectedYear, now);
 
   const handleSelectYear = (year: number) => {
     setSelectedYear(year);
@@ -87,6 +137,39 @@ const StatisticsView = () => {
         compareExceptionals={compareExceptionals}
         showExceptionals={showExceptionals}
       />
+
+      <StatisticsMonthlyChart
+        year={selectedYear}
+        compareYear={compareYear}
+        regularMonthly={regularMonthly}
+        exceptionalMonthly={excMonthly}
+        compareMonthly={compareMonthly}
+        monthlyBudget={monthlyBudget}
+        compareEnabled={compareEnabled}
+        showExceptionals={showExceptionals}
+        now={now}
+      />
+
+      {categorySeries.length > 0 && (
+        <StatisticsCategoryChart
+          year={selectedYear}
+          series={categorySeries}
+          monthsCount={monthsCount}
+          now={now}
+        />
+      )}
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[7fr_5fr]">
+        <StatisticsHeatmap year={selectedYear} now={now} />
+        <StatisticsTopCategories
+          rows={topCategoryRows}
+          compareYear={compareYear}
+        />
+      </div>
+
+      <StatisticsFixedExpenses recurrings={recurrings ?? []} now={now} />
+
+      <StatisticsDayOfWeek />
     </div>
   );
 };

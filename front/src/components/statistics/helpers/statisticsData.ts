@@ -48,6 +48,16 @@ export const monthlyTotals = (
 export const yearTotal = (data: StatData | undefined, year: number): number =>
   monthlyTotals(data, year).reduce((a, b) => a + b, 0);
 
+/** Round up to a "nice" axis ceiling (1, 1.5, 2, 3, 4, 5, 7.5, 10 × 10ⁿ). */
+export const niceCeil = (value: number): number => {
+  if (value <= 0) return 1;
+  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+  const steps = [1, 1.5, 2, 3, 4, 5, 7.5, 10];
+  const normalized = value / magnitude;
+  const step = steps.find((s) => s >= normalized) ?? 10;
+  return step * magnitude;
+};
+
 /** Index of the largest value (0 on empty input / first on ties). */
 export const maxIndex = (values: number[]): number =>
   values.reduce((best, value, i) => (value > values[best] ? i : best), 0);

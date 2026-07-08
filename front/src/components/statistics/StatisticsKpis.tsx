@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import StatMiniChart from "@components/statistics/StatMiniChart";
+import GlowCard from "@components/shared/GlowCard";
 import {
   MONTHS_FR,
   cumulative,
@@ -40,12 +41,12 @@ const Card = ({
   label: string;
   children: React.ReactNode;
 }) => (
-  <div className="flex flex-col rounded-[14px] border border-line-soft bg-bg-elev px-5 py-6">
+  <GlowCard className="flex flex-col px-5 py-6">
     <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
       {label}
     </span>
     {children}
-  </div>
+  </GlowCard>
 );
 
 const Value = ({ amount }: { amount: number }) => (

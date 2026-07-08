@@ -37,3 +37,6 @@ yarn-error.log*
 *.tsbuildinfo
 .vscode/
 .claude/
+
+# design handoff (mockups / reference, not part of the app)
+design_handoff_pfa/

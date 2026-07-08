@@ -8,6 +8,7 @@ import getDayOfYear from "date-fns/getDayOfYear";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { AnimatedNumber, ProgressTrack } from "@components/dataviz";
+import GlowCard from "@components/shared/GlowCard";
 import { yearTotal } from "@components/statistics/helpers/statisticsData";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
 import { euro, euro0 } from "@components/overview/format";
@@ -52,7 +53,10 @@ const StatisticsForecast = ({
   const asOfLabel = isCurrent ? format(now, "d MMM", { locale: fr }) : "31 déc.";
 
   return (
-    <section className="grid grid-cols-1 items-center gap-6 rounded-[14px] border border-line-soft bg-bg-elev px-6 py-5 sm:grid-cols-[220px_1fr_240px] sm:gap-8">
+    <GlowCard
+      as="section"
+      className="grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[220px_1fr_240px] sm:gap-8"
+    >
       <div className="flex flex-col gap-1">
         <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
           Dépensé · 1er janv. → {asOfLabel}
@@ -106,7 +110,7 @@ const StatisticsForecast = ({
           vs {compareYear} ({euro0(compareTotal)} €)
         </span>
       </div>
-    </section>
+    </GlowCard>
   );
 };
 
