@@ -1,6 +1,8 @@
 ## NextJS / TailwindCSS / MySQL / NestJS
 
 
-![main screenshot](readme-assets/pfa-screenshot-1.png)
+![dashboard screenshot](readme-assets/pfa-dashboard.png)
 
-![modal screenshot](readme-assets/pfa-screenshot-modal.png)
+![stats screenshot](readme-assets/pfa-stats.png)
+
+![spendings screenshot](readme-assets/pfa-spendings.png)
