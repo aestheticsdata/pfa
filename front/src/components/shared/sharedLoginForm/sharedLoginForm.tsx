@@ -43,9 +43,20 @@ const buildSchema = (
     });
 
 const LABEL = "text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4";
-const FIELD_ERROR = "text-[12px] text-neg";
 const INPUT_BASE =
   "w-full rounded-[6px] border px-[13px] py-[11px] text-[14px] text-ink outline-none transition [background:oklch(0.12_0.008_250/0.75)] border-[oklch(0.30_0.010_250)] placeholder:text-ink-4 focus:border-[oklch(0.65_0.11_175)] focus:[background:oklch(0.13_0.008_250)] focus:shadow-[0_0_0_3px_oklch(0.65_0.11_175/0.15)] aria-invalid:border-neg";
+
+/**
+ * Single shared message slot for the auth forms. Always rendered — it reserves one
+ * line so the layout never shifts — and shows whichever message is injected: the
+ * server error (bad credentials…) or the first field-validation error. Rendered once,
+ * between the fields and the submit button.
+ */
+const FormMessage = ({ message }: { message?: string | null }) => (
+  <p role="alert" className="min-h-5 text-[13px] leading-5 text-neg">
+    {message ?? ""}
+  </p>
+);
 
 const SharedLoginForm = ({
   onSubmit,
@@ -55,6 +66,8 @@ const SharedLoginForm = ({
   displayConfirmPasswordField,
   displayCurrencyField,
   submitIcon,
+  serverError,
+  onDismissError,
 }: SharedLoginFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -73,6 +86,7 @@ const SharedLoginForm = ({
     handleSubmit,
     setValue,
     watch,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -85,6 +99,20 @@ const SharedLoginForm = ({
   });
 
   const currency = watch("currency");
+
+  // The server error (injected by the parent) takes precedence over the first
+  // field-validation error; both surface in the single FormMessage slot below.
+  const fieldError =
+    errors.email?.message ||
+    errors.password?.message ||
+    errors.confirmPassword?.message ||
+    errors.currency?.message;
+  const formMessage = serverError || (fieldError ? String(fieldError) : null);
+
+  const clearFieldError = (field: keyof FormValues) => () => {
+    clearErrors(field);
+    onDismissError?.();
+  };
 
   return (
     <form
@@ -103,11 +131,8 @@ const SharedLoginForm = ({
             autoComplete="email"
             className={INPUT_BASE}
             aria-invalid={!!errors.email}
-            {...register("email")}
+            {...register("email", { onChange: clearFieldError("email") })}
           />
-          {errors.email && (
-            <p className={FIELD_ERROR}>{String(errors.email.message)}</p>
-          )}
         </div>
       )}
 
@@ -126,7 +151,7 @@ const SharedLoginForm = ({
               }
               className={cn(INPUT_BASE, "pr-[42px]")}
               aria-invalid={!!errors.password}
-              {...register("password")}
+              {...register("password", { onChange: clearFieldError("password") })}
             />
             <button
               type="button"
@@ -146,9 +171,6 @@ const SharedLoginForm = ({
               )}
             </button>
           </div>
-          {errors.password && (
-            <p className={FIELD_ERROR}>{String(errors.password.message)}</p>
-          )}
         </div>
       )}
 
@@ -165,7 +187,9 @@ const SharedLoginForm = ({
               autoComplete="new-password"
               className={cn(INPUT_BASE, "pr-[42px]")}
               aria-invalid={!!errors.confirmPassword}
-              {...register("confirmPassword")}
+              {...register("confirmPassword", {
+                onChange: clearFieldError("confirmPassword"),
+              })}
             />
             <button
               type="button"
@@ -185,11 +209,6 @@ const SharedLoginForm = ({
               )}
             </button>
           </div>
-          {errors.confirmPassword && (
-            <p className={FIELD_ERROR}>
-              {String(errors.confirmPassword.message)}
-            </p>
-          )}
         </div>
       )}
 
@@ -216,11 +235,13 @@ const SharedLoginForm = ({
         </div>
       )}
 
+      <FormMessage message={formMessage} />
+
       <Button
         type="submit"
         variant="primary"
         disabled={isSubmitting}
-        className="mt-1.5 h-auto w-full rounded-[10px] py-3 text-[14px] tracking-[0.01em]"
+        className="h-auto w-full rounded-[10px] py-3 text-[14px] tracking-[0.01em]"
       >
         {buttonTitle}
         {submitIcon && <ArrowRight className="size-3.5" strokeWidth={2.5} />}

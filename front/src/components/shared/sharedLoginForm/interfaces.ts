@@ -13,4 +13,8 @@ export interface SharedLoginFormProps {
   displayCurrencyField?: boolean;
   /** Show a trailing arrow on the submit button (login). */
   submitIcon?: boolean;
+  /** Form-level server error rendered above the submit button (e.g. bad credentials). */
+  serverError?: string | null;
+  /** Called when the user edits email/password, so the parent can clear serverError. */
+  onDismissError?: () => void;
 }
