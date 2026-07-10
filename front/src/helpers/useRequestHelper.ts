@@ -1,7 +1,6 @@
 "use client";
 
 import axios from "axios";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@auth/context/AuthContext";
 import { ROUTES } from "@components/shared/config/constants";
 
@@ -23,9 +22,31 @@ const getRequestUrl = (url: string): string => `${getApiBase()}/api${normalizeUr
 
 const isUnsafeMethod = (method?: string): boolean => !SAFE_HTTP_METHODS.has((method ?? "GET").toUpperCase());
 
+/**
+ * Sends the user to the login screen when the backend session is gone.
+ *
+ * Returns `true` when it triggered the redirect — the caller should then leave its
+ * promise pending so the 401 never reaches the error boundary. Returns `false` when it
+ * can't / shouldn't navigate (SSR, or already on `/login`), so the caller rejects /
+ * throws normally instead of hanging forever. The hard navigation (like logout)
+ * discards the auth context + React Query cache and re-runs the server `(private)`
+ * guard. `trailingSlash: true` means the path can be `/login/`, hence the strip.
+ */
+const redirectToLogin = (): boolean => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  if (window.location.pathname.replace(/\/$/, "") === ROUTES.login.path) {
+    return false;
+  }
+
+  window.location.replace(ROUTES.login.path);
+  return true;
+};
+
 const useRequestHelper = () => {
-  const router = useRouter();
-  const { user, csrfToken, setCsrfToken, clearAuth } = useAuth();
+  const { user, csrfToken, setCsrfToken } = useAuth();
 
   const request = (url: string, options?: AxiosRequestConfig): Promise<AxiosResponse> => {
     return axios(getRequestUrl(url), {
@@ -40,8 +61,9 @@ const useRequestHelper = () => {
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse> => {
     if (!user) {
-      clearAuth();
-      router.replace(ROUTES.login.path);
+      if (redirectToLogin()) {
+        return new Promise<never>(() => {});
+      }
       throw new Error("User not logged in");
     }
 
@@ -86,13 +108,14 @@ const useRequestHelper = () => {
             });
           }
         } catch {
-          // Fall through to 401/throw path.
+          // Fall through to the 401 / throw path below.
         }
       }
 
-      if (status === 401) {
-        clearAuth();
-        router.replace(ROUTES.login.path);
+      if (status === 401 && redirectToLogin()) {
+        // Expired session: navigate to /login and leave this promise pending so the
+        // 401 never becomes a React Query error and never reaches error.tsx.
+        return new Promise<never>(() => {});
       }
 
       throw error;
