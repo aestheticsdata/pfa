@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import type { AxiosError } from "axios";
 import AuthCard from "@components/auth/AuthCard";
 import AuthBrand from "@components/auth/AuthBrand";
 import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
@@ -12,11 +14,22 @@ import type { LoginValues } from "@src/components/shared/sharedLoginForm/interfa
 export default function LoginFormClient() {
   const { loginService } = useLoginService();
   const { setCredentials } = useCredentials();
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const onSubmit = async (values: LoginValues) => {
-    const result = await loginService(values.email!, values.password!);
-    if (result?.user && result.csrfToken) {
-      await setCredentials(result);
+    try {
+      const result = await loginService(values.email!, values.password!);
+      if (result?.user && result.csrfToken) {
+        setServerError(null);
+        await setCredentials(result);
+      }
+    } catch (e) {
+      const status = (e as AxiosError)?.response?.status;
+      setServerError(
+        status === 401
+          ? "Email ou mot de passe incorrect."
+          : "Une erreur est survenue. Réessaie.",
+      );
     }
   };
 
@@ -33,6 +46,7 @@ export default function LoginFormClient() {
         displayEmailField
         displayPasswordField
         submitIcon
+        serverError={serverError}
       />
 
       <div className="mt-4 text-center">

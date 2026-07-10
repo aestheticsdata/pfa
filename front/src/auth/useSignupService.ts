@@ -3,6 +3,7 @@
 import { toast } from "sonner";
 import useRequestHelper from "@helpers/useRequestHelper";
 
+import type { AxiosError } from "axios";
 import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 import type { AuthResponse } from "@auth/types";
 
@@ -26,8 +27,13 @@ const useSignupService = () => {
         },
       });
       return res.data as AuthResponse;
-    } catch {
-      toast.error("Erreur lors de la création de compte");
+    } catch (e) {
+      const status = (e as AxiosError)?.response?.status;
+      toast.error(
+        status === 409
+          ? "Un compte existe déjà avec cet email."
+          : "La création du compte a échoué. Réessaie.",
+      );
     }
   };
 

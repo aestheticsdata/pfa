@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import NavBar from "@components/shared/navBar/NavBar";
 import { AuthProvider } from "@auth/context/AuthContext";
 import { getServerSession } from "@auth/server/getServerSession";
-import { Toaster } from "@components/ui/sonner";
 import SessionWatcher from "@components/shared/sessionWatcher/SessionWatcher";
 
 export default async function PrivateLayout({
@@ -25,7 +24,6 @@ export default async function PrivateLayout({
           <main>{children}</main>
         </div>
       </div>
-      <Toaster richColors closeButton position="bottom-right" />
     </AuthProvider>
   );
 }

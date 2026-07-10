@@ -55,6 +55,7 @@ const SharedLoginForm = ({
   displayConfirmPasswordField,
   displayCurrencyField,
   submitIcon,
+  serverError,
 }: SharedLoginFormProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -214,6 +215,12 @@ const SharedLoginForm = ({
             </SelectContent>
           </Select>
         </div>
+      )}
+
+      {serverError !== undefined && (
+        <p role="alert" className="min-h-5 text-[13px] font-medium text-neg">
+          {serverError}
+        </p>
       )}
 
       <Button
