@@ -47,6 +47,7 @@ export default function LoginFormClient() {
         displayPasswordField
         submitIcon
         serverError={serverError}
+        onDismissError={() => setServerError(null)}
       />
 
       <div className="mt-4 text-center">
