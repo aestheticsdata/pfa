@@ -11,6 +11,7 @@ export const QUERY_KEYS = {
   CHARTS: "charts",
   WEEKLY_STATS: "weeklyStats",
   CATEGORIES: "categories",
+  CATEGORY_STATS: "categoryStats",
   EXCEPTIONALS: "exceptionals",
   EXCEPTIONAL_YEARS: "exceptionalYears",
 };

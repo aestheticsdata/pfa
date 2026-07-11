@@ -58,3 +58,14 @@ export class RegularMonthlyAverageController {
     return this.statsService.getRegularMonthlyAverage(query.year, userID);
   }
 }
+
+@Controller("category-stats")
+@UseGuards(SessionAuthGuard)
+export class CategoryStatsController {
+  constructor(private readonly statsService: StatsService) {}
+
+  @Get()
+  async getCategoryStats(@GetUserId() userID: string) {
+    return this.statsService.getCategoryStats(userID);
+  }
+}

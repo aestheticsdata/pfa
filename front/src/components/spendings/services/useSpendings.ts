@@ -89,6 +89,7 @@ const useSpendings = () => {
     await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH, from, to]);
     await queryClient.invalidateQueries([QUERY_KEYS.WEEKLY_STATS, monthBeginning]);
     await queryClient.invalidateQueries([QUERY_KEYS.CATEGORIES]);
+    await queryClient.invalidateQueries([QUERY_KEYS.CATEGORY_STATS]);
     await queryClient.invalidateQueries([QUERY_KEYS.INITIAL_AMOUNT, monthBeginning]);
     await queryClient.invalidateQueries([QUERY_KEYS.CHARTS, monthBeginning]);
   }

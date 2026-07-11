@@ -9,7 +9,7 @@ import CategoryItem from "@components/categories/CategoryItem";
 import CategoryFormModal from "@components/categories/CategoryFormModal";
 import Spinner from "@components/common/Spinner";
 import { Button } from "@components/ui/button";
-import { mockCategoryUsage } from "@components/categories/helpers/mockCategoryStats";
+import useCategoryStats from "@components/categories/services/useCategoryStats";
 
 import type { Category } from "@src/schemas/categories";
 
@@ -17,6 +17,7 @@ const isMock = (id: string) => id.startsWith("mock-");
 
 const CategoriesListcontainer = () => {
   const { categories, error, updateCategory, deleteCategory } = useCategories();
+  const { categoryStats, error: statsError } = useCategoryStats();
   const { user } = useAuth();
 
   const [query, setQuery] = useState("");
@@ -30,11 +31,13 @@ const CategoriesListcontainer = () => {
     [categories, localCats],
   );
 
-  const grandTotal = useMemo(
-    () =>
-      allCats.reduce((sum, c) => sum + mockCategoryUsage(c.name).total, 0),
-    [allCats],
+  // Real all-time usage per category, keyed by category ID.
+  const statsByCategory = new Map(
+    (categoryStats?.byCategory ?? []).map((s) => [s.categoryID, s]),
   );
+  // Denominator for each category's share: total spent over all history
+  // (includes uncategorized spendings), as returned by the backend.
+  const grandTotal = categoryStats?.totalSpent ?? 0;
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -45,6 +48,10 @@ const CategoriesListcontainer = () => {
 
   if (error) {
     throw error;
+  }
+
+  if (statsError) {
+    throw statsError;
   }
 
   const handleSave = (cat: Category, name: string, color: string) => {
@@ -76,7 +83,7 @@ const CategoriesListcontainer = () => {
     toast.info("Catégorie créée en local (mock — non enregistrée)");
   };
 
-  const isLoading = !categories && localCats.length === 0;
+  const isLoading = (!categories || !categoryStats) && localCats.length === 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -128,8 +135,10 @@ const CategoriesListcontainer = () => {
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(238px,1fr))] gap-3">
           {visible.map((cat) => {
-            const { used, total } = mockCategoryUsage(cat.name);
-            const share = grandTotal > 0 ? (total / grandTotal) * 100 : 0;
+            const stat = statsByCategory.get(cat.ID);
+            const used = stat?.count ?? 0;
+            const share =
+              grandTotal > 0 ? ((stat?.total ?? 0) / grandTotal) * 100 : 0;
             const takenNames = allCats
               .filter((c) => c.ID !== cat.ID)
               .map((c) => c.name.toLowerCase());
