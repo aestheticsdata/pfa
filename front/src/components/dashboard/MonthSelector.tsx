@@ -4,7 +4,6 @@ import addMonths from "date-fns/addMonths";
 import addDays from "date-fns/addDays";
 import startOfMonth from "date-fns/startOfMonth";
 import endOfMonth from "date-fns/endOfMonth";
-import isSameMonth from "date-fns/isSameMonth";
 import eachDayOfInterval from "date-fns/eachDayOfInterval";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
@@ -29,8 +28,6 @@ const MonthSelector = () => {
     // keep a valid 7-day range around for any hook that still reads it
     setRange(eachDayOfInterval({ start, end: addDays(start, 6) }));
   };
-
-  const isCurrentMonth = isSameMonth(month, new Date());
 
   return (
     <div className="flex items-center gap-2.5">
@@ -58,14 +55,6 @@ const MonthSelector = () => {
           <ChevronRight className="size-4" />
         </button>
       </div>
-      <button
-        type="button"
-        onClick={() => applyMonth(new Date())}
-        disabled={isCurrentMonth}
-        className="rounded-[6px] border border-line bg-transparent px-3 py-[7px] text-[13px] text-ink-2 transition-colors hover:border-ink-4 hover:text-ink disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink-2"
-      >
-        Aujourd&apos;hui
-      </button>
     </div>
   );
 };
