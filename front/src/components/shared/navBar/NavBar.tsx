@@ -50,7 +50,7 @@ const ROUTE_ICONS: Record<string, LucideIcon> = {
 
 const ACTIVE_BG = "bg-[oklch(0.26_0.010_248)]";
 const PERIOD_BTN =
-  "rounded-[6px] border border-[oklch(0.30_0.010_248)] bg-[oklch(0.125_0.006_250/0.55)] px-3 py-2 text-[13px] text-ink-2 transition-colors hover:text-ink whitespace-nowrap";
+  "cursor-pointer rounded-[6px] border border-[oklch(0.30_0.010_248)] bg-[oklch(0.125_0.006_250/0.55)] px-3 py-2 text-[13px] text-ink-2 transition-colors hover:text-ink whitespace-nowrap";
 
 const normalizePath = (path: string): string => {
   const normalized = path.replace(/\/+$/, "");
