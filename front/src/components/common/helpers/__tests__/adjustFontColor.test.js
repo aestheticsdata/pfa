@@ -1,4 +1,4 @@
-import adjustFontColor from './adjustFontColor';
+import adjustFontColor from '@components/common/helpers/adjustFontColor';
 
 describe('adjustFontColor', () => {
   it('should return #ffffff', () => {

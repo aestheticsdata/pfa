@@ -42,7 +42,8 @@ const contentSecurityPolicy = Object.entries(cspDirectives)
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
+  reactCompiler: true,
   // Static export is now opt-in (NEXT_OUTPUT_MODE=export).
   ...(isStaticExport && { output: 'export' }),
   trailingSlash: true,

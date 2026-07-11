@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo } from "react";
+import { useState } from "react";
 import type { ReactNode } from "react";
 import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
 import { fr } from "date-fns/locale";
 
+import { computeExceptionalStats } from "@components/exceptionals/helpers/exceptionalStats";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
 interface ExceptionalStatsCardsProps {
@@ -49,30 +49,9 @@ const ExceptionalStatsCards = ({
   year,
   monthlyAverage,
 }: ExceptionalStatsCardsProps) => {
-  const stats = useMemo(() => {
-    let total = 0;
-    let biggest: { label: string; amount: number; date: Date } | null = null;
-    const years = new Set<number>();
-    for (const item of items) {
-      const amount = Number(item.amount);
-      total += amount;
-      const date = parseISO(item.date);
-      years.add(date.getFullYear());
-      if (!biggest || amount > biggest.amount) {
-        biggest = { label: item.label, amount, date };
-      }
-    }
-    // For a single year: smoothed over 12 months. For "all years": over the
-    // span actually covered by the data.
-    const months = year != null ? 12 : 12 * Math.max(1, years.size);
-    return {
-      total,
-      count: items.length,
-      biggest,
-      average: total / months,
-      spanMonths: months,
-    };
-  }, [items, year]);
+  // Stable across re-renders so the elapsed-month count doesn't drift mid-session.
+  const [now] = useState(() => new Date());
+  const stats = computeExceptionalStats(items, year, now);
 
   // Part of total spending — derived from the real regular monthly average
   // (regular annual ≈ monthlyAverage × 12). Only meaningful for a single year.
