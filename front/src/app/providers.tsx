@@ -20,7 +20,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
         {children}
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
-      <Toaster richColors closeButton position="bottom-right" />
+      <Toaster richColors closeButton position="top-right" />
     </ThemeProvider>
   );
 }
