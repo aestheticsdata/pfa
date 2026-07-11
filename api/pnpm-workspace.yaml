@@ -1,4 +1,0 @@
-onlyBuiltDependencies:
-  - sharp
-  - ssh2
-  - cpu-features
