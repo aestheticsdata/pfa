@@ -29,7 +29,7 @@ const LabelField = ({
     <Input
       id="spendingLabel"
       placeholder="Ex : Boulangerie du coin"
-      className="border-line bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
+      className="border-line bg-background dark:bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
       {...register("spendingLabel", {
         onChange: (e) => setLabelQuery(e.target.value),
       })}
