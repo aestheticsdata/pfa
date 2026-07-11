@@ -7,44 +7,17 @@ import { z } from "zod";
 import Mexp from "math-expression-evaluator";
 import subMonths from "date-fns/subMonths";
 import addDays from "date-fns/addDays";
-import addMonths from "date-fns/addMonths";
 import startOfMonth from "date-fns/startOfMonth";
 import endOfMonth from "date-fns/endOfMonth";
 import parseISO from "date-fns/parseISO";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
-import {
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsUpDown,
-  Copy,
-  Upload,
-  X,
-} from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@components/ui/dialog";
+import { Check, ChevronLeft, ChevronRight, ChevronsUpDown, Copy, Upload, X } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
 import { Button } from "@components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import { cn } from "@lib/utils";
 import useCategories from "@components/spendings/services/useCategories";
 import { useAuth } from "@auth/context/AuthContext";
@@ -55,10 +28,7 @@ import { mockLabelSuggestions } from "@components/spendings/common/spendingModal
 import { SpendingCategoryInputSchema } from "@src/schemas/spendings";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
-import type {
-  SpendingItem,
-  SpendingListItem,
-} from "@components/spendings/types";
+import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
 
 const spendingSchema = z.object({
   spendingLabel: z.string().min(1, "Label requis"),
@@ -103,29 +73,29 @@ const getRandomHexColor = () => {
 const Toggle = ({
   active,
   onClick,
+  disabled = false,
   children,
 }: {
   active: boolean;
   onClick: () => void;
+  disabled?: boolean;
   children: React.ReactNode;
 }) => (
   <button
     type="button"
     onClick={onClick}
+    disabled={disabled}
     aria-pressed={active}
     className={cn(
       "inline-flex select-none items-center gap-2 rounded-md border px-3 py-2 text-xs transition-colors",
-      active
-        ? "border-accent-d bg-accent-strong/10 text-ink"
-        : "border-line bg-background text-ink-3 hover:text-ink-2",
+      active ? "border-accent-d bg-accent-strong/10 text-ink" : "border-line bg-background text-ink-3 hover:text-ink-2",
+      disabled && "cursor-not-allowed opacity-45 hover:text-ink-3",
     )}
   >
     <span
       className={cn(
         "grid size-3.5 place-items-center rounded-[3px] border",
-        active
-          ? "border-accent-strong bg-accent-strong text-[oklch(0.15_0.02_180)]"
-          : "border-line bg-bg-hi",
+        active ? "border-accent-strong bg-accent-strong text-[oklch(0.15_0.02_180)]" : "border-line bg-bg-hi",
       )}
     >
       {active && <Check className="size-2.5" strokeWidth={3} />}
@@ -149,8 +119,7 @@ const SpendingModal = ({
   };
   const { user } = useAuth();
   const { createSpending, updateSpending } = useSpendings();
-  const { recurrings, createRecurring, updateRecurring, copyRecurrings } =
-    useReccurings();
+  const { recurrings, createRecurring, updateRecurring, copyRecurrings } = useReccurings();
   const { categories, error: categoriesError } = useCategories();
   if (categoriesError) {
     throw categoriesError;
@@ -169,13 +138,9 @@ const SpendingModal = ({
 
   // MOCK — "Fréquentes" quick-picks: the SELECTION is real, but the ranking
   // (first N categories) stands in for real per-category usage counts.
-  const frequentCategories = useMemo(
-    () => categoryOptions.filter((c) => c.name).slice(0, 6),
-    [categoryOptions],
-  );
+  const frequentCategories = useMemo(() => categoryOptions.filter((c) => c.name).slice(0, 6), [categoryOptions]);
 
-  const isSpendingItem = (v: SpendingListItem | null): v is SpendingItem =>
-    !!v && "date" in v;
+  const isSpendingItem = (v: SpendingListItem | null): v is SpendingItem => !!v && "date" in v;
 
   const initialCategory: CategoryOption | null =
     isSpendingItem(spending) && spending.category
@@ -187,9 +152,7 @@ const SpendingModal = ({
         }
       : null;
 
-  const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(
-    initialCategory,
-  );
+  const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(initialCategory);
   const [comboboxOpen, setComboboxOpen] = useState(false);
   const [comboboxQuery, setComboboxQuery] = useState("");
   const [labelQuery, setLabelQuery] = useState(spending?.label ?? "");
@@ -199,11 +162,10 @@ const SpendingModal = ({
   const asRecurring = recurringType || isRecurringToggle;
   const canToggleRecurring = !isEditing && !recurringType;
 
-  // Month a new recurring belongs to (its start/end window). Defaults to the
-  // viewed month; the user can step it in the modal.
-  const [recurringMonth, setRecurringMonth] = useState<Date>(() =>
-    month?.start ? startOfMonth(month.start) : startOfMonth(new Date()),
-  );
+  // Month a new recurring belongs to (its start/end window): always the viewed
+  // month. A recurring has no single date, so the modal no longer swaps the
+  // Date field for a month stepper — it just disables Date when recurring.
+  const [recurringMonth] = useState<Date>(() => (month?.start ? startOfMonth(month.start) : startOfMonth(new Date())));
 
   // MOCK — receipt-at-creation is visual only: POST /spendings returns no ID and
   // /spendings/upload needs the spendingID, so the file can't be persisted at
@@ -218,10 +180,7 @@ const SpendingModal = ({
     if (!file || !file.type.startsWith("image/")) return;
     setReceiptFile(file);
     const reader = new FileReader();
-    reader.onload = (e) =>
-      setReceiptPreview(
-        typeof e.target?.result === "string" ? e.target.result : null,
-      );
+    reader.onload = (e) => setReceiptPreview(typeof e.target?.result === "string" ? e.target.result : null);
     reader.readAsDataURL(file);
   };
   const clearReceipt = () => {
@@ -265,17 +224,13 @@ const SpendingModal = ({
   const applySuggestion = (suggestion: { label: string; category: string }) => {
     setValue("spendingLabel", suggestion.label, { shouldValidate: true });
     setLabelQuery(suggestion.label);
-    const match = categoryOptions.find(
-      (c) => c.name.toLowerCase() === suggestion.category.toLowerCase(),
-    );
+    const match = categoryOptions.find((c) => c.name.toLowerCase() === suggestion.category.toLowerCase());
     if (match) {
       setSelectedCategory(match);
     }
   };
 
-  const exactMatch = categoryOptions.find(
-    (c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase(),
-  );
+  const exactMatch = categoryOptions.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());
 
   const onSubmit = (values: SpendingForm) => {
     if (!user) {
@@ -306,14 +261,12 @@ const SpendingModal = ({
     const resolvedCategory: CategoryOption | null = selectedCategory
       ? selectedCategory
       : trimmedQuery
-        ? categoryOptions.find(
-            (c) => c.name.toLowerCase() === trimmedQuery.toLowerCase(),
-          ) ?? {
+        ? (categoryOptions.find((c) => c.name.toLowerCase() === trimmedQuery.toLowerCase()) ?? {
             ID: null,
             userID: user.id,
             name: trimmedQuery,
             color: getRandomHexColor(),
-          }
+          })
         : null;
 
     const categoryPayload: CategoryOption = resolvedCategory ?? {
@@ -323,9 +276,7 @@ const SpendingModal = ({
       color: null,
     };
 
-    const spendingDateStr = !asRecurring
-      ? values.spendingDate || format(new Date(), "yyyy-MM-dd")
-      : null;
+    const spendingDateStr = !asRecurring ? values.spendingDate || format(new Date(), "yyyy-MM-dd") : null;
 
     const spendingEdited = {
       date: spendingDateStr,
@@ -373,86 +324,65 @@ const SpendingModal = ({
     setComboboxQuery("");
   };
 
+  // Title tracks recurringType (dashboard "dépense fixe" entry) only, NOT the
+  // in-modal toggle — so ticking "Récurrente mensuelle" keeps the title stable
+  // instead of making the modal look like a different one.
   const title = isEditing
-    ? `Modifier la dépense${asRecurring ? " fixe" : ""}`
-    : `Nouvelle dépense${asRecurring ? " fixe" : ""}`;
+    ? `Modifier la dépense${recurringType ? " fixe" : ""}`
+    : `Nouvelle dépense${recurringType ? " fixe" : ""}`;
   const submitLabel = isEditing ? "Enregistrer" : "Ajouter la dépense";
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && closeModal()}>
       <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[480px]">
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-[22px] py-[18px] text-left">
-          <DialogTitle className="pr-8 text-[15px] font-semibold tracking-[-0.01em] text-ink">
-            {title}
-          </DialogTitle>
+          <DialogTitle className="pr-8 text-[15px] font-semibold tracking-[-0.01em] text-ink">{title}</DialogTitle>
         </DialogHeader>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex max-h-[min(78vh,720px)] flex-col gap-[18px] overflow-y-auto px-[22px] py-[22px]"
         >
-          {!asRecurring && (
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="spendingDate" className="text-[13px] text-ink-2">
-                Date
-              </Label>
-              <div className="flex items-stretch overflow-hidden rounded-md border border-line bg-background focus-within:border-accent-d">
-                <button
-                  type="button"
-                  aria-label="Jour précédent"
-                  onClick={() => stepDate(-1)}
-                  className="grid place-items-center border-r border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                <Input
-                  id="spendingDate"
-                  type="date"
-                  className="num flex-1 rounded-none border-0 bg-transparent text-sm text-ink [color-scheme:dark] focus-visible:ring-0"
-                  {...register("spendingDate")}
-                />
-                <button
-                  type="button"
-                  aria-label="Jour suivant"
-                  onClick={() => stepDate(1)}
-                  className="grid place-items-center border-l border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-              </div>
+          {/* Date is not applicable to a recurring (no single charge date), so
+              it is disabled — not removed or swapped for a month stepper — when
+              "Récurrente mensuelle" is on. */}
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="spendingDate" className="text-[13px] text-ink-2">
+              Date
+            </Label>
+            <div
+              className={cn(
+                "flex items-stretch overflow-hidden rounded-md border border-line bg-background transition-opacity",
+                asRecurring ? "opacity-45" : "focus-within:border-accent-d",
+              )}
+            >
+              <button
+                type="button"
+                aria-label="Jour précédent"
+                onClick={() => stepDate(-1)}
+                disabled={asRecurring}
+                className="grid place-items-center border-r border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-3"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <Input
+                id="spendingDate"
+                type="date"
+                disabled={asRecurring}
+                className="num flex-1 rounded-none border-0 bg-transparent text-sm text-ink [color-scheme:dark] focus-visible:ring-0 disabled:cursor-not-allowed"
+                {...register("spendingDate")}
+              />
+              <button
+                type="button"
+                aria-label="Jour suivant"
+                onClick={() => stepDate(1)}
+                disabled={asRecurring}
+                className="grid place-items-center border-l border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-3"
+              >
+                <ChevronRight className="size-4" />
+              </button>
             </div>
-          )}
-
-          {asRecurring && !isEditing && (
-            <div className="flex flex-col gap-2">
-              <Label className="text-[13px] text-ink-2">Mois</Label>
-              <div className="flex items-stretch overflow-hidden rounded-md border border-line bg-background focus-within:border-accent-d">
-                <button
-                  type="button"
-                  aria-label="Mois précédent"
-                  onClick={() =>
-                    setRecurringMonth((m) => startOfMonth(addMonths(m, -1)))
-                  }
-                  className="grid place-items-center border-r border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink"
-                >
-                  <ChevronLeft className="size-4" />
-                </button>
-                <span className="num flex flex-1 items-center justify-center py-2 text-sm capitalize text-ink">
-                  {format(recurringMonth, "MMMM yyyy", { locale: fr })}
-                </span>
-                <button
-                  type="button"
-                  aria-label="Mois suivant"
-                  onClick={() =>
-                    setRecurringMonth((m) => startOfMonth(addMonths(m, 1)))
-                  }
-                  className="grid place-items-center border-l border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink"
-                >
-                  <ChevronRight className="size-4" />
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="spendingLabel" className="text-[13px] text-ink-2">
@@ -466,11 +396,10 @@ const SpendingModal = ({
                 onChange: (e) => setLabelQuery(e.target.value),
               })}
             />
-            {errors.spendingLabel && (
-              <p className="text-xs text-neg">{errors.spendingLabel.message}</p>
-            )}
+            {errors.spendingLabel && <p className="text-xs text-neg">{errors.spendingLabel.message}</p>}
             {!asRecurring && labelSuggestions.length > 0 && (
-              // MOCK suggestions (see mockSuggestions.ts)
+              // MOCK suggestions — spending-specific, hidden for recurrings.
+              // (see mockSuggestions.ts)
               <div className="flex flex-wrap gap-1.5">
                 {labelSuggestions.map((s) => (
                   <button
@@ -501,11 +430,13 @@ const SpendingModal = ({
               />
               <span className="num text-[18px] text-ink-3">€</span>
             </div>
-            {errors.spendingAmount && (
-              <p className="text-xs text-neg">{errors.spendingAmount.message}</p>
-            )}
+            {errors.spendingAmount && <p className="text-xs text-neg">{errors.spendingAmount.message}</p>}
           </div>
 
+          {/* Category is hidden for recurrings: the backend/DB have no notion of
+              a category on a recurring (no column, postRecurringController drops
+              it, RecurringItemSchema omits it). Enabling it needs DB + back work
+              — tracked separately, not in this modal-layout fix. */}
           {!asRecurring && (
             <div className="flex flex-col gap-2">
               <Label className="text-[13px] text-ink-2">Catégorie</Label>
@@ -518,9 +449,7 @@ const SpendingModal = ({
                   if (!isOpen) {
                     const q = comboboxQuery.trim();
                     if (q) {
-                      const match = categoryOptions.find(
-                        (c) => c.name.toLowerCase() === q.toLowerCase(),
-                      );
+                      const match = categoryOptions.find((c) => c.name.toLowerCase() === q.toLowerCase());
                       setSelectedCategory(
                         match ?? {
                           ID: null,
@@ -542,13 +471,7 @@ const SpendingModal = ({
                     role="combobox"
                     aria-expanded={comboboxOpen}
                     onKeyDown={(e) => {
-                      if (
-                        !comboboxOpen &&
-                        e.key.length === 1 &&
-                        !e.ctrlKey &&
-                        !e.metaKey &&
-                        !e.altKey
-                      ) {
+                      if (!comboboxOpen && e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
                         e.preventDefault();
                         setComboboxQuery(e.key);
                         setComboboxOpen(true);
@@ -564,13 +487,10 @@ const SpendingModal = ({
                         <span
                           className="size-2.5 shrink-0 rounded-[3px]"
                           style={{
-                            backgroundColor:
-                              selectedCategory.color ?? FALLBACK_COLOR,
+                            backgroundColor: selectedCategory.color ?? FALLBACK_COLOR,
                           }}
                         />
-                        <span className="capitalize">
-                          {selectedCategory.name}
-                        </span>
+                        <span className="capitalize">{selectedCategory.name}</span>
                       </>
                     ) : (
                       <span className="text-ink-4">Aucune</span>
@@ -578,10 +498,7 @@ const SpendingModal = ({
                     <ChevronsUpDown className="ml-auto size-4 shrink-0 text-ink-4" />
                   </button>
                 </PopoverTrigger>
-                <PopoverContent
-                  className="w-[--radix-popover-trigger-width] border-line bg-bg-elev p-0"
-                  align="start"
-                >
+                <PopoverContent className="w-[--radix-popover-trigger-width] border-line bg-bg-elev p-0" align="start">
                   <Command className="bg-transparent">
                     <CommandInput
                       placeholder="Rechercher ou saisir…"
@@ -620,12 +537,8 @@ const SpendingModal = ({
                                 backgroundColor: category.color ?? FALLBACK_COLOR,
                               }}
                             />
-                            <span className="flex-1 capitalize">
-                              {category.name}
-                            </span>
-                            {selectedCategory?.ID === category.ID && (
-                              <Check className="size-4 text-accent-strong" />
-                            )}
+                            <span className="flex-1 capitalize">{category.name}</span>
+                            {selectedCategory?.ID === category.ID && <Check className="size-4 text-accent-strong" />}
                           </CommandItem>
                         ))}
                         {comboboxQuery.trim() && !exactMatch && (
@@ -637,9 +550,7 @@ const SpendingModal = ({
                             onSelect={() => onCreateCategory(comboboxQuery.trim())}
                           >
                             <span className="mr-1 size-2.5 rounded-[3px] bg-ink-4" />
-                            <span className="flex-1 capitalize">
-                              {comboboxQuery.trim()}
-                            </span>
+                            <span className="flex-1 capitalize">{comboboxQuery.trim()}</span>
                           </CommandItem>
                         )}
                       </CommandGroup>
@@ -680,24 +591,17 @@ const SpendingModal = ({
             </div>
           )}
 
-          {!asRecurring && (
-            <div className="flex flex-wrap gap-2.5 pt-0.5">
-              {canToggleRecurring && (
-                <Toggle
-                  active={isRecurringToggle}
-                  onClick={() => setIsRecurringToggle((v) => !v)}
-                >
-                  Récurrente mensuelle
-                </Toggle>
-              )}
-              <Toggle
-                active={isReceiptToggle}
-                onClick={() => setIsReceiptToggle((v) => !v)}
-              >
-                Joindre un reçu
+          <div className="flex flex-wrap gap-2.5 pt-0.5">
+            {canToggleRecurring && (
+              <Toggle active={isRecurringToggle} onClick={() => setIsRecurringToggle((v) => !v)}>
+                Récurrente mensuelle
               </Toggle>
-            </div>
-          )}
+            )}
+            {/* Receipt is not applicable to a recurring — disabled, not removed. */}
+            <Toggle active={isReceiptToggle} onClick={() => setIsReceiptToggle((v) => !v)} disabled={asRecurring}>
+              Joindre un reçu
+            </Toggle>
+          </div>
 
           {!asRecurring && isReceiptToggle && (
             <div className="flex flex-col gap-2">
@@ -734,14 +638,9 @@ const SpendingModal = ({
                   </span>
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="text-sm font-semibold text-ink">
-                      Glisser un reçu ou{" "}
-                      <span className="text-elec underline underline-offset-2">
-                        parcourir
-                      </span>
+                      Glisser un reçu ou <span className="text-elec underline underline-offset-2">parcourir</span>
                     </span>
-                    <span className="num text-xs text-ink-4">
-                      jpg, png, webp
-                    </span>
+                    <span className="num text-xs text-ink-4">jpg, png, webp</span>
                   </span>
                   <input
                     type="file"
@@ -757,19 +656,11 @@ const SpendingModal = ({
                 <div className="flex items-center gap-3 rounded-md border border-line bg-background p-2 pr-2.5">
                   {receiptPreview && (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={receiptPreview}
-                      alt=""
-                      className="size-11 shrink-0 rounded-md object-cover"
-                    />
+                    <img src={receiptPreview} alt="" className="size-11 shrink-0 rounded-md object-cover" />
                   )}
                   <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="truncate text-sm font-semibold text-ink">
-                      {receiptFile.name}
-                    </span>
-                    <span className="num text-xs text-ink-4">
-                      {humanSize(receiptFile.size)}
-                    </span>
+                    <span className="truncate text-sm font-semibold text-ink">{receiptFile.name}</span>
+                    <span className="num text-xs text-ink-4">{humanSize(receiptFile.size)}</span>
                   </span>
                   <button
                     type="button"
@@ -805,10 +696,7 @@ const SpendingModal = ({
                   dates: {
                     start: format(mStart, DATE_FORMAT),
                     end: format(mEnd, DATE_FORMAT),
-                    previousMonthStart: format(
-                      subMonths(mStart, 1),
-                      DATE_FORMAT,
-                    ),
+                    previousMonthStart: format(subMonths(mStart, 1), DATE_FORMAT),
                     previousMonthEnd: format(subMonths(mEnd, 1), DATE_FORMAT),
                   },
                 });
