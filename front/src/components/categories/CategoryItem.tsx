@@ -19,7 +19,7 @@ import type { Category } from "@src/schemas/categories";
 
 interface CategoryItemProps {
   category: Category;
-  /** MOCK usage stats */
+  /** number of spendings in this category (all history) */
   used: number;
   /** share of total spending, already computed (percent) */
   share: number;

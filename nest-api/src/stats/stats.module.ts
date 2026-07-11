@@ -5,6 +5,7 @@ import {
   MonthlyStatsController,
   StatisticsController,
   RegularMonthlyAverageController,
+  CategoryStatsController,
 } from "@stats/stats.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
@@ -16,6 +17,7 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
     MonthlyStatsController,
     StatisticsController,
     RegularMonthlyAverageController,
+    CategoryStatsController,
   ],
   providers: [StatsService, SessionAuthGuard],
 })

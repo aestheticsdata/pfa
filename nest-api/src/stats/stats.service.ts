@@ -4,6 +4,7 @@ import { fr } from "date-fns/locale";
 import { PrismaService } from "../prisma/prisma.service";
 
 import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
+import type { CategoryStat, CategoryStatsResponse } from "@stats/dto/category-stats-response.interface";
 
 /** Rounds to 2 decimal places to avoid JS float precision issues. */
 const roundCurrency = (n: number): number => Math.round(n);
@@ -140,6 +141,34 @@ export class StatsService {
     };
 
     return { spendingsSum, recurringsSum };
+  }
+
+  /**
+   * All-time usage aggregate per category: number of spendings and total amount
+   * spent, grouped by category over the user's whole history (no date filter).
+   * `totalSpent` sums every spending (incl. uncategorized) so the front can derive
+   * each category's share of total spending.
+   */
+  async getCategoryStats(userID: string): Promise<CategoryStatsResponse> {
+    const grouped = await this.prisma.spendings.groupBy({
+      by: ["categoryID"],
+      where: { userID },
+      _sum: { amount: true },
+      _count: true,
+    });
+
+    let totalSpent = 0;
+    const byCategory: CategoryStat[] = [];
+
+    for (const group of grouped) {
+      const total = Number(group._sum.amount ?? 0);
+      totalSpent += total;
+      if (group.categoryID !== null) {
+        byCategory.push({ categoryID: group.categoryID, count: group._count, total });
+      }
+    }
+
+    return { totalSpent, byCategory };
   }
 
   async getStatistics(categoryIDs: string[], years: string[], userID: string): Promise<StatisticsResponse> {
