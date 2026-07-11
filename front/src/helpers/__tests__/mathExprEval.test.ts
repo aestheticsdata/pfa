@@ -3,7 +3,7 @@ import toFixedEval, {
   validateMathExpr,
   sanitizeMathExpr,
   applyMinus,
-} from './mathExprEval';
+} from '@helpers/mathExprEval';
 
 describe('accurateFixed', () => {
   it('should return the correct rounding', () => {
