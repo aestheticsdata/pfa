@@ -12,15 +12,15 @@ const AmountField = ({ register, errors }: AmountFieldProps) => (
     <Label htmlFor="spendingAmount" className="text-[13px] text-ink-2">
       Montant
     </Label>
-    <div className="flex items-baseline gap-2 rounded-md border border-line bg-background px-4 py-3 transition-colors focus-within:border-accent-d">
+    <div className="flex items-baseline gap-2 rounded-md border border-line bg-background px-3 py-2.5 transition-colors focus-within:border-accent-d">
       <input
         id="spendingAmount"
         inputMode="decimal"
         placeholder="0,00"
-        className="num min-w-0 flex-1 bg-transparent text-[28px] font-medium tracking-[-0.02em] text-ink outline-none placeholder:text-ink-5"
+        className="num min-w-0 flex-1 bg-transparent text-sm font-medium tracking-tight text-ink outline-none placeholder:text-ink-5"
         {...register("spendingAmount")}
       />
-      <span className="num text-[18px] text-ink-3">€</span>
+      <span className="num text-sm text-ink-3">€</span>
     </div>
     {errors.spendingAmount && <p className="text-xs text-neg">{errors.spendingAmount.message}</p>}
   </div>
