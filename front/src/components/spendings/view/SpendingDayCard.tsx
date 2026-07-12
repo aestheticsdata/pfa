@@ -143,7 +143,7 @@ const SpendingDayCard = ({
   const emptyLabel = items.length === 0 ? "Aucune dépense" : "Aucun résultat";
 
   return (
-    <div className={cn("sp-day", isToday && "sp-day--today")}>
+    <div className={cn("sp-day", isToday && "sp-day--today")} data-sp-day={format(date, "yyyy-MM-dd")}>
       <div className="sp-day-h">
         <div className="sp-day-h-top">
           <div className="sp-date">

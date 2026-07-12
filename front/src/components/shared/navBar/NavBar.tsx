@@ -60,7 +60,7 @@ const normalizePath = (path: string): string => {
 const NavBar = () => {
   const { user } = useAuth();
   const { isCalendarVisible } = useGlobalStore();
-  const { selectedDateIso } = useDatePickerWrapperStore();
+  const { selectedDateIso, setScrollToDayIso } = useDatePickerWrapperStore();
   const pathname = usePathname();
   const router = useRouter();
   const isClientHydrated = useSyncExternalStore(
@@ -100,6 +100,11 @@ const NavBar = () => {
 
   const handleGoToToday = () => {
     const today = getTodayIsoDate();
+    // Ask the timeline to scroll to today's card. Set this before the
+    // early-return below: when we are already on the current week no navigation
+    // happens, so the scroll request is the only thing that recenters the view
+    // (COS-38). Shared by both the desktop and mobile "Aujourd'hui" buttons.
+    setScrollToDayIso(today);
     if (normalizePath(pathname) === SPENDINGS_PATH && selectedDateIso === today) {
       return;
     }

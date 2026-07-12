@@ -718,10 +718,19 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   box-shadow:
     0 12px 30px oklch(0 0 0 / 0.24),
     inset 0 1px 0 oklch(1 0 0 / 0.045);
+  /* Keep a scrolled-to day card clear of the sticky .pfa-hdr (COS-38). Below md
+     the header stacks the date-picker + "Aujourd'hui" button onto their own
+     full-width row, so it is much taller than the single-row desktop header. */
+  scroll-margin-top: 168px;
 }
 @media (min-width: 760px) {
   .sp-day {
     height: 464px;
+  }
+}
+@media (min-width: 768px) {
+  .sp-day {
+    scroll-margin-top: 88px;
   }
 }
 .sp-day--today {
