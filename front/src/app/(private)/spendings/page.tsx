@@ -1,34 +1,9 @@
-import { redirect } from "next/navigation";
 import SpendingPageClient from "@components/spendings/view/SpendingPageClient";
-import {
-  DATE_QUERY_PARAM,
-  buildSpendingsPath,
-  isValidIsoDate,
-} from "@helpers/dateRoute";
 
-interface SpendingsPageProps {
-  searchParams:
-    | Promise<Record<string, string | string[] | undefined>>
-    | Record<string, string | string[] | undefined>;
-}
-
-const resolveSearchParams = async (
-  searchParams: SpendingsPageProps["searchParams"],
-): Promise<Record<string, string | string[] | undefined>> => {
-  if (searchParams instanceof Promise) {
-    return await searchParams;
-  }
-  return searchParams;
-};
-
-export default async function SpendingsPage({ searchParams }: SpendingsPageProps) {
-  const params = await resolveSearchParams(searchParams);
-  const rawDate = params[DATE_QUERY_PARAM];
-  const date = typeof rawDate === "string" ? rawDate : undefined;
-
-  if (!isValidIsoDate(date)) {
-    redirect(buildSpendingsPath());
-  }
-
+// "Today" for the weekly Dépenses view is resolved in the browser
+// (SpendingPageClient), never here: the server's timezone can differ from the
+// user's and would otherwise bake the wrong day into ?date= (COS-73). The
+// client reads/writes the ?date= param, so this page just renders it.
+export default function SpendingsPage() {
   return <SpendingPageClient />;
 }

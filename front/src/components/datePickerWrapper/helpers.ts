@@ -10,7 +10,17 @@ import getDate from "date-fns/getDate";
 import getDay from "date-fns/getDay";
 import lastDayOfMonth from "date-fns/lastDayOfMonth";
 import setHours from "date-fns/setHours";
+import parseISO from "date-fns/parseISO";
 
+
+/**
+ * Parse a date-only ISO string (e.g. the `?date=` URL param "2026-07-12") as a
+ * LOCAL date. `new Date("2026-07-12")` parses it as UTC midnight, which rolls
+ * back to the previous calendar day in timezones west of UTC and then makes
+ * getWeekRange return the previous week (COS-73). parseISO keeps it local,
+ * consistent with the rest of the app's date handling.
+ */
+export const parseDateParam = (isoDate: string): Date => parseISO(isoDate);
 
 export const getWeekDays = (weekStart: Date, date: Date): Date[] => {
   const days: Date[] = [weekStart];

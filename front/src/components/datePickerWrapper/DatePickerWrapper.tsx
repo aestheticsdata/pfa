@@ -13,6 +13,7 @@ import format from "date-fns/format";
 import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 import { WEEKDAYS_LONG, WEEKDAYS_SHORT, MONTHS } from "./locale-fr";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
+import { parseDateParam } from "@components/datePickerWrapper/helpers";
 import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
 import type { Modifiers } from "react-day-picker";
@@ -55,7 +56,7 @@ const DatePickerWrapper = () => {
 
   useEffect(() => {
     if (selectedDateParam) {
-      const date = new Date(selectedDateParam);
+      const date = parseDateParam(selectedDateParam);
       if (
         !Number.isNaN(date.getTime())
         && (selectedDays.length === 0
