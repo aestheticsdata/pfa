@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "react-query";
 import { ChevronDown, KeyRound, LogOut } from "lucide-react";
 import { useAuth } from "@auth/context/AuthContext";
 import useRequestHelper from "@helpers/useRequestHelper";
@@ -26,8 +25,7 @@ const initialsFromEmail = (email?: string): string => {
 };
 
 const UserMenu = () => {
-  const { user, clearAuth } = useAuth();
-  const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { privateRequest } = useRequestHelper();
   const router = useRouter();
 
@@ -37,8 +35,11 @@ const UserMenu = () => {
     } catch {
       // Session may already be expired.
     } finally {
-      queryClient.clear();
-      clearAuth();
+      // A full-document navigation tears down the React tree, the auth context and the
+      // React Query cache on its own, then re-runs the server `(private)` guard — the same
+      // hard-redirect path as `redirectToLogin`. Clearing that client state here first would
+      // only repaint the current page with emptied data (a flash of the blank dashboard)
+      // before the browser leaves, so we navigate straight away.
       window.location.replace(ROUTES.login.path);
     }
   };
