@@ -141,6 +141,7 @@ const SpendingView = () => {
       <SpendingToolbar search={search} onSearchChange={setSearch} />
 
       <SpendingSummary
+        remaining={remaining}
         weekTotal={weekTotal}
         txCount={txCount}
         weeklyCeiling={weeklyCeiling}

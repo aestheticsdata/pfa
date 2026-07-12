@@ -3,6 +3,8 @@
 import type { ReactNode } from "react";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
+import { AnimatedNumber } from "@lib/dataviz";
+import { cn } from "@lib/utils";
 
 const splitAmount = (n: number): { int: string; dec: string } => {
   const [int, dec = "00"] = Number(n)
@@ -34,6 +36,8 @@ interface Biggest {
 }
 
 interface SpendingSummaryProps {
+  /** Remaining monthly budget (real data via useDashboard) — hero widget. */
+  remaining: number;
   weekTotal: number;
   txCount: number;
   weeklyCeiling: number | null;
@@ -63,6 +67,7 @@ const Cell = ({
 );
 
 const SpendingSummary = ({
+  remaining,
   weekTotal,
   txCount,
   weeklyCeiling,
@@ -71,6 +76,15 @@ const SpendingSummary = ({
 }: SpendingSummaryProps) => {
   const perDay = (txCount / 7).toFixed(1).replace(".", ",");
   const average = weekTotal / 7;
+
+  // Hero "budget restant" — big number, split integer/decimals like the Dashboard
+  // BudgetHero, red when over budget. The integer counts up via the reusable
+  // AnimatedNumber component; the cents stay fixed beside it.
+  const over = remaining < 0;
+  const { int: remainingInt, dec: remainingDec } = splitAmount(
+    Math.abs(remaining),
+  );
+  const remainingIntValue = Number(remainingInt.replace(/\D/g, ""));
 
   const ceilingSub =
     weeklyCeiling != null && weeklyCeiling > 0 ? (
@@ -100,7 +114,26 @@ const SpendingSummary = ({
     );
 
   return (
-    <section className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-line-soft bg-line-soft min-[760px]:grid-cols-4">
+    <section className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-line-soft bg-line-soft min-[760px]:grid-cols-5">
+      {/* Hero — full-width banner on mobile, one equal-width cell (1/5) on desktop
+          like the other four. Its font stays big; the four keep theirs too. */}
+      <div className="col-span-2 bg-background px-5 py-4 min-[760px]:col-span-1">
+        <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
+          Budget restant
+        </span>
+        <div
+          className={cn(
+            "num text-[34px] font-medium leading-none tracking-[-0.02em] min-[1100px]:text-[46px]",
+            over ? "text-neg" : "text-ink",
+          )}
+        >
+          {over && "−"}
+          <AnimatedNumber value={remainingIntValue} />
+          <span className="text-[18px] font-normal text-ink-3 min-[1100px]:text-[26px]">
+            ,{remainingDec} €
+          </span>
+        </div>
+      </div>
       <Cell
         label="Total semaine"
         value={<Amount value={weekTotal} />}
