@@ -7,10 +7,15 @@ export interface DatePickerWrapperStoreProps {
   to: Date | null;
   range: Date[] | null;
   selectedDateIso: string | null;
+  // Cross-tree "scroll the Dépenses timeline to this day" request (COS-38). Set
+  // by the NavBar "Aujourd'hui" button and by a fresh spending creation; read
+  // and consumed (reset to null) by SpendingView once the matching card mounts.
+  scrollToDayIso: string | null;
   setFrom: (from: Date) => void;
   setTo: (from: Date) => void;
   setRange: (from: Date[]) => void;
   setSelectedDateIso: (dateIso: string | null) => void;
+  setScrollToDayIso: (dateIso: string | null) => void;
 }
 
 // This store is intentionally NOT persisted. The selected week is carried by the
@@ -25,6 +30,7 @@ const useStore = create<DatePickerWrapperStoreProps>()(
     to: null,
     range: null,
     selectedDateIso: null,
+    scrollToDayIso: null,
     setFrom: (from: Date) =>
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
@@ -47,6 +53,12 @@ const useStore = create<DatePickerWrapperStoreProps>()(
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
           draft.selectedDateIso = dateIso;
+        })
+      ),
+    setScrollToDayIso: (dateIso: string | null) =>
+      set(
+        produce((draft: DatePickerWrapperStoreProps) => {
+          draft.scrollToDayIso = dateIso;
         })
       ),
   }))

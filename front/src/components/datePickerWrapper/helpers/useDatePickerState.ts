@@ -25,7 +25,7 @@ const useDatePickerState = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const { setFrom, setTo, setRange, setSelectedDateIso } = useDatePickerWrapperStore();
+  const { setFrom, setTo, setRange, setSelectedDateIso, setScrollToDayIso } = useDatePickerWrapperStore();
 
   const normalizePath = (path: string): string => {
     const normalized = path.replace(/\/+$/, "");
@@ -44,6 +44,13 @@ const useDatePickerState = () => {
 
   const handleDayChange = (date: Date, updateUrl = true) => {
     const dateISO = formatISO(date, { representation: "date" });
+    // A deliberate week pick (updateUrl is only true for a user calendar click,
+    // never the programmatic URL sync) supersedes any pending "scroll to a day"
+    // request — e.g. an "Aujourd'hui" scroll that never got consumed — so it
+    // can't fire later on an unrelated navigation (COS-38).
+    if (updateUrl) {
+      setScrollToDayIso(null);
+    }
     if (updateUrl && normalizePath(pathname) === SPENDINGS_PATH) {
       const dateInUrl = searchParams.get(DATE_QUERY_PARAM);
       if (dateInUrl !== dateISO) {

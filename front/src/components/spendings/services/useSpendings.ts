@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import getDate from "date-fns/getDate";
+import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import startOfMonth from "date-fns/startOfMonth";
 import endOfMonth from "date-fns/endOfMonth";
@@ -25,7 +26,7 @@ const useSpendings = () => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
-  const { from, to, range } = useDatePickerWrapperStore();
+  const { from, to, range, setScrollToDayIso } = useDatePickerWrapperStore();
   const monthStart = from ? startOfMonth(from) : undefined;
   const monthEnd = to ? endOfMonth(to) : undefined;
   const monthBeginning = monthStart;
@@ -115,7 +116,21 @@ const useSpendings = () => {
   const createSpending = useMutation<unknown, AxiosError, SpendingMutationPayload>((spending) => {
     return createSpendingService(spending);
   }, {
-    onSuccess: () => { spendingsActionOnSuccess("créée") },
+    onSuccess: async (_data, variables) => {
+      await spendingsActionOnSuccess("créée");
+      // COS-38: once the list has refreshed, recenter the timeline on the day of
+      // the spending just created — but only when that day belongs to the week
+      // CURRENTLY on screen. We read the live range from the store rather than the
+      // closure `range` (react-query snapshots the callback at mutate() time, so
+      // the closure can be stale if the user changed week while the POST was in
+      // flight). Creating a spending for another week must not yank the view to
+      // it (product decision on the ticket's open edge case).
+      const createdDate = variables?.date;
+      const currentRange = useDatePickerWrapperStore.getState().range;
+      if (createdDate && currentRange?.some((day) => format(day, "yyyy-MM-dd") === createdDate)) {
+        setScrollToDayIso(createdDate);
+      }
+    },
     onError: (e) => {
       console.log("error creating spendings : ", e);
     }

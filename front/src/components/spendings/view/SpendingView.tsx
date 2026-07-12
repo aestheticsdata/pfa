@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { endOfMonth, isSameDay } from "date-fns";
 import startOfMonth from "date-fns/startOfMonth";
 import format from "date-fns/format";
@@ -44,7 +44,7 @@ interface CategoryAggregate {
  * timeline. Reuses the existing data layer (useSpendings / useDashboard).
  */
 const SpendingView = () => {
-  const { from, to, range } = useDatePickerWrapperStore();
+  const { from, to, range, scrollToDayIso, setScrollToDayIso } = useDatePickerWrapperStore();
   const [now] = useState(() => new Date());
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -99,6 +99,28 @@ const SpendingView = () => {
       categoryAgg: Array.from(map.values()).sort((a, b) => b.total - a.total),
     };
   }, [groups]);
+
+  // Auto-scroll the timeline to a requested day card (COS-38). Both the NavBar
+  // "Aujourd'hui" button and a fresh spending creation set `scrollToDayIso`; we
+  // scroll as soon as the matching `[data-sp-day]` card is in the DOM. That can
+  // be immediately (already the right week) or after a re-render triggered by a
+  // week navigation (`range`) or the initial data load (`isLoading`), so the
+  // effect re-runs on those. The request is consumed (reset to null) once used.
+  useEffect(() => {
+    if (!scrollToDayIso || !range || isLoading) {
+      return;
+    }
+    const card = document.querySelector<HTMLElement>(`[data-sp-day="${scrollToDayIso}"]`);
+    if (!card) {
+      return;
+    }
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
+    setScrollToDayIso(null);
+  }, [scrollToDayIso, range, isLoading, setScrollToDayIso]);
+
+  // Drop any pending scroll request when leaving the page so it can't fire on a
+  // later visit (COS-38).
+  useEffect(() => () => setScrollToDayIso(null), [setScrollToDayIso]);
 
   if (error) {
     throw error;
