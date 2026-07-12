@@ -20,6 +20,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
+import { Button } from "@components/ui/button";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
@@ -66,6 +67,13 @@ const InvoiceModal = ({
   const [isProgress, setIsProgress] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [showConfirmDeleteImage, setShowConfirmDeleteImage] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+
+  const clearPending = () => {
+    setPendingFile(null);
+    setPendingPreview(null);
+  };
 
   const deleteImage = async () => {
     try {
@@ -110,6 +118,7 @@ const InvoiceModal = ({
         config,
       );
       setInvoiceImage(uploadedImage.data);
+      clearPending();
       await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
       setIsLoading(false);
     } catch (e) {
@@ -141,7 +150,15 @@ const InvoiceModal = ({
     getInvoiceImage();
   }, []);
 
-  const uploadFile = (file: File) => {
+  // Free the local blob URL when the pending preview changes or the modal unmounts
+  useEffect(() => {
+    if (!pendingPreview) return;
+    return () => URL.revokeObjectURL(pendingPreview);
+  }, [pendingPreview]);
+
+  // Selecting/dropping a file only stages it locally (preview) — the upload is
+  // deferred until the user confirms with « Envoyer » (see sendInvoice).
+  const selectFile = (file: File) => {
     setIsFileTooBig(false);
     setIsInvalidFile(false);
     if (!userID) return;
@@ -153,6 +170,13 @@ const InvoiceModal = ({
       setIsFileTooBig(true);
       return;
     }
+
+    setPendingFile(file);
+    setPendingPreview(URL.createObjectURL(file));
+  };
+
+  const sendInvoice = () => {
+    if (!pendingFile || !userID) return;
 
     const formData = new FormData();
     formData.append("userID", userID);
@@ -176,7 +200,7 @@ const InvoiceModal = ({
 
     formData.append("label", spending.label);
     formData.append("spendingID", spending.ID);
-    formData.append("invoiceImageUpload", file);
+    formData.append("invoiceImageUpload", pendingFile);
 
     uploadInvoiceImage(formData);
   };
@@ -186,7 +210,7 @@ const InvoiceModal = ({
     setIsDragging(false);
     const file = e.dataTransfer.files?.[0];
     if (file) {
-      uploadFile(file);
+      selectFile(file);
     }
   };
 
@@ -232,7 +256,7 @@ const InvoiceModal = ({
           <div
             className={cn(
               "mx-[22px] overflow-hidden rounded-[14px] border border-line",
-              invoiceImage ? "bg-[#b3ada4]" : "bg-background",
+              invoiceImage || pendingPreview ? "bg-[#b3ada4]" : "bg-background",
             )}
           >
             {isLoading && !isProgress ? (
@@ -255,6 +279,15 @@ const InvoiceModal = ({
                   unoptimized
                 />
               </button>
+            ) : pendingPreview ? (
+              <Image
+                src={pendingPreview}
+                width={1000}
+                height={800}
+                alt="aperçu de la facture"
+                className="block max-h-[min(460px,60vh)] w-full object-contain"
+                unoptimized
+              />
             ) : (
               <div className="grid min-h-[300px] place-items-center text-base tracking-[-0.01em] text-ink-4">
                 {invoiceModalTexts.noInvoice}
@@ -295,6 +328,27 @@ const InvoiceModal = ({
                 <Trash2 className="size-4" />
                 {invoiceModalTexts.delete}
               </button>
+            ) : pendingPreview && !isLoading ? (
+              <div className="flex gap-2.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="lg"
+                  onClick={clearPending}
+                  className="flex-1 border-line bg-background text-[15px] text-ink-2 hover:bg-bg-hi"
+                >
+                  Annuler
+                </Button>
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="lg"
+                  onClick={sendInvoice}
+                  className="flex-1 text-[15px]"
+                >
+                  {invoiceModalTexts.send}
+                </Button>
+              </div>
             ) : !isLoading ? (
               <>
                 <input
@@ -306,8 +360,9 @@ const InvoiceModal = ({
                   onChange={(e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      uploadFile(file);
+                      selectFile(file);
                     }
+                    e.currentTarget.value = "";
                   }}
                 />
                 <label
