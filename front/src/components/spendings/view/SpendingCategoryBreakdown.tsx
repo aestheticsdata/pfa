@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowDown, ArrowUp } from "lucide-react";
 import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { WEEKLY } from "@components/spendings/config/constants";
-import { cn } from "@lib/utils";
+import { CategoryBarTooltip, CategoryTrend } from "@lib/dataviz";
 
 export interface BreakdownRow {
   key: string;
@@ -23,28 +22,20 @@ const formatAmount = (amount: number) =>
     maximumFractionDigits: 2,
   });
 
-const Trend = ({ name }: { name: string }) => {
-  // MOCK — needs previous-week data (see mockSpending.ts)
-  const { direction, label } = mockCategoryTrend(name);
-  return (
-    <span
-      className={cn(
-        "num flex items-center justify-end gap-1 text-[11.5px]",
-        direction === "up" && "text-neg",
-        direction === "down" && "text-accent-strong",
-        direction === "flat" && "text-ink-4",
-      )}
-    >
-      {direction === "up" && <ArrowUp className="size-2.5" />}
-      {direction === "down" && <ArrowDown className="size-2.5" />}
-      {label}
-    </span>
-  );
-};
+// MOCK — needs previous-week data (see mockSpending.ts). De-mocks with COS-35.
+const Trend = ({ name }: { name: string }) => (
+  <CategoryTrend {...mockCategoryTrend(name)} />
+);
 
 interface SpendingCategoryBreakdownProps {
   rows: BreakdownRow[];
   rangeLabel: string;
+}
+
+interface BarHover {
+  row: BreakdownRow;
+  x: number;
+  y: number;
 }
 
 /**
@@ -57,6 +48,7 @@ const SpendingCategoryBreakdown = ({
   rangeLabel,
 }: SpendingCategoryBreakdownProps) => {
   const [selected, setSelected] = useState<BreakdownRow | null>(null);
+  const [hover, setHover] = useState<BarHover | null>(null);
 
   if (rows.length === 0) {
     return null;
@@ -71,11 +63,15 @@ const SpendingCategoryBreakdown = ({
         <span className="text-xs text-ink-4">{rangeLabel} · semaine</span>
       </div>
 
-      <div className="sp-cat-bar mb-[18px]" title="Répartition de la semaine">
+      <div className="sp-cat-bar mb-[18px]">
         {rows.map((r) => (
           <span
             key={r.key}
+            role="img"
+            aria-label={`${r.name} : ${r.pct.toFixed(1).replace(".", ",")} % (${formatAmount(r.total)} €)`}
             style={{ width: `${r.pct.toFixed(2)}%`, background: r.color }}
+            onMouseMove={(e) => setHover({ row: r, x: e.clientX, y: e.clientY })}
+            onMouseLeave={() => setHover(null)}
           />
         ))}
       </div>
@@ -108,6 +104,13 @@ const SpendingCategoryBreakdown = ({
           </button>
         ))}
       </div>
+
+      {hover && (
+        <CategoryBarTooltip
+          point={{ x: hover.x, y: hover.y }}
+          datum={{ ...hover.row, trend: mockCategoryTrend(hover.row.name) }}
+        />
+      )}
 
       {selected && (
         <SpendingsListModal
