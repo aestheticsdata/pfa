@@ -53,7 +53,7 @@ const CategoryBreakdown = () => {
   const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: fr });
 
   return (
-    <section className="pfa-card flex flex-col gap-4 px-6 py-5">
+    <section className="pfa-card flex max-h-[550px] min-h-[320px] flex-col gap-4 px-6 py-5">
       <div className="flex items-baseline justify-between">
         <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">
           Répartition par catégorie
@@ -69,7 +69,7 @@ const CategoryBreakdown = () => {
             radius={4}
             ariaLabel="Répartition mensuelle par catégorie"
           />
-          <div className="charts-categories-list flex max-h-[340px] flex-col overflow-y-auto pr-1">
+          <div className="charts-categories-list flex min-h-0 flex-1 flex-col overflow-y-auto pr-1">
             {list.map((c, i) => {
               const color = c.categoryColor ?? FALLBACK_COLOR;
               const name = c.category ?? "sans catégorie";
