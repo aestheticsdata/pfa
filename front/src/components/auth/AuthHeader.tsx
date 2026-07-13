@@ -1,12 +1,13 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Info, LogIn, UserPlus } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import Logo from "@components/shared/brand/Logo";
 import { ROUTES } from "@components/shared/config/constants";
 import { cn } from "@lib/utils";
+import { Info, LogIn, UserPlus } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import type { LucideIcon } from "lucide-react";
 
 type Tab = { path: string; label: string; icon: LucideIcon };
 
@@ -39,12 +40,13 @@ export default function AuthHeader() {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "relative inline-flex items-center gap-2 rounded-[6px] px-[13px] py-2 text-[13.5px] font-medium transition-colors",
-                active
-                  ? "text-ink"
-                  : "text-ink-3 hover:bg-white/[0.03] hover:text-ink-2",
+                active ? "text-ink" : "text-ink-3 hover:bg-white/[0.03] hover:text-ink-2",
               )}
             >
-              <Icon className="size-3.5" strokeWidth={2} />
+              <Icon
+                className="size-3.5"
+                strokeWidth={2}
+              />
               {label}
               {active && (
                 <span
