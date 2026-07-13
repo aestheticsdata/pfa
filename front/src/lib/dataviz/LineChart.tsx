@@ -1,15 +1,8 @@
 "use client";
 
+import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@lib/dataviz/dataVizTypes";
+import { areaPath, extent, linearScale, linePath, normalizePoints } from "@lib/dataviz/svg";
 import { cn } from "@lib/utils";
-import {
-  areaPath,
-  extent,
-  linePath,
-  linearScale,
-  normalizePoints,
-} from "@lib/dataviz/svg";
-
-import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@lib/dataviz/types";
 
 interface Padding {
   top?: number;
@@ -66,9 +59,7 @@ const LineChart = ({
 }: LineChartProps) => {
   const pad = { top: 6, right: 6, bottom: 6, left: 6, ...padding };
 
-  const normalized: LinePoint[][] = series.map((s) =>
-    normalizePoints(s.points),
-  );
+  const normalized: LinePoint[][] = series.map((s) => normalizePoints(s.points));
   const allX = normalized.flat().map((p) => p.x);
   const allY = normalized.flat().map((p) => p.y);
 
@@ -97,16 +88,8 @@ const LineChart = ({
           s.area ? (
             <defs key={`def-${i}`}>
               <linearGradient id={`${id}-a${i}`} x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="0%"
-                  stopColor={s.color ?? DEFAULT_COLOR}
-                  stopOpacity="0.28"
-                />
-                <stop
-                  offset="100%"
-                  stopColor={s.color ?? DEFAULT_COLOR}
-                  stopOpacity="0"
-                />
+                <stop offset="0%" stopColor={s.color ?? DEFAULT_COLOR} stopOpacity="0.28" />
+                <stop offset="100%" stopColor={s.color ?? DEFAULT_COLOR} stopOpacity="0" />
               </linearGradient>
             </defs>
           ) : null,
@@ -115,10 +98,7 @@ const LineChart = ({
       {Array.from({ length: gridLines }, (_, i) => {
         const inner = height - pad.top - pad.bottom;
         // a lone grid line sits in the middle; 2+ span top→bottom edges
-        const y =
-          gridLines === 1
-            ? pad.top + inner / 2
-            : pad.top + (inner * i) / (gridLines - 1);
+        const y = gridLines === 1 ? pad.top + inner / 2 : pad.top + (inner * i) / (gridLines - 1);
         return (
           <line
             key={`grid-${i}`}
@@ -136,10 +116,7 @@ const LineChart = ({
 
       {Array.from({ length: verticalGrid }, (_, i) => {
         const innerW = width - pad.left - pad.right;
-        const x =
-          verticalGrid === 1
-            ? pad.left + innerW / 2
-            : pad.left + (innerW * i) / (verticalGrid - 1);
+        const x = verticalGrid === 1 ? pad.left + innerW / 2 : pad.left + (innerW * i) / (verticalGrid - 1);
         return (
           <line
             key={`vgrid-${i}`}

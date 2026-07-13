@@ -683,22 +683,9 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
     justify-self: end;
   }
 }
-/* mouse-following tooltip over category stacked-bar segments (shared:
-   Dépenses + Dashboard breakdowns — see @lib/dataviz/CategoryBarTooltip).
-   Layout-critical props (position/left/top/z-index/pointer-events) are set
-   INLINE on the element so a floating, portaled tooltip can never fall into
-   normal flow if this stylesheet is missing/stale — here we only skin it. */
-.cat-tooltip {
-  min-width: 172px;
-  max-width: 240px;
-  padding: 10px 12px;
-  background: var(--bg-elev);
-  border: 1px solid var(--line);
-  border-radius: var(--r-md);
-  box-shadow:
-    0 16px 40px oklch(0 0 0 / 0.5),
-    inset 0 1px 0 oklch(1 0 0 / 0.05);
-}
+/* The category-bar tooltip (@lib/dataviz/CategoryBarTooltip) is portaled to
+   document.body, so it is skinned entirely inline in the component — no class
+   here, so a rule that fails to resolve at the portal can't leave it bare. */
 
 /* ---- Timeline grid ---- */
 .sp-timeline {

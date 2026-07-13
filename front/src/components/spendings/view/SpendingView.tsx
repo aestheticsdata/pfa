@@ -1,30 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { endOfMonth, isSameDay } from "date-fns";
-import startOfMonth from "date-fns/startOfMonth";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
-import fr from "date-fns/locale/fr";
-import { Plus } from "lucide-react";
-import { Button } from "@components/ui/button";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import useEnsureWeekRange from "@components/spendings/helpers/useEnsureWeekRange";
-import useSpendings from "@components/spendings/services/useSpendings";
-import useDashboard from "@components/spendings/services/useDashboard";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
-import SpendingToolbar from "@components/spendings/view/SpendingToolbar";
-import SpendingSummary from "@components/spendings/view/SpendingSummary";
+import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
+import useEnsureWeekRange from "@components/spendings/helpers/useEnsureWeekRange";
+import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
+import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
+import useDashboard from "@components/spendings/services/useDashboard";
+import useSpendings from "@components/spendings/services/useSpendings";
+import type { SpendingDayGroup } from "@components/spendings/types";
+import { mockAvgDailyDelta } from "@components/spendings/view/helpers/mockSpending";
 import SpendingCategoryBreakdown from "@components/spendings/view/SpendingCategoryBreakdown";
+import type { FilterCategory } from "@components/spendings/view/SpendingCategoryFilter";
 import SpendingCategoryFilter from "@components/spendings/view/SpendingCategoryFilter";
 import SpendingDayCard from "@components/spendings/view/SpendingDayCard";
-import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
-import { mockAvgDailyDelta } from "@components/spendings/view/helpers/mockSpending";
-
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
-import type { SpendingDayGroup } from "@components/spendings/types";
-import type { BreakdownRow } from "@components/spendings/view/SpendingCategoryBreakdown";
-import type { FilterCategory } from "@components/spendings/view/SpendingCategoryFilter";
+import SpendingSummary from "@components/spendings/view/SpendingSummary";
+import SpendingToolbar from "@components/spendings/view/SpendingToolbar";
+import { Button } from "@components/ui/button";
+import { endOfMonth, isSameDay } from "date-fns";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
+import parseISO from "date-fns/parseISO";
+import startOfMonth from "date-fns/startOfMonth";
+import { Plus } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 const FALLBACK_COLOR = "#94a3b8";
 const UNCATEGORIZED_KEY = "none";
@@ -55,10 +54,7 @@ const SpendingView = () => {
   const { spendingsByWeek, isLoading, error } = useSpendings();
   const { get: dashboardQuery, remaining } = useDashboard();
 
-  const groups = useMemo<SpendingDayGroup[]>(
-    () => spendingsByWeek ?? [],
-    [spendingsByWeek],
-  );
+  const groups = useMemo<SpendingDayGroup[]>(() => spendingsByWeek ?? [], [spendingsByWeek]);
 
   const { weekTotal, txCount, biggest, categoryAgg } = useMemo(() => {
     let total = 0;
@@ -139,18 +135,19 @@ const SpendingView = () => {
   // "Budget du jour maximum" — remaining monthly budget spread over the days left
   // in the month (today included). Shared with the Dashboard "reste à vivre" so
   // the two always match; only rendered on today's card (see SpendingDayCard).
-  const dailyBudget = dashboardQuery.data
-    ? dailyRemainingBudget(remaining, now)
-    : null;
+  const dailyBudget = dashboardQuery.data ? dailyRemainingBudget(remaining, now) : null;
 
   const grand = weekTotal || 1;
   const breakdownRows: BreakdownRow[] = categoryAgg.map((c) => ({
     ...c,
     pct: (c.total / grand) * 100,
   }));
-  const filterCategories: FilterCategory[] = categoryAgg.map(
-    ({ key, name, color, count }) => ({ key, name, color, count }),
-  );
+  const filterCategories: FilterCategory[] = categoryAgg.map(({ key, name, color, count }) => ({
+    key,
+    name,
+    color,
+    count,
+  }));
 
   const rangeLabel = `${format(from, "dd")} — ${format(to, "dd MMM yyyy", {
     locale: fr,
@@ -181,9 +178,7 @@ const SpendingView = () => {
       />
 
       {isInitialLoading ? (
-        <div className="grid place-items-center py-16 text-sm text-ink-4">
-          Chargement…
-        </div>
+        <div className="grid place-items-center py-16 text-sm text-ink-4">Chargement…</div>
       ) : (
         <section className="sp-timeline">
           {groups.map((group, i) => (

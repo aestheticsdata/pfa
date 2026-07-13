@@ -1,14 +1,9 @@
 // pfa data-viz lib — pure SVG geometry helpers (no React, no side effects).
 
-import type { LinePoint } from "@lib/dataviz/types";
+import type { LinePoint } from "@lib/dataviz/dataVizTypes";
 
 /** Angle in degrees (0 = 12 o'clock, clockwise) → point on a circle. */
-export const polarToCartesian = (
-  cx: number,
-  cy: number,
-  r: number,
-  angleDeg: number,
-): LinePoint => {
+export const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: number): LinePoint => {
   const a = ((angleDeg - 90) * Math.PI) / 180;
   return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
 };
@@ -20,13 +15,7 @@ export const polarToCartesian = (
  * With `polarToCartesian` measuring clockwise from 12 o'clock, this renders the
  * correct [startAngle, endAngle] wedge (do not "simplify" the angle swap).
  */
-export const wedgePath = (
-  cx: number,
-  cy: number,
-  r: number,
-  startAngle: number,
-  endAngle: number,
-): string => {
+export const wedgePath = (cx: number, cy: number, r: number, startAngle: number, endAngle: number): string => {
   const start = polarToCartesian(cx, cy, r, endAngle);
   const end = polarToCartesian(cx, cy, r, startAngle);
   const largeArc = endAngle - startAngle <= 180 ? "0" : "1";
@@ -34,9 +23,7 @@ export const wedgePath = (
 };
 
 /** Coerce a number[] | LinePoint[] into LinePoint[] (index as x for numbers). */
-export const normalizePoints = (
-  points: LinePoint[] | number[],
-): LinePoint[] =>
+export const normalizePoints = (points: LinePoint[] | number[]): LinePoint[] =>
   points.map((p, i) => (typeof p === "number" ? { x: i, y: p } : p));
 
 /** [min, max] of a numeric list, guarded against empty / flat inputs. */
@@ -56,10 +43,7 @@ export const extent = (values: number[]): [number, number] => {
 export const linearScale =
   (domainMin: number, domainMax: number, rangeMin: number, rangeMax: number) =>
   (v: number): number =>
-    domainMax === domainMin
-      ? rangeMin
-      : rangeMin +
-        ((v - domainMin) / (domainMax - domainMin)) * (rangeMax - rangeMin);
+    domainMax === domainMin ? rangeMin : rangeMin + ((v - domainMin) / (domainMax - domainMin)) * (rangeMax - rangeMin);
 
 /** Polyline `M/L` path through pixel-space points. */
 export const linePath = (pts: LinePoint[]): string =>
