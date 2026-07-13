@@ -5,12 +5,9 @@
  * normalize any CSS color (oklch/hex) to hex for the native color input.
  */
 
-export const PALETTE_HUES = [
-  5, 25, 60, 80, 110, 140, 175, 210, 250, 290, 320, 350,
-] as const;
+export const PALETTE_HUES = [5, 25, 60, 80, 110, 140, 175, 210, 250, 290, 320, 350] as const;
 
-export const catColorOklch = (hue: number): string =>
-  `oklch(0.80 0.09 ${hue})`;
+export const catColorOklch = (hue: number): string => `oklch(0.80 0.09 ${hue})`;
 
 let sharedCtx: CanvasRenderingContext2D | null | undefined;
 
@@ -36,11 +33,8 @@ export const cssColorToHex = (css: string): string => {
   ctx.fillStyle = css;
   ctx.fillRect(0, 0, 1, 1);
   const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-  return `#${[r, g, b]
-    .map((n) => n.toString(16).padStart(2, "0"))
-    .join("")}`;
+  return `#${[r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("")}`;
 };
 
 /** The 12 palette hues as hex (computed once, client-side). */
-export const paletteHex = (): string[] =>
-  PALETTE_HUES.map((hue) => cssColorToHex(catColorOklch(hue)));
+export const paletteHex = (): string[] => PALETTE_HUES.map((hue) => cssColorToHex(catColorOklch(hue)));

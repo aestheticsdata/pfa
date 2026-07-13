@@ -1,15 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Plus, Search } from "lucide-react";
-import { toast } from "sonner";
 import { useAuth } from "@auth/context/AuthContext";
-import useCategories from "@components/spendings/services/useCategories";
-import CategoryItem from "@components/categories/CategoryItem";
 import CategoryFormModal from "@components/categories/CategoryFormModal";
-import Spinner from "@components/common/Spinner";
-import { Button } from "@components/ui/button";
+import CategoryItem from "@components/categories/CategoryItem";
 import useCategoryStats from "@components/categories/services/useCategoryStats";
+import Spinner from "@components/common/Spinner";
+import useCategories from "@components/spendings/services/useCategories";
+import { Button } from "@components/ui/button";
+import { Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import type { Category } from "@src/schemas/categories";
 
@@ -26,15 +26,10 @@ const CategoriesListcontainer = () => {
   // categories live here locally until a create endpoint exists.
   const [localCats, setLocalCats] = useState<Category[]>([]);
 
-  const allCats = useMemo<Category[]>(
-    () => [...(categories ?? []), ...localCats],
-    [categories, localCats],
-  );
+  const allCats = useMemo<Category[]>(() => [...(categories ?? []), ...localCats], [categories, localCats]);
 
   // Real all-time usage per category, keyed by category ID.
-  const statsByCategory = new Map(
-    (categoryStats?.byCategory ?? []).map((s) => [s.categoryID, s]),
-  );
+  const statsByCategory = new Map((categoryStats?.byCategory ?? []).map((s) => [s.categoryID, s]));
   // Denominator for each category's share: total spent over all history
   // (includes uncategorized spendings), as returned by the backend.
   const grandTotal = categoryStats?.totalSpent ?? 0;
@@ -56,9 +51,7 @@ const CategoriesListcontainer = () => {
 
   const handleSave = (cat: Category, name: string, color: string) => {
     if (isMock(cat.ID)) {
-      setLocalCats((prev) =>
-        prev.map((c) => (c.ID === cat.ID ? { ...c, name, color } : c)),
-      );
+      setLocalCats((prev) => prev.map((c) => (c.ID === cat.ID ? { ...c, name, color } : c)));
       return;
     }
     updateCategory.mutate({
@@ -76,10 +69,7 @@ const CategoriesListcontainer = () => {
 
   const handleCreate = (name: string, color: string) => {
     // MOCK — local only, not sent to the API.
-    setLocalCats((prev) => [
-      ...prev,
-      { ID: `mock-${Date.now()}`, userID: user?.id ?? null, name, color },
-    ]);
+    setLocalCats((prev) => [...prev, { ID: `mock-${Date.now()}`, userID: user?.id ?? null, name, color }]);
     toast.info("Catégorie créée en local (mock — non enregistrée)");
   };
 
@@ -88,9 +78,7 @@ const CategoriesListcontainer = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-[18px] font-semibold tracking-[-0.01em] text-ink">
-          Catégories
-        </h1>
+        <h1 className="text-[18px] font-semibold tracking-[-0.01em] text-ink">Catégories</h1>
         <span className="num rounded-full border border-line-soft bg-bg-elev px-2.5 py-[3px] text-[12px] text-ink-3">
           {allCats.length}
         </span>
@@ -114,14 +102,16 @@ const CategoriesListcontainer = () => {
           size="sm"
           onClick={() => setCreateOpen(true)}
         >
-          <Plus className="size-3.5" strokeWidth={2.5} />
+          <Plus
+            className="size-3.5"
+            strokeWidth={2.5}
+          />
           Nouvelle catégorie
         </Button>
       </div>
 
       <p className="text-[12.5px] text-ink-4">
-        Gérer tes catégories · part et fréquence{" "}
-        <b className="font-medium text-ink-3">sur tout l&apos;historique</b>
+        Gérer tes catégories · part et fréquence <b className="font-medium text-ink-3">sur tout l&apos;historique</b>
       </p>
 
       {isLoading ? (
@@ -129,19 +119,14 @@ const CategoriesListcontainer = () => {
           <Spinner />
         </div>
       ) : visible.length === 0 ? (
-        <p className="py-6 text-[13px] text-ink-4">
-          Aucune catégorie ne correspond.
-        </p>
+        <p className="py-6 text-[13px] text-ink-4">Aucune catégorie ne correspond.</p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(238px,1fr))] gap-3">
           {visible.map((cat) => {
             const stat = statsByCategory.get(cat.ID);
             const used = stat?.count ?? 0;
-            const share =
-              grandTotal > 0 ? ((stat?.total ?? 0) / grandTotal) * 100 : 0;
-            const takenNames = allCats
-              .filter((c) => c.ID !== cat.ID)
-              .map((c) => c.name.toLowerCase());
+            const share = grandTotal > 0 ? ((stat?.total ?? 0) / grandTotal) * 100 : 0;
+            const takenNames = allCats.filter((c) => c.ID !== cat.ID).map((c) => c.name.toLowerCase());
             return (
               <CategoryItem
                 key={cat.ID}
