@@ -1,8 +1,8 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@auth/context/AuthContext";
 import { ROUTES } from "@components/shared/config/constants";
+import { usePathname, useRouter } from "next/navigation";
 
 import type { AuthResponse } from "@auth/types";
 
