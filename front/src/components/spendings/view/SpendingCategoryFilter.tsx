@@ -46,14 +46,7 @@ const Chip = ({
       />
     )}
     {label}
-    <span
-      className={cn(
-        "num text-[11px]",
-        active ? "text-accent-strong/80" : "text-ink-4",
-      )}
-    >
-      {count}
-    </span>
+    <span className={cn("num text-[11px]", active ? "text-accent-strong/80" : "text-ink-4")}>{count}</span>
   </button>
 );
 
@@ -61,21 +54,14 @@ const Chip = ({
  * Global category filter strip for the Dépenses timeline. Selecting a chip
  * filters every day card to that category (null = all).
  */
-const SpendingCategoryFilter = ({
-  categories,
-  total,
-  selected,
-  onSelect,
-}: SpendingCategoryFilterProps) => {
+const SpendingCategoryFilter = ({ categories, total, selected, onSelect }: SpendingCategoryFilterProps) => {
   if (categories.length === 0) {
     return null;
   }
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.1em] text-ink-4">
-        Filtrer
-      </span>
+      <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.1em] text-ink-4">Filtrer</span>
       <Chip
         active={selected === null}
         onClick={() => onSelect(null)}

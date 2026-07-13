@@ -1,28 +1,15 @@
-import { ArrowDownUp } from "lucide-react";
 import spendingsText from "@components/spendings/config/text";
-import {
-  SORT_BY_LABEL,
-  SORT_BY_CATEGORY,
-  SORT_BY_AMOUNT,
-} from "@components/spendings/helpers/sortConstants";
+import { SORT_BY_AMOUNT, SORT_BY_CATEGORY, SORT_BY_LABEL } from "@components/spendings/helpers/sortConstants";
+import { ArrowDownUp } from "lucide-react";
 
-type SortField =
-  | typeof SORT_BY_LABEL
-  | typeof SORT_BY_CATEGORY
-  | typeof SORT_BY_AMOUNT;
+type SortField = typeof SORT_BY_LABEL | typeof SORT_BY_CATEGORY | typeof SORT_BY_AMOUNT;
 
 interface SpendingSortProps {
   recurringType?: boolean;
   onClickSort: (field: SortField) => void;
 }
 
-const SortPill = ({
-  label,
-  onClick,
-}: {
-  label: string;
-  onClick: () => void;
-}) => (
+const SortPill = ({ label, onClick }: { label: string; onClick: () => void }) => (
   <button
     type="button"
     onClick={onClick}

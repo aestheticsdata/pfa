@@ -1,11 +1,10 @@
-import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { useQuery } from "react-query";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
-import startOfMonth from "date-fns/startOfMonth";
+import useRequestHelper from "@helpers/useRequestHelper";
 import { MonthlyStatsSchema } from "@src/schemas/dashboard";
-
+import startOfMonth from "date-fns/startOfMonth";
+import { useQuery } from "react-query";
 
 const useInitialAmount = () => {
   const { privateRequest } = useRequestHelper();
@@ -33,6 +32,6 @@ const useInitialAmount = () => {
     enabled: !!from && !!userID,
     ...QUERY_OPTIONS,
   });
-}
+};
 
 export default useInitialAmount;

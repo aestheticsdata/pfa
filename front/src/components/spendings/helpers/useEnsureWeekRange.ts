@@ -1,11 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { getWeekDays, getWeekRange } from "@components/datePickerWrapper/helpers";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import {
-  getWeekRange,
-  getWeekDays,
-} from "@components/datePickerWrapper/helpers";
+import { useEffect } from "react";
 
 /**
  * Ensures the shared date-picker store has a week range (from/to/range) set,

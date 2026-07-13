@@ -1,5 +1,6 @@
-import type { SpendingCategoryInputSchema } from "@src/schemas/spendings";
 import { z } from "zod";
+
+import type { SpendingCategoryInputSchema } from "@src/schemas/spendings";
 
 export const spendingSchema = z.object({
   spendingLabel: z.string().min(1, "Label requis"),

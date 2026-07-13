@@ -2,6 +2,7 @@ import { humanSize } from "@components/spendings/common/spendingModal/helpers";
 import { cn } from "@lib/utils";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
+
 import type { Dispatch, SetStateAction } from "react";
 
 interface ReceiptFieldProps {

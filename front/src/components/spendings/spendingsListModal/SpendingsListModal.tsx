@@ -1,20 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import parseISO from "date-fns/parseISO";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
+import texts from "@components/spendings/config/text";
+import useSpendings from "@components/spendings/services/useSpendings";
+import { DATE_QUERY_PARAM, SPENDINGS_PATH } from "@helpers/dateRoute";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
-import * as DialogPrimitive from "@radix-ui/react-dialog";
+import parseISO from "date-fns/parseISO";
 import { ChevronRight, Search, X } from "lucide-react";
-import useSpendings from "@components/spendings/services/useSpendings";
-import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { MONTHLY, DATE_FORMAT } from "@components/spendings/config/constants";
-import texts from "@components/spendings/config/text";
-import { SPENDINGS_PATH, DATE_QUERY_PARAM } from "@helpers/dateRoute";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRef, useState } from "react";
 
-import type { CategoryProps } from "@src/interfaces/category";
 import type { SpendingItem } from "@components/spendings/types";
+import type { CategoryProps } from "@src/interfaces/category";
 
 interface SpendingsListModalProps {
   handleClickOutside: () => void;
@@ -31,17 +31,12 @@ const euro = (n: number) =>
     maximumFractionDigits: 2,
   });
 
-const groupByDate = (
-  spendings: SpendingItem[],
-): Record<string, SpendingItem[]> => {
-  return spendings.reduce(
-    (acc: Record<string, SpendingItem[]>, curr) => {
-      if (!acc[curr.date]) acc[curr.date] = [];
-      acc[curr.date].push(curr);
-      return acc;
-    },
-    {},
-  );
+const groupByDate = (spendings: SpendingItem[]): Record<string, SpendingItem[]> => {
+  return spendings.reduce((acc: Record<string, SpendingItem[]>, curr) => {
+    if (!acc[curr.date]) acc[curr.date] = [];
+    acc[curr.date].push(curr);
+    return acc;
+  }, {});
 };
 
 /**
@@ -51,12 +46,7 @@ const groupByDate = (
  * card links back to the week that contains it. Design: `.catd-*` (faithful
  * port of design_handoff_pfa/designs/assets/cat-detail.{js,css}).
  */
-const SpendingsListModal = ({
-  handleClickOutside,
-  periodType,
-  categoryInfos,
-  total,
-}: SpendingsListModalProps) => {
+const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, total }: SpendingsListModalProps) => {
   const { spendingsByWeek, spendingsByMonth } = useSpendings();
   const { from, to } = useDatePickerWrapperStore();
   const [searchTerm, setSearchTerm] = useState("");
@@ -73,25 +63,16 @@ const SpendingsListModal = ({
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
   const sourceItems: SpendingItem[] = (
-    isMonthly
-      ? (spendingsByMonth ?? [])
-      : (spendingsByWeek ?? []).flatMap((g) => g.items)
-  ).filter(
-    (s) =>
-      (s.category ?? null) === targetCategory &&
-      s.label.toLowerCase().includes(normalizedSearchTerm),
-  );
+    isMonthly ? (spendingsByMonth ?? []) : (spendingsByWeek ?? []).flatMap((g) => g.items)
+  ).filter((s) => (s.category ?? null) === targetCategory && s.label.toLowerCase().includes(normalizedSearchTerm));
 
   const grouped = groupByDate(sourceItems);
   const groupedEntries = Object.entries(grouped);
 
-  const dayTotal = (items: SpendingItem[]) =>
-    items.reduce((acc, s) => acc + Number(s.amount), 0);
+  const dayTotal = (items: SpendingItem[]) => items.reduce((acc, s) => acc + Number(s.amount), 0);
 
   const cumulativeAt = (idx: number): number =>
-    groupedEntries
-      .slice(0, idx + 1)
-      .reduce((acc, [, items]) => acc + dayTotal(items), 0);
+    groupedEntries.slice(0, idx + 1).reduce((acc, [, items]) => acc + dayTotal(items), 0);
 
   const periodLabel = isMonthly
     ? from
@@ -106,9 +87,7 @@ const SpendingsListModal = ({
     const dateISO = format(parseISO(date), DATE_FORMAT);
     const normalizedPath = pathname.replace(/\/+$/, "") || "/";
     const params =
-      normalizedPath === SPENDINGS_PATH
-        ? new URLSearchParams(searchParams.toString())
-        : new URLSearchParams();
+      normalizedPath === SPENDINGS_PATH ? new URLSearchParams(searchParams.toString()) : new URLSearchParams();
     params.set(DATE_QUERY_PARAM, dateISO);
     router.push(`${SPENDINGS_PATH}?${params.toString()}`);
     handleClickOutside();
@@ -138,9 +117,7 @@ const SpendingsListModal = ({
                 style={{ background: categoryColor }}
               />
               <DialogPrimitive.Title asChild>
-                <span className="catd-name">
-                  {categoryInfos.category ?? t.noCategoryLabel}
-                </span>
+                <span className="catd-name">{categoryInfos.category ?? t.noCategoryLabel}</span>
               </DialogPrimitive.Title>
               <span className="catd-total">
                 <span className="k">{t.total} :</span>
@@ -148,15 +125,24 @@ const SpendingsListModal = ({
               </span>
               <span className="catd-sp" />
               {periodLabel && <span className="catd-period">{periodLabel}</span>}
-              <DialogPrimitive.Close className="catd-close" aria-label={t.close}>
-                <X size={13} strokeWidth={2.5} />
+              <DialogPrimitive.Close
+                className="catd-close"
+                aria-label={t.close}
+              >
+                <X
+                  size={13}
+                  strokeWidth={2.5}
+                />
               </DialogPrimitive.Close>
             </div>
 
             <div className="catd-filter">
               <span className="catd-filter-lbl">{t.filter} :</span>
               <span className="catd-search">
-                <Search size={15} strokeWidth={2} />
+                <Search
+                  size={15}
+                  strokeWidth={2}
+                />
                 <input
                   ref={searchRef}
                   type="text"
@@ -169,9 +155,7 @@ const SpendingsListModal = ({
 
             <div className="catd-body">
               {groupedEntries.length === 0 ? (
-                <div className="catd-empty">
-                  {normalizedSearchTerm ? t.noMatch : t.noSpendings}
-                </div>
+                <div className="catd-empty">{normalizedSearchTerm ? t.noMatch : t.noSpendings}</div>
               ) : (
                 groupedEntries.map(([date, items], i) => {
                   const cumulative = cumulativeAt(i);
@@ -219,7 +203,10 @@ const SpendingsListModal = ({
 
                       <div className="catd-day-list">
                         {items.map((spending) => (
-                          <div key={spending.ID} className="catd-exp">
+                          <div
+                            key={spending.ID}
+                            className="catd-exp"
+                          >
                             <span
                               className="dot"
                               style={{ background: categoryColor }}

@@ -1,10 +1,11 @@
 "use client";
 
-import type { ReactNode } from "react";
-import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import { AnimatedNumber } from "@lib/dataviz";
 import { cn } from "@lib/utils";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
+
+import type { ReactNode } from "react";
 
 const splitAmount = (n: number): { int: string; dec: string } => {
   const [int, dec = "00"] = Number(n)
@@ -46,22 +47,10 @@ interface SpendingSummaryProps {
   biggest: Biggest | null;
 }
 
-const Cell = ({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: ReactNode;
-  sub: ReactNode;
-}) => (
+const Cell = ({ label, value, sub }: { label: string; value: ReactNode; sub: ReactNode }) => (
   <div className="bg-background px-5 py-4">
-    <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
-      {label}
-    </span>
-    <div className="num text-[24px] font-medium leading-none tracking-[-0.02em] text-ink">
-      {value}
-    </div>
+    <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</span>
+    <div className="num text-[24px] font-medium leading-none tracking-[-0.02em] text-ink">{value}</div>
     <div className="mt-1.5 text-xs text-ink-3">{sub}</div>
   </div>
 );
@@ -81,21 +70,15 @@ const SpendingSummary = ({
   // BudgetHero, red when over budget. The integer counts up via the reusable
   // AnimatedNumber component; the cents stay fixed beside it.
   const over = remaining < 0;
-  const { int: remainingInt, dec: remainingDec } = splitAmount(
-    Math.abs(remaining),
-  );
+  const { int: remainingInt, dec: remainingDec } = splitAmount(Math.abs(remaining));
   const remainingIntValue = Number(remainingInt.replace(/\D/g, ""));
 
   const ceilingSub =
     weeklyCeiling != null && weeklyCeiling > 0 ? (
       weekTotal > weeklyCeiling ? (
-        <span className="text-neg">
-          +{Math.round(weekTotal - weeklyCeiling)} € vs plafond
-        </span>
+        <span className="text-neg">+{Math.round(weekTotal - weeklyCeiling)} € vs plafond</span>
       ) : (
-        <span className="text-accent-strong">
-          −{Math.round(weeklyCeiling - weekTotal)} € sous plafond
-        </span>
+        <span className="text-accent-strong">−{Math.round(weeklyCeiling - weekTotal)} € sous plafond</span>
       )
     ) : (
       "plafond non défini"
@@ -108,9 +91,7 @@ const SpendingSummary = ({
     ) : roundedDelta > 0 ? (
       <span className="text-neg">+{roundedDelta} € vs sem. dernière</span>
     ) : (
-      <span className="text-accent-strong">
-        −{Math.abs(roundedDelta)} € vs sem. dernière
-      </span>
+      <span className="text-accent-strong">−{Math.abs(roundedDelta)} € vs sem. dernière</span>
     );
 
   return (
@@ -129,9 +110,7 @@ const SpendingSummary = ({
         >
           {over && "−"}
           <AnimatedNumber value={remainingIntValue} />
-          <span className="text-[18px] font-normal text-ink-3 min-[1100px]:text-[26px]">
-            ,{remainingDec} €
-          </span>
+          <span className="text-[18px] font-normal text-ink-3 min-[1100px]:text-[26px]">,{remainingDec} €</span>
         </div>
       </div>
       <Cell
@@ -153,11 +132,7 @@ const SpendingSummary = ({
       <Cell
         label="Plus grosse"
         value={biggest ? <Amount value={biggest.amount} /> : "—"}
-        sub={
-          biggest
-            ? `${biggest.label} · ${format(biggest.date, "dd MMM", { locale: fr })}`
-            : "—"
-        }
+        sub={biggest ? `${biggest.label} · ${format(biggest.date, "dd MMM", { locale: fr })}` : "—"}
       />
     </section>
   );

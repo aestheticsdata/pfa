@@ -1,7 +1,8 @@
-import type { LabelSuggestion } from "@components/spendings/common/spendingModal/mockSuggestions";
-import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
+
+import type { LabelSuggestion } from "@components/spendings/common/spendingModal/mockSuggestions";
+import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import type { Dispatch, SetStateAction } from "react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
@@ -23,7 +24,10 @@ const LabelField = ({
   setLabelQuery,
 }: LabelFieldProps) => (
   <div className="flex flex-col gap-2">
-    <Label htmlFor="spendingLabel" className="text-[13px] text-ink-2">
+    <Label
+      htmlFor="spendingLabel"
+      className="text-[13px] text-ink-2"
+    >
       Label
     </Label>
     <Input

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { Edit2, Trash2, ImageIcon } from "lucide-react";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
-import useSpendings from "@components/spendings/services/useSpendings";
 import useReccurings from "@components/spendings/services/useReccurings";
+import useSpendings from "@components/spendings/services/useSpendings";
 import { cn } from "@lib/utils";
+import { Edit2, ImageIcon, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 import type { SpendingListItem } from "@components/spendings/types";
 
@@ -16,20 +16,14 @@ interface SpendingItemProps {
   isRecurring?: boolean;
 }
 
-const SpendingItem = ({
-  spending,
-  editCallback,
-  toggleAddSpending,
-  isRecurring,
-}: SpendingItemProps) => {
+const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }: SpendingItemProps) => {
   const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
   const { deleteSpending } = useSpendings();
   const { deleteRecurring } = useReccurings();
 
   const spendingLabel = spending.label ?? "";
-  const hasInvoice =
-    "invoicefile" in spending && Boolean(spending.invoicefile);
+  const hasInvoice = "invoicefile" in spending && Boolean(spending.invoicefile);
 
   const onConfirmDelete = () => {
     if (isRecurring) {
@@ -49,9 +43,7 @@ const SpendingItem = ({
   if (isDeleteConfirmVisible) {
     return (
       <div className="flex items-center gap-2 py-2 px-3 bg-red-900/20 border border-red-600/40 rounded">
-        <span className="text-gray-200 text-sm flex-1">
-          Supprimer cette dépense ?
-        </span>
+        <span className="text-gray-200 text-sm flex-1">Supprimer cette dépense ?</span>
         <button
           type="button"
           onClick={onCancelDelete}
@@ -70,20 +62,14 @@ const SpendingItem = ({
     );
   }
 
-  const category =
-    "category" in spending ? spending.category : null;
-  const categoryColor =
-    "categoryColor" in spending && spending.categoryColor
-      ? spending.categoryColor
-      : "#94a3b8";
+  const category = "category" in spending ? spending.category : null;
+  const categoryColor = "categoryColor" in spending && spending.categoryColor ? spending.categoryColor : "#94a3b8";
 
   return (
     <>
       {isInvoiceModalVisible && (
         <InvoiceModal
-          handleClickOutside={() =>
-            setIsInvoiceModalVisible(!isInvoiceModalVisible)
-          }
+          handleClickOutside={() => setIsInvoiceModalVisible(!isInvoiceModalVisible)}
           spending={spending}
         />
       )}
@@ -125,9 +111,7 @@ const SpendingItem = ({
               onClick={() => setIsInvoiceModalVisible(true)}
               className={cn(
                 "w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer",
-                hasInvoice
-                  ? "bg-emerald-700/80 hover:bg-emerald-600"
-                  : "bg-gray-700/80 hover:bg-cyan-600",
+                hasInvoice ? "bg-emerald-700/80 hover:bg-emerald-600" : "bg-gray-700/80 hover:bg-cyan-600",
               )}
               title="Facture"
             >

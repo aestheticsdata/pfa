@@ -1,15 +1,10 @@
-import { User } from "@src/interfaces/user";
-import type {
-  RecurringItem,
-  SpendingItem,
-} from "@src/schemas/spendings";
+import type { User } from "@src/interfaces/user";
+import type { RecurringItem, SpendingItem } from "@src/schemas/spendings";
 
-export type Month =
-  | { start: Date; end: Date; }
-  | null;
+export type Month = { start: Date; end: Date } | null;
 
 export type SpendingListItem = SpendingItem | RecurringItem;
-export type { SpendingItem, RecurringItem };
+export type { RecurringItem, SpendingItem };
 
 export interface SpendingDayGroup {
   dayOfMonth: number;

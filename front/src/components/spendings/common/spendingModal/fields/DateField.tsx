@@ -1,4 +1,3 @@
-import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
 import { Input } from "@components/ui/input";
 import { Label } from "@components/ui/label";
@@ -7,6 +6,8 @@ import addDays from "date-fns/addDays";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import type { UseFormGetValues, UseFormRegister, UseFormSetValue } from "react-hook-form";
 
 interface DateFieldProps {
@@ -30,7 +31,10 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
     // it is disabled — not removed or swapped for a month stepper — when
     // "Récurrente mensuelle" is on.
     <div className="flex flex-col gap-2">
-      <Label htmlFor="spendingDate" className="text-[13px] text-ink-2">
+      <Label
+        htmlFor="spendingDate"
+        className="text-[13px] text-ink-2"
+      >
         Date
       </Label>
       <div

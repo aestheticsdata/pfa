@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
 import orderBy from "lodash/orderBy";
+import { useMemo, useState } from "react";
 
 import type { SpendingListItem } from "@components/spendings/types";
 
@@ -43,10 +43,7 @@ const useDaySort = (spendings: SpendingListItem[]) => {
     if (sort.field === "category") {
       return orderBy(
         spendings,
-        [
-          (s) => (("category" in s ? s.category : "") ?? "").toLowerCase(),
-          (s) => Number(s.amount),
-        ],
+        [(s) => (("category" in s ? s.category : "") ?? "").toLowerCase(), (s) => Number(s.amount)],
         [sort.dir, "desc"],
       );
     }

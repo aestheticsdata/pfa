@@ -1,10 +1,11 @@
 import { FALLBACK_COLOR, getRandomHexColor } from "@components/spendings/common/spendingModal/helpers";
-import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import { Label } from "@components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { cn } from "@lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
+
+import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
 import type { Dispatch, SetStateAction } from "react";
 
 interface CategoryFieldProps {
@@ -108,7 +109,10 @@ const CategoryField = ({
             <ChevronsUpDown className="ml-auto size-4 shrink-0 text-ink-4" />
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-[--radix-popover-trigger-width] border-line bg-bg-elev p-0" align="start">
+        <PopoverContent
+          className="w-[--radix-popover-trigger-width] border-line bg-bg-elev p-0"
+          align="start"
+        >
           <Command className="bg-transparent">
             <CommandInput
               placeholder="Rechercher ou saisir…"

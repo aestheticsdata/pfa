@@ -33,7 +33,5 @@ const COMMON_LABELS: LabelSuggestion[] = [
 export const mockLabelSuggestions = (query: string): LabelSuggestion[] => {
   const q = query.trim().toLowerCase();
   if (!q) return COMMON_LABELS.slice(0, 3);
-  return COMMON_LABELS.filter(
-    (s) => s.label.toLowerCase().includes(q) && s.label.toLowerCase() !== q,
-  ).slice(0, 3);
+  return COMMON_LABELS.filter((s) => s.label.toLowerCase().includes(q) && s.label.toLowerCase() !== q).slice(0, 3);
 };

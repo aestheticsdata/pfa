@@ -1,15 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useQueryClient } from "react-query";
-import { Upload, Trash2 } from "lucide-react";
-import Image from "next/image";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@components/ui/dialog";
+import { useAuth } from "@auth/context/AuthContext";
+import Spinner from "@components/common/Spinner";
+import { QUERY_KEYS } from "@components/spendings/config/constants";
+import texts from "@components/spendings/config/text";
+import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,13 +16,13 @@ import {
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
 import { Button } from "@components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useAuth } from "@auth/context/AuthContext";
-import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
-import texts from "@components/spendings/config/text";
-import Spinner from "@components/common/Spinner";
-import { QUERY_KEYS } from "@components/spendings/config/constants";
 import { cn } from "@lib/utils";
+import { Trash2, Upload } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useQueryClient } from "react-query";
 
 import type { SpendingListItem } from "@components/spendings/types";
 
@@ -44,10 +39,7 @@ interface InvoiceModalProps {
 const FILE_SIZE_LIMIT = 32_097_152;
 const FALLBACK_COLOR = "#94a3b8";
 
-const InvoiceModal = ({
-  handleClickOutside: handleClickOutsideProp,
-  spending,
-}: InvoiceModalProps) => {
+const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: InvoiceModalProps) => {
   const [open, setOpen] = useState(true);
   const handleClickOutside = () => {
     setOpen(false);
@@ -82,10 +74,7 @@ const InvoiceModal = ({
         method: "DELETE",
         data: spending,
       });
-      if (
-        (res as { data?: { msg?: string } })?.data?.msg ===
-        "INVOICE_IMAGE_DELETED"
-      ) {
+      if ((res as { data?: { msg?: string } })?.data?.msg === "INVOICE_IMAGE_DELETED") {
         setInvoiceImage(null);
         await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
         setIsLoading(false);
@@ -99,9 +88,7 @@ const InvoiceModal = ({
   const uploadInvoiceImage = async (payload: FormData) => {
     const config = {
       onUploadProgress: (progressEvent: ProgressEvent) => {
-        const value = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total,
-        );
+        const value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         setProgressValue(value);
         if (value === 100) {
           setIsProgress(false);
@@ -112,18 +99,13 @@ const InvoiceModal = ({
     try {
       setIsProgress(true);
       setIsLoading(true);
-      const uploadedImage = await privateRequest(
-        "/spendings/upload",
-        { method: "POST", data: payload },
-        config,
-      );
+      const uploadedImage = await privateRequest("/spendings/upload", { method: "POST", data: payload }, config);
       setInvoiceImage(uploadedImage.data);
       clearPending();
       await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
       setIsLoading(false);
     } catch (e) {
-      const message = (e as { response?: { data?: { message?: string } } })
-        ?.response?.data?.message;
+      const message = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
       if (message === "INVALID_IMAGE_FILE") {
         setIsInvalidFile(true);
       }
@@ -215,10 +197,7 @@ const InvoiceModal = ({
   };
 
   const category = "category" in spending ? spending.category : null;
-  const categoryColor =
-    "categoryColor" in spending && spending.categoryColor
-      ? spending.categoryColor
-      : FALLBACK_COLOR;
+  const categoryColor = "categoryColor" in spending && spending.categoryColor ? spending.categoryColor : FALLBACK_COLOR;
 
   return (
     <>
@@ -238,7 +217,7 @@ const InvoiceModal = ({
               <span
                 className="shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em]"
                 style={{
-                  backgroundColor: categoryColor + "30",
+                  backgroundColor: `${categoryColor}30`,
                   color: categoryColor,
                 }}
               >
@@ -296,22 +275,12 @@ const InvoiceModal = ({
           </div>
 
           <div className="flex flex-col gap-2 px-[22px] pb-[22px] pt-[18px]">
-            {isFileTooBig && (
-              <p className="text-center text-sm text-neg">
-                {invoiceModalTexts.fileTooBig}
-              </p>
-            )}
-            {isInvalidFile && (
-              <p className="text-center text-sm text-neg">
-                {invoiceModalTexts.invalidFileType}
-              </p>
-            )}
+            {isFileTooBig && <p className="text-center text-sm text-neg">{invoiceModalTexts.fileTooBig}</p>}
+            {isInvalidFile && <p className="text-center text-sm text-neg">{invoiceModalTexts.invalidFileType}</p>}
 
             {isProgress ? (
               <div className="flex flex-col gap-2">
-                <span className="num text-right text-xs text-ink-3">
-                  {progressValue} %
-                </span>
+                <span className="num text-right text-xs text-ink-3">{progressValue} %</span>
                 <div className="h-2 overflow-hidden rounded bg-bg-hi">
                   <div
                     className="h-full bg-elec transition-all"
@@ -384,18 +353,12 @@ const InvoiceModal = ({
                     // children are pointer-events-none so drag events target the
                     // label itself (no flicker when hovering child elements)
                     "flex cursor-pointer flex-col items-center gap-1.5 rounded-[14px] border-[1.5px] border-dashed px-[22px] py-[30px] text-center transition-colors [&_*]:pointer-events-none",
-                    isDragging
-                      ? "border-elec bg-elec/[0.06]"
-                      : "border-line hover:border-elec hover:bg-elec/[0.06]",
+                    isDragging ? "border-elec bg-elec/[0.06]" : "border-line hover:border-elec hover:bg-elec/[0.06]",
                   )}
                 >
                   <Upload className="size-[30px] text-elec" />
-                  <span className="text-[17px] font-semibold text-ink">
-                    {invoiceModalTexts.chooseFile}
-                  </span>
-                  <span className="num text-[13px] text-ink-4">
-                    {invoiceModalTexts.fileTypeWarning}
-                  </span>
+                  <span className="text-[17px] font-semibold text-ink">{invoiceModalTexts.chooseFile}</span>
+                  <span className="num text-[13px] text-ink-4">{invoiceModalTexts.fileTypeWarning}</span>
                 </label>
               </>
             ) : null}
@@ -416,12 +379,8 @@ const InvoiceModal = ({
       >
         <AlertDialogContent className="border-line bg-bg-elev">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-ink">
-              Supprimer la facture&nbsp;?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-ink-3">
-              Cette action est irréversible.
-            </AlertDialogDescription>
+            <AlertDialogTitle className="text-ink">Supprimer la facture&nbsp;?</AlertDialogTitle>
+            <AlertDialogDescription className="text-ink-3">Cette action est irréversible.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-bg-hi">
