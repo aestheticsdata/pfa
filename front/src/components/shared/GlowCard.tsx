@@ -12,13 +12,7 @@ type GlowCardProps = React.HTMLAttributes<HTMLElement> & {
  * border and soft shadow (`.pfa-card`). Shared by every private-screen card so
  * the KPIs, charts and panels all read as the same material.
  */
-const GlowCard = ({
-  as: Tag = "div",
-  hover = false,
-  className,
-  children,
-  ...rest
-}: GlowCardProps) => (
+const GlowCard = ({ as: Tag = "div", hover = false, className, children, ...rest }: GlowCardProps) => (
   <Tag
     className={cn("pfa-card", hover && "pfa-card-hover", className)}
     {...rest}

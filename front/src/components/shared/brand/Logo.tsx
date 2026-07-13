@@ -33,14 +33,38 @@ export default function Logo({ size = 26, glow = false, className }: LogoProps) 
       className={cn("block", className)}
     >
       <defs>
-        <linearGradient id={strokeId} x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0" stopColor="oklch(0.80 0.13 210)" />
-          <stop offset="1" stopColor="oklch(0.85 0.15 150)" />
+        <linearGradient
+          id={strokeId}
+          x1="0"
+          y1="1"
+          x2="1"
+          y2="0"
+        >
+          <stop
+            offset="0"
+            stopColor="oklch(0.80 0.13 210)"
+          />
+          <stop
+            offset="1"
+            stopColor="oklch(0.85 0.15 150)"
+          />
         </linearGradient>
         {glow && (
-          <linearGradient id={tileId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="oklch(0.22 0.015 240)" />
-            <stop offset="1" stopColor="oklch(0.13 0.010 250)" />
+          <linearGradient
+            id={tileId}
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop
+              offset="0"
+              stopColor="oklch(0.22 0.015 240)"
+            />
+            <stop
+              offset="1"
+              stopColor="oklch(0.13 0.010 250)"
+            />
           </linearGradient>
         )}
       </defs>
@@ -77,7 +101,14 @@ export default function Logo({ size = 26, glow = false, className }: LogoProps) 
         strokeLinejoin="round"
       />
 
-      {glow && <circle cx="38" cy="23.5" r="2.6" fill="oklch(0.85 0.15 150)" />}
+      {glow && (
+        <circle
+          cx="38"
+          cy="23.5"
+          r="2.6"
+          fill="oklch(0.85 0.15 150)"
+        />
+      )}
     </svg>
   );
 }

@@ -1,7 +1,6 @@
-import { create } from "zustand";
 import produce from "immer";
-import { devtools } from 'zustand/middleware';
-
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 interface GlobalStore {
   isCalendarVisible: boolean;
@@ -15,9 +14,9 @@ export const useGlobalStore = create<GlobalStore>()(
       set(
         produce((draft: GlobalStore) => {
           draft.isCalendarVisible = isVisible;
-        })
+        }),
       ),
-  }))
+  })),
 );
 
 export default useGlobalStore;

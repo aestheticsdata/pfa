@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 // Minimum delay between two liveness probes, so focus + visibilitychange firing
 // together on a tab switch (or rapid navigations) don't stack up requests.
