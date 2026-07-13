@@ -68,7 +68,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
   const upcomingSum = upcoming.reduce((a, r) => a + Number(r.amount), 0);
 
   return (
-    <section className="pfa-card flex h-full flex-col gap-4 px-6 py-5">
+    <section className="pfa-card flex max-h-[550px] min-h-[320px] flex-col gap-4 px-6 py-5">
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">
@@ -124,7 +124,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
         </div>
       )}
 
-      <div className="recurrings-list-container flex flex-1 flex-col overflow-y-auto">
+      <div className="recurrings-list-container flex min-h-0 flex-1 flex-col overflow-y-auto pr-1">
         {list.map((r) => {
           if (pendingDelete === r.ID) {
             return (
