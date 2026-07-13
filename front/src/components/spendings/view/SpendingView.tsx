@@ -4,14 +4,10 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
 import useEnsureWeekRange from "@components/spendings/helpers/useEnsureWeekRange";
-import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendings from "@components/spendings/services/useSpendings";
-import type { SpendingDayGroup } from "@components/spendings/types";
 import { mockAvgDailyDelta } from "@components/spendings/view/helpers/mockSpending";
 import SpendingCategoryBreakdown from "@components/spendings/view/SpendingCategoryBreakdown";
-import type { FilterCategory } from "@components/spendings/view/SpendingCategoryFilter";
 import SpendingCategoryFilter from "@components/spendings/view/SpendingCategoryFilter";
 import SpendingDayCard from "@components/spendings/view/SpendingDayCard";
 import SpendingSummary from "@components/spendings/view/SpendingSummary";
@@ -24,6 +20,11 @@ import parseISO from "date-fns/parseISO";
 import startOfMonth from "date-fns/startOfMonth";
 import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+
+import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
+import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { SpendingDayGroup } from "@components/spendings/types";
+import type { FilterCategory } from "@components/spendings/view/SpendingCategoryFilter";
 
 const FALLBACK_COLOR = "#94a3b8";
 const UNCATEGORIZED_KEY = "none";
@@ -157,7 +158,10 @@ const SpendingView = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <SpendingToolbar search={search} onSearchChange={setSearch} />
+      <SpendingToolbar
+        search={search}
+        onSearchChange={setSearch}
+      />
 
       <SpendingSummary
         remaining={remaining}
@@ -168,7 +172,10 @@ const SpendingView = () => {
         biggest={biggest}
       />
 
-      <SpendingCategoryBreakdown rows={breakdownRows} rangeLabel={rangeLabel} />
+      <SpendingCategoryBreakdown
+        rows={breakdownRows}
+        rangeLabel={rangeLabel}
+      />
 
       <SpendingCategoryFilter
         categories={filterCategories}

@@ -1,5 +1,5 @@
-import getDaysInMonth from "date-fns/getDaysInMonth";
 import getDate from "date-fns/getDate";
+import getDaysInMonth from "date-fns/getDaysInMonth";
 
 /**
  * "Budget du jour maximum" / "reste à vivre" — the remaining monthly budget
@@ -9,10 +9,7 @@ import getDate from "date-fns/getDate";
  * "reste à vivre" insight so the two always show the exact same figure.
  * Rounded to the nearest euro and clamped at 0 (never negative).
  */
-export default function dailyRemainingBudget(
-  remaining: number,
-  reference: Date,
-): number {
+export default function dailyRemainingBudget(remaining: number, reference: Date): number {
   const daysLeft = Math.max(1, getDaysInMonth(reference) - getDate(reference) + 1);
   return Math.max(0, Math.round(remaining / daysLeft));
 }

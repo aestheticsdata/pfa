@@ -1,5 +1,6 @@
-import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import { Label } from "@components/ui/label";
+
+import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
 interface AmountFieldProps {
@@ -9,7 +10,10 @@ interface AmountFieldProps {
 
 const AmountField = ({ register, errors }: AmountFieldProps) => (
   <div className="flex flex-col gap-2">
-    <Label htmlFor="spendingAmount" className="text-[13px] text-ink-2">
+    <Label
+      htmlFor="spendingAmount"
+      className="text-[13px] text-ink-2"
+    >
       Montant
     </Label>
     <div className="flex items-baseline gap-2 rounded-md border border-line bg-background px-3 py-2.5 transition-colors focus-within:border-accent-d">

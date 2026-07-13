@@ -1,19 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
+import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
+import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
+import useDaySort from "@components/spendings/view/helpers/useDaySort";
+import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
+import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { Plus } from "lucide-react";
-import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
-import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
-import useDaySort, {
-  type DaySortField,
-} from "@components/spendings/view/helpers/useDaySort";
-import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
-import { cn } from "@lib/utils";
+import { useMemo } from "react";
 
-import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
+import type { DaySortField } from "@components/spendings/view/helpers/useDaySort";
 
 const FALLBACK_COLOR = "#94a3b8";
 const UNCATEGORIZED_KEY = "none";
@@ -84,15 +83,8 @@ const SpendingDayCard = ({
   search,
   onSelectCategory,
 }: SpendingDayCardProps) => {
-  const {
-    isModalVisible,
-    addSpendingEnabled,
-    spending,
-    isEditing,
-    addSpending,
-    closeModal,
-    editSpending,
-  } = useSpendingDayItem();
+  const { isModalVisible, addSpendingEnabled, spending, isEditing, addSpending, closeModal, editSpending } =
+    useSpendingDayItem();
 
   const query = search.trim().toLowerCase();
 
@@ -120,9 +112,7 @@ const SpendingDayCard = ({
   const { field, dir, onSort, sorted } = useDaySort(filtered);
 
   const isFiltering = Boolean(selectedCategory) || query.length > 0;
-  const displayTotal = isFiltering
-    ? filtered.reduce((acc, s) => acc + Number(s.amount), 0)
-    : total;
+  const displayTotal = isFiltering ? filtered.reduce((acc, s) => acc + Number(s.amount), 0) : total;
   const over = dailyBudget != null && displayTotal > dailyBudget;
 
   const dayCategories = useMemo<DayCategory[]>(() => {
@@ -143,7 +133,10 @@ const SpendingDayCard = ({
   const emptyLabel = items.length === 0 ? "Aucune dépense" : "Aucun résultat";
 
   return (
-    <div className={cn("sp-day", isToday && "sp-day--today")} data-sp-day={format(date, "yyyy-MM-dd")}>
+    <div
+      className={cn("sp-day", isToday && "sp-day--today")}
+      data-sp-day={format(date, "yyyy-MM-dd")}
+    >
       <div className="sp-day-h">
         <div className="sp-day-h-top">
           <div className="sp-date">
@@ -190,16 +183,9 @@ const SpendingDayCard = ({
                   <button
                     key={c.key}
                     type="button"
-                    className={cn(
-                      "sp-tag",
-                      selectedCategory === c.key && "active",
-                    )}
+                    className={cn("sp-tag", selectedCategory === c.key && "active")}
                     style={{ color: c.color }}
-                    onClick={() =>
-                      onSelectCategory(
-                        selectedCategory === c.key ? null : c.key,
-                      )
-                    }
+                    onClick={() => onSelectCategory(selectedCategory === c.key ? null : c.key)}
                   >
                     {c.name}
                   </button>

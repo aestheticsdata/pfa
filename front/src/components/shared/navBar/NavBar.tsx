@@ -1,34 +1,22 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import {
-  BarChart3,
-  LayoutDashboard,
-  Menu,
-  Receipt,
-  Sparkles,
-  Tag,
-  X,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { useAuth } from "@auth/context/AuthContext";
-import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
 import MonthSelector from "@components/dashboard/MonthSelector";
+import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import useGlobalStore from "@components/shared/globalStore";
-import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
 import Logo from "@components/shared/brand/Logo";
 import { ROUTES } from "@components/shared/config/constants";
-import {
-  SPENDINGS_PATH,
-  buildSpendingsPath,
-  getTodayIsoDate,
-  isValidIsoDate,
-} from "@helpers/dateRoute";
+import useGlobalStore from "@components/shared/globalStore";
+import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
+import { buildSpendingsPath, getTodayIsoDate, isValidIsoDate, SPENDINGS_PATH } from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
 import text from "@src/components/shared/navBar/common/text";
+import { BarChart3, LayoutDashboard, Menu, Receipt, Sparkles, Tag, X } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
+import type { LucideIcon } from "lucide-react";
 
 type NavRoute = { path: string; label: string };
 
@@ -91,9 +79,7 @@ const NavBar = () => {
 
   const hrefFor = (route: NavRoute): string => {
     const storedDate = selectedDateIso ?? undefined;
-    return route.path === ROUTES.spendings.path
-      && isClientHydrated
-      && isValidIsoDate(storedDate)
+    return route.path === ROUTES.spendings.path && isClientHydrated && isValidIsoDate(storedDate)
       ? buildSpendingsPath(storedDate)
       : route.path;
   };
@@ -141,9 +127,7 @@ const NavBar = () => {
               href={hrefFor(route)}
               className={cn(
                 "rounded-[6px] px-3 py-1.5 text-[13px] font-medium transition-colors",
-                isActiveRoute(route.path)
-                  ? cn(ACTIVE_BG, "text-ink")
-                  : "text-ink-3 hover:text-ink-2",
+                isActiveRoute(route.path) ? cn(ACTIVE_BG, "text-ink") : "text-ink-3 hover:text-ink-2",
               )}
             >
               {route.label}

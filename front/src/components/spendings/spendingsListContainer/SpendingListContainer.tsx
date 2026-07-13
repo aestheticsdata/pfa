@@ -1,5 +1,5 @@
-import SpendingItem from "@components/spendings/spendingDayItem/spendingItem/SpendingItem";
 import Spinner from "@components/common/Spinner";
+import SpendingItem from "@components/spendings/spendingDayItem/spendingItem/SpendingItem";
 
 import type { SpendingsListContainerType } from "@components/spendings/types";
 
@@ -19,11 +19,7 @@ const SpendingsListContainer = ({
   }
 
   if (!spendingsByDaySorted?.length) {
-    return (
-      <div className="flex justify-center items-center min-h-[80px] text-gray-500 text-xs">
-        Aucune dépense
-      </div>
-    );
+    return <div className="flex justify-center items-center min-h-[80px] text-gray-500 text-xs">Aucune dépense</div>;
   }
 
   return (

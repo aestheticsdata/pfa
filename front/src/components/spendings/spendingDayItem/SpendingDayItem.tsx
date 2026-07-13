@@ -1,23 +1,20 @@
-import { useState } from "react";
-import { getDayOfYear, endOfMonth } from "date-fns";
+import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
+import spendingsText from "@components/spendings/config/text";
+import useClickSort from "@components/spendings/helpers/useClickSort";
+import useDashboard from "@components/spendings/services/useDashboard";
+import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
+import SpendingSort from "@components/spendings/spendingSort/SpendingSort";
+import SpendingsListContainer from "@components/spendings/spendingsListContainer/SpendingListContainer";
+import { cn } from "@lib/utils";
+import { endOfMonth, getDayOfYear } from "date-fns";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { Plus } from "lucide-react";
-import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
-import useClickSort from "@components/spendings/helpers/useClickSort";
-import spendingsText from "@components/spendings/config/text";
-import SpendingsListContainer from "@components/spendings/spendingsListContainer/SpendingListContainer";
-import SpendingSort from "@components/spendings/spendingSort/SpendingSort";
-import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
-import useDashboard from "@components/spendings/services/useDashboard";
-import { cn } from "@lib/utils";
+import { useState } from "react";
 
 import type { AuthUser } from "@auth/types";
-import type {
-  SpendingItem as SpendingItemType,
-  SpendingListItem,
-} from "@components/spendings/types";
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { SpendingItem as SpendingItemType, SpendingListItem } from "@components/spendings/types";
 
 interface SpendingDayItemProps {
   spendingsByDay: SpendingListItem[];
@@ -43,10 +40,7 @@ const SpendingDayItem = ({
   const isToday = date ? getDayOfYear(date) === getDayOfYear(today) : false;
 
   const todayCredits =
-    remainingAmount && isToday
-      ? remainingAmount /
-        (getDayOfYear(endOfMonth(today)) - getDayOfYear(today) + 1)
-      : 0;
+    remainingAmount && isToday ? remainingAmount / (getDayOfYear(endOfMonth(today)) - getDayOfYear(today) + 1) : 0;
 
   const spendingsFilteredByCategory = selectedCategory
     ? spendingsByDay.filter((spending) => {
@@ -60,15 +54,10 @@ const SpendingDayItem = ({
       })
     : spendingsByDay;
 
-  const { onClickSort, spendingsByDaySorted } = useClickSort(
-    spendingsFilteredByCategory,
-  );
+  const { onClickSort, spendingsByDaySorted } = useClickSort(spendingsFilteredByCategory);
 
   const displayTotal = selectedCategory
-    ? spendingsFilteredByCategory.reduce(
-        (acc, spending) => acc + Number(spending.amount),
-        0,
-      )
+    ? spendingsFilteredByCategory.reduce((acc, spending) => acc + Number(spending.amount), 0)
     : total;
 
   const {
@@ -82,48 +71,28 @@ const SpendingDayItem = ({
     editSpending,
   } = useSpendingDayItem();
 
-  const categorySpendings = spendingsByDay.filter(
-    (s): s is SpendingItemType => "category" in s,
-  );
+  const categorySpendings = spendingsByDay.filter((s): s is SpendingItemType => "category" in s);
   const getCategories = (items: SpendingItemType[]) =>
-    Array.from(
-      new Set(
-        items
-          .map((s) => s.category)
-          .filter((c): c is string | null => c !== undefined),
-      ),
-    );
+    Array.from(new Set(items.map((s) => s.category).filter((c): c is string | null => c !== undefined)));
   const getCategoryColor = (category: string | null) =>
-    categorySpendings.find((s) => s.category === category)?.categoryColor ??
-    "#94a3b8";
+    categorySpendings.find((s) => s.category === category)?.categoryColor ?? "#94a3b8";
 
   return (
     <div
       className={cn(
         "relative bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black rounded-lg border overflow-hidden transition-all shadow-xl flex flex-col h-full",
-        isToday
-          ? "border-cyan-300"
-          : "border-gray-800/50 hover:border-gray-700/50",
+        isToday ? "border-cyan-300" : "border-gray-800/50 hover:border-gray-700/50",
       )}
     >
       {/* Header */}
       <div className="bg-linear-to-r from-gray-800/60 to-gray-800/40 px-4 py-2.5 border-b border-gray-700/50 shrink-0">
         <div className="flex items-center justify-between mb-2">
-          <div
-            className={cn(
-              "text-sm",
-              isToday ? "text-cyan-300 font-semibold" : "text-gray-200",
-            )}
-          >
+          <div className={cn("text-sm", isToday ? "text-cyan-300 font-semibold" : "text-gray-200")}>
             {date ? format(date, "dd MMM yyyy", { locale: fr }) : "—"}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-xs uppercase tracking-wide">
-              {spendingsText.dayItem.total}
-            </span>
-            <span className="text-gray-100 text-sm tabular-nums">
-              {Number(displayTotal).toFixed(2)} €
-            </span>
+            <span className="text-gray-400 text-xs uppercase tracking-wide">{spendingsText.dayItem.total}</span>
+            <span className="text-gray-100 text-sm tabular-nums">{Number(displayTotal).toFixed(2)} €</span>
           </div>
         </div>
 
@@ -149,9 +118,7 @@ const SpendingDayItem = ({
                   onClick={() => setSelectedCategory(key)}
                   className={cn(
                     "px-2 py-0.5 rounded text-[10px] uppercase font-medium transition-all border cursor-pointer",
-                    isClicked
-                      ? "border-transparent"
-                      : "border-transparent opacity-70 hover:opacity-100",
+                    isClicked ? "border-transparent" : "border-transparent opacity-70 hover:opacity-100",
                   )}
                   style={{
                     backgroundColor: color + (isClicked ? "" : "30"),
@@ -196,12 +163,8 @@ const SpendingDayItem = ({
 
         {!recurringType && isToday && (
           <div className="mt-2 pt-2 border-t border-gray-800/50 flex items-center justify-between text-xs">
-            <span className="text-gray-500">
-              {spendingsText.dayItem.remainingBudget}
-            </span>
-            <span className="text-cyan-400 font-semibold">
-              {Math.trunc(todayCredits)} €
-            </span>
+            <span className="text-gray-500">{spendingsText.dayItem.remainingBudget}</span>
+            <span className="text-cyan-400 font-semibold">{Math.trunc(todayCredits)} €</span>
           </div>
         )}
       </div>

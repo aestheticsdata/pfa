@@ -1,7 +1,7 @@
 "use client";
 
-import { Search } from "lucide-react";
 import ExportButton from "@components/shared/ExportButton";
+import { Search } from "lucide-react";
 
 interface SpendingToolbarProps {
   search: string;

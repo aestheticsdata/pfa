@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
+import DashboardView from "@components/dashboard/DashboardView";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import useGlobalStore from "@components/shared/globalStore";
 import { endOfMonth } from "date-fns";
-import startOfMonth from "date-fns/startOfMonth";
 import addDays from "date-fns/addDays";
 import eachDayOfInterval from "date-fns/eachDayOfInterval";
-import useGlobalStore from "@components/shared/globalStore";
-import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import DashboardView from "@components/dashboard/DashboardView";
+import startOfMonth from "date-fns/startOfMonth";
+import { useEffect } from "react";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 
@@ -26,10 +26,7 @@ export default function DashboardPageClient() {
 
   useEffect(() => {
     const alreadyMonth =
-      from &&
-      to &&
-      from.getTime() === startOfMonth(from).getTime() &&
-      to.getTime() === endOfMonth(from).getTime();
+      from && to && from.getTime() === startOfMonth(from).getTime() && to.getTime() === endOfMonth(from).getTime();
     if (alreadyMonth) return;
     const base = from ?? new Date();
     const start = startOfMonth(base);
@@ -39,8 +36,7 @@ export default function DashboardPageClient() {
     setRange(eachDayOfInterval({ start, end: addDays(start, 6) }));
   }, [from, to, setFrom, setTo, setRange]);
 
-  const month: MonthRange | null =
-    from && to ? { start: startOfMonth(from), end: endOfMonth(to) } : null;
+  const month: MonthRange | null = from && to ? { start: startOfMonth(from), end: endOfMonth(to) } : null;
 
   if (!month) {
     return null;

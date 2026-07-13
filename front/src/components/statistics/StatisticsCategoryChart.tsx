@@ -100,8 +100,8 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
             aria-label={`Dépenses mensuelles par catégorie ${year}`}
           >
             {/* grid + y labels */}
-            {gridRows.map((row, i) => (
-              <g key={`grid-${i}`}>
+            {gridRows.map((row) => (
+              <g key={`grid-${row.value}`}>
                 <line
                   x1={PAD_L}
                   x2={width - PAD_R}

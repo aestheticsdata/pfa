@@ -87,6 +87,7 @@ const LineChart = ({
       {id &&
         series.map((s, i) =>
           s.area ? (
+            // biome-ignore lint/suspicious/noArrayIndexKey: series is a fixed positional list; each gradient id is linked to its series by index
             <defs key={`def-${i}`}>
               <linearGradient
                 id={`${id}-a${i}`}
@@ -116,6 +117,7 @@ const LineChart = ({
         const y = gridLines === 1 ? pad.top + inner / 2 : pad.top + (inner * i) / (gridLines - 1);
         return (
           <line
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed count of evenly-spaced grid lines built from Array.from
             key={`grid-${i}`}
             x1={pad.left}
             x2={width - pad.right}
@@ -134,6 +136,7 @@ const LineChart = ({
         const x = verticalGrid === 1 ? pad.left + innerW / 2 : pad.left + (innerW * i) / (verticalGrid - 1);
         return (
           <line
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed count of evenly-spaced vertical grid lines built from Array.from
             key={`vgrid-${i}`}
             x1={x}
             x2={x}
@@ -153,6 +156,7 @@ const LineChart = ({
         const color = s.color ?? DEFAULT_COLOR;
         const pixels = pts.map((p) => ({ x: sx(p.x), y: sy(p.y) }));
         return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: series is a fixed positional list; s.color/s.area carry no stable id and series[i] is referenced by index
           <g key={`s-${i}`}>
             {s.area && pixels.length > 1 && (
               <path
@@ -178,9 +182,9 @@ const LineChart = ({
         );
       })}
 
-      {markers.map((m, i) => (
+      {markers.map((m) => (
         <line
-          key={`m-${i}`}
+          key={`m-${m.x}`}
           x1={sx(m.x)}
           x2={sx(m.x)}
           y1={pad.top}
@@ -191,9 +195,9 @@ const LineChart = ({
         />
       ))}
 
-      {dots.map((d, i) => (
+      {dots.map((d) => (
         <circle
-          key={`d-${i}`}
+          key={`d-${d.x}-${d.y}`}
           cx={sx(d.x)}
           cy={sy(d.y)}
           r={3.5}

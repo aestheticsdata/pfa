@@ -157,8 +157,12 @@ const StatisticsFilters = ({
       </div>
 
       {/* Exceptionals */}
-      <label className="inline-flex cursor-pointer items-center gap-2 rounded-[6px] border border-line px-2.5 py-[6px] text-[12px] text-ink-2">
+      <label
+        htmlFor="stat-exceptionals"
+        className="inline-flex cursor-pointer items-center gap-2 rounded-[6px] border border-line px-2.5 py-[6px] text-[12px] text-ink-2"
+      >
         <Switch
+          id="stat-exceptionals"
           checked={showExceptionals}
           onCheckedChange={onToggleExceptionals}
           className="data-[state=checked]:bg-exc"

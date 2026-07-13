@@ -5,17 +5,17 @@
 // Rendered as a card-less section: it nests inside the BudgetHero card, matching
 // the `.spark-section` block of Dashboard 2026.html.
 
-import { useMemo } from "react";
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import getDate from "date-fns/getDate";
-import parseISO from "date-fns/parseISO";
-import isSameMonth from "date-fns/isSameMonth";
-import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
+import { euro } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { LineChart } from "@lib/dataviz";
-import { euro } from "@components/dashboard/format";
+import format from "date-fns/format";
+import getDate from "date-fns/getDate";
+import getDaysInMonth from "date-fns/getDaysInMonth";
+import isSameMonth from "date-fns/isSameMonth";
+import fr from "date-fns/locale/fr";
+import parseISO from "date-fns/parseISO";
+import { useMemo } from "react";
 
 import type { LinePoint } from "@lib/dataviz";
 
@@ -39,9 +39,7 @@ const DailySparkline = () => {
     const realPts: LinePoint[] = [];
     for (let d = 1; d <= today; d += 1) realPts.push({ x: d, y: totals[d] });
     const active = realPts.filter((p) => p.y > 0);
-    const average = active.length
-      ? active.reduce((a, p) => a + p.y, 0) / active.length
-      : 0;
+    const average = active.length ? active.reduce((a, p) => a + p.y, 0) / active.length : 0;
     let peakVal = 0;
     let peakD = 0;
     for (const p of realPts) {
@@ -68,9 +66,7 @@ const DailySparkline = () => {
     };
   }, [spendingsByMonth, monthRef, daysInMonth]);
 
-  const ticks = Array.from({ length: 6 }, (_, i) =>
-    Math.round(1 + ((daysInMonth - 1) * i) / 5),
-  );
+  const ticks = Array.from({ length: 6 }, (_, i) => Math.round(1 + ((daysInMonth - 1) * i) / 5));
   // The today marker / crossing-dot / date-label only make sense while the
   // viewed month is in progress (a "today" falls inside it).
   const showToday = todayX < daysInMonth;
@@ -92,9 +88,7 @@ const DailySparkline = () => {
   return (
     <div className="mt-6 border-t border-line-soft pt-[18px]">
       <div className="mb-2.5 flex items-baseline justify-between">
-        <h3 className="text-[12px] font-medium tracking-[-0.005em] text-ink-2">
-          Consommation jour par jour
-        </h3>
+        <h3 className="text-[12px] font-medium tracking-[-0.005em] text-ink-2">Consommation jour par jour</h3>
         <div className="flex gap-5 text-[12px] text-ink-3">
           <span>
             Moyenne <span className="num text-ink">{euro(avg)} €</span>/jour
@@ -105,7 +99,10 @@ const DailySparkline = () => {
         </div>
       </div>
 
-      <div key={curveKey} className="pfa-anim-draw-x relative">
+      <div
+        key={curveKey}
+        className="pfa-anim-draw-x relative"
+      >
         <LineChart
           id="dash-spark"
           height={110}
@@ -153,8 +150,8 @@ const DailySparkline = () => {
       </div>
 
       <div className="num mt-1 flex justify-between text-[9px] text-ink-4">
-        {ticks.map((d, i) => (
-          <span key={i}>{String(d).padStart(2, "0")}</span>
+        {ticks.map((d) => (
+          <span key={d}>{String(d).padStart(2, "0")}</span>
         ))}
       </div>
     </div>

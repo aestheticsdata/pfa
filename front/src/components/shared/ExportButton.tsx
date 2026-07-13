@@ -1,9 +1,9 @@
 "use client";
 
-import { toast } from "sonner";
-import { Download } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { cn } from "@lib/utils";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
 
 interface ExportButtonProps {
   className?: string;
@@ -17,9 +17,7 @@ const ExportButton = ({ className }: ExportButtonProps) => (
     variant="outline"
     size="sm"
     className={cn(className)}
-    onClick={() =>
-      toast("Export à venir", { description: "Bientôt disponible." })
-    }
+    onClick={() => toast("Export à venir", { description: "Bientôt disponible." })}
   >
     <Download className="size-3.5" />
     Exporter

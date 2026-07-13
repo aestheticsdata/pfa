@@ -1,12 +1,13 @@
 "use client";
 
 import { WEEKLY } from "@components/spendings/config/constants";
-import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
-import type { BarHover } from "@lib/dataviz";
 import { CategoryBarTooltip, CategoryTrend } from "@lib/dataviz";
 import { useState } from "react";
+
+import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
+import type { BarHover } from "@lib/dataviz";
 
 const formatAmount = (amount: number) =>
   Number(amount).toLocaleString("fr-FR", {
@@ -57,8 +58,16 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
 
       <div className="sp-cat-list">
         {rows.map((r) => (
-          <button key={r.key} type="button" onClick={() => setSelected(r)} className="sp-cat-row w-full text-left">
-            <span className="size-2 rounded-[2px]" style={{ background: r.color }} />
+          <button
+            key={r.key}
+            type="button"
+            onClick={() => setSelected(r)}
+            className="sp-cat-row w-full text-left"
+          >
+            <span
+              className="size-2 rounded-[2px]"
+              style={{ background: r.color }}
+            />
             <span className="flex min-w-0 items-baseline gap-2">
               <span className="truncate capitalize text-ink">{r.name}</span>
               <span className="num shrink-0 rounded-full border border-line-soft bg-background px-1.75 text-[10.5px] leading-[1.55] text-ink-3">

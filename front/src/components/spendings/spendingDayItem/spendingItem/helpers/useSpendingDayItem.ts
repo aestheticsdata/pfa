@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import type { SpendingListItem } from "@components/spendings/types";
 
 const useSpendingDayItem = () => {
@@ -39,7 +40,7 @@ const useSpendingDayItem = () => {
     closeModal,
     toggleAddSpending,
     editSpending,
-  }
-}
+  };
+};
 
 export default useSpendingDayItem;

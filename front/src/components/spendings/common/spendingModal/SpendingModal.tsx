@@ -7,16 +7,13 @@ import DateField from "@components/spendings/common/spendingModal/fields/DateFie
 import LabelField from "@components/spendings/common/spendingModal/fields/LabelField";
 import ReceiptField from "@components/spendings/common/spendingModal/fields/ReceiptField";
 import { mockLabelSuggestions } from "@components/spendings/common/spendingModal/mockSuggestions";
-import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import { spendingSchema } from "@components/spendings/common/spendingModal/schema";
 import Toggle from "@components/spendings/common/spendingModal/Toggle";
 import useSpendingSubmit from "@components/spendings/common/spendingModal/useSpendingSubmit";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 import useCategories from "@components/spendings/services/useCategories";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendings from "@components/spendings/services/useSpendings";
-import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,6 +24,10 @@ import subMonths from "date-fns/subMonths";
 import { Copy } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+
+import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";
+import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
 
 interface SpendingModalProps {
   date?: Date;
@@ -173,7 +174,10 @@ const SpendingModal = ({
   const submitLabel = isEditing ? "Enregistrer" : "Ajouter la dépense";
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && closeModal()}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => !isOpen && closeModal()}
+    >
       <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[480px]">
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-[22px] py-[18px] text-left">
           <DialogTitle className="pr-8 text-[15px] font-semibold tracking-[-0.01em] text-ink">{title}</DialogTitle>
@@ -183,7 +187,12 @@ const SpendingModal = ({
           onSubmit={handleSubmit(onSubmit)}
           className="flex max-h-[min(78vh,720px)] flex-col gap-[18px] overflow-y-auto px-[22px] py-[22px]"
         >
-          <DateField register={register} getValues={getValues} setValue={setValue} asRecurring={asRecurring} />
+          <DateField
+            register={register}
+            getValues={getValues}
+            setValue={setValue}
+            asRecurring={asRecurring}
+          />
 
           <LabelField
             register={register}
@@ -194,7 +203,10 @@ const SpendingModal = ({
             setLabelQuery={setLabelQuery}
           />
 
-          <AmountField register={register} errors={errors} />
+          <AmountField
+            register={register}
+            errors={errors}
+          />
 
           {/* Category is hidden for recurrings: the backend/DB have no notion of
               a category on a recurring (no column, postRecurringController drops
@@ -215,12 +227,19 @@ const SpendingModal = ({
 
           <div className="flex flex-wrap gap-2.5 pt-0.5">
             {canToggleRecurring && (
-              <Toggle active={isRecurringToggle} onClick={() => setIsRecurringToggle((v) => !v)}>
+              <Toggle
+                active={isRecurringToggle}
+                onClick={() => setIsRecurringToggle((v) => !v)}
+              >
                 Récurrente mensuelle
               </Toggle>
             )}
             {/* Receipt is not applicable to a recurring — disabled, not removed. */}
-            <Toggle active={isReceiptToggle} onClick={() => setIsReceiptToggle((v) => !v)} disabled={asRecurring}>
+            <Toggle
+              active={isReceiptToggle}
+              onClick={() => setIsReceiptToggle((v) => !v)}
+              disabled={asRecurring}
+            >
               Joindre un reçu
             </Toggle>
           </div>
@@ -278,7 +297,11 @@ const SpendingModal = ({
             >
               Annuler
             </Button>
-            <Button type="submit" variant="primary" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={isSubmitting}
+            >
               {submitLabel}
             </Button>
           </DialogFooter>

@@ -82,6 +82,7 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
           preserveAspectRatio="none"
           className="block"
           role="img"
+          aria-label="Graphique d'évolution"
         >
           <defs>
             <linearGradient
@@ -112,9 +113,9 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
           />
 
           {/* dashed grid — drawn over the fill so it stays visible */}
-          {hGrid.map((v, i) => (
+          {hGrid.map((v) => (
             <line
-              key={`h-${i}`}
+              key={`h-${v}`}
               x1={PAD.left}
               x2={W - PAD.right}
               y1={sy(v)}
@@ -126,9 +127,9 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
               vectorEffect="non-scaling-stroke"
             />
           ))}
-          {vGrid.map((x, i) => (
+          {vGrid.map((x) => (
             <line
-              key={`v-${i}`}
+              key={`v-${x}`}
               x1={x}
               x2={x}
               y1={PAD.top}

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { cn } from "@lib/utils";
+import { ImageIcon, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 import type { SpendingItem } from "@components/spendings/types";
 
@@ -70,12 +70,22 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
       ) : (
         <>
           <span className="sp-t-label">
-            <span className="pill" style={{ background: color }} />
-            <span className="lbl-txt" title={spending.label}>
+            <span
+              className="pill"
+              style={{ background: color }}
+            />
+            <span
+              className="lbl-txt"
+              title={spending.label}
+            >
               {spending.label}
             </span>
             {hasInvoice && (
-              <span className="recipt" aria-label="reçu joint">
+              <span
+                className="recipt"
+                role="img"
+                aria-label="reçu joint"
+              >
                 <ImageIcon className="size-3.5" />
               </span>
             )}
@@ -83,7 +93,10 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
 
           {category && (
             <span className="sp-t-tag">
-              <span className="sp-tag" style={{ color }}>
+              <span
+                className="sp-tag"
+                style={{ color }}
+              >
                 {category}
               </span>
             </span>

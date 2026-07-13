@@ -59,7 +59,7 @@ const BarChart = ({
           const y = i * band + (band - barH) / 2;
           const w = frac * width;
           return (
-            <g key={i}>
+            <g key={b.label}>
               {trackColor && (
                 <rect
                   x={0}
@@ -86,7 +86,7 @@ const BarChart = ({
         const x = i * band + (band - barW) / 2;
         const h = frac * height;
         return (
-          <g key={i}>
+          <g key={b.label}>
             {trackColor && (
               <rect
                 x={x}

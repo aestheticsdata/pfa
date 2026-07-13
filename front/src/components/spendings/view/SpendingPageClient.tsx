@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import SpendingView from "@components/spendings/view/SpendingView";
-import useGlobalStore from "@components/shared/globalStore";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { DATE_QUERY_PARAM, buildSpendingsPath, getTodayIsoDate, isValidIsoDate } from "@helpers/dateRoute";
+import useGlobalStore from "@components/shared/globalStore";
+import SpendingView from "@components/spendings/view/SpendingView";
+import { buildSpendingsPath, DATE_QUERY_PARAM, getTodayIsoDate, isValidIsoDate } from "@helpers/dateRoute";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function SpendingPageClient() {
   const { setIsCalendarVisible } = useGlobalStore();

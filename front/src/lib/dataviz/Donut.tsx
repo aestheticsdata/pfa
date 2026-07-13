@@ -66,6 +66,7 @@ const Donut = ({
     }
     body = wedges.map((w, i) => (
       <path
+        // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional pie wedges with no stable unique field
         key={i}
         d={w.d}
         fill={w.color}
@@ -93,6 +94,7 @@ const Donut = ({
         />
         {arcs.map((a, i) => (
           <circle
+            // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional ring arcs with no stable unique field
             key={i}
             cx={CX}
             cy={CY}

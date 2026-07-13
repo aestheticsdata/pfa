@@ -1,40 +1,24 @@
 "use client";
 
+import { Button } from "@components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { cn } from "@lib/utils";
+import currencyCodes from "@src/currency-codes.json";
+import getSymbolFromCurrency from "currency-symbol-map";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
-import getSymbolFromCurrency from "currency-symbol-map";
-import currencyCodes from "@src/currency-codes.json";
-import { Button } from "@components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@components/ui/select";
-import { cn } from "@lib/utils";
+
 import type { SharedLoginFormProps } from "@src/components/shared/sharedLoginForm/interfaces";
 
-const buildSchema = (
-  needEmail: boolean,
-  needPassword: boolean,
-  needConfirm: boolean,
-  needCurrency: boolean,
-) =>
+const buildSchema = (needEmail: boolean, needPassword: boolean, needConfirm: boolean, needCurrency: boolean) =>
   z
     .object({
-      email: needEmail
-        ? z.string().min(1, "Email requis").email("Email invalide")
-        : z.string().optional(),
-      password: needPassword
-        ? z.string().min(1, "Mot de passe requis")
-        : z.string().optional(),
-      confirmPassword: needConfirm
-        ? z.string().min(1, "Confirmation requise")
-        : z.string().optional(),
+      email: needEmail ? z.string().min(1, "Email requis").email("Email invalide") : z.string().optional(),
+      password: needPassword ? z.string().min(1, "Mot de passe requis") : z.string().optional(),
+      confirmPassword: needConfirm ? z.string().min(1, "Confirmation requise") : z.string().optional(),
       currency: needCurrency ? z.string().min(1) : z.string().optional(),
     })
     .refine((d) => !needConfirm || d.password === d.confirmPassword, {
@@ -53,7 +37,10 @@ const INPUT_BASE =
  * between the fields and the submit button.
  */
 const FormMessage = ({ message }: { message?: string | null }) => (
-  <p role="alert" className="min-h-5 text-[13px] leading-5 text-neg">
+  <p
+    role="alert"
+    className="min-h-5 text-[13px] leading-5 text-neg"
+  >
     {message ?? ""}
   </p>
 );
@@ -103,10 +90,7 @@ const SharedLoginForm = ({
   // The server error (injected by the parent) takes precedence over the first
   // field-validation error; both surface in the single FormMessage slot below.
   const fieldError =
-    errors.email?.message ||
-    errors.password?.message ||
-    errors.confirmPassword?.message ||
-    errors.currency?.message;
+    errors.email?.message || errors.password?.message || errors.confirmPassword?.message || errors.currency?.message;
   const formMessage = serverError || (fieldError ? String(fieldError) : null);
 
   const clearFieldError = (field: keyof FormValues) => () => {
@@ -121,7 +105,10 @@ const SharedLoginForm = ({
     >
       {displayEmailField && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className={LABEL}>
+          <label
+            htmlFor="email"
+            className={LABEL}
+          >
             Email
           </label>
           <input
@@ -138,7 +125,10 @@ const SharedLoginForm = ({
 
       {displayPasswordField && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className={LABEL}>
+          <label
+            htmlFor="password"
+            className={LABEL}
+          >
             Mot de passe
           </label>
           <div className="relative">
@@ -146,9 +136,7 @@ const SharedLoginForm = ({
               id="password"
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
-              autoComplete={
-                displayConfirmPasswordField ? "new-password" : "current-password"
-              }
+              autoComplete={displayConfirmPasswordField ? "new-password" : "current-password"}
               className={cn(INPUT_BASE, "pr-[42px]")}
               aria-invalid={!!errors.password}
               {...register("password", { onChange: clearFieldError("password") })}
@@ -158,17 +146,9 @@ const SharedLoginForm = ({
               onClick={() => setShowPassword((p) => !p)}
               className="absolute right-[7px] top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-md text-ink-4 transition-colors hover:bg-white/[0.06] hover:text-ink-2"
               tabIndex={-1}
-              aria-label={
-                showPassword
-                  ? "Masquer le mot de passe"
-                  : "Afficher le mot de passe"
-              }
+              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
             >
-              {showPassword ? (
-                <EyeOff className="size-[15px]" />
-              ) : (
-                <Eye className="size-[15px]" />
-              )}
+              {showPassword ? <EyeOff className="size-[15px]" /> : <Eye className="size-[15px]" />}
             </button>
           </div>
         </div>
@@ -176,7 +156,10 @@ const SharedLoginForm = ({
 
       {displayConfirmPasswordField && (
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="confirmPassword" className={LABEL}>
+          <label
+            htmlFor="confirmPassword"
+            className={LABEL}
+          >
             Confirmer le mot de passe
           </label>
           <div className="relative">
@@ -196,17 +179,9 @@ const SharedLoginForm = ({
               onClick={() => setShowConfirm((p) => !p)}
               className="absolute right-[7px] top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-md text-ink-4 transition-colors hover:bg-white/[0.06] hover:text-ink-2"
               tabIndex={-1}
-              aria-label={
-                showConfirm
-                  ? "Masquer le mot de passe"
-                  : "Afficher le mot de passe"
-              }
+              aria-label={showConfirm ? "Masquer le mot de passe" : "Afficher le mot de passe"}
             >
-              {showConfirm ? (
-                <EyeOff className="size-[15px]" />
-              ) : (
-                <Eye className="size-[15px]" />
-              )}
+              {showConfirm ? <EyeOff className="size-[15px]" /> : <Eye className="size-[15px]" />}
             </button>
           </div>
         </div>
@@ -214,19 +189,28 @@ const SharedLoginForm = ({
 
       {displayCurrencyField && (
         <div className="flex flex-col gap-1.5">
-          <label className={LABEL}>Devise</label>
+          <label
+            htmlFor="currency"
+            className={LABEL}
+          >
+            Devise
+          </label>
           <Select
             value={currency || "EUR"}
-            onValueChange={(value) =>
-              setValue("currency", value, { shouldDirty: true })
-            }
+            onValueChange={(value) => setValue("currency", value, { shouldDirty: true })}
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger
+              id="currency"
+              className="w-full"
+            >
               <SelectValue placeholder="Devise" />
             </SelectTrigger>
             <SelectContent className="max-h-72">
               {currencyCodes.map((c) => (
-                <SelectItem key={c.code} value={c.code}>
+                <SelectItem
+                  key={c.code}
+                  value={c.code}
+                >
                   {c.name} : {getSymbolFromCurrency(c.code)}
                 </SelectItem>
               ))}
@@ -244,7 +228,12 @@ const SharedLoginForm = ({
         className="h-auto w-full rounded-[10px] py-3 text-[14px] tracking-[0.01em]"
       >
         {buttonTitle}
-        {submitIcon && <ArrowRight className="size-3.5" strokeWidth={2.5} />}
+        {submitIcon && (
+          <ArrowRight
+            className="size-3.5"
+            strokeWidth={2.5}
+          />
+        )}
       </Button>
     </form>
   );

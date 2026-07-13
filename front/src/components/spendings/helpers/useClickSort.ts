@@ -1,11 +1,8 @@
-import { useState } from "react";
+import { SORT_BY_CATEGORY, SORT_BY_LABEL } from "@components/spendings/helpers/sortConstants";
 import _ from "lodash";
-import {
-  SORT_BY_LABEL,
-  SORT_BY_CATEGORY,
-  SORT_BY_AMOUNT,
-} from "@components/spendings/helpers/sortConstants";
+import { useState } from "react";
 
+import type { SORT_BY_AMOUNT } from "@components/spendings/helpers/sortConstants";
 import type { SpendingListItem } from "@components/spendings/types";
 
 type SortOrder = "asc" | "desc";
@@ -25,11 +22,7 @@ const getSortedSpendings = (spendings: SpendingListItem[], { field, order }: Sor
   }
 
   if (field === SORT_BY_CATEGORY) {
-    return _.orderBy(
-      spendings,
-      (entry) => ("category" in entry ? entry.category : "") ?? "",
-      [order]
-    );
+    return _.orderBy(spendings, (entry) => ("category" in entry ? entry.category : "") ?? "", [order]);
   }
 
   return _.orderBy(spendings, (entry) => entry.amount, [order]);
@@ -60,6 +53,6 @@ const useClickSort = (spendings: SpendingListItem[]) => {
     onClickSort,
     spendingsByDaySorted,
   };
-}
+};
 
 export default useClickSort;

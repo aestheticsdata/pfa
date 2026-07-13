@@ -58,6 +58,7 @@ const AnimatedNumber = ({
 
   return (
     <span
+      role="img"
       className={cn("tabular-nums", className)}
       style={{ color, fontSize, fontWeight: weight, ...style }}
       aria-label={ariaLabel ?? `${prefix}${finalText}${suffix}`}

@@ -1,11 +1,11 @@
 "use client";
 
-import InsightsRibbon from "@components/dashboard/sections/InsightsRibbon";
-import ForecastStrip from "@components/dashboard/sections/ForecastStrip";
 import BudgetHero from "@components/dashboard/sections/BudgetHero";
-import WeeklyCeiling from "@components/dashboard/sections/WeeklyCeiling";
 import CategoryBreakdown from "@components/dashboard/sections/CategoryBreakdown";
 import FixedExpenses from "@components/dashboard/sections/FixedExpenses";
+import ForecastStrip from "@components/dashboard/sections/ForecastStrip";
+import InsightsRibbon from "@components/dashboard/sections/InsightsRibbon";
+import WeeklyCeiling from "@components/dashboard/sections/WeeklyCeiling";
 
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 

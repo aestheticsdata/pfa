@@ -1,9 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { ChevronDown, KeyRound, LogOut } from "lucide-react";
 import { useAuth } from "@auth/context/AuthContext";
-import useRequestHelper from "@helpers/useRequestHelper";
+import { ROUTES } from "@components/shared/config/constants";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,16 +9,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
-import { ROUTES } from "@components/shared/config/constants";
+import useRequestHelper from "@helpers/useRequestHelper";
+import { ChevronDown, KeyRound, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const initialsFromEmail = (email?: string): string => {
   if (!email) return "?";
   const local = email.split("@")[0] ?? "";
   const parts = local.split(/[.\-_]+/).filter(Boolean);
-  const letters =
-    parts.length >= 2
-      ? `${parts[0][0]}${parts[1][0]}`
-      : local.slice(0, 2);
+  const letters = parts.length >= 2 ? `${parts[0][0]}${parts[1][0]}` : local.slice(0, 2);
   return (letters || "?").toUpperCase();
 };
 
@@ -50,12 +47,14 @@ const UserMenu = () => {
         <span className="grid size-[30px] flex-shrink-0 place-items-center rounded-full border border-line bg-bg-hi text-[11px] font-medium text-ink-2">
           {initialsFromEmail(user?.email)}
         </span>
-        <span className="hidden max-w-[200px] truncate text-[13px] text-ink-2 xl:inline">
-          {user?.email}
-        </span>
+        <span className="hidden max-w-[200px] truncate text-[13px] text-ink-2 xl:inline">{user?.email}</span>
         <ChevronDown className="size-4 flex-shrink-0 text-ink-4 transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={12} className="w-64 p-1">
+      <DropdownMenuContent
+        align="end"
+        sideOffset={12}
+        className="w-64 p-1"
+      >
         <DropdownMenuItem
           onClick={() => router.push(ROUTES.changePassword.path)}
           className="cursor-pointer gap-3 px-3 py-2.5 text-[13px] text-ink-2"

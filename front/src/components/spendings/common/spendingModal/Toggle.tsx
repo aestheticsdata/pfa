@@ -1,5 +1,6 @@
 import { cn } from "@lib/utils";
 import { Check } from "lucide-react";
+
 import type { ReactNode } from "react";
 
 const Toggle = ({
@@ -30,7 +31,12 @@ const Toggle = ({
         active ? "border-accent-strong bg-accent-strong text-[oklch(0.15_0.02_180)]" : "border-line bg-bg-hi",
       )}
     >
-      {active && <Check className="size-2.5" strokeWidth={3} />}
+      {active && (
+        <Check
+          className="size-2.5"
+          strokeWidth={3}
+        />
+      )}
     </span>
     {children}
   </button>
