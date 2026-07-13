@@ -6,12 +6,13 @@ import { MONTHLY } from "@components/spendings/config/constants";
 import useCharts from "@components/spendings/services/useCharts";
 import useSpendings from "@components/spendings/services/useSpendings";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
-import type { BarHover, CategoryTrendData } from "@lib/dataviz";
 import { CategoryBarTooltip, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
-import type { ChartsCategory } from "@src/schemas/stats";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { useMemo, useState } from "react";
+
+import type { BarHover, CategoryTrendData } from "@lib/dataviz";
+import type { ChartsCategory } from "@src/schemas/stats";
 
 const FALLBACK_COLOR = "#94a3b8";
 
@@ -90,7 +91,10 @@ const CategoryBreakdown = () => {
                 onClick={() => setSelected(row.category)}
                 className="grid cursor-pointer grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line-soft px-1 py-3 text-left text-[13.5px] transition-colors last:border-b-0 hover:bg-bg-hi sm:grid-cols-[10px_minmax(0,1fr)_58px_84px_58px]"
               >
-                <span className="size-2 rounded-[2px]" style={{ background: row.color }} />
+                <span
+                  className="size-2 rounded-[2px]"
+                  style={{ background: row.color }}
+                />
                 <span className="flex items-center gap-2 truncate">
                   <span className="truncate capitalize text-ink">{row.name}</span>
                   {row.count > 0 && (
@@ -99,7 +103,10 @@ const CategoryBreakdown = () => {
                 </span>
                 <span className="num hidden text-right text-ink-2 sm:block">{pct1(row.pct)} %</span>
                 <span className="num text-right text-ink">{euro(row.total)} €</span>
-                <CategoryTrend {...row.trend} className="hidden sm:flex" />
+                <CategoryTrend
+                  {...row.trend}
+                  className="hidden sm:flex"
+                />
               </button>
             ))}
           </div>
@@ -108,7 +115,12 @@ const CategoryBreakdown = () => {
         <div className="py-10 text-center text-[12.5px] text-ink-4">Aucune dépense ce mois.</div>
       )}
 
-      {hover && <CategoryBarTooltip point={{ x: hover.x, y: hover.y }} datum={rows[hover.target]} />}
+      {hover && (
+        <CategoryBarTooltip
+          point={{ x: hover.x, y: hover.y }}
+          datum={rows[hover.target]}
+        />
+      )}
 
       {selected && (
         <SpendingsListModal

@@ -3,18 +3,18 @@
 // MOCK — the end-of-month projection is a synthetic average-forward model
 // (spent / days-elapsed × days-in-month). Spent + budget are real.
 
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import getDate from "date-fns/getDate";
-import isSameMonth from "date-fns/isSameMonth";
-import isBefore from "date-fns/isBefore";
-import startOfMonth from "date-fns/startOfMonth";
-import endOfMonth from "date-fns/endOfMonth";
-import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
+import { euro0 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
-import { euro0 } from "@components/dashboard/format";
+import endOfMonth from "date-fns/endOfMonth";
+import format from "date-fns/format";
+import getDate from "date-fns/getDate";
+import getDaysInMonth from "date-fns/getDaysInMonth";
+import isBefore from "date-fns/isBefore";
+import isSameMonth from "date-fns/isSameMonth";
+import fr from "date-fns/locale/fr";
+import startOfMonth from "date-fns/startOfMonth";
 
 const ForecastStrip = () => {
   const { from } = useDatePickerWrapperStore();
@@ -33,8 +33,7 @@ const ForecastStrip = () => {
   const dayOfMonth = isThisMonth ? getDate(now) : isPastMonth ? daysInMonth : 0;
   // "as of" date shown next to "Dépensé"
   const asOf = isThisMonth ? now : isPastMonth ? endOfMonth(monthRef) : startOfMonth(monthRef);
-  const projection =
-    dayOfMonth > 0 ? (monthlyTotal / dayOfMonth) * daysInMonth : monthlyTotal; // MOCK
+  const projection = dayOfMonth > 0 ? (monthlyTotal / dayOfMonth) * daysInMonth : monthlyTotal; // MOCK
   const spentPct = budget > 0 ? Math.round((monthlyTotal / budget) * 100) : 0;
   const delta = projection - budget;
 
@@ -73,8 +72,7 @@ const ForecastStrip = () => {
               <span
                 className="inline-block h-2 w-3 rounded-[2px]"
                 style={{
-                  background:
-                    "linear-gradient(90deg,var(--accent-d),var(--accent-strong))",
+                  background: "linear-gradient(90deg,var(--accent-d),var(--accent-strong))",
                   opacity: 0.55,
                 }}
               />
@@ -84,8 +82,7 @@ const ForecastStrip = () => {
               <span
                 className="inline-block h-2 w-3 rounded-[2px] border border-[var(--accent-d)]"
                 style={{
-                  background:
-                    "repeating-linear-gradient(45deg,transparent 0 3px,var(--accent-d) 3px 6px)",
+                  background: "repeating-linear-gradient(45deg,transparent 0 3px,var(--accent-d) 3px 6px)",
                 }}
               />
               projection
@@ -96,9 +93,7 @@ const ForecastStrip = () => {
       </div>
 
       <div className="flex flex-col items-start gap-1 sm:items-end sm:text-right">
-        <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
-          Projection fin de mois
-        </span>
+        <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">Projection fin de mois</span>
         <AnimatedNumber
           value={projection}
           decimals={0}

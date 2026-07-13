@@ -1,14 +1,14 @@
 "use client";
 
-import addMonths from "date-fns/addMonths";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import addDays from "date-fns/addDays";
-import startOfMonth from "date-fns/startOfMonth";
-import endOfMonth from "date-fns/endOfMonth";
+import addMonths from "date-fns/addMonths";
 import eachDayOfInterval from "date-fns/eachDayOfInterval";
+import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
+import startOfMonth from "date-fns/startOfMonth";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
-import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 
 /**
  * Month period selector shown in the app header on the Dashboard (mirrors the

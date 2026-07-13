@@ -6,7 +6,6 @@ export const euro = (n: number) =>
     maximumFractionDigits: 2,
   });
 
-export const euro0 = (n: number) =>
-  Math.round(Number(n)).toLocaleString("fr-FR");
+export const euro0 = (n: number) => Math.round(Number(n)).toLocaleString("fr-FR");
 
 export const pct1 = (n: number) => n.toFixed(1).replace(".", ",");

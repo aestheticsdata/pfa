@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { FocusEvent, KeyboardEvent } from "react";
-import { useForm } from "react-hook-form";
-import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
+import EditGlyph from "@components/dashboard/EditGlyph";
+import { euro, euro0 } from "@components/dashboard/format";
+import DailySparkline from "@components/dashboard/sections/DailySparkline";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { Input } from "@components/ui/input";
 import { Donut, useCountUp } from "@lib/dataviz";
-import DailySparkline from "@components/dashboard/sections/DailySparkline";
-import EditGlyph from "@components/dashboard/EditGlyph";
-import { euro, euro0 } from "@components/dashboard/format";
 import { cn } from "@lib/utils";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import type { FocusEvent, KeyboardEvent } from "react";
 
 interface SalaryForm {
   initialAmount: string;
@@ -40,8 +41,7 @@ const BudgetHero = () => {
   const initialAmount = Number(dashboard?.initialAmount ?? 0);
   const fixed = recurrings?.reduce((a, r) => a + Number(r.amount), 0) ?? 0;
   const variable = Math.max(0, monthlyTotal - fixed);
-  const usedPct =
-    initialAmount > 0 ? Math.min(100, (monthlyTotal / initialAmount) * 100) : 0;
+  const usedPct = initialAmount > 0 ? Math.min(100, (monthlyTotal / initialAmount) * 100) : 0;
   const over = remaining < 0;
 
   // count both figures up from 0 (mount, data load, month change)
@@ -92,9 +92,7 @@ const BudgetHero = () => {
           >
             {over && "−"}
             {amountInt}
-            <span className="text-[26px] font-normal text-ink-3 sm:text-[36px]">
-              ,{amountDec} €
-            </span>
+            <span className="text-[26px] font-normal text-ink-3 sm:text-[36px]">,{amountDec} €</span>
           </div>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-ink-3">
@@ -108,9 +106,7 @@ const BudgetHero = () => {
                   aria-label="Modifier le budget alloué"
                   title="Modifier le montant initial"
                 >
-                  <span className="num text-ink-2">
-                    {euro0(initialAmount)} €
-                  </span>
+                  <span className="num text-ink-2">{euro0(initialAmount)} €</span>
                   <EditGlyph className="size-[11px] text-ink-4 transition-colors group-hover:text-accent-strong" />
                 </button>
                 alloués
@@ -167,9 +163,7 @@ const BudgetHero = () => {
                 {Math.round(animatedPct)}
                 <span className="text-[18px] text-ink-3">%</span>
               </div>
-              <div className="mt-0.5 text-[10px] uppercase tracking-[0.1em] text-ink-4">
-                utilisé
-              </div>
+              <div className="mt-0.5 text-[10px] uppercase tracking-[0.1em] text-ink-4">utilisé</div>
             </div>
           </Donut>
           <div className="flex gap-4 text-[11px] text-ink-3">
@@ -179,8 +173,7 @@ const BudgetHero = () => {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="size-2 rounded-[2px] bg-accent-strong" />
-              Variables{" "}
-              <span className="num text-ink-2">{euro0(variable)}</span>
+              Variables <span className="num text-ink-2">{euro0(variable)}</span>
             </span>
           </div>
         </div>

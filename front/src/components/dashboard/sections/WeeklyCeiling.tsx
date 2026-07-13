@@ -1,22 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { FocusEvent, KeyboardEvent } from "react";
-import { useForm } from "react-hook-form";
-import getDate from "date-fns/getDate";
-import startOfMonth from "date-fns/startOfMonth";
-import isAfter from "date-fns/isAfter";
-import isBefore from "date-fns/isBefore";
-import format from "date-fns/format";
-import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import useDashboard from "@components/spendings/services/useDashboard";
-import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
-import useWeeklyStatsHelper from "@components/spendings/helpers/useWeeklyStatsHelper";
-import { Input } from "@components/ui/input";
-import { ProgressTrack } from "@lib/dataviz";
 import EditGlyph from "@components/dashboard/EditGlyph";
 import { euro, euro0 } from "@components/dashboard/format";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import useWeeklyStatsHelper from "@components/spendings/helpers/useWeeklyStatsHelper";
+import useDashboard from "@components/spendings/services/useDashboard";
+import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
+import { Input } from "@components/ui/input";
+import { ProgressTrack } from "@lib/dataviz";
 import { cn } from "@lib/utils";
+import format from "date-fns/format";
+import getDate from "date-fns/getDate";
+import isAfter from "date-fns/isAfter";
+import isBefore from "date-fns/isBefore";
+import startOfMonth from "date-fns/startOfMonth";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
+import type { FocusEvent, KeyboardEvent } from "react";
 
 interface CeilingForm {
   initialCeiling: string;
@@ -44,26 +45,19 @@ const WeeklyCeiling = () => {
   const slices = from ? makeSlices(makeRange(from)) : [];
   const stats = weeklyStats ?? [];
   const nonZero = stats.filter(Boolean);
-  const avg = nonZero.length
-    ? nonZero.reduce((a, b) => a + b, 0) / nonZero.length
-    : 0;
+  const avg = nonZero.length ? nonZero.reduce((a, b) => a + b, 0) / nonZero.length : 0;
   const scaleMax = ceiling > 0 ? ceiling * 3 : Math.max(1, ...stats);
   const canEdit = dashboard != null;
   // remount key → replays the bar grow-from-zero on month change / data load
   const monthKey = from ? format(from, "yyyy-MM") : "none";
 
-  const monthIsFuture = from
-    ? isAfter(startOfMonth(from), startOfMonth(now))
-    : false;
-  const monthIsPast = from
-    ? isBefore(startOfMonth(from), startOfMonth(now))
-    : false;
+  const monthIsFuture = from ? isAfter(startOfMonth(from), startOfMonth(now)) : false;
+  const monthIsPast = from ? isBefore(startOfMonth(from), startOfMonth(now)) : false;
 
   const isFutureWeek = (slice: string | number): boolean => {
     if (monthIsFuture) return true;
     if (monthIsPast) return false;
-    const startDay =
-      typeof slice === "number" ? slice : parseInt(String(slice), 10);
+    const startDay = typeof slice === "number" ? slice : parseInt(String(slice), 10);
     return Number.isFinite(startDay) && startDay > getDate(now);
   };
 
@@ -83,9 +77,7 @@ const WeeklyCeiling = () => {
   return (
     <section className="pfa-card flex flex-col gap-4 px-6 py-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">
-          Plafond hebdomadaire
-        </h2>
+        <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">Plafond hebdomadaire</h2>
         {!editing ? (
           <button
             type="button"
@@ -93,9 +85,7 @@ const WeeklyCeiling = () => {
             onClick={() => canEdit && setEditing(true)}
             className={cn(
               "group inline-flex items-center gap-1 border-b border-dashed pb-px text-[12px] transition-colors",
-              canEdit
-                ? "border-ink-4 text-ink-2 hover:border-accent-strong"
-                : "border-transparent opacity-50",
+              canEdit ? "border-ink-4 text-ink-2 hover:border-accent-strong" : "border-transparent opacity-50",
             )}
             title="Modifier le plafond"
           >
@@ -105,7 +95,11 @@ const WeeklyCeiling = () => {
             )}
           </button>
         ) : (
-          <form key={ceiling} onBlur={closeIfLeft} onSubmit={handleSubmit(onSubmit)}>
+          <form
+            key={ceiling}
+            onBlur={closeIfLeft}
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <Input
               defaultValue={ceiling}
               className="num h-7 w-24 border-accent-d bg-background text-ink"
@@ -121,23 +115,22 @@ const WeeklyCeiling = () => {
 
       <div className="flex flex-col">
         {stats.map((weekTotal, i) => {
+          const weekLabel = slices[i] ?? `S${i + 1}`;
           const current = from ? isCurrentWeek(slices[i], from) : false;
           const over = ceiling > 0 && weekTotal > ceiling;
           const future = isFutureWeek(slices[i]);
           const delta = weekTotal - ceiling;
           return (
             <div
-              key={i}
+              key={`${monthKey}-${weekLabel}`}
               className={cn(
                 "grid grid-cols-[52px_1fr_74px] items-center gap-3 border-b border-line-soft py-[11px] text-[13px] last:border-b-0",
                 current && "font-semibold",
               )}
             >
-              <span className="num text-[12px] text-ink-2">
-                {slices[i] ?? `S${i + 1}`}
-              </span>
+              <span className="num text-[12px] text-ink-2">{slices[i] ?? `S${i + 1}`}</span>
               <ProgressTrack
-                key={`${monthKey}-${i}-${weekTotal > 0 ? "d" : "e"}`}
+                key={`${monthKey}-${weekLabel}-${weekTotal > 0 ? "d" : "e"}`}
                 value={weekTotal}
                 max={scaleMax}
                 ceiling={ceiling > 0 ? ceiling : undefined}
@@ -148,24 +141,14 @@ const WeeklyCeiling = () => {
                 animationDelay={i * 0.07}
               />
               <span className="text-right">
-                <span
-                  className={cn(
-                    "num block font-medium",
-                    over ? "text-neg" : "text-ink",
-                  )}
-                >
+                <span className={cn("num block font-medium", over ? "text-neg" : "text-ink")}>
                   {future ? "—" : `${euro(weekTotal)} €`}
                 </span>
                 {future ? (
                   <span className="block text-[11px] text-ink-4">à venir</span>
                 ) : (
                   ceiling > 0 && (
-                    <span
-                      className={cn(
-                        "num block text-[11px]",
-                        delta > 0 ? "text-neg" : "text-accent-strong",
-                      )}
-                    >
+                    <span className={cn("num block text-[11px]", delta > 0 ? "text-neg" : "text-accent-strong")}>
                       {delta > 0 ? `+${euro0(delta)} €` : `${euro0(delta)} €`}
                     </span>
                   )
@@ -174,23 +157,14 @@ const WeeklyCeiling = () => {
             </div>
           );
         })}
-        {stats.length === 0 && (
-          <div className="py-6 text-center text-[12.5px] text-ink-4">
-            Pas encore de données.
-          </div>
-        )}
+        {stats.length === 0 && <div className="py-6 text-center text-[12.5px] text-ink-4">Pas encore de données.</div>}
       </div>
 
       <div className="flex items-center justify-between border-t border-line pt-3.5 text-[12px] text-ink-3">
         <span>Moyenne hebdo</span>
         <span className="num text-ink">
           {euro(avg)} €
-          {ceiling > 0 && (
-            <span className="text-ink-4">
-              {" "}
-              · {Math.round((avg / ceiling) * 100)}% du plafond
-            </span>
-          )}
+          {ceiling > 0 && <span className="text-ink-4"> · {Math.round((avg / ceiling) * 100)}% du plafond</span>}
         </span>
       </div>
 
