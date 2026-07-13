@@ -1,27 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import StatMiniChart from "@components/statistics/StatMiniChart";
+import { euro0 } from "@components/dashboard/format";
 import GlowCard from "@components/shared/GlowCard";
-import {
-  MONTHS_FR,
-  cumulative,
-  elapsedMonths,
-  maxIndex,
-  monthlyTotals,
-  perCategoryTotals,
-  yearTotal,
-} from "@components/statistics/helpers/statisticsData";
 import {
   biggestExceptional,
   exceptionalMonthly,
   exceptionalTotal,
 } from "@components/statistics/helpers/exceptionalsData";
-import { euro0 } from "@components/dashboard/format";
+import {
+  cumulative,
+  elapsedMonths,
+  MONTHS_FR,
+  maxIndex,
+  monthlyTotals,
+  perCategoryTotals,
+  yearTotal,
+} from "@components/statistics/helpers/statisticsData";
+import StatMiniChart from "@components/statistics/StatMiniChart";
 import { cn } from "@lib/utils";
+import { useState } from "react";
 
-import type { StatisticsResponse } from "@src/schemas/stats";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
+import type { StatisticsResponse } from "@src/schemas/stats";
 
 interface StatisticsKpisProps {
   statistics: StatisticsResponse | undefined;
@@ -34,17 +34,9 @@ interface StatisticsKpisProps {
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
-const Card = ({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) => (
+const Card = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <GlowCard className="flex flex-col px-5 py-6">
-    <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
-      {label}
-    </span>
+    <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</span>
     {children}
   </GlowCard>
 );
@@ -84,9 +76,7 @@ const CmpRow = ({
       <span
         className={cn(
           "num shrink-0 rounded-[3px] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.04em]",
-          kind === "exc"
-            ? "bg-[var(--exc-bg)] text-exc"
-            : "bg-[var(--accent-bg)] text-accent-strong",
+          kind === "exc" ? "bg-[var(--exc-bg)] text-exc" : "bg-[var(--accent-bg)] text-accent-strong",
         )}
       >
         {tag}
@@ -94,16 +84,12 @@ const CmpRow = ({
       <span
         className={cn(
           "truncate",
-          titleVariant === "month"
-            ? "text-[11px] uppercase tracking-[0.08em] text-ink-3"
-            : "text-[13px] text-ink-2",
+          titleVariant === "month" ? "text-[11px] uppercase tracking-[0.08em] text-ink-3" : "text-[13px] text-ink-2",
         )}
       >
         {title}
       </span>
-      <span className="num ml-auto text-[17px] font-medium text-ink">
-        {euro0(amount)} €
-      </span>
+      <span className="num ml-auto text-[17px] font-medium text-ink">{euro0(amount)} €</span>
     </div>
     <div className="flex h-2 overflow-hidden rounded-[3px] bg-bg-hi">
       <span
@@ -113,11 +99,7 @@ const CmpRow = ({
           opacity: 0.9,
         }}
       />
-      {excWidth > 0 && (
-        <span
-          style={{ width: `${excWidth * 100}%`, background: "var(--exc)" }}
-        />
-      )}
+      {excWidth > 0 && <span style={{ width: `${excWidth * 100}%`, background: "var(--exc)" }} />}
     </div>
   </div>
 );
@@ -138,9 +120,7 @@ const StatisticsKpis = ({
   const data = statistics?.data;
   const regMonthly = monthlyTotals(data, year);
   const excMonthly = exceptionalMonthly(exceptionals);
-  const totalMonthly = regMonthly.map(
-    (v, i) => v + (showExceptionals ? excMonthly[i] : 0),
-  );
+  const totalMonthly = regMonthly.map((v, i) => v + (showExceptionals ? excMonthly[i] : 0));
 
   const months = elapsedMonths(year, now);
   const total = totalMonthly.reduce((a, b) => a + b, 0);
@@ -167,32 +147,28 @@ const StatisticsKpis = ({
   const mockRegularBiggest = topCategory
     ? { label: cap(topCategory.name), amount: Math.round(topCategory.value / months) }
     : { label: "Dépense courante", amount: 0 };
-  const expenseScale = Math.max(
-    Number(topExc?.amount ?? 0),
-    mockRegularBiggest.amount,
-    1,
-  );
+  const expenseScale = Math.max(Number(topExc?.amount ?? 0), mockRegularBiggest.amount, 1);
 
   return (
     <section className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 min-[768px]:grid-cols-4">
       <Card label={`Total dépensé ${year}`}>
         <Value amount={total} />
         <span className="text-[12px] text-ink-3">
-          <Delta down={deltaPct <= 0}>
-            {Math.abs(Math.round(deltaPct))}%
-          </Delta>{" "}
-          vs {compareYear} · sur {months} mois
+          <Delta down={deltaPct <= 0}>{Math.abs(Math.round(deltaPct))}%</Delta> vs {compareYear} · sur {months} mois
         </span>
         <div className="mt-4">
-          <StatMiniChart id="kpi-total" values={cumulative(totalMonthly)} count={months} />
+          <StatMiniChart
+            id="kpi-total"
+            values={cumulative(totalMonthly)}
+            count={months}
+          />
         </div>
       </Card>
 
       <Card label="Moyenne / mois">
         <Value amount={avg} />
         <span className="text-[12px] text-ink-3">
-          <Delta down={avgDelta <= 0}>{euro0(Math.abs(avgDelta))} €</Delta> vs
-          moyenne {compareYear} (
+          <Delta down={avgDelta <= 0}>{euro0(Math.abs(avgDelta))} €</Delta> vs moyenne {compareYear} (
           <span className="num font-medium text-ink">{euro0(compareAvg)} €</span>)
         </span>
         <div className="mt-4">

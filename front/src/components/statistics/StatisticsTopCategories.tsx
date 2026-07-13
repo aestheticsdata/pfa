@@ -1,8 +1,8 @@
 "use client";
 
-import { ChevronDown, ChevronUp } from "lucide-react";
-import GlowCard from "@components/shared/GlowCard";
 import { euro0 } from "@components/dashboard/format";
+import GlowCard from "@components/shared/GlowCard";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 export interface TopCategoryRow {
   name: string;
@@ -28,13 +28,17 @@ const Trend = ({ deltaPct }: { deltaPct: number | null }) => {
   // spending up = worse (red), down = better (green)
   const up = rounded > 0;
   return (
-    <span
-      className={`inline-flex items-center gap-1 ${up ? "text-neg" : "text-accent-strong"}`}
-    >
+    <span className={`inline-flex items-center gap-1 ${up ? "text-neg" : "text-accent-strong"}`}>
       {up ? (
-        <ChevronUp size={9} strokeWidth={3} />
+        <ChevronUp
+          size={9}
+          strokeWidth={3}
+        />
       ) : (
-        <ChevronDown size={9} strokeWidth={3} />
+        <ChevronDown
+          size={9}
+          strokeWidth={3}
+        />
       )}
       {up ? "+" : "−"}
       {Math.abs(rounded)}%
@@ -44,15 +48,10 @@ const Trend = ({ deltaPct }: { deltaPct: number | null }) => {
 
 /** "Top catégories" — the year's largest categories with their real
  *  year-over-year trend (all figures from /statistics). */
-const StatisticsTopCategories = ({
-  rows,
-  compareYear,
-}: StatisticsTopCategoriesProps) => (
+const StatisticsTopCategories = ({ rows, compareYear }: StatisticsTopCategoriesProps) => (
   <GlowCard className="flex flex-col px-6 py-[22px]">
     <div className="flex items-baseline justify-between gap-4">
-      <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">
-        Top catégories
-      </h2>
+      <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Top catégories</h2>
       <span className="text-[12px] text-ink-4">tendance vs {compareYear}</span>
     </div>
 
@@ -74,9 +73,7 @@ const StatisticsTopCategories = ({
             style={{ background: row.color }}
           />
           <span className="truncate capitalize text-ink">{row.name}</span>
-          <span className="num text-right font-medium text-ink">
-            {euro0(row.value)} €
-          </span>
+          <span className="num text-right font-medium text-ink">{euro0(row.value)} €</span>
           <span className="num flex justify-end text-right text-[12px]">
             <Trend deltaPct={row.deltaPct} />
           </span>

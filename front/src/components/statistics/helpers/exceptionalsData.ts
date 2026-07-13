@@ -1,5 +1,5 @@
-import parseISO from "date-fns/parseISO";
 import getMonth from "date-fns/getMonth";
+import parseISO from "date-fns/parseISO";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
@@ -17,11 +17,8 @@ export const exceptionalTotal = (items: ExceptionalItem[]): number =>
   items.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
 
 /** The single largest exceptional purchase, or null when there are none. */
-export const biggestExceptional = (
-  items: ExceptionalItem[],
-): ExceptionalItem | null =>
+export const biggestExceptional = (items: ExceptionalItem[]): ExceptionalItem | null =>
   items.reduce<ExceptionalItem | null>(
-    (max, item) =>
-      !max || Number(item.amount) > Number(max.amount) ? item : max,
+    (max, item) => (!max || Number(item.amount) > Number(max.amount) ? item : max),
     null,
   );

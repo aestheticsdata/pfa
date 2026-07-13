@@ -28,11 +28,12 @@ const WEEKEND_FILL = "linear-gradient(90deg, oklch(0.50 0.13 25), oklch(0.72 0.1
 
 /** "Dépenses par jour de la semaine" — weekly spending rhythm (MOCK). */
 const StatisticsDayOfWeek = () => (
-  <GlowCard as="section" className="px-6 py-[22px]">
+  <GlowCard
+    as="section"
+    className="px-6 py-[22px]"
+  >
     <div className="flex items-baseline justify-between gap-4">
-      <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">
-        Dépenses par jour de la semaine
-      </h2>
+      <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Dépenses par jour de la semaine</h2>
       <span className="text-[12px] text-ink-4">moyenne sur 12 mois</span>
     </div>
 
@@ -42,9 +43,7 @@ const StatisticsDayOfWeek = () => (
           key={row.day}
           className="grid grid-cols-[90px_1fr_130px] items-center gap-3 text-[13px]"
         >
-          <span className={row.weekend ? "text-ink" : "text-ink-2"}>
-            {row.day}
-          </span>
+          <span className={row.weekend ? "text-ink" : "text-ink-2"}>{row.day}</span>
           <div className="h-[22px] overflow-hidden rounded-[4px] bg-bg-hi">
             <span
               className="block h-full rounded-[4px]"
@@ -57,9 +56,7 @@ const StatisticsDayOfWeek = () => (
           </div>
           <span className="num text-right font-medium text-ink">
             {row.amount}
-            <small className="block text-[10.5px] font-normal text-ink-4">
-              {row.transactions}
-            </small>
+            <small className="block text-[10.5px] font-normal text-ink-4">{row.transactions}</small>
           </span>
         </div>
       ))}
