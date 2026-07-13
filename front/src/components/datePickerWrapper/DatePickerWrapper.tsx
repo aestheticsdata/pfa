@@ -1,21 +1,22 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { parseDateParam } from "@components/datePickerWrapper/helpers";
+import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
+import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
+import { cn } from "@lib/utils";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
+import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { useEffect, useRef } from "react";
 import DayPicker from "react-day-picker";
 // NOTE: react-day-picker/lib/style.css is intentionally NOT imported — the pfa
 // "Capsule" styling in globals.css fully styles the DayPicker, and the lib CSS
 // (loaded after globals) would otherwise win and reintroduce the blue band,
 // triangle nav arrows and white hover box.
 import useOnClickOutside from "use-onclickoutside";
-import fr from "date-fns/locale/fr";
-import format from "date-fns/format";
-import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
-import { WEEKDAYS_LONG, WEEKDAYS_SHORT, MONTHS } from "./locale-fr";
-import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
-import { parseDateParam } from "@components/datePickerWrapper/helpers";
-import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
-import { cn } from "@lib/utils";
+import { MONTHS, WEEKDAYS_LONG, WEEKDAYS_SHORT } from "./locale-fr";
+
 import type { Modifiers } from "react-day-picker";
 
 const DatePickerWrapper = () => {
@@ -58,9 +59,8 @@ const DatePickerWrapper = () => {
     if (selectedDateParam) {
       const date = parseDateParam(selectedDateParam);
       if (
-        !Number.isNaN(date.getTime())
-        && (selectedDays.length === 0
-          || selectedDays[0].getTime() !== date.getTime())
+        !Number.isNaN(date.getTime()) &&
+        (selectedDays.length === 0 || selectedDays[0].getTime() !== date.getTime())
       ) {
         handleDayChange(date, false);
       }
@@ -70,7 +70,10 @@ const DatePickerWrapper = () => {
   }, [selectedDateParam]);
 
   return (
-    <div ref={ref} className="relative">
+    <div
+      ref={ref}
+      className="relative"
+    >
       <button
         type="button"
         onClick={toggleCalendar}
@@ -94,10 +97,7 @@ const DatePickerWrapper = () => {
           <span className="text-[13.5px]">Sélectionner une période</span>
         )}
         <ChevronDown
-          className={cn(
-            "size-3.5 shrink-0 text-gray-500 transition-transform",
-            isCalendarVisible && "rotate-180",
-          )}
+          className={cn("size-3.5 shrink-0 text-gray-500 transition-transform", isCalendarVisible && "rotate-180")}
         />
       </button>
       {isCalendarVisible && (
