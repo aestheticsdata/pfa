@@ -1,15 +1,15 @@
 "use client";
 
+import useCredentials from "@auth/helpers/useCredentials";
+import useLoginService from "@auth/useLoginService";
+import AuthBrand from "@components/auth/AuthBrand";
+import AuthCard from "@components/auth/AuthCard";
+import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
 import Link from "next/link";
 import { useState } from "react";
-import type { AxiosError } from "axios";
-import AuthCard from "@components/auth/AuthCard";
-import AuthBrand from "@components/auth/AuthBrand";
-import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
-import useLoginService from "@auth/useLoginService";
-import useCredentials from "@auth/helpers/useCredentials";
 
 import type { LoginValues } from "@src/components/shared/sharedLoginForm/interfaces";
+import type { AxiosError } from "axios";
 
 export default function LoginFormClient() {
   const { loginService } = useLoginService();
@@ -25,11 +25,7 @@ export default function LoginFormClient() {
       }
     } catch (e) {
       const status = (e as AxiosError)?.response?.status;
-      setServerError(
-        status === 401
-          ? "Email ou mot de passe incorrect."
-          : "Une erreur est survenue. Réessaie.",
-      );
+      setServerError(status === 401 ? "Email ou mot de passe incorrect." : "Une erreur est survenue. Réessaie.");
     }
   };
 
