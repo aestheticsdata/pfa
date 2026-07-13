@@ -1,16 +1,14 @@
 "use client";
 
+import type { CategoryTrendData } from "@lib/dataviz/CategoryTrend";
+import CategoryTrend from "@lib/dataviz/CategoryTrend";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import CategoryTrend from "@lib/dataviz/CategoryTrend";
-
-import type { CategoryTrendData } from "@lib/dataviz/CategoryTrend";
 
 // Measure-then-position must run before paint to clamp the tooltip at the
 // viewport edge without a flash; fall back to useEffect on the server, where
 // layout effects warn (and never run) anyway.
-const useIsomorphicLayoutEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
+const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 const formatAmount = (amount: number) =>
   Number(amount).toLocaleString("fr-FR", {
@@ -35,6 +33,20 @@ export interface CategoryBarTooltipProps {
   /** Cursor position in viewport coords, or null when the tooltip is hidden. */
   point: { x: number; y: number } | null;
   datum: CategoryTooltipDatum;
+}
+
+/**
+ * Local hover state a consumer keeps to drive this tooltip: viewport coords
+ * plus the hovered target. `T` is whatever resolves the datum — the row object
+ * itself, or its index into a rows array.
+ */
+export interface BarHover<T> {
+  /** Cursor X in viewport coords (clientX). */
+  x: number;
+  /** Cursor Y in viewport coords (clientY). */
+  y: number;
+  /** The hovered target (a row, an index, …). */
+  target: T;
 }
 
 /**
@@ -76,38 +88,38 @@ const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
   return createPortal(
     <div
       ref={ref}
-      className="cat-tooltip"
       style={{
-        // Layout-critical → inline so the portaled tooltip stays out of normal
-        // flow even if the .cat-tooltip stylesheet is missing/stale.
+        // This tooltip is portaled to document.body, so its whole skin is inline
+        // (not a `.cat-tooltip` class): a portaled element can't rely on an
+        // external rule resolving there — that class not applying left it
+        // see-through over the list (COS-76 QA). Theme vars keep a literal
+        // fallback; ~92% opacity for a very light, readable transparency.
         position: "fixed",
         zIndex: 60,
         pointerEvents: "none",
         left: pos ? pos.left : point.x + 16,
         top: pos ? pos.top : point.y + 16,
+        minWidth: 172,
+        maxWidth: 240,
+        padding: "10px 12px",
+        background: "color-mix(in oklch, var(--bg-elev, oklch(0.185 0.006 250)) 92%, transparent)",
+        border: "1px solid var(--line, oklch(0.27 0.008 250))",
+        borderRadius: "var(--r-md, 10px)",
+        boxShadow: "0 16px 40px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.05)",
       }}
     >
       <div className="mb-2 flex items-center gap-2">
-        <span
-          className="size-2 shrink-0 rounded-[2px]"
-          style={{ background: datum.color }}
-        />
-        <span className="truncate text-[13px] font-medium capitalize text-ink">
-          {datum.name}
-        </span>
+        <span className="size-2 shrink-0 rounded-[2px]" style={{ background: datum.color }} />
+        <span className="truncate text-[13px] font-medium capitalize text-ink">{datum.name}</span>
         <span className="num ml-auto shrink-0 rounded-full border border-line-soft bg-background px-[7px] text-[10.5px] leading-[1.55] text-ink-3">
           {datum.count}
         </span>
       </div>
       <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-1 text-[12px]">
         <span className="text-ink-4">Part</span>
-        <span className="num text-right text-ink-2">
-          {datum.pct.toFixed(1).replace(".", ",")} %
-        </span>
+        <span className="num text-right text-ink-2">{datum.pct.toFixed(1).replace(".", ",")} %</span>
         <span className="text-ink-4">Montant</span>
-        <span className="num text-right text-ink">
-          {formatAmount(datum.total)} €
-        </span>
+        <span className="num text-right text-ink">{formatAmount(datum.total)} €</span>
         <span className="text-ink-4">Tendance</span>
         <CategoryTrend {...datum.trend} />
       </div>
