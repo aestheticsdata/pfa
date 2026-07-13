@@ -17,7 +17,8 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double"
+      "quoteStyle": "double",
+      "attributePosition": "multiline"
     }
   },
   "css": {
@@ -33,6 +34,22 @@
         "useImportType": {
           "level": "warn",
           "options": { "style": "separatedType" }
+        }
+      }
+    }
+  },
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": {
+          "level": "on",
+          "options": {
+            "groups": [
+              { "type": false },
+              ":BLANK_LINE:",
+              { "type": true }
+            ]
+          }
         }
       }
     }
