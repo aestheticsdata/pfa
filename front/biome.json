@@ -30,6 +30,9 @@
     "enabled": true,
     "rules": {
       "preset": "recommended",
+      "correctness": {
+        "useExhaustiveDependencies": "off"
+      },
       "style": {
         "useImportType": {
           "level": "warn",
