@@ -85,6 +85,7 @@ const CategoryFormBody = ({
                 submit();
               }
             }}
+            // biome-ignore lint/a11y/noAutofocus: intentional focus when the modal opens
             autoFocus
           />
         </div>

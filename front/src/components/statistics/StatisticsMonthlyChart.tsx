@@ -190,8 +190,8 @@ const StatisticsMonthlyChart = ({
             </defs>
 
             {/* grid + y labels */}
-            {gridRows.map((row, i) => (
-              <g key={`grid-${i}`}>
+            {gridRows.map((row) => (
+              <g key={`grid-${row.value}`}>
                 <line
                   x1={PAD_L}
                   x2={width - PAD_R}
@@ -401,7 +401,7 @@ const StatisticsMonthlyChart = ({
             {/* x labels */}
             {MONTHS_FR.map((label, m) => (
               <text
-                key={`x-${m}`}
+                key={label}
                 x={cx(m)}
                 y={X_LABEL_Y}
                 fontSize={11}

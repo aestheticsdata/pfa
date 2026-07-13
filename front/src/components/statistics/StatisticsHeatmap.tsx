@@ -165,6 +165,7 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
         >
           {rows.map((weekArr, dow) => (
             <div
+              // biome-ignore lint/suspicious/noArrayIndexKey: fixed 7-row day-of-week grid, positional slot never reorders
               key={dow}
               className="contents"
             >
@@ -173,6 +174,7 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
               </span>
               {weekArr.map((lvl, week) => (
                 <span
+                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed 53-week grid, positional cell never reorders
                   key={week}
                   className="aspect-square min-h-[9px] rounded-[2px]"
                   style={

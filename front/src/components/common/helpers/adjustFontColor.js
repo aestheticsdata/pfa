@@ -2,7 +2,9 @@
 // https://stackoverflow.com/questions/3942878/how-to-decide-font-color-in-white-or-black-depending-on-background-color
 
 const adjustFontColor = (categoryColor) => {
-  categoryColor === "#fff" && (categoryColor = "#ffffff");
+  if (categoryColor === "#fff") {
+    categoryColor = "#ffffff";
+  }
   const c = categoryColor.substring(1);
   const rgb = parseInt(c, 16);
   const [r, g, b] = [(rgb >> 16) & 0xff, (rgb >> 8) & 0xff, (rgb >> 0) & 0xff];
