@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import useGlobalStore from "@components/shared/globalStore";
+import Spinner from "@components/common/Spinner";
+import ExceptionalFilters from "@components/exceptionals/ExceptionalFilters";
+import ExceptionalModal from "@components/exceptionals/ExceptionalModal";
+import ExceptionalStatsCards from "@components/exceptionals/ExceptionalStatsCards";
+import ExceptionalsList from "@components/exceptionals/ExceptionalsList";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import useRegularMonthlyAverage from "@components/exceptionals/services/useRegularMonthlyAverage";
-import ExceptionalStatsCards from "@components/exceptionals/ExceptionalStatsCards";
-import ExceptionalFilters from "@components/exceptionals/ExceptionalFilters";
-import ExceptionalsList from "@components/exceptionals/ExceptionalsList";
-import ExceptionalModal from "@components/exceptionals/ExceptionalModal";
-import Spinner from "@components/common/Spinner";
+import useGlobalStore from "@components/shared/globalStore";
+import { useEffect, useMemo, useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
@@ -25,9 +25,7 @@ const Exceptionals = () => {
   const { exceptionals, isLoading, error, years } = useExceptionals({
     year: selectedYear ?? undefined,
   });
-  const { data: monthlyAverageData } = useRegularMonthlyAverage(
-    selectedYear ?? currentYear,
-  );
+  const { data: monthlyAverageData } = useRegularMonthlyAverage(selectedYear ?? currentYear);
 
   useEffect(() => {
     setIsCalendarVisible(false);

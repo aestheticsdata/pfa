@@ -1,8 +1,8 @@
-import { useQuery } from "react-query";
-import { z } from "zod";
-import useRequestHelper from "@helpers/useRequestHelper";
 import { useAuth } from "@auth/context/AuthContext";
 import { QUERY_OPTIONS } from "@components/spendings/config/constants";
+import useRequestHelper from "@helpers/useRequestHelper";
+import { useQuery } from "react-query";
+import { z } from "zod";
 
 const RegularMonthlyAverageSchema = z.object({
   monthlyAverage: z.number(),

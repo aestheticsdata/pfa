@@ -1,6 +1,6 @@
+import { elapsedMonths } from "@components/statistics/helpers/statisticsData";
 import parseISO from "date-fns/parseISO";
 
-import { elapsedMonths } from "@components/statistics/helpers/statisticsData";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
 export interface ExceptionalStats {
@@ -20,11 +20,7 @@ export interface ExceptionalStats {
  * "all years" (`year == null`), the divisor is the sum of the elapsed months of
  * every year the data spans, floored at 1 to avoid a division by zero.
  */
-export const computeExceptionalStats = (
-  items: ExceptionalItem[],
-  year: number | null,
-  now: Date,
-): ExceptionalStats => {
+export const computeExceptionalStats = (items: ExceptionalItem[], year: number | null, now: Date): ExceptionalStats => {
   let total = 0;
   let biggest: { label: string; amount: number; date: Date } | null = null;
   const years = new Set<number>();

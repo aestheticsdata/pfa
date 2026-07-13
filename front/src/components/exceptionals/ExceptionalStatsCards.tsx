@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import type { ReactNode } from "react";
+import { computeExceptionalStats } from "@components/exceptionals/helpers/exceptionalStats";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
+import { useState } from "react";
 
-import { computeExceptionalStats } from "@components/exceptionals/helpers/exceptionalStats";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
+import type { ReactNode } from "react";
 
 interface ExceptionalStatsCardsProps {
   items: ExceptionalItem[];
@@ -20,35 +20,17 @@ const fmt = (v: number) =>
     maximumFractionDigits: 2,
   });
 
-const Kpi = ({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: ReactNode;
-  sub: ReactNode;
-}) => (
+const Kpi = ({ label, value, sub }: { label: string; value: ReactNode; sub: ReactNode }) => (
   <div className="rounded-[14px] border border-line-soft bg-bg-elev px-5 py-[18px]">
-    <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
-      {label}
-    </div>
-    <div className="num mt-2 text-[26px] font-medium tracking-[-0.02em] text-ink">
-      {value}
-    </div>
+    <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</div>
+    <div className="num mt-2 text-[26px] font-medium tracking-[-0.02em] text-ink">{value}</div>
     <div className="mt-1 text-xs text-ink-3">{sub}</div>
   </div>
 );
 
-const cur = (unit: string) => (
-  <span className="text-[17px] font-normal text-ink-3">{unit}</span>
-);
+const cur = (unit: string) => <span className="text-[17px] font-normal text-ink-3">{unit}</span>;
 
-const ExceptionalStatsCards = ({
-  items,
-  year,
-  monthlyAverage,
-}: ExceptionalStatsCardsProps) => {
+const ExceptionalStatsCards = ({ items, year, monthlyAverage }: ExceptionalStatsCardsProps) => {
   // Stable across re-renders so the elapsed-month count doesn't drift mid-session.
   const [now] = useState(() => new Date());
   const stats = computeExceptionalStats(items, year, now);
@@ -70,9 +52,7 @@ const ExceptionalStatsCards = ({
             {cur(" €")}
           </>
         }
-        sub={`${stats.count} achat${stats.count > 1 ? "s" : ""} exceptionnel${
-          stats.count > 1 ? "s" : ""
-        }`}
+        sub={`${stats.count} achat${stats.count > 1 ? "s" : ""} exceptionnel${stats.count > 1 ? "s" : ""}`}
       />
       <Kpi
         label="Moyenne / mois"
@@ -116,11 +96,7 @@ const ExceptionalStatsCards = ({
             "—"
           )
         }
-        sub={
-          part != null
-            ? `sur ${fmt(totalSpent)} € dépensés en ${year}`
-            : "indisponible"
-        }
+        sub={part != null ? `sur ${fmt(totalSpent)} € dépensés en ${year}` : "indisponible"}
       />
     </div>
   );

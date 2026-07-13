@@ -1,38 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import Mexp from "math-expression-evaluator";
-import format from "date-fns/format";
-import { Check, ChevronsUpDown } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@components/ui/dialog";
-import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
-import { Button } from "@components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@components/ui/command";
-import { cn } from "@lib/utils";
 import { useAuth } from "@auth/context/AuthContext";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
+import { Button } from "@components/ui/button";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
+import { Input } from "@components/ui/input";
+import { Label } from "@components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { cn } from "@lib/utils";
+import format from "date-fns/format";
+import { Check, ChevronsUpDown } from "lucide-react";
+import Mexp from "math-expression-evaluator";
+import { useMemo, useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
@@ -71,11 +54,7 @@ const getRandomHexColor = () => {
   return `#${r}${g}${b}`;
 };
 
-const ExceptionalModal = ({
-  closeModal: closeModalProp,
-  item,
-  existingCategories,
-}: ExceptionalModalProps) => {
+const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories }: ExceptionalModalProps) => {
   const [open, setOpen] = useState(true);
   const closeModal = () => {
     setOpen(false);
@@ -90,15 +69,11 @@ const ExceptionalModal = ({
     ? { name: item.categoryName, color: item.categoryColor ?? FALLBACK_COLOR }
     : null;
 
-  const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(
-    initialCategory,
-  );
+  const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(initialCategory);
   const [comboboxOpen, setComboboxOpen] = useState(false);
   const [comboboxQuery, setComboboxQuery] = useState("");
 
-  const initialDateStr = item?.date
-    ? item.date.slice(0, 10)
-    : format(new Date(), "yyyy-MM-dd");
+  const initialDateStr = item?.date ? item.date.slice(0, 10) : format(new Date(), "yyyy-MM-dd");
 
   const {
     register,
@@ -115,14 +90,9 @@ const ExceptionalModal = ({
     },
   });
 
-  const categoryOptions = useMemo(
-    () => existingCategories,
-    [existingCategories],
-  );
+  const categoryOptions = useMemo(() => existingCategories, [existingCategories]);
 
-  const exactMatch = categoryOptions.find(
-    (c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase(),
-  );
+  const exactMatch = categoryOptions.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());
 
   const onSubmit = (values: FormValues) => {
     if (!user) {
@@ -172,7 +142,10 @@ const ExceptionalModal = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => !isOpen && closeModal()}>
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => !isOpen && closeModal()}
+    >
       <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[440px]">
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-[22px] py-[18px] text-left">
           <DialogTitle className="pr-8 text-[15px] font-semibold tracking-[-0.01em] text-ink">
@@ -186,7 +159,10 @@ const ExceptionalModal = ({
         >
           <div className="grid grid-cols-2 gap-3.5">
             <div className="flex flex-col gap-2">
-              <Label htmlFor="exceptional-date" className="text-[13px] text-ink-2">
+              <Label
+                htmlFor="exceptional-date"
+                className="text-[13px] text-ink-2"
+              >
                 Date
               </Label>
               <Input
@@ -197,7 +173,10 @@ const ExceptionalModal = ({
               />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="exceptional-amount" className="text-[13px] text-ink-2">
+              <Label
+                htmlFor="exceptional-amount"
+                className="text-[13px] text-ink-2"
+              >
                 Montant (€)
               </Label>
               <Input
@@ -209,12 +188,13 @@ const ExceptionalModal = ({
               />
             </div>
           </div>
-          {errors.amount && (
-            <p className="-mt-3 text-xs text-neg">{errors.amount.message}</p>
-          )}
+          {errors.amount && <p className="-mt-3 text-xs text-neg">{errors.amount.message}</p>}
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="exceptional-label" className="text-[13px] text-ink-2">
+            <Label
+              htmlFor="exceptional-label"
+              className="text-[13px] text-ink-2"
+            >
               Label
             </Label>
             <Input
@@ -223,9 +203,7 @@ const ExceptionalModal = ({
               className="border-line bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
               {...register("label")}
             />
-            {errors.label && (
-              <p className="text-xs text-neg">{errors.label.message}</p>
-            )}
+            {errors.label && <p className="text-xs text-neg">{errors.label.message}</p>}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -245,7 +223,11 @@ const ExceptionalModal = ({
 
           <div className="flex flex-col gap-2">
             <Label className="text-[13px] text-ink-2">Catégorie</Label>
-            <Popover open={comboboxOpen} onOpenChange={setComboboxOpen} modal>
+            <Popover
+              open={comboboxOpen}
+              onOpenChange={setComboboxOpen}
+              modal
+            >
               <PopoverTrigger asChild>
                 <button
                   type="button"
@@ -321,9 +303,7 @@ const ExceptionalModal = ({
                             style={{ backgroundColor: cat.color }}
                           />
                           <span className="flex-1 capitalize">{cat.name}</span>
-                          {selectedCategory?.name === cat.name && (
-                            <Check className="size-4 text-accent-strong" />
-                          )}
+                          {selectedCategory?.name === cat.name && <Check className="size-4 text-accent-strong" />}
                         </CommandItem>
                       ))}
                       {comboboxQuery.trim() && !exactMatch && (
@@ -331,9 +311,7 @@ const ExceptionalModal = ({
                           value={`__create-${comboboxQuery.trim()}`}
                           onSelect={() => onCreateCategory(comboboxQuery.trim())}
                         >
-                          <span className="text-accent-strong">
-                            Créer «&nbsp;{comboboxQuery.trim()}&nbsp;»
-                          </span>
+                          <span className="text-accent-strong">Créer «&nbsp;{comboboxQuery.trim()}&nbsp;»</span>
                         </CommandItem>
                       )}
                     </CommandGroup>
