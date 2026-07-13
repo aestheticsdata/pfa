@@ -1,4 +1,4 @@
-import { LangKeys } from "@src/interfaces/locales";
+import type { LangKeys } from "@src/interfaces/locales";
 
 export interface User {
   baseCurrency: string;
