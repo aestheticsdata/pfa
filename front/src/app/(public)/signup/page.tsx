@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import AuthCard from "@components/auth/AuthCard";
-import AuthBrand from "@components/auth/AuthBrand";
-import SharedLoginForm from "@components/shared/sharedLoginForm/sharedLoginForm";
-import useSignupService from "@auth/useSignupService";
 import useCredentials from "@auth/helpers/useCredentials";
+import useSignupService from "@auth/useSignupService";
+import AuthBrand from "@components/auth/AuthBrand";
+import AuthCard from "@components/auth/AuthCard";
+import SharedLoginForm from "@components/shared/sharedLoginForm/sharedLoginForm";
+import Link from "next/link";
 
 import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 

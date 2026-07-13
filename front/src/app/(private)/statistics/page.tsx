@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import StatisticsView from "@components/statistics/StatisticsView";
 import useGlobalStore from "@components/shared/globalStore";
+import StatisticsView from "@components/statistics/StatisticsView";
+import { useEffect } from "react";
 
 export default function StatisticsPage() {
   const { setIsCalendarVisible } = useGlobalStore();

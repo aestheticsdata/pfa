@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import AuthCard from "@components/auth/AuthCard";
-import AuthBrand from "@components/auth/AuthBrand";
-import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
 import useResetPasswordService from "@auth/useResetPasswordService";
+import AuthBrand from "@components/auth/AuthBrand";
+import AuthCard from "@components/auth/AuthCard";
+import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 
@@ -34,7 +34,10 @@ export default function ForgotPassword() {
           href="/login"
           className="inline-flex items-center gap-1.5 text-[12.5px] text-ink-3 transition-colors hover:text-ink"
         >
-          <ArrowLeft className="size-3.5" strokeWidth={2} />
+          <ArrowLeft
+            className="size-3.5"
+            strokeWidth={2}
+          />
           Retour à la connexion
         </Link>
       </div>

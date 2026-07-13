@@ -24,19 +24,14 @@ const toNumber = (value: string | number | undefined): number =>
 
 const rowTotal = (row: Row): number =>
   Object.entries(row).reduce(
-    (sum, [key, value]) =>
-      key === "month" ? sum : sum + toNumber(value as string | number),
+    (sum, [key, value]) => (key === "month" ? sum : sum + toNumber(value as string | number)),
     0,
   );
 
-const rowsForYear = (data: StatData | undefined, year: number): Row[] =>
-  data?.[String(year)] ?? [];
+const rowsForYear = (data: StatData | undefined, year: number): Row[] => data?.[String(year)] ?? [];
 
 /** 12-slot array (Jan→Dec) of the total spend per month for `year`. */
-export const monthlyTotals = (
-  data: StatData | undefined,
-  year: number,
-): number[] => {
+export const monthlyTotals = (data: StatData | undefined, year: number): number[] => {
   const totals = Array<number>(12).fill(0);
   rowsForYear(data, year).forEach((row, i) => {
     const idx = MONTHS_FR.indexOf(String(row.month));
@@ -51,7 +46,7 @@ export const yearTotal = (data: StatData | undefined, year: number): number =>
 /** Round up to a "nice" axis ceiling (1, 1.5, 2, 3, 4, 5, 7.5, 10 × 10ⁿ). */
 export const niceCeil = (value: number): number => {
   if (value <= 0) return 1;
-  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+  const magnitude = 10 ** Math.floor(Math.log10(value));
   const steps = [1, 1.5, 2, 3, 4, 5, 7.5, 10];
   const normalized = value / magnitude;
   const step = steps.find((s) => s >= normalized) ?? 10;
@@ -98,11 +93,7 @@ export const perCategoryTotals = (
 };
 
 /** 12-slot monthly series for a single category in `year`. */
-export const categoryMonthly = (
-  data: StatData | undefined,
-  year: number,
-  name: string,
-): number[] => {
+export const categoryMonthly = (data: StatData | undefined, year: number, name: string): number[] => {
   const out = Array<number>(12).fill(0);
   rowsForYear(data, year).forEach((row, i) => {
     const idx = MONTHS_FR.indexOf(String(row.month));

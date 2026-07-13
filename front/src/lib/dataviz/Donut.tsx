@@ -1,8 +1,9 @@
 "use client";
 
-import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
 import { wedgePath } from "@lib/dataviz/svg";
 import { cn } from "@lib/utils";
+
+import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
 import type { CSSProperties, ReactNode } from "react";
 
 interface DonutProps {
@@ -63,7 +64,13 @@ const Donut = ({
         wedges.push({ d: wedgePath(CX, CY, r, start, end), color: seg.color });
       }
     }
-    body = wedges.map((w, i) => <path key={i} d={w.d} fill={w.color} />);
+    body = wedges.map((w, i) => (
+      <path
+        key={i}
+        d={w.d}
+        fill={w.color}
+      />
+    ));
   } else {
     const r = 50 - thickness / 2;
     const circumference = 2 * Math.PI * r;
@@ -76,7 +83,14 @@ const Donut = ({
     }
     body = (
       <g transform={`rotate(-90 ${CX} ${CY})`}>
-        <circle cx={CX} cy={CY} r={r} fill="none" stroke={trackColor} strokeWidth={thickness} />
+        <circle
+          cx={CX}
+          cy={CY}
+          r={r}
+          fill="none"
+          stroke={trackColor}
+          strokeWidth={thickness}
+        />
         {arcs.map((a, i) => (
           <circle
             key={i}
@@ -106,8 +120,17 @@ const Donut = ({
   }
 
   return (
-    <div className={cn("relative inline-grid place-items-center", className)} style={{ width: size, height: size }}>
-      <svg viewBox="0 0 100 100" width={size} height={size} role="img" aria-label={ariaLabel}>
+    <div
+      className={cn("relative inline-grid place-items-center", className)}
+      style={{ width: size, height: size }}
+    >
+      <svg
+        viewBox="0 0 100 100"
+        width={size}
+        height={size}
+        role="img"
+        aria-label={ariaLabel}
+      >
         {body}
       </svg>
       {children && <div className="absolute inset-0 grid place-content-center text-center">{children}</div>}

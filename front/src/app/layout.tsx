@@ -1,6 +1,6 @@
 import "@styles/globals.css";
-import { Geist, Geist_Mono } from "next/font/google";
 import Providers from "@app/providers";
+import { Geist, Geist_Mono } from "next/font/google";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -14,11 +14,7 @@ const geistMono = Geist_Mono({
   display: "swap",
 });
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="fr"

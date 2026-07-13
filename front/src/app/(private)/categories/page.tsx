@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
-import useGlobalStore from "@components/shared/globalStore";
 import CategoriesListcontainer from "@components/categories/CategoriesListcontainer";
+import useGlobalStore from "@components/shared/globalStore";
+import { useEffect } from "react";
 
 export default function Categories() {
   const { setIsCalendarVisible } = useGlobalStore();

@@ -1,8 +1,8 @@
-import { useQuery } from "react-query";
-import useRequestHelper from "@src/helpers/useRequestHelper";
-import useCategories from "@components/spendings/services/useCategories";
 import { QUERY_OPTIONS } from "@components/spendings/config/constants";
+import useCategories from "@components/spendings/services/useCategories";
+import useRequestHelper from "@src/helpers/useRequestHelper";
 import { StatisticsResponseSchema } from "@src/schemas/stats";
+import { useQuery } from "react-query";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
 
@@ -26,9 +26,7 @@ const useStatistics = ({ years }: UseStatisticsOptions) => {
   const queryKey = ["statistics", yearsParam, categoryIds.join(",")];
 
   const getStatistics = async (): Promise<StatisticsResponse> => {
-    const response = await privateRequest(
-      `/statistics?years=${yearsParam}&categories=${categoryIds.join(",")}`,
-    );
+    const response = await privateRequest(`/statistics?years=${yearsParam}&categories=${categoryIds.join(",")}`);
     return StatisticsResponseSchema.parse(response.data);
   };
 

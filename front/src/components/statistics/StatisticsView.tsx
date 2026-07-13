@@ -1,31 +1,30 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import useStatistics from "@components/statistics/services/useStatistics";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
-import StatisticsFilters from "@components/statistics/StatisticsFilters";
-import StatisticsKpis from "@components/statistics/StatisticsKpis";
-import StatisticsForecast from "@components/statistics/StatisticsForecast";
-import StatisticsMonthlyChart from "@components/statistics/StatisticsMonthlyChart";
-import StatisticsCategoryChart from "@components/statistics/StatisticsCategoryChart";
-import StatisticsHeatmap from "@components/statistics/StatisticsHeatmap";
-import StatisticsTopCategories from "@components/statistics/StatisticsTopCategories";
-import StatisticsFixedExpenses from "@components/statistics/StatisticsFixedExpenses";
-import StatisticsDayOfWeek from "@components/statistics/StatisticsDayOfWeek";
+import { exceptionalMonthly } from "@components/statistics/helpers/exceptionalsData";
 import {
   categoryMonthly,
   elapsedMonths,
   monthlyTotals,
   perCategoryTotals,
 } from "@components/statistics/helpers/statisticsData";
-import { exceptionalMonthly } from "@components/statistics/helpers/exceptionalsData";
+import StatisticsCategoryChart from "@components/statistics/StatisticsCategoryChart";
+import StatisticsDayOfWeek from "@components/statistics/StatisticsDayOfWeek";
+import StatisticsFilters from "@components/statistics/StatisticsFilters";
+import StatisticsFixedExpenses from "@components/statistics/StatisticsFixedExpenses";
+import StatisticsForecast from "@components/statistics/StatisticsForecast";
+import StatisticsHeatmap from "@components/statistics/StatisticsHeatmap";
+import StatisticsKpis from "@components/statistics/StatisticsKpis";
+import StatisticsMonthlyChart from "@components/statistics/StatisticsMonthlyChart";
+import StatisticsTopCategories from "@components/statistics/StatisticsTopCategories";
+import useStatistics from "@components/statistics/services/useStatistics";
+import { useMemo, useState } from "react";
 
 const MAX_CATEGORIES = 3;
 
-const yearOptions = (currentYear: number): number[] =>
-  Array.from({ length: 7 }, (_, i) => currentYear - i);
+const yearOptions = (currentYear: number): number[] => Array.from({ length: 7 }, (_, i) => currentYear - i);
 
 /**
  * Statistiques (/statistics) — redesigned on the custom dataviz lib (Phase 6).
@@ -42,10 +41,7 @@ const StatisticsView = () => {
   const [showExceptionals, setShowExceptionals] = useState(true);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
-  const years = useMemo(
-    () => Array.from(new Set([selectedYear, compareYear])),
-    [selectedYear, compareYear],
-  );
+  const years = useMemo(() => Array.from(new Set([selectedYear, compareYear])), [selectedYear, compareYear]);
 
   const { statistics, categories } = useStatistics({ years });
   const { exceptionals } = useExceptionals({ year: selectedYear });
@@ -60,9 +56,7 @@ const StatisticsView = () => {
   const regularMonthly = monthlyTotals(data, selectedYear);
   const excMonthly = exceptionalMonthly(exceptionals);
   const compareMonthly = monthlyTotals(data, compareYear);
-  const monthlyBudget = dashboard.get.data
-    ? Number(dashboard.get.data.initialAmount) || null
-    : null;
+  const monthlyBudget = dashboard.get.data ? Number(dashboard.get.data.initialAmount) || null : null;
 
   const prevTotals = perCategoryTotals(data, colors, compareYear);
   const prevByName = new Map(prevTotals.map((c) => [c.name, c.value]));
@@ -95,11 +89,7 @@ const StatisticsView = () => {
 
   const toggleCategory = (id: string) =>
     setSelectedCategoryIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((c) => c !== id)
-        : prev.length < MAX_CATEGORIES
-          ? [...prev, id]
-          : prev,
+      prev.includes(id) ? prev.filter((c) => c !== id) : prev.length < MAX_CATEGORIES ? [...prev, id] : prev,
     );
 
   return (
@@ -160,14 +150,20 @@ const StatisticsView = () => {
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[7fr_5fr]">
-        <StatisticsHeatmap year={selectedYear} now={now} />
+        <StatisticsHeatmap
+          year={selectedYear}
+          now={now}
+        />
         <StatisticsTopCategories
           rows={topCategoryRows}
           compareYear={compareYear}
         />
       </div>
 
-      <StatisticsFixedExpenses recurrings={recurrings ?? []} now={now} />
+      <StatisticsFixedExpenses
+        recurrings={recurrings ?? []}
+        now={now}
+      />
 
       <StatisticsDayOfWeek />
     </div>

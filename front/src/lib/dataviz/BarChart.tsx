@@ -1,7 +1,8 @@
 "use client";
 
-import type { BarDatum } from "@lib/dataviz/dataVizTypes";
 import { cn } from "@lib/utils";
+
+import type { BarDatum } from "@lib/dataviz/dataVizTypes";
 
 interface BarChartProps {
   bars: BarDatum[];
@@ -59,8 +60,24 @@ const BarChart = ({
           const w = frac * width;
           return (
             <g key={i}>
-              {trackColor && <rect x={0} y={y} width={width} height={barH} rx={radius} fill={trackColor} />}
-              <rect x={0} y={y} width={Math.max(w, 0.5)} height={barH} rx={radius} fill={fill} />
+              {trackColor && (
+                <rect
+                  x={0}
+                  y={y}
+                  width={width}
+                  height={barH}
+                  rx={radius}
+                  fill={trackColor}
+                />
+              )}
+              <rect
+                x={0}
+                y={y}
+                width={Math.max(w, 0.5)}
+                height={barH}
+                rx={radius}
+                fill={fill}
+              />
             </g>
           );
         }
@@ -70,8 +87,24 @@ const BarChart = ({
         const h = frac * height;
         return (
           <g key={i}>
-            {trackColor && <rect x={x} y={0} width={barW} height={height} rx={radius} fill={trackColor} />}
-            <rect x={x} y={height - h} width={barW} height={Math.max(h, 0.5)} rx={radius} fill={fill} />
+            {trackColor && (
+              <rect
+                x={x}
+                y={0}
+                width={barW}
+                height={height}
+                rx={radius}
+                fill={trackColor}
+              />
+            )}
+            <rect
+              x={x}
+              y={height - h}
+              width={barW}
+              height={Math.max(h, 0.5)}
+              rx={radius}
+              fill={fill}
+            />
           </g>
         );
       })}

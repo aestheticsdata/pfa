@@ -1,8 +1,8 @@
 "use client";
 
-import { Plus } from "lucide-react";
 import { Button } from "@components/ui/button";
 import { cn } from "@lib/utils";
+import { Plus } from "lucide-react";
 
 interface CategoryChip {
   name: string;
@@ -19,23 +19,13 @@ interface ExceptionalFiltersProps {
   onAdd: () => void;
 }
 
-const YearChip = ({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) => (
+const YearChip = ({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) => (
   <button
     type="button"
     onClick={onClick}
     className={cn(
       "inline-flex items-center rounded-full border px-3 py-1 text-xs transition-colors",
-      active
-        ? "border-exc/60 bg-exc/10 text-exc"
-        : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
+      active ? "border-exc/60 bg-exc/10 text-exc" : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
     )}
   >
     {label}
@@ -68,7 +58,12 @@ const ExceptionalFilters = ({
         onClick={() => onSelectYear(null)}
       />
       <span className="grow" />
-      <Button type="button" variant="primary" size="sm" onClick={onAdd}>
+      <Button
+        type="button"
+        variant="primary"
+        size="sm"
+        onClick={onAdd}
+      >
         <Plus className="size-3.5" />
         Ajouter
       </Button>
@@ -76,9 +71,7 @@ const ExceptionalFilters = ({
 
     {categories.length > 0 && (
       <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.1em] text-ink-4">
-          Catégorie
-        </span>
+        <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.1em] text-ink-4">Catégorie</span>
         <button
           type="button"
           onClick={() => onSelectCategory(null)}
@@ -100,9 +93,7 @@ const ExceptionalFilters = ({
               onClick={() => onSelectCategory(active ? null : cat.name)}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs capitalize transition-colors",
-                active
-                  ? "text-ink"
-                  : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
+                active ? "text-ink" : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
               )}
               style={
                 active

@@ -31,8 +31,7 @@ interface ProgressTrackProps {
   ariaLabel?: string;
 }
 
-const clampFrac = (v: number, max: number) =>
-  Math.max(0, Math.min(1, v / (max || 1)));
+const clampFrac = (v: number, max: number) => Math.max(0, Math.min(1, v / (max || 1)));
 const asPct = (f: number) => `${Math.max(0, f) * 100}%`;
 
 /**
@@ -91,8 +90,7 @@ const ProgressTrack = ({
             style={{
               left: asPct(fValue),
               width: asPct(fProjected - fValue),
-              background:
-                "repeating-linear-gradient(45deg, transparent 0 6px, var(--accent-bg) 6px 12px)",
+              background: "repeating-linear-gradient(45deg, transparent 0 6px, var(--accent-bg) 6px 12px)",
               borderLeft: "1px solid var(--accent-d)",
               borderRight: "1px dashed var(--accent-d)",
             }}
@@ -102,9 +100,7 @@ const ProgressTrack = ({
           className="absolute inset-y-0 left-0"
           style={{
             width: asPct(fBudget),
-            background: gradient
-              ? "linear-gradient(90deg, var(--accent-d), var(--accent-strong))"
-              : color,
+            background: gradient ? "linear-gradient(90deg, var(--accent-d), var(--accent-strong))" : color,
             opacity: gradient ? 0.45 : 0.92,
           }}
         />

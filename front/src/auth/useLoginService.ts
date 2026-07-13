@@ -9,10 +9,7 @@ const useLoginService = () => {
 
   // Rejects on failure (e.g. 401) so the caller can surface an inline error;
   // no toast here — login errors are shown inline in the form.
-  const loginService = async (
-    email: string,
-    password: string,
-  ): Promise<AuthResponse> => {
+  const loginService = async (email: string, password: string): Promise<AuthResponse> => {
     const result = await request("/users", {
       method: "POST",
       data: {

@@ -1,18 +1,16 @@
 "use client";
 
-import { toast } from "sonner";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { toast } from "sonner";
 
-import type { AxiosError } from "axios";
-import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 import type { AuthResponse } from "@auth/types";
+import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
+import type { AxiosError } from "axios";
 
 const useSignupService = () => {
   const { request } = useRequestHelper();
 
-  const signupService = async (
-    user: LoginValues,
-  ): Promise<AuthResponse | undefined> => {
+  const signupService = async (user: LoginValues): Promise<AuthResponse | undefined> => {
     const { email, password } = user;
     try {
       const res = await request("/users/add", {
@@ -30,9 +28,7 @@ const useSignupService = () => {
     } catch (e) {
       const status = (e as AxiosError)?.response?.status;
       toast.error(
-        status === 409
-          ? "Un compte existe déjà avec cet email."
-          : "La création du compte a échoué. Réessaie.",
+        status === 409 ? "Un compte existe déjà avec cet email." : "La création du compte a échoué. Réessaie.",
       );
     }
   };

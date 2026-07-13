@@ -1,9 +1,9 @@
 "use client";
 
+import { useAuth } from "@auth/context/AuthContext";
+import useRequestHelper from "@helpers/useRequestHelper";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import useRequestHelper from "@helpers/useRequestHelper";
-import { useAuth } from "@auth/context/AuthContext";
 
 import type { AxiosError } from "axios";
 
@@ -29,8 +29,7 @@ const useResetPasswordService = () => {
         router.push("/login");
       }, 600);
     } catch (err: unknown) {
-      const description =
-        (err as AxiosError<{ error?: string }>).response?.data?.error ?? "";
+      const description = (err as AxiosError<{ error?: string }>).response?.data?.error ?? "";
       toast.error("Le mot de passe n'a pas pu être ré-initialisé", {
         description,
         duration: 3000,

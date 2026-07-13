@@ -1,17 +1,13 @@
-import { describe, it, expect } from "vitest";
-
 import { computeExceptionalStats } from "@components/exceptionals/helpers/exceptionalStats";
 import { elapsedMonths } from "@components/statistics/helpers/statisticsData";
+import { describe, expect, it } from "vitest";
+
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
 // 11 July 2026 → month index 6 → 7 elapsed months in the current year.
 const NOW = new Date(2026, 6, 11);
 
-const item = (
-  date: string,
-  amount: number,
-  label = "Achat",
-): ExceptionalItem => ({
+const item = (date: string, amount: number, label = "Achat"): ExceptionalItem => ({
   ID: "1",
   userID: "user-1",
   date,
@@ -62,11 +58,7 @@ describe("computeExceptionalStats — all years (year == null)", () => {
   });
 
   it("only counts years present in the data (gap years excluded)", () => {
-    const stats = computeExceptionalStats(
-      [item("2022-04-01", 500), item("2026-04-01", 500)],
-      null,
-      NOW,
-    );
+    const stats = computeExceptionalStats([item("2022-04-01", 500), item("2026-04-01", 500)], null, NOW);
     // 12 (2022) + 7 (2026) = 19; the empty 2023–2025 do not count.
     expect(stats.spanMonths).toBe(19);
   });
@@ -92,11 +84,7 @@ describe("computeExceptionalStats — edge cases", () => {
 describe("computeExceptionalStats — aggregates", () => {
   it("computes total, count and the biggest expense", () => {
     const stats = computeExceptionalStats(
-      [
-        item("2026-01-01", 100, "A"),
-        item("2026-02-01", 500, "B"),
-        item("2026-03-01", 300, "C"),
-      ],
+      [item("2026-01-01", 100, "A"), item("2026-02-01", 500, "B"), item("2026-03-01", 300, "C")],
       2026,
       NOW,
     );

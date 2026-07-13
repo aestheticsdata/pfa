@@ -9,9 +9,7 @@ import { useEffect, useRef, useState } from "react";
  *
  * Returns `[ref, width]`; `width` stays `fallback` until the node is measured.
  */
-export default function useElementWidth<T extends HTMLElement>(
-  fallback = 0,
-): [React.RefObject<T | null>, number] {
+export default function useElementWidth<T extends HTMLElement>(fallback = 0): [React.RefObject<T | null>, number] {
   const ref = useRef<T>(null);
   const [width, setWidth] = useState(fallback);
 

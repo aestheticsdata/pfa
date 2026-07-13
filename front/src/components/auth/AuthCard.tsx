@@ -5,13 +5,7 @@ import { cn } from "@lib/utils";
  * fill with a top sheen. Ported from Login 2026.html (.card-halo/.card-border/
  * .login-card). Shared by Login / Signup / About / Forgot-password.
  */
-export default function AuthCard({
-  children,
-  className,
-}: {
-  children: React.ReactNode;
-  className?: string;
-}) {
+export default function AuthCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
     <div className="relative">
       {/* halo */}

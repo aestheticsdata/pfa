@@ -12,12 +12,7 @@ import { useEffect, useRef, useState } from "react";
  * Respects prefers-reduced-motion (snaps). Pass `enabled = false` to bypass and
  * return the raw target. All setState runs inside requestAnimationFrame (async).
  */
-export default function useTween(
-  target: number,
-  enabled = true,
-  duration = 650,
-  delay = 0,
-): number {
+export default function useTween(target: number, enabled = true, duration = 650, delay = 0): number {
   const [value, setValue] = useState(0);
   const fromRef = useRef(0);
   const rafRef = useRef(0);
@@ -27,15 +22,13 @@ export default function useTween(
     const from = fromRef.current;
     if (from === target) return; // nothing to animate → no rAF churn
     const reduce =
-      typeof window !== "undefined" &&
-      Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+      typeof window !== "undefined" && Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
     let startTs = 0;
     const tick = (ts: number) => {
       if (!startTs) startTs = ts;
       const elapsed = ts - startTs - delay;
-      const p =
-        elapsed <= 0 ? 0 : reduce ? 1 : Math.min(1, elapsed / duration);
-      const eased = 1 - Math.pow(1 - p, 3);
+      const p = elapsed <= 0 ? 0 : reduce ? 1 : Math.min(1, elapsed / duration);
+      const eased = 1 - (1 - p) ** 3;
       const next = from + (target - from) * eased;
       fromRef.current = next;
       setValue(next);

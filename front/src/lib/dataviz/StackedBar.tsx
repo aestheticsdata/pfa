@@ -1,7 +1,8 @@
 "use client";
 
-import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
 import { cn } from "@lib/utils";
+
+import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
 import type { MouseEvent } from "react";
 
 interface StackedBarProps {

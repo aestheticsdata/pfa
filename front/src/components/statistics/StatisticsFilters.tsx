@@ -1,16 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import { Calendar, Check, ChevronDown, Plus, Search, X } from "lucide-react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@components/ui/popover";
-import { Switch } from "@components/ui/switch";
-import { Input } from "@components/ui/input";
 import ExportButton from "@components/shared/ExportButton";
+import { Input } from "@components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
+import { Switch } from "@components/ui/switch";
 import { cn } from "@lib/utils";
+import { Calendar, Check, ChevronDown, Plus, Search, X } from "lucide-react";
+import { useState } from "react";
 
 import type { Category } from "@src/schemas/categories";
 
@@ -30,8 +26,7 @@ interface StatisticsFiltersProps {
   maxCategories: number;
 }
 
-const popContent =
-  "rounded-[10px] border border-line bg-bg-elev p-1.5 shadow-[0_20px_48px_oklch(0_0_0/0.55)]";
+const popContent = "rounded-[10px] border border-line bg-bg-elev p-1.5 shadow-[0_20px_48px_oklch(0_0_0/0.55)]";
 
 const YearMenu = ({
   years,
@@ -50,9 +45,15 @@ const YearMenu = ({
 }) => {
   const [open, setOpen] = useState(false);
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover
+      open={open}
+      onOpenChange={setOpen}
+    >
       <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent align={align} className={cn(popContent, "w-[132px]")}>
+      <PopoverContent
+        align={align}
+        className={cn(popContent, "w-[132px]")}
+      >
         <div className="flex max-h-[264px] flex-col overflow-y-auto">
           {years
             .filter((year) => year !== exclude)
@@ -104,14 +105,16 @@ const StatisticsFilters = ({
     .map((id) => categories.find((c) => c.ID === id))
     .filter((c): c is Category => Boolean(c));
 
-  const filtered = categories.filter((c) =>
-    c.name.toLowerCase().includes(query.trim().toLowerCase()),
-  );
+  const filtered = categories.filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase()));
 
   return (
     <section className="flex flex-wrap items-center gap-2.5">
       {/* Year */}
-      <YearMenu years={years} selected={selectedYear} onSelect={onSelectYear}>
+      <YearMenu
+        years={years}
+        selected={selectedYear}
+        onSelect={onSelectYear}
+      >
         <button
           type="button"
           className="inline-flex items-center gap-2 rounded-[6px] border border-line bg-bg-elev px-2.5 py-[7px] text-[13px] text-ink-2 transition-colors hover:border-ink-4"
@@ -164,7 +167,10 @@ const StatisticsFilters = ({
       </label>
 
       {/* Category picker */}
-      <Popover open={catOpen} onOpenChange={setCatOpen}>
+      <Popover
+        open={catOpen}
+        onOpenChange={setCatOpen}
+      >
         <PopoverTrigger asChild>
           <button
             type="button"
@@ -178,7 +184,10 @@ const StatisticsFilters = ({
             Ajouter une catégorie
           </button>
         </PopoverTrigger>
-        <PopoverContent align="start" className={cn(popContent, "w-72")}>
+        <PopoverContent
+          align="start"
+          className={cn(popContent, "w-72")}
+        >
           <div className="relative mb-1.5">
             <Search className="absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-ink-4" />
             <Input
@@ -190,9 +199,7 @@ const StatisticsFilters = ({
           </div>
           <div className="max-h-[264px] overflow-y-auto pr-0.5">
             {filtered.length === 0 ? (
-              <div className="px-2.5 py-3 text-center text-[12.5px] text-ink-4">
-                Aucune catégorie
-              </div>
+              <div className="px-2.5 py-3 text-center text-[12.5px] text-ink-4">Aucune catégorie</div>
             ) : (
               filtered.map((category) => {
                 const active = selectedCategoryIds.includes(category.ID);
@@ -208,9 +215,7 @@ const StatisticsFilters = ({
                       style={{ background: category.color }}
                     />
                     <span className="flex-1 truncate">{category.name}</span>
-                    {active && (
-                      <Check className="size-3.5 text-accent-strong" />
-                    )}
+                    {active && <Check className="size-3.5 text-accent-strong" />}
                   </button>
                 );
               })

@@ -3,18 +3,18 @@
 // MOCK — the end-of-year projection is a synthetic average-forward model
 // (spent / days-elapsed × days-in-year). Spent + the year-over-year figure are real.
 
-import { useState } from "react";
-import getDayOfYear from "date-fns/getDayOfYear";
-import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
-import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
-import GlowCard from "@components/shared/GlowCard";
-import { yearTotal } from "@components/statistics/helpers/statisticsData";
-import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
 import { euro, euro0 } from "@components/dashboard/format";
+import GlowCard from "@components/shared/GlowCard";
+import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
+import { yearTotal } from "@components/statistics/helpers/statisticsData";
+import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
+import format from "date-fns/format";
+import getDayOfYear from "date-fns/getDayOfYear";
+import fr from "date-fns/locale/fr";
+import { useState } from "react";
 
-import type { StatisticsResponse } from "@src/schemas/stats";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
+import type { StatisticsResponse } from "@src/schemas/stats";
 
 interface StatisticsForecastProps {
   statistics: StatisticsResponse | undefined;
@@ -36,18 +36,13 @@ const StatisticsForecast = ({
   const [now] = useState(() => new Date());
   const data = statistics?.data;
 
-  const spent =
-    yearTotal(data, year) +
-    (showExceptionals ? exceptionalTotal(exceptionals) : 0);
-  const compareTotal =
-    yearTotal(data, compareYear) +
-    (showExceptionals ? exceptionalTotal(compareExceptionals) : 0);
+  const spent = yearTotal(data, year) + (showExceptionals ? exceptionalTotal(exceptionals) : 0);
+  const compareTotal = yearTotal(data, compareYear) + (showExceptionals ? exceptionalTotal(compareExceptionals) : 0);
 
   const isCurrent = year === now.getFullYear();
   const daysInYear = getDayOfYear(new Date(year, 11, 31));
   const daysElapsed = isCurrent ? getDayOfYear(now) : daysInYear;
-  const projection =
-    isCurrent && daysElapsed > 0 ? (spent / daysElapsed) * daysInYear : spent; // MOCK
+  const projection = isCurrent && daysElapsed > 0 ? (spent / daysElapsed) * daysInYear : spent; // MOCK
   const perDay = daysElapsed > 0 ? spent / daysElapsed : 0;
   const delta = projection - compareTotal;
   const asOfLabel = isCurrent ? format(now, "d MMM", { locale: fr }) : "31 déc.";

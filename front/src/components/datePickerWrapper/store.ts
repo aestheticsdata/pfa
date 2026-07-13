@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import produce from "immer";
+import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 export interface DatePickerWrapperStoreProps {
@@ -35,33 +35,33 @@ const useStore = create<DatePickerWrapperStoreProps>()(
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
           draft.from = from;
-        })
+        }),
       ),
     setTo: (to: Date) =>
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
           draft.to = to;
-        })
+        }),
       ),
     setRange: (range: Date[]) =>
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
           draft.range = range;
-        })
+        }),
       ),
     setSelectedDateIso: (dateIso: string | null) =>
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
           draft.selectedDateIso = dateIso;
-        })
+        }),
       ),
     setScrollToDayIso: (dateIso: string | null) =>
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
           draft.scrollToDayIso = dateIso;
-        })
+        }),
       ),
-  }))
+  })),
 );
 
 export default useStore;

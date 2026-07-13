@@ -1,8 +1,8 @@
 "use client";
 
-import axios from "axios";
 import { useAuth } from "@auth/context/AuthContext";
 import { ROUTES } from "@components/shared/config/constants";
+import axios from "axios";
 
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 

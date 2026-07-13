@@ -6,11 +6,11 @@
 // year — there is no per-month budget endpoint) and the current-month
 // end-of-month projection (an average-forward estimate).
 
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import { niceCeil, MONTHS_FR } from "@components/statistics/helpers/statisticsData";
 import { euro0 } from "@components/dashboard/format";
-import useElementWidth from "@lib/dataviz/useElementWidth";
 import GlowCard from "@components/shared/GlowCard";
+import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
+import useElementWidth from "@lib/dataviz/useElementWidth";
+import getDaysInMonth from "date-fns/getDaysInMonth";
 
 interface StatisticsMonthlyChartProps {
   year: number;
@@ -69,20 +69,16 @@ const StatisticsMonthlyChart = ({
 
   const cm = now.getMonth();
   const isCurrentYear = year === now.getFullYear();
-  const realizedCount =
-    year > now.getFullYear() ? 0 : isCurrentYear ? cm + 1 : 12;
+  const realizedCount = year > now.getFullYear() ? 0 : isCurrentYear ? cm + 1 : 12;
 
-  const exc = regularMonthly.map((_, i) =>
-    showExceptionals ? exceptionalMonthly[i] ?? 0 : 0,
-  );
+  const exc = regularMonthly.map((_, i) => (showExceptionals ? (exceptionalMonthly[i] ?? 0) : 0));
   const total = regularMonthly.map((v, i) => v + exc[i]);
 
   // current-month end-of-month projection (MOCK — average-forward)
   const dayOfMonth = now.getDate();
   const daysInMonth = getDaysInMonth(now);
   const realizedCM = total[cm] ?? 0;
-  const projectedCM =
-    isCurrentYear && dayOfMonth > 0 ? (realizedCM / dayOfMonth) * daysInMonth : 0;
+  const projectedCM = isCurrentYear && dayOfMonth > 0 ? (realizedCM / dayOfMonth) * daysInMonth : 0;
   const hasProjection = isCurrentYear && realizedCount > 0 && projectedCM > realizedCM + 1;
 
   const scaleValues = [
@@ -118,12 +114,13 @@ const StatisticsMonthlyChart = ({
       : `${year}`;
 
   return (
-    <GlowCard as="section" className="px-6 py-[22px]">
+    <GlowCard
+      as="section"
+      className="px-6 py-[22px]"
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
-          <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">
-            Dépenses mensuelles
-          </h2>
+          <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Dépenses mensuelles</h2>
           <p className="mt-0.5 text-[12px] text-ink-4">{subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-[18px] text-[12px] text-ink-3">
@@ -139,7 +136,10 @@ const StatisticsMonthlyChart = ({
           )}
           {compareEnabled && (
             <span className="inline-flex items-center gap-1.5">
-              <DashSwatch color="var(--accent-strong)" opacity={0.85} />
+              <DashSwatch
+                color="var(--accent-strong)"
+                opacity={0.85}
+              />
               {compareYear}
             </span>
           )}
@@ -150,7 +150,10 @@ const StatisticsMonthlyChart = ({
         </div>
       </div>
 
-      <div ref={ref} className="mt-[18px] w-full">
+      <div
+        ref={ref}
+        className="mt-[18px] w-full"
+      >
         {width > 0 && (
           <svg
             viewBox={`0 0 ${width} ${H}`}
@@ -168,8 +171,21 @@ const StatisticsMonthlyChart = ({
                 patternUnits="userSpaceOnUse"
                 patternTransform="rotate(45)"
               >
-                <rect width="5" height="5" fill="var(--accent-strong)" opacity="0.08" />
-                <line x1="0" y1="0" x2="0" y2="5" stroke="var(--accent-strong)" strokeWidth="1.4" opacity="0.3" />
+                <rect
+                  width="5"
+                  height="5"
+                  fill="var(--accent-strong)"
+                  opacity="0.08"
+                />
+                <line
+                  x1="0"
+                  y1="0"
+                  x2="0"
+                  y2="5"
+                  stroke="var(--accent-strong)"
+                  strokeWidth="1.4"
+                  opacity="0.3"
+                />
               </pattern>
             </defs>
 

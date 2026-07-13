@@ -63,8 +63,8 @@
   "app.components.SpendingsSort.SORT_BY_CATEGORY": "Category",
   "app.components.SpendingsSort.SORT_BY_AMOUNT": "Amount",
 
-  "app.components.Categories.confirmDeleteCancelButton":  "Cancel",
-  "app.components.Categories.confirmChangesCategoryButton":  "Modify",
+  "app.components.Categories.confirmDeleteCancelButton": "Cancel",
+  "app.components.Categories.confirmChangesCategoryButton": "Modify",
 
   "app.helpers.requestHelper.expiredToken": "Session has expired",
   "app.helpers.requestHelper.text": "You will be redirected to login",

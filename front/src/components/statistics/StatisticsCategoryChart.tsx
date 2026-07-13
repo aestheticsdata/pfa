@@ -1,9 +1,9 @@
 "use client";
 
-import { niceCeil, MONTHS_FR } from "@components/statistics/helpers/statisticsData";
 import { euro0 } from "@components/dashboard/format";
-import useElementWidth from "@lib/dataviz/useElementWidth";
 import GlowCard from "@components/shared/GlowCard";
+import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
+import useElementWidth from "@lib/dataviz/useElementWidth";
 
 export interface CategorySeries {
   name: string;
@@ -32,22 +32,14 @@ const range = (n: number): number[] => Array.from({ length: n }, (_, i) => i);
 
 /** "Dépenses mensuelles par catégorie" — grouped bars, one group per month and
  *  one bar per selected category. All data is real (from /statistics). */
-const StatisticsCategoryChart = ({
-  year,
-  series,
-  monthsCount,
-  now,
-}: StatisticsCategoryChartProps) => {
+const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsCategoryChartProps) => {
   const [ref, width] = useElementWidth<HTMLDivElement>();
 
   const months = Math.max(1, monthsCount);
   const isCurrentYear = year === now.getFullYear();
   const cm = now.getMonth();
 
-  const dataMax = Math.max(
-    1,
-    ...series.flatMap((s) => range(months).map((m) => s.monthly[m] ?? 0)),
-  );
+  const dataMax = Math.max(1, ...series.flatMap((s) => range(months).map((m) => s.monthly[m] ?? 0)));
   const yMax = niceCeil(dataMax);
 
   const plotW = Math.max(0, width - PAD_L - PAD_R);
@@ -66,22 +58,24 @@ const StatisticsCategoryChart = ({
     value: (yMax * i) / 4,
   }));
 
-  const subtitle = isCurrentYear
-    ? `${year} · janv. → ${MONTHS_FR[months - 1]}`
-    : `${year}`;
+  const subtitle = isCurrentYear ? `${year} · janv. → ${MONTHS_FR[months - 1]}` : `${year}`;
 
   return (
-    <GlowCard as="section" className="px-6 py-[22px]">
+    <GlowCard
+      as="section"
+      className="px-6 py-[22px]"
+    >
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
-          <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">
-            Dépenses mensuelles par catégorie
-          </h2>
+          <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Dépenses mensuelles par catégorie</h2>
           <p className="mt-0.5 text-[12px] text-ink-4">{subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-[18px] text-[12px] text-ink-3">
           {series.map((s) => (
-            <span key={s.name} className="inline-flex items-center gap-1.5 capitalize">
+            <span
+              key={s.name}
+              className="inline-flex items-center gap-1.5 capitalize"
+            >
               <i
                 className="inline-block size-2.5 rounded-[2px]"
                 style={{ background: s.color }}
@@ -92,7 +86,10 @@ const StatisticsCategoryChart = ({
         </div>
       </div>
 
-      <div ref={ref} className="mt-[18px] w-full">
+      <div
+        ref={ref}
+        className="mt-[18px] w-full"
+      >
         {width > 0 && (
           <svg
             viewBox={`0 0 ${width} ${H}`}

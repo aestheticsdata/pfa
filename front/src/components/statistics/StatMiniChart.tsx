@@ -1,6 +1,6 @@
 "use client";
 
-import { areaPath, linePath, linearScale } from "@lib/dataviz/svg";
+import { areaPath, linearScale, linePath } from "@lib/dataviz/svg";
 
 interface StatMiniChartProps {
   /** Stable, unique gradient id. */
@@ -16,7 +16,7 @@ interface StatMiniChartProps {
 /** Round up to a "nice" axis ceiling (1, 1.5, 2, 3, 4, 5, 7.5, 10 × 10ⁿ). */
 const niceCeil = (value: number): number => {
   if (value <= 0) return 1;
-  const magnitude = Math.pow(10, Math.floor(Math.log10(value)));
+  const magnitude = 10 ** Math.floor(Math.log10(value));
   const steps = [1, 1.5, 2, 3, 4, 5, 7.5, 10];
   const normalized = value / magnitude;
   const step = steps.find((s) => s >= normalized) ?? 10;
@@ -24,9 +24,7 @@ const niceCeil = (value: number): number => {
 };
 
 const kFormat = (value: number): string =>
-  value >= 1000
-    ? `${(value / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}k`
-    : `${Math.round(value)}`;
+  value >= 1000 ? `${(value / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}k` : `${Math.round(value)}`;
 
 const W = 300;
 const PAD = { top: 12, right: 8, bottom: 12, left: 8 };
@@ -38,13 +36,7 @@ const PAD = { top: 12, right: 8, bottom: 12, left: 8 };
  * optional dashed average line, and an HTML y-axis graduation (SVG text would be
  * distorted by the stretched viewBox — the end dot is HTML for the same reason).
  */
-const StatMiniChart = ({
-  id,
-  values,
-  count,
-  average,
-  height = 150,
-}: StatMiniChartProps) => {
+const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniChartProps) => {
   const points = values.slice(0, count).map((y, x) => ({ x, y }));
   if (points.length < 2) return <div style={{ height }} />;
 
@@ -61,10 +53,7 @@ const StatMiniChart = ({
   // under the end dot (the y-axis is the left edge)
   const innerW = W - PAD.left - PAD.right;
   const V_LINES = 4;
-  const vGrid = Array.from(
-    { length: V_LINES },
-    (_, i) => PAD.left + (innerW * (i + 1)) / V_LINES,
-  );
+  const vGrid = Array.from({ length: V_LINES }, (_, i) => PAD.left + (innerW * (i + 1)) / V_LINES);
 
   const last = pixels[pixels.length - 1];
   const dotLeft = (last.x / W) * 100;
@@ -73,7 +62,10 @@ const StatMiniChart = ({
   const avgTop = avgY != null ? (avgY / height) * 100 : 0;
 
   return (
-    <div className="flex gap-2.5" style={{ height }}>
+    <div
+      className="flex gap-2.5"
+      style={{ height }}
+    >
       <div
         className="num flex flex-col justify-between text-[11px] leading-none text-ink-4"
         style={{ paddingTop: PAD.top - 6, paddingBottom: PAD.bottom - 6 }}
@@ -92,14 +84,32 @@ const StatMiniChart = ({
           role="img"
         >
           <defs>
-            <linearGradient id={`${id}-fill`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--accent-strong)" stopOpacity="0.28" />
-              <stop offset="100%" stopColor="var(--accent-strong)" stopOpacity="0" />
+            <linearGradient
+              id={`${id}-fill`}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="0%"
+                stopColor="var(--accent-strong)"
+                stopOpacity="0.28"
+              />
+              <stop
+                offset="100%"
+                stopColor="var(--accent-strong)"
+                stopOpacity="0"
+              />
             </linearGradient>
           </defs>
 
           {/* gradient area (behind) */}
-          <path d={areaPath(pixels, baseY)} fill={`url(#${id}-fill)`} stroke="none" />
+          <path
+            d={areaPath(pixels, baseY)}
+            fill={`url(#${id}-fill)`}
+            stroke="none"
+          />
 
           {/* dashed grid — drawn over the fill so it stays visible */}
           {hGrid.map((v, i) => (

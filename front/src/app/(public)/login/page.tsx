@@ -1,7 +1,7 @@
-import { redirect } from "next/navigation";
 import { getServerSession } from "@auth/server/getServerSession";
-import { ROUTES } from "@components/shared/config/constants";
 import LoginFormClient from "@components/login/LoginFormClient";
+import { ROUTES } from "@components/shared/config/constants";
+import { redirect } from "next/navigation";
 
 import type { AuthResponse } from "@auth/types";
 

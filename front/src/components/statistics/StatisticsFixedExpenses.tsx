@@ -5,12 +5,12 @@
 // "déjà prélevé", derived from each line's charge-day vs today (MOCK: recurrings
 // have no dedicated charge-day field, so the day-of-month of `dateFrom` is used).
 
-import parseISO from "date-fns/parseISO";
-import getDate from "date-fns/getDate";
-import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
-import GlowCard from "@components/shared/GlowCard";
 import { euro } from "@components/dashboard/format";
+import GlowCard from "@components/shared/GlowCard";
+import format from "date-fns/format";
+import getDate from "date-fns/getDate";
+import fr from "date-fns/locale/fr";
+import parseISO from "date-fns/parseISO";
 
 import type { RecurringItem } from "@src/schemas/spendings";
 
@@ -45,9 +45,7 @@ const Stat = ({
   const [int, dec] = splitAmount(value);
   return (
     <div className={className}>
-      <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
-        {label}
-      </div>
+      <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</div>
       <div
         className={
           small
@@ -56,13 +54,7 @@ const Stat = ({
         }
       >
         {int}
-        <span
-          className={
-            small
-              ? "text-[14px] font-normal text-ink-3"
-              : "text-[20px] font-normal text-ink-3"
-          }
-        >
+        <span className={small ? "text-[14px] font-normal text-ink-3" : "text-[20px] font-normal text-ink-3"}>
           ,{dec} €
         </span>
       </div>
@@ -72,42 +64,39 @@ const Stat = ({
 
 /** "Dépenses fixes" — recurrings annualised, with per-line share and the
  *  year-to-date drawn amount. */
-const StatisticsFixedExpenses = ({
-  recurrings,
-  now,
-}: StatisticsFixedExpensesProps) => {
+const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesProps) => {
   if (recurrings.length === 0) return null;
 
-  const list = [...recurrings].sort(
-    (a, b) => Number(b.amount) - Number(a.amount),
-  );
+  const list = [...recurrings].sort((a, b) => Number(b.amount) - Number(a.amount));
   const monthlyTotal = list.reduce((sum, r) => sum + Number(r.amount), 0);
   const annualTotal = monthlyTotal * 12;
   const maxAmount = Number(list[0].amount) || 1;
 
   const monthsElapsed = now.getMonth(); // fully-elapsed months before this one
   const today = getDate(now);
-  const drawn = list.reduce(
-    (sum, r) =>
-      sum + Number(r.amount) * (monthsElapsed + (chargeDay(r) <= today ? 1 : 0)),
-    0,
-  );
+  const drawn = list.reduce((sum, r) => sum + Number(r.amount) * (monthsElapsed + (chargeDay(r) <= today ? 1 : 0)), 0);
   const topShare = Math.round((Number(list[0].amount) / monthlyTotal) * 100);
 
   return (
-    <GlowCard as="section" className="px-6 py-[22px]">
+    <GlowCard
+      as="section"
+      className="px-6 py-[22px]"
+    >
       <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">
-          Dépenses fixes
-        </h2>
-        <span className="text-[12px] text-ink-4">
-          annualisé · {list.length} lignes récurrentes · sans catégorie
-        </span>
+        <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Dépenses fixes</h2>
+        <span className="text-[12px] text-ink-4">annualisé · {list.length} lignes récurrentes · sans catégorie</span>
       </div>
 
       <div className="mt-[18px] flex flex-wrap items-baseline gap-x-10 gap-y-4 border-b border-line-soft pb-5">
-        <Stat label="Total sur l'année" value={annualTotal} />
-        <Stat label="Mensuel" value={monthlyTotal} small />
+        <Stat
+          label="Total sur l'année"
+          value={annualTotal}
+        />
+        <Stat
+          label="Mensuel"
+          value={monthlyTotal}
+          small
+        />
         <Stat
           label={`Déjà prélevé · au ${format(now, "d MMM", { locale: fr })}`}
           value={drawn}
@@ -122,14 +111,14 @@ const StatisticsFixedExpenses = ({
           const share = Math.round((Number(r.amount) / monthlyTotal) * 100);
           const barWidth = (Number(r.amount) / maxAmount) * 100;
           return (
-            <div key={r.ID} className="flex flex-col gap-[7px]">
+            <div
+              key={r.ID}
+              className="flex flex-col gap-[7px]"
+            >
               <div className="flex items-baseline gap-2.5 text-[13px]">
                 <span className="text-ink">{r.label}</span>
                 <span className="num ml-auto font-medium text-ink">
-                  {euro(annual)} €
-                  <small className="ml-1.5 text-[11px] font-normal text-ink-4">
-                    {share}%
-                  </small>
+                  {euro(annual)} €<small className="ml-1.5 text-[11px] font-normal text-ink-4">{share}%</small>
                 </span>
               </div>
               <div className="h-[7px] overflow-hidden rounded-[4px] bg-bg-hi">
@@ -137,8 +126,7 @@ const StatisticsFixedExpenses = ({
                   className="block h-full rounded-[4px]"
                   style={{
                     width: `${barWidth}%`,
-                    background:
-                      "linear-gradient(90deg, var(--accent-d), var(--accent-strong))",
+                    background: "linear-gradient(90deg, var(--accent-d), var(--accent-strong))",
                     opacity: 0.9,
                   }}
                 />
@@ -149,11 +137,9 @@ const StatisticsFixedExpenses = ({
       </div>
 
       <p className="mt-5 border-t border-line-soft pt-[18px] text-[12px] text-ink-4">
-        Les dépenses fixes ne portent pas de catégorie — elles sont totalisées
-        par nom. Le{" "}
-        <b className="num font-medium text-ink-2">{list[0].label}</b> représente à
-        lui seul <b className="num font-medium text-ink-2">{topShare} %</b> du
-        total annuel des récurrents.
+        Les dépenses fixes ne portent pas de catégorie — elles sont totalisées par nom. Le{" "}
+        <b className="num font-medium text-ink-2">{list[0].label}</b> représente à lui seul{" "}
+        <b className="num font-medium text-ink-2">{topShare} %</b> du total annuel des récurrents.
       </p>
     </GlowCard>
   );

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import CategoryFormModal from "@components/categories/CategoryFormModal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,8 +11,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
-import CategoryFormModal from "@components/categories/CategoryFormModal";
 import { cn } from "@lib/utils";
+import { Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 import type { Category } from "@src/schemas/categories";
 
@@ -34,14 +34,7 @@ const IC =
 
 const pct1 = (value: number): string => value.toFixed(1).replace(".", ",");
 
-const CategoryItem = ({
-  category,
-  used,
-  share,
-  takenNames,
-  onSave,
-  onDelete,
-}: CategoryItemProps) => {
+const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: CategoryItemProps) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -53,9 +46,7 @@ const CategoryItem = ({
             className="h-5 w-1 flex-none rounded-[2px]"
             style={{ background: category.color || "#94a3b8" }}
           />
-          <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium capitalize text-ink">
-            {category.name}
-          </span>
+          <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium capitalize text-ink">{category.name}</span>
           <span className="flex flex-none gap-1.5">
             <button
               type="button"
@@ -69,10 +60,7 @@ const CategoryItem = ({
             <button
               type="button"
               onClick={() => setIsDeleteOpen(true)}
-              className={cn(
-                IC,
-                "hover:border-neg hover:bg-[oklch(0.72_0.17_25/0.10)] hover:text-neg",
-              )}
+              className={cn(IC, "hover:border-neg hover:bg-[oklch(0.72_0.17_25/0.10)] hover:text-neg")}
               aria-label="Supprimer la catégorie"
               title="Supprimer la catégorie"
             >
@@ -86,12 +74,9 @@ const CategoryItem = ({
             "nouvelle catégorie · jamais utilisée"
           ) : (
             <>
-              <b className="font-medium text-ink-2">{pct1(share)} %</b> des
-              dépenses <span className="mx-1.5 text-ink-5">·</span>
-              <b className="font-medium text-ink-2">
-                {used.toLocaleString("fr-FR")}
-              </b>{" "}
-              fois
+              <b className="font-medium text-ink-2">{pct1(share)} %</b> des dépenses{" "}
+              <span className="mx-1.5 text-ink-5">·</span>
+              <b className="font-medium text-ink-2">{used.toLocaleString("fr-FR")}</b> fois
             </>
           )}
         </span>
@@ -107,15 +92,15 @@ const CategoryItem = ({
         onSubmit={onSave}
       />
 
-      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+      <AlertDialog
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle className="capitalize">
-              Supprimer la catégorie « {category.name} » ?
-            </AlertDialogTitle>
+            <AlertDialogTitle className="capitalize">Supprimer la catégorie « {category.name} » ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. Les dépenses associées n&apos;auront
-              plus de catégorie.
+              Cette action est irréversible. Les dépenses associées n&apos;auront plus de catégorie.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

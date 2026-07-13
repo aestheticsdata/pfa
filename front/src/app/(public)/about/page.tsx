@@ -1,7 +1,7 @@
 "use client";
 
-import AuthCard from "@components/auth/AuthCard";
 import AuthBrand from "@components/auth/AuthBrand";
+import AuthCard from "@components/auth/AuthCard";
 
 const LEGAL = [
   "Site hébergé chez OVH SAS",
@@ -13,7 +13,10 @@ const LEGAL = [
 export default function About() {
   return (
     <AuthCard>
-      <AuthBrand title="À propos" subtitle="Personal Finance Assistant" />
+      <AuthBrand
+        title="À propos"
+        subtitle="Personal Finance Assistant"
+      />
 
       <ul className="flex flex-col gap-2.5 text-[13px] text-ink-2">
         {LEGAL.map((line) => (

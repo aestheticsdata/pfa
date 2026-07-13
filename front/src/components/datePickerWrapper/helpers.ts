@@ -1,17 +1,16 @@
-import { WeekRange } from "./types";
-
 import addDays from "date-fns/addDays";
-import startOfWeek from "date-fns/startOfWeek";
 import endOfWeek from "date-fns/endOfWeek";
-import subDays from "date-fns/subDays";
-import startOfMonth from "date-fns/startOfMonth";
-import isSameMonth from "date-fns/isSameMonth";
 import getDate from "date-fns/getDate";
 import getDay from "date-fns/getDay";
+import isSameMonth from "date-fns/isSameMonth";
 import lastDayOfMonth from "date-fns/lastDayOfMonth";
-import setHours from "date-fns/setHours";
 import parseISO from "date-fns/parseISO";
+import setHours from "date-fns/setHours";
+import startOfMonth from "date-fns/startOfMonth";
+import startOfWeek from "date-fns/startOfWeek";
+import subDays from "date-fns/subDays";
 
+import type { WeekRange } from "./types";
 
 /**
  * Parse a date-only ISO string (e.g. the `?date=` URL param "2026-07-12") as a
@@ -25,10 +24,7 @@ export const parseDateParam = (isoDate: string): Date => parseISO(isoDate);
 export const getWeekDays = (weekStart: Date, date: Date): Date[] => {
   const days: Date[] = [weekStart];
 
-  if (
-    !isSameMonth(startOfWeek(date), date) ||
-    !isSameMonth(endOfWeek(date), date)
-  ) {
+  if (!isSameMonth(startOfWeek(date), date) || !isSameMonth(endOfWeek(date), date)) {
     if (getDate(date) > 15) {
       for (let i = 1; i <= getDay(lastDayOfMonth(date)); i += 1) {
         days.push(addDays(weekStart, i));
@@ -50,10 +46,7 @@ export const getWeekDays = (weekStart: Date, date: Date): Date[] => {
 export const getWeekRange = (date: Date): WeekRange => {
   let dateRange: WeekRange;
 
-  if (
-    !isSameMonth(startOfWeek(date), date) ||
-    !isSameMonth(endOfWeek(date), date)
-  ) {
+  if (!isSameMonth(startOfWeek(date), date) || !isSameMonth(endOfWeek(date), date)) {
     if (getDate(date) > 15) {
       dateRange = {
         // setHours force the 'from" to be at midnight and not noon

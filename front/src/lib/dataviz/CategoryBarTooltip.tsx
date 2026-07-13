@@ -1,9 +1,10 @@
 "use client";
 
-import type { CategoryTrendData } from "@lib/dataviz/CategoryTrend";
 import CategoryTrend from "@lib/dataviz/CategoryTrend";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+
+import type { CategoryTrendData } from "@lib/dataviz/CategoryTrend";
 
 // Measure-then-position must run before paint to clamp the tooltip at the
 // viewport edge without a flash; fall back to useEffect on the server, where
@@ -109,7 +110,10 @@ const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
       }}
     >
       <div className="mb-2 flex items-center gap-2">
-        <span className="size-2 shrink-0 rounded-[2px]" style={{ background: datum.color }} />
+        <span
+          className="size-2 shrink-0 rounded-[2px]"
+          style={{ background: datum.color }}
+        />
         <span className="truncate text-[13px] font-medium capitalize text-ink">{datum.name}</span>
         <span className="num ml-auto shrink-0 rounded-full border border-line-soft bg-background px-[7px] text-[10.5px] leading-[1.55] text-ink-3">
           {datum.count}

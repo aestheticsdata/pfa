@@ -1,10 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
-import { fr } from "date-fns/locale";
-import { Pencil, Trash2 } from "lucide-react";
+import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +11,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
-import useExceptionals from "@components/exceptionals/services/useExceptionals";
+import format from "date-fns/format";
+import { fr } from "date-fns/locale";
+import parseISO from "date-fns/parseISO";
+import { Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
 
 import type { ExceptionalItem as ExceptionalItemType } from "@src/schemas/exceptionals";
 
@@ -37,8 +37,7 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
-  const budgetMonths =
-    monthlyAverage > 0 ? (Number(item.amount) / monthlyAverage).toFixed(1) : null;
+  const budgetMonths = monthlyAverage > 0 ? (Number(item.amount) / monthlyAverage).toFixed(1) : null;
 
   const onDelete = () => {
     deleteExceptional.mutate({ id: item.ID });
@@ -52,7 +51,10 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
 
         <div className="exc-main">
           <div className="flex min-w-0 items-center gap-2">
-            <span className="exc-label truncate" title={item.label}>
+            <span
+              className="exc-label truncate"
+              title={item.label}
+            >
               {item.label}
             </span>
             {item.categoryName && (
@@ -69,7 +71,10 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
             )}
           </div>
           {item.description && (
-            <span className="exc-impact truncate" title={item.description}>
+            <span
+              className="exc-impact truncate"
+              title={item.description}
+            >
               {item.description}
             </span>
           )}
@@ -104,15 +109,14 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
         </span>
       </div>
 
-      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+      <AlertDialog
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+      >
         <AlertDialogContent className="border-line bg-bg-elev">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-ink">
-              Supprimer {item.label}&nbsp;?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-ink-3">
-              Cette action est irréversible.
-            </AlertDialogDescription>
+            <AlertDialogTitle className="text-ink">Supprimer {item.label}&nbsp;?</AlertDialogTitle>
+            <AlertDialogDescription className="text-ink-3">Cette action est irréversible.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-bg-hi">

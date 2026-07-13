@@ -1,8 +1,9 @@
 "use client";
 
-import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@lib/dataviz/dataVizTypes";
 import { areaPath, extent, linearScale, linePath, normalizePoints } from "@lib/dataviz/svg";
 import { cn } from "@lib/utils";
+
+import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@lib/dataviz/dataVizTypes";
 
 interface Padding {
   top?: number;
@@ -87,9 +88,23 @@ const LineChart = ({
         series.map((s, i) =>
           s.area ? (
             <defs key={`def-${i}`}>
-              <linearGradient id={`${id}-a${i}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={s.color ?? DEFAULT_COLOR} stopOpacity="0.28" />
-                <stop offset="100%" stopColor={s.color ?? DEFAULT_COLOR} stopOpacity="0" />
+              <linearGradient
+                id={`${id}-a${i}`}
+                x1="0"
+                y1="0"
+                x2="0"
+                y2="1"
+              >
+                <stop
+                  offset="0%"
+                  stopColor={s.color ?? DEFAULT_COLOR}
+                  stopOpacity="0.28"
+                />
+                <stop
+                  offset="100%"
+                  stopColor={s.color ?? DEFAULT_COLOR}
+                  stopOpacity="0"
+                />
               </linearGradient>
             </defs>
           ) : null,

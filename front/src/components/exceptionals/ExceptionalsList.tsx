@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo } from "react";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
-import { fr } from "date-fns/locale";
 import ExceptionalItem from "@components/exceptionals/ExceptionalItem";
+import format from "date-fns/format";
+import { fr } from "date-fns/locale";
+import parseISO from "date-fns/parseISO";
+import { useMemo } from "react";
 
 import type { ExceptionalItem as ExceptionalItemType } from "@src/schemas/exceptionals";
 
@@ -27,11 +27,7 @@ const fmt = (v: number) =>
     maximumFractionDigits: 2,
   });
 
-const ExceptionalsList = ({
-  items,
-  onEdit,
-  monthlyAverage,
-}: ExceptionalsListProps) => {
+const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListProps) => {
   const groups = useMemo<MonthGroup[]>(() => {
     const map = new Map<string, MonthGroup>();
     for (const item of items) {
@@ -50,11 +46,7 @@ const ExceptionalsList = ({
   }, [items]);
 
   if (groups.length === 0) {
-    return (
-      <div className="py-12 text-center text-[12.5px] text-ink-4">
-        Aucun achat exceptionnel.
-      </div>
-    );
+    return <div className="py-12 text-center text-[12.5px] text-ink-4">Aucun achat exceptionnel.</div>;
   }
 
   return (

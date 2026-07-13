@@ -63,8 +63,8 @@
   "app.components.SpendingsSort.SORT_BY_CATEGORY": "Catégorie",
   "app.components.SpendingsSort.SORT_BY_AMOUNT": "Montant",
 
-  "app.components.Categories.confirmDeleteCancelButton":  "Annuler",
-  "app.components.Categories.confirmChangesCategoryButton":  "Modifier",
+  "app.components.Categories.confirmDeleteCancelButton": "Annuler",
+  "app.components.Categories.confirmChangesCategoryButton": "Modifier",
 
   "app.helpers.requestHelper.expiredToken": "La session a expiré",
   "app.helpers.requestHelper.text": "Vous allez être redirigé vers la page de connexion",
@@ -77,7 +77,6 @@
   "app.components.About.ovhAddress": "Siège social : 2 rue Kellermann - 59100 Roubaix - France Code APE 2620Z N° TVA : FR 22 424 761 419",
   "app.components.About.ovhAPE": "Code APE 2620Z",
   "app.components.About.ovhTVA": "N° TVA : FR 22 424 761 419",
-
 
   "app.components.langMenu.LangMenu.languageLabel": "Langue",
 
