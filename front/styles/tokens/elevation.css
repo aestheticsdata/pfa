@@ -1,0 +1,17 @@
+/* Elevation scale — one vocabulary for the app's shadows. Each token is a full
+ * box-shadow value (soft black drop + a subtle top highlight where present),
+ * ramped by depth. Exposed by `@theme` as both a `shadow-*` utility (TSX) and a
+ * `--shadow-*` custom property (the CSS partials use `var(--shadow-*)`). */
+@theme {
+  --shadow-float: 0 10px 30px oklch(0 0 0 / 0.35);
+  --shadow-card: 0 12px 32px oklch(0 0 0 / 0.26), inset 0 1px 0 oklch(1 0 0 / 0.045);
+  --shadow-header: 0 14px 36px oklch(0 0 0 / 0.32), inset 0 1px 0 oklch(1 0 0 / 0.06);
+  --shadow-card-hover: 0 18px 42px oklch(0 0 0 / 0.36), inset 0 1px 0 oklch(1 0 0 / 0.07);
+  --shadow-popover: 0 20px 48px oklch(0 0 0 / 0.55);
+  --shadow-drawer: 24px 0 70px oklch(0 0 0 / 0.55);
+  --shadow-modal: 0 34px 90px oklch(0 0 0 / 0.62), inset 0 1px 0 oklch(1 0 0 / 0.05);
+  --shadow-lightbox: 0 24px 80px oklch(0 0 0 / 0.6);
+  --shadow-hero: 0 40px 100px oklch(0 0 0 / 0.6), 0 0 80px oklch(0.6 0.13 180 / 0.1);
+  /* Accent glow — the primary CTA (green→blue). */
+  --shadow-primary: 0 4px 18px oklch(0.75 0.14 165 / 0.25), inset 0 1px 0 oklch(1 0 0 / 0.3);
+}

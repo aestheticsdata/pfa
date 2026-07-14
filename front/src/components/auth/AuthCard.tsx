@@ -14,7 +14,7 @@ export default function AuthCard({ children, className }: { children: React.Reac
         className="pointer-events-none absolute -inset-x-[90px] -inset-y-[70px] -z-10 blur-[20px] [background:radial-gradient(60%_55%_at_50%_40%,oklch(0.55_0.13_185/0.20)_0%,transparent_70%),radial-gradient(45%_45%_at_60%_70%,oklch(0.60_0.14_150/0.14)_0%,transparent_70%)]"
       />
       {/* gradient border */}
-      <div className="rounded-[26px] p-px shadow-[0_40px_100px_oklch(0_0_0/0.60),0_0_80px_oklch(0.60_0.13_180/0.10)] [background:linear-gradient(165deg,oklch(0.75_0.10_200/0.55)_0%,oklch(0.40_0.03_250/0.18)_28%,oklch(0.30_0.02_250/0.14)_62%,oklch(0.72_0.13_155/0.45)_100%)]">
+      <div className="rounded-[26px] p-px shadow-hero [background:linear-gradient(165deg,oklch(0.75_0.10_200/0.55)_0%,oklch(0.40_0.03_250/0.18)_28%,oklch(0.30_0.02_250/0.14)_62%,oklch(0.72_0.13_155/0.45)_100%)]">
         {/* glass */}
         <div
           className={cn(

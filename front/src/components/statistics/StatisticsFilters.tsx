@@ -26,7 +26,7 @@ interface StatisticsFiltersProps {
   maxCategories: number;
 }
 
-const popContent = "rounded-[10px] border border-line bg-surface-elev p-1.5 shadow-[0_20px_48px_oklch(0_0_0/0.55)]";
+const popContent = "rounded-[10px] border border-line bg-surface-elev p-1.5 shadow-popover";
 
 const YearMenu = ({
   years,
