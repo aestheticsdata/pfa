@@ -1,8 +1,8 @@
 "use client";
 
+import { IconButton } from "@components/shared/IconButton";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useSpendings from "@components/spendings/services/useSpendings";
-import { cn } from "@lib/utils";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -108,30 +108,35 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
           </span>
 
           <span className="sp-t-actions">
-            <button
-              type="button"
-              className={cn("ic ic-img", hasInvoice && "has-img")}
+            <IconButton
+              variant="bordered"
+              size={7}
               title={hasInvoice ? "Voir le reçu" : "Ajouter un reçu"}
               onClick={() => setInvoiceOpen(true)}
+              className={
+                hasInvoice
+                  ? "border-accent-strong bg-accent-strong text-[oklch(0.18_0.01_148)] hover:text-[oklch(0.18_0.01_148)] hover:brightness-[1.06]"
+                  : undefined
+              }
             >
-              <ImageIcon className="size-3.5" />
-            </button>
-            <button
-              type="button"
-              className="ic"
+              <ImageIcon />
+            </IconButton>
+            <IconButton
+              variant="bordered"
+              size={7}
               title="Modifier"
               onClick={() => onEdit(spending)}
             >
-              <Pencil className="size-3" />
-            </button>
-            <button
-              type="button"
-              className="ic ic-del"
+              <Pencil />
+            </IconButton>
+            <IconButton
+              variant="danger"
+              size={7}
               title="Supprimer"
               onClick={() => setConfirming(true)}
             >
-              <Trash2 className="size-3" />
-            </button>
+              <Trash2 />
+            </IconButton>
           </span>
         </>
       )}

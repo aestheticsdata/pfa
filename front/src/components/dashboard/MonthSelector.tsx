@@ -1,6 +1,7 @@
 "use client";
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { IconButton } from "@components/shared/IconButton";
 import addDays from "date-fns/addDays";
 import addMonths from "date-fns/addMonths";
 import eachDayOfInterval from "date-fns/eachDayOfInterval";
@@ -33,27 +34,27 @@ const MonthSelector = () => {
     <div className="flex items-center gap-2.5">
       <div className="flex items-center gap-1.5 rounded-sm border border-line bg-surface-elev px-2.5 py-2 text-sm text-ink-2">
         <Calendar className="size-3.5 text-ink-4" />
-        <button
-          type="button"
+        <IconButton
+          variant="ghost"
+          size={5}
           onClick={() => applyMonth(addMonths(month, -1))}
           aria-label="Mois précédent"
-          className="grid size-5 place-items-center rounded text-ink-4 transition-colors hover:text-ink"
         >
-          <ChevronLeft className="size-4" />
-        </button>
+          <ChevronLeft />
+        </IconButton>
         {/* fixed width (fits the longest month, "septembre") so the control
             never resizes as the month changes */}
         <span className="num w-[116px] text-center capitalize tracking-normal">
           {format(month, "MMMM yyyy", { locale: fr })}
         </span>
-        <button
-          type="button"
+        <IconButton
+          variant="ghost"
+          size={5}
           onClick={() => applyMonth(addMonths(month, 1))}
           aria-label="Mois suivant"
-          className="grid size-5 place-items-center rounded text-ink-4 transition-colors hover:text-ink"
         >
-          <ChevronRight className="size-4" />
-        </button>
+          <ChevronRight />
+        </IconButton>
       </div>
     </div>
   );

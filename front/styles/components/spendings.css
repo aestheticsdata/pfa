@@ -406,41 +406,6 @@
 .sp-tx:hover .sp-t-actions {
   display: flex;
 }
-.sp-t-actions .ic {
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  background: var(--surface-hi);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--ink-3);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition:
-    color 0.12s,
-    border-color 0.12s,
-    background 0.12s;
-}
-.sp-t-actions .ic:hover {
-  color: var(--ink);
-  border-color: var(--ink-4);
-  background: var(--surface-hover);
-}
-.sp-t-actions .ic-img.has-img {
-  background: var(--accent-strong);
-  border-color: var(--accent-strong);
-  color: oklch(0.18 0.01 148);
-}
-.sp-t-actions .ic-img.has-img:hover {
-  filter: brightness(1.06);
-  background: var(--accent-strong);
-}
-.sp-t-actions .ic-del:hover {
-  color: oklch(0.78 0.16 25);
-  border-color: oklch(0.55 0.15 25);
-  background: oklch(0.72 0.17 25 / 0.12);
-}
 
 /* inline delete confirmation (replaces the row content in React) */
 .sp-tx-confirm {
@@ -594,9 +559,5 @@
     justify-self: end;
     background: none;
     padding: 0;
-  }
-  .sp-t-actions .ic {
-    width: 30px;
-    height: 30px;
   }
 }

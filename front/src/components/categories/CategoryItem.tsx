@@ -2,7 +2,7 @@
 
 import CategoryFormModal from "@components/categories/CategoryFormModal";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
-import { cn } from "@lib/utils";
+import { IconButton } from "@components/shared/IconButton";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,9 +20,6 @@ interface CategoryItemProps {
   onDelete: () => void;
 }
 
-const IC =
-  "grid size-[26px] place-items-center rounded-[6px] border border-line bg-bg text-ink-4 transition-colors hover:border-ink-4 hover:bg-surface-hi hover:text-ink";
-
 const pct1 = (value: number): string => value.toFixed(1).replace(".", ",");
 
 const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: CategoryItemProps) => {
@@ -39,24 +36,24 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
           />
           <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium capitalize text-ink">{category.name}</span>
           <span className="flex flex-none gap-1.5">
-            <button
-              type="button"
+            <IconButton
+              variant="bordered"
+              size={6}
               onClick={() => setIsEditOpen(true)}
-              className={IC}
               aria-label="Modifier le nom et la couleur"
               title="Modifier le nom et la couleur"
             >
-              <Pencil className="size-3" />
-            </button>
-            <button
-              type="button"
+              <Pencil />
+            </IconButton>
+            <IconButton
+              variant="danger"
+              size={6}
               onClick={() => setIsDeleteOpen(true)}
-              className={cn(IC, "hover:border-neg hover:bg-[oklch(0.72_0.17_25/0.10)] hover:text-neg")}
               aria-label="Supprimer la catégorie"
               title="Supprimer la catégorie"
             >
-              <Trash2 className="size-3" />
-            </button>
+              <Trash2 />
+            </IconButton>
           </span>
         </div>
 

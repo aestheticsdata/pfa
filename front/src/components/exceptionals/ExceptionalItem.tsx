@@ -2,6 +2,7 @@
 
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
+import { IconButton } from "@components/shared/IconButton";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
 import parseISO from "date-fns/parseISO";
@@ -79,24 +80,24 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
         <span className="exc-amt">{amount} €</span>
 
         <span className="exc-acts">
-          <button
-            type="button"
-            className="exc-ic"
+          <IconButton
+            variant="bordered"
+            size={7}
             onClick={() => onEdit(item)}
             aria-label="Modifier"
             title="Modifier"
           >
-            <Pencil className="size-3.5" />
-          </button>
-          <button
-            type="button"
-            className="exc-ic exc-ic-del"
+            <Pencil />
+          </IconButton>
+          <IconButton
+            variant="danger"
+            size={7}
             onClick={() => setIsDeleteOpen(true)}
             aria-label="Supprimer"
             title="Supprimer"
           >
-            <Trash2 className="size-3.5" />
-          </button>
+            <Trash2 />
+          </IconButton>
         </span>
       </div>
 

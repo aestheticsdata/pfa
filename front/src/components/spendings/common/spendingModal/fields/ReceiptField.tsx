@@ -1,3 +1,4 @@
+import { IconButton } from "@components/shared/IconButton";
 import { humanSize } from "@components/spendings/common/spendingModal/helpers";
 import { cn } from "@lib/utils";
 import { Upload, X } from "lucide-react";
@@ -84,14 +85,14 @@ const ReceiptField = ({
           <span className="truncate text-sm font-semibold text-ink">{receiptFile.name}</span>
           <span className="num text-xs text-ink-4">{humanSize(receiptFile.size)}</span>
         </span>
-        <button
-          type="button"
+        <IconButton
+          variant="danger"
+          size={8}
           onClick={clearReceipt}
           aria-label="Retirer le reçu"
-          className="grid size-8 shrink-0 place-items-center rounded-md border border-line bg-surface-hi text-ink-3 transition-colors hover:border-neg hover:text-neg"
         >
-          <X className="size-4" />
-        </button>
+          <X />
+        </IconButton>
       </div>
     )}
   </div>

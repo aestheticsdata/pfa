@@ -62,30 +62,6 @@
 .exc-item:hover .exc-acts {
   opacity: 1;
 }
-.exc-ic {
-  width: 28px;
-  height: 28px;
-  background: var(--surface-hi);
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--ink-3);
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  transition:
-    color 0.12s,
-    border-color 0.12s,
-    background 0.12s;
-}
-.exc-ic:hover {
-  color: var(--ink);
-  border-color: var(--ink-4);
-}
-.exc-ic-del:hover {
-  color: var(--neg);
-  border-color: color-mix(in oklch, var(--neg) 55%, transparent);
-  background: oklch(0.72 0.17 25 / 0.12);
-}
 @media (max-width: 759px) {
   .exc-item {
     grid-template-columns: 64px 1fr auto;
