@@ -28,7 +28,7 @@ const CategoryComponent = ({ item, customCss = "", isDynamic = false, isClicked 
 
   return (
     <div
-      className={`relative flex items-center px-0.5 rounded-sm ${isDynamic ? "text-tiny" : "text-xxs"} uppercase ${customCss}`}
+      className={`relative flex items-center px-0.5 rounded-sm ${isDynamic ? "text-3xs" : "text-2xs"} uppercase ${customCss}`}
       style={{
         color: getTextColor(),
         backgroundColor: getBackgroundColor(),

@@ -3,8 +3,8 @@
 }
 
 @theme {
-  --text-xxs: 0.7rem;
-  --text-tiny: 0.5rem;
+  --text-2xs: 0.7rem;
+  --text-3xs: 0.5rem;
 
   --font-smooch: Smooch Sans, sans-serif;
   --font-poppins: Poppins, sans-serif;
