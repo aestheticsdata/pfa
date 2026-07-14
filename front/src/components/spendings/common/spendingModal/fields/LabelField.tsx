@@ -1,4 +1,4 @@
-import { Input } from "@components/ui/input";
+import { TextInput } from "@components/shared/TextInput";
 import { Label } from "@components/ui/label";
 
 import type { LabelSuggestion } from "@components/spendings/common/spendingModal/mockSuggestions";
@@ -30,10 +30,10 @@ const LabelField = ({
     >
       Label
     </Label>
-    <Input
+    <TextInput
       id="spendingLabel"
       placeholder="Ex : Boulangerie du coin"
-      className="border-line bg-background dark:bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
+      className="dark:bg-background"
       {...register("spendingLabel", {
         onChange: (e) => setLabelQuery(e.target.value),
       })}

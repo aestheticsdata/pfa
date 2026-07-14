@@ -1,54 +1,23 @@
+import { Dropzone } from "@components/shared/Dropzone";
 import { IconButton } from "@components/shared/IconButton";
 import { humanSize } from "@components/spendings/common/spendingModal/helpers";
-import { cn } from "@lib/utils";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
-
-import type { Dispatch, SetStateAction } from "react";
 
 interface ReceiptFieldProps {
   receiptFile: File | null;
   receiptPreview: string | null;
-  isReceiptDragging: boolean;
-  setIsReceiptDragging: Dispatch<SetStateAction<boolean>>;
   onReceiptFile: (file: File | undefined) => void;
   clearReceipt: () => void;
 }
 
-const ReceiptField = ({
-  receiptFile,
-  receiptPreview,
-  isReceiptDragging,
-  setIsReceiptDragging,
-  onReceiptFile,
-  clearReceipt,
-}: ReceiptFieldProps) => (
+const ReceiptField = ({ receiptFile, receiptPreview, onReceiptFile, clearReceipt }: ReceiptFieldProps) => (
   <div className="flex flex-col gap-2">
     {!receiptFile ? (
-      <label
-        onDragEnter={(e) => {
-          e.preventDefault();
-          setIsReceiptDragging(true);
-        }}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setIsReceiptDragging(true);
-        }}
-        onDragLeave={(e) => {
-          e.preventDefault();
-          setIsReceiptDragging(false);
-        }}
-        onDrop={(e) => {
-          e.preventDefault();
-          setIsReceiptDragging(false);
-          onReceiptFile(e.dataTransfer.files?.[0]);
-        }}
-        className={cn(
-          // children are pointer-events-none so drag events target the
-          // label itself (no flicker when hovering child elements)
-          "flex cursor-pointer items-center gap-3 rounded-md border-[1.5px] border-dashed px-4 py-3.5 transition-colors [&_*]:pointer-events-none",
-          isReceiptDragging ? "border-elec bg-elec/[0.06]" : "border-line hover:border-elec hover:bg-elec/[0.06]",
-        )}
+      <Dropzone
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        onFile={onReceiptFile}
+        className="items-center gap-3 rounded-md px-4 py-3.5"
       >
         <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-elec/10 text-elec">
           <Upload className="size-5" />
@@ -59,16 +28,7 @@ const ReceiptField = ({
           </span>
           <span className="num text-xs text-ink-4">jpg, png, webp</span>
         </span>
-        <input
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          hidden
-          onChange={(e) => {
-            onReceiptFile(e.target.files?.[0]);
-            e.currentTarget.value = "";
-          }}
-        />
-      </label>
+      </Dropzone>
     ) : (
       <div className="flex items-center gap-3 rounded-md border border-line bg-background p-2 pr-2.5">
         {receiptPreview && (

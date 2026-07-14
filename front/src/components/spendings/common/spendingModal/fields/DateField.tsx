@@ -1,6 +1,6 @@
+import { FieldShell } from "@components/shared/FieldShell";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
 import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
 import { cn } from "@lib/utils";
 import addDays from "date-fns/addDays";
 import format from "date-fns/format";
@@ -30,13 +30,10 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
     // Date is not applicable to a recurring (no single charge date), so
     // it is disabled — not removed or swapped for a month stepper — when
     // "Récurrente mensuelle" is on.
-    <div className="flex flex-col gap-2">
-      <Label
-        htmlFor="spendingDate"
-        className="text-sm text-ink-2"
-      >
-        Date
-      </Label>
+    <FieldShell
+      label="Date"
+      htmlFor="spendingDate"
+    >
       <div
         className={cn(
           "flex items-stretch overflow-hidden rounded-md border border-line bg-background transition-opacity",
@@ -69,7 +66,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
           <ChevronRight className="size-4" />
         </button>
       </div>
-    </div>
+    </FieldShell>
   );
 };
 

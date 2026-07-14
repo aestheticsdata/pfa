@@ -3,14 +3,14 @@
 import { useAuth } from "@auth/context/AuthContext";
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
+import { comboboxTriggerClass } from "@components/shared/comboboxTriggerClass";
+import { FieldShell } from "@components/shared/FieldShell";
+import { TextInput } from "@components/shared/TextInput";
 import { Button } from "@components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
-import { Input } from "@components/ui/input";
-import { Label } from "@components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Mexp from "math-expression-evaluator";
@@ -159,71 +159,67 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
           className="flex flex-col gap-[18px] px-[22px] py-[22px]"
         >
           <div className="grid grid-cols-2 gap-3.5">
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="exceptional-date"
-                className="text-[13px] text-ink-2"
-              >
-                Date
-              </Label>
-              <Input
+            <FieldShell
+              label="Date"
+              htmlFor="exceptional-date"
+              labelClassName="text-[13px]"
+            >
+              <TextInput
                 id="exceptional-date"
                 type="date"
-                className="num border-line bg-background text-ink [color-scheme:dark] focus-visible:border-accent-d focus-visible:ring-0"
+                className="num [color-scheme:dark]"
                 {...register("date")}
               />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label
-                htmlFor="exceptional-amount"
-                className="text-[13px] text-ink-2"
-              >
-                Montant (€)
-              </Label>
-              <Input
+            </FieldShell>
+            <FieldShell
+              label="Montant (€)"
+              htmlFor="exceptional-amount"
+              labelClassName="text-[13px]"
+            >
+              <TextInput
                 id="exceptional-amount"
                 inputMode="decimal"
                 placeholder="0,00"
-                className="num border-line bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
+                className="num"
                 {...register("amount")}
               />
-            </div>
+            </FieldShell>
           </div>
           {errors.amount && <p className="-mt-3 text-xs text-neg">{errors.amount.message}</p>}
 
-          <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="exceptional-label"
-              className="text-[13px] text-ink-2"
-            >
-              Label
-            </Label>
-            <Input
+          <FieldShell
+            label="Label"
+            htmlFor="exceptional-label"
+            labelClassName="text-[13px]"
+            error={errors.label?.message}
+          >
+            <TextInput
               id="exceptional-label"
               placeholder="Ex : Climatiseur mobile"
-              className="border-line bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
               {...register("label")}
             />
-            {errors.label && <p className="text-xs text-neg">{errors.label.message}</p>}
-          </div>
+          </FieldShell>
 
-          <div className="flex flex-col gap-2">
-            <Label
-              htmlFor="exceptional-description"
-              className="text-[13px] text-ink-2"
-            >
-              Description <span className="text-ink-4">(optionnel)</span>
-            </Label>
-            <Input
+          <FieldShell
+            label={
+              <>
+                Description <span className="text-ink-4">(optionnel)</span>
+              </>
+            }
+            htmlFor="exceptional-description"
+            labelClassName="text-[13px]"
+          >
+            <TextInput
               id="exceptional-description"
               placeholder="Ex : Ordinateur portable pro"
-              className="border-line bg-background text-ink placeholder:text-ink-5 focus-visible:border-accent-d focus-visible:ring-0"
               {...register("description")}
             />
-          </div>
+          </FieldShell>
 
-          <div className="flex flex-col gap-2">
-            <Label className="text-[13px] text-ink-2">Catégorie</Label>
+          <FieldShell
+            label="Catégorie"
+            labelClassName="text-[13px]"
+          >
             <Popover
               open={comboboxOpen}
               onOpenChange={setComboboxOpen}
@@ -234,10 +230,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                   type="button"
                   role="combobox"
                   aria-expanded={comboboxOpen}
-                  className={cn(
-                    "flex w-full items-center gap-2.5 rounded-md border bg-background px-3 py-2.5 text-left text-sm text-ink transition-colors hover:border-ink-4",
-                    comboboxOpen ? "border-accent-d" : "border-line",
-                  )}
+                  className={comboboxTriggerClass(comboboxOpen)}
                 >
                   {selectedCategory ? (
                     <>
@@ -320,7 +313,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                 </Command>
               </PopoverContent>
             </Popover>
-          </div>
+          </FieldShell>
 
           <DialogFooter className="gap-2.5 border-t border-line-soft pt-4 sm:gap-2.5">
             <Button

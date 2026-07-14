@@ -4,6 +4,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import Spinner from "@components/common/Spinner";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
+import { Dropzone } from "@components/shared/Dropzone";
 import { QUERY_KEYS } from "@components/spendings/config/constants";
 import texts from "@components/spendings/config/text";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
@@ -49,7 +50,6 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
   const [isClickOnThumbnail, setIsClickOnThumbnail] = useState(false);
   const [progressValue, setProgressValue] = useState(0);
   const [isProgress, setIsProgress] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [showConfirmDeleteImage, setShowConfirmDeleteImage] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
@@ -179,15 +179,6 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
     uploadInvoiceImage(formData);
   };
 
-  const onDrop = (e: React.DragEvent<HTMLLabelElement>) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      selectFile(file);
-    }
-  };
-
   const category = "category" in spending ? spending.category : null;
   const categoryColor = "categoryColor" in spending && spending.categoryColor ? spending.categoryColor : FALLBACK_COLOR;
 
@@ -311,48 +302,19 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                 </Button>
               </div>
             ) : !isLoading ? (
-              <>
-                <input
-                  className="hidden"
-                  type="file"
-                  id="invoicefileinputid"
-                  name="invoicefile"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                      selectFile(file);
-                    }
-                    e.currentTarget.value = "";
-                  }}
-                />
-                <label
-                  htmlFor="invoicefileinputid"
-                  onDragEnter={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragLeave={(e) => {
-                    e.preventDefault();
-                    setIsDragging(false);
-                  }}
-                  onDrop={onDrop}
-                  className={cn(
-                    // children are pointer-events-none so drag events target the
-                    // label itself (no flicker when hovering child elements)
-                    "flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-[1.5px] border-dashed px-5.5 py-7.5 text-center transition-colors [&_*]:pointer-events-none",
-                    isDragging ? "border-elec bg-elec/[0.06]" : "border-line hover:border-elec hover:bg-elec/[0.06]",
-                  )}
-                >
-                  <Upload className="size-7.5 text-elec" />
-                  <span className="text-base font-semibold text-ink">{invoiceModalTexts.chooseFile}</span>
-                  <span className="num text-sm text-ink-4">{invoiceModalTexts.fileTypeWarning}</span>
-                </label>
-              </>
+              <Dropzone
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onFile={(file) => {
+                  if (file) {
+                    selectFile(file);
+                  }
+                }}
+                className="flex-col items-center gap-1.5 rounded-xl px-5.5 py-7.5 text-center"
+              >
+                <Upload className="size-7.5 text-elec" />
+                <span className="text-base font-semibold text-ink">{invoiceModalTexts.chooseFile}</span>
+                <span className="num text-sm text-ink-4">{invoiceModalTexts.fileTypeWarning}</span>
+              </Dropzone>
             ) : null}
           </div>
         </DialogContent>

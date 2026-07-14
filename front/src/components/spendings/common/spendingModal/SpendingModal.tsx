@@ -100,7 +100,6 @@ const SpendingModal = ({
   const [isReceiptToggle, setIsReceiptToggle] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
-  const [isReceiptDragging, setIsReceiptDragging] = useState(false);
 
   const onReceiptFile = (file: File | undefined) => {
     if (!file?.type.startsWith("image/")) return;
@@ -248,8 +247,6 @@ const SpendingModal = ({
             <ReceiptField
               receiptFile={receiptFile}
               receiptPreview={receiptPreview}
-              isReceiptDragging={isReceiptDragging}
-              setIsReceiptDragging={setIsReceiptDragging}
               onReceiptFile={onReceiptFile}
               clearReceipt={clearReceipt}
             />

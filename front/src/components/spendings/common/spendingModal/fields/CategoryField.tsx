@@ -1,7 +1,8 @@
+import { comboboxTriggerClass } from "@components/shared/comboboxTriggerClass";
+import { FieldShell } from "@components/shared/FieldShell";
 import { Overline } from "@components/shared/Overline";
 import { FALLBACK_COLOR, getRandomHexColor } from "@components/spendings/common/spendingModal/helpers";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
-import { Label } from "@components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { cn } from "@lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
@@ -50,8 +51,7 @@ const CategoryField = ({
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <Label className="text-sm text-ink-2">Catégorie</Label>
+    <FieldShell label="Catégorie">
       <Popover
         open={comboboxOpen}
         onOpenChange={(isOpen) => {
@@ -89,10 +89,7 @@ const CategoryField = ({
                 setComboboxOpen(true);
               }
             }}
-            className={cn(
-              "flex w-full items-center gap-2.5 rounded-md border bg-background px-3 py-2.5 text-left text-sm text-ink transition-colors hover:border-ink-4",
-              comboboxOpen ? "border-accent-d" : "border-line",
-            )}
+            className={comboboxTriggerClass(comboboxOpen)}
           >
             {selectedCategory?.name ? (
               <>
@@ -201,7 +198,7 @@ const CategoryField = ({
           })}
         </div>
       )}
-    </div>
+    </FieldShell>
   );
 };
 
