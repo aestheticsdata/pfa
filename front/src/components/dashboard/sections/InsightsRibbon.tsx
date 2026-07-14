@@ -91,7 +91,7 @@ const InsightsRibbon = () => {
         )}
       </Insight>
       <Insight
-        tone="bg-bg-hi text-ink-2"
+        tone="bg-surface-hi text-ink-2"
         icon={<Wallet className="size-3.5" />}
         label="Reste à vivre"
       >

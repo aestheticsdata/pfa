@@ -26,7 +26,7 @@ interface StatisticsFiltersProps {
   maxCategories: number;
 }
 
-const popContent = "rounded-[10px] border border-line bg-bg-elev p-1.5 shadow-[0_20px_48px_oklch(0_0_0/0.55)]";
+const popContent = "rounded-[10px] border border-line bg-surface-elev p-1.5 shadow-[0_20px_48px_oklch(0_0_0/0.55)]";
 
 const YearMenu = ({
   years,
@@ -66,7 +66,7 @@ const YearMenu = ({
                   setOpen(false);
                 }}
                 className={cn(
-                  "num flex items-center justify-between rounded-md px-2.5 py-2 text-left text-[13px] transition-colors hover:bg-bg-hi",
+                  "num flex items-center justify-between rounded-md px-2.5 py-2 text-left text-[13px] transition-colors hover:bg-surface-hi",
                   year === selected ? "text-accent-strong" : "text-ink-2",
                 )}
               >
@@ -117,7 +117,7 @@ const StatisticsFilters = ({
       >
         <button
           type="button"
-          className="inline-flex items-center gap-2 rounded-[6px] border border-line bg-bg-elev px-2.5 py-[7px] text-[13px] text-ink-2 transition-colors hover:border-ink-4"
+          className="inline-flex items-center gap-2 rounded-[6px] border border-line bg-surface-elev px-2.5 py-[7px] text-[13px] text-ink-2 transition-colors hover:border-ink-4"
         >
           <Calendar className="size-3.5 text-ink-4" />
           <span className="num text-ink">{selectedYear}</span>
@@ -129,7 +129,7 @@ const StatisticsFilters = ({
       <div
         className={cn(
           "inline-flex items-center gap-2 rounded-[6px] border border-line px-2.5 py-[6px] text-[12px]",
-          compareEnabled ? "bg-bg-elev" : "bg-transparent",
+          compareEnabled ? "bg-surface-elev" : "bg-transparent",
         )}
       >
         <Switch
@@ -148,7 +148,7 @@ const StatisticsFilters = ({
           <button
             type="button"
             disabled={!compareEnabled}
-            className="inline-flex items-center gap-1 rounded-[6px] border border-line bg-bg-hi px-1.5 py-0.5 text-[12px] text-ink-2 transition-colors hover:border-ink-4 disabled:opacity-40"
+            className="inline-flex items-center gap-1 rounded-[6px] border border-line bg-surface-hi px-1.5 py-0.5 text-[12px] text-ink-2 transition-colors hover:border-ink-4 disabled:opacity-40"
           >
             <span className="num">{compareYear}</span>
             <ChevronDown className="size-2.5 text-ink-4" />
@@ -180,7 +180,7 @@ const StatisticsFilters = ({
             type="button"
             disabled={atMax}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-[6px] border border-line bg-bg-elev py-[7px] pl-2.5 pr-3 text-[13px] text-ink-2 transition-colors hover:border-ink-4",
+              "inline-flex items-center gap-1.5 rounded-[6px] border border-line bg-surface-elev py-[7px] pl-2.5 pr-3 text-[13px] text-ink-2 transition-colors hover:border-ink-4",
               atMax && "pointer-events-none opacity-45",
             )}
           >
@@ -212,7 +212,7 @@ const StatisticsFilters = ({
                     key={category.ID}
                     type="button"
                     onClick={() => onToggleCategory(category.ID)}
-                    className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] capitalize text-ink-2 transition-colors hover:bg-bg-hi hover:text-ink"
+                    className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13px] capitalize text-ink-2 transition-colors hover:bg-surface-hi hover:text-ink"
                   >
                     <span
                       className="size-2.5 shrink-0 rounded-full"
@@ -232,7 +232,7 @@ const StatisticsFilters = ({
       {selectedCategories.map((category) => (
         <span
           key={category.ID}
-          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-hi py-[5px] pl-2 pr-1.5 text-[12.5px] capitalize text-ink-2"
+          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-hi py-[5px] pl-2 pr-1.5 text-[12.5px] capitalize text-ink-2"
         >
           <span
             className="size-2 rounded-full"
@@ -243,7 +243,7 @@ const StatisticsFilters = ({
             type="button"
             onClick={() => onToggleCategory(category.ID)}
             aria-label={`Retirer ${category.name}`}
-            className="grid size-[17px] place-items-center rounded-[5px] text-ink-4 transition-colors hover:bg-bg-hover hover:text-ink"
+            className="grid size-[17px] place-items-center rounded-[5px] text-ink-4 transition-colors hover:bg-surface-hover hover:text-ink"
           >
             <X className="size-3" />
           </button>

@@ -79,7 +79,7 @@ const CategoriesListcontainer = () => {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
         <h1 className="text-[18px] font-semibold tracking-[-0.01em] text-ink">Catégories</h1>
-        <span className="num rounded-full border border-line-soft bg-bg-elev px-2.5 py-[3px] text-[12px] text-ink-3">
+        <span className="num rounded-full border border-line-soft bg-surface-elev px-2.5 py-[3px] text-[12px] text-ink-3">
           {allCats.length}
         </span>
 
@@ -92,7 +92,7 @@ const CategoriesListcontainer = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher une catégorie…"
-            className="w-full rounded-[6px] border border-line bg-bg-elev py-2 pl-8 pr-2.5 text-[13px] text-ink outline-none transition placeholder:text-ink-4 focus:border-accent-d"
+            className="w-full rounded-[6px] border border-line bg-surface-elev py-2 pl-8 pr-2.5 text-[13px] text-ink outline-none transition placeholder:text-ink-4 focus:border-accent-d"
           />
         </div>
 

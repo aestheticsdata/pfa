@@ -57,7 +57,7 @@ const ProgressTrack = ({
   animate = false,
   animationDelay = 0,
   overColor = "var(--neg)",
-  trackColor = "var(--bg-hi)",
+  trackColor = "var(--surface-hi)",
   className,
   ariaLabel,
 }: ProgressTrackProps) => {
@@ -142,7 +142,7 @@ const ProgressTrack = ({
           }}
         >
           {markerLabel && (
-            <span className="num absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border border-line bg-bg-elev px-1.5 py-px text-[11px] text-ink">
+            <span className="num absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded border border-line bg-surface-elev px-1.5 py-px text-[11px] text-ink">
               {markerLabel}
             </span>
           )}

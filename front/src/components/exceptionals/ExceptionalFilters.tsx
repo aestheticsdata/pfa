@@ -25,7 +25,9 @@ const YearChip = ({ active, label, onClick }: { active: boolean; label: string; 
     onClick={onClick}
     className={cn(
       "inline-flex items-center rounded-full border px-3 py-1 text-xs transition-colors",
-      active ? "border-exc/60 bg-exc/10 text-exc" : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
+      active
+        ? "border-exc/60 bg-exc/10 text-exc"
+        : "border-line bg-surface-hi text-ink-2 hover:bg-surface-hover hover:text-ink",
     )}
   >
     {label}
@@ -79,7 +81,7 @@ const ExceptionalFilters = ({
             "inline-flex items-center rounded-full border px-2.5 py-1 text-xs transition-colors",
             activeCategory === null
               ? "border-exc/60 bg-exc/10 text-exc"
-              : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
+              : "border-line bg-surface-hi text-ink-2 hover:bg-surface-hover hover:text-ink",
           )}
         >
           Toutes
@@ -93,7 +95,7 @@ const ExceptionalFilters = ({
               onClick={() => onSelectCategory(active ? null : cat.name)}
               className={cn(
                 "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs capitalize transition-colors",
-                active ? "text-ink" : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
+                active ? "text-ink" : "border-line bg-surface-hi text-ink-2 hover:bg-surface-hover hover:text-ink",
               )}
               style={
                 active

@@ -178,7 +178,7 @@ const SpendingModal = ({
       open={open}
       onOpenChange={(isOpen) => !isOpen && closeModal()}
     >
-      <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[480px]">
+      <DialogContent className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[480px]">
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-5.5 py-4.5 text-left">
           <DialogTitle className="pr-8 text-base font-semibold tracking-normal text-ink">{title}</DialogTitle>
         </DialogHeader>
@@ -281,7 +281,7 @@ const SpendingModal = ({
                   },
                 });
               }}
-              className="border-line bg-background text-ink-2 hover:bg-bg-hi"
+              className="border-line bg-background text-ink-2 hover:bg-surface-hi"
             >
               <Copy className="size-4" />
               Copier les dépenses fixes du mois précédent
@@ -293,7 +293,7 @@ const SpendingModal = ({
               type="button"
               variant="outline"
               onClick={closeModal}
-              className="border-line bg-background text-ink-2 hover:bg-bg-hi"
+              className="border-line bg-background text-ink-2 hover:bg-surface-hi"
             >
               Annuler
             </Button>

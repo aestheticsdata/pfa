@@ -30,7 +30,7 @@ interface CategoryItemProps {
 }
 
 const IC =
-  "grid size-[26px] place-items-center rounded-[6px] border border-line bg-bg text-ink-4 transition-colors hover:border-ink-4 hover:bg-bg-hi hover:text-ink";
+  "grid size-[26px] place-items-center rounded-[6px] border border-line bg-bg text-ink-4 transition-colors hover:border-ink-4 hover:bg-surface-hi hover:text-ink";
 
 const pct1 = (value: number): string => value.toFixed(1).replace(".", ",");
 

@@ -42,7 +42,7 @@ const Donut = ({
   gap = 0,
   rounded = false,
   animate = false,
-  trackColor = "var(--bg-hi)",
+  trackColor = "var(--surface-hi)",
   children,
   className,
   ariaLabel,

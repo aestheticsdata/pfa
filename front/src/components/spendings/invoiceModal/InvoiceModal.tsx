@@ -205,7 +205,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
         open={open}
         onOpenChange={(isOpen) => !isOpen && handleClickOutside()}
       >
-        <DialogContent className="max-h-[92vh] gap-0 overflow-y-auto border-line bg-bg-elev p-0 sm:max-w-[600px]">
+        <DialogContent className="max-h-[92vh] gap-0 overflow-y-auto border-line bg-surface-elev p-0 sm:max-w-[600px]">
           <DialogHeader className="flex-row items-center gap-3 space-y-0 pb-4 pl-5.5 pr-14 pt-5 text-left">
             <DialogTitle
               className="min-w-0 flex-1 truncate pr-8 text-xl font-semibold tracking-tight text-ink"
@@ -281,7 +281,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
             {isProgress ? (
               <div className="flex flex-col gap-2">
                 <span className="num text-right text-xs text-ink-3">{progressValue} %</span>
-                <div className="h-2 overflow-hidden rounded bg-bg-hi">
+                <div className="h-2 overflow-hidden rounded bg-surface-hi">
                   <div
                     className="h-full bg-elec transition-all"
                     style={{ width: `${progressValue}%` }}
@@ -304,7 +304,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                   variant="outline"
                   size="lg"
                   onClick={clearPending}
-                  className="flex-1 border-line bg-background text-base text-ink-2 hover:bg-bg-hi"
+                  className="flex-1 border-line bg-background text-base text-ink-2 hover:bg-surface-hi"
                 >
                   Annuler
                 </Button>
@@ -377,13 +377,13 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
         open={showConfirmDeleteImage}
         onOpenChange={setShowConfirmDeleteImage}
       >
-        <AlertDialogContent className="border-line bg-bg-elev">
+        <AlertDialogContent className="border-line bg-surface-elev">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-ink">Supprimer la facture&nbsp;?</AlertDialogTitle>
             <AlertDialogDescription className="text-ink-3">Cette action est irréversible.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-bg-hi">
+            <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-surface-hi">
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction

@@ -91,7 +91,7 @@ const CmpRow = ({
       </span>
       <span className="num ml-auto text-[17px] font-medium text-ink">{euro0(amount)} €</span>
     </div>
-    <div className="flex h-2 overflow-hidden rounded-[3px] bg-bg-hi">
+    <div className="flex h-2 overflow-hidden rounded-[3px] bg-surface-hi">
       <span
         style={{
           width: `${Math.max(0, regWidth) * 100}%`,

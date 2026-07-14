@@ -48,7 +48,7 @@ const LabelField = ({
             key={s.label}
             type="button"
             onClick={() => applySuggestion(s)}
-            className="rounded-md border border-line bg-bg-hi px-2 py-1 text-2xs text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
+            className="rounded-md border border-line bg-surface-hi px-2 py-1 text-2xs text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
           >
             {s.label}
             <span className="text-ink-4"> — {s.category}</span>

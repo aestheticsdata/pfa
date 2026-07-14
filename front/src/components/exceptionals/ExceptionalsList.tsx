@@ -65,7 +65,7 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
               Total <b className="font-medium text-ink">{fmt(group.total)} €</b>
             </span>
           </div>
-          <div className="overflow-hidden rounded-[14px] border border-line-soft bg-bg-elev">
+          <div className="overflow-hidden rounded-[14px] border border-line-soft bg-surface-elev">
             {group.items.map((item) => (
               <ExceptionalItem
                 key={item.ID}

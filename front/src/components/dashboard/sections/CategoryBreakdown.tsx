@@ -89,7 +89,7 @@ const CategoryBreakdown = () => {
                 key={row.name}
                 type="button"
                 onClick={() => setSelected(row.category)}
-                className="grid cursor-pointer grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line-soft px-1 py-3 text-left text-sm transition-colors last:border-b-0 hover:bg-bg-hi sm:grid-cols-[10px_minmax(0,1fr)_58px_84px_58px]"
+                className="grid cursor-pointer grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line-soft px-1 py-3 text-left text-sm transition-colors last:border-b-0 hover:bg-surface-hi sm:grid-cols-[10px_minmax(0,1fr)_58px_84px_58px]"
               >
                 <span
                   className="size-2 rounded-xs"
@@ -98,7 +98,7 @@ const CategoryBreakdown = () => {
                 <span className="flex items-center gap-2 truncate">
                   <span className="truncate capitalize text-ink">{row.name}</span>
                   {row.count > 0 && (
-                    <span className="num shrink-0 rounded bg-bg-hi px-1.5 text-2xs text-ink-4">{row.count}</span>
+                    <span className="num shrink-0 rounded bg-surface-hi px-1.5 text-2xs text-ink-4">{row.count}</span>
                   )}
                 </span>
                 <span className="num hidden text-right text-ink-2 sm:block">{pct1(row.pct)} %</span>

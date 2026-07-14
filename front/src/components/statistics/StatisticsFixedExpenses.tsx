@@ -121,7 +121,7 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
                   {euro(annual)} €<small className="ml-1.5 text-[11px] font-normal text-ink-4">{share}%</small>
                 </span>
               </div>
-              <div className="h-[7px] overflow-hidden rounded-[4px] bg-bg-hi">
+              <div className="h-[7px] overflow-hidden rounded-[4px] bg-surface-hi">
                 <span
                   className="block h-full rounded-[4px]"
                   style={{

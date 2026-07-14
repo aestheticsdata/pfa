@@ -297,7 +297,7 @@ const StatisticsMonthlyChart = ({
                         y={regTop - 1.5}
                         width={barW}
                         height={3}
-                        fill="var(--bg-elev)"
+                        fill="var(--surface-elev)"
                       />
                       {capH >= 13 && (
                         <text

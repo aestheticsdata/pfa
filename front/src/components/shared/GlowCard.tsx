@@ -8,7 +8,7 @@ type GlowCardProps = React.HTMLAttributes<HTMLElement> & {
 };
 
 /**
- * The signature pfa surface: `bg-elev` fill with the diagonal glow gradient
+ * The signature pfa surface: `surface-elev` fill with the diagonal glow gradient
  * border and soft shadow (`.pfa-card`). Shared by every private-screen card so
  * the KPIs, charts and panels all read as the same material.
  */

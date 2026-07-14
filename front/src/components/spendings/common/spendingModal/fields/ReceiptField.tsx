@@ -88,7 +88,7 @@ const ReceiptField = ({
           type="button"
           onClick={clearReceipt}
           aria-label="Retirer le reçu"
-          className="grid size-8 shrink-0 place-items-center rounded-md border border-line bg-bg-hi text-ink-3 transition-colors hover:border-neg hover:text-neg"
+          className="grid size-8 shrink-0 place-items-center rounded-md border border-line bg-surface-hi text-ink-3 transition-colors hover:border-neg hover:text-neg"
         >
           <X className="size-4" />
         </button>

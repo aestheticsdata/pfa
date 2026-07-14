@@ -142,7 +142,7 @@ const DailySparkline = () => {
             {/* HTML overlay dot → stays perfectly round regardless of the
                 non-uniform SVG scaling (unlike an in-SVG <circle>). */}
             <span
-              className="pointer-events-none absolute box-border size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent-strong bg-bg-elev"
+              className="pointer-events-none absolute box-border size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent-strong bg-surface-elev"
               style={{ left: `${dotLeftPct}%`, top: `${dotTopPct}%` }}
             />
           </>
