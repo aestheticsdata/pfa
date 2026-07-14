@@ -1,5 +1,6 @@
 "use client";
 
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
 import texts from "@components/spendings/config/text";
@@ -24,7 +25,7 @@ interface SpendingsListModalProps {
   total: number;
 }
 
-const FALLBACK_COLOR = "#94a3b8";
+const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 const groupByDate = (spendings: SpendingItem[]): Record<string, SpendingItem[]> => {
   return spendings.reduce((acc: Record<string, SpendingItem[]>, curr) => {

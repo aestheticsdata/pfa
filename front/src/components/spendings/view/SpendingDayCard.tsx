@@ -1,5 +1,6 @@
 "use client";
 
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import useDaySort from "@components/spendings/view/helpers/useDaySort";
@@ -15,7 +16,7 @@ import type { MonthRange } from "@components/spendings/interfaces/spendingDashbo
 import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
 import type { DaySortField } from "@components/spendings/view/helpers/useDaySort";
 
-const FALLBACK_COLOR = "#94a3b8";
+const FALLBACK_COLOR = CATEGORY_FALLBACK;
 const UNCATEGORIZED_KEY = "none";
 
 interface DayCategory {

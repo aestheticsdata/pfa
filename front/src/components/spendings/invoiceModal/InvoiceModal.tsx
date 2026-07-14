@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@auth/context/AuthContext";
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import Spinner from "@components/common/Spinner";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { QUERY_KEYS } from "@components/spendings/config/constants";
@@ -28,7 +29,7 @@ interface InvoiceModalProps {
 }
 
 const FILE_SIZE_LIMIT = 32_097_152;
-const FALLBACK_COLOR = "#94a3b8";
+const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: InvoiceModalProps) => {
   const [open, setOpen] = useState(true);

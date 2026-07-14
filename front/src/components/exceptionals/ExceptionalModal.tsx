@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@auth/context/AuthContext";
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import { Button } from "@components/ui/button";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
@@ -39,7 +40,7 @@ interface ExceptionalModalProps {
   existingCategories: CategoryOption[];
 }
 
-const FALLBACK_COLOR = "#94a3b8";
+const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 const getRandomHexColor = () => {
   const r = Math.floor(Math.random() * 255)

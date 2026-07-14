@@ -1,5 +1,6 @@
 "use client";
 
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
@@ -26,7 +27,7 @@ import type { MonthRange } from "@components/spendings/interfaces/spendingDashbo
 import type { SpendingDayGroup } from "@components/spendings/types";
 import type { FilterCategory } from "@components/spendings/view/SpendingCategoryFilter";
 
-const FALLBACK_COLOR = "#94a3b8";
+const FALLBACK_COLOR = CATEGORY_FALLBACK;
 const UNCATEGORIZED_KEY = "none";
 
 interface CategoryAggregate {

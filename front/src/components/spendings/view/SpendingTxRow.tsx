@@ -1,5 +1,6 @@
 "use client";
 
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import { IconButton } from "@components/shared/IconButton";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useSpendings from "@components/spendings/services/useSpendings";
@@ -9,7 +10,7 @@ import { useState } from "react";
 
 import type { SpendingItem } from "@components/spendings/types";
 
-const FALLBACK_COLOR = "#94a3b8";
+const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 interface SpendingTxRowProps {
   spending: SpendingItem;

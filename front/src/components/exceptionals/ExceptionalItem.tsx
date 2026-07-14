@@ -1,5 +1,6 @@
 "use client";
 
+import { CategoryTag } from "@components/categories/CategoryTag";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { IconButton } from "@components/shared/IconButton";
@@ -12,8 +13,6 @@ import { useState } from "react";
 
 import type { ExceptionalItem as ExceptionalItemType } from "@src/schemas/exceptionals";
 
-const FALLBACK_COLOR = "#94a3b8";
-
 interface ExceptionalItemProps {
   item: ExceptionalItemType;
   onEdit: (item: ExceptionalItemType) => void;
@@ -24,7 +23,6 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
   const { deleteExceptional } = useExceptionals();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
-  const accent = item.categoryColor ?? FALLBACK_COLOR;
   const dateLabel = format(parseISO(item.date), "dd MMM", { locale: fr });
   const amount = euro(item.amount);
   const budgetMonths = monthlyAverage > 0 ? (Number(item.amount) / monthlyAverage).toFixed(1) : null;
@@ -47,18 +45,7 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
             >
               {item.label}
             </span>
-            {item.categoryName && (
-              <span
-                className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-                style={{
-                  color: accent,
-                  backgroundColor: `${accent}22`,
-                  border: `1px solid ${accent}44`,
-                }}
-              >
-                {item.categoryName}
-              </span>
-            )}
+            {item.categoryName && <CategoryTag color={item.categoryColor}>{item.categoryName}</CategoryTag>}
           </div>
           {item.description && (
             <span

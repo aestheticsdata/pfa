@@ -1,5 +1,6 @@
 "use client";
 
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import Spinner from "@components/common/Spinner";
 import ExceptionalFilters from "@components/exceptionals/ExceptionalFilters";
 import ExceptionalModal from "@components/exceptionals/ExceptionalModal";
@@ -35,7 +36,7 @@ const Exceptionals = () => {
     const seen = new Map<string, string>();
     for (const item of exceptionals) {
       if (item.categoryName && !seen.has(item.categoryName)) {
-        seen.set(item.categoryName, item.categoryColor ?? "#94a3b8");
+        seen.set(item.categoryName, item.categoryColor ?? CATEGORY_FALLBACK);
       }
     }
     return Array.from(seen.entries()).map(([name, color]) => ({ name, color }));

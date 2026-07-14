@@ -5,6 +5,9 @@
  * normalize any CSS color (oklch/hex) to hex for the native color input.
  */
 
+/** Neutral grey used when a category has no colour (or a colour fails to resolve). */
+export const CATEGORY_FALLBACK = "#94a3b8";
+
 export const PALETTE_HUES = [5, 25, 60, 80, 110, 140, 175, 210, 250, 290, 320, 350] as const;
 
 export const catColorOklch = (hue: number): string => `oklch(0.80 0.09 ${hue})`;
@@ -28,7 +31,7 @@ const getCtx = (): CanvasRenderingContext2D | null => {
 export const cssColorToHex = (css: string): string => {
   if (/^#[0-9a-fA-F]{6}$/.test(css)) return css.toLowerCase();
   const ctx = getCtx();
-  if (!ctx) return "#94a3b8";
+  if (!ctx) return CATEGORY_FALLBACK;
   ctx.fillStyle = "#000000";
   ctx.fillStyle = css;
   ctx.fillRect(0, 0, 1, 1);
