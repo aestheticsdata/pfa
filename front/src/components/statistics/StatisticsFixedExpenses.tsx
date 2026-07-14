@@ -7,6 +7,7 @@
 
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import { MeterBar } from "@components/shared/MeterBar";
 import { Overline } from "@components/shared/Overline";
 import { euro, splitAmount } from "@lib/format";
 import format from "date-fns/format";
@@ -117,16 +118,11 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
                   {euro(annual)} €<small className="ml-1.5 text-[11px] font-normal text-ink-4">{share}%</small>
                 </span>
               </div>
-              <div className="h-[7px] overflow-hidden rounded-[4px] bg-surface-hi">
-                <span
-                  className="block h-full rounded-[4px]"
-                  style={{
-                    width: `${barWidth}%`,
-                    background: "linear-gradient(90deg, var(--accent-d), var(--accent-strong))",
-                    opacity: 0.9,
-                  }}
-                />
-              </div>
+              <MeterBar
+                value={barWidth}
+                height={7}
+                opacity={0.9}
+              />
             </div>
           );
         })}

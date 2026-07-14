@@ -4,6 +4,7 @@
 // (spent / days-elapsed × days-in-month). Spent + budget are real.
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { LegendItem } from "@components/shared/LegendItem";
 import { Overline } from "@components/shared/Overline";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
@@ -67,25 +68,31 @@ const ForecastStrip = () => {
         <div className="mt-2 flex items-center justify-between text-2xs text-ink-4">
           <span className="num">0 €</span>
           <span className="flex items-center gap-4 text-ink-3">
-            <span className="inline-flex items-center gap-1.5">
-              <span
-                className="inline-block h-2 w-3 rounded-xs"
-                style={{
-                  background: "linear-gradient(90deg,var(--accent-d),var(--accent-strong))",
-                  opacity: 0.55,
-                }}
-              />
+            <LegendItem
+              swatch={
+                <span
+                  className="inline-block h-2 w-3 rounded-xs"
+                  style={{
+                    background: "var(--bar-fill)",
+                    opacity: 0.55,
+                  }}
+                />
+              }
+            >
               réalisé
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span
-                className="inline-block h-2 w-3 rounded-xs border border-accent-d"
-                style={{
-                  background: "repeating-linear-gradient(45deg,transparent 0 3px,var(--accent-d) 3px 6px)",
-                }}
-              />
+            </LegendItem>
+            <LegendItem
+              swatch={
+                <span
+                  className="inline-block h-2 w-3 rounded-xs border border-accent-d"
+                  style={{
+                    background: "repeating-linear-gradient(45deg,transparent 0 3px,var(--accent-d) 3px 6px)",
+                  }}
+                />
+              }
+            >
               projection
-            </span>
+            </LegendItem>
           </span>
           <span className="num">{euro0(budget)} € budget</span>
         </div>

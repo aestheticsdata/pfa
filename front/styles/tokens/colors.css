@@ -60,6 +60,8 @@
   --accent-strong: oklch(0.84 0.14 148);
   --accent-d:      oklch(0.55 0.10 148);
   --accent-bg:     oklch(0.84 0.14 148 / 0.10);
+  /* Meter/progress bar fill — the accent gradient used by bars & legends */
+  --bar-fill:      linear-gradient(90deg, var(--accent-d), var(--accent-strong));
   --neg:           oklch(0.72 0.17 25);
   --neg-bg:        oklch(0.72 0.17 25 / 0.12);
 

@@ -2,6 +2,7 @@
 
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import { LegendItem } from "@components/shared/LegendItem";
 import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
 import useElementWidth from "@lib/dataviz/useElementWidth";
 import { euro0 } from "@lib/format";
@@ -73,16 +74,18 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
         </div>
         <div className="flex flex-wrap items-center gap-[18px] text-[12px] text-ink-3">
           {series.map((s) => (
-            <span
+            <LegendItem
               key={s.name}
-              className="inline-flex items-center gap-1.5 capitalize"
+              className="capitalize"
+              swatch={
+                <i
+                  className="inline-block size-2.5 rounded-xs"
+                  style={{ background: s.color }}
+                />
+              }
             >
-              <i
-                className="inline-block size-2.5 rounded-[2px]"
-                style={{ background: s.color }}
-              />
               {s.name}
-            </span>
+            </LegendItem>
           ))}
         </div>
       </div>

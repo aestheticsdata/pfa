@@ -3,6 +3,7 @@
 import EditGlyph from "@components/dashboard/EditGlyph";
 import DailySparkline from "@components/dashboard/sections/DailySparkline";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { LegendItem } from "@components/shared/LegendItem";
 import { MoneyAmount } from "@components/shared/MoneyAmount";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
@@ -169,14 +170,12 @@ const BudgetHero = () => {
             </div>
           </Donut>
           <div className="flex gap-4 text-2xs text-ink-3">
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-2 rounded-xs bg-accent-d" />
+            <LegendItem swatch={<span className="size-2 rounded-xs bg-accent-d" />}>
               Fixes <span className="num text-ink-2">{euro0(fixed)}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5">
-              <span className="size-2 rounded-xs bg-accent-strong" />
+            </LegendItem>
+            <LegendItem swatch={<span className="size-2 rounded-xs bg-accent-strong" />}>
               Variables <span className="num text-ink-2">{euro0(variable)}</span>
-            </span>
+            </LegendItem>
           </div>
         </div>
       </div>

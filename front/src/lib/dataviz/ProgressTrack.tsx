@@ -100,7 +100,7 @@ const ProgressTrack = ({
           className="absolute inset-y-0 left-0"
           style={{
             width: asPct(fBudget),
-            background: gradient ? "linear-gradient(90deg, var(--accent-d), var(--accent-strong))" : color,
+            background: gradient ? "var(--bar-fill)" : color,
             opacity: gradient ? 0.45 : 0.92,
           }}
         />
