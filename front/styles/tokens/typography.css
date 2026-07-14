@@ -1,0 +1,24 @@
+:root {
+  --font-size: 16px;
+}
+
+@theme {
+  --text-xxs: 0.7rem;
+  --text-tiny: 0.5rem;
+
+  --font-smooch: Smooch Sans, sans-serif;
+  --font-poppins: Poppins, sans-serif;
+  --font-ubuntu: Ubuntu, sans-serif;
+}
+
+@theme inline {
+  /* Geist (UI) + Geist Mono (numbers) via next/font */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+/* Every meaningful number → Geist Mono, tabular */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
