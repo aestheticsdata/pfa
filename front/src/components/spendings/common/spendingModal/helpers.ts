@@ -1,4 +1,6 @@
-export const FALLBACK_COLOR = "#94a3b8";
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
+
+export const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 export const humanSize = (bytes: number) => {
   if (bytes < 1024) return `${bytes} o`;

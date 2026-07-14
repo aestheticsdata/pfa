@@ -1,3 +1,5 @@
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
+
 import type { StatisticsResponse } from "@src/schemas/stats";
 
 /** French month abbreviations, matching the labels the /statistics API returns. */
@@ -88,7 +90,7 @@ export const perCategoryTotals = (
     });
   });
   return Array.from(totals.entries())
-    .map(([name, value]) => ({ name, value, color: colors[name] ?? "#94a3b8" }))
+    .map(([name, value]) => ({ name, value, color: colors[name] ?? CATEGORY_FALLBACK }))
     .sort((a, b) => b.value - a.value);
 };
 
