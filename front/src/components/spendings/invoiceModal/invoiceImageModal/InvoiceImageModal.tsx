@@ -22,7 +22,7 @@ const InvoiceImageModal = ({ image, closeImage: closeImageProp }: InvoiceImageMo
     >
       <DialogContent className="w-auto max-w-none sm:max-w-none border-0 bg-transparent p-0 shadow-none">
         <DialogTitle className="sr-only">Facture — aperçu</DialogTitle>
-        <div className="overflow-hidden rounded-xl border border-elec/30 shadow-[0_24px_80px_oklch(0_0_0/0.6)] leading-[0]">
+        <div className="overflow-hidden rounded-xl border border-elec/30 shadow-lightbox leading-[0]">
           <Image
             src={image}
             alt="facture"

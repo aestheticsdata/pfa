@@ -24,7 +24,7 @@ const buttonVariants = cva(
           "bg-gradient-to-br from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-500 hover:to-blue-500",
         cyan: "bg-cyan-600 text-white hover:bg-cyan-700 shadow-lg shadow-cyan-500/20",
         primary:
-          "border-0 font-semibold text-[oklch(0.15_0.02_180)] shadow-[0_4px_18px_oklch(0.75_0.14_165/0.25),inset_0_1px_0_oklch(1_0_0/0.30)] [background:linear-gradient(100deg,oklch(0.84_0.14_148)_0%,oklch(0.82_0.13_175)_55%,oklch(0.80_0.12_210)_100%)] hover:brightness-[1.07] active:translate-y-px",
+          "border-0 font-semibold text-[oklch(0.15_0.02_180)] shadow-primary [background:linear-gradient(100deg,oklch(0.84_0.14_148)_0%,oklch(0.82_0.13_175)_55%,oklch(0.80_0.12_210)_100%)] hover:brightness-[1.07] active:translate-y-px",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

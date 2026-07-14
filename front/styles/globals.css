@@ -10,6 +10,7 @@ layer(base);
 @import './tokens/colors.css';
 @import './tokens/radius.css';
 @import './tokens/typography.css';
+@import './tokens/elevation.css';
 
 /* Base layer + animations */
 @import './base.css';

@@ -211,7 +211,7 @@ const SpendingView = () => {
         type="button"
         variant="primary"
         onClick={() => setIsQuickAddOpen(true)}
-        className="fixed bottom-6 right-6 z-30 shadow-[0_10px_30px_oklch(0_0_0/0.35)]"
+        className="fixed bottom-6 right-6 z-30 shadow-float"
       >
         <Plus className="size-4" />
         Nouvelle dépense

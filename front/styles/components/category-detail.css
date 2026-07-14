@@ -49,9 +49,7 @@
         oklch(0.68 0.11 160 / 0.28) 100%
       )
       border-box;
-  box-shadow:
-    0 34px 90px oklch(0 0 0 / 0.62),
-    inset 0 1px 0 oklch(1 0 0 / 0.05);
+  box-shadow: var(--shadow-modal);
   animation: catdRise 0.2s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 @keyframes catdRise {
