@@ -66,7 +66,7 @@ function DialogContent({ className, children, ...props }: React.ComponentProps<t
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="ring-offset-background absolute top-4 right-4 p-1.5 rounded-md border border-cyan-500/50 text-gray-300 opacity-90 transition-all cursor-pointer hover:opacity-100 hover:border-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10 focus-visible:ring-2 focus-visible:ring-cyan-500/60 focus-visible:ring-offset-2 focus-visible:outline-hidden focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+        <DialogPrimitive.Close className="ring-offset-background absolute top-4 right-4 p-1.5 rounded-md border border-line text-ink-3 opacity-90 transition-all cursor-pointer hover:opacity-100 hover:border-elec hover:text-elec hover:bg-elec/10 focus-visible:ring-2 focus-visible:ring-elec/60 focus-visible:ring-offset-2 focus-visible:outline-hidden focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
           <XIcon />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
