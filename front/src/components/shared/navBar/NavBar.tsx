@@ -7,6 +7,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import Logo from "@components/shared/brand/Logo";
 import { ROUTES } from "@components/shared/config/constants";
 import useGlobalStore from "@components/shared/globalStore";
+import { IconButton } from "@components/shared/IconButton";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
 import { buildSpendingsPath, getTodayIsoDate, isValidIsoDate, SPENDINGS_PATH } from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
@@ -109,14 +110,15 @@ const NavBar = () => {
   return (
     <>
       <header className="pfa-hdr sticky top-0 z-40 mb-7 flex flex-wrap items-center gap-x-3 gap-y-2.5 px-3.5 py-2.5">
-        <button
-          type="button"
+        <IconButton
+          variant="ghost"
+          size={9}
           onClick={() => setDrawerOpen(true)}
           aria-label="Ouvrir le menu"
-          className="grid size-[38px] flex-shrink-0 place-items-center rounded-[9px] border border-transparent text-ink-2 transition-colors hover:border-line hover:bg-surface-hi hover:text-ink lg:hidden"
+          className="hover:border-line lg:hidden"
         >
-          <Menu className="size-5" />
-        </button>
+          <Menu />
+        </IconButton>
 
         {brand}
 
@@ -192,14 +194,15 @@ const NavBar = () => {
       >
         <div className="mb-1.5 flex items-center justify-between border-b border-white/[0.07] px-1.5 pb-3">
           {brand}
-          <button
-            type="button"
+          <IconButton
+            variant="ghost"
+            size={9}
             onClick={() => setDrawerOpen(false)}
             aria-label="Fermer le menu"
-            className="grid size-9 place-items-center rounded-[9px] border border-transparent text-ink-3 transition-colors hover:border-line hover:bg-surface-hi hover:text-ink"
+            className="hover:border-line"
           >
-            <X className="size-5" />
-          </button>
+            <X />
+          </IconButton>
         </div>
         <nav className="flex flex-col gap-0.5">
           {NAV_ROUTES.map((route) => {

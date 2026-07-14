@@ -1,6 +1,7 @@
 "use client";
 
 import { euro } from "@components/dashboard/format";
+import { IconButton } from "@components/shared/IconButton";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useReccurings from "@components/spendings/services/useReccurings";
@@ -66,14 +67,15 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
             {list.length} lignes · échéancier {format(month.start, "MMMM", { locale: fr })}
           </span>
         </div>
-        <button
-          type="button"
+        <IconButton
+          variant="bordered"
+          size={8}
           onClick={addSpending}
           aria-label="Ajouter une dépense fixe"
-          className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-surface-hi text-ink-2 transition-colors hover:border-accent-d hover:text-ink"
+          className="hover:border-accent-d"
         >
-          <Plus className="size-4" />
-        </button>
+          <Plus />
+        </IconButton>
       </div>
 
       <div className="flex items-start justify-between">
@@ -147,35 +149,34 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
               </span>
               <span className="flex items-center gap-2">
                 <span className="flex gap-1 opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
-                  <button
-                    type="button"
+                  <IconButton
+                    variant="bordered"
+                    size={6}
                     onClick={() => setInvoiceFor(r)}
                     title="Facture"
                     className={cn(
-                      "grid size-6 place-items-center rounded border border-line",
-                      hasInvoice(r)
-                        ? "bg-accent-strong text-[oklch(0.18_0.01_148)]"
-                        : "bg-surface-hi text-ink-3 hover:text-ink",
+                      hasInvoice(r) &&
+                        "border-accent-strong bg-accent-strong text-[oklch(0.18_0.01_148)] hover:text-[oklch(0.18_0.01_148)]",
                     )}
                   >
-                    <ImageIcon className="size-3" />
-                  </button>
-                  <button
-                    type="button"
+                    <ImageIcon />
+                  </IconButton>
+                  <IconButton
+                    variant="bordered"
+                    size={6}
                     onClick={() => editSpending(r)}
                     title="Modifier"
-                    className="grid size-6 place-items-center rounded border border-line bg-surface-hi text-ink-3 hover:text-ink"
                   >
-                    <Pencil className="size-3" />
-                  </button>
-                  <button
-                    type="button"
+                    <Pencil />
+                  </IconButton>
+                  <IconButton
+                    variant="danger"
+                    size={6}
                     onClick={() => setPendingDelete(r.ID)}
                     title="Supprimer"
-                    className="grid size-6 place-items-center rounded border border-line bg-surface-hi text-ink-3 hover:text-neg"
                   >
-                    <Trash2 className="size-3" />
-                  </button>
+                    <Trash2 />
+                  </IconButton>
                 </span>
                 {day != null && (
                   <span
