@@ -206,16 +206,16 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
         onOpenChange={(isOpen) => !isOpen && handleClickOutside()}
       >
         <DialogContent className="max-h-[92vh] gap-0 overflow-y-auto border-line bg-bg-elev p-0 sm:max-w-[600px]">
-          <DialogHeader className="flex-row items-center gap-3 space-y-0 pb-4 pl-[22px] pr-14 pt-5 text-left">
+          <DialogHeader className="flex-row items-center gap-3 space-y-0 pb-4 pl-5.5 pr-14 pt-5 text-left">
             <DialogTitle
-              className="min-w-0 flex-1 truncate pr-8 text-[21px] font-semibold tracking-[-0.02em] text-ink"
+              className="min-w-0 flex-1 truncate pr-8 text-xl font-semibold tracking-tight text-ink"
               title={spending.label}
             >
               {spending.label}
             </DialogTitle>
             {category && (
               <span
-                className="shrink-0 rounded-md px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em]"
+                className="shrink-0 rounded-md px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider"
                 style={{
                   backgroundColor: `${categoryColor}30`,
                   color: categoryColor,
@@ -224,7 +224,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                 {category}
               </span>
             )}
-            <span className="num shrink-0 whitespace-nowrap text-[19px] font-semibold tracking-[-0.02em] text-elec">
+            <span className="num shrink-0 whitespace-nowrap text-lg font-semibold tracking-tight text-elec">
               {Number(spending.amount).toFixed(2)} €
             </span>
           </DialogHeader>
@@ -234,7 +234,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
               palette token. */}
           <div
             className={cn(
-              "mx-[22px] overflow-hidden rounded-[14px] border border-line",
+              "mx-5.5 overflow-hidden rounded-xl border border-line",
               invoiceImage || pendingPreview ? "bg-[#b3ada4]" : "bg-background",
             )}
           >
@@ -268,13 +268,13 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                 unoptimized
               />
             ) : (
-              <div className="grid min-h-[300px] place-items-center text-base tracking-[-0.01em] text-ink-4">
+              <div className="grid min-h-[300px] place-items-center text-base tracking-normal text-ink-4">
                 {invoiceModalTexts.noInvoice}
               </div>
             )}
           </div>
 
-          <div className="flex flex-col gap-2 px-[22px] pb-[22px] pt-[18px]">
+          <div className="flex flex-col gap-2 px-5.5 pb-5.5 pt-4.5">
             {isFileTooBig && <p className="text-center text-sm text-neg">{invoiceModalTexts.fileTooBig}</p>}
             {isInvalidFile && <p className="text-center text-sm text-neg">{invoiceModalTexts.invalidFileType}</p>}
 
@@ -292,7 +292,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
               <button
                 type="button"
                 onClick={() => setShowConfirmDeleteImage(true)}
-                className="inline-flex items-center justify-center gap-2.5 rounded-[10px] border border-[oklch(0.55_0.15_25)] bg-[oklch(0.47_0.14_25)] px-[18px] py-3.5 text-[15px] font-semibold text-[oklch(0.98_0.02_25)] transition-[filter] hover:brightness-110"
+                className="inline-flex items-center justify-center gap-2.5 rounded-lg border border-[oklch(0.55_0.15_25)] bg-[oklch(0.47_0.14_25)] px-4.5 py-3.5 text-base font-semibold text-[oklch(0.98_0.02_25)] transition-[filter] hover:brightness-110"
               >
                 <Trash2 className="size-4" />
                 {invoiceModalTexts.delete}
@@ -304,7 +304,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                   variant="outline"
                   size="lg"
                   onClick={clearPending}
-                  className="flex-1 border-line bg-background text-[15px] text-ink-2 hover:bg-bg-hi"
+                  className="flex-1 border-line bg-background text-base text-ink-2 hover:bg-bg-hi"
                 >
                   Annuler
                 </Button>
@@ -313,7 +313,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                   variant="primary"
                   size="lg"
                   onClick={sendInvoice}
-                  className="flex-1 text-[15px]"
+                  className="flex-1 text-base"
                 >
                   {invoiceModalTexts.send}
                 </Button>
@@ -352,13 +352,13 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                   className={cn(
                     // children are pointer-events-none so drag events target the
                     // label itself (no flicker when hovering child elements)
-                    "flex cursor-pointer flex-col items-center gap-1.5 rounded-[14px] border-[1.5px] border-dashed px-[22px] py-[30px] text-center transition-colors [&_*]:pointer-events-none",
+                    "flex cursor-pointer flex-col items-center gap-1.5 rounded-xl border-[1.5px] border-dashed px-5.5 py-7.5 text-center transition-colors [&_*]:pointer-events-none",
                     isDragging ? "border-elec bg-elec/[0.06]" : "border-line hover:border-elec hover:bg-elec/[0.06]",
                   )}
                 >
-                  <Upload className="size-[30px] text-elec" />
-                  <span className="text-[17px] font-semibold text-ink">{invoiceModalTexts.chooseFile}</span>
-                  <span className="num text-[13px] text-ink-4">{invoiceModalTexts.fileTypeWarning}</span>
+                  <Upload className="size-7.5 text-elec" />
+                  <span className="text-base font-semibold text-ink">{invoiceModalTexts.chooseFile}</span>
+                  <span className="num text-sm text-ink-4">{invoiceModalTexts.fileTypeWarning}</span>
                 </label>
               </>
             ) : null}

@@ -27,8 +27,8 @@ const Toggle = ({
   >
     <span
       className={cn(
-        "grid size-3.5 place-items-center rounded-[3px] border",
-        active ? "border-accent-strong bg-accent-strong text-[oklch(0.15_0.02_180)]" : "border-line bg-bg-hi",
+        "grid size-3.5 place-items-center rounded-xs border",
+        active ? "border-accent-strong bg-accent-strong text-primary-foreground" : "border-line bg-bg-hi",
       )}
     >
       {active && (

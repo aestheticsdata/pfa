@@ -26,7 +26,7 @@ const LabelField = ({
   <div className="flex flex-col gap-2">
     <Label
       htmlFor="spendingLabel"
-      className="text-[13px] text-ink-2"
+      className="text-sm text-ink-2"
     >
       Label
     </Label>
@@ -48,7 +48,7 @@ const LabelField = ({
             key={s.label}
             type="button"
             onClick={() => applySuggestion(s)}
-            className="rounded-md border border-line bg-bg-hi px-2 py-1 text-[11px] text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
+            className="rounded-md border border-line bg-bg-hi px-2 py-1 text-2xs text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
           >
             {s.label}
             <span className="text-ink-4"> — {s.category}</span>

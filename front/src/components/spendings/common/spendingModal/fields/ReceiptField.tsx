@@ -49,7 +49,7 @@ const ReceiptField = ({
           isReceiptDragging ? "border-elec bg-elec/[0.06]" : "border-line hover:border-elec hover:bg-elec/[0.06]",
         )}
       >
-        <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-elec/10 text-elec">
+        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-elec/10 text-elec">
           <Upload className="size-5" />
         </span>
         <span className="flex min-w-0 flex-col gap-0.5">
@@ -88,7 +88,7 @@ const ReceiptField = ({
           type="button"
           onClick={clearReceipt}
           aria-label="Retirer le reçu"
-          className="grid size-8 shrink-0 place-items-center rounded-md border border-line bg-bg-hi text-ink-3 transition-colors hover:border-[oklch(0.55_0.15_25)] hover:text-neg"
+          className="grid size-8 shrink-0 place-items-center rounded-md border border-line bg-bg-hi text-ink-3 transition-colors hover:border-neg hover:text-neg"
         >
           <X className="size-4" />
         </button>

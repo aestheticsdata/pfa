@@ -50,7 +50,7 @@ const CategoryField = ({
 
   return (
     <div className="flex flex-col gap-2">
-      <Label className="text-[13px] text-ink-2">Catégorie</Label>
+      <Label className="text-sm text-ink-2">Catégorie</Label>
       <Popover
         open={comboboxOpen}
         onOpenChange={(isOpen) => {
@@ -96,7 +96,7 @@ const CategoryField = ({
             {selectedCategory?.name ? (
               <>
                 <span
-                  className="size-2.5 shrink-0 rounded-[3px]"
+                  className="size-2.5 shrink-0 rounded-xs"
                   style={{
                     backgroundColor: selectedCategory.color ?? FALLBACK_COLOR,
                   }}
@@ -146,7 +146,7 @@ const CategoryField = ({
                     }}
                   >
                     <span
-                      className="mr-1 size-2.5 rounded-[3px]"
+                      className="mr-1 size-2.5 rounded-xs"
                       style={{
                         backgroundColor: category.color ?? FALLBACK_COLOR,
                       }}
@@ -163,7 +163,7 @@ const CategoryField = ({
                     value={`__new-${comboboxQuery.trim()}`}
                     onSelect={() => onCreateCategory(comboboxQuery.trim())}
                   >
-                    <span className="mr-1 size-2.5 rounded-[3px] bg-ink-4" />
+                    <span className="mr-1 size-2.5 rounded-xs bg-ink-4" />
                     <span className="flex-1 capitalize">{comboboxQuery.trim()}</span>
                   </CommandItem>
                 )}
@@ -175,7 +175,7 @@ const CategoryField = ({
 
       {frequentCategories.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ink-4">Fréquentes</span>
+          <span className="mr-1 text-2xs font-medium uppercase tracking-caps text-ink-4">Fréquentes</span>
           {frequentCategories.map((c) => {
             const active = selectedCategory?.name === c.name;
             return (
@@ -191,7 +191,7 @@ const CategoryField = ({
                 )}
               >
                 <span
-                  className="size-[7px] shrink-0 rounded-[2px]"
+                  className="size-2 shrink-0 rounded-xs"
                   style={{ backgroundColor: c.color ?? FALLBACK_COLOR }}
                 />
                 {c.name}

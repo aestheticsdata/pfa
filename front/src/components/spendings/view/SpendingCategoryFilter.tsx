@@ -41,12 +41,12 @@ const Chip = ({
   >
     {color && (
       <span
-        className="size-[7px] shrink-0 rounded-[2px]"
+        className="size-2 shrink-0 rounded-xs"
         style={{ background: color }}
       />
     )}
     {label}
-    <span className={cn("num text-[11px]", active ? "text-accent-strong/80" : "text-ink-4")}>{count}</span>
+    <span className={cn("num text-2xs", active ? "text-accent-strong/80" : "text-ink-4")}>{count}</span>
   </button>
 );
 
@@ -61,7 +61,7 @@ const SpendingCategoryFilter = ({ categories, total, selected, onSelect }: Spend
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.1em] text-ink-4">Filtrer</span>
+      <span className="mr-1 text-2xs font-medium uppercase tracking-widest text-ink-4">Filtrer</span>
       <Chip
         active={selected === null}
         onClick={() => onSelect(null)}

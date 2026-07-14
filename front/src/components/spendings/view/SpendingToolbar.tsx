@@ -17,7 +17,7 @@ const SpendingToolbar = ({ search, onSearchChange }: SpendingToolbarProps) => (
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
         placeholder="Rechercher une dépense…"
-        className="w-full rounded-md border border-line bg-bg-elev py-2 pl-8 pr-3 text-[13px] text-ink outline-none transition-colors placeholder:text-ink-4 focus:border-accent-d"
+        className="w-full rounded-md border border-line bg-bg-elev py-2 pl-8 pr-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-4 focus:border-accent-d"
       />
     </div>
 

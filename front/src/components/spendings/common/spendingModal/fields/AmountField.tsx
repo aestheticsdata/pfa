@@ -12,7 +12,7 @@ const AmountField = ({ register, errors }: AmountFieldProps) => (
   <div className="flex flex-col gap-2">
     <Label
       htmlFor="spendingAmount"
-      className="text-[13px] text-ink-2"
+      className="text-sm text-ink-2"
     >
       Montant
     </Label>
