@@ -2,6 +2,8 @@
 
 import { euro, pct1 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { CardSectionHeader } from "@components/shared/CardSectionHeader";
+import { EmptyState } from "@components/shared/EmptyState";
 import { MONTHLY } from "@components/spendings/config/constants";
 import useCharts from "@components/spendings/services/useCharts";
 import useSpendings from "@components/spendings/services/useSpendings";
@@ -68,10 +70,10 @@ const CategoryBreakdown = () => {
 
   return (
     <section className="pfa-card flex max-h-137.5 min-h-80 flex-col gap-4 px-6 py-5">
-      <div className="flex items-baseline justify-between">
-        <h2 className="text-base font-semibold tracking-normal text-ink">Répartition par catégorie</h2>
-        <span className="text-xs text-ink-4">{monthLabel} · part des variables</span>
-      </div>
+      <CardSectionHeader
+        title="Répartition par catégorie"
+        meta={`${monthLabel} · part des variables`}
+      />
 
       {list.length > 0 ? (
         <>
@@ -112,7 +114,7 @@ const CategoryBreakdown = () => {
           </div>
         </>
       ) : (
-        <div className="py-10 text-center text-xs text-ink-4">Aucune dépense ce mois.</div>
+        <EmptyState className="py-10">Aucune dépense ce mois.</EmptyState>
       )}
 
       {hover && (

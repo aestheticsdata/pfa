@@ -1,5 +1,6 @@
 "use client";
 
+import { Overline } from "@components/shared/Overline";
 import { cn } from "@lib/utils";
 
 export interface FilterCategory {
@@ -61,7 +62,7 @@ const SpendingCategoryFilter = ({ categories, total, selected, onSelect }: Spend
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="mr-1 text-2xs font-medium uppercase tracking-widest text-ink-4">Filtrer</span>
+      <Overline className="mr-1">Filtrer</Overline>
       <Chip
         active={selected === null}
         onClick={() => onSelect(null)}

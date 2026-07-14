@@ -2,6 +2,7 @@
 
 import { euro0 } from "@components/dashboard/format";
 import GlowCard from "@components/shared/GlowCard";
+import { Overline } from "@components/shared/Overline";
 import {
   biggestExceptional,
   exceptionalMonthly,
@@ -36,7 +37,7 @@ const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
 const Card = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <GlowCard className="flex flex-col px-5 py-6">
-    <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</span>
+    <Overline>{label}</Overline>
     {children}
   </GlowCard>
 );

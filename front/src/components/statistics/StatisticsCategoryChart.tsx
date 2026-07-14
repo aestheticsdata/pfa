@@ -1,6 +1,7 @@
 "use client";
 
 import { euro0 } from "@components/dashboard/format";
+import { CardTitle } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
 import useElementWidth from "@lib/dataviz/useElementWidth";
@@ -67,7 +68,7 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
     >
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
-          <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Dépenses mensuelles par catégorie</h2>
+          <CardTitle>Dépenses mensuelles par catégorie</CardTitle>
           <p className="mt-0.5 text-[12px] text-ink-4">{subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-[18px] text-[12px] text-ink-3">

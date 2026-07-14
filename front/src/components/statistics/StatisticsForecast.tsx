@@ -5,6 +5,7 @@
 
 import { euro, euro0 } from "@components/dashboard/format";
 import GlowCard from "@components/shared/GlowCard";
+import { Overline } from "@components/shared/Overline";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
 import { yearTotal } from "@components/statistics/helpers/statisticsData";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
@@ -53,9 +54,7 @@ const StatisticsForecast = ({
       className="grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[220px_1fr_240px] sm:gap-8"
     >
       <div className="flex flex-col gap-1">
-        <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
-          Dépensé · 1er janv. → {asOfLabel}
-        </span>
+        <Overline>Dépensé · 1er janv. → {asOfLabel}</Overline>
         <AnimatedNumber
           value={spent}
           decimals={0}
@@ -88,9 +87,7 @@ const StatisticsForecast = ({
       </div>
 
       <div className="flex flex-col items-start gap-1 sm:items-end sm:text-right">
-        <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
-          Projection fin d&apos;année
-        </span>
+        <Overline>Projection fin d&apos;année</Overline>
         <AnimatedNumber
           value={projection}
           decimals={0}

@@ -1,5 +1,6 @@
 "use client";
 
+import { overlineClass } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +27,7 @@ const buildSchema = (needEmail: boolean, needPassword: boolean, needConfirm: boo
       path: ["confirmPassword"],
     });
 
-const LABEL = "text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4";
+const LABEL = overlineClass;
 const INPUT_BASE =
   "w-full rounded-[6px] border px-[13px] py-[11px] text-[14px] text-ink outline-none transition [background:oklch(0.12_0.008_250/0.75)] border-[oklch(0.30_0.010_250)] placeholder:text-ink-4 focus:border-[oklch(0.65_0.11_175)] focus:[background:oklch(0.13_0.008_250)] focus:shadow-[0_0_0_3px_oklch(0.65_0.11_175/0.15)] aria-invalid:border-neg";
 

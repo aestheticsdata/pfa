@@ -1,12 +1,13 @@
 "use client";
 
 import { cssColorToHex, paletteHex } from "@components/categories/helpers/categoryColors";
+import { Overline, overlineClass } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { cn } from "@lib/utils";
 import { useMemo, useState } from "react";
 
-const LABEL = "text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4";
+const LABEL = overlineClass;
 const INPUT =
   "w-full rounded-[6px] border border-line bg-bg px-3 py-2.5 text-[14px] text-ink outline-none transition focus:border-accent-d";
 
@@ -91,7 +92,7 @@ const CategoryFormBody = ({
         </div>
 
         <div className="flex flex-col gap-2.5">
-          <span className={LABEL}>Couleur</span>
+          <Overline>Couleur</Overline>
           <div className="flex flex-wrap gap-2.5">
             {swatches.map((hex) => (
               <button

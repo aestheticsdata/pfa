@@ -1,7 +1,10 @@
 "use client";
 
 import { euro } from "@components/dashboard/format";
+import { CardTitle } from "@components/shared/CardSectionHeader";
+import { EmptyState } from "@components/shared/EmptyState";
 import { IconButton } from "@components/shared/IconButton";
+import { Overline } from "@components/shared/Overline";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useReccurings from "@components/spendings/services/useReccurings";
@@ -62,7 +65,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
     <section className="pfa-card flex max-h-[550px] min-h-[320px] flex-col gap-4 px-6 py-5">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-base font-semibold tracking-normal text-ink">Dépenses fixes</h2>
+          <CardTitle>Dépenses fixes</CardTitle>
           <span className="text-xs text-ink-4">
             {list.length} lignes · échéancier {format(month.start, "MMMM", { locale: fr })}
           </span>
@@ -80,14 +83,14 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
 
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-2xs font-medium uppercase tracking-caps text-ink-4">Mensuel</div>
+          <Overline>Mensuel</Overline>
           <div className="num text-2xl font-medium tracking-tight text-ink">
             {totalInt}
             <span className="text-lg text-ink-3">,{totalDec} €</span>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-2xs font-medium uppercase tracking-caps text-ink-4">Annualisé</div>
+          <Overline>Annualisé</Overline>
           <div className="num text-lg font-medium tracking-normal text-ink-2">
             {annualInt}
             <span className="text-sm text-ink-3">,{annualDec} €</span>
@@ -193,7 +196,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
             </div>
           );
         })}
-        {list.length === 0 && <div className="py-6 text-center text-xs text-ink-4">Aucune dépense fixe ce mois.</div>}
+        {list.length === 0 && <EmptyState>Aucune dépense fixe ce mois.</EmptyState>}
       </div>
 
       {isModalVisible && (

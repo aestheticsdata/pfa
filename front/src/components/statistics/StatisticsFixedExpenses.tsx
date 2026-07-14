@@ -6,7 +6,9 @@
 // have no dedicated charge-day field, so the day-of-month of `dateFrom` is used).
 
 import { euro } from "@components/dashboard/format";
+import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import { Overline } from "@components/shared/Overline";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import fr from "date-fns/locale/fr";
@@ -45,7 +47,7 @@ const Stat = ({
   const [int, dec] = splitAmount(value);
   return (
     <div className={className}>
-      <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</div>
+      <Overline className="block">{label}</Overline>
       <div
         className={
           small
@@ -82,10 +84,10 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
       as="section"
       className="px-6 py-[22px]"
     >
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Dépenses fixes</h2>
-        <span className="text-[12px] text-ink-4">annualisé · {list.length} lignes récurrentes · sans catégorie</span>
-      </div>
+      <CardSectionHeader
+        title="Dépenses fixes"
+        meta={<>annualisé · {list.length} lignes récurrentes · sans catégorie</>}
+      />
 
       <div className="mt-[18px] flex flex-wrap items-baseline gap-x-10 gap-y-4 border-b border-line-soft pb-5">
         <Stat
