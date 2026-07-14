@@ -40,14 +40,14 @@ const ForecastStrip = () => {
   return (
     <section className="pfa-card grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[200px_1fr_200px] sm:gap-8">
       <div className="flex flex-col gap-1">
-        <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
+        <span className="text-2xs font-medium uppercase tracking-caps text-ink-4">
           Dépensé · {format(asOf, "d MMM", { locale: fr })}
         </span>
         <AnimatedNumber
           value={monthlyTotal}
           decimals={0}
           suffix=" €"
-          className="num text-[22px] font-medium tracking-[-0.01em] text-ink"
+          className="num text-xl font-medium tracking-normal text-ink"
         />
         <span className="text-xs text-ink-3">{spentPct}% du budget</span>
       </div>
@@ -65,12 +65,12 @@ const ForecastStrip = () => {
           height={36}
           radius={8}
         />
-        <div className="mt-2 flex items-center justify-between text-[11px] text-ink-4">
+        <div className="mt-2 flex items-center justify-between text-2xs text-ink-4">
           <span className="num">0 €</span>
           <span className="flex items-center gap-4 text-ink-3">
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="inline-block h-2 w-3 rounded-[2px]"
+                className="inline-block h-2 w-3 rounded-xs"
                 style={{
                   background: "linear-gradient(90deg,var(--accent-d),var(--accent-strong))",
                   opacity: 0.55,
@@ -80,7 +80,7 @@ const ForecastStrip = () => {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="inline-block h-2 w-3 rounded-[2px] border border-accent-d"
+                className="inline-block h-2 w-3 rounded-xs border border-accent-d"
                 style={{
                   background: "repeating-linear-gradient(45deg,transparent 0 3px,var(--accent-d) 3px 6px)",
                 }}
@@ -93,13 +93,13 @@ const ForecastStrip = () => {
       </div>
 
       <div className="flex flex-col items-start gap-1 sm:items-end sm:text-right">
-        <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">Projection fin de mois</span>
+        <span className="text-2xs font-medium uppercase tracking-caps text-ink-4">Projection fin de mois</span>
         <AnimatedNumber
           value={projection}
           decimals={0}
           suffix=" €"
           color={delta > 0 ? "var(--neg)" : "var(--accent-strong)"}
-          className="num text-[22px] font-medium tracking-[-0.01em]"
+          className="num text-xl font-medium tracking-normal"
         />
         <span className="text-xs text-ink-3">
           <span className={delta > 0 ? "text-neg" : "text-accent-strong"}>

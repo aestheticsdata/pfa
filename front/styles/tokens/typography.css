@@ -3,8 +3,12 @@
 }
 
 @theme {
-  --text-2xs: 0.7rem;
-  --text-3xs: 0.5rem;
+  --text-2xs: 0.7rem; /* 11px — compact label */
+  --text-3xs: 0.5rem; /* 8px — micro label */
+  --text-display: 2.5rem; /* 40px — hero display number */
+  --text-display-lg: 3.5rem; /* 56px — hero display, wide screens */
+
+  --tracking-caps: 0.08em; /* uppercase micro-labels */
 
   --font-smooch: Smooch Sans, sans-serif;
   --font-poppins: Poppins, sans-serif;

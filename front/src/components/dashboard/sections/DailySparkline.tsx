@@ -86,10 +86,10 @@ const DailySparkline = () => {
   const curveKey = `${format(monthRef, "yyyy-MM")}-${peak > 0 ? "d" : "e"}`;
 
   return (
-    <div className="mt-6 border-t border-line-soft pt-[18px]">
+    <div className="mt-6 border-t border-line-soft pt-4.5">
       <div className="mb-2.5 flex items-baseline justify-between">
-        <h3 className="text-[12px] font-medium tracking-[-0.005em] text-ink-2">Consommation jour par jour</h3>
-        <div className="flex gap-5 text-[12px] text-ink-3">
+        <h3 className="text-xs font-medium tracking-normal text-ink-2">Consommation jour par jour</h3>
+        <div className="flex gap-5 text-xs text-ink-3">
           <span>
             Moyenne <span className="num text-ink">{euro(avg)} €</span>/jour
           </span>
@@ -126,7 +126,7 @@ const DailySparkline = () => {
           ariaLabel="Consommation quotidienne"
         />
         <span
-          className="num pointer-events-none absolute right-2 text-[9px] text-ink-4"
+          className="num pointer-events-none absolute right-2 text-3xs text-ink-4"
           style={{ top: `calc(${avgTopPct}% - 18px)` }}
         >
           moy. {euro(avg)} €
@@ -134,7 +134,7 @@ const DailySparkline = () => {
         {showToday && (
           <>
             <span
-              className="num pointer-events-none absolute top-0.5 pl-1.5 text-[9px] tracking-[0.03em] text-ink-2"
+              className="num pointer-events-none absolute top-0.5 pl-1.5 text-3xs tracking-wide text-ink-2"
               style={{ left: `${dotLeftPct}%` }}
             >
               {todayLabel}
@@ -142,14 +142,14 @@ const DailySparkline = () => {
             {/* HTML overlay dot → stays perfectly round regardless of the
                 non-uniform SVG scaling (unlike an in-SVG <circle>). */}
             <span
-              className="pointer-events-none absolute box-border size-[7px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.75px] border-accent-strong bg-bg-elev"
+              className="pointer-events-none absolute box-border size-2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-accent-strong bg-bg-elev"
               style={{ left: `${dotLeftPct}%`, top: `${dotTopPct}%` }}
             />
           </>
         )}
       </div>
 
-      <div className="num mt-1 flex justify-between text-[9px] text-ink-4">
+      <div className="num mt-1 flex justify-between text-3xs text-ink-4">
         {ticks.map((d) => (
           <span key={d}>{String(d).padStart(2, "0")}</span>
         ))}

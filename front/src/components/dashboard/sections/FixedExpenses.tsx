@@ -61,7 +61,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
     <section className="pfa-card flex max-h-[550px] min-h-[320px] flex-col gap-4 px-6 py-5">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">Dépenses fixes</h2>
+          <h2 className="text-base font-semibold tracking-normal text-ink">Dépenses fixes</h2>
           <span className="text-xs text-ink-4">
             {list.length} lignes · échéancier {format(month.start, "MMMM", { locale: fr })}
           </span>
@@ -78,17 +78,17 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
 
       <div className="flex items-start justify-between">
         <div>
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">Mensuel</div>
-          <div className="num text-[26px] font-medium tracking-[-0.02em] text-ink">
+          <div className="text-2xs font-medium uppercase tracking-caps text-ink-4">Mensuel</div>
+          <div className="num text-2xl font-medium tracking-tight text-ink">
             {totalInt}
-            <span className="text-[18px] text-ink-3">,{totalDec} €</span>
+            <span className="text-lg text-ink-3">,{totalDec} €</span>
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">Annualisé</div>
-          <div className="num text-[18px] font-medium tracking-[-0.01em] text-ink-2">
+          <div className="text-2xs font-medium uppercase tracking-caps text-ink-4">Annualisé</div>
+          <div className="num text-lg font-medium tracking-normal text-ink-2">
             {annualInt}
-            <span className="text-[14px] text-ink-3">,{annualDec} €</span>
+            <span className="text-sm text-ink-3">,{annualDec} €</span>
           </div>
         </div>
       </div>
@@ -141,10 +141,10 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
           return (
             <div
               key={r.ID}
-              className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 border-b border-line-soft py-[9px] last:border-b-0"
+              className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 border-b border-line-soft py-2.5 last:border-b-0"
             >
               <span
-                className="truncate text-[13px] text-ink"
+                className="truncate text-sm text-ink"
                 title={r.label}
               >
                 {r.label}
@@ -184,21 +184,19 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                 {day != null && (
                   <span
                     className={cn(
-                      "num w-5 text-right text-[11px] tabular-nums",
+                      "num w-5 text-right text-2xs tabular-nums",
                       isUpcoming ? "text-accent-strong" : "text-ink-4",
                     )}
                   >
                     {String(day).padStart(2, "0")}
                   </span>
                 )}
-                <span className="num min-w-[76px] text-right text-[13px] font-medium text-ink">{euro(r.amount)} €</span>
+                <span className="num min-w-[76px] text-right text-sm font-medium text-ink">{euro(r.amount)} €</span>
               </span>
             </div>
           );
         })}
-        {list.length === 0 && (
-          <div className="py-6 text-center text-[12.5px] text-ink-4">Aucune dépense fixe ce mois.</div>
-        )}
+        {list.length === 0 && <div className="py-6 text-center text-xs text-ink-4">Aucune dépense fixe ce mois.</div>}
       </div>
 
       {isModalVisible && (
