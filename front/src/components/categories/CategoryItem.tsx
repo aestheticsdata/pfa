@@ -1,16 +1,7 @@
 "use client";
 
 import CategoryFormModal from "@components/categories/CategoryFormModal";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@components/ui/alert-dialog";
+import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { cn } from "@lib/utils";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -92,28 +83,14 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
         onSubmit={onSave}
       />
 
-      <AlertDialog
+      <ConfirmDeleteDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="capitalize">Supprimer la catégorie « {category.name} » ?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Cette action est irréversible. Les dépenses associées n&apos;auront plus de catégorie.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={onDelete}
-              className="bg-destructive text-white hover:bg-destructive/90"
-            >
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={`Supprimer la catégorie « ${category.name} » ?`}
+        titleClassName="capitalize"
+        description="Cette action est irréversible. Les dépenses associées n'auront plus de catégorie."
+        onConfirm={onDelete}
+      />
     </>
   );
 };
