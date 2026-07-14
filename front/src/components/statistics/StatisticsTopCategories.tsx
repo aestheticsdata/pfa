@@ -1,8 +1,8 @@
 "use client";
 
-import { euro0 } from "@components/dashboard/format";
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import { euro0 } from "@lib/format";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 export interface TopCategoryRow {

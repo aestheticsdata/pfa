@@ -5,10 +5,10 @@
 // Rendered as a card-less section: it nests inside the BudgetHero card, matching
 // the `.spark-section` block of Dashboard 2026.html.
 
-import { euro } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { LineChart } from "@lib/dataviz";
+import { euro } from "@lib/format";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";

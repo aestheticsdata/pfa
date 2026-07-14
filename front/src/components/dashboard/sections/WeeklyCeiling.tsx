@@ -1,7 +1,6 @@
 "use client";
 
 import EditGlyph from "@components/dashboard/EditGlyph";
-import { euro, euro0 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
@@ -10,6 +9,7 @@ import useDashboard from "@components/spendings/services/useDashboard";
 import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
 import { Input } from "@components/ui/input";
 import { ProgressTrack } from "@lib/dataviz";
+import { euro, euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";

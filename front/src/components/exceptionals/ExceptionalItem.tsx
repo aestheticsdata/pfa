@@ -3,6 +3,7 @@
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { IconButton } from "@components/shared/IconButton";
+import { euro } from "@lib/format";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
 import parseISO from "date-fns/parseISO";
@@ -25,10 +26,7 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
 
   const accent = item.categoryColor ?? FALLBACK_COLOR;
   const dateLabel = format(parseISO(item.date), "dd MMM", { locale: fr });
-  const amount = Number(item.amount).toLocaleString("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const amount = euro(item.amount);
   const budgetMonths = monthlyAverage > 0 ? (Number(item.amount) / monthlyAverage).toFixed(1) : null;
 
   const onDelete = () => {

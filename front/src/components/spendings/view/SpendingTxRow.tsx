@@ -3,18 +3,13 @@
 import { IconButton } from "@components/shared/IconButton";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useSpendings from "@components/spendings/services/useSpendings";
+import { euro } from "@lib/format";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import type { SpendingItem } from "@components/spendings/types";
 
 const FALLBACK_COLOR = "#94a3b8";
-
-const formatAmount = (amount: number) =>
-  Number(amount).toLocaleString("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 interface SpendingTxRowProps {
   spending: SpendingItem;
@@ -103,7 +98,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
           )}
 
           <span className="sp-t-amt">
-            {formatAmount(spending.amount)}
+            {euro(spending.amount)}
             <span className="cur"> €</span>
           </span>
 

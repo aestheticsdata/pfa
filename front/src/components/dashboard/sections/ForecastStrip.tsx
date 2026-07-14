@@ -3,11 +3,11 @@
 // MOCK — the end-of-month projection is a synthetic average-forward model
 // (spent / days-elapsed × days-in-month). Spent + budget are real.
 
-import { euro0 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { Overline } from "@components/shared/Overline";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
+import { euro0 } from "@lib/format";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";

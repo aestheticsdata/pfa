@@ -6,11 +6,11 @@
 // year — there is no per-month budget endpoint) and the current-month
 // end-of-month projection (an average-forward estimate).
 
-import { euro0 } from "@components/dashboard/format";
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
 import useElementWidth from "@lib/dataviz/useElementWidth";
+import { euro0 } from "@lib/format";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 
 interface StatisticsMonthlyChartProps {

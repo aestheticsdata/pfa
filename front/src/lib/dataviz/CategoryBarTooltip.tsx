@@ -1,6 +1,7 @@
 "use client";
 
 import CategoryTrend from "@lib/dataviz/CategoryTrend";
+import { euro } from "@lib/format";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -10,12 +11,6 @@ import type { CategoryTrendData } from "@lib/dataviz/CategoryTrend";
 // viewport edge without a flash; fall back to useEffect on the server, where
 // layout effects warn (and never run) anyway.
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
-
-const formatAmount = (amount: number) =>
-  Number(amount).toLocaleString("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 /** One category's display data — mirrors its list row. */
 export interface CategoryTooltipDatum {
@@ -123,7 +118,7 @@ const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
         <span className="text-ink-4">Part</span>
         <span className="num text-right text-ink-2">{datum.pct.toFixed(1).replace(".", ",")} %</span>
         <span className="text-ink-4">Montant</span>
-        <span className="num text-right text-ink">{formatAmount(datum.total)} €</span>
+        <span className="num text-right text-ink">{euro(datum.total)} €</span>
         <span className="text-ink-4">Tendance</span>
         <CategoryTrend {...datum.trend} />
       </div>
