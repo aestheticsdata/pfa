@@ -1,14 +1,15 @@
 "use client";
 
-import { euro } from "@components/dashboard/format";
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
 import { IconButton } from "@components/shared/IconButton";
+import { MoneyAmount } from "@components/shared/MoneyAmount";
 import { Overline } from "@components/shared/Overline";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
+import { euro } from "@lib/format";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
@@ -50,8 +51,6 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
 
   const list = [...(recurrings ?? [])].sort((a, b) => (dayOf(a) ?? 99) - (dayOf(b) ?? 99));
   const total = list.reduce((a, r) => a + Number(r.amount), 0);
-  const [totalInt, totalDec] = euro(total).split(",");
-  const [annualInt, annualDec] = euro(total * 12).split(",");
 
   const upcoming = viewingCurrentMonth
     ? list.filter((r) => {
@@ -85,15 +84,19 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
         <div>
           <Overline>Mensuel</Overline>
           <div className="num text-2xl font-medium tracking-tight text-ink">
-            {totalInt}
-            <span className="text-lg text-ink-3">,{totalDec} €</span>
+            <MoneyAmount
+              value={total}
+              decimalClassName="text-lg"
+            />
           </div>
         </div>
         <div className="text-right">
           <Overline>Annualisé</Overline>
           <div className="num text-lg font-medium tracking-normal text-ink-2">
-            {annualInt}
-            <span className="text-sm text-ink-3">,{annualDec} €</span>
+            <MoneyAmount
+              value={total * 12}
+              decimalClassName="text-sm"
+            />
           </div>
         </div>
       </div>

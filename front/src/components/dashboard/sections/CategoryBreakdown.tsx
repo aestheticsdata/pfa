@@ -1,6 +1,5 @@
 "use client";
 
-import { euro, pct1 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
@@ -9,6 +8,7 @@ import useCharts from "@components/spendings/services/useCharts";
 import useSpendings from "@components/spendings/services/useSpendings";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { CategoryBarTooltip, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
+import { euro, pct1 } from "@lib/format";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { useMemo, useState } from "react";

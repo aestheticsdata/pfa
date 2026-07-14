@@ -1,6 +1,5 @@
 "use client";
 
-import { euro0 } from "@components/dashboard/format";
 import GlowCard from "@components/shared/GlowCard";
 import { Overline } from "@components/shared/Overline";
 import {
@@ -18,6 +17,7 @@ import {
   yearTotal,
 } from "@components/statistics/helpers/statisticsData";
 import StatMiniChart from "@components/statistics/StatMiniChart";
+import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
 import { useState } from "react";
 

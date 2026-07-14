@@ -3,12 +3,12 @@
 // MOCK — the end-of-year projection is a synthetic average-forward model
 // (spent / days-elapsed × days-in-year). Spent + the year-over-year figure are real.
 
-import { euro, euro0 } from "@components/dashboard/format";
 import GlowCard from "@components/shared/GlowCard";
 import { Overline } from "@components/shared/Overline";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
 import { yearTotal } from "@components/statistics/helpers/statisticsData";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
+import { euro, euro0 } from "@lib/format";
 import format from "date-fns/format";
 import getDayOfYear from "date-fns/getDayOfYear";
 import fr from "date-fns/locale/fr";

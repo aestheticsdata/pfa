@@ -1,10 +1,10 @@
 "use client";
 
-import { euro0 } from "@components/dashboard/format";
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
 import useElementWidth from "@lib/dataviz/useElementWidth";
+import { euro0 } from "@lib/format";
 
 export interface CategorySeries {
   name: string;

@@ -5,10 +5,10 @@
 // "déjà prélevé", derived from each line's charge-day vs today (MOCK: recurrings
 // have no dedicated charge-day field, so the day-of-month of `dateFrom` is used).
 
-import { euro } from "@components/dashboard/format";
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { Overline } from "@components/shared/Overline";
+import { euro, splitAmount } from "@lib/format";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import fr from "date-fns/locale/fr";
@@ -27,12 +27,6 @@ const chargeDay = (r: RecurringItem): number => {
   return Number.isNaN(d) ? 1 : d;
 };
 
-/** Splits a fr-FR amount ("1 234,56") into [integer, decimals]. */
-const splitAmount = (value: number): [string, string] => {
-  const [int, dec = "00"] = euro(value).split(",");
-  return [int, dec];
-};
-
 const Stat = ({
   label,
   value,
@@ -44,7 +38,7 @@ const Stat = ({
   small?: boolean;
   className?: string;
 }) => {
-  const [int, dec] = splitAmount(value);
+  const { int, dec } = splitAmount(value);
   return (
     <div className={className}>
       <Overline className="block">{label}</Overline>

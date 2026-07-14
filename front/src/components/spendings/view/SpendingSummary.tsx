@@ -1,35 +1,15 @@
 "use client";
 
+import { MoneyAmount } from "@components/shared/MoneyAmount";
 import { Overline } from "@components/shared/Overline";
+import { StatTile } from "@components/shared/StatTile";
 import { AnimatedNumber } from "@lib/dataviz";
+import { splitAmount } from "@lib/format";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 
 import type { ReactNode } from "react";
-
-const splitAmount = (n: number): { int: string; dec: string } => {
-  const [int, dec = "00"] = Number(n)
-    .toLocaleString("fr-FR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
-    .split(",");
-  return { int, dec };
-};
-
-const Amount = ({ value, unit = " €" }: { value: number; unit?: string }) => {
-  const { int, dec } = splitAmount(value);
-  return (
-    <>
-      {int}
-      <span className="text-lg font-normal text-ink-3">
-        ,{dec}
-        {unit}
-      </span>
-    </>
-  );
-};
 
 interface Biggest {
   label: string;
@@ -49,11 +29,12 @@ interface SpendingSummaryProps {
 }
 
 const Cell = ({ label, value, sub }: { label: string; value: ReactNode; sub: ReactNode }) => (
-  <div className="bg-card px-5 py-4">
-    <Overline className="mb-2 block">{label}</Overline>
-    <div className="num text-2xl font-medium leading-none tracking-tight text-ink">{value}</div>
-    <div className="mt-1.5 text-xs text-ink-3">{sub}</div>
-  </div>
+  <StatTile
+    className="bg-card px-5 py-4"
+    label={label}
+    value={value}
+    sub={sub}
+  />
 );
 
 const SpendingSummary = ({
@@ -114,7 +95,12 @@ const SpendingSummary = ({
       </div>
       <Cell
         label="Total semaine"
-        value={<Amount value={weekTotal} />}
+        value={
+          <MoneyAmount
+            value={weekTotal}
+            decimalClassName="text-lg"
+          />
+        }
         sub={ceilingSub}
       />
       <Cell
@@ -124,13 +110,27 @@ const SpendingSummary = ({
       />
       <Cell
         label="Moyenne / jour"
-        value={<Amount value={average} />}
+        value={
+          <MoneyAmount
+            value={average}
+            decimalClassName="text-lg"
+          />
+        }
         // MOCK sub — cross-week delta (see mockSpending.ts)
         sub={avgSub}
       />
       <Cell
         label="Plus grosse"
-        value={biggest ? <Amount value={biggest.amount} /> : "—"}
+        value={
+          biggest ? (
+            <MoneyAmount
+              value={biggest.amount}
+              decimalClassName="text-lg"
+            />
+          ) : (
+            "—"
+          )
+        }
         sub={biggest ? `${biggest.label} · ${format(biggest.date, "dd MMM", { locale: fr })}` : "—"}
       />
     </section>

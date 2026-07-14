@@ -5,16 +5,11 @@ import { WEEKLY } from "@components/spendings/config/constants";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
 import { CategoryBarTooltip, CategoryTrend } from "@lib/dataviz";
+import { euro } from "@lib/format";
 import { useState } from "react";
 
 import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
 import type { BarHover } from "@lib/dataviz";
-
-const formatAmount = (amount: number) =>
-  Number(amount).toLocaleString("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 // MOCK — needs previous-week data (see mockSpending.ts). De-mocks with COS-35.
 const Trend = ({ name }: { name: string }) => <CategoryTrend {...mockCategoryTrend(name)} />;
@@ -50,7 +45,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
           <span
             key={r.key}
             role="img"
-            aria-label={`${r.name} : ${r.pct.toFixed(1).replace(".", ",")} % (${formatAmount(r.total)} €)`}
+            aria-label={`${r.name} : ${r.pct.toFixed(1).replace(".", ",")} % (${euro(r.total)} €)`}
             style={{ width: `${r.pct.toFixed(2)}%`, background: r.color }}
             onMouseMove={(e) => setHover({ target: r, x: e.clientX, y: e.clientY })}
             onMouseLeave={() => setHover(null)}
@@ -77,7 +72,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
               </span>
             </span>
             <span className="num text-right text-ink-2">{r.pct.toFixed(1).replace(".", ",")} %</span>
-            <span className="num text-right text-ink">{formatAmount(r.total)} €</span>
+            <span className="num text-right text-ink">{euro(r.total)} €</span>
             <Trend name={r.name} />
           </button>
         ))}

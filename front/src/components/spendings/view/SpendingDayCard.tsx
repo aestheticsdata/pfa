@@ -4,6 +4,7 @@ import SpendingModal from "@components/spendings/common/spendingModal/SpendingMo
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import useDaySort from "@components/spendings/view/helpers/useDaySort";
 import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
+import { euro } from "@lib/format";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
@@ -16,12 +17,6 @@ import type { DaySortField } from "@components/spendings/view/helpers/useDaySort
 
 const FALLBACK_COLOR = "#94a3b8";
 const UNCATEGORIZED_KEY = "none";
-
-const formatAmount = (amount: number) =>
-  Number(amount).toLocaleString("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 interface DayCategory {
   key: string;
@@ -145,7 +140,7 @@ const SpendingDayCard = ({
           </div>
           <div className={cn("sp-day-total", over && "over")}>
             <span className="tl">TOTAL</span>
-            {formatAmount(displayTotal)}
+            {euro(displayTotal)}
             <span className="cur"> €</span>
           </div>
         </div>

@@ -5,13 +5,13 @@
 // history. The end-of-month conclusion, the top category name and "reste à vivre"
 // are derived from real data. See REFACTO_NOTES.md §6.
 
-import { euro0 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { Overline } from "@components/shared/Overline";
 import { MONTHLY } from "@components/spendings/config/constants";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
 import useCharts from "@components/spendings/services/useCharts";
 import useDashboard from "@components/spendings/services/useDashboard";
+import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";

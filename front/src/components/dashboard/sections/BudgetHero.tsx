@@ -1,13 +1,14 @@
 "use client";
 
 import EditGlyph from "@components/dashboard/EditGlyph";
-import { euro, euro0 } from "@components/dashboard/format";
 import DailySparkline from "@components/dashboard/sections/DailySparkline";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { MoneyAmount } from "@components/shared/MoneyAmount";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { Input } from "@components/ui/input";
 import { Donut, useCountUp } from "@lib/dataviz";
+import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
@@ -51,7 +52,6 @@ const BudgetHero = () => {
   const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: fr });
   // remount key → replays the donut grow-from-zero on month change
   const monthKey = format(from ?? new Date(), "yyyy-MM");
-  const [amountInt, amountDec] = euro(animatedRemaining).split(",");
 
   const segments =
     initialAmount > 0
@@ -91,8 +91,10 @@ const BudgetHero = () => {
             )}
           >
             {over && "−"}
-            {amountInt}
-            <span className="text-2xl font-normal text-ink-3 sm:text-4xl">,{amountDec} €</span>
+            <MoneyAmount
+              value={animatedRemaining}
+              decimalClassName="text-2xl sm:text-4xl"
+            />
           </div>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-ink-3">

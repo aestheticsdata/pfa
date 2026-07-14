@@ -5,6 +5,7 @@ import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
 import texts from "@components/spendings/config/text";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { DATE_QUERY_PARAM, SPENDINGS_PATH } from "@helpers/dateRoute";
+import { euro } from "@lib/format";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
@@ -24,12 +25,6 @@ interface SpendingsListModalProps {
 }
 
 const FALLBACK_COLOR = "#94a3b8";
-
-const euro = (n: number) =>
-  Number(n).toLocaleString("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 const groupByDate = (spendings: SpendingItem[]): Record<string, SpendingItem[]> => {
   return spendings.reduce((acc: Record<string, SpendingItem[]>, curr) => {

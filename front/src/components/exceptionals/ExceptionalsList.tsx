@@ -1,6 +1,7 @@
 "use client";
 
 import ExceptionalItem from "@components/exceptionals/ExceptionalItem";
+import { euro } from "@lib/format";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
 import parseISO from "date-fns/parseISO";
@@ -20,12 +21,6 @@ interface ExceptionalsListProps {
   onEdit: (item: ExceptionalItemType) => void;
   monthlyAverage: number;
 }
-
-const fmt = (v: number) =>
-  v.toLocaleString("fr-FR", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
 
 const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListProps) => {
   const groups = useMemo<MonthGroup[]>(() => {
@@ -62,7 +57,7 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
               </span>
             </h2>
             <span className="num text-sm text-ink-2">
-              Total <b className="font-medium text-ink">{fmt(group.total)} €</b>
+              Total <b className="font-medium text-ink">{euro(group.total)} €</b>
             </span>
           </div>
           <div className="overflow-hidden rounded-[14px] border border-line-soft bg-surface-elev">
