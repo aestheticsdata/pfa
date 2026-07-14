@@ -48,7 +48,7 @@ interface SpendingSummaryProps {
 }
 
 const Cell = ({ label, value, sub }: { label: string; value: ReactNode; sub: ReactNode }) => (
-  <div className="bg-background px-5 py-4">
+  <div className="bg-card px-5 py-4">
     <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</span>
     <div className="num text-[24px] font-medium leading-none tracking-[-0.02em] text-ink">{value}</div>
     <div className="mt-1.5 text-xs text-ink-3">{sub}</div>
@@ -98,7 +98,7 @@ const SpendingSummary = ({
     <section className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-line-soft bg-line-soft min-[760px]:grid-cols-5">
       {/* Hero — full-width banner on mobile, one equal-width cell (1/5) on desktop
           like the other four. Its font stays big; the four keep theirs too. */}
-      <div className="col-span-2 bg-background px-5 py-4 min-[760px]:col-span-1">
+      <div className="col-span-2 bg-card px-5 py-4 min-[760px]:col-span-1">
         <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
           Budget restant
         </span>

@@ -18,7 +18,7 @@ export default function AuthCard({ children, className }: { children: React.Reac
         {/* glass */}
         <div
           className={cn(
-            "relative w-[400px] max-w-[calc(100vw-48px)] overflow-hidden rounded-[25px] px-[34px] pt-[38px] pb-7 backdrop-blur-[24px] [background:linear-gradient(180deg,oklch(0.19_0.010_245/0.92)_0%,oklch(0.15_0.008_250/0.94)_100%)]",
+            "relative w-[400px] max-w-[calc(100vw-48px)] overflow-hidden rounded-[25px] px-[34px] pt-[38px] pb-7 backdrop-blur-[24px] [background:linear-gradient(180deg,oklch(0.215_0.010_245/0.92)_0%,oklch(0.185_0.008_250/0.94)_100%)]",
             className,
           )}
         >

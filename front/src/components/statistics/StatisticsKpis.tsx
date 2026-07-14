@@ -76,7 +76,7 @@ const CmpRow = ({
       <span
         className={cn(
           "num shrink-0 rounded-[3px] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.04em]",
-          kind === "exc" ? "bg-[var(--exc-bg)] text-exc" : "bg-[var(--accent-bg)] text-accent-strong",
+          kind === "exc" ? "bg-exc-bg text-exc" : "bg-accent-bg text-accent-strong",
         )}
       >
         {tag}

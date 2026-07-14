@@ -1,0 +1,69 @@
+/* Logo — pulsed under-glow on the large "hero" variant */
+.pfa-logo-pulse {
+  filter: blur(3px);
+  opacity: 0.6;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pfa-logo-pulse {
+    animation: pfa-logo-pulse 3.2s ease-in-out infinite;
+  }
+}
+@keyframes pfa-logo-pulse {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  50% {
+    opacity: 0.82;
+  }
+}
+
+/* Dashboard "grow from zero" reveals (forecast bar + budget donut).
+   No animation-fill-mode: after the run the property reverts to its static
+   value (same as the keyframe target), so live data updates still show. */
+@keyframes pfa-donut-grow {
+  from {
+    stroke-dasharray: 0 var(--pfa-circ);
+  }
+  to {
+    stroke-dasharray: var(--pfa-dash) var(--pfa-gap);
+  }
+}
+/* left→right reveal of the daily curve (clip walks in from the right) */
+@keyframes pfa-draw-x {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pfa-anim-donut {
+    animation: pfa-donut-grow 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .pfa-anim-draw-x {
+    animation: pfa-draw-x 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+.transition-bar-enter {
+  opacity: 0.01;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.transition-bar-enter-active {
+  opacity: 1;
+  transform: scaleX(1);
+  transition: all 300ms ease-in;
+  transform-origin: left;
+}
+.transition-bar-exit {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+.transition-bar-exit-active {
+  opacity: 0.01;
+  transform: translate(0, 10px);
+  transition: all 300ms ease-out;
+}

@@ -1,0 +1,39 @@
+/*
+  Default border color — Tailwind CSS v4 changed it to `currentcolor`.
+  Pin to the shadcn `border` token so all bordered elements use it.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border, currentcolor);
+  }
+}
+
+@layer base {
+  * {
+    @apply outline-ring/50;
+  }
+  html,
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    letter-spacing: -0.005em;
+    font-feature-settings: "ss01", "cv11";
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input,
+  textarea,
+  [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+}
+
+/* Webkit autofill yellow background fix */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
+  -webkit-transition-delay: 9999s;
+}

@@ -1,0 +1,376 @@
+/* ============================================================
+   Répartition par catégorie — modal "détail catégorie" (.catd-*)
+   Drill-down partagé Dashboard (mois) + Dépenses (semaine). Port fidèle
+   de design_handoff_pfa/designs/assets/cat-detail.css sur les tokens pfa
+   (design --accent vert → --accent-strong ; couleur catégorie via inline
+   `background`). Monté sur Radix Dialog : .catd-backdrop = overlay,
+   .catd-viewport = conteneur centreur, .catd = panneau (Content).
+   ============================================================ */
+.catd-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: oklch(0.02 0.004 250 / 0.62);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  animation: catdFade 0.16s ease-out;
+}
+@keyframes catdFade {
+  from {
+    opacity: 0;
+  }
+}
+.catd-viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 201;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  pointer-events: none;
+}
+
+.catd {
+  pointer-events: auto;
+  width: min(1000px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid transparent;
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background:
+    linear-gradient(var(--bg-elev), var(--bg-elev)) padding-box,
+    linear-gradient(
+        165deg,
+        oklch(0.7 0.09 200 / 0.34) 0%,
+        oklch(0.4 0.02 250 / 0.14) 32%,
+        oklch(0.35 0.02 250 / 0.1) 64%,
+        oklch(0.68 0.11 160 / 0.28) 100%
+      )
+      border-box;
+  box-shadow:
+    0 34px 90px oklch(0 0 0 / 0.62),
+    inset 0 1px 0 oklch(1 0 0 / 0.05);
+  animation: catdRise 0.2s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+@keyframes catdRise {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+}
+
+/* ---- Header ---- */
+.catd-h {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 22px;
+  background: linear-gradient(180deg, oklch(1 0 0 / 0.045), oklch(1 0 0 / 0.018));
+  border-bottom: 1px solid var(--line);
+}
+.catd-swatch {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  flex: 0 0 auto;
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.25);
+}
+.catd-name {
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-transform: capitalize;
+}
+.catd-total {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.catd-total .k {
+  font-size: 10.5px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  font-weight: 500;
+}
+.catd-total .v {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.catd-sp {
+  flex: 1;
+}
+.catd-period {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.catd-close {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  background: var(--bg-hi);
+  border: 1px solid var(--line);
+  color: var(--ink-3);
+  transition:
+    color 0.12s,
+    border-color 0.12s,
+    background 0.12s,
+    box-shadow 0.12s;
+}
+.catd-close:hover {
+  color: var(--elec);
+  border-color: var(--elec);
+  background: oklch(0.72 0.15 230 / 0.12);
+  box-shadow: 0 0 0 3px oklch(0.72 0.15 230 / 0.16);
+}
+.catd-close svg {
+  display: block;
+}
+
+/* ---- Filter ---- */
+.catd-filter {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 22px;
+  border-bottom: 1px solid var(--line);
+}
+.catd-filter-lbl {
+  font-size: 12.5px;
+  color: var(--ink-3);
+  flex: 0 0 auto;
+}
+.catd-search {
+  position: relative;
+  flex: 1;
+  display: block;
+}
+.catd-search svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ink-4);
+  pointer-events: none;
+}
+.catd-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px 9px 36px;
+  font-family: inherit;
+  font-size: 13.5px;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  outline: none;
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
+}
+.catd-search input::placeholder {
+  color: var(--ink-4);
+}
+.catd-search input:focus {
+  border-color: var(--elec);
+  box-shadow: 0 0 0 3px oklch(0.72 0.15 230 / 0.14);
+}
+
+/* ---- Body (day cards) ---- */
+.catd-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 22px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.catd-day {
+  flex: 0 0 auto;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--bg-elev);
+  cursor: pointer;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s,
+    transform 0.14s;
+}
+.catd-day:hover {
+  border-color: var(--elec);
+  box-shadow:
+    0 0 0 1px var(--elec),
+    0 14px 34px oklch(0.72 0.15 230 / 0.2);
+  transform: translateY(-1px);
+}
+.catd-day-h {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 18px 0;
+}
+.catd-day:hover .catd-day-h {
+  background: linear-gradient(180deg, oklch(0.72 0.15 230 / 0.06), transparent);
+}
+.catd-day-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  text-transform: uppercase;
+  padding-top: 3px;
+}
+.catd-day-title .chev {
+  color: var(--elec);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition:
+    opacity 0.14s,
+    transform 0.14s;
+}
+.catd-day:hover .catd-day-title {
+  color: var(--elec);
+}
+.catd-day:hover .catd-day-title .chev {
+  opacity: 1;
+  transform: none;
+}
+.catd-day-stats {
+  display: flex;
+  gap: 20px;
+}
+.catd-stat {
+  text-align: right;
+}
+.catd-stat .k {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  color: var(--ink-4);
+  font-weight: 500;
+}
+.catd-stat .v {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  background: var(--bg-hi);
+  border: 1px solid var(--line);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.catd-stat .v .cur {
+  color: var(--ink-3);
+  font-weight: 500;
+}
+.catd-day-pct {
+  padding: 9px 18px 13px;
+  text-align: right;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent-strong);
+}
+.catd-day-list {
+  background: var(--bg);
+  border-top: 1px solid var(--line-soft);
+  padding: 6px 18px;
+}
+.catd-exp {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.catd-exp:last-child {
+  border-bottom: 0;
+}
+.catd-exp .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+.catd-exp .l {
+  color: var(--ink);
+  font-size: 13.5px;
+}
+.catd-exp .a {
+  font-family: "Geist Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink);
+  text-align: right;
+  white-space: nowrap;
+}
+.catd-exp .a .cur {
+  color: var(--ink-3);
+  font-weight: 400;
+}
+.catd-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--ink-4);
+  font-size: 13.5px;
+}
+@media (max-width: 640px) {
+  .catd-viewport {
+    padding: 14px;
+  }
+  .catd {
+    max-height: 92vh;
+  }
+  .catd-h {
+    flex-wrap: wrap;
+    gap: 10px 12px;
+  }
+  .catd-sp {
+    flex-basis: 100%;
+    order: 5;
+    height: 0;
+  }
+  .catd-period {
+    order: 6;
+  }
+  .catd-day-h {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .catd-day-stats {
+    align-self: stretch;
+    justify-content: space-between;
+  }
+}

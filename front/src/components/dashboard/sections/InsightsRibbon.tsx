@@ -33,7 +33,7 @@ const Insight = ({
   label: string;
   children: ReactNode;
 }) => (
-  <div className="flex items-start gap-3 bg-[var(--bg)] px-[18px] py-3.5">
+  <div className="flex items-start gap-3 bg-card px-[18px] py-3.5">
     <span className={cn("mt-0.5 grid size-7 shrink-0 place-items-center rounded-[7px]", tone)}>{icon}</span>
     <div className="flex flex-col gap-0.5">
       <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-3">{label}</span>
