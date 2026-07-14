@@ -198,7 +198,7 @@ const StatisticsFilters = ({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Rechercher…"
-              className="h-9 border-line bg-[var(--bg)] pl-8 text-[13px]"
+              className="h-9 border-line bg-background pl-8 text-[13px]"
             />
           </div>
           <div className="max-h-[264px] overflow-y-auto pr-0.5">

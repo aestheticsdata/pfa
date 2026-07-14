@@ -80,7 +80,7 @@ const ForecastStrip = () => {
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span
-                className="inline-block h-2 w-3 rounded-[2px] border border-[var(--accent-d)]"
+                className="inline-block h-2 w-3 rounded-[2px] border border-accent-d"
                 style={{
                   background: "repeating-linear-gradient(45deg,transparent 0 3px,var(--accent-d) 3px 6px)",
                 }}

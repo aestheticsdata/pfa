@@ -35,7 +35,7 @@ const Chip = ({
     className={cn(
       "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs capitalize transition-colors",
       active
-        ? "border-[var(--accent-d)] bg-[var(--accent-bg)] text-accent-strong"
+        ? "border-accent-d bg-accent-bg text-accent-strong"
         : "border-line bg-bg-hi text-ink-2 hover:bg-bg-hover hover:text-ink",
     )}
   >

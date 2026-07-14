@@ -163,12 +163,12 @@ const BudgetHero = () => {
                 {Math.round(animatedPct)}
                 <span className="text-[18px] text-ink-3">%</span>
               </div>
-              <div className="mt-0.5 text-[10px] uppercase tracking-[0.1em] text-ink-4">utilisé</div>
+              <div className="mt-0.5 text-[10px] uppercase tracking-widest text-ink-4">utilisé</div>
             </div>
           </Donut>
           <div className="flex gap-4 text-[11px] text-ink-3">
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-2 rounded-[2px] bg-[var(--accent-d)]" />
+              <span className="size-2 rounded-[2px] bg-accent-d" />
               Fixes <span className="num text-ink-2">{euro0(fixed)}</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
