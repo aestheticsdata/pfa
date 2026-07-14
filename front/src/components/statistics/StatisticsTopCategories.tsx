@@ -1,6 +1,7 @@
 "use client";
 
 import { euro0 } from "@components/dashboard/format";
+import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -50,10 +51,10 @@ const Trend = ({ deltaPct }: { deltaPct: number | null }) => {
  *  year-over-year trend (all figures from /statistics). */
 const StatisticsTopCategories = ({ rows, compareYear }: StatisticsTopCategoriesProps) => (
   <GlowCard className="flex flex-col px-6 py-[22px]">
-    <div className="flex items-baseline justify-between gap-4">
-      <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Top catégories</h2>
-      <span className="text-[12px] text-ink-4">tendance vs {compareYear}</span>
-    </div>
+    <CardSectionHeader
+      title="Top catégories"
+      meta={`tendance vs ${compareYear}`}
+    />
 
     <div className="mt-[18px] flex flex-col">
       <div className="mb-0.5 grid grid-cols-[14px_1fr_90px_80px] items-center gap-2.5 border-b border-line pb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ink-4">

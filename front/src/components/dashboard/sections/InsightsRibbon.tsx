@@ -7,6 +7,7 @@
 
 import { euro0 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { Overline } from "@components/shared/Overline";
 import { MONTHLY } from "@components/spendings/config/constants";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
 import useCharts from "@components/spendings/services/useCharts";
@@ -36,7 +37,7 @@ const Insight = ({
   <div className="flex items-start gap-3 bg-card px-4.5 py-3.5">
     <span className={cn("mt-0.5 grid size-7 shrink-0 place-items-center rounded-md", tone)}>{icon}</span>
     <div className="flex flex-col gap-0.5">
-      <span className="text-2xs font-medium uppercase tracking-caps text-ink-3">{label}</span>
+      <Overline className="text-ink-3">{label}</Overline>
       <span className="text-sm text-ink-2">{children}</span>
     </div>
   </div>

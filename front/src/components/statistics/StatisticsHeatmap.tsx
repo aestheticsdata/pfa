@@ -5,6 +5,7 @@
 // sober-streak and the exceptional-pic count are all derived from that same
 // generated pattern, so the card stays internally consistent.
 
+import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import getDayOfYear from "date-fns/getDayOfYear";
 
@@ -135,12 +136,14 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
       as="div"
       className="flex flex-col overflow-x-auto px-6 py-[22px]"
     >
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Carte de chaleur — quotidienne</h2>
-        <span className="text-[12px] text-ink-4">
-          {year} · {realizedDays} jours réalisés
-        </span>
-      </div>
+      <CardSectionHeader
+        title="Carte de chaleur — quotidienne"
+        meta={
+          <>
+            {year} · {realizedDays} jours réalisés
+          </>
+        }
+      />
 
       <div className="mt-[18px] min-w-[620px]">
         {/* month axis */}

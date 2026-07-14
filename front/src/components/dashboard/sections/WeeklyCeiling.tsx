@@ -3,6 +3,8 @@
 import EditGlyph from "@components/dashboard/EditGlyph";
 import { euro, euro0 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { CardSectionHeader } from "@components/shared/CardSectionHeader";
+import { EmptyState } from "@components/shared/EmptyState";
 import useWeeklyStatsHelper from "@components/spendings/helpers/useWeeklyStatsHelper";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
@@ -76,40 +78,43 @@ const WeeklyCeiling = () => {
 
   return (
     <section className="pfa-card flex flex-col gap-4 px-6 py-5">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold tracking-normal text-ink">Plafond hebdomadaire</h2>
-        {!editing ? (
-          <button
-            type="button"
-            disabled={!canEdit}
-            onClick={() => canEdit && setEditing(true)}
-            className={cn(
-              "group inline-flex items-center gap-1 border-b border-dashed pb-px text-xs transition-colors",
-              canEdit ? "border-ink-4 text-ink-2 hover:border-accent-strong" : "border-transparent opacity-50",
-            )}
-            title="Modifier le plafond"
-          >
-            <span className="num">{euro0(ceiling)} €/sem.</span>
-            {canEdit && <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />}
-          </button>
-        ) : (
-          <form
-            key={ceiling}
-            onBlur={closeIfLeft}
-            onSubmit={handleSubmit(onSubmit)}
-          >
-            <Input
-              defaultValue={ceiling}
-              className="num h-7 w-24 border-accent-d bg-background text-ink"
-              onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-                if (e.key === "Escape") setEditing(false);
-              }}
-              autoFocus
-              {...register("initialCeiling")}
-            />
-          </form>
-        )}
-      </div>
+      <CardSectionHeader
+        title="Plafond hebdomadaire"
+        className="items-center"
+        action={
+          !editing ? (
+            <button
+              type="button"
+              disabled={!canEdit}
+              onClick={() => canEdit && setEditing(true)}
+              className={cn(
+                "group inline-flex items-center gap-1 border-b border-dashed pb-px text-xs transition-colors",
+                canEdit ? "border-ink-4 text-ink-2 hover:border-accent-strong" : "border-transparent opacity-50",
+              )}
+              title="Modifier le plafond"
+            >
+              <span className="num">{euro0(ceiling)} €/sem.</span>
+              {canEdit && <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />}
+            </button>
+          ) : (
+            <form
+              key={ceiling}
+              onBlur={closeIfLeft}
+              onSubmit={handleSubmit(onSubmit)}
+            >
+              <Input
+                defaultValue={ceiling}
+                className="num h-7 w-24 border-accent-d bg-background text-ink"
+                onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                  if (e.key === "Escape") setEditing(false);
+                }}
+                autoFocus
+                {...register("initialCeiling")}
+              />
+            </form>
+          )
+        }
+      />
 
       <div className="flex flex-col">
         {stats.map((weekTotal, i) => {
@@ -155,7 +160,7 @@ const WeeklyCeiling = () => {
             </div>
           );
         })}
-        {stats.length === 0 && <div className="py-6 text-center text-xs text-ink-4">Pas encore de données.</div>}
+        {stats.length === 0 && <EmptyState>Pas encore de données.</EmptyState>}
       </div>
 
       <div className="flex items-center justify-between border-t border-line pt-3.5 text-xs text-ink-3">

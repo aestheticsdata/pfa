@@ -3,6 +3,7 @@
 // MOCK — there is no per-transaction / day-of-week aggregation endpoint, so
 // these weekly averages are illustrative sample values.
 
+import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 
 interface DayRow {
@@ -32,10 +33,10 @@ const StatisticsDayOfWeek = () => (
     as="section"
     className="px-6 py-[22px]"
   >
-    <div className="flex items-baseline justify-between gap-4">
-      <h2 className="text-[14px] font-medium tracking-[-0.01em] text-ink">Dépenses par jour de la semaine</h2>
-      <span className="text-[12px] text-ink-4">moyenne sur 12 mois</span>
-    </div>
+    <CardSectionHeader
+      title="Dépenses par jour de la semaine"
+      meta="moyenne sur 12 mois"
+    />
 
     <div className="mt-[18px] flex flex-col gap-2">
       {ROWS.map((row) => (

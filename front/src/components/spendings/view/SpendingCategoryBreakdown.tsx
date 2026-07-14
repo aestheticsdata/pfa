@@ -1,5 +1,6 @@
 "use client";
 
+import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import { WEEKLY } from "@components/spendings/config/constants";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
@@ -38,10 +39,11 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
 
   return (
     <section className="sp-catrep">
-      <div className="mb-4.5 flex items-baseline justify-between">
-        <h2 className="text-base font-semibold tracking-normal text-ink">Répartition par catégorie</h2>
-        <span className="text-xs text-ink-4">{rangeLabel} · semaine</span>
-      </div>
+      <CardSectionHeader
+        className="mb-4.5"
+        title="Répartition par catégorie"
+        meta={`${rangeLabel} · semaine`}
+      />
 
       <div className="sp-cat-bar mb-4.5">
         {rows.map((r) => (

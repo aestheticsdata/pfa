@@ -1,3 +1,4 @@
+import { Overline } from "@components/shared/Overline";
 import { FALLBACK_COLOR, getRandomHexColor } from "@components/spendings/common/spendingModal/helpers";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import { Label } from "@components/ui/label";
@@ -175,7 +176,7 @@ const CategoryField = ({
 
       {frequentCategories.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-2xs font-medium uppercase tracking-caps text-ink-4">Fréquentes</span>
+          <Overline className="mr-1">Fréquentes</Overline>
           {frequentCategories.map((c) => {
             const active = selectedCategory?.name === c.name;
             return (

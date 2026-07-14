@@ -1,5 +1,6 @@
 "use client";
 
+import { Overline } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
 import { cn } from "@lib/utils";
 import { Plus } from "lucide-react";
@@ -73,7 +74,7 @@ const ExceptionalFilters = ({
 
     {categories.length > 0 && (
       <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 text-[11px] font-medium uppercase tracking-[0.1em] text-ink-4">Catégorie</span>
+        <Overline className="mr-1">Catégorie</Overline>
         <button
           type="button"
           onClick={() => onSelectCategory(null)}

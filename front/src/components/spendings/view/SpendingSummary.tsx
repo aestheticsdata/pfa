@@ -1,5 +1,6 @@
 "use client";
 
+import { Overline } from "@components/shared/Overline";
 import { AnimatedNumber } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
@@ -49,7 +50,7 @@ interface SpendingSummaryProps {
 
 const Cell = ({ label, value, sub }: { label: string; value: ReactNode; sub: ReactNode }) => (
   <div className="bg-card px-5 py-4">
-    <span className="mb-2 block text-2xs font-medium uppercase tracking-caps text-ink-4">{label}</span>
+    <Overline className="mb-2 block">{label}</Overline>
     <div className="num text-2xl font-medium leading-none tracking-tight text-ink">{value}</div>
     <div className="mt-1.5 text-xs text-ink-3">{sub}</div>
   </div>
@@ -99,7 +100,7 @@ const SpendingSummary = ({
       {/* Hero — full-width banner on mobile, one equal-width cell (1/5) on desktop
           like the other four. Its font stays big; the four keep theirs too. */}
       <div className="col-span-2 bg-card px-5 py-4 min-[760px]:col-span-1">
-        <span className="mb-2 block text-2xs font-medium uppercase tracking-caps text-ink-4">Budget restant</span>
+        <Overline className="mb-2 block">Budget restant</Overline>
         <div
           className={cn(
             "num text-4xl font-medium leading-none tracking-tight min-[1100px]:text-5xl",

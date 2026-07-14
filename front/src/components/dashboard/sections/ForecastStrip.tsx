@@ -5,6 +5,7 @@
 
 import { euro0 } from "@components/dashboard/format";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { Overline } from "@components/shared/Overline";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
 import endOfMonth from "date-fns/endOfMonth";
@@ -40,9 +41,7 @@ const ForecastStrip = () => {
   return (
     <section className="pfa-card grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[200px_1fr_200px] sm:gap-8">
       <div className="flex flex-col gap-1">
-        <span className="text-2xs font-medium uppercase tracking-caps text-ink-4">
-          Dépensé · {format(asOf, "d MMM", { locale: fr })}
-        </span>
+        <Overline>Dépensé · {format(asOf, "d MMM", { locale: fr })}</Overline>
         <AnimatedNumber
           value={monthlyTotal}
           decimals={0}
@@ -93,7 +92,7 @@ const ForecastStrip = () => {
       </div>
 
       <div className="flex flex-col items-start gap-1 sm:items-end sm:text-right">
-        <span className="text-2xs font-medium uppercase tracking-caps text-ink-4">Projection fin de mois</span>
+        <Overline>Projection fin de mois</Overline>
         <AnimatedNumber
           value={projection}
           decimals={0}
