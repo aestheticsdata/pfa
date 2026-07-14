@@ -20,9 +20,6 @@ const buttonVariants = cva(
         muted: "border border-line bg-line/30 text-ink-2 hover:bg-line/50 hover:text-ink",
         ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
-        accent:
-          "bg-gradient-to-br from-cyan-600 to-blue-600 text-white shadow-lg shadow-cyan-500/20 hover:from-cyan-500 hover:to-blue-500",
-        cyan: "bg-cyan-600 text-white hover:bg-cyan-700 shadow-lg shadow-cyan-500/20",
         primary:
           "border-0 font-semibold text-[oklch(0.15_0.02_180)] shadow-primary [background:linear-gradient(100deg,oklch(0.84_0.14_148)_0%,oklch(0.82_0.13_175)_55%,oklch(0.80_0.12_210)_100%)] hover:brightness-[1.07] active:translate-y-px",
       },
