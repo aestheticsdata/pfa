@@ -7,6 +7,7 @@
 
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import { LegendItem } from "@components/shared/LegendItem";
 import getDayOfYear from "date-fns/getDayOfYear";
 
 interface StatisticsHeatmapProps {
@@ -205,13 +206,16 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
           </span>
           <span>210 €/j</span>
           <span className="flex-1" />
-          <span className="flex items-center gap-1.5">
-            <span
-              className="size-2.5 rounded-[2px]"
-              style={{ background: "var(--exc)" }}
-            />
+          <LegendItem
+            swatch={
+              <span
+                className="size-2.5 rounded-xs"
+                style={{ background: "var(--exc)" }}
+              />
+            }
+          >
             Pic exceptionnel
-          </span>
+          </LegendItem>
         </div>
       </div>
 

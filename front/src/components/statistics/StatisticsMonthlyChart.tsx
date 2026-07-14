@@ -8,6 +8,7 @@
 
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import { LegendItem } from "@components/shared/LegendItem";
 import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
 import useElementWidth from "@lib/dataviz/useElementWidth";
 import { euro0 } from "@lib/format";
@@ -125,29 +126,25 @@ const StatisticsMonthlyChart = ({
           <p className="mt-0.5 text-[12px] text-ink-4">{subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-[18px] text-[12px] text-ink-3">
-          <span className="inline-flex items-center gap-1.5">
-            <i className="inline-block size-2.5 rounded-[2px] bg-accent-strong" />
-            {year}
-          </span>
+          <LegendItem swatch={<i className="inline-block size-2.5 rounded-xs bg-accent-strong" />}>{year}</LegendItem>
           {showExceptionals && (
-            <span className="inline-flex items-center gap-1.5">
-              <i className="inline-block size-2.5 rounded-[2px] bg-exc" />
+            <LegendItem swatch={<i className="inline-block size-2.5 rounded-xs bg-exc" />}>
               Achat exceptionnel
-            </span>
+            </LegendItem>
           )}
           {compareEnabled && (
-            <span className="inline-flex items-center gap-1.5">
-              <DashSwatch
-                color="var(--accent-strong)"
-                opacity={0.85}
-              />
+            <LegendItem
+              swatch={
+                <DashSwatch
+                  color="var(--accent-strong)"
+                  opacity={0.85}
+                />
+              }
+            >
               {compareYear}
-            </span>
+            </LegendItem>
           )}
-          <span className="inline-flex items-center gap-1.5">
-            <DashSwatch color="var(--ink-3)" />
-            Budget mensuel
-          </span>
+          <LegendItem swatch={<DashSwatch color="var(--ink-3)" />}>Budget mensuel</LegendItem>
         </div>
       </div>
 

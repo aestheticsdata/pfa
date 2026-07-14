@@ -5,6 +5,7 @@
 
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import { MeterBar } from "@components/shared/MeterBar";
 
 interface DayRow {
   day: string;
@@ -24,7 +25,7 @@ const ROWS: DayRow[] = [
   { day: "Dimanche", width: 78, amount: "71,20 €", transactions: "4,4 transactions/j", weekend: true },
 ];
 
-const WEEKDAY_FILL = "linear-gradient(90deg, var(--accent-d), var(--accent-strong))";
+const WEEKDAY_FILL = "var(--bar-fill)";
 const WEEKEND_FILL = "linear-gradient(90deg, oklch(0.50 0.13 25), oklch(0.72 0.16 25))";
 
 /** "Dépenses par jour de la semaine" — weekly spending rhythm (MOCK). */
@@ -45,16 +46,12 @@ const StatisticsDayOfWeek = () => (
           className="grid grid-cols-[90px_1fr_130px] items-center gap-3 text-[13px]"
         >
           <span className={row.weekend ? "text-ink" : "text-ink-2"}>{row.day}</span>
-          <div className="h-[22px] overflow-hidden rounded-[4px] bg-surface-hi">
-            <span
-              className="block h-full rounded-[4px]"
-              style={{
-                width: `${row.width}%`,
-                background: row.weekend ? WEEKEND_FILL : WEEKDAY_FILL,
-                opacity: 0.85,
-              }}
-            />
-          </div>
+          <MeterBar
+            value={row.width}
+            fill={row.weekend ? WEEKEND_FILL : WEEKDAY_FILL}
+            height={22}
+            opacity={0.85}
+          />
           <span className="num text-right font-medium text-ink">
             {row.amount}
             <small className="block text-[10.5px] font-normal text-ink-4">{row.transactions}</small>
