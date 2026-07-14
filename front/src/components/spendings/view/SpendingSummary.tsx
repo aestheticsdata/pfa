@@ -22,7 +22,7 @@ const Amount = ({ value, unit = " €" }: { value: number; unit?: string }) => {
   return (
     <>
       {int}
-      <span className="text-[18px] font-normal text-ink-3">
+      <span className="text-lg font-normal text-ink-3">
         ,{dec}
         {unit}
       </span>
@@ -49,8 +49,8 @@ interface SpendingSummaryProps {
 
 const Cell = ({ label, value, sub }: { label: string; value: ReactNode; sub: ReactNode }) => (
   <div className="bg-card px-5 py-4">
-    <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</span>
-    <div className="num text-[24px] font-medium leading-none tracking-[-0.02em] text-ink">{value}</div>
+    <span className="mb-2 block text-2xs font-medium uppercase tracking-caps text-ink-4">{label}</span>
+    <div className="num text-2xl font-medium leading-none tracking-tight text-ink">{value}</div>
     <div className="mt-1.5 text-xs text-ink-3">{sub}</div>
   </div>
 );
@@ -95,22 +95,20 @@ const SpendingSummary = ({
     );
 
   return (
-    <section className="grid grid-cols-2 gap-px overflow-hidden rounded-[10px] border border-line-soft bg-line-soft min-[760px]:grid-cols-5">
+    <section className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line-soft bg-line-soft min-[760px]:grid-cols-5">
       {/* Hero — full-width banner on mobile, one equal-width cell (1/5) on desktop
           like the other four. Its font stays big; the four keep theirs too. */}
       <div className="col-span-2 bg-card px-5 py-4 min-[760px]:col-span-1">
-        <span className="mb-2 block text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">
-          Budget restant
-        </span>
+        <span className="mb-2 block text-2xs font-medium uppercase tracking-caps text-ink-4">Budget restant</span>
         <div
           className={cn(
-            "num text-[34px] font-medium leading-none tracking-[-0.02em] min-[1100px]:text-[46px]",
+            "num text-4xl font-medium leading-none tracking-tight min-[1100px]:text-5xl",
             over ? "text-neg" : "text-ink",
           )}
         >
           {over && "−"}
           <AnimatedNumber value={remainingIntValue} />
-          <span className="text-[18px] font-normal text-ink-3 min-[1100px]:text-[26px]">,{remainingDec} €</span>
+          <span className="text-lg font-normal text-ink-3 min-[1100px]:text-2xl">,{remainingDec} €</span>
         </div>
       </div>
       <Cell

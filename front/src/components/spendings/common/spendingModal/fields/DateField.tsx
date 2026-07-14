@@ -33,7 +33,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
     <div className="flex flex-col gap-2">
       <Label
         htmlFor="spendingDate"
-        className="text-[13px] text-ink-2"
+        className="text-sm text-ink-2"
       >
         Date
       </Label>

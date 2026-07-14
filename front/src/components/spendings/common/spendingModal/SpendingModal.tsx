@@ -179,13 +179,13 @@ const SpendingModal = ({
       onOpenChange={(isOpen) => !isOpen && closeModal()}
     >
       <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[480px]">
-        <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-[22px] py-[18px] text-left">
-          <DialogTitle className="pr-8 text-[15px] font-semibold tracking-[-0.01em] text-ink">{title}</DialogTitle>
+        <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-5.5 py-4.5 text-left">
+          <DialogTitle className="pr-8 text-base font-semibold tracking-normal text-ink">{title}</DialogTitle>
         </DialogHeader>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex max-h-[min(78vh,720px)] flex-col gap-[18px] overflow-y-auto px-[22px] py-[22px]"
+          className="flex max-h-[min(78vh,720px)] flex-col gap-4.5 overflow-y-auto px-5.5 py-5.5"
         >
           <DateField
             register={register}

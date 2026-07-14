@@ -39,7 +39,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
   return (
     <section className="sp-catrep">
       <div className="mb-4.5 flex items-baseline justify-between">
-        <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">Répartition par catégorie</h2>
+        <h2 className="text-base font-semibold tracking-normal text-ink">Répartition par catégorie</h2>
         <span className="text-xs text-ink-4">{rangeLabel} · semaine</span>
       </div>
 
@@ -65,12 +65,12 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
             className="sp-cat-row w-full text-left"
           >
             <span
-              className="size-2 rounded-[2px]"
+              className="size-2 rounded-xs"
               style={{ background: r.color }}
             />
             <span className="flex min-w-0 items-baseline gap-2">
               <span className="truncate capitalize text-ink">{r.name}</span>
-              <span className="num shrink-0 rounded-full border border-line-soft bg-background px-1.75 text-[10.5px] leading-[1.55] text-ink-3">
+              <span className="num shrink-0 rounded-full border border-line-soft bg-background px-1.75 text-2xs leading-normal text-ink-3">
                 {r.count}
               </span>
             </span>
