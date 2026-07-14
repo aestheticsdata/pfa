@@ -293,10 +293,10 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
               <div className="flex gap-2.5">
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="muted"
                   size="lg"
                   onClick={clearPending}
-                  className="flex-1 border-line bg-background text-base text-ink-2 hover:bg-surface-hi"
+                  className="flex-1 text-base"
                 >
                   Annuler
                 </Button>

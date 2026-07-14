@@ -1,8 +1,8 @@
 "use client";
 
+import { FilterChip } from "@components/shared/FilterChip";
 import { Overline } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
-import { cn } from "@lib/utils";
 import { Plus } from "lucide-react";
 
 interface CategoryChip {
@@ -21,18 +21,14 @@ interface ExceptionalFiltersProps {
 }
 
 const YearChip = ({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) => (
-  <button
-    type="button"
+  <FilterChip
+    active={active}
     onClick={onClick}
-    className={cn(
-      "inline-flex items-center rounded-full border px-3 py-1 text-xs transition-colors",
-      active
-        ? "border-exc/60 bg-exc/10 text-exc"
-        : "border-line bg-surface-hi text-ink-2 hover:bg-surface-hover hover:text-ink",
-    )}
+    accent="exc"
+    className="rounded-full px-3"
   >
     {label}
-  </button>
+  </FilterChip>
 );
 
 const ExceptionalFilters = ({
@@ -75,45 +71,30 @@ const ExceptionalFilters = ({
     {categories.length > 0 && (
       <div className="flex flex-wrap items-center gap-2">
         <Overline className="mr-1">Catégorie</Overline>
-        <button
-          type="button"
+        <FilterChip
+          active={activeCategory === null}
           onClick={() => onSelectCategory(null)}
-          className={cn(
-            "inline-flex items-center rounded-full border px-2.5 py-1 text-xs transition-colors",
-            activeCategory === null
-              ? "border-exc/60 bg-exc/10 text-exc"
-              : "border-line bg-surface-hi text-ink-2 hover:bg-surface-hover hover:text-ink",
-          )}
+          accent="exc"
+          className="rounded-full px-2.5"
         >
           Toutes
-        </button>
+        </FilterChip>
         {categories.map((cat) => {
           const active = activeCategory === cat.name;
           return (
-            <button
+            <FilterChip
               key={cat.name}
-              type="button"
+              active={active}
+              accentColor={cat.color}
               onClick={() => onSelectCategory(active ? null : cat.name)}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs capitalize transition-colors",
-                active ? "text-ink" : "border-line bg-surface-hi text-ink-2 hover:bg-surface-hover hover:text-ink",
-              )}
-              style={
-                active
-                  ? {
-                      borderColor: cat.color,
-                      backgroundColor: `${cat.color}1f`,
-                      color: cat.color,
-                    }
-                  : undefined
-              }
+              className="gap-1.5 rounded-full px-2.5 capitalize"
             >
               <span
                 className="size-[7px] shrink-0 rounded-[2px]"
                 style={{ backgroundColor: cat.color }}
               />
               {cat.name}
-            </button>
+            </FilterChip>
           );
         })}
       </div>

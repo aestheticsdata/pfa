@@ -1,5 +1,6 @@
 "use client";
 
+import { FilterChip } from "@components/shared/FilterChip";
 import { Overline } from "@components/shared/Overline";
 import { cn } from "@lib/utils";
 
@@ -30,15 +31,10 @@ const Chip = ({
   label: string;
   count: number;
 }) => (
-  <button
-    type="button"
+  <FilterChip
+    active={active}
     onClick={onClick}
-    className={cn(
-      "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs capitalize transition-colors",
-      active
-        ? "border-accent-d bg-accent-bg text-accent-strong"
-        : "border-line bg-surface-hi text-ink-2 hover:bg-surface-hover hover:text-ink",
-    )}
+    className="gap-1.5 rounded-lg px-2.5 capitalize"
   >
     {color && (
       <span
@@ -48,7 +44,7 @@ const Chip = ({
     )}
     {label}
     <span className={cn("num text-2xs", active ? "text-accent-strong/80" : "text-ink-4")}>{count}</span>
-  </button>
+  </FilterChip>
 );
 
 /**
