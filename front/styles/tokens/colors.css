@@ -42,7 +42,7 @@
 
   /* Surfaces (bg → foreground) */
   --bg:         oklch(0.14 0.042 234);
-  --bg-elev:    oklch(0.185 0.006 250);
+  --bg-elev:    oklch(0.205 0.006 250);
   --bg-hi:      oklch(0.215 0.007 250);
   --bg-hover:   oklch(0.22 0.006 250);
   --line:       oklch(0.27 0.008 250);
@@ -156,7 +156,9 @@
   --color-line-soft: var(--line-soft);
   --color-accent-strong: var(--accent-strong);
   --color-accent-d: var(--accent-d);
+  --color-accent-bg: var(--accent-bg);
   --color-neg: var(--neg);
   --color-exc: var(--exc);
+  --color-exc-bg: var(--exc-bg);
   --color-elec: var(--elec);
 }
