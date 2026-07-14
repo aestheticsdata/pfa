@@ -1,16 +1,7 @@
 "use client";
 
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@components/ui/alert-dialog";
+import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
 import parseISO from "date-fns/parseISO";
@@ -109,28 +100,12 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
         </span>
       </div>
 
-      <AlertDialog
+      <ConfirmDeleteDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
-      >
-        <AlertDialogContent className="border-line bg-surface-elev">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-ink">Supprimer {item.label}&nbsp;?</AlertDialogTitle>
-            <AlertDialogDescription className="text-ink-3">Cette action est irréversible.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-surface-hi">
-              Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={onDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={`Supprimer ${item.label} ?`}
+        onConfirm={onDelete}
+      />
     </>
   );
 };

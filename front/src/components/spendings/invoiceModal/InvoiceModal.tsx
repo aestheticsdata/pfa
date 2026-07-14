@@ -2,19 +2,10 @@
 
 import { useAuth } from "@auth/context/AuthContext";
 import Spinner from "@components/common/Spinner";
+import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { QUERY_KEYS } from "@components/spendings/config/constants";
 import texts from "@components/spendings/config/text";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@components/ui/alert-dialog";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
@@ -292,7 +283,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
               <button
                 type="button"
                 onClick={() => setShowConfirmDeleteImage(true)}
-                className="inline-flex items-center justify-center gap-2.5 rounded-lg border border-[oklch(0.55_0.15_25)] bg-[oklch(0.47_0.14_25)] px-4.5 py-3.5 text-base font-semibold text-[oklch(0.98_0.02_25)] transition-[filter] hover:brightness-110"
+                className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-danger-solid px-4.5 py-3.5 text-base font-semibold text-on-danger transition-[filter] hover:brightness-110"
               >
                 <Trash2 className="size-4" />
                 {invoiceModalTexts.delete}
@@ -373,31 +364,12 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
         />
       )}
 
-      <AlertDialog
+      <ConfirmDeleteDialog
         open={showConfirmDeleteImage}
         onOpenChange={setShowConfirmDeleteImage}
-      >
-        <AlertDialogContent className="border-line bg-surface-elev">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-ink">Supprimer la facture&nbsp;?</AlertDialogTitle>
-            <AlertDialogDescription className="text-ink-3">Cette action est irréversible.</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-surface-hi">
-              Annuler
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                deleteImage();
-                setShowConfirmDeleteImage(false);
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title={<>Supprimer la facture&nbsp;?</>}
+        onConfirm={deleteImage}
+      />
     </>
   );
 };

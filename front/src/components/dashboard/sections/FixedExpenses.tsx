@@ -109,11 +109,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
             return (
               <div
                 key={r.ID}
-                className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm"
-                style={{
-                  background: "color-mix(in oklch, var(--neg) 15%, var(--surface-elev))",
-                  border: "1px solid color-mix(in oklch, var(--neg) 55%, transparent)",
-                }}
+                className="flex items-center gap-2 rounded-md border border-danger-border-soft bg-danger-surface px-2.5 py-2 text-sm"
               >
                 <span className="flex-1 truncate text-ink">Supprimer&nbsp;?</span>
                 <button
@@ -129,7 +125,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                     deleteRecurring.mutate({ recurring: r });
                     setPendingDelete(null);
                   }}
-                  className="rounded bg-[oklch(0.6_0.23_25)] px-2 py-1 text-xs text-[oklch(0.99_0.01_25)]"
+                  className="rounded bg-danger-solid px-2 py-1 text-xs text-on-danger hover:brightness-110"
                 >
                   Confirmer
                 </button>
