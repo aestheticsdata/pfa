@@ -69,7 +69,7 @@ const CategoryBreakdown = () => {
   return (
     <section className="pfa-card flex max-h-137.5 min-h-80 flex-col gap-4 px-6 py-5">
       <div className="flex items-baseline justify-between">
-        <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">Répartition par catégorie</h2>
+        <h2 className="text-base font-semibold tracking-normal text-ink">Répartition par catégorie</h2>
         <span className="text-xs text-ink-4">{monthLabel} · part des variables</span>
       </div>
 
@@ -89,16 +89,16 @@ const CategoryBreakdown = () => {
                 key={row.name}
                 type="button"
                 onClick={() => setSelected(row.category)}
-                className="grid cursor-pointer grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line-soft px-1 py-3 text-left text-[13.5px] transition-colors last:border-b-0 hover:bg-bg-hi sm:grid-cols-[10px_minmax(0,1fr)_58px_84px_58px]"
+                className="grid cursor-pointer grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line-soft px-1 py-3 text-left text-sm transition-colors last:border-b-0 hover:bg-bg-hi sm:grid-cols-[10px_minmax(0,1fr)_58px_84px_58px]"
               >
                 <span
-                  className="size-2 rounded-[2px]"
+                  className="size-2 rounded-xs"
                   style={{ background: row.color }}
                 />
                 <span className="flex items-center gap-2 truncate">
                   <span className="truncate capitalize text-ink">{row.name}</span>
                   {row.count > 0 && (
-                    <span className="num shrink-0 rounded bg-bg-hi px-1.5 text-[10px] text-ink-4">{row.count}</span>
+                    <span className="num shrink-0 rounded bg-bg-hi px-1.5 text-2xs text-ink-4">{row.count}</span>
                   )}
                 </span>
                 <span className="num hidden text-right text-ink-2 sm:block">{pct1(row.pct)} %</span>
@@ -112,7 +112,7 @@ const CategoryBreakdown = () => {
           </div>
         </>
       ) : (
-        <div className="py-10 text-center text-[12.5px] text-ink-4">Aucune dépense ce mois.</div>
+        <div className="py-10 text-center text-xs text-ink-4">Aucune dépense ce mois.</div>
       )}
 
       {hover && (

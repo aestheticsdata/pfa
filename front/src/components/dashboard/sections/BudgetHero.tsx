@@ -81,21 +81,21 @@ const BudgetHero = () => {
     <section className="pfa-card flex flex-col px-7 py-6">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col">
-          <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-ink-3">
+          <span className="text-xs font-medium uppercase tracking-widest text-ink-3">
             {monthLabel} — budget restant
           </span>
           <div
             className={cn(
-              "num mt-3.5 text-[40px] font-medium leading-none tracking-[-0.025em] sm:text-[56px]",
+              "num mt-3.5 text-display font-medium leading-none tracking-tight sm:text-display-lg",
               over ? "text-neg" : "text-ink",
             )}
           >
             {over && "−"}
             {amountInt}
-            <span className="text-[26px] font-normal text-ink-3 sm:text-[36px]">,{amountDec} €</span>
+            <span className="text-2xl font-normal text-ink-3 sm:text-4xl">,{amountDec} €</span>
           </div>
 
-          <div className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13px] text-ink-3">
+          <div className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-ink-3">
             {!editing ? (
               <span className="inline-flex items-center gap-1.5">
                 sur
@@ -107,7 +107,7 @@ const BudgetHero = () => {
                   title="Modifier le montant initial"
                 >
                   <span className="num text-ink-2">{euro0(initialAmount)} €</span>
-                  <EditGlyph className="size-[11px] text-ink-4 transition-colors group-hover:text-accent-strong" />
+                  <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />
                 </button>
                 alloués
               </span>
@@ -159,20 +159,20 @@ const BudgetHero = () => {
             ariaLabel="Répartition du budget consommé"
           >
             <div>
-              <div className="num text-[32px] font-medium leading-none tracking-[-0.02em] text-ink">
+              <div className="num text-3xl font-medium leading-none tracking-tight text-ink">
                 {Math.round(animatedPct)}
-                <span className="text-[18px] text-ink-3">%</span>
+                <span className="text-lg text-ink-3">%</span>
               </div>
-              <div className="mt-0.5 text-[10px] uppercase tracking-widest text-ink-4">utilisé</div>
+              <div className="mt-0.5 text-2xs uppercase tracking-widest text-ink-4">utilisé</div>
             </div>
           </Donut>
-          <div className="flex gap-4 text-[11px] text-ink-3">
+          <div className="flex gap-4 text-2xs text-ink-3">
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-2 rounded-[2px] bg-accent-d" />
+              <span className="size-2 rounded-xs bg-accent-d" />
               Fixes <span className="num text-ink-2">{euro0(fixed)}</span>
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-2 rounded-[2px] bg-accent-strong" />
+              <span className="size-2 rounded-xs bg-accent-strong" />
               Variables <span className="num text-ink-2">{euro0(variable)}</span>
             </span>
           </div>

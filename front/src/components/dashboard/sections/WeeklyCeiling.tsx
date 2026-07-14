@@ -77,22 +77,20 @@ const WeeklyCeiling = () => {
   return (
     <section className="pfa-card flex flex-col gap-4 px-6 py-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-[15px] font-semibold tracking-[-0.01em] text-ink">Plafond hebdomadaire</h2>
+        <h2 className="text-base font-semibold tracking-normal text-ink">Plafond hebdomadaire</h2>
         {!editing ? (
           <button
             type="button"
             disabled={!canEdit}
             onClick={() => canEdit && setEditing(true)}
             className={cn(
-              "group inline-flex items-center gap-1 border-b border-dashed pb-px text-[12px] transition-colors",
+              "group inline-flex items-center gap-1 border-b border-dashed pb-px text-xs transition-colors",
               canEdit ? "border-ink-4 text-ink-2 hover:border-accent-strong" : "border-transparent opacity-50",
             )}
             title="Modifier le plafond"
           >
             <span className="num">{euro0(ceiling)} €/sem.</span>
-            {canEdit && (
-              <EditGlyph className="size-[11px] text-ink-4 transition-colors group-hover:text-accent-strong" />
-            )}
+            {canEdit && <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />}
           </button>
         ) : (
           <form
@@ -124,11 +122,11 @@ const WeeklyCeiling = () => {
             <div
               key={`${monthKey}-${weekLabel}`}
               className={cn(
-                "grid grid-cols-[52px_1fr_74px] items-center gap-3 border-b border-line-soft py-[11px] text-[13px] last:border-b-0",
+                "grid grid-cols-[52px_1fr_74px] items-center gap-3 border-b border-line-soft py-3 text-sm last:border-b-0",
                 current && "font-semibold",
               )}
             >
-              <span className="num text-[12px] text-ink-2">{slices[i] ?? `S${i + 1}`}</span>
+              <span className="num text-xs text-ink-2">{slices[i] ?? `S${i + 1}`}</span>
               <ProgressTrack
                 key={`${monthKey}-${weekLabel}-${weekTotal > 0 ? "d" : "e"}`}
                 value={weekTotal}
@@ -145,10 +143,10 @@ const WeeklyCeiling = () => {
                   {future ? "—" : `${euro(weekTotal)} €`}
                 </span>
                 {future ? (
-                  <span className="block text-[11px] text-ink-4">à venir</span>
+                  <span className="block text-2xs text-ink-4">à venir</span>
                 ) : (
                   ceiling > 0 && (
-                    <span className={cn("num block text-[11px]", delta > 0 ? "text-neg" : "text-accent-strong")}>
+                    <span className={cn("num block text-2xs", delta > 0 ? "text-neg" : "text-accent-strong")}>
                       {delta > 0 ? `+${euro0(delta)} €` : `${euro0(delta)} €`}
                     </span>
                   )
@@ -157,10 +155,10 @@ const WeeklyCeiling = () => {
             </div>
           );
         })}
-        {stats.length === 0 && <div className="py-6 text-center text-[12.5px] text-ink-4">Pas encore de données.</div>}
+        {stats.length === 0 && <div className="py-6 text-center text-xs text-ink-4">Pas encore de données.</div>}
       </div>
 
-      <div className="flex items-center justify-between border-t border-line pt-3.5 text-[12px] text-ink-3">
+      <div className="flex items-center justify-between border-t border-line pt-3.5 text-xs text-ink-3">
         <span>Moyenne hebdo</span>
         <span className="num text-ink">
           {euro(avg)} €
@@ -169,18 +167,18 @@ const WeeklyCeiling = () => {
       </div>
 
       {ceiling > 0 && (
-        <div className="flex flex-wrap items-center gap-2 text-[11.5px] text-ink-3">
+        <div className="flex flex-wrap items-center gap-2 text-2xs text-ink-3">
           <span className="inline-block h-2.5 w-0.5 rounded-sm bg-ink-2" />
           <span className="num">Plafond {euro0(ceiling)} €</span>
           <span className="text-ink-4">·</span>
           <span
-            className="inline-block size-2.5 rounded-[2px]"
+            className="inline-block size-2.5 rounded-xs"
             style={{ background: "var(--accent-strong)", opacity: 0.92 }}
           />
           dans le budget
           <span className="text-ink-4">·</span>
           <span
-            className="inline-block size-2.5 rounded-[2px]"
+            className="inline-block size-2.5 rounded-xs"
             style={{ background: "var(--neg)", opacity: 0.95 }}
           />
           dépassement

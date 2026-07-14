@@ -33,11 +33,11 @@ const Insight = ({
   label: string;
   children: ReactNode;
 }) => (
-  <div className="flex items-start gap-3 bg-card px-[18px] py-3.5">
-    <span className={cn("mt-0.5 grid size-7 shrink-0 place-items-center rounded-[7px]", tone)}>{icon}</span>
+  <div className="flex items-start gap-3 bg-card px-4.5 py-3.5">
+    <span className={cn("mt-0.5 grid size-7 shrink-0 place-items-center rounded-md", tone)}>{icon}</span>
     <div className="flex flex-col gap-0.5">
-      <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-3">{label}</span>
-      <span className="text-[13px] text-ink-2">{children}</span>
+      <span className="text-2xs font-medium uppercase tracking-caps text-ink-3">{label}</span>
+      <span className="text-sm text-ink-2">{children}</span>
     </div>
   </div>
 );
@@ -65,7 +65,7 @@ const InsightsRibbon = () => {
   const lastDayLabel = format(endOfMonth(monthRef), "d MMMM", { locale: fr });
 
   return (
-    <section className="grid grid-cols-1 gap-px overflow-hidden rounded-[10px] border border-line-soft bg-line-soft sm:grid-cols-3">
+    <section className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-line-soft bg-line-soft sm:grid-cols-3">
       <Insight
         tone="bg-accent-strong/10 text-accent-strong"
         icon={<TrendingUp className="size-3.5" />}
