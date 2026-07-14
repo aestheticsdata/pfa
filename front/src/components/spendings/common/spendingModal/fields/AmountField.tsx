@@ -1,4 +1,4 @@
-import { Label } from "@components/ui/label";
+import { FieldShell } from "@components/shared/FieldShell";
 
 import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
@@ -9,13 +9,11 @@ interface AmountFieldProps {
 }
 
 const AmountField = ({ register, errors }: AmountFieldProps) => (
-  <div className="flex flex-col gap-2">
-    <Label
-      htmlFor="spendingAmount"
-      className="text-sm text-ink-2"
-    >
-      Montant
-    </Label>
+  <FieldShell
+    label="Montant"
+    htmlFor="spendingAmount"
+    error={errors.spendingAmount?.message}
+  >
     <div className="flex items-baseline gap-2 rounded-md border border-line bg-background px-3 py-2.5 transition-colors focus-within:border-accent-d">
       <input
         id="spendingAmount"
@@ -26,8 +24,7 @@ const AmountField = ({ register, errors }: AmountFieldProps) => (
       />
       <span className="num text-sm text-ink-3">€</span>
     </div>
-    {errors.spendingAmount && <p className="text-xs text-neg">{errors.spendingAmount.message}</p>}
-  </div>
+  </FieldShell>
 );
 
 export default AmountField;
