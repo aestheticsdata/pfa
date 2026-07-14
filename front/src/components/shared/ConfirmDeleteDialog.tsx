@@ -55,9 +55,7 @@ const ConfirmDeleteDialog = ({
         <AlertDialogDescription className="text-ink-3">{description}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
-        <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-surface-hi">
-          {cancelLabel}
-        </AlertDialogCancel>
+        <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
         <AlertDialogAction
           onClick={onConfirm}
           className="bg-danger-solid text-on-danger hover:bg-danger-solid hover:brightness-110"

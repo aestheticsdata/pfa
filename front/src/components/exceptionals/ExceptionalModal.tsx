@@ -325,9 +325,8 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
           <DialogFooter className="gap-2.5 border-t border-line-soft pt-4 sm:gap-2.5">
             <Button
               type="button"
-              variant="outline"
+              variant="muted"
               onClick={closeModal}
-              className="border-line bg-background text-ink-2 hover:bg-surface-hi"
             >
               Annuler
             </Button>

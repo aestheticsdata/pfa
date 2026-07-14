@@ -262,7 +262,7 @@ const SpendingModal = ({
             // discard the entry the user is mid-creating.
             <Button
               type="button"
-              variant="outline"
+              variant="muted"
               onClick={() => {
                 if (!user) {
                   console.error("User is not available");
@@ -281,7 +281,6 @@ const SpendingModal = ({
                   },
                 });
               }}
-              className="border-line bg-background text-ink-2 hover:bg-surface-hi"
             >
               <Copy className="size-4" />
               Copier les dépenses fixes du mois précédent
@@ -291,9 +290,8 @@ const SpendingModal = ({
           <DialogFooter className="gap-2.5 border-t border-line-soft pt-4 sm:gap-2.5">
             <Button
               type="button"
-              variant="outline"
+              variant="muted"
               onClick={closeModal}
-              className="border-line bg-background text-ink-2 hover:bg-surface-hi"
             >
               Annuler
             </Button>
