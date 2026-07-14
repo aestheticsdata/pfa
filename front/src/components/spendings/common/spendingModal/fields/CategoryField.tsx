@@ -110,7 +110,7 @@ const CategoryField = ({
           </button>
         </PopoverTrigger>
         <PopoverContent
-          className="w-[--radix-popover-trigger-width] border-line bg-bg-elev p-0"
+          className="w-[--radix-popover-trigger-width] border-line bg-surface-elev p-0"
           align="start"
         >
           <Command className="bg-transparent">
@@ -187,7 +187,7 @@ const CategoryField = ({
                   "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs capitalize transition-colors",
                   active
                     ? "border-accent-d bg-accent-strong/10 text-ink"
-                    : "border-line bg-bg-hi text-ink-2 hover:text-ink",
+                    : "border-line bg-surface-hi text-ink-2 hover:text-ink",
                 )}
               >
                 <span

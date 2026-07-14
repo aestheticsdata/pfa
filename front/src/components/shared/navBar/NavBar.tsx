@@ -113,7 +113,7 @@ const NavBar = () => {
           type="button"
           onClick={() => setDrawerOpen(true)}
           aria-label="Ouvrir le menu"
-          className="grid size-[38px] flex-shrink-0 place-items-center rounded-[9px] border border-transparent text-ink-2 transition-colors hover:border-line hover:bg-bg-hi hover:text-ink lg:hidden"
+          className="grid size-[38px] flex-shrink-0 place-items-center rounded-[9px] border border-transparent text-ink-2 transition-colors hover:border-line hover:bg-surface-hi hover:text-ink lg:hidden"
         >
           <Menu className="size-5" />
         </button>
@@ -196,7 +196,7 @@ const NavBar = () => {
             type="button"
             onClick={() => setDrawerOpen(false)}
             aria-label="Fermer le menu"
-            className="grid size-9 place-items-center rounded-[9px] border border-transparent text-ink-3 transition-colors hover:border-line hover:bg-bg-hi hover:text-ink"
+            className="grid size-9 place-items-center rounded-[9px] border border-transparent text-ink-3 transition-colors hover:border-line hover:bg-surface-hi hover:text-ink"
           >
             <X className="size-5" />
           </button>

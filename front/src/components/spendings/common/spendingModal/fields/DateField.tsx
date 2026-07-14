@@ -48,7 +48,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
           aria-label="Jour précédent"
           onClick={() => stepDate(-1)}
           disabled={asRecurring}
-          className="grid place-items-center border-r border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-3"
+          className="grid place-items-center border-r border-line px-3 text-ink-3 transition-colors hover:bg-surface-hi hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-3"
         >
           <ChevronLeft className="size-4" />
         </button>
@@ -64,7 +64,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
           aria-label="Jour suivant"
           onClick={() => stepDate(1)}
           disabled={asRecurring}
-          className="grid place-items-center border-l border-line px-3 text-ink-3 transition-colors hover:bg-bg-hi hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-3"
+          className="grid place-items-center border-l border-line px-3 text-ink-3 transition-colors hover:bg-surface-hi hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-3"
         >
           <ChevronRight className="size-4" />
         </button>

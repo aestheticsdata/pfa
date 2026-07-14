@@ -146,7 +146,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
       open={open}
       onOpenChange={(isOpen) => !isOpen && closeModal()}
     >
-      <DialogContent className="gap-0 overflow-hidden border-line bg-bg-elev p-0 sm:max-w-[440px]">
+      <DialogContent className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[440px]">
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-[22px] py-[18px] text-left">
           <DialogTitle className="pr-8 text-[15px] font-semibold tracking-[-0.01em] text-ink">
             {isEditing ? "Modifier l'achat exceptionnel" : "Nouvel achat exceptionnel"}
@@ -253,7 +253,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                 </button>
               </PopoverTrigger>
               <PopoverContent
-                className="w-[--radix-popover-trigger-width] border-line bg-bg-elev p-0"
+                className="w-[--radix-popover-trigger-width] border-line bg-surface-elev p-0"
                 align="start"
               >
                 <Command className="bg-transparent">
@@ -326,7 +326,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
               type="button"
               variant="outline"
               onClick={closeModal}
-              className="border-line bg-background text-ink-2 hover:bg-bg-hi"
+              className="border-line bg-background text-ink-2 hover:bg-surface-hi"
             >
               Annuler
             </Button>

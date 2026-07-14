@@ -44,7 +44,7 @@ const UserMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="group flex cursor-pointer items-center gap-2.5 rounded-[8px] outline-hidden">
-        <span className="grid size-[30px] flex-shrink-0 place-items-center rounded-full border border-line bg-bg-hi text-[11px] font-medium text-ink-2">
+        <span className="grid size-[30px] flex-shrink-0 place-items-center rounded-full border border-line bg-surface-hi text-[11px] font-medium text-ink-2">
           {initialsFromEmail(user?.email)}
         </span>
         <span className="hidden max-w-[200px] truncate text-[13px] text-ink-2 xl:inline">{user?.email}</span>

@@ -113,13 +113,13 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
       >
-        <AlertDialogContent className="border-line bg-bg-elev">
+        <AlertDialogContent className="border-line bg-surface-elev">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-ink">Supprimer {item.label}&nbsp;?</AlertDialogTitle>
             <AlertDialogDescription className="text-ink-3">Cette action est irréversible.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-bg-hi">
+            <AlertDialogCancel className="border-line bg-background text-ink-2 hover:bg-surface-hi">
               Annuler
             </AlertDialogCancel>
             <AlertDialogAction

@@ -21,7 +21,7 @@ const fmt = (v: number) =>
   });
 
 const Kpi = ({ label, value, sub }: { label: string; value: ReactNode; sub: ReactNode }) => (
-  <div className="rounded-[14px] border border-line-soft bg-bg-elev px-5 py-[18px]">
+  <div className="rounded-[14px] border border-line-soft bg-surface-elev px-5 py-[18px]">
     <div className="text-[11px] font-medium uppercase tracking-[0.08em] text-ink-4">{label}</div>
     <div className="num mt-2 text-[26px] font-medium tracking-[-0.02em] text-ink">{value}</div>
     <div className="mt-1 text-xs text-ink-3">{sub}</div>

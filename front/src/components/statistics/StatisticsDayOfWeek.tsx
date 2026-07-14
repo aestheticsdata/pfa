@@ -44,7 +44,7 @@ const StatisticsDayOfWeek = () => (
           className="grid grid-cols-[90px_1fr_130px] items-center gap-3 text-[13px]"
         >
           <span className={row.weekend ? "text-ink" : "text-ink-2"}>{row.day}</span>
-          <div className="h-[22px] overflow-hidden rounded-[4px] bg-bg-hi">
+          <div className="h-[22px] overflow-hidden rounded-[4px] bg-surface-hi">
             <span
               className="block h-full rounded-[4px]"
               style={{

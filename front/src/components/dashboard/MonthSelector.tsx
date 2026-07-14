@@ -31,7 +31,7 @@ const MonthSelector = () => {
 
   return (
     <div className="flex items-center gap-2.5">
-      <div className="flex items-center gap-1.5 rounded-sm border border-line bg-bg-elev px-2.5 py-2 text-sm text-ink-2">
+      <div className="flex items-center gap-1.5 rounded-sm border border-line bg-surface-elev px-2.5 py-2 text-sm text-ink-2">
         <Calendar className="size-3.5 text-ink-4" />
         <button
           type="button"

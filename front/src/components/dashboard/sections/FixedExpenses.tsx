@@ -70,7 +70,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
           type="button"
           onClick={addSpending}
           aria-label="Ajouter une dépense fixe"
-          className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-bg-hi text-ink-2 transition-colors hover:border-accent-d hover:text-ink"
+          className="grid size-8 shrink-0 place-items-center rounded-lg border border-line bg-surface-hi text-ink-2 transition-colors hover:border-accent-d hover:text-ink"
         >
           <Plus className="size-4" />
         </button>
@@ -94,7 +94,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
       </div>
 
       {upcoming.length > 0 && (
-        <div className="flex items-center justify-between gap-3 rounded-lg border border-line-soft bg-bg-hi px-3 py-2.5 text-xs text-ink-3">
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-line-soft bg-surface-hi px-3 py-2.5 text-xs text-ink-3">
           <span>À venir d&apos;ici le {format(month.end, "d MMMM", { locale: fr })}</span>
           <span className="text-ink-2">
             <span className="num font-semibold text-accent-strong">{upcoming.length}</span> prélèvements ·{" "}
@@ -111,7 +111,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                 key={r.ID}
                 className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm"
                 style={{
-                  background: "color-mix(in oklch, var(--neg) 15%, var(--bg-elev))",
+                  background: "color-mix(in oklch, var(--neg) 15%, var(--surface-elev))",
                   border: "1px solid color-mix(in oklch, var(--neg) 55%, transparent)",
                 }}
               >
@@ -119,7 +119,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                 <button
                   type="button"
                   onClick={() => setPendingDelete(null)}
-                  className="rounded border border-line bg-bg-hi px-2 py-1 text-xs text-ink-2 hover:text-ink"
+                  className="rounded border border-line bg-surface-hi px-2 py-1 text-xs text-ink-2 hover:text-ink"
                 >
                   Annuler
                 </button>
@@ -159,7 +159,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                       "grid size-6 place-items-center rounded border border-line",
                       hasInvoice(r)
                         ? "bg-accent-strong text-[oklch(0.18_0.01_148)]"
-                        : "bg-bg-hi text-ink-3 hover:text-ink",
+                        : "bg-surface-hi text-ink-3 hover:text-ink",
                     )}
                   >
                     <ImageIcon className="size-3" />
@@ -168,7 +168,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                     type="button"
                     onClick={() => editSpending(r)}
                     title="Modifier"
-                    className="grid size-6 place-items-center rounded border border-line bg-bg-hi text-ink-3 hover:text-ink"
+                    className="grid size-6 place-items-center rounded border border-line bg-surface-hi text-ink-3 hover:text-ink"
                   >
                     <Pencil className="size-3" />
                   </button>
@@ -176,7 +176,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                     type="button"
                     onClick={() => setPendingDelete(r.ID)}
                     title="Supprimer"
-                    className="grid size-6 place-items-center rounded border border-line bg-bg-hi text-ink-3 hover:text-neg"
+                    className="grid size-6 place-items-center rounded border border-line bg-surface-hi text-ink-3 hover:text-neg"
                   >
                     <Trash2 className="size-3" />
                   </button>

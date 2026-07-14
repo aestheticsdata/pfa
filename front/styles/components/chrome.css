@@ -33,7 +33,7 @@
   border: 1px solid transparent;
   border-radius: var(--r-lg);
   background:
-    linear-gradient(var(--bg-elev), var(--bg-elev)) padding-box,
+    linear-gradient(var(--surface-elev), var(--surface-elev)) padding-box,
     linear-gradient(
         165deg,
         oklch(0.7 0.09 200 / 0.32) 0%,
@@ -58,7 +58,7 @@
   transform: scale(1.025);
   z-index: 1;
   background:
-    linear-gradient(var(--bg-hi), var(--bg-hi)) padding-box,
+    linear-gradient(var(--surface-hi), var(--surface-hi)) padding-box,
     linear-gradient(
         165deg,
         oklch(0.74 0.12 200 / 0.65) 0%,

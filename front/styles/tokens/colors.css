@@ -42,9 +42,9 @@
 
   /* Surfaces (bg → foreground) */
   --bg:         oklch(0.14 0.042 234);
-  --bg-elev:    oklch(0.205 0.006 250);
-  --bg-hi:      oklch(0.215 0.007 250);
-  --bg-hover:   oklch(0.22 0.006 250);
+  --surface-elev:    oklch(0.205 0.006 250);
+  --surface-hi:      oklch(0.215 0.007 250);
+  --surface-hover:   oklch(0.22 0.006 250);
   --line:       oklch(0.27 0.008 250);
   --line-soft:  oklch(0.20 0.006 250);
 
@@ -69,17 +69,17 @@
   /* ===== shadcn semantic tokens remapped onto the pfa palette ===== */
   --background: var(--bg);
   --foreground: var(--ink);
-  --card: var(--bg-elev);
+  --card: var(--surface-elev);
   --card-foreground: var(--ink);
-  --popover: var(--bg-elev);
+  --popover: var(--surface-elev);
   --popover-foreground: var(--ink);
   --primary: var(--accent-strong);
   --primary-foreground: oklch(0.18 0.01 148);
-  --secondary: var(--bg-hi);
+  --secondary: var(--surface-hi);
   --secondary-foreground: var(--ink);
-  --muted: var(--bg-hi);
+  --muted: var(--surface-hi);
   --muted-foreground: var(--ink-3);
-  --accent: var(--bg-hover);
+  --accent: var(--surface-hover);
   --accent-foreground: var(--ink);
   --destructive: var(--neg);
   --destructive-foreground: oklch(0.15 0.01 25);
@@ -94,11 +94,11 @@
   --chart-4: var(--exc);
   --chart-5: var(--neg);
 
-  --sidebar: var(--bg-elev);
+  --sidebar: var(--surface-elev);
   --sidebar-foreground: var(--ink);
   --sidebar-primary: var(--accent-strong);
   --sidebar-primary-foreground: oklch(0.15 0.02 180);
-  --sidebar-accent: var(--bg-hover);
+  --sidebar-accent: var(--surface-hover);
   --sidebar-accent-foreground: var(--ink);
   --sidebar-border: var(--line);
   --sidebar-ring: var(--accent-d);
@@ -149,9 +149,9 @@
   --color-ink-3: var(--ink-3);
   --color-ink-4: var(--ink-4);
   --color-ink-5: var(--ink-5);
-  --color-bg-elev: var(--bg-elev);
-  --color-bg-hi: var(--bg-hi);
-  --color-bg-hover: var(--bg-hover);
+  --color-surface-elev: var(--surface-elev);
+  --color-surface-hi: var(--surface-hi);
+  --color-surface-hover: var(--surface-hover);
   --color-line: var(--line);
   --color-line-soft: var(--line-soft);
   --color-accent-strong: var(--accent-strong);

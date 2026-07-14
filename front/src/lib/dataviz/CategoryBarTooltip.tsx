@@ -103,7 +103,7 @@ const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
         minWidth: 172,
         maxWidth: 240,
         padding: "10px 12px",
-        background: "color-mix(in oklch, var(--bg-elev, oklch(0.185 0.006 250)) 92%, transparent)",
+        background: "color-mix(in oklch, var(--surface-elev, oklch(0.185 0.006 250)) 92%, transparent)",
         border: "1px solid var(--line, oklch(0.27 0.008 250))",
         borderRadius: "var(--r-md, 10px)",
         boxShadow: "0 16px 40px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.05)",
