@@ -23,7 +23,8 @@ currently contains **zero raw Tailwind palette colours** — keep it that way. A
 listed in §10, and they're narrow.
 
 **Tokens are cheap; make one.** When you face a real design decision — a colour, a radius, a
-tracking, an elevation — add a well-named token rather than an ad-hoc value. Many good tokens beat
+tracking, an elevation — add a well-named token rather than an ad-hoc value. (A *new family* also
+needs adding to the Claude Design safelist — see §13.) Many good tokens beat
 scattered literals. Don't argue "avoid token proliferation"; that's not this project's failure mode.
 
 **No `@apply` to bundle utilities.** Don't extract a repeated cluster of utility classes into a CSS
@@ -494,6 +495,17 @@ Code in this repo and run `/design-sync` — it does the rest.
 `noEmit: true`, so the two things the publisher needs don't exist. The script manufactures both from
 this source — a `.d.ts` tree (the API contract the design agent codes against) and a compiled,
 dark-by-default stylesheet. It's wired as the publisher's `buildCmd`, which is what actually calls it.
+
+### Adding a token? Add it to the safelist too
+
+The published bundle ships **static, pre-compiled CSS**. Tailwind only emits a class it has *seen*, so
+a token family the app doesn't already use resolves to **nothing** in Claude Design — silently, with no
+error, the design just renders unstyled. So when you add a family to `tokens/colors.css` (§1 says tokens
+are cheap — keep making them), mirror it in the `@source inline(...)` block of
+`front/.design-sync/ds-styles.src.css`. Same for a new spacing/sizing step.
+
+Running `/design-sync` will normally catch this (it's the first rule in `NOTES.md`), but it's a
+one-line edit and cheaper to do while you're already in the tokens file.
 
 Everything else lives in `front/.design-sync/` — **read `NOTES.md` there before touching any of it.**
 Several of those choices look wrong and are load-bearing (relative imports in `ds-entry.tsx`, an
