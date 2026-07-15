@@ -4,6 +4,7 @@ import useCredentials from "@auth/helpers/useCredentials";
 import useLoginService from "@auth/useLoginService";
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
+import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
 import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
 import Link from "next/link";
 import { useState } from "react";
@@ -56,15 +57,11 @@ export default function LoginFormClient() {
         </Link>
       </div>
 
-      <div className="mt-5 flex justify-center gap-1.5 border-t border-white/[0.07] pt-4.5 text-xs text-ink-3">
-        Pas encore de compte ?{" "}
-        <Link
-          href="/signup"
-          className="font-medium text-[oklch(0.82_0.12_165)] hover:underline"
-        >
-          Créer un compte
-        </Link>
-      </div>
+      <AuthSwitchLink
+        prompt="Pas encore de compte ?"
+        href="/signup"
+        label="Créer un compte"
+      />
     </AuthCard>
   );
 }

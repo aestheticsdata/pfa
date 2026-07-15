@@ -1,14 +1,14 @@
 "use client";
 
 import { overlineClass } from "@components/shared/Overline";
+import { authInputClass } from "@components/shared/sharedLoginForm/authInputClass";
+import { PasswordField } from "@components/shared/sharedLoginForm/PasswordField";
 import { Button } from "@components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@lib/utils";
 import currencyCodes from "@src/currency-codes.json";
 import getSymbolFromCurrency from "currency-symbol-map";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -28,8 +28,6 @@ const buildSchema = (needEmail: boolean, needPassword: boolean, needConfirm: boo
     });
 
 const LABEL = overlineClass;
-const INPUT_BASE =
-  "w-full rounded-sm border px-3.5 py-3 text-sm text-ink outline-none transition [background:oklch(0.12_0.008_250/0.75)] border-[oklch(0.30_0.010_250)] placeholder:text-ink-4 focus:border-[oklch(0.65_0.11_175)] focus:[background:oklch(0.13_0.008_250)] focus:shadow-[0_0_0_3px_oklch(0.65_0.11_175/0.15)] aria-invalid:border-neg";
 
 /**
  * Single shared message slot for the auth forms. Always rendered — it reserves one
@@ -57,9 +55,6 @@ const SharedLoginForm = ({
   serverError,
   onDismissError,
 }: SharedLoginFormProps) => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-
   const schema = buildSchema(
     !!displayEmailField,
     !!displayPasswordField,
@@ -117,7 +112,7 @@ const SharedLoginForm = ({
             type="email"
             placeholder="vous@example.com"
             autoComplete="email"
-            className={INPUT_BASE}
+            className={authInputClass}
             aria-invalid={!!errors.email}
             {...register("email", { onChange: clearFieldError("email") })}
           />
@@ -125,67 +120,23 @@ const SharedLoginForm = ({
       )}
 
       {displayPasswordField && (
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="password"
-            className={LABEL}
-          >
-            Mot de passe
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              placeholder="••••••••"
-              autoComplete={displayConfirmPasswordField ? "new-password" : "current-password"}
-              className={cn(INPUT_BASE, "pr-10.5")}
-              aria-invalid={!!errors.password}
-              {...register("password", { onChange: clearFieldError("password") })}
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((p) => !p)}
-              className="absolute right-[7px] top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-md text-ink-4 transition-colors hover:bg-white/[0.06] hover:text-ink-2"
-              tabIndex={-1}
-              aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-            >
-              {showPassword ? <EyeOff className="size-[15px]" /> : <Eye className="size-[15px]" />}
-            </button>
-          </div>
-        </div>
+        <PasswordField
+          id="password"
+          label="Mot de passe"
+          autoComplete={displayConfirmPasswordField ? "new-password" : "current-password"}
+          invalid={!!errors.password}
+          registration={register("password", { onChange: clearFieldError("password") })}
+        />
       )}
 
       {displayConfirmPasswordField && (
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="confirmPassword"
-            className={LABEL}
-          >
-            Confirmer le mot de passe
-          </label>
-          <div className="relative">
-            <input
-              id="confirmPassword"
-              type={showConfirm ? "text" : "password"}
-              placeholder="••••••••"
-              autoComplete="new-password"
-              className={cn(INPUT_BASE, "pr-10.5")}
-              aria-invalid={!!errors.confirmPassword}
-              {...register("confirmPassword", {
-                onChange: clearFieldError("confirmPassword"),
-              })}
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm((p) => !p)}
-              className="absolute right-[7px] top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-md text-ink-4 transition-colors hover:bg-white/[0.06] hover:text-ink-2"
-              tabIndex={-1}
-              aria-label={showConfirm ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-            >
-              {showConfirm ? <EyeOff className="size-[15px]" /> : <Eye className="size-[15px]" />}
-            </button>
-          </div>
-        </div>
+        <PasswordField
+          id="confirmPassword"
+          label="Confirmer le mot de passe"
+          autoComplete="new-password"
+          invalid={!!errors.confirmPassword}
+          registration={register("confirmPassword", { onChange: clearFieldError("confirmPassword") })}
+        />
       )}
 
       {displayCurrencyField && (
