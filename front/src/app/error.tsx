@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@components/ui/button";
 import { useEffect } from "react";
 
 interface ErrorPageProps {
@@ -13,34 +14,32 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
   }, [error]);
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 px-4 py-16">
-      <div className="mx-auto flex max-w-2xl flex-col items-center rounded-xl border border-slate-400/20 bg-slate-900/50 p-8 text-slate-100 shadow-2xl backdrop-blur-sm">
-        <p className="mb-2 text-xs uppercase tracking-[0.22em] text-amber-300">Application Error</p>
+    <div className="min-h-screen w-full bg-bg px-4 py-16">
+      <div className="mx-auto flex max-w-2xl flex-col items-center rounded-xl border border-line bg-surface-elev p-8 text-ink shadow-card backdrop-blur-sm">
+        <p className="mb-2 text-xs uppercase tracking-[0.22em] text-neg">Application Error</p>
         <h1 className="mb-4 text-center text-3xl font-bold">Something went wrong</h1>
-        <p className="mb-8 text-center text-sm text-slate-300">
+        <p className="mb-8 text-center text-sm text-ink-3">
           The page failed to load. You can retry now or go back to the dashboard.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-3">
-          <button
+          <Button
             type="button"
+            variant="primary"
             onClick={reset}
-            className="rounded-sm bg-emerald-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-emerald-400"
           >
             Retry
-          </button>
-          <a
-            href="/dashboard"
-            className="rounded-sm border border-slate-300/50 px-4 py-2 text-sm font-semibold text-slate-100 hover:bg-slate-100 hover:text-slate-900"
+          </Button>
+          <Button
+            variant="muted"
+            asChild
           >
-            Back to dashboard
-          </a>
+            <a href="/dashboard">Back to dashboard</a>
+          </Button>
         </div>
 
         {process.env.NODE_ENV !== "production" && (
-          <pre className="mt-6 w-full overflow-auto rounded-sm bg-slate-950 p-3 text-xs text-rose-300">
-            {error.message}
-          </pre>
+          <pre className="mt-6 w-full overflow-auto rounded-sm bg-bg p-3 text-xs text-neg">{error.message}</pre>
         )}
       </div>
     </div>
