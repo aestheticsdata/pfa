@@ -1,0 +1,215 @@
+{
+  "projectId": "aba2a406-a3d0-41e5-ab59-3481c4a782ba",
+  "shape": "package",
+  "pkg": "pfa-next",
+  "globalName": "PfaDS",
+  "entry": "./.design-sync/ds-entry.tsx",
+  "srcDir": "src",
+  "tsconfig": "tsconfig.json",
+  "componentSrcMap": {
+    "AlertDialog": "src/components/ui/alert-dialog.tsx",
+    "AlertDialogAction": null,
+    "AlertDialogCancel": null,
+    "AlertDialogContent": null,
+    "AlertDialogDescription": null,
+    "AlertDialogFooter": null,
+    "AlertDialogHeader": null,
+    "AlertDialogOverlay": null,
+    "AlertDialogPortal": null,
+    "AlertDialogTitle": null,
+    "AlertDialogTrigger": null,
+    "Badge": "src/components/ui/badge.tsx",
+    "Button": "src/components/ui/button.tsx",
+    "CardSectionHeader": "src/components/shared/CardSectionHeader.tsx",
+    "CardTitle": "src/components/shared/CardSectionHeader.tsx",
+    "CategoryComponent": "src/components/common/Category.tsx",
+    "Checkbox": "src/components/ui/checkbox.tsx",
+    "Command": "src/components/ui/command.tsx",
+    "CommandEmpty": null,
+    "CommandGroup": null,
+    "CommandInput": null,
+    "CommandItem": null,
+    "CommandList": null,
+    "CommandSeparator": null,
+    "CommandShortcut": null,
+    "ConfirmDeleteDialog": "src/components/shared/ConfirmDeleteDialog.tsx",
+    "Dialog": "src/components/ui/dialog.tsx",
+    "DialogClose": null,
+    "DialogContent": null,
+    "DialogDescription": null,
+    "DialogFooter": null,
+    "DialogHeader": null,
+    "DialogOverlay": null,
+    "DialogPortal": null,
+    "DialogTitle": null,
+    "DialogTrigger": null,
+    "DividedStrip": "src/components/shared/DividedStrip.tsx",
+    "DropdownMenu": "src/components/ui/dropdown-menu.tsx",
+    "DropdownMenuCheckboxItem": null,
+    "DropdownMenuContent": null,
+    "DropdownMenuGroup": null,
+    "DropdownMenuItem": null,
+    "DropdownMenuLabel": null,
+    "DropdownMenuPortal": null,
+    "DropdownMenuRadioGroup": null,
+    "DropdownMenuRadioItem": null,
+    "DropdownMenuSeparator": null,
+    "DropdownMenuShortcut": null,
+    "DropdownMenuSub": null,
+    "DropdownMenuSubContent": null,
+    "DropdownMenuSubTrigger": null,
+    "DropdownMenuTrigger": null,
+    "Dropzone": "src/components/shared/Dropzone.tsx",
+    "EmptyState": "src/components/shared/EmptyState.tsx",
+    "ExportButton": "src/components/shared/ExportButton.tsx",
+    "FieldShell": "src/components/shared/FieldShell.tsx",
+    "FilterChip": "src/components/shared/FilterChip.tsx",
+    "GlowCard": "src/components/shared/GlowCard.tsx",
+    "IconButton": "src/components/shared/IconButton.tsx",
+    "Input": "src/components/ui/input.tsx",
+    "Label": "src/components/ui/label.tsx",
+    "LegendItem": "src/components/shared/LegendItem.tsx",
+    "Logo": "src/components/shared/brand/Logo.tsx",
+    "MeterBar": "src/components/shared/MeterBar.tsx",
+    "MoneyAmount": "src/components/shared/MoneyAmount.tsx",
+    "Overline": "src/components/shared/Overline.tsx",
+    "PasswordField": "src/components/shared/sharedLoginForm/PasswordField.tsx",
+    "Popover": "src/components/ui/popover.tsx",
+    "PopoverAnchor": null,
+    "PopoverContent": null,
+    "PopoverTrigger": null,
+    "Progress": "src/components/ui/progress.tsx",
+    "ScrollArea": "src/components/ui/scroll-area.tsx",
+    "ScrollBar": "src/components/ui/scroll-area.tsx",
+    "Select": "src/components/ui/select.tsx",
+    "SelectContent": null,
+    "SelectGroup": null,
+    "SelectItem": null,
+    "SelectLabel": null,
+    "SelectScrollDownButton": null,
+    "SelectScrollUpButton": null,
+    "SelectSeparator": null,
+    "SelectTrigger": null,
+    "SelectValue": null,
+    "Separator": "src/components/ui/separator.tsx",
+    "Skeleton": "src/components/ui/skeleton.tsx",
+    "StatTile": "src/components/shared/StatTile.tsx",
+    "Switch": "src/components/ui/switch.tsx",
+    "Tabs": "src/components/ui/tabs.tsx",
+    "TabsContent": null,
+    "TabsList": null,
+    "TabsTrigger": null,
+    "TextInput": "src/components/shared/TextInput.tsx",
+    "Toaster": "src/components/ui/sonner.tsx",
+    "Tooltip": "src/components/ui/tooltip.tsx",
+    "TooltipContent": null,
+    "TooltipProvider": null,
+    "TooltipTrigger": null,
+    "Spinner": null
+  },
+  "cssEntry": ".design-sync/.cache/pfa-styles.css",
+  "docsDir": ".design-sync/docs",
+  "libOverrides": {
+    "source-kit.mjs": "src/ dirs are code organization here, not design taxonomy — group from docs frontmatter instead"
+  },
+  "buildCmd": "node .design-sync/prepare.mjs",
+  "dtsPropsFor": {
+    "TextInput": "  /** Allows getting a ref to the underlying input. */\n  ref?: React.Ref;\n  className?: string;\n  id?: string;\n  style?: CSSProperties;"
+  },
+  "readmeHeader": ".design-sync/conventions.md",
+  "overrides": {
+    "Dialog": {
+      "cardMode": "single",
+      "viewport": "760x480"
+    },
+    "AlertDialog": {
+      "cardMode": "single",
+      "viewport": "760x480"
+    },
+    "ConfirmDeleteDialog": {
+      "cardMode": "single",
+      "viewport": "760x480"
+    },
+    "DropdownMenu": {
+      "cardMode": "single",
+      "viewport": "620x420"
+    },
+    "Popover": {
+      "cardMode": "single",
+      "viewport": "620x420"
+    },
+    "Tooltip": {
+      "cardMode": "single",
+      "viewport": "620x300"
+    },
+    "Command": {
+      "cardMode": "single",
+      "viewport": "620x460"
+    },
+    "Select": {
+      "cardMode": "single",
+      "viewport": "620x420"
+    },
+    "Toaster": {
+      "cardMode": "single",
+      "viewport": "620x300"
+    },
+    "StatTile": {
+      "cardMode": "column"
+    },
+    "GlowCard": {
+      "cardMode": "column"
+    },
+    "Button": {
+      "viewport": "620x260"
+    },
+    "IconButton": {
+      "viewport": "620x200"
+    },
+    "ExportButton": {
+      "viewport": "620x200"
+    },
+    "Badge": {
+      "viewport": "620x200"
+    },
+    "Checkbox": {
+      "viewport": "620x240",
+      "cardMode": "column"
+    },
+    "Switch": {
+      "viewport": "620x240",
+      "cardMode": "column"
+    },
+    "Label": {
+      "viewport": "620x320",
+      "cardMode": "column"
+    },
+    "Overline": {
+      "viewport": "620x200"
+    },
+    "MoneyAmount": {
+      "viewport": "620x320"
+    },
+    "MeterBar": {
+      "viewport": "620x320"
+    },
+    "Progress": {
+      "viewport": "620x280"
+    },
+    "Separator": {
+      "viewport": "620x240"
+    },
+    "CardTitle": {
+      "viewport": "620x220"
+    },
+    "ScrollArea": {
+      "viewport": "620x340"
+    },
+    "ScrollBar": {
+      "viewport": "620x340"
+    },
+    "Dropzone": {
+      "cardMode": "column"
+    }
+  }
+}

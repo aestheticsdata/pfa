@@ -475,3 +475,26 @@ Honest list — worth knowing before you trip on them:
 
 Verify with `pnpm exec tsc --noEmit` and `pnpm exec biome check ./src`.
 Biome is the linter/formatter (not ESLint), `lineWidth` 120. Never run Biome over `styles/` — it's CSS.
+
+---
+
+## 13. Claude Design (`pnpm ds:prepare`)
+
+This design system is also published to **Claude Design** so that new PFA screens designed there are
+built from these real components and tokens, instead of the frozen 2026 mockups in
+`design_handoff_pfa/` that the code has long since diverged from.
+
+Project: https://claude.ai/design/p/aba2a406-a3d0-41e5-ab59-3481c4a782ba (tab **Design systems**).
+To use it: in the Claude Design composer, pick "PFA DS" in the **Design system** dropdown.
+
+**You never run `ds:prepare` by hand.** To re-publish after changing components or tokens, open Claude
+Code in this repo and run `/design-sync` — it does the rest.
+
+`ds:prepare` exists because pfa is an app, not a published component library: it has no `dist/` and
+`noEmit: true`, so the two things the publisher needs don't exist. The script manufactures both from
+this source — a `.d.ts` tree (the API contract the design agent codes against) and a compiled,
+dark-by-default stylesheet. It's wired as the publisher's `buildCmd`, which is what actually calls it.
+
+Everything else lives in `front/.design-sync/` — **read `NOTES.md` there before touching any of it.**
+Several of those choices look wrong and are load-bearing (relative imports in `ds-entry.tsx`, an
+unlayered `html body` rule, the `@source inline` safelists); each one failed *silently* when absent.

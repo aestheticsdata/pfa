@@ -1,0 +1,24 @@
+// Emits a .d.ts tree for the DS barrel so design-sync can extract real prop
+// contracts. The app itself is noEmit; without this every <Name>Props degrades
+// to `[key: string]: unknown` and the design agent codes blind.
+//
+// `include` is only the barrel — tsc follows its imports, so the tree covers
+// exactly the DS surface and nothing else.
+//
+//   npx tsc -p .design-sync/tsconfig.dts.json
+//
+// Output lands in front/dist/types (already gitignored via **/dist).
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": false,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "rootDir": "..",
+    "outDir": "../dist/types"
+  },
+  "include": ["./ds-entry.tsx"]
+}
