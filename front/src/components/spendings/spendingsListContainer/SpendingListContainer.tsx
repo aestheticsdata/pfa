@@ -19,7 +19,7 @@ const SpendingsListContainer = ({
   }
 
   if (!spendingsByDaySorted?.length) {
-    return <div className="flex justify-center items-center min-h-[80px] text-gray-500 text-xs">Aucune dépense</div>;
+    return <div className="flex justify-center items-center min-h-[80px] text-ink-5 text-xs">Aucune dépense</div>;
   }
 
   return (

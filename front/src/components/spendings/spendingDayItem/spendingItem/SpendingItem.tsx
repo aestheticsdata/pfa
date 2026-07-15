@@ -1,5 +1,6 @@
 "use client";
 
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendings from "@components/spendings/services/useSpendings";
@@ -42,19 +43,19 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
 
   if (isDeleteConfirmVisible) {
     return (
-      <div className="flex items-center gap-2 py-2 px-3 bg-red-900/20 border border-red-600/40 rounded">
-        <span className="text-gray-200 text-sm flex-1">Supprimer cette dépense ?</span>
+      <div className="flex items-center gap-2 py-2 px-3 bg-danger-surface border border-danger-border-soft rounded">
+        <span className="text-ink-2 text-sm flex-1">Supprimer cette dépense ?</span>
         <button
           type="button"
           onClick={onCancelDelete}
-          className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded transition-colors text-sm"
+          className="px-3 py-1.5 bg-surface-hi hover:bg-surface-hover text-ink-2 rounded transition-colors text-sm"
         >
           Annuler
         </button>
         <button
           type="button"
           onClick={onConfirmDelete}
-          className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded transition-colors text-sm"
+          className="px-3 py-1.5 bg-danger-solid hover:brightness-110 text-on-danger rounded transition-colors text-sm"
         >
           Confirmer
         </button>
@@ -63,7 +64,8 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
   }
 
   const category = "category" in spending ? spending.category : null;
-  const categoryColor = "categoryColor" in spending && spending.categoryColor ? spending.categoryColor : "#94a3b8";
+  const categoryColor =
+    "categoryColor" in spending && spending.categoryColor ? spending.categoryColor : CATEGORY_FALLBACK;
 
   return (
     <>
@@ -73,7 +75,7 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
           spending={spending}
         />
       )}
-      <div className="group flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 py-1.5 hover:bg-gray-800/40 rounded px-2 transition-colors">
+      <div className="group flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 py-1.5 hover:bg-surface-hover rounded px-2 transition-colors">
         <div className="flex items-center gap-2 sm:contents">
           <div
             className="w-1 h-5 rounded-full flex-shrink-0"
@@ -81,13 +83,13 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
           />
 
           <span
-            className="text-gray-300 text-sm flex-1 min-w-0 truncate"
+            className="text-ink-3 text-sm flex-1 min-w-0 truncate"
             title={spendingLabel}
           >
             {spendingLabel}
           </span>
 
-          <span className="text-gray-100 text-sm shrink-0 tabular-nums sm:hidden">
+          <span className="text-ink text-sm shrink-0 tabular-nums sm:hidden">
             {Number(spending.amount).toFixed(2)} €
           </span>
         </div>
@@ -111,19 +113,19 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
               onClick={() => setIsInvoiceModalVisible(true)}
               className={cn(
                 "w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer",
-                hasInvoice ? "bg-emerald-700/80 hover:bg-emerald-600" : "bg-gray-700/80 hover:bg-cyan-600",
+                hasInvoice ? "bg-accent-d/80 hover:bg-accent-d" : "bg-surface-hi hover:bg-elec",
               )}
               title="Facture"
             >
-              <ImageIcon className="w-3 h-3 text-gray-200" />
+              <ImageIcon className="w-3 h-3 text-ink-2" />
             </button>
             <button
               type="button"
               onClick={() => editCallback(spending)}
-              className="w-6 h-6 bg-gray-700/80 hover:bg-gray-600 rounded flex items-center justify-center transition-colors cursor-pointer"
+              className="w-6 h-6 bg-surface-hi hover:bg-surface-hover rounded flex items-center justify-center transition-colors cursor-pointer"
               title="Modifier"
             >
-              <Edit2 className="w-3 h-3 text-gray-300" />
+              <Edit2 className="w-3 h-3 text-ink-3" />
             </button>
             <button
               type="button"
@@ -131,14 +133,14 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
                 toggleAddSpending();
                 setIsDeleteConfirmVisible(true);
               }}
-              className="w-6 h-6 bg-gray-700/80 hover:bg-red-600 rounded flex items-center justify-center transition-colors cursor-pointer"
+              className="w-6 h-6 bg-surface-hi hover:bg-danger-solid rounded flex items-center justify-center transition-colors cursor-pointer"
               title="Supprimer"
             >
-              <Trash2 className="w-3 h-3 text-gray-300 group-hover:text-white" />
+              <Trash2 className="w-3 h-3 text-ink-3 group-hover:text-ink" />
             </button>
           </div>
 
-          <span className="hidden sm:inline text-gray-100 text-sm shrink-0 min-w-[70px] text-right tabular-nums">
+          <span className="hidden sm:inline text-ink text-sm shrink-0 min-w-[70px] text-right tabular-nums">
             {Number(spending.amount).toFixed(2)} €
           </span>
         </div>
