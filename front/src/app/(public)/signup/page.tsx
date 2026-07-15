@@ -4,8 +4,8 @@ import useCredentials from "@auth/helpers/useCredentials";
 import useSignupService from "@auth/useSignupService";
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
+import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
 import SharedLoginForm from "@components/shared/sharedLoginForm/sharedLoginForm";
-import Link from "next/link";
 
 import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 
@@ -35,15 +35,11 @@ export default function SignUp() {
         displayConfirmPasswordField
       />
 
-      <div className="mt-5 flex justify-center gap-1.5 border-t border-white/[0.07] pt-4.5 text-xs text-ink-3">
-        Déjà un compte ?{" "}
-        <Link
-          href="/login"
-          className="font-medium text-[oklch(0.82_0.12_165)] hover:underline"
-        >
-          Se connecter
-        </Link>
-      </div>
+      <AuthSwitchLink
+        prompt="Déjà un compte ?"
+        href="/login"
+        label="Se connecter"
+      />
     </AuthCard>
   );
 }
