@@ -39,7 +39,7 @@ const ROUTE_ICONS: Record<string, LucideIcon> = {
 
 const ACTIVE_BG = "bg-[oklch(0.26_0.010_248)]";
 const PERIOD_BTN =
-  "cursor-pointer rounded-[6px] border border-[oklch(0.30_0.010_248)] bg-[oklch(0.125_0.006_250/0.55)] px-3 py-2 text-[13px] text-ink-2 transition-colors hover:text-ink whitespace-nowrap";
+  "cursor-pointer rounded-sm border border-[oklch(0.30_0.010_248)] bg-[oklch(0.125_0.006_250/0.55)] px-3 py-2 text-sm text-ink-2 transition-colors hover:text-ink whitespace-nowrap";
 
 const normalizePath = (path: string): string => {
   const normalized = path.replace(/\/+$/, "");
@@ -101,7 +101,7 @@ const NavBar = () => {
   if (!user) return null;
 
   const brand = (
-    <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.02em] text-ink">
+    <div className="flex items-center gap-2.5 text-base font-semibold tracking-tight text-ink">
       <Logo size={24} />
       <span>pfa</span>
     </div>
@@ -128,7 +128,7 @@ const NavBar = () => {
               key={route.path}
               href={hrefFor(route)}
               className={cn(
-                "rounded-[6px] px-3 py-1.5 text-[13px] font-medium transition-colors",
+                "rounded-sm px-3 py-1.5 text-sm font-medium transition-colors",
                 isActiveRoute(route.path) ? cn(ACTIVE_BG, "text-ink") : "text-ink-3 hover:text-ink-2",
               )}
             >
@@ -213,7 +213,7 @@ const NavBar = () => {
                 href={hrefFor(route)}
                 onClick={() => setDrawerOpen(false)}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-[8px] px-3 py-2.5 text-[14px] font-medium transition-colors",
+                  "flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
                   isActiveRoute(route.path)
                     ? cn(ACTIVE_BG, "text-ink")
                     : "text-ink-3 hover:bg-white/[0.05] hover:text-ink",

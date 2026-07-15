@@ -32,18 +32,18 @@ const WEEKEND_FILL = "linear-gradient(90deg, oklch(0.50 0.13 25), oklch(0.72 0.1
 const StatisticsDayOfWeek = () => (
   <GlowCard
     as="section"
-    className="px-6 py-[22px]"
+    className="px-6 py-5.5"
   >
     <CardSectionHeader
       title="Dépenses par jour de la semaine"
       meta="moyenne sur 12 mois"
     />
 
-    <div className="mt-[18px] flex flex-col gap-2">
+    <div className="mt-4.5 flex flex-col gap-2">
       {ROWS.map((row) => (
         <div
           key={row.day}
-          className="grid grid-cols-[90px_1fr_130px] items-center gap-3 text-[13px]"
+          className="grid grid-cols-[90px_1fr_130px] items-center gap-3 text-sm"
         >
           <span className={row.weekend ? "text-ink" : "text-ink-2"}>{row.day}</span>
           <MeterBar
@@ -54,7 +54,7 @@ const StatisticsDayOfWeek = () => (
           />
           <span className="num text-right font-medium text-ink">
             {row.amount}
-            <small className="block text-[10.5px] font-normal text-ink-4">{row.transactions}</small>
+            <small className="block text-2xs font-normal text-ink-4">{row.transactions}</small>
           </span>
         </div>
       ))}

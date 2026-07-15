@@ -20,11 +20,11 @@ interface MeterBarProps {
 function MeterBar({ value, fill = "var(--bar-fill)", height, opacity = 1, className }: MeterBarProps) {
   return (
     <div
-      className={cn("overflow-hidden rounded-[4px] bg-surface-hi", className)}
+      className={cn("overflow-hidden rounded-sm bg-surface-hi", className)}
       style={{ height }}
     >
       <span
-        className="block h-full rounded-[4px]"
+        className="block h-full rounded-sm"
         style={{ width: `${value}%`, background: fill, opacity }}
       />
     </div>

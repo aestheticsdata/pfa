@@ -41,15 +41,15 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
   }, [items]);
 
   if (groups.length === 0) {
-    return <div className="py-12 text-center text-[12.5px] text-ink-4">Aucun achat exceptionnel.</div>;
+    return <div className="py-12 text-center text-xs text-ink-4">Aucun achat exceptionnel.</div>;
   }
 
   return (
-    <div className="flex flex-col gap-[18px]">
+    <div className="flex flex-col gap-4.5">
       {groups.map((group) => (
         <section key={group.key}>
           <div className="flex items-baseline justify-between px-1 pb-2.5">
-            <h2 className="text-[15px] font-semibold capitalize tracking-[-0.01em] text-ink">
+            <h2 className="text-base font-semibold capitalize tracking-snug text-ink">
               {group.label}
               <span className="ml-2 text-xs font-normal text-ink-4">
                 · {group.items.length} achat
@@ -60,7 +60,7 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
               Total <b className="font-medium text-ink">{euro(group.total)} €</b>
             </span>
           </div>
-          <div className="overflow-hidden rounded-[14px] border border-line-soft bg-surface-elev">
+          <div className="overflow-hidden rounded-xl border border-line-soft bg-surface-elev">
             {group.items.map((item) => (
               <ExceptionalItem
                 key={item.ID}

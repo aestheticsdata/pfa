@@ -59,9 +59,9 @@ const StatisticsForecast = ({
           value={spent}
           decimals={0}
           suffix=" €"
-          className="num text-[24px] font-medium tracking-[-0.02em] text-ink"
+          className="num text-2xl font-medium tracking-tight text-ink"
         />
-        <span className="text-[12px] text-ink-3">
+        <span className="text-xs text-ink-3">
           {daysElapsed} jours · {euro(perDay)} €/jour
         </span>
       </div>
@@ -79,7 +79,7 @@ const StatisticsForecast = ({
           height={36}
           radius={8}
         />
-        <div className="mt-2 flex items-center justify-between text-[11px] text-ink-4">
+        <div className="mt-2 flex items-center justify-between text-2xs text-ink-4">
           <span className="num">1er janv.</span>
           <span>— projection —</span>
           <span className="num">31 déc.</span>
@@ -93,9 +93,9 @@ const StatisticsForecast = ({
           decimals={0}
           suffix=" €"
           color="var(--accent-strong)"
-          className="num text-[24px] font-medium tracking-[-0.02em]"
+          className="num text-2xl font-medium tracking-tight"
         />
-        <span className="text-[12px] text-ink-3">
+        <span className="text-xs text-ink-3">
           <span className={delta > 0 ? "text-neg" : "text-accent-strong"}>
             {delta > 0 ? `+${euro0(delta)}` : euro0(delta)} €
           </span>{" "}

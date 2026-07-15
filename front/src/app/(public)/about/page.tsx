@@ -18,7 +18,7 @@ export default function About() {
         subtitle="Personal Finance Assistant"
       />
 
-      <ul className="flex flex-col gap-2.5 text-[13px] text-ink-2">
+      <ul className="flex flex-col gap-2.5 text-sm text-ink-2">
         {LEGAL.map((line) => (
           <li
             key={line}
@@ -29,7 +29,7 @@ export default function About() {
         ))}
       </ul>
 
-      <div className="mt-5 border-t border-white/[0.07] pt-[18px] text-center font-mono text-[12px] text-ink-4">
+      <div className="mt-5 border-t border-white/[0.07] pt-4.5 text-center font-mono text-xs text-ink-4">
         pfa · 1991computer.com
       </div>
     </AuthCard>

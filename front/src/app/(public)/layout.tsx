@@ -24,9 +24,7 @@ export default async function PublicLayout({ children }: { children: React.React
         />
         <AuthHeader />
         <main className="relative z-[1] grid flex-1 place-items-center px-6 py-8">{children}</main>
-        <div className="relative z-[1] py-[18px] text-center font-mono text-[11px] text-ink-4">
-          pfa · 1991computer.com
-        </div>
+        <div className="relative z-[1] py-4.5 text-center font-mono text-2xs text-ink-4">pfa · 1991computer.com</div>
       </div>
     </AuthProvider>
   );

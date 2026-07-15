@@ -6,13 +6,13 @@ import Logo from "@components/shared/brand/Logo";
  */
 export default function AuthBrand({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="mb-[30px] flex flex-col items-center gap-4 text-center">
+    <div className="mb-7.5 flex flex-col items-center gap-4 text-center">
       <Logo
         size={58}
         glow
       />
-      <h1 className="text-[20px] font-semibold tracking-[-0.015em] text-ink">{title}</h1>
-      {subtitle && <p className="text-[13px] text-ink-3">{subtitle}</p>}
+      <h1 className="text-xl font-semibold tracking-snug text-ink">{title}</h1>
+      {subtitle && <p className="text-sm text-ink-3">{subtitle}</p>}
     </div>
   );
 }

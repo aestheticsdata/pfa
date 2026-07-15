@@ -25,7 +25,7 @@ interface CategoryTrendProps extends CategoryTrendData {
 const CategoryTrend = ({ direction, label, className }: CategoryTrendProps) => (
   <span
     className={cn(
-      "num flex items-center justify-end gap-1 text-[11.5px]",
+      "num flex items-center justify-end gap-1 text-2xs",
       direction === "up" && "text-neg",
       direction === "down" && "text-accent-strong",
       direction === "flat" && "text-ink-4",

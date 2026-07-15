@@ -43,9 +43,9 @@ const Card = ({ label, children }: { label: string; children: React.ReactNode })
 );
 
 const Value = ({ amount }: { amount: number }) => (
-  <div className="num mb-1 mt-2.5 text-[30px] font-medium leading-none tracking-[-0.025em] text-ink">
+  <div className="num mb-1 mt-2.5 text-3xl font-medium leading-none tracking-tight text-ink">
     {euro0(amount)}
-    <span className="text-[20px] font-normal text-ink-3"> €</span>
+    <span className="text-xl font-normal text-ink-3"> €</span>
   </div>
 );
 
@@ -76,7 +76,7 @@ const CmpRow = ({
     <div className="flex items-baseline gap-2">
       <span
         className={cn(
-          "num shrink-0 rounded-[3px] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-[0.04em]",
+          "num shrink-0 rounded-xs px-1.5 py-0.5 text-3xs font-semibold uppercase tracking-wider",
           kind === "exc" ? "bg-exc-bg text-exc" : "bg-accent-bg text-accent-strong",
         )}
       >
@@ -85,14 +85,14 @@ const CmpRow = ({
       <span
         className={cn(
           "truncate",
-          titleVariant === "month" ? "text-[11px] uppercase tracking-[0.08em] text-ink-3" : "text-[13px] text-ink-2",
+          titleVariant === "month" ? "text-2xs uppercase tracking-caps text-ink-3" : "text-sm text-ink-2",
         )}
       >
         {title}
       </span>
-      <span className="num ml-auto text-[17px] font-medium text-ink">{euro0(amount)} €</span>
+      <span className="num ml-auto text-lg font-medium text-ink">{euro0(amount)} €</span>
     </div>
-    <div className="flex h-2 overflow-hidden rounded-[3px] bg-surface-hi">
+    <div className="flex h-2 overflow-hidden rounded-xs bg-surface-hi">
       <span
         style={{
           width: `${Math.max(0, regWidth) * 100}%`,
@@ -154,7 +154,7 @@ const StatisticsKpis = ({
     <section className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 min-[768px]:grid-cols-4">
       <Card label={`Total dépensé ${year}`}>
         <Value amount={total} />
-        <span className="text-[12px] text-ink-3">
+        <span className="text-xs text-ink-3">
           <Delta down={deltaPct <= 0}>{Math.abs(Math.round(deltaPct))}%</Delta> vs {compareYear} · sur {months} mois
         </span>
         <div className="mt-4">
@@ -168,7 +168,7 @@ const StatisticsKpis = ({
 
       <Card label="Moyenne / mois">
         <Value amount={avg} />
-        <span className="text-[12px] text-ink-3">
+        <span className="text-xs text-ink-3">
           <Delta down={avgDelta <= 0}>{euro0(Math.abs(avgDelta))} €</Delta> vs moyenne {compareYear} (
           <span className="num font-medium text-ink">{euro0(compareAvg)} €</span>)
         </span>

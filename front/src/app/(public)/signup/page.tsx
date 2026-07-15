@@ -35,7 +35,7 @@ export default function SignUp() {
         displayConfirmPasswordField
       />
 
-      <div className="mt-5 flex justify-center gap-1.5 border-t border-white/[0.07] pt-[18px] text-[12.5px] text-ink-3">
+      <div className="mt-5 flex justify-center gap-1.5 border-t border-white/[0.07] pt-4.5 text-xs text-ink-3">
         Déjà un compte ?{" "}
         <Link
           href="/login"

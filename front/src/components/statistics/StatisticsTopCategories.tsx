@@ -50,14 +50,14 @@ const Trend = ({ deltaPct }: { deltaPct: number | null }) => {
 /** "Top catégories" — the year's largest categories with their real
  *  year-over-year trend (all figures from /statistics). */
 const StatisticsTopCategories = ({ rows, compareYear }: StatisticsTopCategoriesProps) => (
-  <GlowCard className="flex flex-col px-6 py-[22px]">
+  <GlowCard className="flex flex-col px-6 py-5.5">
     <CardSectionHeader
       title="Top catégories"
       meta={`tendance vs ${compareYear}`}
     />
 
-    <div className="mt-[18px] flex flex-col">
-      <div className="mb-0.5 grid grid-cols-[14px_1fr_90px_80px] items-center gap-2.5 border-b border-line pb-2 text-[10.5px] font-medium uppercase tracking-[0.08em] text-ink-4">
+    <div className="mt-4.5 flex flex-col">
+      <div className="mb-0.5 grid grid-cols-[14px_1fr_90px_80px] items-center gap-2.5 border-b border-line pb-2 text-2xs font-medium uppercase tracking-caps text-ink-4">
         <span />
         <span>Catégorie</span>
         <span className="text-right">Total</span>
@@ -67,15 +67,15 @@ const StatisticsTopCategories = ({ rows, compareYear }: StatisticsTopCategoriesP
       {rows.map((row) => (
         <div
           key={row.name}
-          className="grid grid-cols-[14px_1fr_90px_80px] items-center gap-2.5 border-b border-line-soft py-2.5 text-[13px] last:border-b-0"
+          className="grid grid-cols-[14px_1fr_90px_80px] items-center gap-2.5 border-b border-line-soft py-2.5 text-sm last:border-b-0"
         >
           <span
-            className="size-2 rounded-[2px]"
+            className="size-2 rounded-xs"
             style={{ background: row.color }}
           />
           <span className="truncate capitalize text-ink">{row.name}</span>
           <span className="num text-right font-medium text-ink">{euro0(row.value)} €</span>
-          <span className="num flex justify-end text-right text-[12px]">
+          <span className="num flex justify-end text-right text-xs">
             <Trend deltaPct={row.deltaPct} />
           </span>
         </div>
