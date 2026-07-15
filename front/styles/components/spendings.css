@@ -7,11 +7,14 @@
    ============================================================ */
 
 /* ---- Category breakdown pane (full width) ---- */
+/* Vertically compact on purpose (COS-101): it lives in the sticky zone, and
+   every pixel it takes is a pixel the day cards lose on a 13" screen. The
+   title/bar margins live in the component (mb-3 / mb-2.5). */
 .sp-catrep {
   background: var(--surface-elev);
   border: 1px solid var(--line-soft);
   border-radius: var(--r-lg);
-  padding: 20px 22px;
+  padding: 14px 22px;
 }
 .sp-cat-bar {
   display: flex;
@@ -35,7 +38,7 @@
   grid-template-columns: 14px minmax(0, 1fr) 76px 88px 60px;
   align-items: center;
   gap: 12px;
-  padding: 11px 8px;
+  padding: 7px 8px;
   margin: 0 -8px;
   border-radius: 8px;
   border-bottom: 1px solid var(--line-soft);
@@ -87,6 +90,33 @@
    document.body, so it is skinned entirely inline in the component — no class
    here, so a rule that fails to resolve at the portal can't leave it bare. */
 
+/* ---- Sticky search + summary + breakdown zone (COS-101) ---- */
+/* Desktop only: pins the toolbar, the five stat widgets and the category
+   breakdown right under the sticky .pfa-hdr while the timeline scrolls. Opaque
+   page background: translucent/blurred variants were tried and rejected — a
+   see-through band shows the cards sliding through it, and a blurred one frosts
+   a rectangle that lines up with neither the header above nor the card borders
+   beside it. Kept below the header (z-40), far below the drawer/scrim
+   (z-110/120). */
+@media (min-width: 768px) {
+  .sp-sticky-zone {
+    position: sticky;
+    /* Header sticks at 16px (NavBar top-4, matching the layout's pt-4) and is
+       ~60px tall → its bottom sits at 76px. */
+    top: 76px;
+    z-index: 30;
+    background: var(--bg);
+    /* Header ↔ search gap, owned here rather than by the header's own mb-7:
+       the negative margin swallows that 28px whole (leaving other pages
+       untouched), and the padding re-adds the gap we actually want — 12px, the
+       same rhythm as the zone's internal gap-3. Being padding INSIDE the zone,
+       it stays opaque and keeps that gap identical once stuck, instead of
+       scrolling away and letting the search bar touch the header. */
+    margin-top: -28px;
+    padding-top: 12px;
+  }
+}
+
 /* ---- Timeline grid ---- */
 .sp-timeline {
   display: grid;
@@ -131,7 +161,11 @@
 }
 @media (min-width: 768px) {
   .sp-day {
-    scroll-margin-top: 88px;
+    /* Bottom of the stuck zone: 76px (header) + 12px gap-padding + ~38px search
+       row + ~106px widgets + ~110px compressed breakdown + 2 × 12px gaps ≈
+       366px, plus breathing room. The "Aujourd'hui" scroll must land the card
+       BELOW the sticky zone, not under it (COS-101). */
+    scroll-margin-top: 376px;
   }
 }
 .sp-day--today {

@@ -109,7 +109,11 @@ const NavBar = () => {
 
   return (
     <>
-      <header className="pfa-hdr sticky top-0 z-40 mb-7 flex flex-wrap items-center gap-x-3 gap-y-2.5 px-3.5 py-2.5">
+      {/* top-4 (not 0): the layout's pt-4 scrolls away with the page, so a
+          top-0 header ends up glued to the viewport edge once stuck. Matching
+          the padding keeps the detached-bar look at rest AND while scrolling
+          (COS-101). */}
+      <header className="pfa-hdr sticky top-4 z-40 mb-7 flex flex-wrap items-center gap-x-3 gap-y-2.5 px-3.5 py-2.5">
         <IconButton
           variant="ghost"
           size={9}
