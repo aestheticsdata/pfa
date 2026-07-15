@@ -106,15 +106,15 @@ const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
     >
       <div className="mb-2 flex items-center gap-2">
         <span
-          className="size-2 shrink-0 rounded-[2px]"
+          className="size-2 shrink-0 rounded-xs"
           style={{ background: datum.color }}
         />
-        <span className="truncate text-[13px] font-medium capitalize text-ink">{datum.name}</span>
-        <span className="num ml-auto shrink-0 rounded-full border border-line-soft bg-background px-[7px] text-[10.5px] leading-[1.55] text-ink-3">
+        <span className="truncate text-sm font-medium capitalize text-ink">{datum.name}</span>
+        <span className="num ml-auto shrink-0 rounded-full border border-line-soft bg-background px-2 text-2xs leading-normal text-ink-3">
           {datum.count}
         </span>
       </div>
-      <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-1 text-[12px]">
+      <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-1 text-xs">
         <span className="text-ink-4">Part</span>
         <span className="num text-right text-ink-2">{datum.pct.toFixed(1).replace(".", ",")} %</span>
         <span className="text-ink-4">Montant</span>

@@ -50,13 +50,13 @@ export default function LoginFormClient() {
         <Link
           href="/forgotPassword"
           prefetch={false}
-          className="text-[12.5px] text-ink-3 transition-colors hover:text-ink"
+          className="text-xs text-ink-3 transition-colors hover:text-ink"
         >
           Mot de passe oublié ?
         </Link>
       </div>
 
-      <div className="mt-5 flex justify-center gap-1.5 border-t border-white/[0.07] pt-[18px] text-[12.5px] text-ink-3">
+      <div className="mt-5 flex justify-center gap-1.5 border-t border-white/[0.07] pt-4.5 text-xs text-ink-3">
         Pas encore de compte ?{" "}
         <Link
           href="/signup"

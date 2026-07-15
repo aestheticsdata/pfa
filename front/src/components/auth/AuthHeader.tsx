@@ -24,8 +24,8 @@ export default function AuthHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="relative z-[2] flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 sm:gap-x-[26px] sm:px-8 sm:py-[18px]">
-      <div className="flex items-center gap-2.5 text-[15px] font-semibold tracking-[-0.02em] text-ink">
+    <header className="relative z-[2] flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 sm:gap-x-6.5 sm:px-8 sm:py-4.5">
+      <div className="flex items-center gap-2.5 text-base font-semibold tracking-tight text-ink">
         <Logo size={26} />
         <span>pfa</span>
       </div>
@@ -39,7 +39,7 @@ export default function AuthHeader() {
               href={path}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative inline-flex items-center gap-2 rounded-[6px] px-[13px] py-2 text-[13.5px] font-medium transition-colors",
+                "relative inline-flex items-center gap-2 rounded-sm px-3.5 py-2 text-sm font-medium transition-colors",
                 active ? "text-ink" : "text-ink-3 hover:bg-white/[0.03] hover:text-ink-2",
               )}
             >

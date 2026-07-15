@@ -29,7 +29,7 @@ const buildSchema = (needEmail: boolean, needPassword: boolean, needConfirm: boo
 
 const LABEL = overlineClass;
 const INPUT_BASE =
-  "w-full rounded-[6px] border px-[13px] py-[11px] text-[14px] text-ink outline-none transition [background:oklch(0.12_0.008_250/0.75)] border-[oklch(0.30_0.010_250)] placeholder:text-ink-4 focus:border-[oklch(0.65_0.11_175)] focus:[background:oklch(0.13_0.008_250)] focus:shadow-[0_0_0_3px_oklch(0.65_0.11_175/0.15)] aria-invalid:border-neg";
+  "w-full rounded-sm border px-3.5 py-3 text-sm text-ink outline-none transition [background:oklch(0.12_0.008_250/0.75)] border-[oklch(0.30_0.010_250)] placeholder:text-ink-4 focus:border-[oklch(0.65_0.11_175)] focus:[background:oklch(0.13_0.008_250)] focus:shadow-[0_0_0_3px_oklch(0.65_0.11_175/0.15)] aria-invalid:border-neg";
 
 /**
  * Single shared message slot for the auth forms. Always rendered — it reserves one
@@ -40,7 +40,7 @@ const INPUT_BASE =
 const FormMessage = ({ message }: { message?: string | null }) => (
   <p
     role="alert"
-    className="min-h-5 text-[13px] leading-5 text-neg"
+    className="min-h-5 text-sm leading-5 text-neg"
   >
     {message ?? ""}
   </p>
@@ -138,7 +138,7 @@ const SharedLoginForm = ({
               type={showPassword ? "text" : "password"}
               placeholder="••••••••"
               autoComplete={displayConfirmPasswordField ? "new-password" : "current-password"}
-              className={cn(INPUT_BASE, "pr-[42px]")}
+              className={cn(INPUT_BASE, "pr-10.5")}
               aria-invalid={!!errors.password}
               {...register("password", { onChange: clearFieldError("password") })}
             />
@@ -169,7 +169,7 @@ const SharedLoginForm = ({
               type={showConfirm ? "text" : "password"}
               placeholder="••••••••"
               autoComplete="new-password"
-              className={cn(INPUT_BASE, "pr-[42px]")}
+              className={cn(INPUT_BASE, "pr-10.5")}
               aria-invalid={!!errors.confirmPassword}
               {...register("confirmPassword", {
                 onChange: clearFieldError("confirmPassword"),
@@ -226,7 +226,7 @@ const SharedLoginForm = ({
         type="submit"
         variant="primary"
         disabled={isSubmitting}
-        className="h-auto w-full rounded-[10px] py-3 text-[14px] tracking-[0.01em]"
+        className="h-auto w-full rounded-lg py-3 text-sm tracking-normal"
       >
         {buttonTitle}
         {submitIcon && (

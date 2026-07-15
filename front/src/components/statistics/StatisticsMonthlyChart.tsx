@@ -118,14 +118,14 @@ const StatisticsMonthlyChart = ({
   return (
     <GlowCard
       as="section"
-      className="px-6 py-[22px]"
+      className="px-6 py-5.5"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
           <CardTitle>Dépenses mensuelles</CardTitle>
-          <p className="mt-0.5 text-[12px] text-ink-4">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-ink-4">{subtitle}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-[18px] text-[12px] text-ink-3">
+        <div className="flex flex-wrap items-center gap-4.5 text-xs text-ink-3">
           <LegendItem swatch={<i className="inline-block size-2.5 rounded-xs bg-accent-strong" />}>{year}</LegendItem>
           {showExceptionals && (
             <LegendItem swatch={<i className="inline-block size-2.5 rounded-xs bg-exc" />}>
@@ -150,7 +150,7 @@ const StatisticsMonthlyChart = ({
 
       <div
         ref={ref}
-        className="mt-[18px] w-full"
+        className="mt-4.5 w-full"
       >
         {width > 0 && (
           <svg

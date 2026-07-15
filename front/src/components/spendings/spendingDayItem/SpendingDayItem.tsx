@@ -117,7 +117,7 @@ const SpendingDayItem = ({
                   key={key}
                   onClick={() => setSelectedCategory(key)}
                   className={cn(
-                    "px-2 py-0.5 rounded text-[10px] uppercase font-medium transition-all border cursor-pointer",
+                    "px-2 py-0.5 rounded text-2xs uppercase font-medium transition-all border cursor-pointer",
                     isClicked ? "border-transparent" : "border-transparent opacity-70 hover:opacity-100",
                   )}
                   style={{
@@ -133,7 +133,7 @@ const SpendingDayItem = ({
               <button
                 type="button"
                 onClick={() => setSelectedCategory(null)}
-                className="px-2 py-0.5 rounded text-[10px] uppercase font-medium bg-gray-700/60 text-gray-200 hover:bg-gray-600"
+                className="px-2 py-0.5 rounded text-2xs uppercase font-medium bg-gray-700/60 text-gray-200 hover:bg-gray-600"
               >
                 {spendingsText.dayItem.filterResetLabel}
               </button>

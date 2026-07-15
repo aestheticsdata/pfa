@@ -29,10 +29,10 @@ export default function ForgotPassword() {
         displayEmailField
       />
 
-      <div className="mt-5 flex justify-center border-t border-white/[0.07] pt-[18px]">
+      <div className="mt-5 flex justify-center border-t border-white/[0.07] pt-4.5">
         <Link
           href="/login"
-          className="inline-flex items-center gap-1.5 text-[12.5px] text-ink-3 transition-colors hover:text-ink"
+          className="inline-flex items-center gap-1.5 text-xs text-ink-3 transition-colors hover:text-ink"
         >
           <ArrowLeft
             className="size-3.5"

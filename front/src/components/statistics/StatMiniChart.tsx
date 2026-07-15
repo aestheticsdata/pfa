@@ -67,7 +67,7 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
       style={{ height }}
     >
       <div
-        className="num flex flex-col justify-between text-[11px] leading-none text-ink-4"
+        className="num flex flex-col justify-between text-2xs leading-none text-ink-4"
         style={{ paddingTop: PAD.top - 6, paddingBottom: PAD.bottom - 6 }}
       >
         <span>{kFormat(max)}</span>
@@ -193,7 +193,7 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
 
         {avgY != null && (
           <span
-            className="num pointer-events-none absolute right-6 text-[9px] text-ink-4"
+            className="num pointer-events-none absolute right-6 text-3xs text-ink-4"
             style={{ top: `calc(${avgTop}% - 14px)` }}
           >
             moy.

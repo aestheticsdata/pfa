@@ -148,21 +148,20 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
       onOpenChange={(isOpen) => !isOpen && closeModal()}
     >
       <DialogContent className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[440px]">
-        <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-[22px] py-[18px] text-left">
-          <DialogTitle className="pr-8 text-[15px] font-semibold tracking-[-0.01em] text-ink">
+        <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-5.5 py-4.5 text-left">
+          <DialogTitle className="pr-8 text-base font-semibold tracking-snug text-ink">
             {isEditing ? "Modifier l'achat exceptionnel" : "Nouvel achat exceptionnel"}
           </DialogTitle>
         </DialogHeader>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-[18px] px-[22px] py-[22px]"
+          className="flex flex-col gap-4.5 px-5.5 py-5.5"
         >
           <div className="grid grid-cols-2 gap-3.5">
             <FieldShell
               label="Date"
               htmlFor="exceptional-date"
-              labelClassName="text-[13px]"
             >
               <TextInput
                 id="exceptional-date"
@@ -174,7 +173,6 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
             <FieldShell
               label="Montant (€)"
               htmlFor="exceptional-amount"
-              labelClassName="text-[13px]"
             >
               <TextInput
                 id="exceptional-amount"
@@ -190,7 +188,6 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
           <FieldShell
             label="Label"
             htmlFor="exceptional-label"
-            labelClassName="text-[13px]"
             error={errors.label?.message}
           >
             <TextInput
@@ -207,7 +204,6 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
               </>
             }
             htmlFor="exceptional-description"
-            labelClassName="text-[13px]"
           >
             <TextInput
               id="exceptional-description"
@@ -216,10 +212,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
             />
           </FieldShell>
 
-          <FieldShell
-            label="Catégorie"
-            labelClassName="text-[13px]"
-          >
+          <FieldShell label="Catégorie">
             <Popover
               open={comboboxOpen}
               onOpenChange={setComboboxOpen}
@@ -235,7 +228,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                   {selectedCategory ? (
                     <>
                       <span
-                        className="size-2.5 shrink-0 rounded-[3px]"
+                        className="size-2.5 shrink-0 rounded-xs"
                         style={{ backgroundColor: selectedCategory.color }}
                       />
                       <span className="capitalize">{selectedCategory.name}</span>
@@ -293,7 +286,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                           }}
                         >
                           <span
-                            className="mr-1 size-2.5 rounded-[3px]"
+                            className="mr-1 size-2.5 rounded-xs"
                             style={{ backgroundColor: cat.color }}
                           />
                           <span className="flex-1 capitalize">{cat.name}</span>

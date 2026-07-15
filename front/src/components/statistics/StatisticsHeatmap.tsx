@@ -135,7 +135,7 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
   return (
     <GlowCard
       as="div"
-      className="flex flex-col overflow-x-auto px-6 py-[22px]"
+      className="flex flex-col overflow-x-auto px-6 py-5.5"
     >
       <CardSectionHeader
         title="Carte de chaleur — quotidienne"
@@ -146,10 +146,10 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
         }
       />
 
-      <div className="mt-[18px] min-w-[620px]">
+      <div className="mt-4.5 min-w-[620px]">
         {/* month axis */}
         <div
-          className="num mb-1 grid text-[9px] text-ink-4"
+          className="num mb-1 grid text-3xs text-ink-4"
           style={{ gridTemplateColumns: "16px repeat(53, minmax(0, 1fr))" }}
         >
           {MONTH_COLS.map((m) => (
@@ -173,14 +173,12 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
               key={dow}
               className="contents"
             >
-              <span className="num self-center pr-1 text-right text-[9px] leading-[11px] text-ink-4">
-                {DOW_LABELS[dow]}
-              </span>
+              <span className="num self-center pr-1 text-right text-3xs leading-3 text-ink-4">{DOW_LABELS[dow]}</span>
               {weekArr.map((lvl, week) => (
                 <span
                   // biome-ignore lint/suspicious/noArrayIndexKey: fixed 53-week grid, positional cell never reorders
                   key={week}
-                  className="aspect-square min-h-[9px] rounded-[2px]"
+                  className="aspect-square min-h-[9px] rounded-xs"
                   style={
                     lvl === "future"
                       ? { background: "transparent", border: "1px dashed var(--line)" }
@@ -193,13 +191,13 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
         </div>
 
         {/* scale legend */}
-        <div className="num mt-4 flex items-center gap-2 text-[11px] text-ink-4">
+        <div className="num mt-4 flex items-center gap-2 text-2xs text-ink-4">
           <span>0 €</span>
           <span className="flex gap-0.5">
             {(["lvl-0", "lvl-1", "lvl-2", "lvl-3", "lvl-4"] as FilledLevel[]).map((lvl) => (
               <span
                 key={lvl}
-                className="size-2.5 rounded-[2px]"
+                className="size-2.5 rounded-xs"
                 style={{ background: CELL_BG[lvl] }}
               />
             ))}
@@ -220,26 +218,26 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
       </div>
 
       {/* derived insights, pinned to the bottom */}
-      <div className="mt-auto flex flex-col gap-[22px] border-t border-line-soft pt-[22px]">
+      <div className="mt-auto flex flex-col gap-5.5 border-t border-line-soft pt-5.5">
         <div>
-          <div className="num mb-2.5 text-[11px] uppercase tracking-[0.07em] text-ink-4">Répartition des journées</div>
-          <div className="flex h-4 gap-0.5 overflow-hidden rounded-[5px]">
+          <div className="num mb-2.5 text-2xs uppercase tracking-caps text-ink-4">Répartition des journées</div>
+          <div className="flex h-4 gap-0.5 overflow-hidden rounded-sm">
             {FILLED_ORDER.filter((lvl) => counts[lvl] > 0).map((lvl) => (
               <span
                 key={lvl}
-                className="block h-full rounded-[2px]"
+                className="block h-full rounded-xs"
                 style={{ background: DIST_BG[lvl], flexGrow: counts[lvl], flexBasis: 0 }}
               />
             ))}
           </div>
-          <div className="num mt-[11px] flex flex-wrap gap-x-[18px] gap-y-[7px] text-[11px] text-ink-3">
+          <div className="num mt-3 flex flex-wrap gap-x-4.5 gap-y-2 text-2xs text-ink-3">
             {distGroups.map((g) => (
               <span
                 key={g.label}
                 className="inline-flex items-center gap-1.5"
               >
                 <i
-                  className="size-2 shrink-0 rounded-[2px]"
+                  className="size-2 shrink-0 rounded-xs"
                   style={{ background: g.color }}
                 />
                 {g.label} <b className="font-medium text-ink">{g.n}</b>
@@ -248,28 +246,22 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-[18px]">
+        <div className="grid grid-cols-3 gap-4.5">
           <div>
-            <div className="num text-[10.5px] uppercase leading-[1.35] tracking-[0.04em] text-ink-4">
-              Journée la plus chargée
-            </div>
+            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">Journée la plus chargée</div>
             {/* MOCK — no per-day amounts */}
-            <div className="num mt-[7px] text-[20px] tracking-[-0.01em] text-ink">210 €</div>
-            <div className="mt-[3px] text-[11px] text-ink-4">hors exceptionnel</div>
+            <div className="num mt-2 text-xl tracking-snug text-ink">210 €</div>
+            <div className="mt-1 text-2xs text-ink-4">hors exceptionnel</div>
           </div>
           <div>
-            <div className="num text-[10.5px] uppercase leading-[1.35] tracking-[0.04em] text-ink-4">
-              Plus longue série sobre
-            </div>
-            <div className="num mt-[7px] text-[20px] tracking-[-0.01em] text-ink">{streak} jours</div>
-            <div className="mt-[3px] text-[11px] text-ink-4">journées calmes d&apos;affilée</div>
+            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">Plus longue série sobre</div>
+            <div className="num mt-2 text-xl tracking-snug text-ink">{streak} jours</div>
+            <div className="mt-1 text-2xs text-ink-4">journées calmes d&apos;affilée</div>
           </div>
           <div>
-            <div className="num text-[10.5px] uppercase leading-[1.35] tracking-[0.04em] text-ink-4">
-              Pics exceptionnels
-            </div>
-            <div className="num mt-[7px] text-[20px] tracking-[-0.01em] text-ink">{counts["lvl-neg"]}</div>
-            <div className="mt-[3px] text-[11px] text-ink-4">ordinateur · vélo</div>
+            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">Pics exceptionnels</div>
+            <div className="num mt-2 text-xl tracking-snug text-ink">{counts["lvl-neg"]}</div>
+            <div className="mt-1 text-2xs text-ink-4">ordinateur · vélo</div>
           </div>
         </div>
       </div>

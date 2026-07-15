@@ -46,14 +46,12 @@ const Stat = ({
       <div
         className={
           small
-            ? "num mt-2 text-[19px] font-medium tracking-[-0.025em] text-ink-2"
-            : "num mt-2 text-[30px] font-medium tracking-[-0.025em] text-ink"
+            ? "num mt-2 text-lg font-medium tracking-tight text-ink-2"
+            : "num mt-2 text-3xl font-medium tracking-tight text-ink"
         }
       >
         {int}
-        <span className={small ? "text-[14px] font-normal text-ink-3" : "text-[20px] font-normal text-ink-3"}>
-          ,{dec} €
-        </span>
+        <span className={small ? "text-sm font-normal text-ink-3" : "text-xl font-normal text-ink-3"}>,{dec} €</span>
       </div>
     </div>
   );
@@ -77,14 +75,14 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
   return (
     <GlowCard
       as="section"
-      className="px-6 py-[22px]"
+      className="px-6 py-5.5"
     >
       <CardSectionHeader
         title="Dépenses fixes"
         meta={<>annualisé · {list.length} lignes récurrentes · sans catégorie</>}
       />
 
-      <div className="mt-[18px] flex flex-wrap items-baseline gap-x-10 gap-y-4 border-b border-line-soft pb-5">
+      <div className="mt-4.5 flex flex-wrap items-baseline gap-x-10 gap-y-4 border-b border-line-soft pb-5">
         <Stat
           label="Total sur l'année"
           value={annualTotal}
@@ -110,12 +108,12 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
           return (
             <div
               key={r.ID}
-              className="flex flex-col gap-[7px]"
+              className="flex flex-col gap-2"
             >
-              <div className="flex items-baseline gap-2.5 text-[13px]">
+              <div className="flex items-baseline gap-2.5 text-sm">
                 <span className="text-ink">{r.label}</span>
                 <span className="num ml-auto font-medium text-ink">
-                  {euro(annual)} €<small className="ml-1.5 text-[11px] font-normal text-ink-4">{share}%</small>
+                  {euro(annual)} €<small className="ml-1.5 text-2xs font-normal text-ink-4">{share}%</small>
                 </span>
               </div>
               <MeterBar
@@ -128,7 +126,7 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
         })}
       </div>
 
-      <p className="mt-5 border-t border-line-soft pt-[18px] text-[12px] text-ink-4">
+      <p className="mt-5 border-t border-line-soft pt-4.5 text-xs text-ink-4">
         Les dépenses fixes ne portent pas de catégorie — elles sont totalisées par nom. Le{" "}
         <b className="num font-medium text-ink-2">{list[0].label}</b> représente à lui seul{" "}
         <b className="num font-medium text-ink-2">{topShare} %</b> du total annuel des récurrents.

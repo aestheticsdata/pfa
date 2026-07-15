@@ -90,7 +90,7 @@ const ExceptionalFilters = ({
               className="gap-1.5 rounded-full px-2.5 capitalize"
             >
               <span
-                className="size-[7px] shrink-0 rounded-[2px]"
+                className="size-[7px] shrink-0 rounded-xs"
                 style={{ backgroundColor: cat.color }}
               />
               {cat.name}
