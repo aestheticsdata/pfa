@@ -1,3 +1,4 @@
+import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import spendingsText from "@components/spendings/config/text";
 import useClickSort from "@components/spendings/helpers/useClickSort";
@@ -75,24 +76,24 @@ const SpendingDayItem = ({
   const getCategories = (items: SpendingItemType[]) =>
     Array.from(new Set(items.map((s) => s.category).filter((c): c is string | null => c !== undefined)));
   const getCategoryColor = (category: string | null) =>
-    categorySpendings.find((s) => s.category === category)?.categoryColor ?? "#94a3b8";
+    categorySpendings.find((s) => s.category === category)?.categoryColor ?? CATEGORY_FALLBACK;
 
   return (
     <div
       className={cn(
         "relative bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black rounded-lg border overflow-hidden transition-all shadow-xl flex flex-col h-full",
-        isToday ? "border-cyan-300" : "border-gray-800/50 hover:border-gray-700/50",
+        isToday ? "border-elec" : "border-line-soft hover:border-line",
       )}
     >
       {/* Header */}
-      <div className="bg-linear-to-r from-gray-800/60 to-gray-800/40 px-4 py-2.5 border-b border-gray-700/50 shrink-0">
+      <div className="bg-linear-to-r from-surface-hi/60 to-surface-hi/40 px-4 py-2.5 border-b border-line shrink-0">
         <div className="flex items-center justify-between mb-2">
-          <div className={cn("text-sm", isToday ? "text-cyan-300 font-semibold" : "text-gray-200")}>
+          <div className={cn("text-sm", isToday ? "text-elec font-semibold" : "text-ink-2")}>
             {date ? format(date, "dd MMM yyyy", { locale: fr }) : "—"}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-gray-400 text-xs uppercase tracking-wide">{spendingsText.dayItem.total}</span>
-            <span className="text-gray-100 text-sm tabular-nums">{Number(displayTotal).toFixed(2)} €</span>
+            <span className="text-ink-4 text-xs uppercase tracking-wide">{spendingsText.dayItem.total}</span>
+            <span className="text-ink text-sm tabular-nums">{Number(displayTotal).toFixed(2)} €</span>
           </div>
         </div>
 
@@ -133,7 +134,7 @@ const SpendingDayItem = ({
               <button
                 type="button"
                 onClick={() => setSelectedCategory(null)}
-                className="px-2 py-0.5 rounded text-2xs uppercase font-medium bg-gray-700/60 text-gray-200 hover:bg-gray-600"
+                className="px-2 py-0.5 rounded text-2xs uppercase font-medium bg-surface-hi text-ink-2 hover:bg-surface-hover"
               >
                 {spendingsText.dayItem.filterResetLabel}
               </button>
@@ -154,7 +155,7 @@ const SpendingDayItem = ({
             type="button"
             onClick={addSpending}
             disabled={!addSpendingEnabled}
-            className="mt-auto w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-md border border-dashed border-gray-700/60 text-gray-500 text-xs uppercase tracking-wide font-medium transition-all hover:border-cyan-500/60 hover:text-cyan-400 hover:bg-cyan-500/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-gray-700/60 disabled:hover:text-gray-500 disabled:hover:bg-transparent"
+            className="mt-auto w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-md border border-dashed border-line text-ink-5 text-xs uppercase tracking-wide font-medium transition-all hover:border-elec/60 hover:text-elec hover:bg-elec/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-line disabled:hover:text-ink-5 disabled:hover:bg-transparent"
           >
             <Plus className="w-3.5 h-3.5" />
             Ajouter une dépense
@@ -162,9 +163,9 @@ const SpendingDayItem = ({
         )}
 
         {!recurringType && isToday && (
-          <div className="mt-2 pt-2 border-t border-gray-800/50 flex items-center justify-between text-xs">
-            <span className="text-gray-500">{spendingsText.dayItem.remainingBudget}</span>
-            <span className="text-cyan-400 font-semibold">{Math.trunc(todayCredits)} €</span>
+          <div className="mt-2 pt-2 border-t border-line-soft flex items-center justify-between text-xs">
+            <span className="text-ink-5">{spendingsText.dayItem.remainingBudget}</span>
+            <span className="text-elec font-semibold">{Math.trunc(todayCredits)} €</span>
           </div>
         )}
       </div>
