@@ -99,6 +99,8 @@
    beside it. Kept below the header (z-40), far below the drawer/scrim
    (z-110/120). */
 @media (min-width: 768px) {
+  /* The strip between the viewport top and the header is masked app-wide by
+     .pfa-shell::before (COS-104) — it is not a Dépenses problem. */
   .sp-sticky-zone {
     position: sticky;
     /* Header sticks at 16px (NavBar top-4, matching the layout's pt-4) and is
@@ -106,6 +108,33 @@
     top: 76px;
     z-index: 30;
     background: var(--bg);
+    /* Bleeds the opaque background across the layout container's gutter (px-6
+       here, px-8 from lg — keep in sync with PrivateLayout). The band and the
+       cards are the same width to the pixel, both being in that container, so
+       anything a card paints OUTSIDE its own box lands in the gutter and stays
+       visible beside the band: .sp-day--today's `0 0 0 1px var(--elec)` ring is
+       exactly the 1-2px of colour that shows, and the 44px glow behind it.
+       Bleeding by exactly the gutter lands the band's edges on the viewport's
+       edges (the container is w-full under its 2000px cap) — full coverage, and
+       it can never overflow, which one more pixel would. The matching padding
+       puts the content back, so the widgets stay aligned with the header and
+       the cards below. Shrinking the cards instead would hide the ring but
+       misalign them and still leak the glow. */
+    margin-inline: -24px;
+    padding-inline: 24px;
+    /* Casts onto the cards passing underneath (COS-102): the band and the cards
+       are both near-black, so without it they merge into one dark mass and the
+       band's bottom edge just vanishes mid-scroll.
+       Carried by the ZONE, not by the breakdown pane sitting at its bottom: the
+       pane unmounts on any week with no categories (rows=[] → null), and the
+       summary that then ends the band has no shadow of its own — anchoring it
+       here keeps the edge drawn whatever the last widget happens to be.
+       --shadow-float (not --shadow-header, the token .pfa-hdr uses for the same
+       pinned job) because it is the inset-free drop: --shadow-header's
+       `inset 0 1px 0` highlight would paint a 1px seam across the band's top
+       edge, which lands in the open right below the header rather than behind
+       it. Its 0.35 alpha separates at least as well. */
+    box-shadow: var(--shadow-float);
     /* Header ↔ search gap, owned here rather than by the header's own mb-7:
        the negative margin swallows that 28px whole (leaving other pages
        untouched), and the padding re-adds the gap we actually want — 12px, the
@@ -114,6 +143,15 @@
        scrolling away and letting the search bar touch the header. */
     margin-top: -28px;
     padding-top: 12px;
+  }
+}
+
+/* The container's gutter steps up at lg (px-6 → px-8), so the bleed must too,
+   or the band stops 8px short of the viewport edge and the ring reappears. */
+@media (min-width: 1024px) {
+  .sp-sticky-zone {
+    margin-inline: -32px;
+    padding-inline: 32px;
   }
 }
 
