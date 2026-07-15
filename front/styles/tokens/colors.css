@@ -46,7 +46,11 @@
   --surface-hi:      oklch(0.215 0.007 250);
   --surface-hover:   oklch(0.22 0.006 250);
   --line:       oklch(0.27 0.008 250);
-  --line-soft:  oklch(0.20 0.006 250);
+  /* Must stay ABOVE every surface it draws on (bg, surface-elev, surface-hi):
+     a hairline is only a line if it is lighter than the fill behind it. At 0.20
+     it sat *under* surface-elev (0.205) and every separator on a card vanished.
+     0.24 restores the design's spacing: ~.035 above the card, ~.03 below --line. */
+  --line-soft:  oklch(0.24 0.006 250);
 
   /* Ink (text) */
   --ink:        oklch(0.975 0.004 250);

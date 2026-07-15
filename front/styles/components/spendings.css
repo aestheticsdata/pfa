@@ -10,10 +10,8 @@
 /* Vertically compact on purpose (COS-101): it lives in the sticky zone, and
    every pixel it takes is a pixel the day cards lose on a 13" screen. The
    title/bar margins live in the component (mb-3 / mb-2.5). */
+/* Surface, gradient border and radius come from `.pfa-card` (GlowCard). */
 .sp-catrep {
-  background: var(--surface-elev);
-  border: 1px solid var(--line-soft);
-  border-radius: var(--r-lg);
   padding: 14px 22px;
 }
 .sp-cat-bar {

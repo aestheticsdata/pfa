@@ -1,5 +1,6 @@
 "use client";
 
+import { DividedStrip } from "@components/shared/DividedStrip";
 import { MoneyAmount } from "@components/shared/MoneyAmount";
 import { Overline } from "@components/shared/Overline";
 import { StatTile } from "@components/shared/StatTile";
@@ -77,7 +78,7 @@ const SpendingSummary = ({
     );
 
   return (
-    <section className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line-soft bg-line-soft min-[760px]:grid-cols-5">
+    <DividedStrip className="grid-cols-2 min-[760px]:grid-cols-5">
       {/* Hero — full-width banner on mobile, one equal-width cell (1/5) on desktop
           like the other four. Its font stays big; the four keep theirs too. */}
       <div className="col-span-2 bg-card px-5 py-4 min-[760px]:col-span-1">
@@ -133,7 +134,7 @@ const SpendingSummary = ({
         }
         sub={biggest ? `${biggest.label} · ${format(biggest.date, "dd MMM", { locale: fr })}` : "—"}
       />
-    </section>
+    </DividedStrip>
   );
 };
 
