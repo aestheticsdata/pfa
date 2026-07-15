@@ -1,6 +1,7 @@
 "use client";
 
 import { computeExceptionalStats } from "@components/exceptionals/helpers/exceptionalStats";
+import GlowCard from "@components/shared/GlowCard";
 import { StatTile } from "@components/shared/StatTile";
 import { euro } from "@lib/format";
 import format from "date-fns/format";
@@ -17,12 +18,13 @@ interface ExceptionalStatsCardsProps {
 }
 
 const Kpi = ({ label, value, sub }: { label: string; value: ReactNode; sub: ReactNode }) => (
-  <StatTile
-    className="rounded-xl border border-line-soft bg-surface-elev px-5 py-4.5"
-    label={label}
-    value={value}
-    sub={sub}
-  />
+  <GlowCard className="px-5 py-4.5">
+    <StatTile
+      label={label}
+      value={value}
+      sub={sub}
+    />
+  </GlowCard>
 );
 
 const cur = (unit: string) => <span className="text-lg font-normal text-ink-3">{unit}</span>;

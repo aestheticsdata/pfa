@@ -1,6 +1,7 @@
 "use client";
 
 import ExceptionalItem from "@components/exceptionals/ExceptionalItem";
+import GlowCard from "@components/shared/GlowCard";
 import { euro } from "@lib/format";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
@@ -60,7 +61,7 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
               Total <b className="font-medium text-ink">{euro(group.total)} €</b>
             </span>
           </div>
-          <div className="overflow-hidden rounded-xl border border-line-soft bg-surface-elev">
+          <GlowCard className="overflow-hidden">
             {group.items.map((item) => (
               <ExceptionalItem
                 key={item.ID}
@@ -69,7 +70,7 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
                 monthlyAverage={monthlyAverage}
               />
             ))}
-          </div>
+          </GlowCard>
         </section>
       ))}
     </div>

@@ -5,6 +5,7 @@ import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
+import GlowCard from "@components/shared/GlowCard";
 import { MONTHLY } from "@components/spendings/config/constants";
 import useCharts from "@components/spendings/services/useCharts";
 import useSpendings from "@components/spendings/services/useSpendings";
@@ -71,7 +72,10 @@ const CategoryBreakdown = () => {
   });
 
   return (
-    <section className="pfa-card flex max-h-137.5 min-h-80 flex-col gap-4 px-6 py-5">
+    <GlowCard
+      as="section"
+      className="flex max-h-137.5 min-h-80 flex-col gap-4 px-6 py-5"
+    >
       <CardSectionHeader
         title="Répartition par catégorie"
         meta={`${monthLabel} · part des variables`}
@@ -131,7 +135,7 @@ const CategoryBreakdown = () => {
           total={selected.value}
         />
       )}
-    </section>
+    </GlowCard>
   );
 };
 
