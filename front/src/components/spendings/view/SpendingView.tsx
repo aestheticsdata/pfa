@@ -159,24 +159,30 @@ const SpendingView = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      <SpendingToolbar
-        search={search}
-        onSearchChange={setSearch}
-      />
+      {/* Search + summary + breakdown stay pinned under the app header while
+          the timeline scrolls (desktop only — see .sp-sticky-zone). Tighter
+          gap than the page flow (12px vs 20px): pinned chrome is denser than
+          scrolling content, and every pixel here is taken from the cards. */}
+      <div className="sp-sticky-zone flex flex-col gap-3">
+        <SpendingToolbar
+          search={search}
+          onSearchChange={setSearch}
+        />
 
-      <SpendingSummary
-        remaining={remaining}
-        weekTotal={weekTotal}
-        txCount={txCount}
-        weeklyCeiling={weeklyCeiling}
-        avgDailyDelta={mockAvgDailyDelta(from.toISOString().slice(0, 10))}
-        biggest={biggest}
-      />
+        <SpendingSummary
+          remaining={remaining}
+          weekTotal={weekTotal}
+          txCount={txCount}
+          weeklyCeiling={weeklyCeiling}
+          avgDailyDelta={mockAvgDailyDelta(from.toISOString().slice(0, 10))}
+          biggest={biggest}
+        />
 
-      <SpendingCategoryBreakdown
-        rows={breakdownRows}
-        rangeLabel={rangeLabel}
-      />
+        <SpendingCategoryBreakdown
+          rows={breakdownRows}
+          rangeLabel={rangeLabel}
+        />
+      </div>
 
       <SpendingCategoryFilter
         categories={filterCategories}

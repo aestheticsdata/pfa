@@ -34,13 +34,15 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
 
   return (
     <section className="sp-catrep">
+      {/* Compact margins (mb-3 / mb-2.5): this pane lives in the sticky zone,
+          where height is taken directly from the day cards (COS-101). */}
       <CardSectionHeader
-        className="mb-4.5"
+        className="mb-3"
         title="Répartition par catégorie"
         meta={`${rangeLabel} · semaine`}
       />
 
-      <div className="sp-cat-bar mb-4.5">
+      <div className="sp-cat-bar mb-2.5">
         {rows.map((r) => (
           <span
             key={r.key}
