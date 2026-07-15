@@ -1,6 +1,7 @@
 "use client";
 
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
+import GlowCard from "@components/shared/GlowCard";
 import { WEEKLY } from "@components/spendings/config/constants";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
@@ -33,7 +34,10 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
   }
 
   return (
-    <section className="sp-catrep">
+    <GlowCard
+      as="section"
+      className="sp-catrep"
+    >
       {/* Compact margins (mb-3 / mb-2.5): this pane lives in the sticky zone,
           where height is taken directly from the day cards (COS-101). */}
       <CardSectionHeader
@@ -99,7 +103,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
           total={selected.total}
         />
       )}
-    </section>
+    </GlowCard>
   );
 };
 

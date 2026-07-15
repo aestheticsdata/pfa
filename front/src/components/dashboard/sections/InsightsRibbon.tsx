@@ -6,6 +6,7 @@
 // are derived from real data. See REFACTO_NOTES.md §6.
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { DividedStrip } from "@components/shared/DividedStrip";
 import { Overline } from "@components/shared/Overline";
 import { MONTHLY } from "@components/spendings/config/constants";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
@@ -66,7 +67,7 @@ const InsightsRibbon = () => {
   const lastDayLabel = format(endOfMonth(monthRef), "d MMMM", { locale: fr });
 
   return (
-    <section className="grid grid-cols-1 gap-px overflow-hidden rounded-lg border border-line-soft bg-line-soft sm:grid-cols-3">
+    <DividedStrip className="grid-cols-1 sm:grid-cols-3">
       <Insight
         tone="bg-accent-strong/10 text-accent-strong"
         icon={<TrendingUp className="size-3.5" />}
@@ -100,7 +101,7 @@ const InsightsRibbon = () => {
         /jour à dépenser d&apos;ici le <b className="font-semibold text-ink">{lastDayLabel}</b> pour rester dans ton
         budget.
       </Insight>
-    </section>
+    </DividedStrip>
   );
 };
 
