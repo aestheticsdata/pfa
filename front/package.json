@@ -10,7 +10,8 @@
     "lint": "biome check ./src",
     "lint:fix": "biome check --write ./src",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "ds:prepare": "node .design-sync/prepare.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

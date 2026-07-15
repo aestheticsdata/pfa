@@ -1,0 +1,80 @@
+/* DS stylesheet source for design-sync — compiled by .design-sync/build-css.mjs.
+   Not used by the app; the app compiles styles/globals.css through Next/PostCSS. */
+
+/* The app gets Geist + Geist Mono from next/font/google (src/app/layout.tsx),
+   which only exists inside the Next runtime. Source the same families from the
+   font host so the bundle is self-sufficient. */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+
+@import '../styles/globals.css';
+
+/* Be explicit about what to scan. Tailwind's automatic detection is anchored on
+   the file that imports it (styles/globals.css) and was silently missing part of
+   the app — e.g. `py-4.5`, used in src/app/(public)/layout.tsx, never compiled. */
+@source "../src";
+
+/* The preview cards are source too. Without this, any class used ONLY in a
+   preview (and not in the app) silently resolves to nothing — the card still
+   renders, just subtly wrong, with no error anywhere. */
+@source "./previews";
+
+/* pfa is dark-only, but globals.css declares `@custom-variant dark (&:is(.dark *))`,
+   so every `dark:` utility compiles gated on a `.dark` ANCESTOR. The app has one
+   (src/app/layout.tsx); the preview host emits a bare <html><body>, so all of it
+   silently no-ops — measurably wrong on button, badge, input, checkbox, switch,
+   tabs, select and dropdown-menu. Re-declaring the variant here (after the import)
+   makes `dark:` unconditional, which is exactly right for a dark-only system and
+   keeps the `:root, .dark` token rewrite intact. */
+@custom-variant dark (&);
+
+/* Tailwind only compiles utilities it finds in the source it scans, so the app's
+   own usage decides the bundle. That is wrong for a design system: the design
+   agent writes NEW markup, and a class the app never happened to use would
+   silently resolve to nothing. Safelist the whole pfa palette across the
+   properties it can legitimately drive. Invalid combinations emit nothing. */
+@source inline(
+  "{text,bg,border,ring,outline,fill,stroke,from,via,to,divide,placeholder,caret,shadow}-{ink,ink-2,ink-3,ink-4,ink-5,surface-elev,surface-hi,surface-hover,line,line-soft,accent-strong,accent-d,accent-bg,neg,danger-solid,on-danger,danger-surface,danger-border-soft,exc,exc-bg,elec}"
+);
+/* Same reasoning for layout glue. The agent writes its own scaffolding, and the
+   app simply never used `gap-8`, `mt-8`, `space-y-4` or `grid-cols-4`, so none
+   of them existed. Safelist the numbered scale the design system documents. */
+@source inline(
+  "{p,px,py,pt,pr,pb,pl,m,mx,my,mt,mr,mb,ml,gap,gap-x,gap-y,space-x,space-y}-{0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,6.5,7,8,9,10,11,12,14,16,20,24}"
+);
+@source inline("grid-cols-{1,2,3,4,5,6,7,8,12}");
+@source inline("col-span-{1,2,3,4,5,6,7,8,9,10,11,12,full}");
+
+/* Sizing. Same reasoning as the spacing scale — and this one bit hard: `h-64` and
+   `max-w-md` did not exist, so ScrollArea could never overflow (no scrollbar) and
+   cards rendered full-width instead of at their intended size. It fails SILENTLY:
+   the element just ignores the class. */
+@source inline(
+  "{w,h,min-w,min-h,max-w,max-h,size}-{0,0.5,1,1.5,2,2.5,3,3.5,4,4.5,5,5.5,6,7,8,9,10,11,12,14,16,20,24,28,32,36,40,44,48,56,64,72,80,96}"
+);
+@source inline("{w,h,min-w,min-h,max-w,max-h}-{full,fit,auto,px,min,max,screen}");
+@source inline("max-w-{3xs,2xs,xs,sm,md,lg,xl,2xl,3xl,4xl,5xl}");
+
+@source inline("text-{2xs,3xs,display,display-lg}");
+@source inline("tracking-{snug,caps}");
+@source inline("font-{sans,mono}");
+@source inline("num");
+
+/* src/app/layout.tsx puts `dark` + next/font's variables on <html>. Preview cards
+   and generated designs have no app shell, so bind the variables here. */
+:root {
+  color-scheme: dark;
+  --font-geist-sans: 'Geist';
+  --font-geist-mono: 'Geist Mono';
+}
+
+/* Paint the page dark — deliberately UNLAYERED and specificity (0,0,2).
+   base.css already says `html, body { @apply bg-background }`, but it sits in
+   `@layer base`, and unlayered CSS beats any layer no matter how specific. The
+   generated preview cards ship their own unlayered `<style>body{background:#fff}`
+   (the converter assumes a light DS), which therefore won every time and rendered
+   pfa's near-white ink on white — invisible. `html body` outranks that `body`.
+   pfa is dark-only, so this is the honest default for cards and for designs. */
+html body {
+  background-color: var(--bg);
+  color: var(--ink);
+}
