@@ -159,7 +159,7 @@ const SpendingView = () => {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Search + summary + breakdown stay pinned under the app header while
+      {/* Search + category filter + summary + breakdown stay pinned under the app header while
           the timeline scrolls (desktop only — see .sp-sticky-zone). Tighter
           gap than the page flow (12px vs 20px): pinned chrome is denser than
           scrolling content, and every pixel here is taken from the cards. */}
@@ -167,7 +167,14 @@ const SpendingView = () => {
         <SpendingToolbar
           search={search}
           onSearchChange={setSearch}
-        />
+        >
+          <SpendingCategoryFilter
+            categories={filterCategories}
+            total={txCount}
+            selected={selectedCategory}
+            onSelect={setSelectedCategory}
+          />
+        </SpendingToolbar>
 
         <SpendingSummary
           remaining={remaining}
@@ -183,13 +190,6 @@ const SpendingView = () => {
           rangeLabel={rangeLabel}
         />
       </div>
-
-      <SpendingCategoryFilter
-        categories={filterCategories}
-        total={txCount}
-        selected={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
 
       {isInitialLoading ? (
         <div className="grid place-items-center py-16 text-sm text-ink-4">Chargement…</div>

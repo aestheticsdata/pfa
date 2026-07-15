@@ -18,7 +18,7 @@ export default async function PrivateLayout({ children }: { children: React.Reac
     >
       <SessionWatcher />
       <div className="min-h-screen w-full bg-background">
-        <div className="mx-auto w-full max-w-[2000px] px-4 pt-4 pb-16 sm:px-6 lg:px-8">
+        <div className="pfa-shell mx-auto w-full max-w-[2000px] px-4 pt-4 pb-16 sm:px-6 lg:px-8">
           <NavBar />
           <main>{children}</main>
         </div>

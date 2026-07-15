@@ -26,6 +26,32 @@
   backdrop-filter: blur(8px);
 }
 
+/* Opaque mask over the strip between the viewport top and the sticky header
+   (COS-104). .pfa-hdr sticks at top-4, so that 1rem band is bare viewport and
+   the page content scrolls straight through it, on every private page.
+   NOT on .pfa-hdr itself: its backdrop-filter makes the header the containing
+   block for fixed descendants, so a fixed ::before there would resolve against
+   the header instead of the viewport. It hangs off the shell, which has no
+   filter/transform of its own.
+   Height tracks the header's `top-4` (1rem), NOT the header's height: the
+   header is a single row on desktop but wraps to a much taller stack on mobile,
+   and only the gap above it needs covering. Masking the header's own box too
+   would kill its backdrop blur — which is the point of the glass look.
+   z-35: over the page content (and over the Dépenses band at z-30, though they
+   never overlap), under the header (z-40), the drawer/scrim (z-110/120) and the
+   detail overlays (z-200). */
+.pfa-shell::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1rem;
+  z-index: 35;
+  background: var(--bg);
+  pointer-events: none;
+}
+
 /* Reusable glow card (cards, kpis, modals on private screens) */
 .pfa-card {
   border: 1px solid transparent;
