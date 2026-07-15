@@ -8,6 +8,7 @@
   --text-display: 2.5rem; /* 40px — hero display number */
   --text-display-lg: 3.5rem; /* 56px — hero display, wide screens */
 
+  --tracking-snug: -0.01em; /* titles/labels — subtle tighten (native `tight` = -0.025em is 2.5× too much) */
   --tracking-caps: 0.08em; /* uppercase micro-labels */
 
   --font-smooch: Smooch Sans, sans-serif;

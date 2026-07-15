@@ -29,13 +29,13 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
 
   return (
     <>
-      <div className="pfa-card pfa-card-hover flex flex-col gap-2.5 rounded-[10px] px-[15px] pb-3 pt-[13px]">
+      <div className="pfa-card pfa-card-hover flex flex-col gap-2.5 rounded-lg px-4 pb-3 pt-3.5">
         <div className="flex items-center gap-2.5">
           <CategoryColorDot
             color={category.color}
             className="h-5 w-1 flex-none"
           />
-          <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium capitalize text-ink">{category.name}</span>
+          <span className="min-w-0 flex-1 truncate text-sm font-medium capitalize text-ink">{category.name}</span>
           <span className="flex flex-none gap-1.5">
             <IconButton
               variant="bordered"
@@ -58,7 +58,7 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
           </span>
         </div>
 
-        <span className="font-mono text-[11.5px] text-ink-4">
+        <span className="font-mono text-2xs text-ink-4">
           {used === 0 ? (
             "nouvelle catégorie · jamais utilisée"
           ) : (

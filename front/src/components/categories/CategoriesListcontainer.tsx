@@ -78,8 +78,8 @@ const CategoriesListcontainer = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-[18px] font-semibold tracking-[-0.01em] text-ink">Catégories</h1>
-        <span className="num rounded-full border border-line-soft bg-surface-elev px-2.5 py-[3px] text-[12px] text-ink-3">
+        <h1 className="text-lg font-semibold tracking-snug text-ink">Catégories</h1>
+        <span className="num rounded-full border border-line-soft bg-surface-elev px-2.5 py-1 text-xs text-ink-3">
           {allCats.length}
         </span>
 
@@ -92,7 +92,7 @@ const CategoriesListcontainer = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Rechercher une catégorie…"
-            className="w-full rounded-[6px] border border-line bg-surface-elev py-2 pl-8 pr-2.5 text-[13px] text-ink outline-none transition placeholder:text-ink-4 focus:border-accent-d"
+            className="w-full rounded-sm border border-line bg-surface-elev py-2 pl-8 pr-2.5 text-sm text-ink outline-none transition placeholder:text-ink-4 focus:border-accent-d"
           />
         </div>
 
@@ -110,7 +110,7 @@ const CategoriesListcontainer = () => {
         </Button>
       </div>
 
-      <p className="text-[12.5px] text-ink-4">
+      <p className="text-xs text-ink-4">
         Gérer tes catégories · part et fréquence <b className="font-medium text-ink-3">sur tout l&apos;historique</b>
       </p>
 
@@ -119,7 +119,7 @@ const CategoriesListcontainer = () => {
           <Spinner />
         </div>
       ) : visible.length === 0 ? (
-        <p className="py-6 text-[13px] text-ink-4">Aucune catégorie ne correspond.</p>
+        <p className="py-6 text-sm text-ink-4">Aucune catégorie ne correspond.</p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(238px,1fr))] gap-3">
           {visible.map((cat) => {
