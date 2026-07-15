@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 
 const LABEL = overlineClass;
 const INPUT =
-  "w-full rounded-[6px] border border-line bg-bg px-3 py-2.5 text-[14px] text-ink outline-none transition focus:border-accent-d";
+  "w-full rounded-sm border border-line bg-bg px-3 py-2.5 text-sm text-ink outline-none transition focus:border-accent-d";
 
 interface CategoryFormModalProps {
   open: boolean;
@@ -100,7 +100,7 @@ const CategoryFormBody = ({
                 type="button"
                 onClick={() => setColor(hex)}
                 className={cn(
-                  "size-[30px] rounded-[8px] border-2 transition-transform hover:scale-110",
+                  "size-[30px] rounded-md border-2 transition-transform hover:scale-110",
                   color.toLowerCase() === hex.toLowerCase() ? "border-ink" : "border-transparent",
                 )}
                 style={{ background: hex }}
@@ -109,19 +109,19 @@ const CategoryFormBody = ({
             ))}
           </div>
           <div className="mt-1 flex items-center gap-3">
-            <span className="text-[12.5px] text-ink-3">Personnalisée</span>
+            <span className="text-xs text-ink-3">Personnalisée</span>
             <input
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
-              className="h-[30px] w-[46px] cursor-pointer rounded-[8px] border border-line bg-transparent p-0"
+              className="h-[30px] w-[46px] cursor-pointer rounded-md border border-line bg-transparent p-0"
               aria-label="Couleur personnalisée"
             />
-            <span className="font-mono text-[12.5px] text-ink-4">{color}</span>
+            <span className="font-mono text-xs text-ink-4">{color}</span>
           </div>
         </div>
 
-        {error && <p className="text-[12.5px] text-neg">{error}</p>}
+        {error && <p className="text-xs text-neg">{error}</p>}
       </div>
 
       <DialogFooter>
