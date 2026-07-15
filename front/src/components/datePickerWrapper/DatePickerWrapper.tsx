@@ -78,17 +78,17 @@ const DatePickerWrapper = () => {
         type="button"
         onClick={toggleCalendar}
         className={cn(
-          "inline-flex select-none items-center gap-2.5 whitespace-nowrap rounded-lg border px-3.5 py-2 text-sm text-gray-200 shadow-lg transition-colors hover:cursor-pointer",
+          "inline-flex select-none items-center gap-2.5 whitespace-nowrap rounded-lg border px-3.5 py-2 text-sm text-ink-2 shadow-lg transition-colors hover:cursor-pointer",
           isCalendarVisible
-            ? "border-accent-d bg-[#151515]"
-            : "border-gray-700/50 bg-[#0c0c0c] hover:border-gray-600 hover:bg-[#151515]",
+            ? "border-accent-d bg-surface-elev"
+            : "border-line bg-bg hover:border-ink-4 hover:bg-surface-elev",
         )}
       >
-        <CalendarIcon className="size-4 shrink-0 text-gray-400" />
+        <CalendarIcon className="size-4 shrink-0 text-ink-4" />
         {selectedDays.length > 0 ? (
           <span className="num text-sm tracking-snug">
             {format(selectedDays[0], "dd MMM yyyy", { locale: fr })}
-            <span className="mx-1 text-gray-500">—</span>
+            <span className="mx-1 text-ink-5">—</span>
             {format(selectedDays[selectedDays.length - 1], "dd MMM yyyy", {
               locale: fr,
             })}
@@ -97,7 +97,7 @@ const DatePickerWrapper = () => {
           <span className="text-sm">Sélectionner une période</span>
         )}
         <ChevronDown
-          className={cn("size-3.5 shrink-0 text-gray-500 transition-transform", isCalendarVisible && "rotate-180")}
+          className={cn("size-3.5 shrink-0 text-ink-5 transition-transform", isCalendarVisible && "rotate-180")}
         />
       </button>
       {isCalendarVisible && (
