@@ -3,6 +3,7 @@
 import EditGlyph from "@components/dashboard/EditGlyph";
 import DailySparkline from "@components/dashboard/sections/DailySparkline";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
 import { MoneyAmount } from "@components/shared/MoneyAmount";
 import useDashboard from "@components/spendings/services/useDashboard";
@@ -79,7 +80,10 @@ const BudgetHero = () => {
   }, [editing, setFocus]);
 
   return (
-    <section className="pfa-card flex flex-col px-7 py-6">
+    <GlowCard
+      as="section"
+      className="flex flex-col px-7 py-6"
+    >
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col">
           <span className="text-xs font-medium uppercase tracking-widest text-ink-3">
@@ -181,7 +185,7 @@ const BudgetHero = () => {
       </div>
 
       <DailySparkline />
-    </section>
+    </GlowCard>
   );
 };
 

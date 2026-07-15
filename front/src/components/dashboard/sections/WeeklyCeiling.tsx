@@ -4,6 +4,7 @@ import EditGlyph from "@components/dashboard/EditGlyph";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
+import GlowCard from "@components/shared/GlowCard";
 import useWeeklyStatsHelper from "@components/spendings/helpers/useWeeklyStatsHelper";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
@@ -77,7 +78,10 @@ const WeeklyCeiling = () => {
   }, [editing, setFocus]);
 
   return (
-    <section className="pfa-card flex flex-col gap-4 px-6 py-5">
+    <GlowCard
+      as="section"
+      className="flex flex-col gap-4 px-6 py-5"
+    >
       <CardSectionHeader
         title="Plafond hebdomadaire"
         className="items-center"
@@ -189,7 +193,7 @@ const WeeklyCeiling = () => {
           dépassement
         </div>
       )}
-    </section>
+    </GlowCard>
   );
 };
 

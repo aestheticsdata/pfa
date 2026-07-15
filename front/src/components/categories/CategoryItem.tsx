@@ -3,6 +3,7 @@
 import { CategoryColorDot } from "@components/categories/CategoryColorDot";
 import CategoryFormModal from "@components/categories/CategoryFormModal";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
+import GlowCard from "@components/shared/GlowCard";
 import { IconButton } from "@components/shared/IconButton";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -29,7 +30,10 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
 
   return (
     <>
-      <div className="pfa-card pfa-card-hover flex flex-col gap-2.5 rounded-lg px-4 pb-3 pt-3.5">
+      <GlowCard
+        hover
+        className="flex flex-col gap-2.5 px-4 pb-3 pt-3.5"
+      >
         <div className="flex items-center gap-2.5">
           <CategoryColorDot
             color={category.color}
@@ -69,7 +73,7 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
             </>
           )}
         </span>
-      </div>
+      </GlowCard>
 
       <CategoryFormModal
         open={isEditOpen}

@@ -2,6 +2,7 @@
 
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
+import GlowCard from "@components/shared/GlowCard";
 import { IconButton } from "@components/shared/IconButton";
 import { MoneyAmount } from "@components/shared/MoneyAmount";
 import { Overline } from "@components/shared/Overline";
@@ -61,7 +62,10 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
   const upcomingSum = upcoming.reduce((a, r) => a + Number(r.amount), 0);
 
   return (
-    <section className="pfa-card flex max-h-[550px] min-h-[320px] flex-col gap-4 px-6 py-5">
+    <GlowCard
+      as="section"
+      className="flex max-h-[550px] min-h-[320px] flex-col gap-4 px-6 py-5"
+    >
       <div className="flex items-start justify-between">
         <div>
           <CardTitle>Dépenses fixes</CardTitle>
@@ -217,7 +221,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
           spending={invoiceFor}
         />
       )}
-    </section>
+    </GlowCard>
   );
 };
 

@@ -1,4 +1,5 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
+import GlowCard from "@components/shared/GlowCard";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import spendingsText from "@components/spendings/config/text";
 import useClickSort from "@components/spendings/helpers/useClickSort";
@@ -79,12 +80,7 @@ const SpendingDayItem = ({
     categorySpendings.find((s) => s.category === category)?.categoryColor ?? CATEGORY_FALLBACK;
 
   return (
-    <div
-      className={cn(
-        "relative bg-gradient-to-br from-[#121212] via-[#0a0a0a] to-black rounded-lg border overflow-hidden transition-all shadow-xl flex flex-col h-full",
-        isToday ? "border-elec" : "border-line-soft hover:border-line",
-      )}
-    >
+    <GlowCard className={cn("relative overflow-hidden transition-all flex flex-col h-full", isToday && "border-elec")}>
       {/* Header */}
       <div className="bg-linear-to-r from-surface-hi/60 to-surface-hi/40 px-4 py-2.5 border-b border-line shrink-0">
         <div className="flex items-center justify-between mb-2">
@@ -180,7 +176,7 @@ const SpendingDayItem = ({
           month={month}
         />
       )}
-    </div>
+    </GlowCard>
   );
 };
 

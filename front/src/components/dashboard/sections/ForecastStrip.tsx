@@ -4,6 +4,7 @@
 // (spent / days-elapsed × days-in-month). Spent + budget are real.
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
 import { Overline } from "@components/shared/Overline";
 import useDashboard from "@components/spendings/services/useDashboard";
@@ -40,7 +41,10 @@ const ForecastStrip = () => {
   const delta = projection - budget;
 
   return (
-    <section className="pfa-card grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[200px_1fr_200px] sm:gap-8">
+    <GlowCard
+      as="section"
+      className="grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[200px_1fr_200px] sm:gap-8"
+    >
       <div className="flex flex-col gap-1">
         <Overline>Dépensé · {format(asOf, "d MMM", { locale: fr })}</Overline>
         <AnimatedNumber
@@ -114,7 +118,7 @@ const ForecastStrip = () => {
           {delta > 0 ? "au-dessus" : "sous budget"}
         </span>
       </div>
-    </section>
+    </GlowCard>
   );
 };
 
