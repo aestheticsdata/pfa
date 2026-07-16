@@ -41,12 +41,12 @@
      ============================================================ */
 
   /* Surfaces (bg → foreground) */
-  --bg:         oklch(0.14 0.042 234);
+  --surface-base:    oklch(0.14 0.042 234);
   --surface-elev:    oklch(0.205 0.006 250);
   --surface-hi:      oklch(0.215 0.007 250);
   --surface-hover:   oklch(0.22 0.006 250);
   --line:       oklch(0.27 0.008 250);
-  /* Must stay ABOVE every surface it draws on (bg, surface-elev, surface-hi):
+  /* Must stay ABOVE every surface it draws on (surface-base, surface-elev, surface-hi):
      a hairline is only a line if it is lighter than the fill behind it. At 0.20
      it sat *under* surface-elev (0.205) and every separator on a card vanished.
      0.24 restores the design's spacing: ~.035 above the card, ~.03 below --line. */
@@ -80,7 +80,7 @@
   --elec:          oklch(0.72 0.15 230); /* "aujourd'hui" */
 
   /* ===== shadcn semantic tokens remapped onto the pfa palette ===== */
-  --background: var(--bg);
+  --background: var(--surface-base);
   --foreground: var(--ink);
   --card: var(--surface-elev);
   --card-foreground: var(--ink);
@@ -98,7 +98,7 @@
   --destructive-foreground: oklch(0.15 0.01 25);
   --border: var(--line);
   --input: var(--line);
-  --input-background: var(--bg);
+  --input-background: var(--surface-base);
   --ring: var(--accent-d);
 
   --chart-1: var(--accent-strong);
@@ -158,6 +158,7 @@
   --color-ink-3: var(--ink-3);
   --color-ink-4: var(--ink-4);
   --color-ink-5: var(--ink-5);
+  --color-surface-base: var(--surface-base);
   --color-surface-elev: var(--surface-elev);
   --color-surface-hi: var(--surface-hi);
   --color-surface-hover: var(--surface-hover);

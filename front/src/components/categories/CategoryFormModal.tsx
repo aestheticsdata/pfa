@@ -9,7 +9,7 @@ import { useMemo, useState } from "react";
 
 const LABEL = overlineClass;
 const INPUT =
-  "w-full rounded-sm border border-line bg-bg px-3 py-2.5 text-sm text-ink outline-none transition focus:border-accent-d";
+  "w-full rounded-sm border border-line bg-surface-base px-3 py-2.5 text-sm text-ink outline-none transition focus:border-accent-d";
 
 interface CategoryFormModalProps {
   open: boolean;

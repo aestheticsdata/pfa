@@ -88,23 +88,23 @@ All colours are oklch. Lightness is the first number — it's the thing to reaso
 
 | Token | Value | Utility | Use |
 |---|---|---|---|
-| `--bg` | `oklch(0.14 0.042 234)` | `bg-background` ⚠️ | page background — the darkest thing |
+| `--surface-base` | `oklch(0.14 0.042 234)` | `bg-surface-base` | page background — the darkest thing |
 | `--surface-elev` | `oklch(0.205 0.006 250)` | `bg-surface-elev` | cards, modals, popovers |
 | `--surface-hi` | `oklch(0.215 0.007 250)` | `bg-surface-hi` | inset chips, meter tracks, controls |
 | `--surface-hover` | `oklch(0.22 0.006 250)` | `bg-surface-hover` | hover state |
 | `--line` | `oklch(0.27 0.008 250)` | `border-line` | default border |
 | `--line-soft` | `oklch(0.24 0.006 250)` | `border-line-soft` | internal dividers |
 
-> ⚠️ **There is no `bg-bg` utility.** `--bg` is the only surface token *not* exposed in `@theme
-> inline`, so `bg-bg` compiles to nothing and fails silently — no build error, no background. Reach
-> the page colour through the shadcn remap (`--background: var(--bg)`), i.e. **`bg-background`**,
-> which is what `layout.tsx` puts on `<body>`. Four files currently use the dead class (§11.6).
+> **`--surface-base` is the base of the surface ladder** (`surface-base → surface-elev → surface-hi`).
+> Use **`bg-surface-base`** in PFA code. shadcn's own remap (`--background: var(--surface-base)`) gives
+> `bg-background` the same colour — keep that inside `ui/*`, but reach for `bg-surface-base` everywhere
+> else.
 
 **A card is lighter than the page.** Surfaces get *lighter* as they come forward (0.14 → 0.205 →
-0.22). If you find yourself making a card darker than `--bg`, you've inverted the system.
+0.22). If you find yourself making a card darker than `--surface-base`, you've inverted the system.
 
 **A hairline is only a line if it's lighter than the fill behind it.** `--line-soft` must stay above
-*every* surface it draws on — `--bg` 0.14, `--surface-elev` 0.205, `--surface-hi` 0.215,
+*every* surface it draws on — `--surface-base` 0.14, `--surface-elev` 0.205, `--surface-hi` 0.215,
 `--surface-hover` 0.22. At 0.20 it sat *under* `--surface-elev`, and every separator on a card
 vanished (COS-105). 0.24 clears the highest surface by 0.02 and sits ~0.03 under `--line`. **If you
 ever raise a surface above 0.24, raise `--line-soft` with it** — the tightest constraint is
@@ -156,7 +156,7 @@ variant="danger">`, or `<ConfirmDeleteDialog>`.
 
 ### shadcn remap
 
-`--background` → `--bg` · `--card` / `--popover` → `--surface-elev` · `--primary` →
+`--background` → `--surface-base` · `--card` / `--popover` → `--surface-elev` · `--primary` →
 `--accent-strong` · `--muted-foreground` → `--ink-3` · `--border` / `--input` → `--line` ·
 `--destructive` → `--neg` · `--ring` → `--accent-d`.
 
@@ -448,16 +448,7 @@ Honest list — worth knowing before you trip on them:
    `fonts.googleapis.com` for three unused families. Leftovers from the pre-Geist design. Deleting
    the `@import` and the three tokens is safe and is a real performance win; it just hasn't been
    ticketed.
-6. **`bg-bg` is a dead class shipped in four places.** `--bg` is the one surface token missing from
-   `@theme inline`, so `bg-bg` generates no CSS — it fails silently, with no build error. It's
-   currently used at `app/error.tsx:17`, `app/error.tsx:42`,
-   `datePickerWrapper/DatePickerWrapper.tsx:84` and `categories/CategoryFormModal.tsx:12`, all of
-   which render with no background as a result. Two fixes are possible and someone should pick one:
-   swap the call sites to `bg-background`, or add `--color-bg: var(--bg)` to `@theme inline` so the
-   name works as everyone already expects. The second is probably right — the whole palette is
-   exposed this way, `--bg` is the lone exception, and the fact that four independent call sites
-   reached for `bg-bg` is evidence the name is the intuitive one.
-7. **No z-index tokens** (§6b). A real seven-rung ladder exists as bare literals in four files, with
+6. **No z-index tokens** (§6b). A real seven-rung ladder exists as bare literals in four files, with
    30 doubly assigned. Add a rung by reading the table and hoping.
 
 ---

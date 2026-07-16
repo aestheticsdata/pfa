@@ -36,7 +36,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
     >
       <div
         className={cn(
-          "flex items-stretch overflow-hidden rounded-md border border-line bg-background transition-opacity",
+          "flex items-stretch overflow-hidden rounded-md border border-line bg-surface-base transition-opacity",
           asRecurring ? "opacity-45" : "focus-within:border-accent-d",
         )}
       >

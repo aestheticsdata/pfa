@@ -73,7 +73,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
             />
             <span className="flex min-w-0 items-baseline gap-2">
               <span className="truncate capitalize text-ink">{r.name}</span>
-              <span className="num shrink-0 rounded-full border border-line-soft bg-background px-1.75 text-2xs leading-normal text-ink-3">
+              <span className="num shrink-0 rounded-full border border-line-soft bg-surface-base px-1.75 text-2xs leading-normal text-ink-3">
                 {r.count}
               </span>
             </span>

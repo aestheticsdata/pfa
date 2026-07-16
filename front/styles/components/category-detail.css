@@ -174,7 +174,7 @@
   font-family: inherit;
   font-size: 13.5px;
   color: var(--ink);
-  background: var(--bg);
+  background: var(--surface-base);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   outline: none;
@@ -301,7 +301,7 @@
   color: var(--accent-strong);
 }
 .catd-day-list {
-  background: var(--bg);
+  background: var(--surface-base);
   border-top: 1px solid var(--line-soft);
   padding: 6px 18px;
 }

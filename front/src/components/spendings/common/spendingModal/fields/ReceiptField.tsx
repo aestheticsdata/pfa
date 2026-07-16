@@ -30,7 +30,7 @@ const ReceiptField = ({ receiptFile, receiptPreview, onReceiptFile, clearReceipt
         </span>
       </Dropzone>
     ) : (
-      <div className="flex items-center gap-3 rounded-md border border-line bg-background p-2 pr-2.5">
+      <div className="flex items-center gap-3 rounded-md border border-line bg-surface-base p-2 pr-2.5">
         {receiptPreview && (
           <Image
             src={receiptPreview}

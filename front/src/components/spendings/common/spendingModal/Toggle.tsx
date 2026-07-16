@@ -21,7 +21,9 @@ const Toggle = ({
     aria-pressed={active}
     className={cn(
       "inline-flex select-none items-center gap-2 rounded-md border px-3 py-2 text-xs transition-colors",
-      active ? "border-accent-d bg-accent-strong/10 text-ink" : "border-line bg-background text-ink-3 hover:text-ink-2",
+      active
+        ? "border-accent-d bg-accent-strong/10 text-ink"
+        : "border-line bg-surface-base text-ink-3 hover:text-ink-2",
       disabled && "cursor-not-allowed opacity-45 hover:text-ink-3",
     )}
   >

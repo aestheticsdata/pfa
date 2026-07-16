@@ -218,7 +218,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
           <div
             className={cn(
               "mx-5.5 overflow-hidden rounded-xl border border-line",
-              invoiceImage || pendingPreview ? "bg-[#b3ada4]" : "bg-background",
+              invoiceImage || pendingPreview ? "bg-[#b3ada4]" : "bg-surface-base",
             )}
           >
             {isLoading && !isProgress ? (

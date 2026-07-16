@@ -17,7 +17,7 @@ export default async function PublicLayout({ children }: { children: React.React
       initialUser={session?.user ?? null}
       initialCsrfToken={session?.csrfToken ?? null}
     >
-      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-background">
+      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-surface-base">
         <div
           className="auth-grain"
           aria-hidden

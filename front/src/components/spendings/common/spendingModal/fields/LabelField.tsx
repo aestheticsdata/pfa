@@ -33,7 +33,7 @@ const LabelField = ({
     <TextInput
       id="spendingLabel"
       placeholder="Ex : Boulangerie du coin"
-      className="dark:bg-background"
+      className="dark:bg-surface-base"
       {...register("spendingLabel", {
         onChange: (e) => setLabelQuery(e.target.value),
       })}
