@@ -40,3 +40,60 @@ location /api {
 2. **If no Set-Cookie**: issue on Nest or proxy side (missing headers)
 3. **If Set-Cookie present but cookie not stored**: likely `Secure` on an HTTP site → add `COOKIE_SECURE=false` in `.env`
 4. **If cookie stored but requests return 401**: `withCredentials` must be `true` (already configured in `useRequestHelper.js`)
+
+## Deploy changelog
+
+Each successful deploy appends an entry (newest first) to a per-app text log listing the commits that
+ship in that version, with their Linear ticket numbers:
+
+| App | URL | File on server |
+|-----|-----|----------------|
+| Front | `https://pfa.1991computer.com/deploys-front.txt` | `/var/www/pfa/deploy-logs/deploys-front.txt` |
+| API | `https://pfa.1991computer.com/deploys-api.txt` | `/var/www/pfa/deploy-logs/deploys-api.txt` |
+
+Both URLs are protected by HTTP Basic Auth. The logs live at a stable path outside the release
+directories, so they survive the atomic release switch. Only the commits added **since that app's
+previous deploy** are recorded (tracked via `/var/www/pfa/deploy-logs/.last-<app>` marker files).
+
+### One-time server setup
+
+```bash
+# 1. Create the Basic Auth credentials (needs apache2-utils)
+htpasswd -bc /var/www/pfa/deploy-logs/.htpasswd <user> <password>
+```
+
+```nginx
+# 2. Add to the nginx server block (same file that proxies /api).
+#    Exact-match locations, so they take priority over the Next proxy and expose ONLY these two files.
+location = /deploys-front.txt {
+  alias /var/www/pfa/deploy-logs/deploys-front.txt;
+  default_type text/plain; charset utf-8;
+  add_header X-Robots-Tag "noindex, nofollow" always;
+  add_header Cache-Control "no-store" always;
+  auth_basic "PFA deploys";
+  auth_basic_user_file /var/www/pfa/deploy-logs/.htpasswd;
+}
+location = /deploys-api.txt {
+  alias /var/www/pfa/deploy-logs/deploys-api.txt;
+  default_type text/plain; charset utf-8;
+  add_header X-Robots-Tag "noindex, nofollow" always;
+  add_header Cache-Control "no-store" always;
+  auth_basic "PFA deploys";
+  auth_basic_user_file /var/www/pfa/deploy-logs/.htpasswd;
+}
+```
+
+```bash
+# 3. Reload nginx
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+### First run
+
+- **Front**: automatic — the current live commit is read from the newest `public_html/releases/` folder,
+  so the first entry already shows the correct delta.
+- **API**: the API deploy leaves no hash on the server, so the first run seeds the marker and prints a
+  labeled *last 10 commits* baseline. To make even that first entry a precise delta, pass the currently
+  deployed commit once: `PFA_SINCE=<hash> ./nest-api/deploy-api.sh`.
+
+Every deploy after the first is fully automatic for both apps.
