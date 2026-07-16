@@ -14,7 +14,7 @@ const AmountField = ({ register, errors }: AmountFieldProps) => (
     htmlFor="spendingAmount"
     error={errors.spendingAmount?.message}
   >
-    <div className="flex items-baseline gap-2 rounded-md border border-line bg-background px-3 py-2.5 transition-colors focus-within:border-accent-d">
+    <div className="flex items-baseline gap-2 rounded-md border border-line bg-surface-base px-3 py-2.5 transition-colors focus-within:border-accent-d">
       <input
         id="spendingAmount"
         inputMode="decimal"

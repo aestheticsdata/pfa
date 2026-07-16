@@ -105,7 +105,7 @@
        ~60px tall → its bottom sits at 76px. */
     top: 76px;
     z-index: 30;
-    background: var(--bg);
+    background: var(--surface-base);
     /* Bleeds the opaque background across the layout container's gutter (px-6
        here, px-8 from lg — keep in sync with PrivateLayout). The band and the
        cards are the same width to the pixel, both being in that container, so

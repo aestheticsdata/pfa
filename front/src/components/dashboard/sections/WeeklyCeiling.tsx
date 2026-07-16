@@ -108,7 +108,7 @@ const WeeklyCeiling = () => {
             >
               <Input
                 defaultValue={ceiling}
-                className="num h-7 w-24 border-accent-d bg-background text-ink"
+                className="num h-7 w-24 border-accent-d bg-surface-base text-ink"
                 onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
                   if (e.key === "Escape") setEditing(false);
                 }}

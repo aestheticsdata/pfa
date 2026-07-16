@@ -110,7 +110,7 @@ const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
           style={{ background: datum.color }}
         />
         <span className="truncate text-sm font-medium capitalize text-ink">{datum.name}</span>
-        <span className="num ml-auto shrink-0 rounded-full border border-line-soft bg-background px-2 text-2xs leading-normal text-ink-3">
+        <span className="num ml-auto shrink-0 rounded-full border border-line-soft bg-surface-base px-2 text-2xs leading-normal text-ink-3">
           {datum.count}
         </span>
       </div>

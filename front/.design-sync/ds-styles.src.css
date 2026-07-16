@@ -33,7 +33,7 @@
    silently resolve to nothing. Safelist the whole pfa palette across the
    properties it can legitimately drive. Invalid combinations emit nothing. */
 @source inline(
-  "{text,bg,border,ring,outline,fill,stroke,from,via,to,divide,placeholder,caret,shadow}-{ink,ink-2,ink-3,ink-4,ink-5,surface-elev,surface-hi,surface-hover,line,line-soft,accent-strong,accent-d,accent-bg,neg,danger-solid,on-danger,danger-surface,danger-border-soft,exc,exc-bg,elec}"
+  "{text,bg,border,ring,outline,fill,stroke,from,via,to,divide,placeholder,caret,shadow}-{ink,ink-2,ink-3,ink-4,ink-5,surface-base,surface-elev,surface-hi,surface-hover,line,line-soft,accent-strong,accent-d,accent-bg,neg,danger-solid,on-danger,danger-surface,danger-border-soft,exc,exc-bg,elec}"
 );
 /* Same reasoning for layout glue. The agent writes its own scaffolding, and the
    app simply never used `gap-8`, `mt-8`, `space-y-4` or `grid-cols-4`, so none
@@ -75,6 +75,6 @@
    pfa's near-white ink on white — invisible. `html body` outranks that `body`.
    pfa is dark-only, so this is the honest default for cards and for designs. */
 html body {
-  background-color: var(--bg);
+  background-color: var(--surface-base);
   color: var(--ink);
 }

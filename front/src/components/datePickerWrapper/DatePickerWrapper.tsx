@@ -81,7 +81,7 @@ const DatePickerWrapper = () => {
           "inline-flex select-none items-center gap-2.5 whitespace-nowrap rounded-lg border px-3.5 py-2 text-sm text-ink-2 shadow-lg transition-colors hover:cursor-pointer",
           isCalendarVisible
             ? "border-accent-d bg-surface-elev"
-            : "border-line bg-bg hover:border-ink-4 hover:bg-surface-elev",
+            : "border-line bg-surface-base hover:border-ink-4 hover:bg-surface-elev",
         )}
       >
         <CalendarIcon className="size-4 shrink-0 text-ink-4" />

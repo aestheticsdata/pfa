@@ -14,7 +14,7 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
   }, [error]);
 
   return (
-    <div className="min-h-screen w-full bg-bg px-4 py-16">
+    <div className="min-h-screen w-full bg-surface-base px-4 py-16">
       <div className="mx-auto flex max-w-2xl flex-col items-center rounded-xl border border-line bg-surface-elev p-8 text-ink shadow-card backdrop-blur-sm">
         <p className="mb-2 text-xs uppercase tracking-[0.22em] text-neg">Application Error</p>
         <h1 className="mb-4 text-center text-3xl font-bold">Something went wrong</h1>
@@ -39,7 +39,9 @@ export default function ErrorPage({ error, reset }: ErrorPageProps) {
         </div>
 
         {process.env.NODE_ENV !== "production" && (
-          <pre className="mt-6 w-full overflow-auto rounded-sm bg-bg p-3 text-xs text-neg">{error.message}</pre>
+          <pre className="mt-6 w-full overflow-auto rounded-sm bg-surface-base p-3 text-xs text-neg">
+            {error.message}
+          </pre>
         )}
       </div>
     </div>
