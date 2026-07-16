@@ -111,6 +111,13 @@ deploy() {
   local STAGING_DIR="$RELEASES_DIR/$RELEASE_NAME"
   local SWITCH_DONE="false"
 
+  # Current live front commit, read from the newest release folder name (…-<hash>) before this
+  # deploy's own staging folder is created. Used only to seed the changelog on the very first run
+  # (no marker yet). Non-fatal: an empty value just falls back to the last-10 baseline.
+  local PREV_FROM_SERVER
+  PREV_FROM_SERVER=$(ssh "$REMOTE_USER_HOST" "ls -1 '$RELEASES_DIR' 2>/dev/null | sort | tail -1" 2>/dev/null \
+    | sed -nE 's/.*-([0-9a-f]{7,40})$/\1/p' || true)
+
   on_error() {
     local lineno=$1
     log "❌ ERROR: Deployment failed at line $lineno"
@@ -126,6 +133,70 @@ deploy() {
     else
       log "ℹ️  No rollback needed: production was not modified yet"
     fi
+  }
+
+  # Prepend this deploy's commits (+ Linear tickets) to the served changelog.
+  # Always invoked as `write_deploy_log || log ...`, so errexit is ignored throughout:
+  # a changelog hiccup can never fail or roll back an otherwise successful deploy.
+  write_deploy_log() {
+    local APP="front"
+    local LOG_DIR="$WEB_ROOT_BASE/deploy-logs"
+    local LOG_FILE="$LOG_DIR/deploys-$APP.txt"
+    local MARKER="$LOG_DIR/.last-$APP"
+    local FULL_HASH WHEN PREV_HASH TICKETS COMMITS ENTRY_TMP
+    local -a RANGE
+    FULL_HASH=$(git rev-parse HEAD)
+    WHEN=$(date +'%Y-%m-%d %H:%M:%S')
+
+    # Resolve the range base (previous deployed commit). Only used when no marker exists yet.
+    # Order: marker (steady state) -> PFA_SINCE override -> newest release folder hash -> last-10 baseline.
+    PREV_HASH=$(ssh "$REMOTE_USER_HOST" "cat '$MARKER' 2>/dev/null || true")
+    [ -z "$PREV_HASH" ] && PREV_HASH="${PFA_SINCE:-}"
+    [ -z "$PREV_HASH" ] && PREV_HASH="${PREV_FROM_SERVER:-}"
+    if [ -n "$PREV_HASH" ] && ! git cat-file -e "${PREV_HASH}^{commit}" 2>/dev/null; then
+      PREV_HASH=""
+    fi
+    if [ -n "$PREV_HASH" ]; then
+      RANGE=("${PREV_HASH}..HEAD")
+    else
+      RANGE=(-n 10 HEAD)
+    fi
+
+    # One git-log call, captured into a var (pipefail-safe: no `| grep -q` on a pipe git may SIGPIPE).
+    COMMITS=$(git log --no-merges --pretty=format:'  %h  %ad  %s' --date=short "${RANGE[@]}")
+    TICKETS=$(printf '%s\n' "$COMMITS" \
+      | grep -oiE 'COS-[0-9]+' | tr 'a-z' 'A-Z' | sort -t- -k2,2n -u | paste -sd ',' - | sed 's/,/, /g' || true)
+
+    ENTRY_TMP=$(mktemp)
+    {
+      echo "=== $WHEN · branch $GIT_BRANCH_RAW · deploy $GIT_HASH ==="
+      [ -n "$TICKETS" ] && echo "Tickets: $TICKETS"
+      [ -z "$PREV_HASH" ] && echo "  (first recorded deploy — baseline: last 10 commits, not full history)"
+      if [ -n "$COMMITS" ]; then
+        printf '%s\n' "$COMMITS"
+      else
+        echo "  (no new commit — redeploy of $GIT_HASH)"
+      fi
+      echo
+    } > "$ENTRY_TMP"
+
+    # Commit messages travel as file content (scp), never interpolated into a shell command.
+    ssh "$REMOTE_USER_HOST" "mkdir -p '$LOG_DIR'"
+    scp -q "$ENTRY_TMP" "$REMOTE_USER_HOST:$LOG_DIR/.entry.tmp"
+    ssh "$REMOTE_USER_HOST" \
+      LOG_DIR="$LOG_DIR" \
+      LOG_FILE="$LOG_FILE" \
+      MARKER="$MARKER" \
+      FULL_HASH="$FULL_HASH" \
+      'bash -s' << 'EOF'
+set -Eeuo pipefail
+touch "$LOG_FILE"
+cat "$LOG_DIR/.entry.tmp" "$LOG_FILE" > "$LOG_FILE.new"
+mv "$LOG_FILE.new" "$LOG_FILE"
+rm -f "$LOG_DIR/.entry.tmp"
+printf '%s\n' "$FULL_HASH" > "$MARKER"
+EOF
+    rm -f "$ENTRY_TMP"
   }
 
   trap 'on_error $LINENO' ERR
@@ -242,6 +313,8 @@ EOF
   remote_pm2_reload
 
   trap - ERR
+
+  write_deploy_log || log "⚠️  Deploy changelog update skipped (non-fatal)"
 
   log "✅ Deployment completed successfully"
   log "ℹ️  Next.js app settings are read from $PM2_ECOSYSTEM_FILE"
