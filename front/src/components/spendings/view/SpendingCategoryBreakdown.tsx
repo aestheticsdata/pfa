@@ -5,8 +5,11 @@ import GlowCard from "@components/shared/GlowCard";
 import { WEEKLY } from "@components/spendings/config/constants";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
 import { CategoryBarTooltip, CategoryTrend } from "@lib/dataviz";
 import { euro } from "@lib/format";
+import { cn } from "@lib/utils";
+import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
@@ -14,6 +17,30 @@ import type { BarHover } from "@lib/dataviz";
 
 // MOCK — needs previous-week data (see mockSpending.ts). De-mocks with COS-35.
 const Trend = ({ name }: { name: string }) => <CategoryTrend {...mockCategoryTrend(name)} />;
+
+// Persisted open/closed state of the detail list (COS-112). The segment bar stays
+// visible whatever the state — it IS the collapsed summary (hover gives per-category
+// detail), so folding the list only trades the breakdown table for sticky-zone height.
+const COLLAPSE_KEY = "pfa:sp-catrep-collapsed";
+const DETAIL_ID = "sp-catrep-detail";
+
+// Lazy initial value: honour the stored choice, else default collapsed in the desktop
+// sticky zone (≥ 768px, where the height matters) and expanded on mobile (not sticky).
+// SSR renders `null` here (rows are client-fetched → empty), so reading window is safe.
+const initialCollapsed = () => {
+  if (typeof window === "undefined") {
+    return true;
+  }
+  const stored = window.localStorage.getItem(COLLAPSE_KEY);
+  if (stored !== null) {
+    return stored === "1";
+  }
+  return window.matchMedia("(min-width: 768px)").matches;
+};
+
+// Has the user ever chosen a state? While they haven't, a first-visit hint nudges
+// them to unfold — the reason collapsed-by-default is acceptable (see COS-112).
+const initialHasStoredPref = () => typeof window !== "undefined" && window.localStorage.getItem(COLLAPSE_KEY) !== null;
 
 interface SpendingCategoryBreakdownProps {
   rows: BreakdownRow[];
@@ -28,10 +55,39 @@ interface SpendingCategoryBreakdownProps {
 const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdownProps) => {
   const [selected, setSelected] = useState<BreakdownRow | null>(null);
   const [hover, setHover] = useState<BarHover<BreakdownRow> | null>(null);
+  const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const [hasStoredPref, setHasStoredPref] = useState(initialHasStoredPref);
+
+  const toggleCollapsed = () => {
+    const next = !collapsed;
+    setCollapsed(next);
+    setHasStoredPref(true);
+    window.localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
+  };
 
   if (rows.length === 0) {
     return null;
   }
+
+  // First-visit discoverability nudge: only until a choice is stored, and only
+  // when there is hidden detail to reveal.
+  const showHint = !hasStoredPref && collapsed;
+
+  const caret = (
+    <button
+      type="button"
+      onClick={toggleCollapsed}
+      aria-expanded={!collapsed}
+      aria-controls={DETAIL_ID}
+      aria-label={collapsed ? "Afficher le détail par catégorie" : "Masquer le détail par catégorie"}
+      className="grid size-6 cursor-pointer place-items-center rounded-md text-ink-3 transition-colors hover:bg-surface-hi hover:text-ink"
+    >
+      <ChevronDown
+        className={cn("size-4 transition-transform", !collapsed && "rotate-180")}
+        aria-hidden
+      />
+    </button>
+  );
 
   return (
     <GlowCard
@@ -43,7 +99,24 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
       <CardSectionHeader
         className="mb-3"
         title="Répartition par catégorie"
-        meta={`${rangeLabel} · semaine`}
+        action={
+          <div className="flex items-center gap-3 self-center">
+            <span className="text-xs text-ink-4">{rangeLabel} · semaine</span>
+            {showHint ? (
+              <Tooltip>
+                <TooltipTrigger asChild>{caret}</TooltipTrigger>
+                <TooltipContent
+                  side="bottom"
+                  sideOffset={6}
+                >
+                  Déplier pour voir le détail
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              caret
+            )}
+          </div>
+        }
       />
 
       <div className="sp-cat-bar mb-2.5">
@@ -59,29 +132,40 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
         ))}
       </div>
 
-      <div className="sp-cat-list">
-        {rows.map((r) => (
-          <button
-            key={r.key}
-            type="button"
-            onClick={() => setSelected(r)}
-            className="sp-cat-row w-full text-left"
-          >
-            <span
-              className="size-2 rounded-xs"
-              style={{ background: r.color }}
-            />
-            <span className="flex min-w-0 items-baseline gap-2">
-              <span className="truncate capitalize text-ink">{r.name}</span>
-              <span className="num shrink-0 rounded-full border border-line-soft bg-surface-base px-1.75 text-2xs leading-normal text-ink-3">
-                {r.count}
-              </span>
-            </span>
-            <span className="num text-right text-ink-2">{r.pct.toFixed(1).replace(".", ",")} %</span>
-            <span className="num text-right text-ink">{euro(r.total)} €</span>
-            <Trend name={r.name} />
-          </button>
-        ))}
+      <div
+        id={DETAIL_ID}
+        className="sp-cat-collapse"
+        data-collapsed={collapsed}
+      >
+        <div
+          className="sp-cat-collapse-inner"
+          inert={collapsed}
+        >
+          <div className="sp-cat-list">
+            {rows.map((r) => (
+              <button
+                key={r.key}
+                type="button"
+                onClick={() => setSelected(r)}
+                className="sp-cat-row w-full text-left"
+              >
+                <span
+                  className="size-2 rounded-xs"
+                  style={{ background: r.color }}
+                />
+                <span className="flex min-w-0 items-baseline gap-2">
+                  <span className="truncate capitalize text-ink">{r.name}</span>
+                  <span className="num shrink-0 rounded-full border border-line-soft bg-surface-base px-1.75 text-2xs leading-normal text-ink-3">
+                    {r.count}
+                  </span>
+                </span>
+                <span className="num text-right text-ink-2">{r.pct.toFixed(1).replace(".", ",")} %</span>
+                <span className="num text-right text-ink">{euro(r.total)} €</span>
+                <Trend name={r.name} />
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {hover && (
