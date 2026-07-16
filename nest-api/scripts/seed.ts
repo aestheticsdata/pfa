@@ -1,24 +1,30 @@
 /**
- * One-off mock-data seeder for the local demo account `abc@abc.com`.
+ * Mock-data seeder for the local demo account `abc@abc.com`.
  *
- * Generates a coherent "Paris life on ~3500 €/month" dataset spread over
- * 2023-01 → 2026-07-08 (today): monthly budgets, ~12 recurring charges,
- * ~14 categories and thousands of realistic variable spendings, plus a few
- * one-off exceptionals.
+ * Generates a coherent "Paris life on ~3500 €/month" dataset: monthly budgets,
+ * ~12 recurring charges, ~14 categories and thousands of realistic variable
+ * spendings, plus a few one-off exceptionals.
  *
- * Strategy: wipe this account's placeholder rows (scoped + guarded), then
- * bulk-insert fresh data. Deterministic (seeded PRNG) so re-runs reproduce.
+ * Two modes, selected on the CLI (the date range is ALWAYS required):
  *
- * Run from nest-api/ (or `pnpm seed`):
- *   TS_NODE_TRANSPILE_ONLY=1 \
- *   TS_NODE_COMPILER_OPTIONS='{"module":"CommonJS","moduleResolution":"Node","resolvePackageJsonExports":false}' \
- *   node -r ts-node/register scripts/seed.ts
+ *   pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wipe]
  *
- * It is idempotent: re-running wipes this account's seeded rows and rebuilds
- * the same dataset (fixed PRNG seed).
+ *   • default (append)  — nothing is deleted. Budgets/recurrings are created
+ *     only for months that don't already have them (so monthly totals stay
+ *     correct), but SPENDINGS are always generated for every day in the range
+ *     and added, even on days that already have spendings. Re-running a range
+ *     just piles on more spendings — by design, kept simple.
+ *   • --wipe            — deletes ALL of this account's seeded rows first, then
+ *     regenerates the whole range from scratch.
+ *
+ *   --to defaults to today when omitted.
+ *
+ * The PRNG is seeded per-month, so each month is reproducible on its own.
  *
  * NOTE: this is a standalone tool, not app code — it imports the gitignored
  * generated Prisma client by relative path (no path alias exists for it).
+ *
+ * See scripts/seeding-guide.md for the full guide.
  */
 
 import { readFileSync } from "node:fs";
@@ -63,26 +69,112 @@ const USER_ID = "6c0183a0-9116-11ed-9ee4-d93e666919a2";
 const USER_EMAIL = "abc@abc.com";
 const CUR = "EUR";
 
-const RANGE_START = { y: 2023, m: 0 }; // 2023-01 (m is 0-based)
-const RANGE_END = { y: 2026, m: 6 }; //   2026-07
-const TODAY = { y: 2026, m: 6, d: 8 }; // 2026-07-08 — daily-spending cutoff
+// --------------------------------------------------------------------------
+// CLI parsing
+// --------------------------------------------------------------------------
+/** Year / month (0-based) / day-of-month. */
+interface Ymd {
+  y: number;
+  m: number;
+  d: number;
+}
+
+class UsageError extends Error {}
+
+const USAGE = `Usage: pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wipe]
+
+  --from <YYYY-MM-DD>   Start date (inclusive). Required.
+  --to   <YYYY-MM-DD>   End date (inclusive). Defaults to today.
+  --wipe                Delete ALL of ${USER_EMAIL}'s seeded rows first, then
+                        regenerate the whole range. Without it the script runs
+                        in append mode: nothing is deleted, only data missing
+                        from the range is added (safe & idempotent).
+
+Examples:
+  pnpm seed -- --wipe --from 2023-01-01            # full rebuild up to today
+  pnpm seed -- --from 2026-07-08                   # top up since the last run
+  pnpm seed -- --from 2025-01-01 --to 2025-03-31   # backfill a window, non-destructive`;
+
+/** Comparable ordinal for a calendar day (m is 0-based). */
+const ord = (y: number, m: number, d: number): number => y * 10000 + m * 100 + d;
+const pad2 = (n: number): string => String(n).padStart(2, "0");
+const fmt = (t: Ymd): string => `${t.y}-${pad2(t.m + 1)}-${pad2(t.d)}`;
+
+function todayYmd(): Ymd {
+  const now = new Date();
+  return { y: now.getFullYear(), m: now.getMonth(), d: now.getDate() };
+}
+
+function parseDate(s: string): Ymd {
+  const mm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s);
+  if (!mm) throw new UsageError(`Invalid date "${s}" — expected YYYY-MM-DD.`);
+  const y = +mm[1];
+  const m = +mm[2] - 1;
+  const d = +mm[3];
+  const probe = new Date(Date.UTC(y, m, d));
+  if (probe.getUTCFullYear() !== y || probe.getUTCMonth() !== m || probe.getUTCDate() !== d) {
+    throw new UsageError(`Invalid calendar date "${s}".`);
+  }
+  return { y, m, d };
+}
+
+function parseArgs(argv: string[]): { from: Ymd; to: Ymd; wipe: boolean } {
+  let fromStr: string | undefined;
+  let toStr: string | undefined;
+  let wipe = false;
+  for (let i = 0; i < argv.length; i += 1) {
+    const a = argv[i];
+    const eq = a.indexOf("=");
+    const flag = eq === -1 ? a : a.slice(0, eq);
+    const inlineVal = eq === -1 ? undefined : a.slice(eq + 1);
+    const nextVal = (): string | undefined => inlineVal ?? argv[(i += 1)];
+    switch (flag) {
+      case "--":
+        break; // pnpm forwards the `--` separator literally; ignore it
+      case "--wipe":
+        wipe = true;
+        break;
+      case "--from":
+        fromStr = nextVal();
+        break;
+      case "--to":
+        toStr = nextVal();
+        break;
+      case "--help":
+      case "-h":
+        throw new UsageError("");
+      default:
+        throw new UsageError(`Unknown argument: ${a}`);
+    }
+  }
+  if (!fromStr) throw new UsageError("Missing required --from.");
+  const from = parseDate(fromStr);
+  const to = toStr ? parseDate(toStr) : todayYmd();
+  if (ord(from.y, from.m, from.d) > ord(to.y, to.m, to.d)) {
+    throw new UsageError(`--from (${fromStr}) is after --to (${toStr ?? "today"}).`);
+  }
+  return { from, to, wipe };
+}
 
 // --------------------------------------------------------------------------
-// Deterministic PRNG + helpers
+// Deterministic PRNG (reseeded per-month) + helpers
 // --------------------------------------------------------------------------
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
+let prngState = 0;
+function reseed(seed: number): void {
+  prngState = seed >>> 0;
 }
-const rand = mulberry32(20240101);
+/** mulberry32 step over the shared, reseedable state. */
+function rand(): number {
+  prngState |= 0;
+  prngState = (prngState + 0x6d2b79f5) | 0;
+  let t = Math.imul(prngState ^ (prngState >>> 15), 1 | prngState);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+/** Per-month seed — makes each month's data reproducible independently of the range. */
+const seedFor = (y: number, m: number): number => ((y * 12 + m) * 2654435761) >>> 0;
+
 const rnd = (lo: number, hi: number): number => lo + (hi - lo) * rand();
-const rndInt = (lo: number, hi: number): number => Math.floor(rnd(lo, hi + 1));
 const round2 = (n: number): number => Math.round(n * 100) / 100;
 const pick = <T>(arr: T[]): T => arr[Math.floor(rand() * arr.length)];
 function weightedPick<T>(items: T[], weights: number[]): T {
@@ -106,10 +198,12 @@ const firstOf = (y: number, m: number): Date => utc(y, m, 1);
 const lastOf = (y: number, m: number): Date => utc(y, m + 1, 0); // day 0 of next month
 const daysIn = (y: number, m: number): number => new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
 const weekdayOf = (y: number, m: number, d: number): number => utc(y, m, d).getUTCDay(); // 0=Sun..6=Sat
+const monthKey = (y: number, m: number): string => `${y}-${m}`;
 
-function* months(): Generator<{ y: number; m: number }> {
-  let { y, m } = RANGE_START;
-  while (y < RANGE_END.y || (y === RANGE_END.y && m <= RANGE_END.m)) {
+function* months(from: Ymd, to: Ymd): Generator<{ y: number; m: number }> {
+  let y = from.y;
+  let m = from.m;
+  while (y < to.y || (y === to.y && m <= to.m)) {
     yield { y, m };
     m += 1;
     if (m > 11) {
@@ -187,10 +281,11 @@ const RECURRINGS: RecDef[] = [
   { label: "iCloud+", amount: 2.99 },
   { label: "Amazon Prime", amount: 6.99 },
 ];
-const rentForYear = (y: number): number => ({ 2023: 1180, 2024: 1210, 2025: 1250, 2026: 1290 }[y] ?? 1250);
+const rentForYear = (y: number): number => ({ 2023: 1180, 2024: 1210, 2025: 1250, 2026: 1290 }[y] ?? 1290);
 
 // --------------------------------------------------------------------------
-// Exceptionals (added; the 2 pre-existing real ones — Japan, MacBook — stay).
+// Exceptionals (inserted when their date falls in the requested range and the
+// account doesn't already have one with the same label).
 // amount is Decimal(10,2) so no cap concern. categoryName ≤ 50, colour ≤ 20.
 // --------------------------------------------------------------------------
 interface ExcDef {
@@ -233,87 +328,168 @@ function seasonalShareMult(name: string, m: number): number {
   return 1.0;
 }
 
-/** Pick a day in [1, lastDay] with weekend bias controlled by `boost`. */
-function pickDay(y: number, m: number, lastDay: number, boost: number): number {
-  if (boost <= 1) return rndInt(1, lastDay);
+/** Pick a day from `days` with weekend bias controlled by `boost`. */
+function pickDay(y: number, m: number, days: number[], boost: number): number {
+  const at = (): number => days[Math.floor(rand() * days.length)];
+  if (days.length === 1) return days[0];
+  if (boost <= 1) return at();
   for (let i = 0; i < 12; i += 1) {
-    const d = rndInt(1, lastDay);
+    const d = at();
     const wd = weekdayOf(y, m, d);
     const isWeekend = wd === 0 || wd === 5 || wd === 6;
     const w = isWeekend ? boost : 1;
     if (rand() * boost <= w) return d;
   }
-  return rndInt(1, lastDay);
+  return at();
 }
 
 // --------------------------------------------------------------------------
-// Row types (loose — validated by Prisma on insert)
+// Existing state (what the account already holds) — drives append decisions.
+// After a --wipe these are all empty, so the same code path regenerates fully.
+// --------------------------------------------------------------------------
+interface Existing {
+  categoryIDs: Set<string>;
+  dashboardMonths: Set<string>;
+  budgetByMonth: Map<string, number>;
+  recurringMonths: Set<string>;
+  exceptionalLabels: Set<string>;
+}
+
+async function loadExisting(prisma: PrismaClient): Promise<Existing> {
+  const cats = await prisma.categories.findMany({ where: { userID: USER_ID }, select: { ID: true } });
+  const dashes = await prisma.dashboards.findMany({ where: { userID: USER_ID }, select: { dateFrom: true, initialAmount: true } });
+  const recs = await prisma.recurrings.findMany({ where: { userID: USER_ID }, select: { dateFrom: true } });
+  const excs = await prisma.exceptionals.findMany({ where: { userID: USER_ID }, select: { label: true } });
+
+  const dashboardMonths = new Set<string>();
+  const budgetByMonth = new Map<string, number>();
+  for (const d of dashes) {
+    const from = d.dateFrom as Date;
+    const key = monthKey(from.getUTCFullYear(), from.getUTCMonth());
+    dashboardMonths.add(key);
+    budgetByMonth.set(key, Number(d.initialAmount));
+  }
+  const recurringMonths = new Set<string>();
+  for (const r of recs) {
+    const from = r.dateFrom as Date;
+    recurringMonths.add(monthKey(from.getUTCFullYear(), from.getUTCMonth()));
+  }
+  return {
+    categoryIDs: new Set(cats.map((c) => c.ID)),
+    dashboardMonths,
+    budgetByMonth,
+    recurringMonths,
+    exceptionalLabels: new Set(excs.map((e) => e.label)),
+  };
+}
+
+// --------------------------------------------------------------------------
+// Generation
 // --------------------------------------------------------------------------
 type Row = Record<string, unknown>;
 
-function generate(): {
+function generate(
+  from: Ymd,
+  to: Ymd,
+  existing: Existing,
+): {
   categoryRows: Row[];
   dashboardRows: Row[];
   recurringRows: Row[];
   spendingRows: Row[];
   exceptionalRows: Row[];
 } {
-  const categoryRows: Row[] = CATS.map((c) => ({ ID: c.id, userID: USER_ID, name: c.name, color: c.color }));
+  const categoryRows: Row[] = CATS.filter((c) => !existing.categoryIDs.has(c.id)).map((c) => ({
+    ID: c.id,
+    userID: USER_ID,
+    name: c.name,
+    color: c.color,
+  }));
   const dashboardRows: Row[] = [];
   const recurringRows: Row[] = [];
   const spendingRows: Row[] = [];
 
-  for (const { y, m } of months()) {
+  for (const { y, m } of months(from, to)) {
+    reseed(seedFor(y, m));
     const dim = daysIn(y, m);
-    const isPartial = y === TODAY.y && m === TODAY.m;
-    const lastDay = isPartial ? TODAY.d : dim;
+    const key = monthKey(y, m);
 
-    // --- Monthly budget ---
-    const budget = weightedPick([3300, 3400, 3500, 3600], [1, 2, 5, 2]);
-    const ceiling = weightedPick([450, 500, 550], [2, 3, 2]);
-    dashboardRows.push({
-      ID: randomUUID(),
-      userID: USER_ID,
-      dateFrom: firstOf(y, m),
-      dateTo: lastOf(y, m),
-      initialAmount: money(budget),
-      initialCeiling: money(ceiling),
-    });
+    // Day window this run covers for this month, honoring day-level endpoints.
+    const monthFromDay = y === from.y && m === from.m ? from.d : 1;
+    const monthToDay = y === to.y && m === to.m ? Math.min(to.d, dim) : dim;
 
-    // --- Recurrings (full month) ---
-    let recTotal = 0;
+    // --- Monthly budget: reuse the stored one, else pick + create the dashboard ---
+    let budget = existing.budgetByMonth.get(key);
+    if (budget === undefined) {
+      budget = weightedPick([3300, 3400, 3500, 3600], [1, 2, 5, 2]);
+      const ceiling = weightedPick([450, 500, 550], [2, 3, 2]);
+      dashboardRows.push({
+        ID: randomUUID(),
+        userID: USER_ID,
+        dateFrom: firstOf(y, m),
+        dateTo: lastOf(y, m),
+        initialAmount: money(budget),
+        initialCeiling: money(ceiling),
+      });
+    }
+
+    // --- Recurrings (full month): deterministic active set; rows only if missing ---
     const active: { label: string; amount: number }[] = [{ label: "Loyer appartement", amount: rentForYear(y) }];
     for (const r of RECURRINGS) {
       if (r.start && (y < r.start.y || (y === r.start.y && m < r.start.m))) continue;
       active.push({ label: r.label, amount: r.amount });
     }
-    for (const r of active) {
-      recurringRows.push({
-        ID: randomUUID(),
-        userID: USER_ID,
-        dateFrom: firstOf(y, m),
-        dateTo: lastOf(y, m),
-        itemType: "recurring",
-        label: r.label,
-        amount: money(r.amount),
-        currency: CUR,
-        invoicefile: null,
-      });
-      recTotal += r.amount;
+    const recTotal = active.reduce((s, r) => s + r.amount, 0);
+    if (!existing.recurringMonths.has(key)) {
+      for (const r of active) {
+        recurringRows.push({
+          ID: randomUUID(),
+          userID: USER_ID,
+          dateFrom: firstOf(y, m),
+          dateTo: lastOf(y, m),
+          itemType: "recurring",
+          label: r.label,
+          amount: money(r.amount),
+          currency: CUR,
+          invoicefile: null,
+        });
+      }
     }
 
-    // --- Variable spendings target ---
+    // --- Variable spendings ---
+    // Always generate for every day in the requested window and ADD them, no
+    // matter what the month already holds. Overlaps are intended: re-running a
+    // range simply piles on more spendings (kept deliberately simple).
+    const targetDays: number[] = [];
+    for (let d = monthFromDay; d <= monthToDay; d += 1) targetDays.push(d);
+
     // Aim for total (fixed + variable) at 86-100% of budget on normal months;
     // the seasonal factor pushes Dec/summer over budget. The /1.1 compensates
     // for the fill loop's tendency to overshoot each category target slightly.
     const targetRatio = rnd(0.86, 1.0) * seasonalFactor(m);
     const desiredTotal = budget * targetRatio;
-    let variableTarget = Math.max(300, (desiredTotal - recTotal) / 1.1);
-    if (isPartial) variableTarget *= lastDay / dim;
+    // Full-month variable target, scaled to the number of days in the window.
+    const variableTarget = (Math.max(300, (desiredTotal - recTotal) / 1.1) * targetDays.length) / dim;
 
     // Seasonally-adjusted, re-normalised category shares.
     const adjShares = CATS.map((c) => c.share * seasonalShareMult(c.name, m));
     const shareSum = adjShares.reduce((s, v) => s + v, 0);
+
+    const filledDays = new Set<number>();
+    const addSpending = (day: number, cat: CatDef, amt: number): void => {
+      spendingRows.push({
+        ID: randomUUID(),
+        userID: USER_ID,
+        date: utc(y, m, day),
+        itemType: "spending",
+        label: pick(cat.labels),
+        amount: amt,
+        categoryID: cat.id,
+        currency: CUR,
+        invoicefile: null,
+      });
+      filledDays.add(day);
+    };
 
     CATS.forEach((cat, i) => {
       const catTarget = variableTarget * (adjShares[i] / shareSum) * rnd(0.8, 1.2);
@@ -324,54 +500,57 @@ function generate(): {
         // Skew toward the low end → many small everyday purchases, few large ones.
         const amt = money(cat.min + (cat.max - cat.min) * Math.pow(rand(), 1.9));
         if (spent > 0 && spent + amt > catTarget * 1.2) break;
-        const day = pickDay(y, m, lastDay, cat.boost);
-        spendingRows.push({
-          ID: randomUUID(),
-          userID: USER_ID,
-          date: utc(y, m, day),
-          itemType: "spending",
-          label: pick(cat.labels),
-          amount: amt,
-          categoryID: cat.id,
-          currency: CUR,
-          invoicefile: null,
-        });
+        addSpending(pickDay(y, m, targetDays, cat.boost), cat, amt);
         spent += amt;
       }
     });
+
+    // Guarantee every day in the window gets at least one spending (no empty days).
+    for (const day of targetDays) {
+      if (filledDays.has(day)) continue;
+      const cat = weightedPick(CATS, adjShares);
+      addSpending(day, cat, money(cat.min + (cat.max - cat.min) * Math.pow(rand(), 1.9)));
+    }
   }
 
-  const exceptionalRows: Row[] = EXCEPTIONALS.map((e) => ({
-    ID: randomUUID(),
-    userID: USER_ID,
-    date: utc(e.y, e.m, e.d),
-    itemType: "exceptional",
-    label: e.label,
-    description: e.description ?? null,
-    amount: round2(e.amount),
-    currency: CUR,
-    categoryName: e.categoryName,
-    categoryColor: e.categoryColor,
-    invoicefile: null,
-  }));
+  const exceptionalRows: Row[] = EXCEPTIONALS.filter(
+    (e) => ord(e.y, e.m, e.d) >= ord(from.y, from.m, from.d) && ord(e.y, e.m, e.d) <= ord(to.y, to.m, to.d),
+  )
+    .filter((e) => !existing.exceptionalLabels.has(e.label))
+    .map((e) => ({
+      ID: randomUUID(),
+      userID: USER_ID,
+      date: utc(e.y, e.m, e.d),
+      itemType: "exceptional",
+      label: e.label,
+      description: e.description ?? null,
+      amount: round2(e.amount),
+      currency: CUR,
+      categoryName: e.categoryName,
+      categoryColor: e.categoryColor,
+      invoicefile: null,
+    }));
 
   return { categoryRows, dashboardRows, recurringRows, spendingRows, exceptionalRows };
 }
 
 // --------------------------------------------------------------------------
-// Wipe (scoped + guarded + FK-safe). Exceptionals are intentionally kept.
+// Guards & wipe (scoped + guarded + FK-safe). Real exceptionals are kept.
 // --------------------------------------------------------------------------
-async function wipe(prisma: PrismaClient): Promise<void> {
+async function guardUser(prisma: PrismaClient): Promise<void> {
   const user = await prisma.users.findUnique({ where: { ID: USER_ID } });
   if (!user || user.email !== USER_EMAIL) {
-    throw new Error(`Refusing to wipe: user guard failed for ${USER_ID} (email=${user?.email ?? "none"})`);
+    throw new Error(`Refusing to run: user guard failed for ${USER_ID} (email=${user?.email ?? "none"})`);
   }
+}
+
+async function wipeAll(prisma: PrismaClient): Promise<void> {
   const s = await prisma.spendings.deleteMany({ where: { userID: USER_ID } });
   const r = await prisma.recurrings.deleteMany({ where: { userID: USER_ID } });
   const d = await prisma.dashboards.deleteMany({ where: { userID: USER_ID } });
   const c = await prisma.categories.deleteMany({ where: { userID: USER_ID } });
-  // Only remove the exceptionals THIS script seeds (matched by label), so re-runs
-  // stay idempotent while the pre-existing real exceptionals are preserved.
+  // Only remove the exceptionals THIS script seeds (matched by label), so the
+  // pre-existing real exceptionals are preserved even on a full wipe.
   const e = await prisma.exceptionals.deleteMany({
     where: { userID: USER_ID, label: { in: EXCEPTIONALS.map((x) => x.label) } },
   });
@@ -385,76 +564,17 @@ const chunk = <T>(a: T[], n: number): T[][] =>
   Array.from({ length: Math.ceil(a.length / n) }, (_, i) => a.slice(i * n, i * n + n));
 
 // --------------------------------------------------------------------------
-// Verification
+// Verification (range-agnostic all-time summary)
 // --------------------------------------------------------------------------
 async function verify(prisma: PrismaClient): Promise<void> {
   console.log("\n=== VERIFICATION ===");
-
   const perYear = (await prisma.$queryRawUnsafe(
     `SELECT YEAR(date) yr, COUNT(*) n, ROUND(SUM(amount)) total,
             DATE_FORMAT(MIN(date),'%Y-%m-%d') mn, DATE_FORMAT(MAX(date),'%Y-%m-%d') mx
      FROM Spendings WHERE userID = '${USER_ID}' GROUP BY yr ORDER BY yr`,
   )) as Array<Record<string, unknown>>;
-  console.log("Spendings per year (raw DATE_FORMAT — proves no off-by-one):");
+  console.log("Spendings per year (all-time, raw DATE_FORMAT — proves no off-by-one):");
   for (const r of perYear) console.log(`  ${r.yr}: n=${r.n} total=${r.total}€ range=${r.mn}..${r.mx}`);
-
-  const dashCheck = (await prisma.$queryRawUnsafe(
-    `SELECT COUNT(*) n, SUM(DAY(dateFrom)=1) day1
-     FROM Dashboards WHERE userID = '${USER_ID}'`,
-  )) as Array<Record<string, unknown>>;
-  console.log(`Dashboards: n=${dashCheck[0].n} (all dateFrom day 01: ${dashCheck[0].day1})`);
-
-  const recCheck = (await prisma.$queryRawUnsafe(
-    `SELECT COUNT(*) n, SUM(DAY(dateFrom)=1) df1, SUM(dateTo=LAST_DAY(dateFrom)) dtok
-     FROM Recurrings WHERE userID = '${USER_ID}'`,
-  )) as Array<Record<string, unknown>>;
-  console.log(`Recurrings: n=${recCheck[0].n} (dateFrom day 01: ${recCheck[0].df1}, dateTo = last-of-month: ${recCheck[0].dtok})`);
-
-  // App code-path checks (same queries the UI runs)
-  const dash = await prisma.dashboards.findFirst({ where: { userID: USER_ID, dateFrom: utc(2025, 2, 1) } });
-  const recSum = await prisma.recurrings.aggregate({
-    where: { userID: USER_ID, dateFrom: utc(2025, 2, 1), dateTo: utc(2025, 2, 31) },
-    _sum: { amount: true },
-  });
-  const buckets = await prisma.spendings.groupBy({
-    by: ["categoryID"],
-    where: { userID: USER_ID, date: { gte: utc(2025, 2, 1), lte: utc(2025, 2, 31) } },
-    _sum: { amount: true },
-  });
-  console.log(
-    `App paths (March 2025): getDashboard→${dash ? `budget ${dash.initialAmount}€, ceiling ${dash.initialCeiling}€` : "NULL"}; ` +
-      `recurringsSum=${Number(recSum._sum.amount ?? 0)}€; spending category buckets=${buckets.length}`,
-  );
-
-  // Budget fit: how do monthly (spendings + recurrings) totals sit vs the budget?
-  const spByM = (await prisma.$queryRawUnsafe(
-    `SELECT DATE_FORMAT(date,'%Y-%m') ym, SUM(amount) v FROM Spendings WHERE userID='${USER_ID}' GROUP BY ym`,
-  )) as Array<{ ym: string; v: unknown }>;
-  const recByM = (await prisma.$queryRawUnsafe(
-    `SELECT DATE_FORMAT(dateFrom,'%Y-%m') ym, SUM(amount) r FROM Recurrings WHERE userID='${USER_ID}' GROUP BY ym`,
-  )) as Array<{ ym: string; r: unknown }>;
-  const budByM = (await prisma.$queryRawUnsafe(
-    `SELECT DATE_FORMAT(dateFrom,'%Y-%m') ym, initialAmount b FROM Dashboards WHERE userID='${USER_ID}'`,
-  )) as Array<{ ym: string; b: unknown }>;
-  const recMap = new Map(recByM.map((x) => [x.ym, Number(x.r)]));
-  const budMap = new Map(budByM.map((x) => [x.ym, Number(x.b)]));
-  let over = 0;
-  let ratioSum = 0;
-  let counted = 0;
-  for (const s of spByM) {
-    if (s.ym === "2026-07") continue; // partial month — skip
-    const tot = Number(s.v) + (recMap.get(s.ym) ?? 0);
-    const bud = budMap.get(s.ym) ?? 0;
-    if (bud > 0) {
-      ratioSum += tot / bud;
-      counted += 1;
-      if (tot > bud) over += 1;
-    }
-  }
-  console.log(
-    `Budget fit: ${counted} full months, avg total/budget=${Math.round((ratioSum / counted) * 100)}%, ` +
-      `months over budget=${over}/${counted}`,
-  );
 
   const counts = {
     categories: await prisma.categories.count({ where: { userID: USER_ID } }),
@@ -463,31 +583,51 @@ async function verify(prisma: PrismaClient): Promise<void> {
     spendings: await prisma.spendings.count({ where: { userID: USER_ID } }),
     exceptionals: await prisma.exceptionals.count({ where: { userID: USER_ID } }),
   };
-  console.log("Final counts:", counts);
+  console.log("All-time counts:", counts);
 }
 
 // --------------------------------------------------------------------------
 // Main
 // --------------------------------------------------------------------------
 async function main(): Promise<void> {
+  let opts: { from: Ymd; to: Ymd; wipe: boolean };
+  try {
+    opts = parseArgs(process.argv.slice(2));
+  } catch (err) {
+    if (err instanceof UsageError) {
+      if (err.message) console.error(`Error: ${err.message}\n`);
+      console.error(USAGE);
+      process.exit(err.message ? 1 : 0);
+    }
+    throw err;
+  }
+  const { from, to, wipe } = opts;
+
   const prisma = makePrisma();
   try {
-    console.log(`Seeding coherent mock data for ${USER_EMAIL} (${USER_ID})`);
-    console.log("Wiping placeholder rows (scoped to this user)...");
-    await wipe(prisma);
-
-    console.log("Generating dataset...");
-    const { categoryRows, dashboardRows, recurringRows, spendingRows, exceptionalRows } = generate();
     console.log(
-      `  generated: categories=${categoryRows.length} dashboards=${dashboardRows.length} ` +
-        `recurrings=${recurringRows.length} spendings=${spendingRows.length} newExceptionals=${exceptionalRows.length}`,
+      `Seeding ${USER_EMAIL} (${USER_ID})\n` +
+        `  mode: ${wipe ? "WIPE + rebuild" : "append (non-destructive)"}, range ${fmt(from)} → ${fmt(to)}`,
+    );
+    await guardUser(prisma);
+
+    if (wipe) {
+      console.log("Wiping this account's seeded rows...");
+      await wipeAll(prisma);
+    }
+
+    const existing = await loadExisting(prisma);
+    const { categoryRows, dashboardRows, recurringRows, spendingRows, exceptionalRows } = generate(from, to, existing);
+    console.log(
+      `Generated (to insert): categories=${categoryRows.length} dashboards=${dashboardRows.length} ` +
+        `recurrings=${recurringRows.length} spendings=${spendingRows.length} exceptionals=${exceptionalRows.length}`,
     );
 
     console.log("Inserting...");
-    await prisma.categories.createMany({ data: categoryRows as never });
-    await prisma.dashboards.createMany({ data: dashboardRows as never });
-    await prisma.recurrings.createMany({ data: recurringRows as never });
-    await prisma.exceptionals.createMany({ data: exceptionalRows as never });
+    if (categoryRows.length) await prisma.categories.createMany({ data: categoryRows as never });
+    if (dashboardRows.length) await prisma.dashboards.createMany({ data: dashboardRows as never });
+    if (recurringRows.length) await prisma.recurrings.createMany({ data: recurringRows as never });
+    if (exceptionalRows.length) await prisma.exceptionals.createMany({ data: exceptionalRows as never });
     for (const c of chunk(spendingRows, 500)) {
       await prisma.spendings.createMany({ data: c as never });
     }
