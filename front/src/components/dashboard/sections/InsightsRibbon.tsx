@@ -14,6 +14,7 @@ import useCharts from "@components/spendings/services/useCharts";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
+import dashboardText from "@text/dashboard";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
@@ -52,6 +53,7 @@ const InsightsRibbon = () => {
     get: { data: dashboard },
   } = useDashboard();
   const { data: charts } = useCharts(MONTHLY);
+  const { insightsRibbon: t } = dashboardText;
 
   const budget = Number(dashboard?.initialAmount ?? 0);
   const now = new Date();
@@ -71,16 +73,16 @@ const InsightsRibbon = () => {
       <Insight
         tone="bg-accent-strong/10 text-accent-strong"
         icon={<TrendingUp className="size-3.5" />}
-        label="Sur le rythme"
+        label={t.paceLabel}
       >
-        Tu consommes <b className="font-semibold text-ink">~16% moins vite</b> {/* MOCK pace */}que ta moyenne 3 mois. À
-        ce rythme, tu termines le mois{" "}
-        <b className="font-semibold text-ink">{underBudget ? "sous ton budget" : "au-dessus de ton budget"}</b>.
+        Consommation <b className="font-semibold text-ink">~16% moins vite</b> {/* MOCK pace */}que la moyenne 3 mois. À
+        ce rythme, le mois se termine{" "}
+        <b className="font-semibold text-ink">{underBudget ? "sous le budget" : "au-dessus du budget"}</b>.
       </Insight>
       <Insight
         tone="bg-neg/10 text-neg"
         icon={<TriangleAlert className="size-3.5" />}
-        label="Catégorie en hausse"
+        label={t.risingLabel}
       >
         {topCategory ? (
           <>
@@ -89,16 +91,16 @@ const InsightsRibbon = () => {
             vs le mois dernier.
           </>
         ) : (
-          "Aucune catégorie ce mois."
+          t.risingEmpty
         )}
       </Insight>
       <Insight
         tone="bg-surface-hi text-ink-2"
         icon={<Wallet className="size-3.5" />}
-        label="Reste à vivre"
+        label={t.remainingLabel}
       >
-        Il te reste <b className="num font-semibold text-ink">{euro0(perDay)} €</b>
-        /jour à dépenser d&apos;ici le <b className="font-semibold text-ink">{lastDayLabel}</b> pour rester dans ton
+        Il reste <b className="num font-semibold text-ink">{euro0(perDay)} €</b>
+        /jour à dépenser d&apos;ici le <b className="font-semibold text-ink">{lastDayLabel}</b> pour rester dans le
         budget.
       </Insight>
     </DividedStrip>

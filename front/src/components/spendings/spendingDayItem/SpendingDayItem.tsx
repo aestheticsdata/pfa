@@ -1,13 +1,13 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import GlowCard from "@components/shared/GlowCard";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
-import spendingsText from "@components/spendings/config/text";
 import useClickSort from "@components/spendings/helpers/useClickSort";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import SpendingSort from "@components/spendings/spendingSort/SpendingSort";
 import SpendingsListContainer from "@components/spendings/spendingsListContainer/SpendingListContainer";
 import { cn } from "@lib/utils";
+import spendingsText from "@text/spendings";
 import { endOfMonth, getDayOfYear } from "date-fns";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
@@ -36,6 +36,7 @@ const SpendingDayItem = ({
   month = null,
   total = 0,
 }: SpendingDayItemProps) => {
+  const { dayItem } = spendingsText;
   const { remaining: remainingAmount } = useDashboard();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [today] = useState(() => Date.now());
@@ -88,7 +89,7 @@ const SpendingDayItem = ({
             {date ? format(date, "dd MMM yyyy", { locale: fr }) : "—"}
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-ink-4 text-xs uppercase tracking-wide">{spendingsText.dayItem.total}</span>
+            <span className="text-ink-4 text-xs uppercase tracking-wide">{dayItem.total}</span>
             <span className="text-ink text-sm tabular-nums">{Number(displayTotal).toFixed(2)} €</span>
           </div>
         </div>
@@ -122,7 +123,7 @@ const SpendingDayItem = ({
                     color: isClicked ? "#0a0a0a" : color,
                   }}
                 >
-                  {category ?? "sans catégorie"}
+                  {category ?? spendingsText.noCategory}
                 </button>
               );
             })}
@@ -132,7 +133,7 @@ const SpendingDayItem = ({
                 onClick={() => setSelectedCategory(null)}
                 className="px-2 py-0.5 rounded text-2xs uppercase font-medium bg-surface-hi text-ink-2 hover:bg-surface-hover"
               >
-                {spendingsText.dayItem.filterResetLabel}
+                {dayItem.filterResetLabel}
               </button>
             )}
           </div>
@@ -154,13 +155,13 @@ const SpendingDayItem = ({
             className="mt-auto w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-md border border-dashed border-line text-ink-5 text-xs uppercase tracking-wide font-medium transition-all hover:border-elec/60 hover:text-elec hover:bg-elec/5 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-line disabled:hover:text-ink-5 disabled:hover:bg-transparent"
           >
             <Plus className="w-3.5 h-3.5" />
-            Ajouter une dépense
+            {dayItem.addSpending}
           </button>
         )}
 
         {!recurringType && isToday && (
           <div className="mt-2 pt-2 border-t border-line-soft flex items-center justify-between text-xs">
-            <span className="text-ink-5">{spendingsText.dayItem.remainingBudget}</span>
+            <span className="text-ink-5">{dayItem.remainingBudget}</span>
             <span className="text-elec font-semibold">{Math.trunc(todayCredits)} €</span>
           </div>
         )}

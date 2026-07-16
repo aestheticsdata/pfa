@@ -10,6 +10,7 @@ import GlowCard from "@components/shared/GlowCard";
 import { MeterBar } from "@components/shared/MeterBar";
 import { Overline } from "@components/shared/Overline";
 import { euro, splitAmount } from "@lib/format";
+import statistics from "@text/statistics";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import fr from "date-fns/locale/fr";
@@ -62,6 +63,8 @@ const Stat = ({
 const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesProps) => {
   if (recurrings.length === 0) return null;
 
+  const { fixedExpenses: t } = statistics;
+
   const list = [...recurrings].sort((a, b) => Number(b.amount) - Number(a.amount));
   const monthlyTotal = list.reduce((sum, r) => sum + Number(r.amount), 0);
   const annualTotal = monthlyTotal * 12;
@@ -78,22 +81,22 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
       className="px-6 py-5.5"
     >
       <CardSectionHeader
-        title="Dépenses fixes"
-        meta={<>annualisé · {list.length} lignes récurrentes · sans catégorie</>}
+        title={t.title}
+        meta={t.meta(list.length)}
       />
 
       <div className="mt-4.5 flex flex-wrap items-baseline gap-x-10 gap-y-4 border-b border-line-soft pb-5">
         <Stat
-          label="Total sur l'année"
+          label={t.annualTotal}
           value={annualTotal}
         />
         <Stat
-          label="Mensuel"
+          label={t.monthly}
           value={monthlyTotal}
           small
         />
         <Stat
-          label={`Déjà prélevé · au ${format(now, "d MMM", { locale: fr })}`}
+          label={t.drawn(format(now, "d MMM", { locale: fr }))}
           value={drawn}
           small
           className="ml-auto text-right"
@@ -126,11 +129,7 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
         })}
       </div>
 
-      <p className="mt-5 border-t border-line-soft pt-4.5 text-xs text-ink-4">
-        Les dépenses fixes ne portent pas de catégorie — elles sont totalisées par nom. Le{" "}
-        <b className="num font-medium text-ink-2">{list[0].label}</b> représente à lui seul{" "}
-        <b className="num font-medium text-ink-2">{topShare} %</b> du total annuel des récurrents.
-      </p>
+      <p className="mt-5 border-t border-line-soft pt-4.5 text-xs text-ink-4">{t.note(list[0].label, topShare)}</p>
     </GlowCard>
   );
 };

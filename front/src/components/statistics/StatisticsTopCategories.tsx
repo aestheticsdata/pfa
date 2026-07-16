@@ -3,7 +3,10 @@
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { euro0 } from "@lib/format";
+import statistics from "@text/statistics";
 import { ChevronDown, ChevronUp } from "lucide-react";
+
+const { topCategories: t } = statistics;
 
 export interface TopCategoryRow {
   name: string;
@@ -20,7 +23,7 @@ interface StatisticsTopCategoriesProps {
 
 const Trend = ({ deltaPct }: { deltaPct: number | null }) => {
   if (deltaPct == null) {
-    return <span className="text-ink-4">nouv.</span>;
+    return <span className="text-ink-4">{t.new}</span>;
   }
   const rounded = Math.round(deltaPct);
   if (rounded === 0) {
@@ -52,16 +55,16 @@ const Trend = ({ deltaPct }: { deltaPct: number | null }) => {
 const StatisticsTopCategories = ({ rows, compareYear }: StatisticsTopCategoriesProps) => (
   <GlowCard className="flex flex-col px-6 py-5.5">
     <CardSectionHeader
-      title="Top catégories"
-      meta={`tendance vs ${compareYear}`}
+      title={t.title}
+      meta={t.meta(compareYear)}
     />
 
     <div className="mt-4.5 flex flex-col">
       <div className="mb-0.5 grid grid-cols-[14px_1fr_90px_80px] items-center gap-2.5 border-b border-line pb-2 text-2xs font-medium uppercase tracking-caps text-ink-4">
         <span />
-        <span>Catégorie</span>
-        <span className="text-right">Total</span>
-        <span className="text-right">vs {compareYear}</span>
+        <span>{t.colCategory}</span>
+        <span className="text-right">{t.colTotal}</span>
+        <span className="text-right">{t.colVs(compareYear)}</span>
       </div>
 
       {rows.map((row) => (

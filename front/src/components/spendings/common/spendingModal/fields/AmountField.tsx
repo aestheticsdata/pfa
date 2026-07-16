@@ -1,4 +1,5 @@
 import { FieldShell } from "@components/shared/FieldShell";
+import spendings from "@text/spendings";
 
 import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
@@ -10,7 +11,7 @@ interface AmountFieldProps {
 
 const AmountField = ({ register, errors }: AmountFieldProps) => (
   <FieldShell
-    label="Montant"
+    label={spendings.modal.fields.amount}
     htmlFor="spendingAmount"
     error={errors.spendingAmount?.message}
   >

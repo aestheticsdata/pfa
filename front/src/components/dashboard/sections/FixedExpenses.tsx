@@ -12,6 +12,7 @@ import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import { euro } from "@lib/format";
 import { cn } from "@lib/utils";
+import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import isSameMonth from "date-fns/isSameMonth";
@@ -43,6 +44,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
   const { isModalVisible, spending, isEditing, addSpending, closeModal, editSpending } = useSpendingDayItem();
   const [invoiceFor, setInvoiceFor] = useState<RecurringItem | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
+  const { fixedExpenses: t } = dashboardText;
 
   if (error) throw error;
 
@@ -68,16 +70,16 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
     >
       <div className="flex items-start justify-between">
         <div>
-          <CardTitle>Dépenses fixes</CardTitle>
+          <CardTitle>{t.title}</CardTitle>
           <span className="text-xs text-ink-4">
-            {list.length} lignes · échéancier {format(month.start, "MMMM", { locale: fr })}
+            {t.linesSchedule(list.length, format(month.start, "MMMM", { locale: fr }))}
           </span>
         </div>
         <IconButton
           variant="bordered"
           size={8}
           onClick={addSpending}
-          aria-label="Ajouter une dépense fixe"
+          aria-label={t.addAria}
           className="hover:border-accent-d"
         >
           <Plus />
@@ -86,7 +88,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
 
       <div className="flex items-start justify-between">
         <div>
-          <Overline>Mensuel</Overline>
+          <Overline>{t.monthly}</Overline>
           <div className="num text-2xl font-medium tracking-tight text-ink">
             <MoneyAmount
               value={total}
@@ -95,7 +97,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
           </div>
         </div>
         <div className="text-right">
-          <Overline>Annualisé</Overline>
+          <Overline>{t.annualized}</Overline>
           <div className="num text-lg font-medium tracking-normal text-ink-2">
             <MoneyAmount
               value={total * 12}
@@ -107,7 +109,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
 
       {upcoming.length > 0 && (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-line-soft bg-surface-hi px-3 py-2.5 text-xs text-ink-3">
-          <span>À venir d&apos;ici le {format(month.end, "d MMMM", { locale: fr })}</span>
+          <span>{t.upcomingBy(format(month.end, "d MMMM", { locale: fr }))}</span>
           <span className="text-ink-2">
             <span className="num font-semibold text-accent-strong">{upcoming.length}</span> prélèvements ·{" "}
             <span className="num font-semibold text-accent-strong">{euro(upcomingSum)} €</span>
@@ -123,13 +125,13 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                 key={r.ID}
                 className="flex items-center gap-2 rounded-md border border-danger-border-soft bg-danger-surface px-2.5 py-2 text-sm"
               >
-                <span className="flex-1 truncate text-ink">Supprimer&nbsp;?</span>
+                <span className="flex-1 truncate text-ink">{t.deleteConfirm}</span>
                 <button
                   type="button"
                   onClick={() => setPendingDelete(null)}
                   className="rounded border border-line bg-surface-hi px-2 py-1 text-xs text-ink-2 hover:text-ink"
                 >
-                  Annuler
+                  {t.cancel}
                 </button>
                 <button
                   type="button"
@@ -139,7 +141,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                   }}
                   className="rounded bg-danger-solid px-2 py-1 text-xs text-on-danger hover:brightness-110"
                 >
-                  Confirmer
+                  {t.confirm}
                 </button>
               </div>
             );
@@ -163,7 +165,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                     variant="bordered"
                     size={6}
                     onClick={() => setInvoiceFor(r)}
-                    title="Facture"
+                    title={t.invoiceTitle}
                     className={cn(
                       hasInvoice(r) &&
                         "border-accent-strong bg-accent-strong text-[oklch(0.18_0.01_148)] hover:text-[oklch(0.18_0.01_148)]",
@@ -175,7 +177,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                     variant="bordered"
                     size={6}
                     onClick={() => editSpending(r)}
-                    title="Modifier"
+                    title={t.editTitle}
                   >
                     <Pencil />
                   </IconButton>
@@ -183,7 +185,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
                     variant="danger"
                     size={6}
                     onClick={() => setPendingDelete(r.ID)}
-                    title="Supprimer"
+                    title={t.deleteTitle}
                   >
                     <Trash2 />
                   </IconButton>
@@ -203,7 +205,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
             </div>
           );
         })}
-        {list.length === 0 && <EmptyState>Aucune dépense fixe ce mois.</EmptyState>}
+        {list.length === 0 && <EmptyState>{t.empty}</EmptyState>}
       </div>
 
       {isModalVisible && (

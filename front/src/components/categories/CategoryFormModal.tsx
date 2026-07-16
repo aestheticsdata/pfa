@@ -5,6 +5,7 @@ import { Overline, overlineClass } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { cn } from "@lib/utils";
+import categories from "@text/categories";
 import { useMemo, useState } from "react";
 
 const LABEL = overlineClass;
@@ -37,6 +38,7 @@ const CategoryFormBody = ({
 }: Omit<CategoryFormModalProps, "open" | "onOpenChange"> & {
   onCancel: () => void;
 }) => {
+  const { form } = categories;
   const swatches = useMemo(() => paletteHex(), []);
   const [name, setName] = useState(initialName);
   const [color, setColor] = useState(() => cssColorToHex(initialColor ?? swatches[7] ?? "#84c4f5"));
@@ -45,11 +47,11 @@ const CategoryFormBody = ({
   const submit = () => {
     const trimmed = name.trim().toLowerCase();
     if (!trimmed) {
-      setError("Le nom est requis.");
+      setError(form.errorNameRequired);
       return;
     }
     if (takenNames.includes(trimmed)) {
-      setError("Cette catégorie existe déjà.");
+      setError(form.errorAlreadyExists);
       return;
     }
     onSubmit(trimmed, color);
@@ -58,7 +60,7 @@ const CategoryFormBody = ({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{mode === "create" ? "Nouvelle catégorie" : "Modifier la catégorie"}</DialogTitle>
+        <DialogTitle>{mode === "create" ? categories.newCategory : form.editTitle}</DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col gap-5">
@@ -67,13 +69,13 @@ const CategoryFormBody = ({
             htmlFor="cat-name"
             className={LABEL}
           >
-            Nom
+            {form.nameLabel}
           </label>
           <input
             id="cat-name"
             className={INPUT}
             type="text"
-            placeholder="Nom de la catégorie"
+            placeholder={form.namePlaceholder}
             autoComplete="off"
             value={name}
             onChange={(e) => {
@@ -92,7 +94,7 @@ const CategoryFormBody = ({
         </div>
 
         <div className="flex flex-col gap-2.5">
-          <Overline>Couleur</Overline>
+          <Overline>{form.colorLabel}</Overline>
           <div className="flex flex-wrap gap-2.5">
             {swatches.map((hex) => (
               <button
@@ -104,18 +106,18 @@ const CategoryFormBody = ({
                   color.toLowerCase() === hex.toLowerCase() ? "border-ink" : "border-transparent",
                 )}
                 style={{ background: hex }}
-                aria-label={`Teinte ${hex}`}
+                aria-label={form.swatchAriaLabel(hex)}
               />
             ))}
           </div>
           <div className="mt-1 flex items-center gap-3">
-            <span className="text-xs text-ink-3">Personnalisée</span>
+            <span className="text-xs text-ink-3">{form.customLabel}</span>
             <input
               type="color"
               value={color}
               onChange={(e) => setColor(e.target.value)}
               className="h-[30px] w-[46px] cursor-pointer rounded-md border border-line bg-transparent p-0"
-              aria-label="Couleur personnalisée"
+              aria-label={form.customColorAriaLabel}
             />
             <span className="font-mono text-xs text-ink-4">{color}</span>
           </div>
@@ -130,14 +132,14 @@ const CategoryFormBody = ({
           variant="ghost"
           onClick={onCancel}
         >
-          Annuler
+          {form.cancel}
         </Button>
         <Button
           type="button"
           variant="primary"
           onClick={submit}
         >
-          {mode === "create" ? "Créer" : "Enregistrer"}
+          {mode === "create" ? form.submitCreate : form.submitEdit}
         </Button>
       </DialogFooter>
     </>

@@ -2,19 +2,17 @@
 
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
+import app from "@text/app";
 
-const LEGAL = [
-  "Site hébergé chez OVH SAS",
-  "Siège social : 2 rue Kellermann — 59100 Roubaix — France",
-  "Code APE 2620Z",
-  "N° TVA : FR 22 424 761 419",
-];
+const { about: t } = app;
+
+const LEGAL = [t.legal.host, t.legal.address, t.legal.ape, t.legal.vat];
 
 export default function About() {
   return (
     <AuthCard>
       <AuthBrand
-        title="À propos"
+        title={t.title}
         subtitle="Personal Finance Assistant"
       />
 

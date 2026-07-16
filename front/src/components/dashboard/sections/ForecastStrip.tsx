@@ -10,6 +10,7 @@ import { Overline } from "@components/shared/Overline";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
 import { euro0 } from "@lib/format";
+import dashboardText from "@text/dashboard";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
@@ -25,6 +26,7 @@ const ForecastStrip = () => {
     get: { data: dashboard },
     monthlyTotal,
   } = useDashboard();
+  const { forecastStrip: t } = dashboardText;
   const budget = Number(dashboard?.initialAmount ?? 0);
   const now = new Date();
   const monthRef = from ?? now;
@@ -46,14 +48,14 @@ const ForecastStrip = () => {
       className="grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[200px_1fr_200px] sm:gap-8"
     >
       <div className="flex flex-col gap-1">
-        <Overline>Dépensé · {format(asOf, "d MMM", { locale: fr })}</Overline>
+        <Overline>{t.spent(format(asOf, "d MMM", { locale: fr }))}</Overline>
         <AnimatedNumber
           value={monthlyTotal}
           decimals={0}
           suffix=" €"
           className="num text-xl font-medium tracking-normal text-ink"
         />
-        <span className="text-xs text-ink-3">{spentPct}% du budget</span>
+        <span className="text-xs text-ink-3">{t.pctOfBudget(spentPct)}</span>
       </div>
 
       <div className="pt-6">
@@ -63,7 +65,7 @@ const ForecastStrip = () => {
           max={budget > 0 ? budget : Math.max(projection, monthlyTotal, 1)}
           projected={projection}
           marker={monthlyTotal}
-          markerLabel="aujourd'hui"
+          markerLabel={t.todayMarker}
           gradient
           animate
           height={36}
@@ -83,7 +85,7 @@ const ForecastStrip = () => {
                 />
               }
             >
-              réalisé
+              {t.realized}
             </LegendItem>
             <LegendItem
               swatch={
@@ -95,7 +97,7 @@ const ForecastStrip = () => {
                 />
               }
             >
-              projection
+              {t.projection}
             </LegendItem>
           </span>
           <span className="num">{euro0(budget)} € budget</span>
@@ -103,7 +105,7 @@ const ForecastStrip = () => {
       </div>
 
       <div className="flex flex-col items-start gap-1 sm:items-end sm:text-right">
-        <Overline>Projection fin de mois</Overline>
+        <Overline>{t.endOfMonthProjection}</Overline>
         <AnimatedNumber
           value={projection}
           decimals={0}
@@ -115,7 +117,7 @@ const ForecastStrip = () => {
           <span className={delta > 0 ? "text-neg" : "text-accent-strong"}>
             {delta > 0 ? `+${euro0(delta)} €` : `${euro0(delta)} €`}
           </span>{" "}
-          {delta > 0 ? "au-dessus" : "sous budget"}
+          {delta > 0 ? t.above : t.underBudget}
         </span>
       </div>
     </GlowCard>

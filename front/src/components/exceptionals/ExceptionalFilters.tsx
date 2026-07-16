@@ -3,6 +3,7 @@
 import { FilterChip } from "@components/shared/FilterChip";
 import { Overline } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
+import exceptionals from "@text/exceptionals";
 import { Plus } from "lucide-react";
 
 interface CategoryChip {
@@ -39,67 +40,70 @@ const ExceptionalFilters = ({
   activeCategory,
   onSelectCategory,
   onAdd,
-}: ExceptionalFiltersProps) => (
-  <div className="flex flex-col gap-3">
-    <div className="flex flex-wrap items-center gap-2.5">
-      <span className="mr-1 text-xs text-ink-3">Filtre :</span>
-      {years.map((y) => (
+}: ExceptionalFiltersProps) => {
+  const { filters } = exceptionals;
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-center gap-2.5">
+        <span className="mr-1 text-xs text-ink-3">{filters.label}</span>
+        {years.map((y) => (
+          <YearChip
+            key={y}
+            active={selectedYear === y}
+            label={String(y)}
+            onClick={() => onSelectYear(y)}
+          />
+        ))}
         <YearChip
-          key={y}
-          active={selectedYear === y}
-          label={String(y)}
-          onClick={() => onSelectYear(y)}
+          active={selectedYear === null}
+          label={filters.allYears}
+          onClick={() => onSelectYear(null)}
         />
-      ))}
-      <YearChip
-        active={selectedYear === null}
-        label="Toutes les années"
-        onClick={() => onSelectYear(null)}
-      />
-      <span className="grow" />
-      <Button
-        type="button"
-        variant="primary"
-        size="sm"
-        onClick={onAdd}
-      >
-        <Plus className="size-3.5" />
-        Ajouter
-      </Button>
-    </div>
-
-    {categories.length > 0 && (
-      <div className="flex flex-wrap items-center gap-2">
-        <Overline className="mr-1">Catégorie</Overline>
-        <FilterChip
-          active={activeCategory === null}
-          onClick={() => onSelectCategory(null)}
-          accent="exc"
-          className="rounded-full px-2.5"
+        <span className="grow" />
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          onClick={onAdd}
         >
-          Toutes
-        </FilterChip>
-        {categories.map((cat) => {
-          const active = activeCategory === cat.name;
-          return (
-            <FilterChip
-              key={cat.name}
-              active={active}
-              accentColor={cat.color}
-              onClick={() => onSelectCategory(active ? null : cat.name)}
-              className="gap-1.5 rounded-full px-2.5 capitalize"
-            >
-              <span
-                className="size-[7px] shrink-0 rounded-xs"
-                style={{ backgroundColor: cat.color }}
-              />
-              {cat.name}
-            </FilterChip>
-          );
-        })}
+          <Plus className="size-3.5" />
+          {exceptionals.actions.add}
+        </Button>
       </div>
-    )}
-  </div>
-);
+
+      {categories.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Overline className="mr-1">{filters.categoryLabel}</Overline>
+          <FilterChip
+            active={activeCategory === null}
+            onClick={() => onSelectCategory(null)}
+            accent="exc"
+            className="rounded-full px-2.5"
+          >
+            {filters.allCategories}
+          </FilterChip>
+          {categories.map((cat) => {
+            const active = activeCategory === cat.name;
+            return (
+              <FilterChip
+                key={cat.name}
+                active={active}
+                accentColor={cat.color}
+                onClick={() => onSelectCategory(active ? null : cat.name)}
+                className="gap-1.5 rounded-full px-2.5 capitalize"
+              >
+                <span
+                  className="size-[7px] shrink-0 rounded-xs"
+                  style={{ backgroundColor: cat.color }}
+                />
+                {cat.name}
+              </FilterChip>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default ExceptionalFilters;

@@ -3,6 +3,7 @@
 import ExceptionalItem from "@components/exceptionals/ExceptionalItem";
 import GlowCard from "@components/shared/GlowCard";
 import { euro } from "@lib/format";
+import exceptionals from "@text/exceptionals";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
 import parseISO from "date-fns/parseISO";
@@ -41,8 +42,10 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
     return Array.from(map.values()).sort((a, b) => (a.key < b.key ? 1 : -1));
   }, [items]);
 
+  const { list: t } = exceptionals;
+
   if (groups.length === 0) {
-    return <div className="py-12 text-center text-xs text-ink-4">Aucun achat exceptionnel.</div>;
+    return <div className="py-12 text-center text-xs text-ink-4">{t.empty}</div>;
   }
 
   return (
@@ -52,13 +55,10 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
           <div className="flex items-baseline justify-between px-1 pb-2.5">
             <h2 className="text-base font-semibold capitalize tracking-snug text-ink">
               {group.label}
-              <span className="ml-2 text-xs font-normal text-ink-4">
-                · {group.items.length} achat
-                {group.items.length > 1 ? "s" : ""}
-              </span>
+              <span className="ml-2 text-xs font-normal text-ink-4">· {t.purchaseCount(group.items.length)}</span>
             </h2>
             <span className="num text-sm text-ink-2">
-              Total <b className="font-medium text-ink">{euro(group.total)} €</b>
+              {t.total} <b className="font-medium text-ink">{euro(group.total)} €</b>
             </span>
           </div>
           <GlowCard className="overflow-hidden">

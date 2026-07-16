@@ -65,7 +65,7 @@ const useReccurings = () => {
       return deleteRecurringService(recurring);
     },
     {
-      onSuccess: () => recurringsActionOnSuccess("effacé"),
+      onSuccess: () => recurringsActionOnSuccess("supprimé"),
       onError: (e) => {
         console.log("error deleting recurring", e);
       },

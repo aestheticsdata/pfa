@@ -1,5 +1,5 @@
-import spendingsText from "@components/spendings/config/text";
 import { SORT_BY_AMOUNT, SORT_BY_CATEGORY, SORT_BY_LABEL } from "@components/spendings/helpers/sortConstants";
+import spendingsText from "@text/spendings";
 import { ArrowDownUp } from "lucide-react";
 
 type SortField = typeof SORT_BY_LABEL | typeof SORT_BY_CATEGORY | typeof SORT_BY_AMOUNT;

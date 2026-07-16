@@ -7,6 +7,7 @@ import { StatTile } from "@components/shared/StatTile";
 import { AnimatedNumber } from "@lib/dataviz";
 import { splitAmount } from "@lib/format";
 import { cn } from "@lib/utils";
+import spendings from "@text/spendings";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 
@@ -46,6 +47,7 @@ const SpendingSummary = ({
   avgDailyDelta,
   biggest,
 }: SpendingSummaryProps) => {
+  const { summary: t } = spendings;
   const perDay = (txCount / 7).toFixed(1).replace(".", ",");
   const average = weekTotal / 7;
 
@@ -59,22 +61,22 @@ const SpendingSummary = ({
   const ceilingSub =
     weeklyCeiling != null && weeklyCeiling > 0 ? (
       weekTotal > weeklyCeiling ? (
-        <span className="text-neg">+{Math.round(weekTotal - weeklyCeiling)} € vs plafond</span>
+        <span className="text-neg">{t.overCeiling(Math.round(weekTotal - weeklyCeiling))}</span>
       ) : (
-        <span className="text-accent-strong">−{Math.round(weeklyCeiling - weekTotal)} € sous plafond</span>
+        <span className="text-accent-strong">{t.underCeiling(Math.round(weeklyCeiling - weekTotal))}</span>
       )
     ) : (
-      "plafond non défini"
+      t.ceilingUndefined
     );
 
   const roundedDelta = Math.round(avgDailyDelta);
   const avgSub =
     roundedDelta === 0 ? (
-      <span className="text-ink-4">stable vs sem. dernière</span>
+      <span className="text-ink-4">{t.deltaStable}</span>
     ) : roundedDelta > 0 ? (
-      <span className="text-neg">+{roundedDelta} € vs sem. dernière</span>
+      <span className="text-neg">{t.deltaUp(roundedDelta)}</span>
     ) : (
-      <span className="text-accent-strong">−{Math.abs(roundedDelta)} € vs sem. dernière</span>
+      <span className="text-accent-strong">{t.deltaDown(Math.abs(roundedDelta))}</span>
     );
 
   return (
@@ -82,7 +84,7 @@ const SpendingSummary = ({
       {/* Hero — full-width banner on mobile, one equal-width cell (1/5) on desktop
           like the other four. Its font stays big; the four keep theirs too. */}
       <div className="col-span-2 bg-card px-5 py-4 min-[760px]:col-span-1">
-        <Overline className="mb-2 block">Budget restant</Overline>
+        <Overline className="mb-2 block">{t.remaining}</Overline>
         <div
           className={cn(
             "num text-4xl font-medium leading-none tracking-tight min-[1100px]:text-5xl",
@@ -95,7 +97,7 @@ const SpendingSummary = ({
         </div>
       </div>
       <Cell
-        label="Total semaine"
+        label={t.weekTotal}
         value={
           <MoneyAmount
             value={weekTotal}
@@ -105,12 +107,12 @@ const SpendingSummary = ({
         sub={ceilingSub}
       />
       <Cell
-        label="Transactions"
+        label={t.transactions}
         value={txCount}
-        sub={`sur 7 jours · ${perDay}/jour`}
+        sub={t.transactionsSub(perDay)}
       />
       <Cell
-        label="Moyenne / jour"
+        label={t.avgPerDay}
         value={
           <MoneyAmount
             value={average}
@@ -121,7 +123,7 @@ const SpendingSummary = ({
         sub={avgSub}
       />
       <Cell
-        label="Plus grosse"
+        label={t.biggest}
         value={
           biggest ? (
             <MoneyAmount

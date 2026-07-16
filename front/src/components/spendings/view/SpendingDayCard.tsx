@@ -7,6 +7,7 @@ import useDaySort from "@components/spendings/view/helpers/useDaySort";
 import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
 import { euro } from "@lib/format";
 import { cn } from "@lib/utils";
+import spendings from "@text/spendings";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { Plus } from "lucide-react";
@@ -79,6 +80,7 @@ const SpendingDayCard = ({
   search,
   onSelectCategory,
 }: SpendingDayCardProps) => {
+  const { sortItem, dayCard } = spendings;
   const { isModalVisible, addSpendingEnabled, spending, isEditing, addSpending, closeModal, editSpending } =
     useSpendingDayItem();
 
@@ -118,7 +120,7 @@ const SpendingDayCard = ({
       if (!map.has(key)) {
         map.set(key, {
           key,
-          name: s.category ?? "sans catégorie",
+          name: s.category ?? spendings.noCategory,
           color: s.categoryColor || FALLBACK_COLOR,
         });
       }
@@ -126,7 +128,7 @@ const SpendingDayCard = ({
     return Array.from(map.values());
   }, [items]);
 
-  const emptyLabel = items.length === 0 ? "Aucune dépense" : "Aucun résultat";
+  const emptyLabel = items.length === 0 ? spendings.list.empty : dayCard.noResults;
 
   return (
     <div
@@ -140,7 +142,7 @@ const SpendingDayCard = ({
             <span className="dow">{format(date, "EEEE", { locale: fr })}</span>
           </div>
           <div className={cn("sp-day-total", over && "over")}>
-            <span className="tl">TOTAL</span>
+            <span className="tl">{dayCard.total}</span>
             {euro(displayTotal)}
             <span className="cur"> €</span>
           </div>
@@ -148,21 +150,21 @@ const SpendingDayCard = ({
         <div className="sp-sort">
           <SortButton
             field="label"
-            label="Label"
+            label={sortItem.label}
             activeField={field}
             dir={dir}
             onSort={onSort}
           />
           <SortButton
             field="category"
-            label="Catégories"
+            label={sortItem.category}
             activeField={field}
             dir={dir}
             onSort={onSort}
           />
           <SortButton
             field="amount"
-            label="Montant"
+            label={sortItem.amount}
             activeField={field}
             dir={dir}
             onSort={onSort}
@@ -209,13 +211,13 @@ const SpendingDayCard = ({
           disabled={!addSpendingEnabled}
         >
           <Plus className="size-3" />
-          Ajouter une dépense ce jour
+          {dayCard.addSpending}
         </button>
       </div>
 
       {isToday && dailyBudget != null && (
         <div className="sp-day-budget">
-          <span>Budget du jour maximum</span>
+          <span>{spendings.dayItem.remainingBudget}</span>
           <span className="v">{dailyBudget} €</span>
         </div>
       )}

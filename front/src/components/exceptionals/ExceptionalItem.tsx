@@ -5,6 +5,7 @@ import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { IconButton } from "@components/shared/IconButton";
 import { euro } from "@lib/format";
+import exceptionals from "@text/exceptionals";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
 import parseISO from "date-fns/parseISO";
@@ -22,6 +23,7 @@ interface ExceptionalItemProps {
 const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps) => {
   const { deleteExceptional } = useExceptionals();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { actions } = exceptionals;
 
   const dateLabel = format(parseISO(item.date), "dd MMM", { locale: fr });
   const amount = euro(item.amount);
@@ -69,8 +71,8 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
             variant="bordered"
             size={7}
             onClick={() => onEdit(item)}
-            aria-label="Modifier"
-            title="Modifier"
+            aria-label={actions.edit}
+            title={actions.edit}
           >
             <Pencil />
           </IconButton>
@@ -78,8 +80,8 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
             variant="danger"
             size={7}
             onClick={() => setIsDeleteOpen(true)}
-            aria-label="Supprimer"
-            title="Supprimer"
+            aria-label={actions.delete}
+            title={actions.delete}
           >
             <Trash2 />
           </IconButton>
@@ -89,7 +91,7 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
       <ConfirmDeleteDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
-        title={`Supprimer ${item.label} ?`}
+        title={exceptionals.item.deleteConfirmTitle(item.label)}
         onConfirm={onDelete}
       />
     </>

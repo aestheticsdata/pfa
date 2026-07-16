@@ -6,12 +6,14 @@ import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
 import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
 import SharedLoginForm from "@components/shared/sharedLoginForm/sharedLoginForm";
+import login from "@text/login";
 
 import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 
 export default function SignUp() {
   const { signupService } = useSignupService();
   const { setCredentials } = useCredentials();
+  const { actions } = login;
 
   const onSubmit = async (values: LoginValues) => {
     const result = await signupService(values);
@@ -23,22 +25,22 @@ export default function SignUp() {
   return (
     <AuthCard>
       <AuthBrand
-        title="Créer un compte"
-        subtitle="Chaque euro à sa place."
+        title={actions.createAccount}
+        subtitle={login.brand.subtitle}
       />
 
       <SharedLoginForm
         onSubmit={onSubmit}
-        buttonTitle="Créer un compte"
+        buttonTitle={actions.createAccount}
         displayEmailField
         displayPasswordField
         displayConfirmPasswordField
       />
 
       <AuthSwitchLink
-        prompt="Déjà un compte ?"
+        prompt={login.switch.toLogin}
         href="/login"
-        label="Se connecter"
+        label={actions.signIn}
       />
     </AuthCard>
   );

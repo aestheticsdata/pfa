@@ -6,6 +6,7 @@ import { LegendItem } from "@components/shared/LegendItem";
 import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
 import useElementWidth from "@lib/dataviz/useElementWidth";
 import { euro0 } from "@lib/format";
+import statistics from "@text/statistics";
 
 export interface CategorySeries {
   name: string;
@@ -60,7 +61,7 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
     value: (yMax * i) / 4,
   }));
 
-  const subtitle = isCurrentYear ? `${year} · janv. → ${MONTHS_FR[months - 1]}` : `${year}`;
+  const subtitle = isCurrentYear ? statistics.ytdSubtitle(year, MONTHS_FR[months - 1]) : `${year}`;
 
   return (
     <GlowCard
@@ -69,7 +70,7 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
     >
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
-          <CardTitle>Dépenses mensuelles par catégorie</CardTitle>
+          <CardTitle>{statistics.categoryChart.title}</CardTitle>
           <p className="mt-0.5 text-xs text-ink-4">{subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-4.5 text-xs text-ink-3">
@@ -101,7 +102,7 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
             height={H}
             className="block"
             role="img"
-            aria-label={`Dépenses mensuelles par catégorie ${year}`}
+            aria-label={statistics.categoryChart.ariaLabel(year)}
           >
             {/* grid + y labels */}
             {gridRows.map((row) => (

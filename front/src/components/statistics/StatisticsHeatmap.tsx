@@ -8,6 +8,7 @@
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
+import statistics from "@text/statistics";
 import getDayOfYear from "date-fns/getDayOfYear";
 
 interface StatisticsHeatmapProps {
@@ -117,6 +118,7 @@ const FILLED_ORDER: FilledLevel[] = ["lvl-0", "lvl-1", "lvl-2", "lvl-3", "lvl-4"
 
 /** "Carte de chaleur — quotidienne" — a daily-intensity calendar (MOCK). */
 const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
+  const { heatmap: t } = statistics;
   const isCurrentYear = year === now.getFullYear();
   const realizedDays = isCurrentYear ? getDayOfYear(now) : getDayOfYear(new Date(year, 11, 31));
   const todayWeek = isCurrentYear ? Math.floor((getDayOfYear(now) - 1) / 7) : WEEKS - 1;
@@ -126,10 +128,10 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
   const sober = counts["lvl-0"] + counts["lvl-1"];
   const common = counts["lvl-2"] + counts["lvl-3"];
   const distGroups = [
-    { label: "sobres", n: sober, color: "oklch(0.45 0.06 148 / 0.7)" },
-    { label: "courantes", n: common, color: "oklch(0.70 0.10 148 / 0.85)" },
-    { label: "intenses", n: counts["lvl-4"], color: "var(--accent-strong)" },
-    { label: "exceptionnelles", n: counts["lvl-neg"], color: "var(--exc)" },
+    { label: t.dist.sober, n: sober, color: "oklch(0.45 0.06 148 / 0.7)" },
+    { label: t.dist.common, n: common, color: "oklch(0.70 0.10 148 / 0.85)" },
+    { label: t.dist.intense, n: counts["lvl-4"], color: "var(--accent-strong)" },
+    { label: t.dist.exceptional, n: counts["lvl-neg"], color: "var(--exc)" },
   ];
 
   return (
@@ -138,12 +140,8 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
       className="flex flex-col overflow-x-auto px-6 py-5.5"
     >
       <CardSectionHeader
-        title="Carte de chaleur — quotidienne"
-        meta={
-          <>
-            {year} · {realizedDays} jours réalisés
-          </>
-        }
+        title={t.title}
+        meta={t.meta(year, realizedDays)}
       />
 
       <div className="mt-4.5 min-w-[620px]">
@@ -212,7 +210,7 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
               />
             }
           >
-            Pic exceptionnel
+            {t.exceptionalPeak}
           </LegendItem>
         </div>
       </div>
@@ -220,7 +218,7 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
       {/* derived insights, pinned to the bottom */}
       <div className="mt-auto flex flex-col gap-5.5 border-t border-line-soft pt-5.5">
         <div>
-          <div className="num mb-2.5 text-2xs uppercase tracking-caps text-ink-4">Répartition des journées</div>
+          <div className="num mb-2.5 text-2xs uppercase tracking-caps text-ink-4">{t.distributionTitle}</div>
           <div className="flex h-4 gap-0.5 overflow-hidden rounded-sm">
             {FILLED_ORDER.filter((lvl) => counts[lvl] > 0).map((lvl) => (
               <span
@@ -248,18 +246,18 @@ const StatisticsHeatmap = ({ year, now }: StatisticsHeatmapProps) => {
 
         <div className="grid grid-cols-3 gap-4.5">
           <div>
-            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">Journée la plus chargée</div>
+            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">{t.busiestDay}</div>
             {/* MOCK — no per-day amounts */}
             <div className="num mt-2 text-xl tracking-snug text-ink">210 €</div>
-            <div className="mt-1 text-2xs text-ink-4">hors exceptionnel</div>
+            <div className="mt-1 text-2xs text-ink-4">{t.excludingExceptional}</div>
           </div>
           <div>
-            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">Plus longue série sobre</div>
-            <div className="num mt-2 text-xl tracking-snug text-ink">{streak} jours</div>
-            <div className="mt-1 text-2xs text-ink-4">journées calmes d&apos;affilée</div>
+            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">{t.longestSoberStreak}</div>
+            <div className="num mt-2 text-xl tracking-snug text-ink">{t.streakDays(streak)}</div>
+            <div className="mt-1 text-2xs text-ink-4">{t.calmDays}</div>
           </div>
           <div>
-            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">Pics exceptionnels</div>
+            <div className="num text-2xs uppercase leading-snug tracking-wider text-ink-4">{t.exceptionalPeaks}</div>
             <div className="num mt-2 text-xl tracking-snug text-ink">{counts["lvl-neg"]}</div>
             <div className="mt-1 text-2xs text-ink-4">ordinateur · vélo</div>
           </div>

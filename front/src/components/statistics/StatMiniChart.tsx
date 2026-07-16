@@ -1,6 +1,7 @@
 "use client";
 
 import { areaPath, linearScale, linePath } from "@lib/dataviz/svg";
+import statistics from "@text/statistics";
 
 interface StatMiniChartProps {
   /** Stable, unique gradient id. */
@@ -82,7 +83,7 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
           preserveAspectRatio="none"
           className="block"
           role="img"
-          aria-label="Graphique d'évolution"
+          aria-label={statistics.miniChart.ariaLabel}
         >
           <defs>
             <linearGradient
@@ -196,7 +197,7 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
             className="num pointer-events-none absolute right-6 text-3xs text-ink-4"
             style={{ top: `calc(${avgTop}% - 14px)` }}
           >
-            moy.
+            {statistics.miniChart.averageShort}
           </span>
         )}
 

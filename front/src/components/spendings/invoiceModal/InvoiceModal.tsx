@@ -6,12 +6,12 @@ import Spinner from "@components/common/Spinner";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { Dropzone } from "@components/shared/Dropzone";
 import { QUERY_KEYS } from "@components/spendings/config/constants";
-import texts from "@components/spendings/config/text";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { cn } from "@lib/utils";
+import texts from "@text/spendings";
 import { Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -230,13 +230,13 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                 type="button"
                 onClick={() => setIsClickOnThumbnail(true)}
                 className="block w-full cursor-zoom-in"
-                aria-label="Agrandir la facture"
+                aria-label={invoiceModalTexts.enlargeAria}
               >
                 <Image
                   src={invoiceImage}
                   width={1000}
                   height={800}
-                  alt="facture"
+                  alt={invoiceModalTexts.imageAlt}
                   className="block max-h-[min(460px,60vh)] w-full object-contain"
                   unoptimized
                 />
@@ -246,7 +246,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                 src={pendingPreview}
                 width={1000}
                 height={800}
-                alt="aperçu de la facture"
+                alt={invoiceModalTexts.previewAlt}
                 className="block max-h-[min(460px,60vh)] w-full object-contain"
                 unoptimized
               />
@@ -289,7 +289,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                   onClick={clearPending}
                   className="flex-1 text-base"
                 >
-                  Annuler
+                  {texts.actions.cancel}
                 </Button>
                 <Button
                   type="button"
@@ -330,7 +330,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
       <ConfirmDeleteDialog
         open={showConfirmDeleteImage}
         onOpenChange={setShowConfirmDeleteImage}
-        title={<>Supprimer la facture&nbsp;?</>}
+        title={invoiceModalTexts.deleteConfirmTitle}
         onConfirm={deleteImage}
       />
     </>

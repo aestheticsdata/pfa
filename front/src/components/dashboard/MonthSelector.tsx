@@ -2,6 +2,7 @@
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { IconButton } from "@components/shared/IconButton";
+import dashboardText from "@text/dashboard";
 import addDays from "date-fns/addDays";
 import addMonths from "date-fns/addMonths";
 import eachDayOfInterval from "date-fns/eachDayOfInterval";
@@ -38,7 +39,7 @@ const MonthSelector = () => {
           variant="ghost"
           size={5}
           onClick={() => applyMonth(addMonths(month, -1))}
-          aria-label="Mois précédent"
+          aria-label={dashboardText.monthSelector.prevMonth}
         >
           <ChevronLeft />
         </IconButton>
@@ -51,7 +52,7 @@ const MonthSelector = () => {
           variant="ghost"
           size={5}
           onClick={() => applyMonth(addMonths(month, 1))}
-          aria-label="Mois suivant"
+          aria-label={dashboardText.monthSelector.nextMonth}
         >
           <ChevronRight />
         </IconButton>

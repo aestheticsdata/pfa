@@ -7,6 +7,7 @@ import {
   ExceptionalMutationPayloadSchema,
   ExceptionalYearsSchema,
 } from "@src/schemas/exceptionals";
+import exceptionals from "@text/exceptionals";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import type { ExceptionalMutationPayload } from "@src/schemas/exceptionals";
@@ -28,7 +29,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   };
 
   const onSuccess = async (action: string) => {
-    displayPopup({ text: `dépense exceptionnelle ${action}` });
+    displayPopup({ text: exceptionals.toast.mutated(action) });
     await invalidate();
   };
 
@@ -96,7 +97,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   };
 
   const deleteExceptional = useMutation<unknown, AxiosError, { id: string }>(({ id }) => deleteExceptionalService(id), {
-    onSuccess: () => onSuccess("effacée"),
+    onSuccess: () => onSuccess("supprimée"),
     onError: (e) => {
       console.log("error deleting exceptional", e);
     },

@@ -2,6 +2,7 @@ import { FieldShell } from "@components/shared/FieldShell";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
 import { Input } from "@components/ui/input";
 import { cn } from "@lib/utils";
+import spendings from "@text/spendings";
 import addDays from "date-fns/addDays";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
@@ -18,6 +19,8 @@ interface DateFieldProps {
 }
 
 const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProps) => {
+  const { modal: t } = spendings;
+
   const stepDate = (delta: number) => {
     const current = getValues("spendingDate");
     const base = current ? parseISO(current) : new Date();
@@ -31,7 +34,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
     // it is disabled — not removed or swapped for a month stepper — when
     // "Récurrente mensuelle" is on.
     <FieldShell
-      label="Date"
+      label={t.fields.date}
       htmlFor="spendingDate"
     >
       <div
@@ -42,7 +45,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
       >
         <button
           type="button"
-          aria-label="Jour précédent"
+          aria-label={t.date.prevDayAria}
           onClick={() => stepDate(-1)}
           disabled={asRecurring}
           className="grid place-items-center border-r border-line px-3 text-ink-3 transition-colors hover:bg-surface-hi hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-3"
@@ -58,7 +61,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
         />
         <button
           type="button"
-          aria-label="Jour suivant"
+          aria-label={t.date.nextDayAria}
           onClick={() => stepDate(1)}
           disabled={asRecurring}
           className="grid place-items-center border-l border-line px-3 text-ink-3 transition-colors hover:bg-surface-hi hover:text-ink disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-ink-3"

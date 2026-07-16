@@ -7,6 +7,7 @@ import { Button } from "@components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
 import currencyCodes from "@src/currency-codes.json";
+import login from "@text/login";
 import getSymbolFromCurrency from "currency-symbol-map";
 import { ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
@@ -17,13 +18,15 @@ import type { SharedLoginFormProps } from "@src/components/shared/sharedLoginFor
 const buildSchema = (needEmail: boolean, needPassword: boolean, needConfirm: boolean, needCurrency: boolean) =>
   z
     .object({
-      email: needEmail ? z.string().min(1, "Email requis").email("Email invalide") : z.string().optional(),
-      password: needPassword ? z.string().min(1, "Mot de passe requis") : z.string().optional(),
-      confirmPassword: needConfirm ? z.string().min(1, "Confirmation requise") : z.string().optional(),
+      email: needEmail
+        ? z.string().min(1, login.validation.emailRequired).email(login.validation.emailInvalid)
+        : z.string().optional(),
+      password: needPassword ? z.string().min(1, login.validation.passwordRequired) : z.string().optional(),
+      confirmPassword: needConfirm ? z.string().min(1, login.validation.confirmRequired) : z.string().optional(),
       currency: needCurrency ? z.string().min(1) : z.string().optional(),
     })
     .refine((d) => !needConfirm || d.password === d.confirmPassword, {
-      message: "Les mots de passe ne correspondent pas",
+      message: login.validation.passwordMismatch,
       path: ["confirmPassword"],
     });
 
@@ -81,6 +84,8 @@ const SharedLoginForm = ({
     },
   });
 
+  const { fields } = login;
+
   const currency = watch("currency");
 
   // The server error (injected by the parent) takes precedence over the first
@@ -105,12 +110,12 @@ const SharedLoginForm = ({
             htmlFor="email"
             className={LABEL}
           >
-            Email
+            {fields.emailLabel}
           </label>
           <input
             id="email"
             type="email"
-            placeholder="vous@example.com"
+            placeholder={fields.emailPlaceholder}
             autoComplete="email"
             className={authInputClass}
             aria-invalid={!!errors.email}
@@ -122,7 +127,7 @@ const SharedLoginForm = ({
       {displayPasswordField && (
         <PasswordField
           id="password"
-          label="Mot de passe"
+          label={fields.passwordLabel}
           autoComplete={displayConfirmPasswordField ? "new-password" : "current-password"}
           invalid={!!errors.password}
           registration={register("password", { onChange: clearFieldError("password") })}
@@ -132,7 +137,7 @@ const SharedLoginForm = ({
       {displayConfirmPasswordField && (
         <PasswordField
           id="confirmPassword"
-          label="Confirmer le mot de passe"
+          label={fields.confirmPasswordLabel}
           autoComplete="new-password"
           invalid={!!errors.confirmPassword}
           registration={register("confirmPassword", { onChange: clearFieldError("confirmPassword") })}
@@ -145,7 +150,7 @@ const SharedLoginForm = ({
             htmlFor="currency"
             className={LABEL}
           >
-            Devise
+            {fields.currencyLabel}
           </label>
           <Select
             value={currency || "EUR"}
@@ -155,7 +160,7 @@ const SharedLoginForm = ({
               id="currency"
               className="w-full"
             >
-              <SelectValue placeholder="Devise" />
+              <SelectValue placeholder={fields.currencyLabel} />
             </SelectTrigger>
             <SelectContent className="max-h-72">
               {currencyCodes.map((c) => (

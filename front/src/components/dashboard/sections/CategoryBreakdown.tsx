@@ -12,6 +12,7 @@ import useSpendings from "@components/spendings/services/useSpendings";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { CategoryBarTooltip, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
 import { euro, pct1 } from "@lib/format";
+import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { useMemo, useState } from "react";
@@ -27,7 +28,7 @@ const FALLBACK_COLOR = CATEGORY_FALLBACK;
 const mockTrend = (name: string): CategoryTrendData => {
   const hash = Array.from(name).reduce((a, c) => a + c.charCodeAt(0), 0);
   const n = (hash % 83) - 40; // -40..+42
-  if (Math.abs(n) < 3) return { direction: "flat", label: "stable" };
+  if (Math.abs(n) < 3) return { direction: "flat", label: dashboardText.categoryBreakdown.trendStable };
   return n > 0 ? { direction: "up", label: `+${n}%` } : { direction: "down", label: `−${Math.abs(n)}%` };
 };
 
@@ -38,6 +39,7 @@ const CategoryBreakdown = () => {
   const { spendingsByMonth } = useSpendings();
   const [selected, setSelected] = useState<ChartsCategory | null>(null);
   const [hover, setHover] = useState<BarHover<number> | null>(null);
+  const { categoryBreakdown: t } = dashboardText;
 
   if (error) {
     throw error;
@@ -46,7 +48,7 @@ const CategoryBreakdown = () => {
   const counts = useMemo(() => {
     const map = new Map<string, number>();
     for (const s of spendingsByMonth ?? []) {
-      const key = (s.category ?? "sans catégorie").toLowerCase();
+      const key = (s.category ?? t.uncategorized).toLowerCase();
       map.set(key, (map.get(key) ?? 0) + 1);
     }
     return map;
@@ -59,7 +61,7 @@ const CategoryBreakdown = () => {
   // One derived row per category, shared by the list AND the hover tooltip so
   // both render identical values (no recompute). Order matches the bar segments.
   const rows = list.map((category) => {
-    const name = category.category ?? "sans catégorie";
+    const name = category.category ?? t.uncategorized;
     return {
       category,
       color: category.categoryColor ?? FALLBACK_COLOR,
@@ -77,8 +79,8 @@ const CategoryBreakdown = () => {
       className="flex max-h-137.5 min-h-80 flex-col gap-4 px-6 py-5"
     >
       <CardSectionHeader
-        title="Répartition par catégorie"
-        meta={`${monthLabel} · part des variables`}
+        title={t.title}
+        meta={t.meta(monthLabel)}
       />
 
       {list.length > 0 ? (
@@ -87,7 +89,7 @@ const CategoryBreakdown = () => {
             segments={categoriesToSegments(list)}
             height={8}
             radius={4}
-            ariaLabel="Répartition mensuelle par catégorie"
+            ariaLabel={t.barAria}
             onSegmentHover={(index, e) => setHover({ target: index, x: e.clientX, y: e.clientY })}
             onSegmentLeave={() => setHover(null)}
           />
@@ -117,7 +119,7 @@ const CategoryBreakdown = () => {
           </div>
         </>
       ) : (
-        <EmptyState className="py-10">Aucune dépense ce mois.</EmptyState>
+        <EmptyState className="py-10">{t.empty}</EmptyState>
       )}
 
       {hover && (

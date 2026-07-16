@@ -11,7 +11,7 @@ import { IconButton } from "@components/shared/IconButton";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
 import { buildSpendingsPath, getTodayIsoDate, isValidIsoDate, SPENDINGS_PATH } from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
-import text from "@src/components/shared/navBar/common/text";
+import text from "@text/navBar";
 import { BarChart3, LayoutDashboard, Menu, Receipt, Sparkles, Tag, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -58,6 +58,7 @@ const NavBar = () => {
     () => false,
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const { aria } = text;
 
   useEffect(() => {
     if (!drawerOpen) return;
@@ -118,7 +119,7 @@ const NavBar = () => {
           variant="ghost"
           size={9}
           onClick={() => setDrawerOpen(true)}
-          aria-label="Ouvrir le menu"
+          aria-label={aria.openMenu}
           className="hover:border-line lg:hidden"
         >
           <Menu />
@@ -193,7 +194,7 @@ const NavBar = () => {
       <aside
         className="pfa-drawer lg:hidden"
         data-open={drawerOpen}
-        aria-label="Navigation"
+        aria-label={aria.drawer}
         aria-hidden={!drawerOpen}
       >
         <div className="mb-1.5 flex items-center justify-between border-b border-white/[0.07] px-1.5 pb-3">
@@ -202,7 +203,7 @@ const NavBar = () => {
             variant="ghost"
             size={9}
             onClick={() => setDrawerOpen(false)}
-            aria-label="Fermer le menu"
+            aria-label={aria.closeMenu}
             className="hover:border-line"
           >
             <X />

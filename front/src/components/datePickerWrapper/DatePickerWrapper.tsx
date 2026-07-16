@@ -4,6 +4,7 @@ import { parseDateParam } from "@components/datePickerWrapper/helpers";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
 import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
+import common from "@text/common";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
@@ -94,7 +95,7 @@ const DatePickerWrapper = () => {
             })}
           </span>
         ) : (
-          <span className="text-sm">Sélectionner une période</span>
+          <span className="text-sm">{common.datePicker.placeholder}</span>
         )}
         <ChevronDown
           className={cn("size-3.5 shrink-0 text-ink-5 transition-transform", isCalendarVisible && "rotate-180")}

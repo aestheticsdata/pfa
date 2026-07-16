@@ -4,6 +4,7 @@ import { computeExceptionalStats } from "@components/exceptionals/helpers/except
 import GlowCard from "@components/shared/GlowCard";
 import { StatTile } from "@components/shared/StatTile";
 import { euro } from "@lib/format";
+import exceptionals from "@text/exceptionals";
 import format from "date-fns/format";
 import { fr } from "date-fns/locale";
 import { useState } from "react";
@@ -33,6 +34,7 @@ const ExceptionalStatsCards = ({ items, year, monthlyAverage }: ExceptionalStats
   // Stable across re-renders so the elapsed-month count doesn't drift mid-session.
   const [now] = useState(() => new Date());
   const stats = computeExceptionalStats(items, year, now);
+  const { stats: t } = exceptionals;
 
   // Part of total spending — derived from the real regular monthly average
   // (regular annual ≈ monthlyAverage × 12). Only meaningful for a single year.
@@ -44,27 +46,27 @@ const ExceptionalStatsCards = ({ items, year, monthlyAverage }: ExceptionalStats
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <Kpi
-        label={year != null ? `Total ${year}` : "Total (toutes années)"}
+        label={year != null ? t.totalYear(year) : t.totalAllYears}
         value={
           <>
             {euro(stats.total)}
             {cur(" €")}
           </>
         }
-        sub={`${stats.count} achat${stats.count > 1 ? "s" : ""} exceptionnel${stats.count > 1 ? "s" : ""}`}
+        sub={t.exceptionalCount(stats.count)}
       />
       <Kpi
-        label="Moyenne / mois"
+        label={t.averagePerMonth}
         value={
           <>
             {euro(stats.average)}
             {cur(" €")}
           </>
         }
-        sub={`lissée sur ${stats.spanMonths} mois`}
+        sub={t.smoothedOver(stats.spanMonths)}
       />
       <Kpi
-        label="Plus grosse dépense"
+        label={t.biggest}
         value={
           stats.biggest ? (
             <>
@@ -84,7 +86,7 @@ const ExceptionalStatsCards = ({ items, year, monthlyAverage }: ExceptionalStats
         }
       />
       <Kpi
-        label="Part des dépenses"
+        label={t.partOfSpending}
         value={
           part != null ? (
             <>
@@ -95,7 +97,7 @@ const ExceptionalStatsCards = ({ items, year, monthlyAverage }: ExceptionalStats
             "—"
           )
         }
-        sub={part != null ? `sur ${euro(totalSpent)} € dépensés en ${year}` : "indisponible"}
+        sub={year != null && part != null ? t.spentIn(euro(totalSpent), year) : t.unavailable}
       />
     </div>
   );

@@ -1,6 +1,7 @@
 import { Dropzone } from "@components/shared/Dropzone";
 import { IconButton } from "@components/shared/IconButton";
 import { humanSize } from "@components/spendings/common/spendingModal/helpers";
+import spendings from "@text/spendings";
 import { Upload, X } from "lucide-react";
 import Image from "next/image";
 
@@ -24,9 +25,10 @@ const ReceiptField = ({ receiptFile, receiptPreview, onReceiptFile, clearReceipt
         </span>
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="text-sm font-semibold text-ink">
-            Glisser un reçu ou <span className="text-elec underline underline-offset-2">parcourir</span>
+            {spendings.modal.receipt.dropPrompt}{" "}
+            <span className="text-elec underline underline-offset-2">{spendings.modal.receipt.browse}</span>
           </span>
-          <span className="num text-xs text-ink-4">jpg, png, webp</span>
+          <span className="num text-xs text-ink-4">{spendings.modal.receipt.fileTypes}</span>
         </span>
       </Dropzone>
     ) : (
@@ -49,7 +51,7 @@ const ReceiptField = ({ receiptFile, receiptPreview, onReceiptFile, clearReceipt
           variant="danger"
           size={8}
           onClick={clearReceipt}
-          aria-label="Retirer le reçu"
+          aria-label={spendings.modal.receipt.removeAria}
         >
           <X />
         </IconButton>
