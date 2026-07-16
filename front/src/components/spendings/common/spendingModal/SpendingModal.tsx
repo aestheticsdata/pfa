@@ -17,6 +17,7 @@ import useSpendings from "@components/spendings/services/useSpendings";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
+import spendings from "@text/spendings";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import startOfMonth from "date-fns/startOfMonth";
@@ -167,10 +168,9 @@ const SpendingModal = ({
   // Title tracks recurringType (dashboard "dépense fixe" entry) only, NOT the
   // in-modal toggle — so ticking "Récurrente mensuelle" keeps the title stable
   // instead of making the modal look like a different one.
-  const title = isEditing
-    ? `Modifier la dépense${recurringType ? " fixe" : ""}`
-    : `Nouvelle dépense${recurringType ? " fixe" : ""}`;
-  const submitLabel = isEditing ? "Enregistrer" : "Ajouter la dépense";
+  const { modal } = spendings;
+  const title = isEditing ? modal.title.edit(recurringType) : modal.title.create(recurringType);
+  const submitLabel = isEditing ? modal.submit.save : modal.submit.add;
 
   return (
     <Dialog
@@ -230,7 +230,7 @@ const SpendingModal = ({
                 active={isRecurringToggle}
                 onClick={() => setIsRecurringToggle((v) => !v)}
               >
-                Récurrente mensuelle
+                {modal.recurringToggle}
               </Toggle>
             )}
             {/* Receipt is not applicable to a recurring — disabled, not removed. */}
@@ -239,7 +239,7 @@ const SpendingModal = ({
               onClick={() => setIsReceiptToggle((v) => !v)}
               disabled={asRecurring}
             >
-              Joindre un reçu
+              {modal.attachReceipt}
             </Toggle>
           </div>
 
@@ -280,7 +280,7 @@ const SpendingModal = ({
               }}
             >
               <Copy className="size-4" />
-              Copier les dépenses fixes du mois précédent
+              {modal.copyPreviousMonth}
             </Button>
           )}
 
@@ -290,7 +290,7 @@ const SpendingModal = ({
               variant="muted"
               onClick={closeModal}
             >
-              Annuler
+              {spendings.actions.cancel}
             </Button>
             <Button
               type="submit"

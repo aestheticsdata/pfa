@@ -3,11 +3,11 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
-import texts from "@components/spendings/config/text";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { DATE_QUERY_PARAM, SPENDINGS_PATH } from "@helpers/dateRoute";
 import { euro } from "@lib/format";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
+import texts from "@text/spendings";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
@@ -116,7 +116,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                 <span className="catd-name">{categoryInfos.category ?? t.noCategoryLabel}</span>
               </DialogPrimitive.Title>
               <span className="catd-total">
-                <span className="k">{t.total} :</span>
+                <span className="k">{t.total}&nbsp;:</span>
                 <span className="v">{euro(total)} €</span>
               </span>
               <span className="catd-sp" />
@@ -133,7 +133,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
             </div>
 
             <div className="catd-filter">
-              <span className="catd-filter-lbl">{t.filter} :</span>
+              <span className="catd-filter-lbl">{t.filter}&nbsp;:</span>
               <span className="catd-search">
                 <Search
                   size={15}

@@ -12,6 +12,7 @@ import { LegendItem } from "@components/shared/LegendItem";
 import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
 import useElementWidth from "@lib/dataviz/useElementWidth";
 import { euro0 } from "@lib/format";
+import statistics from "@text/statistics";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 
 interface StatisticsMonthlyChartProps {
@@ -69,6 +70,8 @@ const StatisticsMonthlyChart = ({
 }: StatisticsMonthlyChartProps) => {
   const [ref, width] = useElementWidth<HTMLDivElement>();
 
+  const { monthlyChart } = statistics;
+
   const cm = now.getMonth();
   const isCurrentYear = year === now.getFullYear();
   const realizedCount = year > now.getFullYear() ? 0 : isCurrentYear ? cm + 1 : 12;
@@ -110,9 +113,9 @@ const StatisticsMonthlyChart = ({
     .join(" ");
 
   const subtitle = compareEnabled
-    ? `${year} comparé à ${compareYear} · ligne pointillée`
+    ? monthlyChart.subtitleCompare(year, compareYear)
     : isCurrentYear
-      ? `${year} · janv. → ${MONTHS_FR[cm]}`
+      ? statistics.ytdSubtitle(year, MONTHS_FR[cm])
       : `${year}`;
 
   return (
@@ -122,14 +125,14 @@ const StatisticsMonthlyChart = ({
     >
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <div>
-          <CardTitle>Dépenses mensuelles</CardTitle>
+          <CardTitle>{monthlyChart.title}</CardTitle>
           <p className="mt-0.5 text-xs text-ink-4">{subtitle}</p>
         </div>
         <div className="flex flex-wrap items-center gap-4.5 text-xs text-ink-3">
           <LegendItem swatch={<i className="inline-block size-2.5 rounded-xs bg-accent-strong" />}>{year}</LegendItem>
           {showExceptionals && (
             <LegendItem swatch={<i className="inline-block size-2.5 rounded-xs bg-exc" />}>
-              Achat exceptionnel
+              {monthlyChart.legendExceptional}
             </LegendItem>
           )}
           {compareEnabled && (
@@ -144,7 +147,7 @@ const StatisticsMonthlyChart = ({
               {compareYear}
             </LegendItem>
           )}
-          <LegendItem swatch={<DashSwatch color="var(--ink-3)" />}>Budget mensuel</LegendItem>
+          <LegendItem swatch={<DashSwatch color="var(--ink-3)" />}>{monthlyChart.legendBudget}</LegendItem>
         </div>
       </div>
 
@@ -159,7 +162,7 @@ const StatisticsMonthlyChart = ({
             height={H}
             className="block"
             role="img"
-            aria-label={`Dépenses mensuelles ${year}`}
+            aria-label={monthlyChart.ariaLabel(year)}
           >
             <defs>
               <pattern
@@ -231,7 +234,7 @@ const StatisticsMonthlyChart = ({
                   fill="var(--ink-3)"
                   className="num"
                 >
-                  budget mensuel
+                  {monthlyChart.budgetLine}
                 </text>
               </>
             )}
@@ -374,7 +377,7 @@ const StatisticsMonthlyChart = ({
                   fill="var(--ink-3)"
                   className="num"
                 >
-                  proj. {euro0(projectedCM)} €
+                  {monthlyChart.projection(euro0(projectedCM))}
                 </text>
               </g>
             )}

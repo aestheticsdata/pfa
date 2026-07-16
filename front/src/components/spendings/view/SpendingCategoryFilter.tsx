@@ -3,6 +3,7 @@
 import { FilterChip } from "@components/shared/FilterChip";
 import { Overline } from "@components/shared/Overline";
 import { cn } from "@lib/utils";
+import spendings from "@text/spendings";
 
 export interface FilterCategory {
   key: string;
@@ -58,11 +59,11 @@ const SpendingCategoryFilter = ({ categories, total, selected, onSelect }: Spend
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Overline className="mr-1">Filtrer</Overline>
+      <Overline className="mr-1">{spendings.filter.label}</Overline>
       <Chip
         active={selected === null}
         onClick={() => onSelect(null)}
-        label="Toutes"
+        label={spendings.filter.all}
         count={total}
       />
       {categories.map((c) => (

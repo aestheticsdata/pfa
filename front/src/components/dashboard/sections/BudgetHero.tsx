@@ -12,6 +12,7 @@ import { Input } from "@components/ui/input";
 import { Donut, useCountUp } from "@lib/dataviz";
 import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
+import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { useEffect, useState } from "react";
@@ -36,6 +37,7 @@ const BudgetHero = () => {
   const { recurrings } = useReccurings();
   const [editing, setEditing] = useState(false);
   const { register, handleSubmit, setFocus } = useForm<SalaryForm>();
+  const { budgetHero: t } = dashboardText;
 
   if (error) {
     throw error;
@@ -58,8 +60,8 @@ const BudgetHero = () => {
   const segments =
     initialAmount > 0
       ? [
-          { label: "Fixes", value: fixed, color: "var(--accent-d)" },
-          { label: "Variables", value: variable, color: "var(--accent-strong)" },
+          { label: t.fixed, value: fixed, color: "var(--accent-d)" },
+          { label: t.variables, value: variable, color: "var(--accent-strong)" },
         ]
       : [];
 
@@ -87,7 +89,7 @@ const BudgetHero = () => {
       <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col">
           <span className="text-xs font-medium uppercase tracking-widest text-ink-3">
-            {monthLabel} — budget restant
+            {t.remainingLabel(monthLabel)}
           </span>
           <div
             className={cn(
@@ -110,8 +112,8 @@ const BudgetHero = () => {
                   type="button"
                   onClick={() => setEditing(true)}
                   className="group inline-flex items-center gap-1 border-b border-dashed border-ink-4 pb-px leading-tight transition-colors hover:border-accent-strong"
-                  aria-label="Modifier le budget alloué"
-                  title="Modifier le montant initial"
+                  aria-label={t.editBudgetAria}
+                  title={t.editAmountTitle}
                 >
                   <span className="num text-ink-2">{euro0(initialAmount)} €</span>
                   <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />
@@ -142,15 +144,13 @@ const BudgetHero = () => {
             {initialAmount > 0 ? (
               <>
                 <span className="text-ink-4">•</span>
-                <span className={over ? "text-neg" : "text-accent-strong"}>
-                  {over ? "↓ au-dessus du budget" : "↑ dans le budget"}
-                </span>
-                <span>au rythme actuel</span>
+                <span className={over ? "text-neg" : "text-accent-strong"}>{over ? t.overBudget : t.withinBudget}</span>
+                <span>{t.atCurrentPace}</span>
               </>
             ) : (
               <>
                 <span className="text-ink-4">•</span>
-                <span className="text-accent-strong">Définis ton budget du mois</span>
+                <span className="text-accent-strong">{t.setBudgetPrompt}</span>
               </>
             )}
           </div>
@@ -163,7 +163,7 @@ const BudgetHero = () => {
             size={168}
             thickness={7}
             animate
-            ariaLabel="Répartition du budget consommé"
+            ariaLabel={t.donutAria}
           >
             <div>
               <div className="num text-3xl font-medium leading-none tracking-tight text-ink">
@@ -175,10 +175,10 @@ const BudgetHero = () => {
           </Donut>
           <div className="flex gap-4 text-2xs text-ink-3">
             <LegendItem swatch={<span className="size-2 rounded-xs bg-accent-d" />}>
-              Fixes <span className="num text-ink-2">{euro0(fixed)}</span>
+              {t.fixed} <span className="num text-ink-2">{euro0(fixed)}</span>
             </LegendItem>
             <LegendItem swatch={<span className="size-2 rounded-xs bg-accent-strong" />}>
-              Variables <span className="num text-ink-2">{euro0(variable)}</span>
+              {t.variables} <span className="num text-ink-2">{euro0(variable)}</span>
             </LegendItem>
           </div>
         </div>

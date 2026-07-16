@@ -6,6 +6,9 @@
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { MeterBar } from "@components/shared/MeterBar";
+import statistics from "@text/statistics";
+
+const { dayOfWeek: t } = statistics;
 
 interface DayRow {
   day: string;
@@ -16,13 +19,25 @@ interface DayRow {
 }
 
 const ROWS: DayRow[] = [
-  { day: "Lundi", width: 42, amount: "38,20 €", transactions: "3,2 transactions/j" },
-  { day: "Mardi", width: 48, amount: "44,10 €", transactions: "3,5 transactions/j" },
-  { day: "Mercredi", width: 55, amount: "50,80 €", transactions: "4,1 transactions/j" },
-  { day: "Jeudi", width: 51, amount: "46,90 €", transactions: "3,7 transactions/j" },
-  { day: "Vendredi", width: 64, amount: "58,60 €", transactions: "4,5 transactions/j" },
-  { day: "Samedi", width: 96, amount: "88,40 €", transactions: "5,2 transactions/j", weekend: true },
-  { day: "Dimanche", width: 78, amount: "71,20 €", transactions: "4,4 transactions/j", weekend: true },
+  { day: "Lundi", width: 42, amount: "38,20 €", transactions: t.transactionsPerDay("3,2") },
+  { day: "Mardi", width: 48, amount: "44,10 €", transactions: t.transactionsPerDay("3,5") },
+  { day: "Mercredi", width: 55, amount: "50,80 €", transactions: t.transactionsPerDay("4,1") },
+  { day: "Jeudi", width: 51, amount: "46,90 €", transactions: t.transactionsPerDay("3,7") },
+  { day: "Vendredi", width: 64, amount: "58,60 €", transactions: t.transactionsPerDay("4,5") },
+  {
+    day: "Samedi",
+    width: 96,
+    amount: "88,40 €",
+    transactions: t.transactionsPerDay("5,2"),
+    weekend: true,
+  },
+  {
+    day: "Dimanche",
+    width: 78,
+    amount: "71,20 €",
+    transactions: t.transactionsPerDay("4,4"),
+    weekend: true,
+  },
 ];
 
 const WEEKDAY_FILL = "var(--bar-fill)";
@@ -35,8 +50,8 @@ const StatisticsDayOfWeek = () => (
     className="px-6 py-5.5"
   >
     <CardSectionHeader
-      title="Dépenses par jour de la semaine"
-      meta="moyenne sur 12 mois"
+      title={t.title}
+      meta={t.meta}
     />
 
     <div className="mt-4.5 flex flex-col gap-2">

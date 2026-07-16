@@ -19,6 +19,7 @@ import {
 import StatMiniChart from "@components/statistics/StatMiniChart";
 import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
+import statisticsText from "@text/statistics";
 import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
@@ -118,6 +119,7 @@ const StatisticsKpis = ({
 }: StatisticsKpisProps) => {
   const [now] = useState(() => new Date());
 
+  const { kpis: t } = statisticsText;
   const data = statistics?.data;
   const regMonthly = monthlyTotals(data, year);
   const excMonthly = exceptionalMonthly(exceptionals);
@@ -147,15 +149,15 @@ const StatisticsKpis = ({
   // MOCK — no per-transaction yearly endpoint; approximated from the top category
   const mockRegularBiggest = topCategory
     ? { label: cap(topCategory.name), amount: Math.round(topCategory.value / months) }
-    : { label: "Dépense courante", amount: 0 };
+    : { label: t.regularExpenseFallback, amount: 0 };
   const expenseScale = Math.max(Number(topExc?.amount ?? 0), mockRegularBiggest.amount, 1);
 
   return (
     <section className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 min-[768px]:grid-cols-4">
-      <Card label={`Total dépensé ${year}`}>
+      <Card label={t.totalSpent(year)}>
         <Value amount={total} />
         <span className="text-xs text-ink-3">
-          <Delta down={deltaPct <= 0}>{Math.abs(Math.round(deltaPct))}%</Delta> vs {compareYear} · sur {months} mois
+          <Delta down={deltaPct <= 0}>{Math.abs(Math.round(deltaPct))}%</Delta> {t.vsMonths(compareYear, months)}
         </span>
         <div className="mt-4">
           <StatMiniChart
@@ -166,10 +168,10 @@ const StatisticsKpis = ({
         </div>
       </Card>
 
-      <Card label="Moyenne / mois">
+      <Card label={t.avgPerMonth}>
         <Value amount={avg} />
         <span className="text-xs text-ink-3">
-          <Delta down={avgDelta <= 0}>{euro0(Math.abs(avgDelta))} €</Delta> vs moyenne {compareYear} (
+          <Delta down={avgDelta <= 0}>{euro0(Math.abs(avgDelta))} €</Delta> {t.vsAverage(compareYear)} (
           <span className="num font-medium text-ink">{euro0(compareAvg)} €</span>)
         </span>
         <div className="mt-4">
@@ -182,11 +184,11 @@ const StatisticsKpis = ({
         </div>
       </Card>
 
-      <Card label="Plus gros mois">
+      <Card label={t.biggestMonth}>
         <div className="mt-2 flex flex-1 flex-col justify-evenly gap-3">
           {showExceptionals && excYearTotal > 0 && (
             <CmpRow
-              tag="avec exceptionnel"
+              tag={t.tag.withExceptional}
               kind="exc"
               title={cap(MONTHS_FR[totalIdx])}
               amount={totalMonthly[totalIdx]}
@@ -195,7 +197,7 @@ const StatisticsKpis = ({
             />
           )}
           <CmpRow
-            tag="hors exceptionnel"
+            tag={t.tag.withoutExceptional}
             kind="reg"
             title={cap(MONTHS_FR[regIdx])}
             amount={regMonthly[regIdx]}
@@ -205,11 +207,11 @@ const StatisticsKpis = ({
         </div>
       </Card>
 
-      <Card label="Plus grosse dépense">
+      <Card label={t.biggestExpense}>
         <div className="mt-2 flex flex-1 flex-col justify-evenly gap-3">
           {showExceptionals && topExc && (
             <CmpRow
-              tag="exceptionnelle"
+              tag={t.tag.exceptional}
               kind="exc"
               title={cap(topExc.label)}
               titleVariant="expense"
@@ -219,7 +221,7 @@ const StatisticsKpis = ({
             />
           )}
           <CmpRow
-            tag="courante"
+            tag={t.tag.regular}
             kind="reg"
             title={mockRegularBiggest.label}
             titleVariant="expense"

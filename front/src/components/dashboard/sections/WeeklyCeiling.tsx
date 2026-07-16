@@ -12,6 +12,7 @@ import { Input } from "@components/ui/input";
 import { ProgressTrack } from "@lib/dataviz";
 import { euro, euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
+import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import isAfter from "date-fns/isAfter";
@@ -39,6 +40,7 @@ const WeeklyCeiling = () => {
   } = useDashboard();
   const [editing, setEditing] = useState(false);
   const { register, handleSubmit, setFocus } = useForm<CeilingForm>();
+  const { weeklyCeiling: t } = dashboardText;
 
   if (wsError) throw wsError;
   if (dbError) throw dbError;
@@ -83,7 +85,7 @@ const WeeklyCeiling = () => {
       className="flex flex-col gap-4 px-6 py-5"
     >
       <CardSectionHeader
-        title="Plafond hebdomadaire"
+        title={t.title}
         className="items-center"
         action={
           !editing ? (
@@ -95,7 +97,7 @@ const WeeklyCeiling = () => {
                 "group inline-flex items-center gap-1 border-b border-dashed pb-px text-xs transition-colors",
                 canEdit ? "border-ink-4 text-ink-2 hover:border-accent-strong" : "border-transparent opacity-50",
               )}
-              title="Modifier le plafond"
+              title={t.editTitle}
             >
               <span className="num">{euro0(ceiling)} €/sem.</span>
               {canEdit && <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />}
@@ -152,7 +154,7 @@ const WeeklyCeiling = () => {
                   {future ? "—" : `${euro(weekTotal)} €`}
                 </span>
                 {future ? (
-                  <span className="block text-2xs text-ink-4">à venir</span>
+                  <span className="block text-2xs text-ink-4">{t.upcoming}</span>
                 ) : (
                   ceiling > 0 && (
                     <span className={cn("num block text-2xs", delta > 0 ? "text-neg" : "text-accent-strong")}>
@@ -164,33 +166,33 @@ const WeeklyCeiling = () => {
             </div>
           );
         })}
-        {stats.length === 0 && <EmptyState>Pas encore de données.</EmptyState>}
+        {stats.length === 0 && <EmptyState>{t.empty}</EmptyState>}
       </div>
 
       <div className="flex items-center justify-between border-t border-line pt-3.5 text-xs text-ink-3">
-        <span>Moyenne hebdo</span>
+        <span>{t.avgLabel}</span>
         <span className="num text-ink">
           {euro(avg)} €
-          {ceiling > 0 && <span className="text-ink-4"> · {Math.round((avg / ceiling) * 100)}% du plafond</span>}
+          {ceiling > 0 && <span className="text-ink-4"> · {t.pctOfCeiling(Math.round((avg / ceiling) * 100))}</span>}
         </span>
       </div>
 
       {ceiling > 0 && (
         <div className="flex flex-wrap items-center gap-2 text-2xs text-ink-3">
           <span className="inline-block h-2.5 w-0.5 rounded-sm bg-ink-2" />
-          <span className="num">Plafond {euro0(ceiling)} €</span>
+          <span className="num">{t.ceilingAmount(euro0(ceiling))}</span>
           <span className="text-ink-4">·</span>
           <span
             className="inline-block size-2.5 rounded-xs"
             style={{ background: "var(--accent-strong)", opacity: 0.92 }}
           />
-          dans le budget
+          {t.withinBudget}
           <span className="text-ink-4">·</span>
           <span
             className="inline-block size-2.5 rounded-xs"
             style={{ background: "var(--neg)", opacity: 0.95 }}
           />
-          dépassement
+          {t.overrun}
         </div>
       )}
     </GlowCard>

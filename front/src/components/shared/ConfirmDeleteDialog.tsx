@@ -11,6 +11,7 @@ import {
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
 import { cn } from "@lib/utils";
+import common from "@text/common";
 
 import type { ReactNode } from "react";
 
@@ -39,9 +40,9 @@ const ConfirmDeleteDialog = ({
   open,
   onOpenChange,
   title,
-  description = "Cette action est irréversible.",
-  confirmLabel = "Supprimer",
-  cancelLabel = "Annuler",
+  description = common.confirmDelete.description,
+  confirmLabel = common.actions.delete,
+  cancelLabel = common.actions.cancel,
   titleClassName,
   onConfirm,
 }: ConfirmDeleteDialogProps) => (

@@ -5,6 +5,7 @@ import { FALLBACK_COLOR, getRandomHexColor } from "@components/spendings/common/
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { cn } from "@lib/utils";
+import spendings from "@text/spendings";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
@@ -31,6 +32,8 @@ const CategoryField = ({
   setComboboxQuery,
   userId,
 }: CategoryFieldProps) => {
+  const { modal: t } = spendings;
+
   // MOCK — "Fréquentes" quick-picks: the SELECTION is real, but the ranking
   // (first N categories) stands in for real per-category usage counts.
   // De-mock tracked in COS-22.
@@ -51,7 +54,7 @@ const CategoryField = ({
   };
 
   return (
-    <FieldShell label="Catégorie">
+    <FieldShell label={t.fields.category}>
       <Popover
         open={comboboxOpen}
         onOpenChange={(isOpen) => {
@@ -102,7 +105,7 @@ const CategoryField = ({
                 <span className="capitalize">{selectedCategory.name}</span>
               </>
             ) : (
-              <span className="text-ink-4">Aucune</span>
+              <span className="text-ink-4">{t.category.triggerEmpty}</span>
             )}
             <ChevronsUpDown className="ml-auto size-4 shrink-0 text-ink-4" />
           </button>
@@ -113,13 +116,13 @@ const CategoryField = ({
         >
           <Command className="bg-transparent">
             <CommandInput
-              placeholder="Rechercher ou saisir…"
+              placeholder={t.category.searchPlaceholder}
               value={comboboxQuery}
               onValueChange={setComboboxQuery}
               className="text-ink"
             />
             <CommandList>
-              <CommandEmpty>Aucune catégorie.</CommandEmpty>
+              <CommandEmpty>{t.category.commandEmpty}</CommandEmpty>
               <CommandGroup>
                 {selectedCategory && (
                   <CommandItem
@@ -130,7 +133,7 @@ const CategoryField = ({
                       setComboboxOpen(false);
                     }}
                   >
-                    <span className="text-ink-4">Aucune catégorie</span>
+                    <span className="text-ink-4">{t.category.clearOption}</span>
                   </CommandItem>
                 )}
                 {categoryOptions.map((category) => (
@@ -173,7 +176,7 @@ const CategoryField = ({
 
       {frequentCategories.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5">
-          <Overline className="mr-1">Fréquentes</Overline>
+          <Overline className="mr-1">{t.category.frequent}</Overline>
           {frequentCategories.map((c) => {
             const active = selectedCategory?.name === c.name;
             return (

@@ -14,6 +14,8 @@ import SpendingDayCard from "@components/spendings/view/SpendingDayCard";
 import SpendingSummary from "@components/spendings/view/SpendingSummary";
 import SpendingToolbar from "@components/spendings/view/SpendingToolbar";
 import { Button } from "@components/ui/button";
+import common from "@text/common";
+import spendings from "@text/spendings";
 import { endOfMonth, isSameDay } from "date-fns";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
@@ -81,7 +83,7 @@ const SpendingView = () => {
           map.set(key, {
             key,
             category: tx.category ?? null,
-            name: tx.category ?? "sans catégorie",
+            name: tx.category ?? spendings.noCategory,
             color: tx.categoryColor || FALLBACK_COLOR,
             count: 1,
             total: amount,
@@ -192,7 +194,7 @@ const SpendingView = () => {
       </div>
 
       {isInitialLoading ? (
-        <div className="grid place-items-center py-16 text-sm text-ink-4">Chargement…</div>
+        <div className="grid place-items-center py-16 text-sm text-ink-4">{common.loading}</div>
       ) : (
         <section className="sp-timeline">
           {groups.map((group, i) => (
@@ -220,7 +222,7 @@ const SpendingView = () => {
         className="fixed bottom-6 right-6 z-30 shadow-float"
       >
         <Plus className="size-4" />
-        Nouvelle dépense
+        {spendings.view.newSpending}
       </Button>
 
       {isQuickAddOpen && (

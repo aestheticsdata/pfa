@@ -11,6 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { zodResolver } from "@hookform/resolvers/zod";
+import exceptionals from "@text/exceptionals";
 import format from "date-fns/format";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Mexp from "math-expression-evaluator";
@@ -21,9 +22,9 @@ import { z } from "zod";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
 const formSchema = z.object({
-  label: z.string().min(1, "Label requis"),
-  amount: z.string().min(1, "Montant requis"),
-  date: z.string().min(1, "Date requise"),
+  label: z.string().min(1, exceptionals.modal.errors.labelRequired),
+  amount: z.string().min(1, exceptionals.modal.errors.amountRequired),
+  date: z.string().min(1, exceptionals.modal.errors.dateRequired),
   description: z.string().optional(),
 });
 
@@ -56,6 +57,7 @@ const getRandomHexColor = () => {
 };
 
 const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories }: ExceptionalModalProps) => {
+  const { modal, actions } = exceptionals;
   const [open, setOpen] = useState(true);
   const closeModal = () => {
     setOpen(false);
@@ -150,7 +152,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
       <DialogContent className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[440px]">
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-5.5 py-4.5 text-left">
           <DialogTitle className="pr-8 text-base font-semibold tracking-snug text-ink">
-            {isEditing ? "Modifier l'achat exceptionnel" : "Nouvel achat exceptionnel"}
+            {isEditing ? modal.editTitle : modal.createTitle}
           </DialogTitle>
         </DialogHeader>
 
@@ -160,7 +162,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
         >
           <div className="grid grid-cols-2 gap-3.5">
             <FieldShell
-              label="Date"
+              label={modal.fields.date}
               htmlFor="exceptional-date"
             >
               <TextInput
@@ -171,7 +173,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
               />
             </FieldShell>
             <FieldShell
-              label="Montant (€)"
+              label={modal.fields.amount}
               htmlFor="exceptional-amount"
             >
               <TextInput
@@ -186,13 +188,13 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
           {errors.amount && <p className="-mt-3 text-xs text-neg">{errors.amount.message}</p>}
 
           <FieldShell
-            label="Label"
+            label={modal.fields.label}
             htmlFor="exceptional-label"
             error={errors.label?.message}
           >
             <TextInput
               id="exceptional-label"
-              placeholder="Ex : Climatiseur mobile"
+              placeholder={modal.fields.labelPlaceholder}
               {...register("label")}
             />
           </FieldShell>
@@ -200,19 +202,19 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
           <FieldShell
             label={
               <>
-                Description <span className="text-ink-4">(optionnel)</span>
+                {modal.fields.description} <span className="text-ink-4">{modal.fields.optional}</span>
               </>
             }
             htmlFor="exceptional-description"
           >
             <TextInput
               id="exceptional-description"
-              placeholder="Ex : Ordinateur portable pro"
+              placeholder={modal.fields.descriptionPlaceholder}
               {...register("description")}
             />
           </FieldShell>
 
-          <FieldShell label="Catégorie">
+          <FieldShell label={modal.fields.category}>
             <Popover
               open={comboboxOpen}
               onOpenChange={setComboboxOpen}
@@ -234,7 +236,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                       <span className="capitalize">{selectedCategory.name}</span>
                     </>
                   ) : (
-                    <span className="text-ink-4">Aucune</span>
+                    <span className="text-ink-4">{modal.category.nonePlaceholder}</span>
                   )}
                   <ChevronsUpDown className="ml-auto size-4 shrink-0 text-ink-4" />
                 </button>
@@ -245,7 +247,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
               >
                 <Command className="bg-transparent">
                   <CommandInput
-                    placeholder="Rechercher ou créer…"
+                    placeholder={modal.category.searchPlaceholder}
                     value={comboboxQuery}
                     onValueChange={setComboboxQuery}
                     className="text-ink"
@@ -258,10 +260,10 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                           className="px-3 py-1 text-xs text-accent-strong hover:brightness-110"
                           onClick={() => onCreateCategory(comboboxQuery.trim())}
                         >
-                          Créer «&nbsp;{comboboxQuery.trim()}&nbsp;»
+                          {modal.category.create(comboboxQuery.trim())}
                         </button>
                       ) : (
-                        "Aucune catégorie."
+                        modal.category.empty
                       )}
                     </CommandEmpty>
                     <CommandGroup>
@@ -273,7 +275,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                             setComboboxOpen(false);
                           }}
                         >
-                          <span className="text-ink-4">Aucune catégorie</span>
+                          <span className="text-ink-4">{modal.category.noneItem}</span>
                         </CommandItem>
                       )}
                       {categoryOptions.map((cat) => (
@@ -298,7 +300,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                           value={`__create-${comboboxQuery.trim()}`}
                           onSelect={() => onCreateCategory(comboboxQuery.trim())}
                         >
-                          <span className="text-accent-strong">Créer «&nbsp;{comboboxQuery.trim()}&nbsp;»</span>
+                          <span className="text-accent-strong">{modal.category.create(comboboxQuery.trim())}</span>
                         </CommandItem>
                       )}
                     </CommandGroup>
@@ -314,14 +316,14 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
               variant="muted"
               onClick={closeModal}
             >
-              Annuler
+              {actions.cancel}
             </Button>
             <Button
               type="submit"
               variant="primary"
               disabled={isSubmitting || !isValid}
             >
-              {isEditing ? "Enregistrer" : "Ajouter"}
+              {isEditing ? actions.save : actions.add}
             </Button>
           </DialogFooter>
         </form>

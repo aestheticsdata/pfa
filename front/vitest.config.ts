@@ -15,6 +15,7 @@ export default defineConfig({
       "@auth": abs("./src/auth"),
       "@helpers": abs("./src/helpers"),
       "@lib": abs("./src/lib"),
+      "@text": abs("./src/text"),
       "@src": abs("./src"),
     },
   },

@@ -9,6 +9,7 @@ import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsDat
 import { yearTotal } from "@components/statistics/helpers/statisticsData";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
 import { euro, euro0 } from "@lib/format";
+import statisticsText from "@text/statistics";
 import format from "date-fns/format";
 import getDayOfYear from "date-fns/getDayOfYear";
 import fr from "date-fns/locale/fr";
@@ -35,6 +36,7 @@ const StatisticsForecast = ({
   showExceptionals,
 }: StatisticsForecastProps) => {
   const [now] = useState(() => new Date());
+  const { forecast: t } = statisticsText;
   const data = statistics?.data;
 
   const spent = yearTotal(data, year) + (showExceptionals ? exceptionalTotal(exceptionals) : 0);
@@ -46,7 +48,7 @@ const StatisticsForecast = ({
   const projection = isCurrent && daysElapsed > 0 ? (spent / daysElapsed) * daysInYear : spent; // MOCK
   const perDay = daysElapsed > 0 ? spent / daysElapsed : 0;
   const delta = projection - compareTotal;
-  const asOfLabel = isCurrent ? format(now, "d MMM", { locale: fr }) : "31 déc.";
+  const asOfLabel = isCurrent ? format(now, "d MMM", { locale: fr }) : t.endOfYear;
 
   return (
     <GlowCard
@@ -54,16 +56,14 @@ const StatisticsForecast = ({
       className="grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[220px_1fr_240px] sm:gap-8"
     >
       <div className="flex flex-col gap-1">
-        <Overline>Dépensé · 1er janv. → {asOfLabel}</Overline>
+        <Overline>{t.spentLabel(asOfLabel)}</Overline>
         <AnimatedNumber
           value={spent}
           decimals={0}
           suffix=" €"
           className="num text-2xl font-medium tracking-tight text-ink"
         />
-        <span className="text-xs text-ink-3">
-          {daysElapsed} jours · {euro(perDay)} €/jour
-        </span>
+        <span className="text-xs text-ink-3">{t.perDay(daysElapsed, euro(perDay))}</span>
       </div>
 
       <div className="pt-6">
@@ -80,14 +80,14 @@ const StatisticsForecast = ({
           radius={8}
         />
         <div className="mt-2 flex items-center justify-between text-2xs text-ink-4">
-          <span className="num">1er janv.</span>
-          <span>— projection —</span>
-          <span className="num">31 déc.</span>
+          <span className="num">{t.startOfYear}</span>
+          <span>{t.projectionAxis}</span>
+          <span className="num">{t.endOfYear}</span>
         </div>
       </div>
 
       <div className="flex flex-col items-start gap-1 sm:items-end sm:text-right">
-        <Overline>Projection fin d&apos;année</Overline>
+        <Overline>{t.projectionTitle}</Overline>
         <AnimatedNumber
           value={projection}
           decimals={0}
@@ -99,7 +99,7 @@ const StatisticsForecast = ({
           <span className={delta > 0 ? "text-neg" : "text-accent-strong"}>
             {delta > 0 ? `+${euro0(delta)}` : euro0(delta)} €
           </span>{" "}
-          vs {compareYear} ({euro0(compareTotal)} €)
+          {t.vsCompare(compareYear, euro0(compareTotal))}
         </span>
       </div>
     </GlowCard>

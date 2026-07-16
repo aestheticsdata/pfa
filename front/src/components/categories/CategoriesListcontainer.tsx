@@ -7,6 +7,7 @@ import useCategoryStats from "@components/categories/services/useCategoryStats";
 import Spinner from "@components/common/Spinner";
 import useCategories from "@components/spendings/services/useCategories";
 import { Button } from "@components/ui/button";
+import categoriesText from "@text/categories";
 import { Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +20,7 @@ const CategoriesListcontainer = () => {
   const { categories, error, updateCategory, deleteCategory } = useCategories();
   const { categoryStats, error: statsError } = useCategoryStats();
   const { user } = useAuth();
+  const { list } = categoriesText;
 
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
@@ -70,7 +72,7 @@ const CategoriesListcontainer = () => {
   const handleCreate = (name: string, color: string) => {
     // MOCK — local only, not sent to the API.
     setLocalCats((prev) => [...prev, { ID: `mock-${Date.now()}`, userID: user?.id ?? null, name, color }]);
-    toast.info("Catégorie créée en local (mock — non enregistrée)");
+    toast.info(list.toastCreatedLocal);
   };
 
   const isLoading = (!categories || !categoryStats) && localCats.length === 0;
@@ -78,7 +80,7 @@ const CategoriesListcontainer = () => {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-lg font-semibold tracking-snug text-ink">Catégories</h1>
+        <h1 className="text-lg font-semibold tracking-snug text-ink">{categoriesText.title}</h1>
         <span className="num rounded-full border border-line-soft bg-surface-elev px-2.5 py-1 text-xs text-ink-3">
           {allCats.length}
         </span>
@@ -91,7 +93,7 @@ const CategoriesListcontainer = () => {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Rechercher une catégorie…"
+            placeholder={list.searchPlaceholder}
             className="w-full rounded-sm border border-line bg-surface-elev py-2 pl-8 pr-2.5 text-sm text-ink outline-none transition placeholder:text-ink-4 focus:border-accent-d"
           />
         </div>
@@ -106,12 +108,12 @@ const CategoriesListcontainer = () => {
             className="size-3.5"
             strokeWidth={2.5}
           />
-          Nouvelle catégorie
+          {categoriesText.newCategory}
         </Button>
       </div>
 
       <p className="text-xs text-ink-4">
-        Gérer tes catégories · part et fréquence <b className="font-medium text-ink-3">sur tout l&apos;historique</b>
+        {list.subtitle} <b className="font-medium text-ink-3">{list.subtitleStrong}</b>
       </p>
 
       {isLoading ? (
@@ -119,7 +121,7 @@ const CategoriesListcontainer = () => {
           <Spinner />
         </div>
       ) : visible.length === 0 ? (
-        <p className="py-6 text-sm text-ink-4">Aucune catégorie ne correspond.</p>
+        <p className="py-6 text-sm text-ink-4">{list.empty}</p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(238px,1fr))] gap-3">
           {visible.map((cat) => {

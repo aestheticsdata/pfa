@@ -3,6 +3,7 @@
 import { overlineClass } from "@components/shared/Overline";
 import { authInputClass } from "@components/shared/sharedLoginForm/authInputClass";
 import { cn } from "@lib/utils";
+import login from "@text/login";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
@@ -43,7 +44,7 @@ const PasswordField = ({ id, label, autoComplete, invalid, registration }: Passw
           onClick={() => setShow((p) => !p)}
           className="absolute right-[7px] top-1/2 grid size-7 -translate-y-1/2 place-items-center rounded-md text-ink-4 transition-colors hover:bg-white/[0.06] hover:text-ink-2"
           tabIndex={-1}
-          aria-label={show ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+          aria-label={show ? login.password.hide : login.password.show}
         >
           {show ? <EyeOff className="size-[15px]" /> : <Eye className="size-[15px]" />}
         </button>

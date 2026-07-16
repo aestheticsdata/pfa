@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip"
 import { CategoryBarTooltip, CategoryTrend } from "@lib/dataviz";
 import { euro } from "@lib/format";
 import { cn } from "@lib/utils";
+import spendings from "@text/spendings";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
@@ -53,6 +54,7 @@ interface SpendingCategoryBreakdownProps {
  * (Trend column is MOCK.)
  */
 const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdownProps) => {
+  const { breakdown: t } = spendings;
   const [selected, setSelected] = useState<BreakdownRow | null>(null);
   const [hover, setHover] = useState<BarHover<BreakdownRow> | null>(null);
   const [collapsed, setCollapsed] = useState(initialCollapsed);
@@ -79,7 +81,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
       onClick={toggleCollapsed}
       aria-expanded={!collapsed}
       aria-controls={DETAIL_ID}
-      aria-label={collapsed ? "Afficher le détail par catégorie" : "Masquer le détail par catégorie"}
+      aria-label={collapsed ? t.expandAria : t.collapseAria}
       className="grid size-6 cursor-pointer place-items-center rounded-md text-ink-3 transition-colors hover:bg-surface-hi hover:text-ink"
     >
       <ChevronDown
@@ -98,7 +100,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
           where height is taken directly from the day cards (COS-101). */}
       <CardSectionHeader
         className="mb-3"
-        title="Répartition par catégorie"
+        title={t.title}
         action={
           <div className="flex items-center gap-3 self-center">
             <span className="text-xs text-ink-4">{rangeLabel} · semaine</span>
@@ -109,7 +111,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
                   side="bottom"
                   sideOffset={6}
                 >
-                  Déplier pour voir le détail
+                  {t.expandHint}
                 </TooltipContent>
               </Tooltip>
             ) : (

@@ -1,6 +1,7 @@
 "use client";
 
 import ExportButton from "@components/shared/ExportButton";
+import spendings from "@text/spendings";
 import { Search } from "lucide-react";
 
 interface SpendingToolbarProps {
@@ -18,7 +19,7 @@ const SpendingToolbar = ({ search, onSearchChange, children }: SpendingToolbarPr
         type="search"
         value={search}
         onChange={(e) => onSearchChange(e.target.value)}
-        placeholder="Rechercher une dépense…"
+        placeholder={spendings.toolbar.searchPlaceholder}
         className="w-full rounded-md border border-line bg-surface-elev py-2 pl-8 pr-3 text-sm text-ink outline-none transition-colors placeholder:text-ink-4 focus:border-accent-d"
       />
     </div>

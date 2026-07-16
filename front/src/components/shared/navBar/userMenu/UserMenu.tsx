@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
 import useRequestHelper from "@helpers/useRequestHelper";
+import text from "@text/navBar";
 import { ChevronDown, KeyRound, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -60,7 +61,7 @@ const UserMenu = () => {
           className="cursor-pointer gap-3 px-3 py-2.5 text-sm text-ink-2"
         >
           <KeyRound className="size-4 text-primary" />
-          Modifier le mot de passe
+          {text.userMenu.changePassword}
         </DropdownMenuItem>
         <DropdownMenuSeparator className="my-1" />
         <DropdownMenuItem
@@ -68,7 +69,7 @@ const UserMenu = () => {
           className="cursor-pointer gap-3 px-3 py-2.5 text-sm text-ink-2"
         >
           <LogOut className="size-4 text-ink-3" />
-          Se déconnecter
+          {text.userMenu.logout}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -1,4 +1,5 @@
 import adjustFontColor from "@components/common/helpers/adjustFontColor";
+import common from "@text/common";
 
 import type { CategoryProps } from "@src/interfaces/category";
 
@@ -43,7 +44,7 @@ const CategoryComponent = ({ item, customCss = "", isDynamic = false, isClicked 
           }}
         ></span>
       )}
-      <span className="mx-auto z-10">{item.category || "sans catégorie"}</span>
+      <span className="mx-auto z-10">{item.category || common.category.uncategorized}</span>
     </div>
   );
 };

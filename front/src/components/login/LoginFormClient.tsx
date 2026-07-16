@@ -6,6 +6,7 @@ import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
 import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
 import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
+import login from "@text/login";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -26,20 +27,20 @@ export default function LoginFormClient() {
       }
     } catch (e) {
       const status = (e as AxiosError)?.response?.status;
-      setServerError(status === 401 ? "Email ou mot de passe incorrect." : "Une erreur est survenue. Réessaie.");
+      setServerError(status === 401 ? login.errors.invalidCredentials : login.errors.generic);
     }
   };
 
   return (
     <AuthCard>
       <AuthBrand
-        title="Personal Finance Assistant"
-        subtitle="Chaque euro à sa place."
+        title={login.brand.title}
+        subtitle={login.brand.subtitle}
       />
 
       <SharedLoginForm
         onSubmit={onSubmit}
-        buttonTitle="Se connecter"
+        buttonTitle={login.actions.signIn}
         displayEmailField
         displayPasswordField
         submitIcon
@@ -53,14 +54,14 @@ export default function LoginFormClient() {
           prefetch={false}
           className="text-xs text-ink-3 transition-colors hover:text-ink"
         >
-          Mot de passe oublié ?
+          {login.forgotPassword.title}
         </Link>
       </div>
 
       <AuthSwitchLink
-        prompt="Pas encore de compte ?"
+        prompt={login.switch.toSignup}
         href="/signup"
-        label="Créer un compte"
+        label={login.actions.createAccount}
       />
     </AuthCard>
   );

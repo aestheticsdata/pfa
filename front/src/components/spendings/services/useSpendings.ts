@@ -4,6 +4,7 @@ import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constant
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { SpendingListSchema, SpendingMutationPayloadSchema } from "@src/schemas/spendings";
+import spendingsText from "@text/spendings";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
@@ -74,7 +75,7 @@ const useSpendings = () => {
   const queryClient = useQueryClient();
 
   const spendingsActionOnSuccess = async (message: string) => {
-    displayPopup({ text: `dépense ${message}` });
+    displayPopup({ text: spendingsText.toasts.spending(message) });
 
     await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH, from, to]);
     await queryClient.invalidateQueries([QUERY_KEYS.WEEKLY_STATS, monthBeginning]);
@@ -94,7 +95,7 @@ const useSpendings = () => {
     },
     {
       onSuccess: () => {
-        spendingsActionOnSuccess("effacée");
+        spendingsActionOnSuccess("supprimée");
       },
     },
   );

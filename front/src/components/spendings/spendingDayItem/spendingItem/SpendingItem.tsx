@@ -5,6 +5,7 @@ import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { cn } from "@lib/utils";
+import spendings from "@text/spendings";
 import { Edit2, ImageIcon, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -18,6 +19,7 @@ interface SpendingItemProps {
 }
 
 const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }: SpendingItemProps) => {
+  const { item } = spendings;
   const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
   const { deleteSpending } = useSpendings();
@@ -44,20 +46,20 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
   if (isDeleteConfirmVisible) {
     return (
       <div className="flex items-center gap-2 py-2 px-3 bg-danger-surface border border-danger-border-soft rounded">
-        <span className="text-ink-2 text-sm flex-1">Supprimer cette dépense ?</span>
+        <span className="text-ink-2 text-sm flex-1">{item.deleteConfirm}</span>
         <button
           type="button"
           onClick={onCancelDelete}
           className="px-3 py-1.5 bg-surface-hi hover:bg-surface-hover text-ink-2 rounded transition-colors text-sm"
         >
-          Annuler
+          {spendings.actions.cancel}
         </button>
         <button
           type="button"
           onClick={onConfirmDelete}
           className="px-3 py-1.5 bg-danger-solid hover:brightness-110 text-on-danger rounded transition-colors text-sm"
         >
-          Confirmer
+          {spendings.actions.confirm}
         </button>
       </div>
     );
@@ -115,7 +117,7 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
                 "w-6 h-6 rounded flex items-center justify-center transition-colors cursor-pointer",
                 hasInvoice ? "bg-accent-d/80 hover:bg-accent-d" : "bg-surface-hi hover:bg-elec",
               )}
-              title="Facture"
+              title={item.actions.receipt}
             >
               <ImageIcon className="w-3 h-3 text-ink-2" />
             </button>
@@ -123,7 +125,7 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
               type="button"
               onClick={() => editCallback(spending)}
               className="w-6 h-6 bg-surface-hi hover:bg-surface-hover rounded flex items-center justify-center transition-colors cursor-pointer"
-              title="Modifier"
+              title={item.actions.edit}
             >
               <Edit2 className="w-3 h-3 text-ink-3" />
             </button>
@@ -134,7 +136,7 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
                 setIsDeleteConfirmVisible(true);
               }}
               className="w-6 h-6 bg-surface-hi hover:bg-danger-solid rounded flex items-center justify-center transition-colors cursor-pointer"
-              title="Supprimer"
+              title={item.actions.delete}
             >
               <Trash2 className="w-3 h-3 text-ink-3 group-hover:text-ink" />
             </button>

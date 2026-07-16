@@ -5,6 +5,7 @@ import CategoryFormModal from "@components/categories/CategoryFormModal";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import GlowCard from "@components/shared/GlowCard";
 import { IconButton } from "@components/shared/IconButton";
+import categories from "@text/categories";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -27,6 +28,7 @@ const pct1 = (value: number): string => value.toFixed(1).replace(".", ",");
 const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: CategoryItemProps) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const { item: t } = categories;
 
   return (
     <>
@@ -45,8 +47,8 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
               variant="bordered"
               size={6}
               onClick={() => setIsEditOpen(true)}
-              aria-label="Modifier le nom et la couleur"
-              title="Modifier le nom et la couleur"
+              aria-label={t.editAction}
+              title={t.editAction}
             >
               <Pencil />
             </IconButton>
@@ -54,8 +56,8 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
               variant="danger"
               size={6}
               onClick={() => setIsDeleteOpen(true)}
-              aria-label="Supprimer la catégorie"
-              title="Supprimer la catégorie"
+              aria-label={t.deleteAction}
+              title={t.deleteAction}
             >
               <Trash2 />
             </IconButton>
@@ -64,7 +66,7 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
 
         <span className="font-mono text-2xs text-ink-4">
           {used === 0 ? (
-            "nouvelle catégorie · jamais utilisée"
+            t.neverUsed
           ) : (
             <>
               <b className="font-medium text-ink-2">{pct1(share)} %</b> des dépenses{" "}
@@ -88,9 +90,9 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
       <ConfirmDeleteDialog
         open={isDeleteOpen}
         onOpenChange={setIsDeleteOpen}
-        title={`Supprimer la catégorie « ${category.name} » ?`}
+        title={t.deleteConfirmTitle(category.name)}
         titleClassName="capitalize"
-        description="Cette action est irréversible. Les dépenses associées n'auront plus de catégorie."
+        description={t.deleteConfirmDescription}
         onConfirm={onDelete}
       />
     </>

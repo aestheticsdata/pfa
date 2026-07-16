@@ -5,6 +5,7 @@ import { IconButton } from "@components/shared/IconButton";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { euro } from "@lib/format";
+import spendings from "@text/spendings";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -23,6 +24,7 @@ interface SpendingTxRowProps {
  * (receipt / edit / delete) and an inline delete confirmation.
  */
 const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
+  const { txRow, item } = spendings;
   const [confirming, setConfirming] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const { deleteSpending } = useSpendings();
@@ -42,24 +44,24 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
         <div
           className="sp-tx-confirm"
           role="alertdialog"
-          aria-label="Confirmer la suppression"
+          aria-label={txRow.deleteAria}
           style={{ gridColumn: "1 / -1" }}
         >
-          <span className="txt">Supprimer cette dépense&nbsp;?</span>
+          <span className="txt">{item.deleteConfirm}</span>
           <span className="acts">
             <button
               type="button"
               className="btn-cancel"
               onClick={() => setConfirming(false)}
             >
-              Annuler
+              {spendings.actions.cancel}
             </button>
             <button
               type="button"
               className="btn-confirm"
               onClick={onConfirmDelete}
             >
-              Confirmer
+              {spendings.actions.confirm}
             </button>
           </span>
         </div>
@@ -80,7 +82,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
               <span
                 className="recipt"
                 role="img"
-                aria-label="reçu joint"
+                aria-label={txRow.receiptAttachedAria}
               >
                 <ImageIcon className="size-3.5" />
               </span>
@@ -107,7 +109,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             <IconButton
               variant="bordered"
               size={7}
-              title={hasInvoice ? "Voir le reçu" : "Ajouter un reçu"}
+              title={hasInvoice ? txRow.viewReceipt : txRow.addReceipt}
               onClick={() => setInvoiceOpen(true)}
               className={
                 hasInvoice
@@ -120,7 +122,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             <IconButton
               variant="bordered"
               size={7}
-              title="Modifier"
+              title={item.actions.edit}
               onClick={() => onEdit(spending)}
             >
               <Pencil />
@@ -128,7 +130,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             <IconButton
               variant="danger"
               size={7}
-              title="Supprimer"
+              title={item.actions.delete}
               onClick={() => setConfirming(true)}
             >
               <Trash2 />

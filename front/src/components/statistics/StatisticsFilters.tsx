@@ -5,6 +5,8 @@ import { Input } from "@components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { Switch } from "@components/ui/switch";
 import { cn } from "@lib/utils";
+import common from "@text/common";
+import statistics from "@text/statistics";
 import { Calendar, Check, ChevronDown, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 
@@ -100,6 +102,8 @@ const StatisticsFilters = ({
   const [catOpen, setCatOpen] = useState(false);
   const [query, setQuery] = useState("");
 
+  const { filters } = statistics;
+
   const atMax = selectedCategoryIds.length >= maxCategories;
   const selectedCategories = selectedCategoryIds
     .map((id) => categories.find((c) => c.ID === id))
@@ -137,7 +141,7 @@ const StatisticsFilters = ({
           onCheckedChange={onToggleCompare}
           className="data-[state=checked]:bg-accent-strong"
         />
-        <span className="text-ink-3">Comparer à</span>
+        <span className="text-ink-3">{filters.compareTo}</span>
         <YearMenu
           years={years}
           selected={compareYear}
@@ -167,7 +171,7 @@ const StatisticsFilters = ({
           onCheckedChange={onToggleExceptionals}
           className="data-[state=checked]:bg-exc"
         />
-        Achats exceptionnels
+        {filters.exceptionals}
       </label>
 
       {/* Category picker */}
@@ -185,7 +189,7 @@ const StatisticsFilters = ({
             )}
           >
             <Plus className="size-3" />
-            Ajouter une catégorie
+            {filters.addCategory}
           </button>
         </PopoverTrigger>
         <PopoverContent
@@ -197,13 +201,13 @@ const StatisticsFilters = ({
             <Input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Rechercher…"
+              placeholder={common.searchPlaceholder}
               className="h-9 border-line bg-surface-base pl-8 text-sm"
             />
           </div>
           <div className="max-h-[264px] overflow-y-auto pr-0.5">
             {filtered.length === 0 ? (
-              <div className="px-2.5 py-3 text-center text-xs text-ink-4">Aucune catégorie</div>
+              <div className="px-2.5 py-3 text-center text-xs text-ink-4">{filters.noCategory}</div>
             ) : (
               filtered.map((category) => {
                 const active = selectedCategoryIds.includes(category.ID);
@@ -242,7 +246,7 @@ const StatisticsFilters = ({
           <button
             type="button"
             onClick={() => onToggleCategory(category.ID)}
-            aria-label={`Retirer ${category.name}`}
+            aria-label={common.actions.remove(category.name)}
             className="grid size-[17px] place-items-center rounded-sm text-ink-4 transition-colors hover:bg-surface-hover hover:text-ink"
           >
             <X className="size-3" />

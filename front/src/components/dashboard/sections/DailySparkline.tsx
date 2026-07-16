@@ -9,6 +9,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { LineChart } from "@lib/dataviz";
 import { euro } from "@lib/format";
+import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";
@@ -22,6 +23,7 @@ import type { LinePoint } from "@lib/dataviz";
 const DailySparkline = () => {
   const { from } = useDatePickerWrapperStore();
   const { spendingsByMonth } = useSpendings();
+  const { dailySparkline: t } = dashboardText;
 
   const monthRef = from ?? new Date();
   const daysInMonth = getDaysInMonth(monthRef);
@@ -88,13 +90,13 @@ const DailySparkline = () => {
   return (
     <div className="mt-6 border-t border-line-soft pt-4.5">
       <div className="mb-2.5 flex items-baseline justify-between">
-        <h3 className="text-xs font-medium tracking-normal text-ink-2">Consommation jour par jour</h3>
+        <h3 className="text-xs font-medium tracking-normal text-ink-2">{t.title}</h3>
         <div className="flex gap-5 text-xs text-ink-3">
           <span>
-            Moyenne <span className="num text-ink">{euro(avg)} €</span>/jour
+            {t.average} <span className="num text-ink">{euro(avg)} €</span>/jour
           </span>
           <span>
-            Pic <span className="num text-ink">{euro(peak)} €</span> · {peakLabel}
+            {t.peak} <span className="num text-ink">{euro(peak)} €</span> · {peakLabel}
           </span>
         </div>
       </div>
@@ -123,13 +125,13 @@ const DailySparkline = () => {
           ]}
           markers={showToday ? [{ x: todayX, color: "var(--ink-3)" }] : []}
           gridLines={3}
-          ariaLabel="Consommation quotidienne"
+          ariaLabel={t.chartAria}
         />
         <span
           className="num pointer-events-none absolute right-2 text-3xs text-ink-4"
           style={{ top: `calc(${avgTopPct}% - 18px)` }}
         >
-          moy. {euro(avg)} €
+          {t.avgShort} {euro(avg)} €
         </span>
         {showToday && (
           <>

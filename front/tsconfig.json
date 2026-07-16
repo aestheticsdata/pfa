@@ -39,6 +39,9 @@
       ],
       "@lib/*": [
         "src/lib/*"
+      ],
+      "@text/*": [
+        "src/text/*"
       ]
     },
     "plugins": [

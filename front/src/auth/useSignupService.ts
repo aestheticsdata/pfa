@@ -1,6 +1,7 @@
 "use client";
 
 import useRequestHelper from "@helpers/useRequestHelper";
+import login from "@text/login";
 import { toast } from "sonner";
 
 import type { AuthResponse } from "@auth/types";
@@ -27,9 +28,7 @@ const useSignupService = () => {
       return res.data as AuthResponse;
     } catch (e) {
       const status = (e as AxiosError)?.response?.status;
-      toast.error(
-        status === 409 ? "Un compte existe déjà avec cet email." : "La création du compte a échoué. Réessaie.",
-      );
+      toast.error(status === 409 ? login.signup.emailAlreadyExists : login.signup.error);
     }
   };
 

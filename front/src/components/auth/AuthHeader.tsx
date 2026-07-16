@@ -3,6 +3,7 @@
 import Logo from "@components/shared/brand/Logo";
 import { ROUTES } from "@components/shared/config/constants";
 import { cn } from "@lib/utils";
+import login from "@text/login";
 import { Info, LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,7 +15,7 @@ type Tab = { path: string; label: string; icon: LucideIcon };
 const TABS: Tab[] = [
   { path: ROUTES.login.path, label: "Login", icon: LogIn },
   { path: ROUTES.signup.path, label: "Signup", icon: UserPlus },
-  { path: ROUTES.about.path, label: "À propos", icon: Info },
+  { path: ROUTES.about.path, label: login.header.aboutTab, icon: Info },
 ];
 
 const normalize = (p: string) => p.replace(/\/+$/, "") || "/";

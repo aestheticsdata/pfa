@@ -1,0 +1,22 @@
+const navBar = {
+  today: "Aujourd'hui",
+  links: {
+    dashboard: "Dashboard",
+    spendings: "Dépenses",
+    exceptionals: "Exceptionnels",
+    categories: "Catégories",
+    statistics: "Statistiques",
+    about: "À propos",
+  },
+  aria: {
+    openMenu: "Ouvrir le menu",
+    drawer: "Navigation",
+    closeMenu: "Fermer le menu",
+  },
+  userMenu: {
+    changePassword: "Modifier le mot de passe",
+    logout: "Se déconnecter",
+  },
+};
+
+export default navBar;

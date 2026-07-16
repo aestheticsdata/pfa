@@ -1,5 +1,6 @@
 import { TextInput } from "@components/shared/TextInput";
 import { Label } from "@components/ui/label";
+import spendings from "@text/spendings";
 
 import type { LabelSuggestion } from "@components/spendings/common/spendingModal/mockSuggestions";
 import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
@@ -28,11 +29,11 @@ const LabelField = ({
       htmlFor="spendingLabel"
       className="text-sm text-ink-2"
     >
-      Label
+      {spendings.modal.fields.label}
     </Label>
     <TextInput
       id="spendingLabel"
-      placeholder="Ex : Boulangerie du coin"
+      placeholder={spendings.modal.fields.labelPlaceholder}
       className="dark:bg-surface-base"
       {...register("spendingLabel", {
         onChange: (e) => setLabelQuery(e.target.value),
