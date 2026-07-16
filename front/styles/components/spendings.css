@@ -24,6 +24,29 @@
   display: block;
   height: 100%;
 }
+/* Collapsible detail list (COS-112). grid-template-rows 1fr↔0fr animates the
+   auto-height list open/closed without measuring it in JS; the inner wrapper
+   clips the overflow while it shrinks. The segment bar above stays put. */
+.sp-cat-collapse {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition:
+    grid-template-rows 0.24s ease,
+    opacity 0.2s ease;
+}
+.sp-cat-collapse[data-collapsed="true"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.sp-cat-collapse-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-cat-collapse {
+    transition: none;
+  }
+}
 .sp-cat-list {
   display: grid;
   /* min(400px, 100%) so a narrow phone gets ONE full-width column instead of a
@@ -198,9 +221,13 @@
 @media (min-width: 768px) {
   .sp-day {
     /* Bottom of the stuck zone: 76px (header) + 12px gap-padding + ~38px search
-       row + ~106px widgets + ~110px compressed breakdown + 2 × 12px gaps ≈
+       row + ~106px widgets + ~110px expanded breakdown + 2 × 12px gaps ≈
        366px, plus breathing room. The "Aujourd'hui" scroll must land the card
-       BELOW the sticky zone, not under it (COS-101). */
+       BELOW the sticky zone, not under it (COS-101). Sized for the EXPANDED
+       breakdown, the tallest the zone gets: since the detail list can now be
+       folded (COS-112), a collapsed zone is shorter and just leaves a little
+       extra gap above the card — never tucks it under the zone, which a value
+       trimmed to the collapsed height would do the moment the list is open. */
     scroll-margin-top: 376px;
   }
 }
