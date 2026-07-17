@@ -9,6 +9,7 @@ import { ROUTES } from "@components/shared/config/constants";
 import useGlobalStore from "@components/shared/globalStore";
 import { IconButton } from "@components/shared/IconButton";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
+import SpendingSearchTrigger from "@components/spendings/search/SpendingSearchTrigger";
 import { buildSpendingsPath, getTodayIsoDate, isValidIsoDate, SPENDINGS_PATH } from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
 import text from "@text/navBar";
@@ -143,6 +144,9 @@ const NavBar = () => {
         </nav>
 
         <div className="ml-auto flex items-center gap-2.5">
+          {/* Whole-history spending search (COS-114) — Dashboard only, left of the
+              month selector; on mobile it collapses to a magnifier icon. */}
+          {isDashboard && <SpendingSearchTrigger />}
           {isDashboard ? (
             <div className="hidden items-center md:flex">
               <MonthSelector />
