@@ -9,13 +9,24 @@ import { ROUTES } from "@components/shared/config/constants";
 import useGlobalStore from "@components/shared/globalStore";
 import { IconButton } from "@components/shared/IconButton";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
-import SpendingSearchTrigger from "@components/spendings/search/SpendingSearchTrigger";
-import { buildSpendingsPath, getTodayIsoDate, isValidIsoDate, SPENDINGS_PATH } from "@helpers/dateRoute";
+import {
+  buildDashboardPath,
+  buildSpendingsPath,
+  formatMonthParam,
+  getTodayIsoDate,
+  isValidIsoDate,
+  isValidMonthParam,
+  MONTH_QUERY_PARAM,
+  SPENDINGS_PATH,
+} from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
 import text from "@text/navBar";
+import parseISO from "date-fns/parseISO";
+import startOfMonth from "date-fns/startOfMonth";
 import { BarChart3, LayoutDashboard, Menu, Receipt, Sparkles, Tag, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 import type { LucideIcon } from "lucide-react";
@@ -53,6 +64,7 @@ const NavBar = () => {
   const { selectedDateIso, setScrollToDayIso } = useDatePickerWrapperStore();
   const pathname = usePathname();
   const router = useRouter();
+  const [monthParam, setMonthParam] = useQueryState(MONTH_QUERY_PARAM, parseAsString);
   const isClientHydrated = useSyncExternalStore(
     () => () => {},
     () => true,
@@ -80,11 +92,38 @@ const NavBar = () => {
   // month selector; every other private page keeps the weekly date-picker.
   const isDashboard = isActiveRoute(ROUTES.dashboard.path);
 
+  // "Current month" shortcut on the Dashboard: always shown, but disabled while
+  // already on the current month (COS-118) — it stays put and greys out instead
+  // of disappearing. Client-only (isClientHydrated) so `new Date()` never runs on
+  // the server (COS-73) and can't cause a hydration mismatch; before hydration it
+  // renders disabled, matching SSR.
+  const currentMonthDisabled =
+    !isClientHydrated ||
+    !isValidMonthParam(monthParam ?? "") ||
+    (monthParam ?? "") === formatMonthParam(startOfMonth(new Date()));
+
+  const goToCurrentMonth = () => setMonthParam(null);
+
+  const currentMonthButtonClass = cn(
+    PERIOD_BTN,
+    "disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:text-ink-2",
+  );
+
   const hrefFor = (route: NavRoute): string => {
     const storedDate = selectedDateIso ?? undefined;
-    return route.path === ROUTES.spendings.path && isClientHydrated && isValidIsoDate(storedDate)
-      ? buildSpendingsPath(storedDate)
-      : route.path;
+    if (route.path === ROUTES.spendings.path && isClientHydrated && isValidIsoDate(storedDate)) {
+      return buildSpendingsPath(storedDate);
+    }
+    // The Dashboard link carries the month of the currently selected week, so
+    // jumping from a past week lands on that month's dashboard (COS-118). The
+    // current month links to a clean /dashboard.
+    if (route.path === ROUTES.dashboard.path && isClientHydrated && isValidIsoDate(storedDate)) {
+      const weekMonth = formatMonthParam(startOfMonth(parseISO(storedDate)));
+      return weekMonth === formatMonthParam(startOfMonth(new Date()))
+        ? ROUTES.dashboard.path
+        : buildDashboardPath(weekMonth);
+    }
+    return route.path;
   };
 
   const handleGoToToday = () => {
@@ -144,12 +183,17 @@ const NavBar = () => {
         </nav>
 
         <div className="ml-auto flex items-center gap-2.5">
-          {/* Whole-history spending search (COS-114) — Dashboard only, left of the
-              month selector; on mobile it collapses to a magnifier icon. */}
-          {isDashboard && <SpendingSearchTrigger />}
           {isDashboard ? (
-            <div className="hidden items-center md:flex">
+            <div className="hidden items-center gap-2 md:flex">
               <MonthSelector />
+              <button
+                type="button"
+                onClick={goToCurrentMonth}
+                disabled={currentMonthDisabled}
+                className={currentMonthButtonClass}
+              >
+                {text.currentMonth}
+              </button>
             </div>
           ) : (
             isCalendarVisible && (
@@ -169,8 +213,16 @@ const NavBar = () => {
         </div>
 
         {isDashboard ? (
-          <div className="w-full md:hidden">
+          <div className="flex w-full items-center gap-2 md:hidden">
             <MonthSelector />
+            <button
+              type="button"
+              onClick={goToCurrentMonth}
+              disabled={currentMonthDisabled}
+              className={currentMonthButtonClass}
+            >
+              {text.currentMonth}
+            </button>
           </div>
         ) : (
           isCalendarVisible && (

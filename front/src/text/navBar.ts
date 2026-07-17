@@ -1,5 +1,6 @@
 const navBar = {
   today: "Aujourd'hui",
+  currentMonth: "Mois en cours",
   links: {
     dashboard: "Dashboard",
     spendings: "Dépenses",
