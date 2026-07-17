@@ -12,11 +12,13 @@ import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
 import {
   buildDashboardPath,
   buildSpendingsPath,
+  formatIsoDate,
   formatMonthParam,
   getTodayIsoDate,
   isValidIsoDate,
   isValidMonthParam,
   MONTH_QUERY_PARAM,
+  parseMonthParam,
   SPENDINGS_PATH,
 } from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
@@ -111,8 +113,25 @@ const NavBar = () => {
 
   const hrefFor = (route: NavRoute): string => {
     const storedDate = selectedDateIso ?? undefined;
-    if (route.path === ROUTES.spendings.path && isClientHydrated && isValidIsoDate(storedDate)) {
-      return buildSpendingsPath(storedDate);
+    if (route.path === ROUTES.spendings.path && isClientHydrated) {
+      // On the Dashboard, the Dépenses link follows the viewed month (?month=) so
+      // "Mois en cours" / month stepping can't strand you on an old searched week
+      // (COS-119). Keep the exact selected day when it falls inside that month;
+      // otherwise today for the current month, else the month's first day.
+      if (isDashboard) {
+        const currentMonth = formatMonthParam(startOfMonth(new Date()));
+        const rawMonth = monthParam ?? "";
+        const dashMonth = isValidMonthParam(rawMonth) ? rawMonth : currentMonth;
+        if (isValidIsoDate(storedDate) && formatMonthParam(parseISO(storedDate)) === dashMonth) {
+          return buildSpendingsPath(storedDate);
+        }
+        return buildSpendingsPath(
+          dashMonth === currentMonth ? getTodayIsoDate() : formatIsoDate(parseMonthParam(dashMonth)),
+        );
+      }
+      if (isValidIsoDate(storedDate)) {
+        return buildSpendingsPath(storedDate);
+      }
     }
     // The Dashboard link carries the month of the currently selected week, so
     // jumping from a past week lands on that month's dashboard (COS-118). The

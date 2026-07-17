@@ -101,6 +101,17 @@ const SpendingSearchModal = () => {
 
   const groups = groupSpendingsByMonth(results);
 
+  // A single placeholder message (or null when there are rows) so the scroll area
+  // keeps its fixed height and the modal never resizes as the query starts empty,
+  // matches, or stops matching (COS-119).
+  const resolveEmptyMessage = (): string | null => {
+    if (error) return spendingSearch.error;
+    if (!hasQuery) return spendingSearch.hint;
+    if (results.length === 0) return isSearching ? spendingSearch.loading : spendingSearch.noResults;
+    return null;
+  };
+  const emptyMessage = resolveEmptyMessage();
+
   // Picking a result jumps to the Dépenses page on the week that contains it (and
   // asks that page to scroll the day into view). We stash the scroll offset first
   // and leave the URL search state intact, so Back restores the modal + list.
@@ -122,11 +133,15 @@ const SpendingSearchModal = () => {
     >
       <DialogContent
         aria-describedby={undefined}
-        className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[560px]"
+        className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[700px]"
       >
         <DialogTitle className="sr-only">{spendingSearch.title}</DialogTitle>
 
-        <div className="flex items-center gap-2.5 border-b border-line-soft px-4 py-3.5 pr-14">
+        {/* Keep the DS dialog's own top-right close (absolute top-4, centre at 30px)
+            and mirror the p-0 modal header pattern (SpendingModal): py-4.5 + a
+            text-base row so the content centres at that same 30px, pr-14 clears the
+            close. No overriding the DS close. */}
+        <div className="flex items-center gap-2.5 border-b border-line-soft py-4.5 pl-5.5 pr-14">
           <Search className="size-4 shrink-0 text-ink-4" />
           <input
             type="search"
@@ -134,7 +149,7 @@ const SpendingSearchModal = () => {
             value={q}
             onChange={(e) => onQueryChange(e.target.value)}
             placeholder={spendingSearch.placeholder}
-            className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-4"
+            className="min-w-0 flex-1 bg-transparent p-0 text-base text-ink outline-none placeholder:text-ink-4"
           />
           {hasQuery && !isSearching && (
             <span className="shrink-0 text-xs text-ink-4">{spendingSearch.resultsCount(total)}</span>
@@ -165,16 +180,12 @@ const SpendingSearchModal = () => {
 
         <div
           ref={scrollRef}
-          className="max-h-[min(60vh,440px)] overflow-y-auto"
+          className="h-[min(72vh,590px)] overflow-y-auto"
         >
-          {error ? (
-            <EmptyState className="py-10">{spendingSearch.error}</EmptyState>
-          ) : !hasQuery ? (
-            <EmptyState className="py-10">{spendingSearch.hint}</EmptyState>
-          ) : isSearching && results.length === 0 ? (
-            <EmptyState className="py-10">{spendingSearch.loading}</EmptyState>
-          ) : results.length === 0 ? (
-            <EmptyState className="py-10">{spendingSearch.noResults}</EmptyState>
+          {emptyMessage !== null ? (
+            <div className="flex h-full items-center justify-center px-6">
+              <EmptyState className="text-base">{emptyMessage}</EmptyState>
+            </div>
           ) : (
             <>
               {groups.map((group) => (
