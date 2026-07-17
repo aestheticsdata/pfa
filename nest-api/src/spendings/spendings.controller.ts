@@ -20,6 +20,7 @@ import { CreateSpendingDto } from "@spendings/dto/create-spending.dto";
 import { UpdateSpendingDto } from "@spendings/dto/update-spending.dto";
 import { DeleteInvoiceImageDto } from "@spendings/dto/delete-invoice-image.dto";
 import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
+import { SpendingsSearchQueryDto } from "@spendings/dto/spendings-search-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { invoiceUploadOptions } from "@spendings/upload/upload.config";
@@ -38,6 +39,16 @@ export class SpendingsController {
   @Post()
   async createSpending(@Body() dto: CreateSpendingDto, @GetUserId() userID: string) {
     return this.spendingsService.createSpending(dto, userID);
+  }
+
+  @Get("search")
+  async searchSpendings(@Query() query: SpendingsSearchQueryDto, @GetUserId() userID: string) {
+    return this.spendingsService.searchSpendings(query.q, userID, query.cursor, query.year);
+  }
+
+  @Get("years")
+  async getSpendingYears(@GetUserId() userID: string) {
+    return this.spendingsService.getSpendingYears(userID);
   }
 
   @Get("charts")

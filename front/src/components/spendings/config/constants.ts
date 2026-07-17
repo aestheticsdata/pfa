@@ -14,7 +14,13 @@ export const QUERY_KEYS = {
   CATEGORY_STATS: "categoryStats",
   EXCEPTIONALS: "exceptionals",
   EXCEPTIONAL_YEARS: "exceptionalYears",
+  SPENDINGS_SEARCH: "spendingsSearch",
+  SPENDINGS_YEARS: "spendingsYears",
 };
+
+// Whole-history search (COS-114): minimum query length before the modal hits the
+// backend, kept in sync with the server-side guard.
+export const SEARCH_MIN_LENGTH = 2;
 
 export const DATE_FORMAT = "yyyy-MM-dd";
 

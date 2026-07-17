@@ -31,6 +31,19 @@ export const SpendingItemSchema = z.object({
 export const SpendingListSchema = z.array(SpendingItemSchema);
 export type SpendingItem = z.infer<typeof SpendingItemSchema>;
 
+// Whole-history search page (COS-114): one keyset page of matches, the cursor to
+// fetch the next page (null at the end), and the unbounded total — sent only on
+// the first page, so the UI can say "N résultats" without recounting every page.
+export const SpendingSearchPageSchema = z.object({
+  items: SpendingListSchema,
+  nextCursor: z.string().nullable(),
+  total: z.number().optional(),
+});
+export type SpendingSearchPage = z.infer<typeof SpendingSearchPageSchema>;
+
+// Years the user has spendings in (newest first) — the search modal's year filter.
+export const SpendingYearsSchema = z.array(z.number());
+
 export const RecurringItemSchema = z.object({
   ID: z.string(),
   amount: numberLikeSchema,

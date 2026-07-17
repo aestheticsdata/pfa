@@ -5,5 +5,6 @@ export { default as dashboard } from "@text/dashboard";
 export { default as exceptionals } from "@text/exceptionals";
 export { default as login } from "@text/login";
 export { default as navBar } from "@text/navBar";
+export { default as spendingSearch } from "@text/spendingSearch";
 export { default as spendings } from "@text/spendings";
 export { default as statistics } from "@text/statistics";

@@ -19,6 +19,11 @@ const MIME_BY_EXT: Record<string, string> = {
   gif: "image/gif",
 };
 
+// Whole-history search (COS-114): require a minimal query so a stray keystroke
+// can't scan the entire table, and stream results a page at a time.
+const MIN_SEARCH_LENGTH = 2;
+const SEARCH_PAGE_SIZE = 50;
+
 @Injectable()
 export class SpendingsService {
   private readonly logger = new Logger(SpendingsService.name);
@@ -241,6 +246,97 @@ export class SpendingsService {
       category: category && (category.userID === userID || category.userID === null) ? category.name : null,
       categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
     }));
+  }
+
+  // Whole-history text search over the user's spendings (COS-114). Matches the
+  // label OR the (accessible) category name, newest first, capped. Returns the
+  // capped page plus the unbounded total so the UI can say "N résultats". The
+  // category is flattened to name/color exactly like getSpendings, and a category
+  // owned by another user is nulled out defensively.
+  async searchSpendings(query: string, userID: string, cursor?: string, year?: string) {
+    const q = query.trim();
+    const hasText = q.length >= MIN_SEARCH_LENGTH;
+    const yearNum = year ? Number(year) : Number.NaN;
+    const hasYear = Number.isInteger(yearNum);
+
+    // Need at least a usable term OR a year filter, else there is nothing to search.
+    if (!hasText && !hasYear) {
+      return { items: [], nextCursor: null, total: 0 };
+    }
+
+    // Escape LIKE metacharacters so a literal % or _ in the term (e.g. "100%",
+    // "T_Mobile") matches literally instead of acting as a wildcard. MySQL's
+    // default LIKE escape is backslash; the single pass escapes the backslash too.
+    const escaped = q.replace(/[\\%_]/g, "\\$&");
+
+    const where = {
+      userID,
+      ...(hasText
+        ? { OR: [{ label: { contains: escaped } }, { category: { is: { name: { contains: escaped } } } }] }
+        : {}),
+      // Year filter: half-open [year-01-01, next-year-01-01) covers the whole year
+      // regardless of any time component on the date column.
+      ...(hasYear
+        ? {
+            date: {
+              gte: new Date(`${yearNum}-01-01T00:00:00.000Z`),
+              lt: new Date(`${yearNum + 1}-01-01T00:00:00.000Z`),
+            },
+          }
+        : {}),
+    };
+
+    // Keyset (cursor) pagination: a common term (e.g. a category name) can match
+    // thousands of rows, so results stream a page at a time as the user scrolls,
+    // rather than capping (which would hide older months) or shipping everything.
+    // Ordered newest-first with the unique ID as tiebreaker so the cursor is
+    // stable. We over-fetch one row to know whether a further page exists without
+    // a spurious empty request at exact page-size multiples. `total` is counted
+    // once, on the first page only (COS-114).
+    const rows = await this.prisma.spendings.findMany({
+      where,
+      orderBy: [{ date: "desc" }, { ID: "desc" }],
+      include: { category: true },
+      take: SEARCH_PAGE_SIZE + 1,
+      ...(cursor ? { cursor: { ID: cursor }, skip: 1 } : {}),
+    });
+
+    const hasMore = rows.length > SEARCH_PAGE_SIZE;
+    const pageRows = hasMore ? rows.slice(0, SEARCH_PAGE_SIZE) : rows;
+
+    const items = pageRows.map(({ category, ...spending }) => ({
+      ...spending,
+      category: category && (category.userID === userID || category.userID === null) ? category.name : null,
+      categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
+    }));
+
+    const nextCursor = hasMore ? items[items.length - 1].ID : null;
+    const total = cursor ? undefined : await this.prisma.spendings.count({ where });
+
+    return { items, nextCursor, total };
+  }
+
+  // Years the user has spendings in, newest first — powers the search modal's
+  // year filter (COS-114). Derived from the min/max spending date, so a
+  // continuously-used account yields a contiguous range.
+  async getSpendingYears(userID: string): Promise<number[]> {
+    const range = await this.prisma.spendings.aggregate({
+      where: { userID },
+      _min: { date: true },
+      _max: { date: true },
+    });
+
+    const min = range._min.date;
+    const max = range._max.date;
+    if (!min || !max) {
+      return [];
+    }
+
+    const years: number[] = [];
+    for (let y = max.getUTCFullYear(); y >= min.getUTCFullYear(); y--) {
+      years.push(y);
+    }
+    return years;
   }
 
   async getSpendingsCharts(from: string, to: string, userID: string) {
