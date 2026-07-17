@@ -50,9 +50,13 @@ const spendings = {
   filter: {
     label: "Filtrer",
     all: "Toutes",
+    // Caret at the end of the one-line category strip; opens the full list overlay.
+    showAllAria: "Afficher toutes les catégories",
   },
   toolbar: {
-    searchPlaceholder: "Rechercher une dépense…",
+    // Week-scoped client-side filter — distinct from the whole-history search
+    // (COS-118), which lives next to it and opens the search modal.
+    searchPlaceholder: "Filtrer la semaine…",
   },
   view: {
     newSpending: "Nouvelle dépense",

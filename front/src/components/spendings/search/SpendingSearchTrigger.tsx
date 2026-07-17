@@ -1,6 +1,5 @@
 "use client";
 
-import { IconButton } from "@components/shared/IconButton";
 import SpendingSearchModal from "@components/spendings/search/SpendingSearchModal";
 import { spendingSearchParsers, spendingSearchUrlOptions } from "@components/spendings/search/searchParams";
 import spendingSearch from "@text/spendingSearch";
@@ -9,11 +8,13 @@ import { useQueryStates } from "nuqs";
 import { useEffect } from "react";
 
 /**
- * Dashboard entry point for the whole-history spending search (COS-114). Rendered
- * in the NavBar right cluster, gated by `isDashboard`. Opening writes the modal's
- * open flag to the URL (a pushed history entry) so browser Back can restore it;
- * the modal itself reads that state. Primary access is the click target (field on
- * desktop, magnifier on mobile); ⌘K / Ctrl+K is an optional desktop shortcut.
+ * Whole-history spending search entry point (COS-114/COS-118), rendered in the
+ * Dépenses toolbar next to the week filter. Opening writes the modal's open flag
+ * to the URL (a pushed history entry) so browser Back can restore it; the modal
+ * itself reads that state. Two presentations of the same click target: a compact
+ * labelled button with a ⌘K hint on desktop (md+), and a full-width field styled
+ * like the week filter on mobile — so it reads as a search field, not a stray
+ * icon. ⌘K / Ctrl+K is an optional desktop shortcut.
  */
 const SpendingSearchTrigger = () => {
   const [, setSearchState] = useQueryStates(spendingSearchParsers, spendingSearchUrlOptions);
@@ -45,15 +46,14 @@ const SpendingSearchTrigger = () => {
         </kbd>
       </button>
 
-      <IconButton
-        variant="bordered"
-        size={9}
+      <button
+        type="button"
         onClick={openSearch}
-        aria-label={spendingSearch.trigger}
-        className="md:hidden"
+        className="relative flex w-full items-center rounded-md border border-line bg-surface-elev py-2 pl-8 pr-3 text-left text-sm text-ink-4 transition-colors hover:text-ink md:hidden"
       >
-        <Search />
-      </IconButton>
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-ink-4" />
+        {spendingSearch.trigger}
+      </button>
 
       <SpendingSearchModal />
     </>
