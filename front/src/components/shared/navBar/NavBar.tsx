@@ -5,6 +5,7 @@ import MonthSelector from "@components/dashboard/MonthSelector";
 import DatePickerWrapper from "@components/datePickerWrapper/DatePickerWrapper";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import Logo from "@components/shared/brand/Logo";
+import Wordmark from "@components/shared/brand/Wordmark";
 import { ROUTES } from "@components/shared/config/constants";
 import useGlobalStore from "@components/shared/globalStore";
 import { IconButton } from "@components/shared/IconButton";
@@ -160,10 +161,12 @@ const NavBar = () => {
 
   if (!user) return null;
 
-  const brand = (
-    <div className="flex items-center gap-2.5 text-base font-semibold tracking-tight text-ink">
+  // Wordmark is hidden on mobile in the top bar (icon only there); the drawer
+  // keeps it, so mobile users still see it in the open sidebar.
+  const renderBrand = (wordmarkClassName?: string) => (
+    <div className="flex items-center gap-1 text-ink">
       <Logo size={24} />
-      <span>pfa</span>
+      <Wordmark className={wordmarkClassName} />
     </div>
   );
 
@@ -184,7 +187,7 @@ const NavBar = () => {
           <Menu />
         </IconButton>
 
-        {brand}
+        {renderBrand("hidden lg:inline")}
 
         <nav className="ml-1.5 hidden gap-0.5 lg:flex">
           {NAV_ROUTES.map((route) => (
@@ -273,7 +276,7 @@ const NavBar = () => {
         aria-hidden={!drawerOpen}
       >
         <div className="mb-1.5 flex items-center justify-between border-b border-white/[0.07] px-1.5 pb-3">
-          {brand}
+          {renderBrand()}
           <IconButton
             variant="ghost"
             size={9}

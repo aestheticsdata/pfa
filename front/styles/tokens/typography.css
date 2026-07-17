@@ -20,6 +20,8 @@
   /* Geist (UI) + Geist Mono (numbers) via next/font */
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  /* Keania One — brand wordmark only (`font-wordmark`), via next/font */
+  --font-wordmark: var(--font-keania), ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Every meaningful number → Geist Mono, tabular */

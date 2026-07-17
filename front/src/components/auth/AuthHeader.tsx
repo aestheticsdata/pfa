@@ -1,6 +1,7 @@
 "use client";
 
 import Logo from "@components/shared/brand/Logo";
+import Wordmark from "@components/shared/brand/Wordmark";
 import { ROUTES } from "@components/shared/config/constants";
 import { cn } from "@lib/utils";
 import login from "@text/login";
@@ -26,9 +27,9 @@ export default function AuthHeader() {
 
   return (
     <header className="relative z-[2] flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 sm:gap-x-6.5 sm:px-8 sm:py-4.5">
-      <div className="flex items-center gap-2.5 text-base font-semibold tracking-tight text-ink">
+      <div className="flex items-center gap-1 text-ink">
         <Logo size={26} />
-        <span>pfa</span>
+        <Wordmark />
       </div>
 
       <nav className="flex flex-wrap gap-1">
