@@ -6,7 +6,10 @@ export const SPENDINGS_PATH = "/spendings";
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-export const getTodayIsoDate = (): string => formatISO(new Date(), { representation: "date" });
+/** A Date as an ISO calendar day ("YYYY-MM-DD") on the local calendar. */
+export const formatIsoDate = (date: Date): string => formatISO(date, { representation: "date" });
+
+export const getTodayIsoDate = (): string => formatIsoDate(new Date());
 
 export const isValidIsoDate = (value?: string): value is string => {
   if (!value || !ISO_DATE_PATTERN.test(value)) {
