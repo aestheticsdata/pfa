@@ -4,6 +4,7 @@ import { WeeklyStatsQueryDto } from "@stats/dto/weekly-stats-query.dto";
 import { MonthlyStatsQueryDto } from "@stats/dto/monthly-stats-query.dto";
 import { StatisticsQueryDto } from "@stats/dto/statistics-query.dto";
 import { RegularMonthlyAverageQueryDto } from "@stats/dto/regular-monthly-average-query.dto";
+import { DailyStatsQueryDto } from "@stats/dto/daily-stats-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
@@ -67,5 +68,16 @@ export class CategoryStatsController {
   @Get()
   async getCategoryStats(@GetUserId() userID: string) {
     return this.statsService.getCategoryStats(userID);
+  }
+}
+
+@Controller("daily-stats")
+@UseGuards(SessionAuthGuard)
+export class DailyStatsController {
+  constructor(private readonly statsService: StatsService) {}
+
+  @Get()
+  async getDailyStats(@Query() query: DailyStatsQueryDto, @GetUserId() userID: string) {
+    return this.statsService.getDailyStats(query.year, userID);
   }
 }
