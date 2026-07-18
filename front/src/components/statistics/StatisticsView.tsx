@@ -170,7 +170,12 @@ const StatisticsView = () => {
         now={now}
       />
 
-      <StatisticsDayOfWeek />
+      <StatisticsDayOfWeek
+        year={selectedYear}
+        now={now}
+        days={dailyStats?.days}
+        weeklyCeiling={dashboard.get.data?.initialCeiling ?? null}
+      />
     </div>
   );
 };

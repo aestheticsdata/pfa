@@ -74,8 +74,9 @@ const statistics = {
     },
   },
   dayOfWeek: {
-    title: "Dépenses par jour de la semaine",
-    meta: "moyenne sur 12 mois",
+    title: "Dépenses par jour de la semaine (moyenne sur l'année)",
+    meta: (year: number) => `${year}`,
+    days: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
     transactionsPerDay: (value: string) => `${value} transactions/j`,
   },
   fixedExpenses: {

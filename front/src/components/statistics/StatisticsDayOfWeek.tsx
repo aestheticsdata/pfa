@@ -1,80 +1,90 @@
 "use client";
 
-// MOCK — there is no per-transaction / day-of-week aggregation endpoint, so
-// these weekly averages are illustrative sample values.
-
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { MeterBar } from "@components/shared/MeterBar";
+import overspendLevel from "@components/spendings/helpers/overspendLevel";
+import { weekdayAverages } from "@components/statistics/helpers/weekdayStats";
+import { euro, pct1 } from "@lib/format";
+import common from "@text/common";
 import statistics from "@text/statistics";
+
+import type { OverspendLevel } from "@components/spendings/helpers/overspendLevel";
+import type { DailyStat } from "@src/schemas/stats";
 
 const { dayOfWeek: t } = statistics;
 
-interface DayRow {
-  day: string;
-  width: number;
-  amount: string;
-  transactions: string;
-  weekend?: boolean;
+interface StatisticsDayOfWeekProps {
+  year: number;
+  now: Date;
+  /** Per-day spending totals for the year (COS-45); `undefined` while the request is in flight. */
+  days: DailyStat[] | undefined;
+  /** Weekly ceiling (real data) — its per-day share drives the colour ramp. */
+  weeklyCeiling: number | null;
 }
 
-const ROWS: DayRow[] = [
-  { day: "Lundi", width: 42, amount: "38,20 €", transactions: t.transactionsPerDay("3,2") },
-  { day: "Mardi", width: 48, amount: "44,10 €", transactions: t.transactionsPerDay("3,5") },
-  { day: "Mercredi", width: 55, amount: "50,80 €", transactions: t.transactionsPerDay("4,1") },
-  { day: "Jeudi", width: 51, amount: "46,90 €", transactions: t.transactionsPerDay("3,7") },
-  { day: "Vendredi", width: 64, amount: "58,60 €", transactions: t.transactionsPerDay("4,5") },
-  {
-    day: "Samedi",
-    width: 96,
-    amount: "88,40 €",
-    transactions: t.transactionsPerDay("5,2"),
-    weekend: true,
-  },
-  {
-    day: "Dimanche",
-    width: 78,
-    amount: "71,20 €",
-    transactions: t.transactionsPerDay("4,4"),
-    weekend: true,
-  },
-];
+// Bar fill by overspend level: green under the daily budget, orange over it, red
+// well over it — same orange-before-red philosophy as COS-34 / COS-36.
+const FILL: Record<OverspendLevel, string> = {
+  normal: "var(--bar-fill)",
+  warn: "linear-gradient(90deg, oklch(0.60 0.13 70), var(--warn))",
+  danger: "linear-gradient(90deg, oklch(0.50 0.13 25), oklch(0.72 0.16 25))",
+};
 
-const WEEKDAY_FILL = "var(--bar-fill)";
-const WEEKEND_FILL = "linear-gradient(90deg, oklch(0.50 0.13 25), oklch(0.72 0.16 25))";
+/** "Dépenses par jour de la semaine" — real weekday spending rhythm (COS-48). */
+const StatisticsDayOfWeek = ({ year, now, days, weeklyCeiling }: StatisticsDayOfWeekProps) => {
+  if (days === undefined) {
+    return (
+      <GlowCard
+        as="section"
+        className="px-6 py-5.5"
+      >
+        <CardSectionHeader
+          title={t.title}
+          meta={t.meta(year)}
+        />
+        <div className="grid place-items-center py-10 text-sm text-ink-4">{common.loading}</div>
+      </GlowCard>
+    );
+  }
 
-/** "Dépenses par jour de la semaine" — weekly spending rhythm (MOCK). */
-const StatisticsDayOfWeek = () => (
-  <GlowCard
-    as="section"
-    className="px-6 py-5.5"
-  >
-    <CardSectionHeader
-      title={t.title}
-      meta={t.meta}
-    />
+  const stats = weekdayAverages(days, year, now);
+  const maxAmount = Math.max(...stats.map((s) => s.avgAmount), 1);
+  // Per-weekday budget = the weekly ceiling spread over 7 days (COS-34 rule).
+  const dayBudget = weeklyCeiling != null && weeklyCeiling > 0 ? weeklyCeiling / 7 : null;
 
-    <div className="mt-4.5 flex flex-col gap-2">
-      {ROWS.map((row) => (
-        <div
-          key={row.day}
-          className="grid grid-cols-[90px_1fr_130px] items-center gap-3 text-sm"
-        >
-          <span className={row.weekend ? "text-ink" : "text-ink-2"}>{row.day}</span>
-          <MeterBar
-            value={row.width}
-            fill={row.weekend ? WEEKEND_FILL : WEEKDAY_FILL}
-            height={22}
-            opacity={0.85}
-          />
-          <span className="num text-right font-medium text-ink">
-            {row.amount}
-            <small className="block text-2xs font-normal text-ink-4">{row.transactions}</small>
-          </span>
-        </div>
-      ))}
-    </div>
-  </GlowCard>
-);
+  return (
+    <GlowCard
+      as="section"
+      className="px-6 py-5.5"
+    >
+      <CardSectionHeader
+        title={t.title}
+        meta={t.meta(year)}
+      />
+
+      <div className="mt-4.5 flex flex-col gap-2">
+        {stats.map((s, dow) => (
+          <div
+            key={t.days[dow]}
+            className="grid grid-cols-[90px_1fr_130px] items-center gap-3 text-sm"
+          >
+            <span className="text-ink-2">{t.days[dow]}</span>
+            <MeterBar
+              value={(s.avgAmount / maxAmount) * 100}
+              fill={FILL[overspendLevel(s.avgAmount, dayBudget)]}
+              height={22}
+              opacity={0.85}
+            />
+            <span className="num text-right font-medium text-ink">
+              {euro(s.avgAmount)} €
+              <small className="block text-2xs font-normal text-ink-4">{t.transactionsPerDay(pct1(s.avgTx))}</small>
+            </span>
+          </div>
+        ))}
+      </div>
+    </GlowCard>
+  );
+};
 
 export default StatisticsDayOfWeek;
