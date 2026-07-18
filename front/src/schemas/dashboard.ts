@@ -30,6 +30,22 @@ export const DashboardResponseSchema = DashboardSchema.nullable();
 
 export type DashboardResponse = z.infer<typeof DashboardResponseSchema>;
 
+// Sparkline projection reference data (COS-27). `source` names which historical
+// period the projected tail is based on (GLOBAL chain N-1 → N-2 → M-1), or
+// "none" at the user's very first month of data → no tail. `dailyTotals` are the
+// reference month's day-by-day spending totals, index i = day (i+1).
+export const ProjectionSourceSchema = z.enum(["sameMonthLastYear", "sameMonthTwoYearsAgo", "previousMonth", "none"]);
+
+export type ProjectionSource = z.infer<typeof ProjectionSourceSchema>;
+
+export const DailyProjectionSchema = z.object({
+  source: ProjectionSourceSchema,
+  referenceMonth: z.string().nullable(),
+  dailyTotals: z.array(numberLikeSchema),
+});
+
+export type DailyProjection = z.infer<typeof DailyProjectionSchema>;
+
 export const MonthlyStatsSchema = z.object({
   spendingsSum: z.object({
     amount: numberLikeSchema,

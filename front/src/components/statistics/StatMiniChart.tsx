@@ -1,6 +1,7 @@
 "use client";
 
-import { areaPath, linearScale, linePath } from "@lib/dataviz/svg";
+import { areaPath, linePath } from "@lib/dataviz/linePaths";
+import { linearScale } from "@lib/dataviz/scales";
 import statistics from "@text/statistics";
 
 interface StatMiniChartProps {

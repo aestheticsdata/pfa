@@ -19,6 +19,14 @@ export class DashboardController {
     res.json(result);
   }
 
+  // Day-by-day totals of the historical reference period (COS-27), used to draw
+  // the in-progress month's projected sparkline tail. `start` = viewed month's
+  // first day (ISO date).
+  @Get("projection")
+  async getDailyProjection(@Query() query: DashboardQueryDto, @GetUserId() userID: string) {
+    return this.dashboardService.getDailyProjection(query.start, userID);
+  }
+
   @Post()
   async createDashboard(@Body() dto: CreateDashboardDto, @GetUserId() userID: string) {
     return this.dashboardService.createDashboard(

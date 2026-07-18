@@ -1,11 +1,14 @@
 "use client";
 
-// MOCK — the dashed projection tail (today → month-end at the running average)
-// is synthetic; the daily history up to today and the average/peak are real.
 // Rendered as a card-less section: it nests inside the BudgetHero card, matching
-// the `.spark-section` block of Dashboard 2026.html.
+// the `.spark-section` block of Dashboard 2026.html. The daily history up to
+// today and the average/peak are real; the dashed tail after today is the
+// historical reference period (useDailyProjection), drawn smoothed. The
+// reference follows the GLOBAL projection chain and is absent at the user's very
+// first month of data (source "none" → no tail, no legend).
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import useDailyProjection from "@components/spendings/services/useDailyProjection";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { LineChart } from "@lib/dataviz";
 import { euro } from "@lib/format";
@@ -19,16 +22,18 @@ import parseISO from "date-fns/parseISO";
 import { useMemo } from "react";
 
 import type { LinePoint } from "@lib/dataviz";
+import type { ProjectionSource } from "@src/schemas/dashboard";
 
 const DailySparkline = () => {
   const { from } = useDatePickerWrapperStore();
   const { spendingsByMonth } = useSpendings();
+  const { data: projectionData } = useDailyProjection();
   const { dailySparkline: t } = dashboardText;
 
   const monthRef = from ?? new Date();
   const daysInMonth = getDaysInMonth(monthRef);
 
-  const { real, projection, todayX, todayY, avg, peak, peakDay } = useMemo(() => {
+  const { real, projection, projectionSource, todayX, todayY, avg, peak, peakDay } = useMemo(() => {
     const isThisMonth = isSameMonth(monthRef, new Date());
     const today = isThisMonth ? getDate(new Date()) : daysInMonth;
     const totals = new Array(daysInMonth + 1).fill(0) as number[];
@@ -50,33 +55,51 @@ const DailySparkline = () => {
         peakD = p.x;
       }
     }
-    const projPts: LinePoint[] =
-      today < daysInMonth
-        ? [
-            { x: today, y: totals[today] || average },
-            { x: daysInMonth, y: average },
-          ]
-        : [];
+    // Projected tail: the reference month's day-by-day totals for the days after
+    // today. Only for the in-progress month with a usable reference (source
+    // "none" → the user's first month of data → no tail). It starts at today's
+    // real point so the dashed curve continues seamlessly from the solid one.
+    // A reference month shorter than the current one carries its last day's value
+    // forward for the overhanging days.
+    const source: ProjectionSource = projectionData?.source ?? "none";
+    const refDaily = projectionData?.dailyTotals ?? [];
+    const canProject = isThisMonth && today < daysInMonth && source !== "none" && refDaily.length > 0;
+    const projPts: LinePoint[] = canProject
+      ? [
+          { x: today, y: totals[today] ?? 0 },
+          ...Array.from({ length: daysInMonth - today }, (_, i) => {
+            const day = today + 1 + i;
+            const refValue = refDaily[day - 1] ?? refDaily[refDaily.length - 1] ?? 0;
+            return { x: day, y: refValue };
+          }),
+        ]
+      : [];
     return {
       real: realPts,
       projection: projPts,
+      projectionSource: canProject ? source : ("none" as ProjectionSource),
       todayX: today,
       todayY: totals[today] ?? 0,
       avg: average,
       peak: peakVal,
       peakDay: peakD,
     };
-  }, [spendingsByMonth, monthRef, daysInMonth]);
+  }, [spendingsByMonth, monthRef, daysInMonth, projectionData]);
 
   const ticks = Array.from({ length: 6 }, (_, i) => Math.round(1 + ((daysInMonth - 1) * i) / 5));
   // The today marker / crossing-dot / date-label only make sense while the
   // viewed month is in progress (a "today" falls inside it).
   const showToday = todayX < daysInMonth;
+  // The projected tail can exceed the real peak, so the chart's y-domain — and
+  // the overlay math below — must key off the greater of the two, else the dot /
+  // avg label drift out of alignment with the rendered curve.
+  const projMax = projection.reduce((m, p) => Math.max(m, p.y), 0);
+  const yTop = Math.max(peak, projMax);
   // Positions as % of the chart box. LineChart maps its [1, daysInMonth] x-domain
-  // and [0, peak] y-domain into a 600×110 viewBox with 6px padding all round.
+  // and [0, yTop] y-domain into a 600×110 viewBox with 6px padding all round.
   const dotLeftPct = 1 + ((todayX - 1) / (daysInMonth - 1)) * 98;
-  const dotTopPct = peak > 0 ? ((104 - (todayY / peak) * 98) / 110) * 100 : 50;
-  const avgTopPct = peak > 0 ? ((104 - (avg / peak) * 98) / 110) * 100 : 50;
+  const dotTopPct = yTop > 0 ? ((104 - (todayY / yTop) * 98) / 110) * 100 : 50;
+  const avgTopPct = yTop > 0 ? ((104 - (avg / yTop) * 98) / 110) * 100 : 50;
   const todayLabel = format(new Date(), "d MMM", { locale: fr });
   const peakLabel =
     peakDay > 0
@@ -109,9 +132,10 @@ const DailySparkline = () => {
           id="dash-spark"
           height={110}
           xDomain={[1, daysInMonth]}
+          yDomain={[0, yTop]}
           series={[
             { points: real, color: "var(--accent-strong)", area: true },
-            { points: projection, color: "var(--accent-d)", dashed: true },
+            { points: projection, color: "var(--accent-d)", dashed: true, smooth: true },
             // average reference line
             {
               points: [
@@ -156,6 +180,10 @@ const DailySparkline = () => {
           <span key={d}>{String(d).padStart(2, "0")}</span>
         ))}
       </div>
+
+      {projectionSource !== "none" && (
+        <p className="mt-1.5 text-right text-3xs text-ink-4">{t.projectionBasis[projectionSource]}</p>
+      )}
     </div>
   );
 };

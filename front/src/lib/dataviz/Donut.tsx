@@ -1,6 +1,6 @@
 "use client";
 
-import { wedgePath } from "@lib/dataviz/svg";
+import { wedgePath } from "@lib/dataviz/arcPaths";
 import { cn } from "@lib/utils";
 
 import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
