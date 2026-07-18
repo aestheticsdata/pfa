@@ -97,21 +97,29 @@ const StatisticsView = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      <StatisticsFilters
-        years={yearOptions(currentYear)}
-        selectedYear={selectedYear}
-        onSelectYear={handleSelectYear}
-        compareEnabled={compareEnabled}
-        onToggleCompare={setCompareEnabled}
-        compareYear={compareYear}
-        onSelectCompareYear={setCompareYear}
-        showExceptionals={showExceptionals}
-        onToggleExceptionals={setShowExceptionals}
-        categories={categories}
-        selectedCategoryIds={selectedCategoryIds}
-        onToggleCategory={toggleCategory}
-        maxCategories={MAX_CATEGORIES}
-      />
+      {/* Filter bar as its own bordered sticky card. Dépenses keeps its full-bleed
+          .sp-sticky-zone band (it needs the gutter bleed for the timeline cards'
+          rings/glows); Stats' toolbar stands alone, so a contained card reads
+          better — the two look close but aren't pixel-identical (accepted). Shadow
+          is the shared --shadow-sticky token. `-mt-7` swallows the header's mb-7 to
+          sit tight; `before` seals the seam above, as the KPI cards scroll behind. */}
+      <div className="rounded-xl border border-line bg-surface-elev px-4 py-2.5 shadow-sticky md:sticky md:top-[76px] md:z-30 md:-mt-7 md:before:pointer-events-none md:before:absolute md:before:inset-x-0 md:before:bottom-full md:before:h-16 md:before:bg-surface-base md:before:content-['']">
+        <StatisticsFilters
+          years={yearOptions(currentYear)}
+          selectedYear={selectedYear}
+          onSelectYear={handleSelectYear}
+          compareEnabled={compareEnabled}
+          onToggleCompare={setCompareEnabled}
+          compareYear={compareYear}
+          onSelectCompareYear={setCompareYear}
+          showExceptionals={showExceptionals}
+          onToggleExceptionals={setShowExceptionals}
+          categories={categories}
+          selectedCategoryIds={selectedCategoryIds}
+          onToggleCategory={toggleCategory}
+          maxCategories={MAX_CATEGORIES}
+        />
+      </div>
 
       <StatisticsKpis
         statistics={statistics}
