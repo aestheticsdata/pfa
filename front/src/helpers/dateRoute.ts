@@ -1,4 +1,5 @@
 import formatISO from "date-fns/formatISO";
+import startOfMonth from "date-fns/startOfMonth";
 
 export const DATE_QUERY_PARAM = "date";
 // The Dépenses (weekly) page carries the selected week as a ?date= query param.
@@ -43,3 +44,13 @@ export const parseMonthParam = (value: string): Date => {
 
 export const buildDashboardPath = (month?: string): string =>
   month ? `${DASHBOARD_PATH}?${MONTH_QUERY_PARAM}=${month}` : DASHBOARD_PATH;
+
+/**
+ * The ?month= value for viewing `target`'s month: `null` when it resolves to the
+ * current month (so /dashboard stays clean), otherwise "YYYY-MM". Shared by the
+ * MonthSelector arrow steppers and the direct month picker (COS-120).
+ */
+export const resolveMonthParam = (target: Date, currentMonthStart: Date): string | null => {
+  const start = startOfMonth(target);
+  return start.getTime() === currentMonthStart.getTime() ? null : formatMonthParam(start);
+};

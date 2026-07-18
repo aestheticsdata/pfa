@@ -1,11 +1,10 @@
 "use client";
 
+import MonthPickerPopover from "@components/dashboard/MonthPickerPopover";
 import { IconButton } from "@components/shared/IconButton";
-import { formatMonthParam, isValidMonthParam, MONTH_QUERY_PARAM, parseMonthParam } from "@helpers/dateRoute";
+import { isValidMonthParam, MONTH_QUERY_PARAM, parseMonthParam, resolveMonthParam } from "@helpers/dateRoute";
 import dashboardText from "@text/dashboard";
 import addMonths from "date-fns/addMonths";
-import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import startOfMonth from "date-fns/startOfMonth";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
@@ -15,7 +14,8 @@ import { useState, useSyncExternalStore } from "react";
  * Month period selector shown in the app header on the Dashboard. The month is
  * the URL's ?month= param (single source of truth, COS-118); DashboardPageClient
  * syncs the shared store from it. Landing on the current month clears the param,
- * keeping /dashboard clean.
+ * keeping /dashboard clean. The label opens a direct year+month picker (COS-120);
+ * the ‹ › arrows step one month at a time.
  */
 const MonthSelector = () => {
   const [monthParam, setMonthParam] = useQueryState(MONTH_QUERY_PARAM, parseAsString);
@@ -33,10 +33,13 @@ const MonthSelector = () => {
   // Until then the label is blank (the control keeps its fixed width).
   const month = paramMonth ?? (isClientHydrated ? currentMonthStart : null);
 
+  // Jump straight to `target`'s month; the current month clears the param. Shared
+  // by the ‹ › steppers and the picker so both land identically.
+  const goToMonth = (target: Date) => setMonthParam(resolveMonthParam(target, currentMonthStart));
+
   const stepMonth = (delta: number) => {
     if (!month) return;
-    const start = startOfMonth(addMonths(month, delta));
-    setMonthParam(start.getTime() === currentMonthStart.getTime() ? null : formatMonthParam(start));
+    goToMonth(addMonths(month, delta));
   };
 
   return (
@@ -51,11 +54,11 @@ const MonthSelector = () => {
         >
           <ChevronLeft />
         </IconButton>
-        {/* fixed width (fits the longest month, "septembre") so the control
-            never resizes as the month changes */}
-        <span className="num w-[116px] text-center capitalize tracking-normal">
-          {month ? format(month, "MMMM yyyy", { locale: fr }) : ""}
-        </span>
+        <MonthPickerPopover
+          month={month}
+          currentMonthStart={currentMonthStart}
+          onSelectMonth={goToMonth}
+        />
         <IconButton
           variant="ghost"
           size={5}
