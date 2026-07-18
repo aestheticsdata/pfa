@@ -4,6 +4,7 @@ import { DividedStrip } from "@components/shared/DividedStrip";
 import { MoneyAmount } from "@components/shared/MoneyAmount";
 import { Overline } from "@components/shared/Overline";
 import { StatTile } from "@components/shared/StatTile";
+import overspendLevel from "@components/spendings/helpers/overspendLevel";
 import { AnimatedNumber } from "@lib/dataviz";
 import { splitAmount } from "@lib/format";
 import { cn } from "@lib/utils";
@@ -58,12 +59,17 @@ const SpendingSummary = ({
   const { int: remainingInt, dec: remainingDec } = splitAmount(Math.abs(remaining));
   const remainingIntValue = Number(remainingInt.replace(/\D/g, ""));
 
+  // Green under the ceiling, then an orange (warn) step before red (danger),
+  // using the exact same thresholds as the day-card totals (COS-34/COS-36).
+  const ceilingLevel = overspendLevel(weekTotal, weeklyCeiling);
   const ceilingSub =
     weeklyCeiling != null && weeklyCeiling > 0 ? (
-      weekTotal > weeklyCeiling ? (
-        <span className="text-neg">{t.overCeiling(Math.round(weekTotal - weeklyCeiling))}</span>
-      ) : (
+      ceilingLevel === "normal" ? (
         <span className="text-accent-strong">{t.underCeiling(Math.round(weeklyCeiling - weekTotal))}</span>
+      ) : (
+        <span className={ceilingLevel === "danger" ? "text-neg" : "text-warn"}>
+          {t.overCeiling(Math.round(weekTotal - weeklyCeiling))}
+        </span>
       )
     ) : (
       t.ceilingUndefined
