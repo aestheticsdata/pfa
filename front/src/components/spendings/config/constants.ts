@@ -11,6 +11,7 @@ export const QUERY_KEYS = {
   DAILY_PROJECTION: "dailyProjection",
   CHARTS: "charts",
   WEEKLY_STATS: "weeklyStats",
+  DAILY_STATS: "dailyStats",
   CATEGORIES: "categories",
   CATEGORY_STATS: "categoryStats",
   EXCEPTIONALS: "exceptionals",

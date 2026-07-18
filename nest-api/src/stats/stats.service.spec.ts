@@ -86,3 +86,80 @@ describe("StatsService.getCategoryStats", () => {
     expect(result.byCategory[0]?.total).toBeCloseTo(99.99, 2);
   });
 });
+
+/**
+ * Unit tests for StatsService.getDailyStats — the per-day spending totals for a
+ * year backing the daily heatmap (COS-45) and the day-of-week averages (COS-48).
+ * Prisma is mocked; these assert the query range/scoping and the JS bucketing.
+ */
+describe("StatsService.getDailyStats", () => {
+  const makeService = (findManyResult: { date: Date; amount: unknown }[]) => {
+    const findMany = jest.fn().mockResolvedValue(findManyResult);
+    const prisma = { spendings: { findMany } } as unknown as never;
+    return { service: new StatsService(prisma), findMany };
+  };
+
+  it("returns no days and skips the query for a non-numeric year", async () => {
+    const { service, findMany } = makeService([]);
+
+    await expect(service.getDailyStats("not-a-year", "user-1")).resolves.toEqual({ days: [] });
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it("queries the whole year as a half-open UTC range, scoped to the user", async () => {
+    const { service, findMany } = makeService([]);
+
+    await service.getDailyStats("2023", "user-1");
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        userID: "user-1",
+        date: { gte: new Date(Date.UTC(2023, 0, 1)), lt: new Date(Date.UTC(2024, 0, 1)) },
+      },
+      select: { date: true, amount: true },
+    });
+  });
+
+  it("buckets rows per day (sum + count), sorted chronologically", async () => {
+    const { service } = makeService([
+      { date: new Date("2023-03-15T00:00:00.000Z"), amount: 10 },
+      { date: new Date("2023-01-02T00:00:00.000Z"), amount: 5 },
+      { date: new Date("2023-03-15T00:00:00.000Z"), amount: 2.5 },
+    ]);
+
+    const result = await service.getDailyStats("2023", "user-1");
+
+    expect(result.days).toEqual([
+      { date: "2023-01-02", total: 5, count: 1 },
+      { date: "2023-03-15", total: 12.5, count: 2 },
+    ]);
+  });
+
+  it("keys days by their UTC calendar date, including the year's first and last day", async () => {
+    // Late-in-day UTC timestamps must still key to the UTC calendar date (not the
+    // local one) so day buckets are timezone-safe on any runner.
+    const { service } = makeService([
+      { date: new Date("2023-01-01T00:00:00.000Z"), amount: 5 },
+      { date: new Date("2023-12-31T23:59:59.000Z"), amount: 8 },
+    ]);
+
+    const result = await service.getDailyStats("2023", "user-1");
+
+    expect(result.days).toEqual([
+      { date: "2023-01-01", total: 5, count: 1 },
+      { date: "2023-12-31", total: 8, count: 1 },
+    ]);
+  });
+
+  it("coerces Prisma Decimal amounts and rounds the daily total to the cent", async () => {
+    const decimal = (v: string) => ({ toString: () => v });
+    const { service } = makeService([
+      { date: new Date("2023-02-01T00:00:00.000Z"), amount: decimal("10.004") },
+      { date: new Date("2023-02-01T00:00:00.000Z"), amount: decimal("0.004") },
+    ]);
+
+    const result = await service.getDailyStats("2023", "user-1");
+
+    expect(result.days).toEqual([{ date: "2023-02-01", total: 10.01, count: 2 }]);
+  });
+});

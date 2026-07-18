@@ -5,9 +5,13 @@ import { PrismaService } from "../prisma/prisma.service";
 
 import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
 import type { CategoryStat, CategoryStatsResponse } from "@stats/dto/category-stats-response.interface";
+import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-response.interface";
 
 /** Rounds to 2 decimal places to avoid JS float precision issues. */
 const roundCurrency = (n: number): number => Math.round(n);
+
+/** Rounds to the cent, killing the float noise of summed Prisma Decimals. */
+const round2 = (n: number): number => Math.round(n * 100) / 100;
 
 @Injectable()
 export class StatsService {
@@ -169,6 +173,43 @@ export class StatsService {
     }
 
     return { totalSpent, byCategory };
+  }
+
+  /**
+   * Per-day spending totals for a whole year (COS-45). Reads the one-off
+   * `Spendings` table only, so recurrings and exceptionals — which live in their
+   * own tables — are excluded by construction. Buckets in JS from a half-open
+   * UTC range (like the dashboard projection) so day keys are timezone-safe.
+   * Feeds the daily heatmap and the day-of-week averages (COS-48).
+   */
+  async getDailyStats(yearStr: string, userID: string): Promise<DailyStatsResponse> {
+    const year = parseInt(yearStr, 10);
+    if (Number.isNaN(year)) {
+      return { days: [] };
+    }
+
+    const yearStart = new Date(Date.UTC(year, 0, 1));
+    const nextYearStart = new Date(Date.UTC(year + 1, 0, 1));
+
+    const rows = await this.prisma.spendings.findMany({
+      where: { userID, date: { gte: yearStart, lt: nextYearStart } },
+      select: { date: true, amount: true },
+    });
+
+    const byDay = new Map<string, { total: number; count: number }>();
+    for (const row of rows) {
+      const key = row.date.toISOString().slice(0, 10);
+      const bucket = byDay.get(key) ?? { total: 0, count: 0 };
+      bucket.total += Number(row.amount);
+      bucket.count += 1;
+      byDay.set(key, bucket);
+    }
+
+    const days: DailyStat[] = Array.from(byDay.entries())
+      .map(([date, { total, count }]) => ({ date, total: round2(total), count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return { days };
   }
 
   async getStatistics(categoryIDs: string[], years: string[], userID: string): Promise<StatisticsResponse> {

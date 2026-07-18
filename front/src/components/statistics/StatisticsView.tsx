@@ -19,6 +19,7 @@ import StatisticsHeatmap from "@components/statistics/StatisticsHeatmap";
 import StatisticsKpis from "@components/statistics/StatisticsKpis";
 import StatisticsMonthlyChart from "@components/statistics/StatisticsMonthlyChart";
 import StatisticsTopCategories from "@components/statistics/StatisticsTopCategories";
+import useDailyStats from "@components/statistics/services/useDailyStats";
 import useStatistics from "@components/statistics/services/useStatistics";
 import { useMemo, useState } from "react";
 
@@ -44,6 +45,7 @@ const StatisticsView = () => {
   const years = useMemo(() => Array.from(new Set([selectedYear, compareYear])), [selectedYear, compareYear]);
 
   const { statistics, categories } = useStatistics({ years });
+  const { dailyStats } = useDailyStats({ year: selectedYear });
   const { exceptionals } = useExceptionals({ year: selectedYear });
   const { exceptionals: compareExceptionals } = useExceptionals({
     year: compareYear,
@@ -153,6 +155,8 @@ const StatisticsView = () => {
         <StatisticsHeatmap
           year={selectedYear}
           now={now}
+          days={dailyStats?.days}
+          exceptionals={exceptionals}
         />
         <StatisticsTopCategories
           rows={topCategoryRows}
