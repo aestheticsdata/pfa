@@ -2,6 +2,7 @@
 
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
+import overspendLevel from "@components/spendings/helpers/overspendLevel";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import useDaySort from "@components/spendings/view/helpers/useDaySort";
 import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
@@ -57,6 +58,8 @@ interface SpendingDayCardProps {
   items: SpendingItem[];
   total: number;
   dailyBudget: number | null;
+  /** The day's share of the weekly ceiling — threshold for the total colour (COS-34). */
+  ceilingPerDay: number | null;
   isToday: boolean;
   month: MonthRange | null;
   selectedCategory: string | null;
@@ -74,6 +77,7 @@ const SpendingDayCard = ({
   items,
   total,
   dailyBudget,
+  ceilingPerDay,
   isToday,
   month,
   selectedCategory,
@@ -111,7 +115,7 @@ const SpendingDayCard = ({
 
   const isFiltering = Boolean(selectedCategory) || query.length > 0;
   const displayTotal = isFiltering ? filtered.reduce((acc, s) => acc + Number(s.amount), 0) : total;
-  const over = dailyBudget != null && displayTotal > dailyBudget;
+  const level = overspendLevel(displayTotal, ceilingPerDay);
 
   const dayCategories = useMemo<DayCategory[]>(() => {
     const map = new Map<string, DayCategory>();
@@ -141,7 +145,7 @@ const SpendingDayCard = ({
             {format(date, "dd MMM", { locale: fr })}
             <span className="dow">{format(date, "EEEE", { locale: fr })}</span>
           </div>
-          <div className={cn("sp-day-total", over && "over")}>
+          <div className={cn("sp-day-total", level !== "normal" && level)}>
             <span className="tl">{dayCard.total}</span>
             {euro(displayTotal)}
             <span className="cur"> €</span>
