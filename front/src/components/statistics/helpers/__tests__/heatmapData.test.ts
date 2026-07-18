@@ -61,6 +61,19 @@ describe("buildHeatmap", () => {
     expect(rows[2][2]).toBe("future"); // Wed 01-11, past the realized window
   });
 
+  it("carries per-cell tooltip metadata; future and out-of-year slots stay null", () => {
+    const { cells } = buildHeatmap(2023, now, days, exceptionals);
+    expect(cells[0][1]).toEqual({ date: "2023-01-02", amount: 100, level: "lvl-4", exceptionals: [] });
+    expect(cells[3][1]).toEqual({
+      date: "2023-01-05",
+      amount: 0,
+      level: "lvl-neg",
+      exceptionals: [{ label: "ordinateur", amount: 800 }],
+    });
+    expect(cells[2][2]).toBeNull(); // 01-11, future
+    expect(cells[0][0]).toBeNull(); // out-of-year padding
+  });
+
   it("handles a year with no spending: no scale, no busiest day, every day sober", () => {
     const { scaleMax, busiest, counts, streak, realizedDays } = buildHeatmap(2023, new Date(2023, 5, 1), [], []);
     expect(scaleMax).toBe(0);

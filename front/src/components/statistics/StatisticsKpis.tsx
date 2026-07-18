@@ -17,9 +17,13 @@ import {
   yearTotal,
 } from "@components/statistics/helpers/statisticsData";
 import StatMiniChart from "@components/statistics/StatMiniChart";
+import { CursorTooltip, useCursorHover } from "@lib/dataviz";
 import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
 import statisticsText from "@text/statistics";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
+import parseISO from "date-fns/parseISO";
 import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
@@ -64,6 +68,8 @@ const CmpRow = ({
   amount,
   regWidth,
   excWidth,
+  titleTooltip,
+  barTooltip,
 }: {
   tag: string;
   kind: "exc" | "reg";
@@ -72,39 +78,59 @@ const CmpRow = ({
   amount: number;
   regWidth: number;
   excWidth: number;
-}) => (
-  <div className="flex flex-col gap-1.5">
-    <div className="flex items-baseline gap-2">
-      <span
-        className={cn(
-          "num shrink-0 rounded-xs px-1.5 py-0.5 text-3xs font-semibold uppercase tracking-wider",
-          kind === "exc" ? "bg-exc-bg text-exc" : "bg-accent-bg text-accent-strong",
-        )}
+  /** Optional hover detail for the (possibly truncated) title. */
+  titleTooltip?: React.ReactNode;
+  /** Optional hover detail for the regular/exceptional split bar. */
+  barTooltip?: React.ReactNode;
+}) => {
+  const rowTip = useCursorHover<"title" | "bar">();
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-baseline gap-2">
+        <span
+          className={cn(
+            "num shrink-0 rounded-xs px-1.5 py-0.5 text-3xs font-semibold uppercase tracking-wider",
+            kind === "exc" ? "bg-exc-bg text-exc" : "bg-accent-bg text-accent-strong",
+          )}
+        >
+          {tag}
+        </span>
+        <span
+          className={cn(
+            "truncate",
+            titleVariant === "month" ? "text-2xs uppercase tracking-caps text-ink-3" : "text-sm text-ink-2",
+          )}
+          role="img"
+          aria-label={title}
+          onMouseMove={titleTooltip ? rowTip.move("title") : undefined}
+          onMouseLeave={titleTooltip ? rowTip.clear : undefined}
+        >
+          {title}
+        </span>
+        <span className="num ml-auto text-lg font-medium text-ink">{euro0(amount)} €</span>
+      </div>
+      <div
+        className="flex h-2 overflow-hidden rounded-xs bg-surface-hi"
+        role="img"
+        aria-label={tag}
+        onMouseMove={barTooltip ? rowTip.move("bar") : undefined}
+        onMouseLeave={barTooltip ? rowTip.clear : undefined}
       >
-        {tag}
-      </span>
-      <span
-        className={cn(
-          "truncate",
-          titleVariant === "month" ? "text-2xs uppercase tracking-caps text-ink-3" : "text-sm text-ink-2",
-        )}
-      >
-        {title}
-      </span>
-      <span className="num ml-auto text-lg font-medium text-ink">{euro0(amount)} €</span>
+        <span
+          style={{
+            width: `${Math.max(0, regWidth) * 100}%`,
+            background: "var(--accent-strong)",
+            opacity: 0.9,
+          }}
+        />
+        {excWidth > 0 && <span style={{ width: `${excWidth * 100}%`, background: "var(--exc)" }} />}
+      </div>
+      <CursorTooltip point={rowTip.hover}>
+        {rowTip.hover ? (rowTip.hover.data === "title" ? titleTooltip : barTooltip) : null}
+      </CursorTooltip>
     </div>
-    <div className="flex h-2 overflow-hidden rounded-xs bg-surface-hi">
-      <span
-        style={{
-          width: `${Math.max(0, regWidth) * 100}%`,
-          background: "var(--accent-strong)",
-          opacity: 0.9,
-        }}
-      />
-      {excWidth > 0 && <span style={{ width: `${excWidth * 100}%`, background: "var(--exc)" }} />}
-    </div>
-  </div>
-);
+  );
+};
 
 /** The four Statistiques KPI cards. Totals / averages / biggest month are real
  *  (from /statistics + /exceptionals); the "courante" biggest single expense in
@@ -118,6 +144,7 @@ const StatisticsKpis = ({
   showExceptionals,
 }: StatisticsKpisProps) => {
   const [now] = useState(() => new Date());
+  const compareTotalTip = useCursorHover();
 
   const { kpis: t } = statisticsText;
   const data = statistics?.data;
@@ -136,6 +163,8 @@ const StatisticsKpis = ({
 
   const deltaPct = compareTotal > 0 ? ((total - compareTotal) / compareTotal) * 100 : 0;
   const avgDelta = avg - compareAvg;
+  const totalDiff = total - compareTotal;
+  const totalDiffStr = `${totalDiff >= 0 ? "+" : "−"}${euro0(Math.abs(totalDiff))}`;
 
   // biggest month counting exceptionals vs regular-only
   const excYearTotal = exceptionalTotal(exceptionals);
@@ -156,9 +185,18 @@ const StatisticsKpis = ({
     <section className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 min-[768px]:grid-cols-4">
       <Card label={t.totalSpent(year)}>
         <Value amount={total} />
-        <span className="text-xs text-ink-3">
+        <span
+          className="w-fit text-xs text-ink-3"
+          role="img"
+          aria-label={t.vsMonths(compareYear, months)}
+          onMouseMove={compareTotalTip.move()}
+          onMouseLeave={compareTotalTip.clear}
+        >
           <Delta down={deltaPct <= 0}>{Math.abs(Math.round(deltaPct))}%</Delta> {t.vsMonths(compareYear, months)}
         </span>
+        <CursorTooltip point={compareTotalTip.hover}>
+          {compareTotalTip.hover ? t.tooltip.total(compareYear, euro0(compareTotal), totalDiffStr, months) : null}
+        </CursorTooltip>
         <div className="mt-4">
           <StatMiniChart
             id="kpi-total"
@@ -194,6 +232,7 @@ const StatisticsKpis = ({
               amount={totalMonthly[totalIdx]}
               regWidth={regMonthly[totalIdx] / cmpScale}
               excWidth={excMonthly[totalIdx] / cmpScale}
+              barTooltip={statisticsText.regExcSplit(euro0(regMonthly[totalIdx]), euro0(excMonthly[totalIdx]))}
             />
           )}
           <CmpRow
@@ -218,6 +257,10 @@ const StatisticsKpis = ({
               amount={Number(topExc.amount)}
               regWidth={0}
               excWidth={Number(topExc.amount) / expenseScale}
+              titleTooltip={t.tooltip.expenseInfo(
+                cap(topExc.label),
+                format(parseISO(topExc.date), "d MMM yyyy", { locale: fr }),
+              )}
             />
           )}
           <CmpRow

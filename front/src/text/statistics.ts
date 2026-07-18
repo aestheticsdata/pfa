@@ -2,6 +2,8 @@ const statistics = {
   // Shared "year-to-date" subtitle, rendered identically by the monthly and
   // category charts ("2026 · janv. → juil.").
   ytdSubtitle: (year: number, endMonth: string) => `${year} · janv. → ${endMonth}`,
+  // Shared tooltip line splitting a total into its regular vs exceptional parts.
+  regExcSplit: (regular: string, exceptional: string) => `Régulier ${regular} € · Exceptionnel ${exceptional} €`,
   miniChart: {
     ariaLabel: "Graphique d'évolution",
     averageShort: "moy.",
@@ -26,6 +28,12 @@ const statistics = {
       exceptional: "exceptionnelle",
       regular: "courante",
     },
+    tooltip: {
+      total: (compareYear: number, total: string, diff: string, months: number) =>
+        `${compareYear} : ${total} € · ${diff} € sur ${months} mois`,
+      avg: (exact: string, total: string, months: number) => `${exact} € · ${total} € ÷ ${months} mois`,
+      expenseInfo: (label: string, date: string) => `${label} · ${date}`,
+    },
   },
   forecast: {
     spentLabel: (asOf: string) => `Dépensé · 1er janv. → ${asOf}`,
@@ -35,6 +43,10 @@ const statistics = {
     projectionAxis: "— projection —",
     projectionTitle: "Projection fin d'année",
     vsCompare: (compareYear: number, total: string) => `vs ${compareYear} (${total} €)`,
+    tooltip: {
+      projectionModel: (perDay: string, days: number) => `Au rythme actuel · ${perDay} €/jour × ${days} jours`,
+      projectionActual: "Total réalisé sur l'année",
+    },
   },
   monthlyChart: {
     title: "Dépenses mensuelles",
@@ -56,6 +68,10 @@ const statistics = {
     colTotal: "Total",
     colVs: (compareYear: number) => `vs ${compareYear}`,
     new: "nouv.",
+    tooltip: {
+      trend: (compareYear: number, value: string, diff: string) => `${compareYear} : ${value} € · ${diff} €`,
+      newCategory: (compareYear: number) => `Nouvelle catégorie — absente en ${compareYear}`,
+    },
   },
   dayOfWeek: {
     title: "Dépenses par jour de la semaine",
@@ -70,6 +86,11 @@ const statistics = {
     drawn: (date: string) => `Déjà prélevé · au ${date}`,
     note: (topName: string, topShare: number) =>
       `Les dépenses fixes ne portent pas de catégorie — elles sont totalisées par nom. Le ${topName} représente à lui seul ${topShare} % du total annuel des récurrents.`,
+    tooltip: {
+      row: (monthly: string, day: number) => `${monthly} €/mois · prélevé le ${day}`,
+      drawn:
+        "Estimation : une ligne est comptée prélevée si son jour de prélèvement (jour du mois de la date de début) est passé.",
+    },
   },
   heatmap: {
     title: "Carte de chaleur — quotidienne",
@@ -87,6 +108,12 @@ const statistics = {
       common: "courantes",
       intense: "intenses",
       exceptional: "exceptionnelles",
+    },
+    tooltip: {
+      noSpend: "Aucune dépense",
+      exceptionalLead: "Exceptionnel",
+      exceptional: (label: string, amount: string) => `${label} · ${amount} €`,
+      distSegment: (n: number, label: string, pct: string) => `${n} journées ${label} · ${pct} %`,
     },
   },
 };

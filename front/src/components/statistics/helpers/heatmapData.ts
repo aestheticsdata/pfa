@@ -7,9 +7,28 @@ import type { DailyStat } from "@src/schemas/stats";
 export type HeatmapLevel = "empty" | "future" | "lvl-0" | "lvl-1" | "lvl-2" | "lvl-3" | "lvl-4" | "lvl-neg";
 export type FilledLevel = Exclude<HeatmapLevel, "future" | "empty">;
 
+export interface HeatmapCellExceptional {
+  label: string;
+  /** Exceptional purchase amount in euros. */
+  amount: number;
+}
+
+export interface HeatmapCell {
+  /** Local calendar date, YYYY-MM-DD. */
+  date: string;
+  /** The day's regular spend total in euros; 0 when the day has no spending. */
+  amount: number;
+  /** Colour band for the day (lvl-neg on an exceptional day). */
+  level: FilledLevel;
+  /** Exceptional purchases on this day, biggest first; empty when none. */
+  exceptionals: HeatmapCellExceptional[];
+}
+
 export interface HeatmapModel {
   /** [dow 0=Mon..6=Sun][week 0..weeks-1]; "empty" = out-of-year padding, "future" = not yet reached. */
   rows: HeatmapLevel[][];
+  /** Per-slot tooltip meta, same [dow][week] indexing as `rows`; null for empty/future slots. */
+  cells: (HeatmapCell | null)[][];
   /** Number of week-columns this year actually spans (52–54, so the grid matches the calendar). */
   weeks: number;
   counts: Record<FilledLevel, number>;
@@ -79,9 +98,15 @@ export const buildHeatmap = (
     totalByDate.set(day.date, (totalByDate.get(day.date) ?? 0) + day.total);
   }
 
-  const exceptionalDates = new Set<string>();
+  const exceptionalsByDate = new Map<string, HeatmapCellExceptional[]>();
   for (const item of exceptionals) {
-    exceptionalDates.add(item.date.slice(0, 10));
+    const iso = item.date.slice(0, 10);
+    const list = exceptionalsByDate.get(iso) ?? [];
+    list.push({ label: item.label, amount: Number(item.amount) });
+    exceptionalsByDate.set(iso, list);
+  }
+  for (const list of exceptionalsByDate.values()) {
+    list.sort((a, b) => b.amount - a.amount);
   }
 
   // Colour scale + busiest day: the heaviest realized, non-exceptional day.
@@ -90,7 +115,7 @@ export const buildHeatmap = (
   let scaleMax = 0;
   let busiest: { amount: number; date: string } | null = null;
   for (const [date, total] of totalByDate) {
-    if (date > lastRealizedIso || exceptionalDates.has(date)) {
+    if (date > lastRealizedIso || exceptionalsByDate.has(date)) {
       continue;
     }
     if (total > scaleMax) {
@@ -104,6 +129,7 @@ export const buildHeatmap = (
   const firstOffset = mondayDow(new Date(year, 0, 1));
   const weeks = Math.floor((daysInYear - 1 + firstOffset) / 7) + 1;
   const rows: HeatmapLevel[][] = Array.from({ length: 7 }, () => Array<HeatmapLevel>(weeks).fill("empty"));
+  const cells: (HeatmapCell | null)[][] = Array.from({ length: 7 }, () => Array<HeatmapCell | null>(weeks).fill(null));
   const realizedLevels: FilledLevel[] = []; // chronological, for counts + streak
 
   for (let doy = 1; doy <= daysInYear; doy++) {
@@ -117,9 +143,12 @@ export const buildHeatmap = (
     }
 
     const iso = isoOf(date);
-    const level: FilledLevel = exceptionalDates.has(iso) ? "lvl-neg" : bandFor(totalByDate.get(iso) ?? 0, scaleMax);
+    const dayExceptionals = exceptionalsByDate.get(iso) ?? [];
+    const amount = totalByDate.get(iso) ?? 0;
+    const level: FilledLevel = dayExceptionals.length > 0 ? "lvl-neg" : bandFor(amount, scaleMax);
     realizedLevels.push(level);
     rows[row][col] = level;
+    cells[row][col] = { date: iso, amount, level, exceptionals: dayExceptionals };
   }
 
   const counts = emptyCounts();
@@ -140,7 +169,7 @@ export const buildHeatmap = (
     .sort((a, b) => Number(b.amount) - Number(a.amount))
     .map((item) => item.label);
 
-  return { rows, weeks, counts, streak: best, scaleMax, busiest, exceptionalLabels, realizedDays };
+  return { rows, cells, weeks, counts, streak: best, scaleMax, busiest, exceptionalLabels, realizedDays };
 };
 
 /** Month labels positioned at the grid column of each month's first day. */

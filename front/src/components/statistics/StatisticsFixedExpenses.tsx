@@ -9,6 +9,7 @@ import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { MeterBar } from "@components/shared/MeterBar";
 import { Overline } from "@components/shared/Overline";
+import { CursorTooltip, useCursorHover } from "@lib/dataviz";
 import { euro, splitAmount } from "@lib/format";
 import statistics from "@text/statistics";
 import format from "date-fns/format";
@@ -61,6 +62,7 @@ const Stat = ({
 /** "Dépenses fixes" — recurrings annualised, with per-line share and the
  *  year-to-date drawn amount. */
 const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesProps) => {
+  const rowTip = useCursorHover<{ monthly: string; day: number }>();
   if (recurrings.length === 0) return null;
 
   const { fixedExpenses: t } = statistics;
@@ -114,7 +116,15 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
               className="flex flex-col gap-2"
             >
               <div className="flex items-baseline gap-2.5 text-sm">
-                <span className="text-ink">{r.label}</span>
+                <span
+                  className="text-ink"
+                  role="img"
+                  aria-label={r.label}
+                  onMouseMove={rowTip.move({ monthly: euro(Number(r.amount)), day: chargeDay(r) })}
+                  onMouseLeave={rowTip.clear}
+                >
+                  {r.label}
+                </span>
                 <span className="num ml-auto font-medium text-ink">
                   {euro(annual)} €<small className="ml-1.5 text-2xs font-normal text-ink-4">{share}%</small>
                 </span>
@@ -130,6 +140,10 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
       </div>
 
       <p className="mt-5 border-t border-line-soft pt-4.5 text-xs text-ink-4">{t.note(list[0].label, topShare)}</p>
+
+      <CursorTooltip point={rowTip.hover}>
+        {rowTip.hover ? t.tooltip.row(rowTip.hover.data.monthly, rowTip.hover.data.day) : null}
+      </CursorTooltip>
     </GlowCard>
   );
 };
