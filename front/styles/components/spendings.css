@@ -296,10 +296,17 @@
   font-weight: 400;
   font-size: 13px;
 }
-.sp-day-total.over {
+.sp-day-total.warn {
+  color: var(--warn);
+}
+.sp-day-total.warn .cur {
+  color: var(--warn);
+  opacity: 0.7;
+}
+.sp-day-total.danger {
   color: var(--neg);
 }
-.sp-day-total.over .cur {
+.sp-day-total.danger .cur {
   color: var(--neg);
   opacity: 0.7;
 }

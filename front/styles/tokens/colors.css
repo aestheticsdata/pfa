@@ -68,6 +68,10 @@
   --bar-fill:      linear-gradient(90deg, var(--accent-d), var(--accent-strong));
   --neg:           oklch(0.72 0.17 25);
   --neg-bg:        oklch(0.72 0.17 25 / 0.12);
+  /* Warn (amber) — the middle "over budget but not alarming" step, between the
+     accent green and --neg red (Dépenses overspend indicators, COS-34/COS-36) */
+  --warn:          oklch(0.80 0.15 70);
+  --warn-bg:       oklch(0.80 0.15 70 / 0.12);
 
   /* Danger — solid delete button + inline confirm affordance */
   --danger-solid:       oklch(0.55 0.18 25); /* solid delete-button fill */
@@ -168,6 +172,8 @@
   --color-accent-d: var(--accent-d);
   --color-accent-bg: var(--accent-bg);
   --color-neg: var(--neg);
+  --color-warn: var(--warn);
+  --color-warn-bg: var(--warn-bg);
   --color-danger-solid: var(--danger-solid);
   --color-on-danger: var(--on-danger);
   --color-danger-surface: var(--danger-surface);

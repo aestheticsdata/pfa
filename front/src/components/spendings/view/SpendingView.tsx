@@ -140,6 +140,10 @@ const SpendingView = () => {
   // in the month (today included). Shared with the Dashboard "reste à vivre" so
   // the two always match; only rendered on today's card (see SpendingDayCard).
   const dailyBudget = dashboardQuery.data ? dailyRemainingBudget(remaining, now) : null;
+  // Threshold for each day-card total colour (COS-34): the weekly ceiling split
+  // over the number of cards actually shown (not always 7). The same ceiling the
+  // weekly "vs plafond" widget uses, so day and week colours stay consistent.
+  const ceilingPerDay = weeklyCeiling != null && groups.length > 0 ? weeklyCeiling / groups.length : null;
 
   const grand = weekTotal || 1;
   const breakdownRows: BreakdownRow[] = categoryAgg.map((c) => ({
@@ -204,6 +208,7 @@ const SpendingView = () => {
               items={group.items}
               total={group.total}
               dailyBudget={dailyBudget}
+              ceilingPerDay={ceilingPerDay}
               isToday={isSameDay(range[i], now)}
               month={month}
               selectedCategory={selectedCategory}
