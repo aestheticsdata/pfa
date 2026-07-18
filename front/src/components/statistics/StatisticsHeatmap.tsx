@@ -4,11 +4,16 @@ import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
 import { buildHeatmap, monthColumns } from "@components/statistics/helpers/heatmapData";
-import { euro0 } from "@lib/format";
+import { CursorTooltip, useCursorHover } from "@lib/dataviz";
+import { euro0, pct1 } from "@lib/format";
+import { cn } from "@lib/utils";
 import common from "@text/common";
 import statistics from "@text/statistics";
+import format from "date-fns/format";
+import fr from "date-fns/locale/fr";
+import parseISO from "date-fns/parseISO";
 
-import type { FilledLevel } from "@components/statistics/helpers/heatmapData";
+import type { FilledLevel, HeatmapCell } from "@components/statistics/helpers/heatmapData";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { DailyStat } from "@src/schemas/stats";
 
@@ -43,9 +48,27 @@ const DIST_BG: Record<FilledLevel, string> = {
 
 const FILLED_ORDER: FilledLevel[] = ["lvl-0", "lvl-1", "lvl-2", "lvl-3", "lvl-4", "lvl-neg"];
 
+// The hover tooltip wears the hovered cell/segment colour. CELL_BG/DIST_BG use
+// alpha for the mid greens, so composite over the base surface to stay opaque;
+// TIP_FG keeps the text readable on each level (dark on the light bands).
+const tipBg = (color: string) => `linear-gradient(${color}, ${color}), var(--surface-base)`;
+// A slightly lifted tint of the cell colour: enough to separate the tooltip
+// from the page, subtle enough not to read as a bright ring on dark cells.
+const tipBorder = (color: string) => `color-mix(in oklch, ${color} 82%, var(--ink) 18%)`;
+const TIP_FG: Record<FilledLevel, string> = {
+  "lvl-0": "var(--ink)",
+  "lvl-1": "var(--ink)",
+  "lvl-2": "var(--ink)",
+  "lvl-3": "var(--surface-base)",
+  "lvl-4": "var(--surface-base)",
+  "lvl-neg": "var(--surface-base)",
+};
+
 /** "Carte de chaleur — quotidienne" — daily-spend intensity calendar (COS-45). */
 const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapProps) => {
   const { heatmap: t } = statistics;
+  const cellTip = useCursorHover<HeatmapCell>();
+  const distributionTip = useCursorHover<FilledLevel>();
 
   // Not yet loaded (or the request failed): show a placeholder rather than an
   // all-zero grid, which would read as a real, confident "sober all year".
@@ -64,7 +87,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
     );
   }
 
-  const { rows, weeks, counts, streak, scaleMax, busiest, exceptionalLabels, realizedDays } = buildHeatmap(
+  const { rows, cells, weeks, counts, streak, scaleMax, busiest, exceptionalLabels, realizedDays } = buildHeatmap(
     year,
     now,
     days,
@@ -80,7 +103,18 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
     { label: t.dist.intense, n: counts["lvl-4"], color: "var(--accent-strong)" },
     { label: t.dist.exceptional, n: counts["lvl-neg"], color: "var(--exc)" },
   ];
+  // Each colour band maps to its distribution group, so a hovered bar segment
+  // (two bands share a group) explains itself.
+  const groupForLevel: Record<FilledLevel, (typeof distGroups)[number]> = {
+    "lvl-0": distGroups[0],
+    "lvl-1": distGroups[0],
+    "lvl-2": distGroups[1],
+    "lvl-3": distGroups[1],
+    "lvl-4": distGroups[2],
+    "lvl-neg": distGroups[3],
+  };
   const peakLabels = exceptionalLabels.slice(0, 3).join(" · ");
+  const distShare = (n: number) => pct1(realizedDays > 0 ? (n / realizedDays) * 100 : 0);
 
   return (
     <GlowCard
@@ -108,10 +142,26 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
           ))}
         </div>
 
-        {/* grid */}
+        {/* grid — one hover handler on the container resolves the cell by position
+            (like StackedBar), so the tooltip follows the cursor across the grid. */}
         <div
           className="grid gap-0.5"
           style={{ gridTemplateColumns: gridColumns }}
+          role="img"
+          aria-label={t.title}
+          onMouseMove={(e) => {
+            const el = (e.target as HTMLElement).closest<HTMLElement>("[data-week]");
+            if (!el) {
+              return; // over a gap or the day-of-week label — keep the current tooltip
+            }
+            const cell = cells[Number(el.dataset.dow)]?.[Number(el.dataset.week)];
+            if (cell) {
+              cellTip.show(e.clientX, e.clientY, cell);
+            } else {
+              cellTip.clear(); // future / out-of-year cell
+            }
+          }}
+          onMouseLeave={cellTip.clear}
         >
           {rows.map((weekArr, dow) => (
             <div
@@ -120,20 +170,25 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
               className="contents"
             >
               <span className="num self-center pr-1 text-right text-3xs leading-3 text-ink-4">{DOW_LABELS[dow]}</span>
-              {weekArr.map((lvl, week) => (
-                <span
-                  // biome-ignore lint/suspicious/noArrayIndexKey: fixed 53-week grid, positional cell never reorders
-                  key={week}
-                  className="aspect-square min-h-[9px] rounded-xs"
-                  style={
-                    lvl === "future"
-                      ? { background: "transparent", border: "1px dashed var(--line)" }
-                      : lvl === "empty"
-                        ? { background: "transparent" }
-                        : { background: CELL_BG[lvl] }
-                  }
-                />
-              ))}
+              {weekArr.map((lvl, week) => {
+                const filled = lvl !== "future" && lvl !== "empty";
+                const style =
+                  lvl === "future"
+                    ? { background: "transparent", border: "1px dashed var(--line)" }
+                    : lvl === "empty"
+                      ? { background: "transparent" }
+                      : { background: CELL_BG[lvl] };
+                return (
+                  <span
+                    // biome-ignore lint/suspicious/noArrayIndexKey: fixed week grid, positional cell never reorders
+                    key={week}
+                    className={cn("aspect-square min-h-[9px] rounded-xs", filled && "transition hover:brightness-150")}
+                    style={style}
+                    data-dow={dow}
+                    data-week={week}
+                  />
+                );
+              })}
             </div>
           ))}
         </div>
@@ -169,12 +224,25 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
       <div className="mt-auto flex flex-col gap-5.5 border-t border-line-soft pt-5.5">
         <div>
           <div className="num mb-2.5 text-2xs uppercase tracking-caps text-ink-4">{t.distributionTitle}</div>
-          <div className="flex h-4 gap-0.5 overflow-hidden rounded-sm">
+          <div
+            className="flex h-4 gap-0.5 overflow-hidden rounded-sm"
+            role="img"
+            aria-label={t.distributionTitle}
+            onMouseMove={(e) => {
+              const el = (e.target as HTMLElement).closest<HTMLElement>("[data-level]");
+              if (el) {
+                distributionTip.show(e.clientX, e.clientY, el.dataset.level as FilledLevel);
+              }
+              // over a gap — keep the current tooltip; onMouseLeave clears
+            }}
+            onMouseLeave={distributionTip.clear}
+          >
             {FILLED_ORDER.filter((lvl) => counts[lvl] > 0).map((lvl) => (
               <span
                 key={lvl}
                 className="block h-full rounded-xs"
                 style={{ background: DIST_BG[lvl], flexGrow: counts[lvl], flexBasis: 0 }}
+                data-level={lvl}
               />
             ))}
           </div>
@@ -214,6 +282,44 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
           </div>
         </div>
       </div>
+
+      <CursorTooltip
+        point={cellTip.hover}
+        background={cellTip.hover ? tipBg(CELL_BG[cellTip.hover.data.level]) : undefined}
+        color={cellTip.hover ? TIP_FG[cellTip.hover.data.level] : undefined}
+        borderColor={cellTip.hover ? tipBorder(CELL_BG[cellTip.hover.data.level]) : undefined}
+      >
+        {cellTip.hover && (
+          <>
+            <div className="font-medium capitalize">
+              {format(parseISO(cellTip.hover.data.date), "EEE d MMM", { locale: fr })}
+            </div>
+            <div>{cellTip.hover.data.amount > 0 ? `${euro0(cellTip.hover.data.amount)} €` : t.tooltip.noSpend}</div>
+            {cellTip.hover.data.exceptionals.length > 0 && (
+              <div className="mt-1">
+                <div className="font-medium">{t.tooltip.exceptionalLead}</div>
+                {cellTip.hover.data.exceptionals.map((e) => (
+                  <div key={`${e.label}-${e.amount}`}>{t.tooltip.exceptional(e.label, euro0(e.amount))}</div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </CursorTooltip>
+
+      <CursorTooltip
+        point={distributionTip.hover}
+        background={distributionTip.hover ? tipBg(DIST_BG[distributionTip.hover.data]) : undefined}
+        color={distributionTip.hover ? TIP_FG[distributionTip.hover.data] : undefined}
+        borderColor={distributionTip.hover ? tipBorder(DIST_BG[distributionTip.hover.data]) : undefined}
+      >
+        {distributionTip.hover &&
+          t.tooltip.distSegment(
+            groupForLevel[distributionTip.hover.data].n,
+            groupForLevel[distributionTip.hover.data].label,
+            distShare(groupForLevel[distributionTip.hover.data].n),
+          )}
+      </CursorTooltip>
     </GlowCard>
   );
 };

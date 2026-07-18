@@ -7,7 +7,7 @@ import GlowCard from "@components/shared/GlowCard";
 import { Overline } from "@components/shared/Overline";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
 import { yearTotal } from "@components/statistics/helpers/statisticsData";
-import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
+import { AnimatedNumber, CursorTooltip, ProgressTrack, useCursorHover } from "@lib/dataviz";
 import { euro, euro0 } from "@lib/format";
 import statisticsText from "@text/statistics";
 import format from "date-fns/format";
@@ -36,6 +36,7 @@ const StatisticsForecast = ({
   showExceptionals,
 }: StatisticsForecastProps) => {
   const [now] = useState(() => new Date());
+  const projectionTip = useCursorHover();
   const { forecast: t } = statisticsText;
   const data = statistics?.data;
 
@@ -86,7 +87,13 @@ const StatisticsForecast = ({
         </div>
       </div>
 
-      <div className="flex flex-col items-start gap-1 sm:items-end sm:text-right">
+      <div
+        className="flex flex-col items-start gap-1 sm:items-end sm:text-right"
+        role="img"
+        aria-label={t.projectionTitle}
+        onMouseMove={projectionTip.move()}
+        onMouseLeave={projectionTip.clear}
+      >
         <Overline>{t.projectionTitle}</Overline>
         <AnimatedNumber
           value={projection}
@@ -101,6 +108,13 @@ const StatisticsForecast = ({
           </span>{" "}
           {t.vsCompare(compareYear, euro0(compareTotal))}
         </span>
+        <CursorTooltip point={projectionTip.hover}>
+          {projectionTip.hover
+            ? isCurrent
+              ? t.tooltip.projectionModel(euro(perDay), daysInYear)
+              : t.tooltip.projectionActual
+            : null}
+        </CursorTooltip>
       </div>
     </GlowCard>
   );

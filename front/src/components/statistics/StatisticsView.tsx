@@ -71,6 +71,7 @@ const StatisticsView = () => {
         color: c.color,
         value: c.value,
         deltaPct: prev > 0 ? ((c.value - prev) / prev) * 100 : null,
+        compareValue: prev,
       };
     });
 
