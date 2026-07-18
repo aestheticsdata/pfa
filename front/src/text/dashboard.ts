@@ -2,6 +2,10 @@ const dashboard = {
   monthSelector: {
     prevMonth: "Mois précédent",
     nextMonth: "Mois suivant",
+    chooseMonth: (month: string) => (month ? `Choisir le mois, actuellement ${month}` : "Choisir le mois"),
+    prevYear: "Année précédente",
+    nextYear: "Année suivante",
+    goToMonth: (month: string) => `Aller à ${month}`,
   },
   budgetHero: {
     remainingLabel: (month: string) => `${month} — budget restant`,
