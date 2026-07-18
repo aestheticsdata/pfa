@@ -22,3 +22,34 @@ export const wedgePath = (cx: number, cy: number, r: number, startAngle: number,
   const largeArc = endAngle - startAngle <= 180 ? "0" : "1";
   return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 0 ${end.x} ${end.y} Z`;
 };
+
+/**
+ * Closed annular-sector ("ring segment") outline from `startAngle` to `endAngle`
+ * (degrees, clockwise from 12 o'clock), between `rInner` and `rOuter`. Traces the
+ * band's whole perimeter — outer arc, end cap, inner arc, start cap — so a
+ * `fill="none"` stroke draws it as a hollow, see-through band: the Donut's empty
+ * "remaining" arc, the same width as the solid arcs but only outlined (dotted).
+ * The path length lives in its geometry, leaving `stroke-dasharray` free for the
+ * dot pattern.
+ */
+export const annularSectorPath = (
+  cx: number,
+  cy: number,
+  rInner: number,
+  rOuter: number,
+  startAngle: number,
+  endAngle: number,
+): string => {
+  const oStart = polarToCartesian(cx, cy, rOuter, startAngle);
+  const oEnd = polarToCartesian(cx, cy, rOuter, endAngle);
+  const iEnd = polarToCartesian(cx, cy, rInner, endAngle);
+  const iStart = polarToCartesian(cx, cy, rInner, startAngle);
+  const largeArc = endAngle - startAngle > 180 ? "1" : "0";
+  return [
+    `M ${oStart.x} ${oStart.y}`,
+    `A ${rOuter} ${rOuter} 0 ${largeArc} 1 ${oEnd.x} ${oEnd.y}`,
+    `L ${iEnd.x} ${iEnd.y}`,
+    `A ${rInner} ${rInner} 0 ${largeArc} 0 ${iStart.x} ${iStart.y}`,
+    "Z",
+  ].join(" ");
+};
