@@ -160,6 +160,7 @@ const BudgetHero = () => {
           <Donut
             key={monthKey}
             segments={segments}
+            capacity={initialAmount}
             size={168}
             thickness={7}
             animate
@@ -175,10 +176,10 @@ const BudgetHero = () => {
           </Donut>
           <div className="flex gap-4 text-2xs text-ink-3">
             <LegendItem swatch={<span className="size-2 rounded-xs bg-accent-d" />}>
-              {t.fixed} <span className="num text-ink-2">{euro0(fixed)}</span>
+              {t.fixed} <span className="num text-ink-2">{euro0(fixed)} €</span>
             </LegendItem>
             <LegendItem swatch={<span className="size-2 rounded-xs bg-accent-strong" />}>
-              {t.variables} <span className="num text-ink-2">{euro0(variable)}</span>
+              {t.variables} <span className="num text-ink-2">{euro0(variable)} €</span>
             </LegendItem>
           </div>
         </div>
