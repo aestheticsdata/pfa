@@ -4,8 +4,27 @@ import getDayOfYear from "date-fns/getDayOfYear";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { DailyStat } from "@src/schemas/stats";
 
-export type HeatmapLevel = "empty" | "future" | "lvl-0" | "lvl-1" | "lvl-2" | "lvl-3" | "lvl-4" | "lvl-neg";
-export type FilledLevel = Exclude<HeatmapLevel, "future" | "empty">;
+/**
+ * The single source of truth for heat-map intensity levels: the `empty`/`future`
+ * grid states, the spend bands `lvl-0`…`lvl-4`, and the `lvl-neg` exceptional day.
+ * Keys drive counts and styling maps; values are the CSS band identifiers.
+ */
+export const LEVEL = {
+  EMPTY: "empty",
+  FUTURE: "future",
+  ZERO: "lvl-0",
+  ONE: "lvl-1",
+  TWO: "lvl-2",
+  THREE: "lvl-3",
+  FOUR: "lvl-4",
+  NEG: "lvl-neg",
+} as const;
+
+export type HeatmapLevel = (typeof LEVEL)[keyof typeof LEVEL];
+export type FilledLevel = Exclude<HeatmapLevel, typeof LEVEL.EMPTY | typeof LEVEL.FUTURE>;
+
+/** Spend bands in ascending order, indexed by the 0–4 band number (`lvl-neg` excluded). */
+export const SPEND_BANDS = [LEVEL.ZERO, LEVEL.ONE, LEVEL.TWO, LEVEL.THREE, LEVEL.FOUR] as const;
 
 export interface HeatmapCellExceptional {
   label: string;
@@ -45,12 +64,12 @@ export interface HeatmapModel {
 }
 
 const emptyCounts = (): Record<FilledLevel, number> => ({
-  "lvl-0": 0,
-  "lvl-1": 0,
-  "lvl-2": 0,
-  "lvl-3": 0,
-  "lvl-4": 0,
-  "lvl-neg": 0,
+  [LEVEL.ZERO]: 0,
+  [LEVEL.ONE]: 0,
+  [LEVEL.TWO]: 0,
+  [LEVEL.THREE]: 0,
+  [LEVEL.FOUR]: 0,
+  [LEVEL.NEG]: 0,
 });
 
 /** Monday-based day of week: 0 = Monday … 6 = Sunday (date-fns getDay is 0=Sunday). */
@@ -69,10 +88,10 @@ const isoOf = (date: Date): string => {
  */
 export const bandFor = (amount: number, max: number): FilledLevel => {
   if (amount <= 0 || max <= 0) {
-    return "lvl-0";
+    return LEVEL.ZERO;
   }
   const band = Math.min(4, Math.max(1, Math.ceil((amount / max) * 4)));
-  return `lvl-${band}` as FilledLevel;
+  return SPEND_BANDS[band];
 };
 
 /**
@@ -128,7 +147,7 @@ export const buildHeatmap = (
   // sized to the exact number of columns this year spans (52–54).
   const firstOffset = mondayDow(new Date(year, 0, 1));
   const weeks = Math.floor((daysInYear - 1 + firstOffset) / 7) + 1;
-  const rows: HeatmapLevel[][] = Array.from({ length: 7 }, () => Array<HeatmapLevel>(weeks).fill("empty"));
+  const rows: HeatmapLevel[][] = Array.from({ length: 7 }, () => Array<HeatmapLevel>(weeks).fill(LEVEL.EMPTY));
   const cells: (HeatmapCell | null)[][] = Array.from({ length: 7 }, () => Array<HeatmapCell | null>(weeks).fill(null));
   const realizedLevels: FilledLevel[] = []; // chronological, for counts + streak
 
@@ -138,14 +157,14 @@ export const buildHeatmap = (
     const row = mondayDow(date);
 
     if (doy > realizedDays) {
-      rows[row][col] = "future";
+      rows[row][col] = LEVEL.FUTURE;
       continue;
     }
 
     const iso = isoOf(date);
     const dayExceptionals = exceptionalsByDate.get(iso) ?? [];
     const amount = totalByDate.get(iso) ?? 0;
-    const level: FilledLevel = dayExceptionals.length > 0 ? "lvl-neg" : bandFor(amount, scaleMax);
+    const level: FilledLevel = dayExceptionals.length > 0 ? LEVEL.NEG : bandFor(amount, scaleMax);
     realizedLevels.push(level);
     rows[row][col] = level;
     cells[row][col] = { date: iso, amount, level, exceptionals: dayExceptionals };
@@ -156,7 +175,7 @@ export const buildHeatmap = (
   let best = 0;
   for (const level of realizedLevels) {
     counts[level] += 1;
-    if (level === "lvl-0" || level === "lvl-1") {
+    if (level === LEVEL.ZERO || level === LEVEL.ONE) {
       run += 1;
       best = Math.max(best, run);
     } else {
