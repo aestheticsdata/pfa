@@ -19,6 +19,3 @@ layer(base);
 /* Component styles */
 @import './components/chrome.css';
 @import './components/daypicker.css';
-@import './components/spendings.css';
-@import './components/exceptionals.css';
-@import './components/category-detail.css';

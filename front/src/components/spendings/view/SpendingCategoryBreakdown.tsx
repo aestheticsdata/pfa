@@ -94,7 +94,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
   return (
     <GlowCard
       as="section"
-      className="sp-catrep"
+      className="px-5.5 py-3.5"
     >
       {/* Compact margins (mb-3 / mb-2.5): this pane lives in the sticky zone,
           where height is taken directly from the day cards (COS-101). */}
@@ -121,11 +121,12 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
         }
       />
 
-      <div className="sp-cat-bar mb-2.5">
+      <div className="mb-2.5 flex h-2 overflow-hidden rounded-sm">
         {rows.map((r) => (
           <span
             key={r.key}
             role="img"
+            className="block h-full"
             aria-label={`${r.name} : ${r.pct.toFixed(1).replace(".", ",")} % (${euro(r.total)} €)`}
             style={{ width: `${r.pct.toFixed(2)}%`, background: r.color }}
             onMouseMove={(e) => setHover({ target: r, x: e.clientX, y: e.clientY })}
@@ -136,34 +137,42 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
 
       <div
         id={DETAIL_ID}
-        className="sp-cat-collapse"
+        className="grid grid-rows-[1fr] [transition:grid-template-rows_0.24s_ease,opacity_0.2s_ease] data-[collapsed=true]:grid-rows-[0fr] data-[collapsed=true]:opacity-0 motion-reduce:transition-none"
         data-collapsed={collapsed}
       >
         <div
-          className="sp-cat-collapse-inner"
+          className="min-h-0 overflow-hidden"
           inert={collapsed}
         >
-          <div className="sp-cat-list">
+          {/* min(400px,100%) so a narrow phone gets ONE full-width column instead of a
+              forced 400px track overflowing to the right. */}
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(400px,100%),1fr))] gap-x-11 max-[520px]:grid-cols-1 max-[520px]:gap-x-0">
             {rows.map((r) => (
               <button
                 key={r.key}
                 type="button"
                 onClick={() => setSelected(r)}
-                className="sp-cat-row w-full text-left"
+                className="-mx-2 grid w-full cursor-pointer grid-cols-[14px_minmax(0,1fr)_76px_88px_60px] items-center gap-3 rounded-md border-b border-line-soft px-2 py-1.75 text-left text-sm transition-colors duration-100 hover:bg-surface-hi max-[520px]:grid-cols-[14px_minmax(0,1fr)_auto] max-[520px]:grid-rows-[auto_auto] max-[520px]:gap-x-2.5 max-[520px]:gap-y-0.75"
               >
                 <span
-                  className="size-2 rounded-xs"
+                  className="size-2 rounded-xs max-[520px]:row-span-2 max-[520px]:row-start-1 max-[520px]:self-center"
                   style={{ background: r.color }}
                 />
-                <span className="flex min-w-0 items-baseline gap-2">
+                <span className="flex min-w-0 items-baseline gap-2 max-[520px]:col-start-2 max-[520px]:row-start-1">
                   <span className="truncate capitalize text-ink">{r.name}</span>
                   <span className="num shrink-0 rounded-full border border-line-soft bg-surface-base px-1.75 text-2xs leading-normal text-ink-3">
                     {r.count}
                   </span>
                 </span>
-                <span className="num text-right text-ink-2">{r.pct.toFixed(1).replace(".", ",")} %</span>
-                <span className="num text-right text-ink">{euro(r.total)} €</span>
-                <Trend name={r.name} />
+                <span className="num text-right text-ink-2 max-[520px]:col-start-2 max-[520px]:row-start-2 max-[520px]:justify-self-start max-[520px]:text-left">
+                  {r.pct.toFixed(1).replace(".", ",")} %
+                </span>
+                <span className="num text-right text-ink max-[520px]:col-start-3 max-[520px]:row-start-1 max-[520px]:justify-self-end">
+                  {euro(r.total)} €
+                </span>
+                <span className="max-[520px]:col-start-3 max-[520px]:row-start-2 max-[520px]:justify-self-end">
+                  <Trend name={r.name} />
+                </span>
               </button>
             ))}
           </div>

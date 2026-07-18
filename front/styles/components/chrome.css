@@ -180,3 +180,23 @@
 .charts-categories-list::-webkit-scrollbar-thumb:hover {
   background-color: rgba(107, 114, 128, 0.8);
 }
+
+/* Thin scrollbar for the Dépenses day-card transaction lists (::-webkit-scrollbar
+   has no Tailwind utility, so it stays here as obligatoire). Layout (flex/overflow/
+   padding) lives on the element in Tailwind. */
+.pfa-scroll-thin {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.pfa-scroll-thin::-webkit-scrollbar {
+  width: 7px;
+  background: transparent;
+}
+.pfa-scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 4px;
+}
+.pfa-scroll-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-5);
+}
