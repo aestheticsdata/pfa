@@ -3,7 +3,7 @@
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
-import { buildHeatmap, monthColumns } from "@components/statistics/helpers/heatmapData";
+import { buildHeatmap, LEVEL, monthColumns, SPEND_BANDS } from "@components/statistics/helpers/heatmapData";
 import { CursorTooltip, useCursorHover } from "@lib/dataviz";
 import { euro0, pct1 } from "@lib/format";
 import { cn } from "@lib/utils";
@@ -29,24 +29,24 @@ interface StatisticsHeatmapProps {
 const DOW_LABELS = ["lun", "", "mer", "", "ven", "", "dim"];
 
 const CELL_BG: Record<FilledLevel, string> = {
-  "lvl-0": "oklch(0.20 0.006 250)",
-  "lvl-1": "oklch(0.40 0.05 148 / 0.4)",
-  "lvl-2": "oklch(0.55 0.08 148 / 0.6)",
-  "lvl-3": "oklch(0.70 0.10 148 / 0.8)",
-  "lvl-4": "var(--accent-strong)",
-  "lvl-neg": "var(--exc)",
+  [LEVEL.ZERO]: "oklch(0.20 0.006 250)",
+  [LEVEL.ONE]: "oklch(0.40 0.05 148 / 0.4)",
+  [LEVEL.TWO]: "oklch(0.55 0.08 148 / 0.6)",
+  [LEVEL.THREE]: "oklch(0.70 0.10 148 / 0.8)",
+  [LEVEL.FOUR]: "var(--accent-strong)",
+  [LEVEL.NEG]: "var(--exc)",
 };
 
 const DIST_BG: Record<FilledLevel, string> = {
-  "lvl-0": "oklch(0.20 0.006 250)",
-  "lvl-1": "oklch(0.40 0.05 148 / 0.45)",
-  "lvl-2": "oklch(0.55 0.08 148 / 0.7)",
-  "lvl-3": "oklch(0.70 0.10 148 / 0.85)",
-  "lvl-4": "var(--accent-strong)",
-  "lvl-neg": "var(--exc)",
+  [LEVEL.ZERO]: "oklch(0.20 0.006 250)",
+  [LEVEL.ONE]: "oklch(0.40 0.05 148 / 0.45)",
+  [LEVEL.TWO]: "oklch(0.55 0.08 148 / 0.7)",
+  [LEVEL.THREE]: "oklch(0.70 0.10 148 / 0.85)",
+  [LEVEL.FOUR]: "var(--accent-strong)",
+  [LEVEL.NEG]: "var(--exc)",
 };
 
-const FILLED_ORDER: FilledLevel[] = ["lvl-0", "lvl-1", "lvl-2", "lvl-3", "lvl-4", "lvl-neg"];
+const FILLED_ORDER: FilledLevel[] = [...SPEND_BANDS, LEVEL.NEG];
 
 // The hover tooltip wears the hovered cell/segment colour. CELL_BG/DIST_BG use
 // alpha for the mid greens, so composite over the base surface to stay opaque;
@@ -56,12 +56,12 @@ const tipBg = (color: string) => `linear-gradient(${color}, ${color}), var(--sur
 // from the page, subtle enough not to read as a bright ring on dark cells.
 const tipBorder = (color: string) => `color-mix(in oklch, ${color} 82%, var(--ink) 18%)`;
 const TIP_FG: Record<FilledLevel, string> = {
-  "lvl-0": "var(--ink)",
-  "lvl-1": "var(--ink)",
-  "lvl-2": "var(--ink)",
-  "lvl-3": "var(--surface-base)",
-  "lvl-4": "var(--surface-base)",
-  "lvl-neg": "var(--surface-base)",
+  [LEVEL.ZERO]: "var(--ink)",
+  [LEVEL.ONE]: "var(--ink)",
+  [LEVEL.TWO]: "var(--ink)",
+  [LEVEL.THREE]: "var(--surface-base)",
+  [LEVEL.FOUR]: "var(--surface-base)",
+  [LEVEL.NEG]: "var(--surface-base)",
 };
 
 /** "Carte de chaleur — quotidienne" — daily-spend intensity calendar (COS-45). */
@@ -95,23 +95,23 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
   );
 
   const gridColumns = `16px repeat(${weeks}, minmax(0, 1fr))`;
-  const soberDays = counts["lvl-0"] + counts["lvl-1"];
-  const commonDays = counts["lvl-2"] + counts["lvl-3"];
+  const soberDays = counts[LEVEL.ZERO] + counts[LEVEL.ONE];
+  const commonDays = counts[LEVEL.TWO] + counts[LEVEL.THREE];
   const distGroups = [
     { label: t.dist.sober, n: soberDays, color: "oklch(0.45 0.06 148 / 0.7)" },
     { label: t.dist.common, n: commonDays, color: "oklch(0.70 0.10 148 / 0.85)" },
-    { label: t.dist.intense, n: counts["lvl-4"], color: "var(--accent-strong)" },
-    { label: t.dist.exceptional, n: counts["lvl-neg"], color: "var(--exc)" },
+    { label: t.dist.intense, n: counts[LEVEL.FOUR], color: "var(--accent-strong)" },
+    { label: t.dist.exceptional, n: counts[LEVEL.NEG], color: "var(--exc)" },
   ];
   // Each colour band maps to its distribution group, so a hovered bar segment
   // (two bands share a group) explains itself.
   const groupForLevel: Record<FilledLevel, (typeof distGroups)[number]> = {
-    "lvl-0": distGroups[0],
-    "lvl-1": distGroups[0],
-    "lvl-2": distGroups[1],
-    "lvl-3": distGroups[1],
-    "lvl-4": distGroups[2],
-    "lvl-neg": distGroups[3],
+    [LEVEL.ZERO]: distGroups[0],
+    [LEVEL.ONE]: distGroups[0],
+    [LEVEL.TWO]: distGroups[1],
+    [LEVEL.THREE]: distGroups[1],
+    [LEVEL.FOUR]: distGroups[2],
+    [LEVEL.NEG]: distGroups[3],
   };
   const peakLabels = exceptionalLabels.slice(0, 3).join(" · ");
   const distShare = (n: number) => pct1(realizedDays > 0 ? (n / realizedDays) * 100 : 0);
@@ -171,11 +171,11 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
             >
               <span className="num self-center pr-1 text-right text-3xs leading-3 text-ink-4">{DOW_LABELS[dow]}</span>
               {weekArr.map((lvl, week) => {
-                const filled = lvl !== "future" && lvl !== "empty";
+                const filled = lvl !== LEVEL.FUTURE && lvl !== LEVEL.EMPTY;
                 const style =
-                  lvl === "future"
+                  lvl === LEVEL.FUTURE
                     ? { background: "transparent", border: "1px dashed var(--line)" }
-                    : lvl === "empty"
+                    : lvl === LEVEL.EMPTY
                       ? { background: "transparent" }
                       : { background: CELL_BG[lvl] };
                 return (
@@ -197,7 +197,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
         <div className="num mt-4 flex items-center gap-2 text-2xs text-ink-4">
           <span>0 €</span>
           <span className="flex gap-0.5">
-            {(["lvl-0", "lvl-1", "lvl-2", "lvl-3", "lvl-4"] as FilledLevel[]).map((lvl) => (
+            {SPEND_BANDS.map((lvl) => (
               <span
                 key={lvl}
                 className="size-2.5 rounded-xs"
