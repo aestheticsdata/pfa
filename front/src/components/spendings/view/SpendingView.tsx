@@ -166,10 +166,15 @@ const SpendingView = () => {
   return (
     <div className="flex flex-col gap-5">
       {/* Search + category filter + summary + breakdown stay pinned under the app header while
-          the timeline scrolls (desktop only — see .sp-sticky-zone). Tighter
-          gap than the page flow (12px vs 20px): pinned chrome is denser than
-          scrolling content, and every pixel here is taken from the cards. */}
-      <div className="sp-sticky-zone flex flex-col gap-3">
+          the timeline scrolls (desktop only). Tighter gap than the page flow (12px vs 20px):
+          pinned chrome is denser, and every pixel here is taken from the cards.
+          The negative margins bleed the opaque band across the layout gutter (px-6, px-8 from
+          lg — keep in sync with PrivateLayout) so the today card's ring/glow that
+          paints outside its box stays visible beside the band; the matching padding puts the
+          content back, aligned with the header. `-mt-7` swallows the header's mb-7 and `pt-3`
+          re-adds the wanted 12px gap so it stays opaque once stuck (COS-101/104). The strip
+          above the header is masked app-wide by `.pfa-shell::before`. */}
+      <div className="flex flex-col gap-3 md:sticky md:top-[76px] md:z-30 md:-mx-6 md:-mt-7 md:bg-surface-base md:px-6 md:pt-3 md:shadow-sticky lg:-mx-8 lg:px-8">
         <SpendingToolbar
           search={search}
           onSearchChange={setSearch}
@@ -200,7 +205,7 @@ const SpendingView = () => {
       {isInitialLoading ? (
         <div className="grid place-items-center py-16 text-sm text-ink-4">{common.loading}</div>
       ) : (
-        <section className="sp-timeline">
+        <section className="grid grid-cols-1 items-start gap-4 min-[760px]:grid-cols-[repeat(auto-fill,minmax(500px,1fr))]">
           {groups.map((group, i) => (
             <SpendingDayCard
               key={group.dayOfMonth}

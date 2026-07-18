@@ -4,6 +4,7 @@ import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import overspendLevel from "@components/spendings/helpers/overspendLevel";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
+import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
 import useDaySort from "@components/spendings/view/helpers/useDaySort";
 import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
 import { euro } from "@lib/format";
@@ -45,10 +46,15 @@ const SortButton = ({
   return (
     <button
       type="button"
-      className={cn(active && "active")}
+      className={cn(
+        "inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.75 py-1.5 text-xs transition duration-100",
+        active
+          ? "border-elec bg-elec/12 text-ink"
+          : "border-line bg-surface-hi text-ink-2 hover:border-ink-4 hover:text-ink",
+      )}
       onClick={() => onSort(field)}
     >
-      {label} <span className="ar">{glyph}</span>
+      {label} <span className={cn("text-xs leading-none", active ? "text-elec" : "text-ink-4")}>{glyph}</span>
     </button>
   );
 };
@@ -136,22 +142,47 @@ const SpendingDayCard = ({
 
   return (
     <div
-      className={cn("sp-day", isToday && "sp-day--today")}
+      className={cn(
+        "flex h-125 flex-col overflow-hidden scroll-mt-42 rounded-2xl! min-[760px]:h-116 min-[768px]:scroll-mt-94",
+        isToday
+          ? "border border-elec bg-surface-elev shadow-[0_0_0_1px_var(--elec),0_16px_44px_oklch(0.72_0.15_230/0.24),inset_0_1px_0_oklch(1_0_0/0.06)]"
+          : "pfa-card",
+      )}
       data-sp-day={format(date, "yyyy-MM-dd")}
     >
-      <div className="sp-day-h">
-        <div className="sp-day-h-top">
-          <div className="sp-date">
+      <div
+        className={cn(
+          "shrink-0 border-b bg-[linear-gradient(180deg,oklch(1_0_0/0.045),oklch(1_0_0/0.022))] px-4.5 pt-3.75 pb-3.25",
+          isToday ? "border-elec/32" : "border-line",
+        )}
+      >
+        <div className="flex items-baseline justify-between gap-3">
+          <div className={cn("text-base font-semibold tracking-snug", isToday ? "text-elec" : "text-ink")}>
             {format(date, "dd MMM", { locale: fr })}
-            <span className="dow">{format(date, "EEEE", { locale: fr })}</span>
+            <span className={cn("ml-2 text-xs font-normal capitalize", isToday ? "text-elec/85" : "text-ink-4")}>
+              {format(date, "EEEE", { locale: fr })}
+            </span>
           </div>
-          <div className={cn("sp-day-total", level !== "normal" && level)}>
-            <span className="tl">{dayCard.total}</span>
+          <div
+            className={cn(
+              "whitespace-nowrap font-mono text-base font-medium tabular-nums",
+              level === "warn" ? "text-warn" : level === "danger" ? "text-neg" : "text-ink",
+            )}
+          >
+            <span className="mr-2 font-sans text-2xs font-medium tracking-widest text-ink-4">{dayCard.total}</span>
             {euro(displayTotal)}
-            <span className="cur"> €</span>
+            <span
+              className={cn(
+                "text-sm font-normal",
+                level === "warn" ? "text-warn/70" : level === "danger" ? "text-neg/70" : "text-ink-3",
+              )}
+            >
+              {" "}
+              €
+            </span>
           </div>
         </div>
-        <div className="sp-sort">
+        <div className="mt-3.25 flex flex-wrap gap-2">
           <SortButton
             field="label"
             label={sortItem.label}
@@ -176,16 +207,20 @@ const SpendingDayCard = ({
         </div>
       </div>
 
-      <div className="sp-day-body">
+      <div className="flex min-h-0 flex-auto flex-col px-4.5 pt-3.5 pb-4">
         {sorted.length > 0 ? (
           <>
             {dayCategories.length > 0 && (
-              <div className="sp-day-tags">
+              <div className="mb-1.5 flex shrink-0 flex-wrap gap-1.5">
                 {dayCategories.map((c) => (
                   <button
                     key={c.key}
                     type="button"
-                    className={cn("sp-tag", selectedCategory === c.key && "active")}
+                    className={cn(
+                      TAG_CHIP,
+                      "cursor-pointer transition-opacity duration-100 hover:opacity-100",
+                      selectedCategory === c.key ? "opacity-100" : "opacity-70",
+                    )}
                     style={{ color: c.color }}
                     onClick={() => onSelectCategory(selectedCategory === c.key ? null : c.key)}
                   >
@@ -194,7 +229,7 @@ const SpendingDayCard = ({
                 ))}
               </div>
             )}
-            <div className="sp-tx-list">
+            <div className="pfa-scroll-thin flex min-h-0 flex-auto flex-col overflow-y-auto pr-2">
               {sorted.map((s) => (
                 <SpendingTxRow
                   key={s.ID}
@@ -205,12 +240,12 @@ const SpendingDayCard = ({
             </div>
           </>
         ) : (
-          <div className="sp-day-empty">{emptyLabel}</div>
+          <div className="grid min-h-0 flex-auto place-items-center text-sm text-ink-4">{emptyLabel}</div>
         )}
 
         <button
           type="button"
-          className="sp-add-row"
+          className="mt-2.5 flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-line p-2.75 text-xs text-ink-4 transition duration-100 enabled:hover:border-[oklch(0.82_0.12_175/0.6)] enabled:hover:bg-[linear-gradient(100deg,oklch(0.84_0.14_148/0.08)_0%,oklch(0.82_0.13_175/0.09)_55%,oklch(0.8_0.12_210/0.1)_100%)] enabled:hover:text-[oklch(0.87_0.06_178)] disabled:cursor-not-allowed disabled:opacity-50"
           onClick={addSpending}
           disabled={!addSpendingEnabled}
         >
@@ -220,9 +255,9 @@ const SpendingDayCard = ({
       </div>
 
       {isToday && dailyBudget != null && (
-        <div className="sp-day-budget">
+        <div className="flex shrink-0 items-center justify-between border-t border-elec/24 bg-black/16 px-4.5 py-3 text-xs text-ink-3">
           <span>{spendings.dayItem.remainingBudget}</span>
-          <span className="v">{dailyBudget} €</span>
+          <span className="font-mono text-sm font-semibold tabular-nums text-elec">{dailyBudget} €</span>
         </div>
       )}
 

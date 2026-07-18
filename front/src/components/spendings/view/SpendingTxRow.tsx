@@ -4,7 +4,9 @@ import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors
 import { IconButton } from "@components/shared/IconButton";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useSpendings from "@components/spendings/services/useSpendings";
+import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
 import { euro } from "@lib/format";
+import { cn } from "@lib/utils";
 import spendings from "@text/spendings";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -39,26 +41,25 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
   };
 
   return (
-    <div className="sp-tx">
+    <div className="group relative grid grid-cols-[minmax(0,1fr)_auto_78px] items-center gap-3 border-t border-line-soft py-2.75 first:border-t-0 before:pointer-events-none before:absolute before:inset-x-0 before:inset-y-px before:z-0 before:rounded-lg before:transition-colors before:duration-100 before:content-[''] hover:before:bg-surface-hi max-[759px]:grid-cols-[minmax(0,1fr)_auto] max-[759px]:grid-rows-[auto_auto] max-[759px]:gap-y-1.5">
       {confirming ? (
         <div
-          className="sp-tx-confirm"
+          className="relative z-10 col-span-full flex items-center gap-3 rounded-lg border border-danger-border-soft bg-danger-surface py-2 pl-3.75 pr-2.5 shadow-[0_6px_20px_oklch(0.3_0.16_25/0.28)]"
           role="alertdialog"
           aria-label={txRow.deleteAria}
-          style={{ gridColumn: "1 / -1" }}
         >
-          <span className="txt">{item.deleteConfirm}</span>
-          <span className="acts">
+          <span className="flex-auto text-sm font-medium text-ink">{item.deleteConfirm}</span>
+          <span className="flex shrink-0 gap-2">
             <button
               type="button"
-              className="btn-cancel"
+              className="cursor-pointer rounded-md border border-line bg-surface-hi px-3.75 py-1.75 text-sm font-semibold text-ink-2 transition duration-100 hover:border-ink-4 hover:bg-surface-hover hover:text-ink"
               onClick={() => setConfirming(false)}
             >
               {spendings.actions.cancel}
             </button>
             <button
               type="button"
-              className="btn-confirm"
+              className="cursor-pointer rounded-md border border-danger-solid bg-danger-solid px-3.75 py-1.75 text-sm font-semibold text-on-danger transition duration-100 hover:brightness-[1.08]"
               onClick={onConfirmDelete}
             >
               {spendings.actions.confirm}
@@ -67,20 +68,20 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
         </div>
       ) : (
         <>
-          <span className="sp-t-label">
+          <span className="relative z-10 flex min-w-0 items-center gap-2.5 text-sm text-ink max-[759px]:col-start-1 max-[759px]:row-start-1 max-[759px]:text-base">
             <span
-              className="pill"
+              className="h-5.5 w-0.75 shrink-0 rounded-xs"
               style={{ background: color }}
             />
             <span
-              className="lbl-txt"
+              className="truncate max-[759px]:line-clamp-2 max-[759px]:whitespace-normal"
               title={spending.label}
             >
               {spending.label}
             </span>
             {hasInvoice && (
               <span
-                className="recipt"
+                className="inline-flex shrink-0 text-ink-4"
                 role="img"
                 aria-label={txRow.receiptAttachedAria}
               >
@@ -90,9 +91,9 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
           </span>
 
           {category && (
-            <span className="sp-t-tag">
+            <span className="relative z-10 justify-self-end max-[759px]:col-start-1 max-[759px]:row-start-2 max-[759px]:justify-self-start">
               <span
-                className="sp-tag"
+                className={cn(TAG_CHIP, "max-[759px]:border-transparent max-[759px]:bg-transparent max-[759px]:p-0")}
                 style={{ color }}
               >
                 {category}
@@ -100,12 +101,12 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             </span>
           )}
 
-          <span className="sp-t-amt">
+          <span className="relative z-10 justify-self-end whitespace-nowrap text-right font-mono text-sm font-medium tabular-nums text-ink max-[759px]:col-start-2 max-[759px]:row-start-1 max-[759px]:self-center">
             {euro(spending.amount)}
-            <span className="cur"> €</span>
+            <span className="text-xs font-normal text-ink-3"> €</span>
           </span>
 
-          <span className="sp-t-actions">
+          <span className="absolute right-22 top-1/2 z-20 hidden -translate-y-1/2 items-center gap-1.5 bg-[linear-gradient(90deg,transparent,var(--surface-hi)_26px)] pl-7.5 group-hover:flex max-[759px]:static max-[759px]:col-start-2 max-[759px]:row-start-2 max-[759px]:flex max-[759px]:translate-y-0 max-[759px]:justify-self-end max-[759px]:bg-none max-[759px]:p-0">
             <IconButton
               variant="bordered"
               size={7}

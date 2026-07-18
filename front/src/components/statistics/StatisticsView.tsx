@@ -97,8 +97,8 @@ const StatisticsView = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Filter bar as its own bordered sticky card. Dépenses keeps its full-bleed
-          .sp-sticky-zone band (it needs the gutter bleed for the timeline cards'
+      {/* Filter bar as its own bordered sticky card. Dépenses uses a full-bleed
+          sticky band (it needs the gutter bleed for the timeline cards'
           rings/glows); Stats' toolbar stands alone, so a contained card reads
           better — the two look close but aren't pixel-identical (accepted). Shadow
           is the shared --shadow-sticky token. `-mt-7` swallows the header's mb-7 to
