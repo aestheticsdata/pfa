@@ -29,6 +29,12 @@ const dashboard = {
     peak: "Pic",
     avgShort: "moy.",
     chartAria: "Consommation quotidienne",
+    // Caption naming the historical basis of the projected (dashed) tail (COS-27).
+    projectionBasis: {
+      sameMonthLastYear: "Projection basée sur le même mois l'an dernier",
+      sameMonthTwoYearsAgo: "Projection basée sur le même mois il y a deux ans",
+      previousMonth: "Projection basée sur le mois précédent",
+    },
   },
   fixedExpenses: {
     title: "Dépenses fixes",

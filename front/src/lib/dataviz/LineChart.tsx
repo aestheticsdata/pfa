@@ -1,6 +1,7 @@
 "use client";
 
-import { areaPath, extent, linearScale, linePath, normalizePoints } from "@lib/dataviz/svg";
+import { areaPath, linePath, smoothPath } from "@lib/dataviz/linePaths";
+import { extent, linearScale, normalizePoints } from "@lib/dataviz/scales";
 import { cn } from "@lib/utils";
 
 import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@lib/dataviz/dataVizTypes";
@@ -168,7 +169,7 @@ const LineChart = ({
             )}
             {pixels.length > 1 && (
               <path
-                d={linePath(pixels)}
+                d={s.smooth ? smoothPath(pixels) : linePath(pixels)}
                 fill="none"
                 stroke={color}
                 strokeWidth={s.width ?? 1.75}

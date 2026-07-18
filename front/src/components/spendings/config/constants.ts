@@ -8,6 +8,7 @@ export const QUERY_KEYS = {
   RECURRINGS: "recurrings",
   INITIAL_AMOUNT: "initialAmount",
   DASHBOARD: "dashboard",
+  DAILY_PROJECTION: "dailyProjection",
   CHARTS: "charts",
   WEEKLY_STATS: "weeklyStats",
   CATEGORIES: "categories",

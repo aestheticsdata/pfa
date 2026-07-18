@@ -27,6 +27,8 @@ export interface LineSeries {
   area?: boolean;
   /** Render the line dashed (e.g. a projection). */
   dashed?: boolean;
+  /** Draw the stroke as a smooth curve (Catmull-Rom) instead of a polyline. */
+  smooth?: boolean;
   /** Stroke width in viewBox units. */
   width?: number;
 }

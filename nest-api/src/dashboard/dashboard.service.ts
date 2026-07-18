@@ -2,9 +2,82 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 
+// Which historical period the sparkline projection is based on (COS-27). Follows
+// the GLOBAL projection chain; "none" is the very-first-month case (no reference
+// exists yet — the front shows no projection tail, never an average fallback).
+export type ProjectionSource = "sameMonthLastYear" | "sameMonthTwoYearsAgo" | "previousMonth" | "none";
+
+export interface DailyProjection {
+  source: ProjectionSource;
+  /** ISO date (YYYY-MM-DD) of the reference month's first day, or null when source is "none". */
+  referenceMonth: string | null;
+  /** Day-by-day spending totals of the reference month; index i = day (i+1). */
+  dailyTotals: number[];
+}
+
 @Injectable()
 export class DashboardService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Day-by-day totals of the reference period used to project the (in-progress)
+   * month's sparkline tail (COS-27). Resolves the reference month by walking the
+   * GLOBAL projection chain, stopping at the first month the user has any
+   * spending in:
+   *   1. same month, previous year   (N-1)
+   *   2. same month, two years ago   (N-2)
+   *   3. previous calendar month     (M-1)
+   *   4. none of the above → "none"  (the user's very first month of data)
+   *
+   * `start` must be a clean ISO date (YYYY-MM-DD) for the viewed month's first
+   * day so the UTC month arithmetic below is timezone-safe.
+   */
+  async getDailyProjection(start: string, userID: string): Promise<DailyProjection> {
+    const base = new Date(start);
+    if (Number.isNaN(base.getTime())) {
+      return { source: "none", referenceMonth: null, dailyTotals: [] };
+    }
+
+    const year = base.getUTCFullYear();
+    const month = base.getUTCMonth();
+
+    const candidates: { source: ProjectionSource; year: number; month: number }[] = [
+      { source: "sameMonthLastYear", year: year - 1, month },
+      { source: "sameMonthTwoYearsAgo", year: year - 2, month },
+      // Previous calendar month, wrapping January → previous December.
+      { source: "previousMonth", year: month === 0 ? year - 1 : year, month: (month + 11) % 12 },
+    ];
+
+    for (const candidate of candidates) {
+      const monthStart = new Date(Date.UTC(candidate.year, candidate.month, 1));
+      const nextMonthStart = new Date(Date.UTC(candidate.year, candidate.month + 1, 1));
+
+      const rows = await this.prisma.spendings.findMany({
+        where: { userID, date: { gte: monthStart, lt: nextMonthStart } },
+        select: { date: true, amount: true },
+      });
+
+      if (rows.length === 0) continue;
+
+      // Day 0 of the next month == last day of this month → number of days.
+      const daysInMonth = new Date(Date.UTC(candidate.year, candidate.month + 1, 0)).getUTCDate();
+      const dailyTotals = new Array<number>(daysInMonth).fill(0);
+      for (const rowItem of rows) {
+        const day = rowItem.date.getUTCDate();
+        if (day >= 1 && day <= daysInMonth) {
+          dailyTotals[day - 1] += Number(rowItem.amount);
+        }
+      }
+
+      return {
+        source: candidate.source,
+        referenceMonth: monthStart.toISOString().slice(0, 10),
+        dailyTotals,
+      };
+    }
+
+    return { source: "none", referenceMonth: null, dailyTotals: [] };
+  }
 
   async getDashboard(start: string, userID: string) {
     const dashboard = await this.prisma.dashboards.findFirst({
