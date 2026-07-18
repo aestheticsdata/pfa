@@ -150,12 +150,11 @@
        pane unmounts on any week with no categories (rows=[] → null), and the
        summary that then ends the band has no shadow of its own — anchoring it
        here keeps the edge drawn whatever the last widget happens to be.
-       --shadow-float (not --shadow-header, the token .pfa-hdr uses for the same
-       pinned job) because it is the inset-free drop: --shadow-header's
-       `inset 0 1px 0` highlight would paint a 1px seam across the band's top
-       edge, which lands in the open right below the header rather than behind
-       it. Its 0.35 alpha separates at least as well. */
-    box-shadow: var(--shadow-float);
+       --shadow-sticky = the DS token for pinned-bar separation (COS-122,
+       tokens/elevation.css), shared with the Statistiques toolbar. Inset-free
+       on purpose: an inset highlight (like --shadow-header's) would paint a 1px
+       seam across the band's top edge, out in the open below the header. */
+    box-shadow: var(--shadow-sticky);
     /* Header ↔ search gap, owned here rather than by the header's own mb-7:
        the negative margin swallows that 28px whole (leaving other pages
        untouched), and the padding re-adds the gap we actually want — 12px, the
