@@ -6,6 +6,7 @@ import {
   StatisticsController,
   RegularMonthlyAverageController,
   CategoryStatsController,
+  CategoryTrendsController,
   DailyStatsController,
   BiggestRegularExpenseController,
 } from "@stats/stats.controller";
@@ -20,6 +21,7 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
     StatisticsController,
     RegularMonthlyAverageController,
     CategoryStatsController,
+    CategoryTrendsController,
     DailyStatsController,
     BiggestRegularExpenseController,
   ],

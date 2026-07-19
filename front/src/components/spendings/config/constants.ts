@@ -10,7 +10,7 @@ export const QUERY_KEYS = {
   DASHBOARD: "dashboard",
   DAILY_PROJECTION: "dailyProjection",
   MONTHLY_INCOME: "monthlyIncome",
-  CHARTS: "charts",
+  CATEGORY_TRENDS: "categoryTrends",
   WEEKLY_STATS: "weeklyStats",
   DAILY_STATS: "dailyStats",
   BIGGEST_REGULAR_EXPENSE: "biggestRegularExpense",

@@ -7,6 +7,7 @@ import { RegularMonthlyAverageQueryDto } from "@stats/dto/regular-monthly-averag
 import { DailyStatsQueryDto } from "@stats/dto/daily-stats-query.dto";
 import { CategoryStatsQueryDto } from "@stats/dto/category-stats-query.dto";
 import { BiggestRegularExpenseQueryDto } from "@stats/dto/biggest-regular-expense-query.dto";
+import { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
@@ -70,6 +71,17 @@ export class CategoryStatsController {
   @Get()
   async getCategoryStats(@Query() query: CategoryStatsQueryDto, @GetUserId() userID: string) {
     return this.statsService.getCategoryStats(userID, query.from, query.to);
+  }
+}
+
+@Controller("category-trends")
+@UseGuards(SessionAuthGuard)
+export class CategoryTrendsController {
+  constructor(private readonly statsService: StatsService) {}
+
+  @Get()
+  async getCategoryTrends(@Query() query: CategoryTrendsQueryDto, @GetUserId() userID: string) {
+    return this.statsService.getCategoryTrends(userID, query.from, query.to, query.prevFrom, query.prevTo);
   }
 }
 

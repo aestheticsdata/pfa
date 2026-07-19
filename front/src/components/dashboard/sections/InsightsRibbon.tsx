@@ -1,16 +1,17 @@
 "use client";
 
-// Partly MOCK — the pace framing ("~16% moins vite") and the category trend
-// ("+X% vs le mois dernier") are placeholders needing real 3-month / prior-month
-// history. The end-of-month conclusion, the top category name and "reste à vivre"
-// are derived from real data. See REFACTO_NOTES.md §6.
+// Partly MOCK — the pace framing ("~16% moins vite") is still a placeholder
+// needing real 3-month history. The end-of-month conclusion, the rising category
+// (name + real % vs last month) and "reste à vivre" are derived from real data.
+// See REFACTO_NOTES.md §6.
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DividedStrip } from "@components/shared/DividedStrip";
 import { Overline } from "@components/shared/Overline";
 import { MONTHLY } from "@components/spendings/config/constants";
+import { categoryDeltaPct, STABLE_TREND_THRESHOLD } from "@components/spendings/helpers/categoryTrend";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
-import useCharts from "@components/spendings/services/useCharts";
+import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useDashboard from "@components/spendings/services/useDashboard";
 import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
@@ -52,7 +53,7 @@ const InsightsRibbon = () => {
     monthlyTotal,
     get: { data: dashboard },
   } = useDashboard();
-  const { data: charts } = useCharts(MONTHLY);
+  const { data: trends } = useCategoryTrends(MONTHLY);
   const { insightsRibbon: t } = dashboardText;
 
   const budget = Number(dashboard?.initialAmount ?? 0);
@@ -65,7 +66,17 @@ const InsightsRibbon = () => {
   const underBudget = budget <= 0 || projection <= budget;
   // same figure as the Dépenses "Budget du jour maximum" (shared helper)
   const perDay = dailyRemainingBudget(remaining, isThisMonth ? now : endOfMonth(monthRef));
-  const topCategory = (charts ?? []).slice().sort((a, b) => b.value - a.value)[0]?.category;
+  // The named category whose spending rose the most vs last month. Gated on the
+  // same threshold as the breakdown's trend badge, so a rise the list still shows
+  // as "stable" is never headlined here. New/uncategorized categories are skipped.
+  const topRiser = (trends ?? [])
+    .flatMap((c) => {
+      const delta = categoryDeltaPct(c.value, c.previousValue);
+      return c.category != null && delta != null && delta >= STABLE_TREND_THRESHOLD
+        ? [{ category: c.category, delta }]
+        : [];
+    })
+    .sort((a, b) => b.delta - a.delta)[0];
   const lastDayLabel = format(endOfMonth(monthRef), "d MMMM", { locale: fr });
 
   return (
@@ -84,11 +95,10 @@ const InsightsRibbon = () => {
         icon={<TriangleAlert className="size-3.5" />}
         label={t.risingLabel}
       >
-        {topCategory ? (
+        {topRiser ? (
           <>
-            <b className="font-semibold capitalize text-ink">{topCategory}</b> à{" "}
-            <b className="num font-semibold text-ink">+24%</b> {/* MOCK trend */}
-            vs le mois dernier.
+            <b className="font-semibold capitalize text-ink">{topRiser.category}</b> à{" "}
+            <b className="num font-semibold text-ink">+{Math.round(topRiser.delta)}%</b> vs le mois dernier.
           </>
         ) : (
           t.risingEmpty

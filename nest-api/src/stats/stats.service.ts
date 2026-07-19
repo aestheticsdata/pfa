@@ -7,6 +7,7 @@ import type { StatisticsResponse } from "@stats/dto/statistics-response.interfac
 import type { CategoryStat, CategoryStatsResponse } from "@stats/dto/category-stats-response.interface";
 import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-response.interface";
 import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-expense-response.interface";
+import type { CategoryTrendPoint, CategoryTrendsResponse } from "@stats/dto/category-trends-response.interface";
 
 /** Rounds to 2 decimal places to avoid JS float precision issues. */
 const roundCurrency = (n: number): number => Math.round(n);
@@ -270,6 +271,75 @@ export class StatsService {
         categoryColor: row.category?.color ?? null,
       },
     };
+  }
+
+  /**
+   * Per-category spending totals for two windows — the current period and the
+   * one it is compared against — so the front can show a per-category trend
+   * (month-over-month for the dashboard, COS-41; week-over-week for Dépenses,
+   * COS-35). Reads the one-off `Spendings` table only, so recurrings and
+   * exceptionals — which live in their own tables — are excluded by construction.
+   * Groups each window by category with a single `groupBy`, resolves names/colours
+   * for the current window, and returns one row per category present in the
+   * CURRENT window, sorted by current amount desc (matching the breakdown
+   * bar/list order). `previousValue` is null when the category had no spending in
+   * the comparison window ("nouv."). Amounts are rounded to the cent; the delta %
+   * is derived on the front.
+   */
+  async getCategoryTrends(
+    userID: string,
+    from: string,
+    to: string,
+    prevFrom: string,
+    prevTo: string,
+  ): Promise<CategoryTrendsResponse> {
+    const currentWindow = this.dateWindow(from, to);
+    const previousWindow = this.dateWindow(prevFrom, prevTo);
+
+    const [current, previous] = await Promise.all([
+      this.prisma.spendings.groupBy({
+        by: ["categoryID"],
+        where: { userID, ...(currentWindow ? { date: currentWindow } : {}) },
+        _sum: { amount: true },
+        orderBy: { _sum: { amount: "desc" } },
+      }),
+      this.prisma.spendings.groupBy({
+        by: ["categoryID"],
+        where: { userID, ...(previousWindow ? { date: previousWindow } : {}) },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    // Keyed by categoryID (null = uncategorized), so a current category absent
+    // here stays null ("nouv.") rather than being read as a real 0.
+    const previousByCategory = new Map<string | null, number>();
+    for (const group of previous) {
+      previousByCategory.set(group.categoryID, round2(Number(group._sum.amount ?? 0)));
+    }
+
+    const categoryIDs = current.map((g) => g.categoryID).filter((id): id is string => id !== null);
+    const categories =
+      categoryIDs.length > 0
+        ? await this.prisma.categories.findMany({
+            where: { ID: { in: categoryIDs }, OR: [{ userID }, { userID: null }] },
+            select: { ID: true, name: true, color: true },
+          })
+        : [];
+    const categoryMap = new Map(categories.map((c) => [c.ID, c]));
+
+    const trends: CategoryTrendPoint[] = current.map((group) => {
+      const category = group.categoryID ? categoryMap.get(group.categoryID) : null;
+      return {
+        category: category?.name ?? null,
+        categoryColor: category?.color ?? null,
+        value: round2(Number(group._sum.amount ?? 0)),
+        previousValue: previousByCategory.has(group.categoryID)
+          ? (previousByCategory.get(group.categoryID) ?? null)
+          : null,
+      };
+    });
+
+    return { trends };
   }
 
   async getStatistics(categoryIDs: string[], years: string[], userID: string): Promise<StatisticsResponse> {

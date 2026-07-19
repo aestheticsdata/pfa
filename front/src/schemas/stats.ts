@@ -24,7 +24,26 @@ export const ChartsCategorySchema = z.object({
 });
 
 export type ChartsCategory = z.infer<typeof ChartsCategorySchema>;
-export const ChartsCategoryListSchema = z.array(ChartsCategorySchema);
+
+// Per-category totals for the current period and the one it is compared against
+// (GET /category-trends). Feeds the dashboard's monthly "Répartition par
+// catégorie" trend column + "Catégorie en hausse" insight (COS-41); the delta %
+// and its hausse/baisse/stable/nouv. styling are derived on the front.
+// `previousValue` is null when the category is new to the comparison window.
+export const CategoryTrendPointSchema = z.object({
+  category: z.string().nullable(),
+  categoryColor: z.string().nullable(),
+  value: numberLikeSchema,
+  previousValue: numberLikeSchema.nullable(),
+});
+
+export type CategoryTrendPoint = z.infer<typeof CategoryTrendPointSchema>;
+
+export const CategoryTrendsResponseSchema = z.object({
+  trends: z.array(CategoryTrendPointSchema),
+});
+
+export type CategoryTrendsResponse = z.infer<typeof CategoryTrendsResponseSchema>;
 
 // Per-day spending totals for a year (COS-45) — GET /daily-stats. Sparse: one
 // entry per day that has at least one spending. Feeds the daily heatmap and the
