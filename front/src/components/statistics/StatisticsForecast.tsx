@@ -1,12 +1,10 @@
 "use client";
 
-// MOCK — the end-of-year projection is a synthetic average-forward model
-// (spent / days-elapsed × days-in-year). Spent + the year-over-year figure are real.
-
 import GlowCard from "@components/shared/GlowCard";
 import { Overline } from "@components/shared/Overline";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
-import { yearTotal } from "@components/statistics/helpers/statisticsData";
+import { projectedRemainingRegular } from "@components/statistics/helpers/projection";
+import { monthlyPresence, monthlyTotals, yearTotal } from "@components/statistics/helpers/statisticsData";
 import { AnimatedNumber, CursorTooltip, ProgressTrack, useCursorHover } from "@lib/dataviz";
 import { euro, euro0 } from "@lib/format";
 import statisticsText from "@text/statistics";
@@ -15,8 +13,14 @@ import getDayOfYear from "date-fns/getDayOfYear";
 import fr from "date-fns/locale/fr";
 import { useState } from "react";
 
+import type { YearMonthly } from "@components/statistics/helpers/projection";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { StatisticsResponse } from "@src/schemas/stats";
+
+const yearMonthly = (data: StatisticsResponse["data"] | undefined, year: number): YearMonthly => ({
+  totals: monthlyTotals(data, year),
+  present: monthlyPresence(data, year),
+});
 
 interface StatisticsForecastProps {
   statistics: StatisticsResponse | undefined;
@@ -46,10 +50,22 @@ const StatisticsForecast = ({
   const isCurrent = year === now.getFullYear();
   const daysInYear = getDayOfYear(new Date(year, 11, 31));
   const daysElapsed = isCurrent ? getDayOfYear(now) : daysInYear;
-  const projection = isCurrent && daysElapsed > 0 ? (spent / daysElapsed) * daysInYear : spent; // MOCK
   const perDay = daysElapsed > 0 ? spent / daysElapsed : 0;
-  const delta = projection - compareTotal;
   const asOfLabel = isCurrent ? format(now, "d MMM", { locale: fr }) : t.endOfYear;
+
+  // Real end-of-year projection: cumulative-to-date + the rest of the year
+  // estimated month by month from history (same month N-1 → N-2 → previous
+  // month), exceptionals left as known one-offs. A past year is already complete,
+  // so its projection is just its actual total. `null` remaining = the user's very
+  // first month of data (no reference) → no projection shown.
+  const remaining = isCurrent
+    ? projectedRemainingRegular(yearMonthly(data, year), yearMonthly(data, year - 1), yearMonthly(data, year - 2), now)
+    : 0;
+  const projection = remaining === null ? null : spent + remaining;
+  const delta = projection === null ? 0 : projection - compareTotal;
+  // Tell "loaded, no history" (show the reason) apart from "still loading" (stay
+  // silent) — the empty-reference path resolves to null in both cases.
+  const noHistory = projection === null && data !== undefined;
 
   return (
     <GlowCard
@@ -95,24 +111,37 @@ const StatisticsForecast = ({
         onMouseLeave={projectionTip.clear}
       >
         <Overline>{t.projectionTitle}</Overline>
-        <AnimatedNumber
-          value={projection}
-          decimals={0}
-          suffix=" €"
-          color="var(--accent-strong)"
-          className="num text-2xl font-medium tracking-tight"
-        />
-        <span className="text-xs text-ink-3">
-          <span className={delta > 0 ? "text-neg" : "text-accent-strong"}>
-            {delta > 0 ? `+${euro0(delta)}` : euro0(delta)} €
-          </span>{" "}
-          {t.vsCompare(compareYear, euro0(compareTotal))}
-        </span>
+        {projection === null ? (
+          <>
+            <span className="num text-2xl font-medium tracking-tight text-ink-3">—</span>
+            {noHistory && <span className="text-xs text-ink-3">{t.noProjection}</span>}
+          </>
+        ) : (
+          <>
+            <AnimatedNumber
+              value={projection}
+              decimals={0}
+              suffix=" €"
+              color="var(--accent-strong)"
+              className="num text-2xl font-medium tracking-tight"
+            />
+            <span className="text-xs text-ink-3">
+              <span className={delta > 0 ? "text-neg" : "text-accent-strong"}>
+                {delta > 0 ? `+${euro0(delta)}` : euro0(delta)} €
+              </span>{" "}
+              {t.vsCompare(compareYear, euro0(compareTotal))}
+            </span>
+          </>
+        )}
         <CursorTooltip point={projectionTip.hover}>
           {projectionTip.hover
-            ? isCurrent
-              ? t.tooltip.projectionModel(euro(perDay), daysInYear)
-              : t.tooltip.projectionActual
+            ? projection === null
+              ? noHistory
+                ? t.tooltip.noProjection
+                : null
+              : isCurrent
+                ? t.tooltip.projectionModel
+                : t.tooltip.projectionActual
             : null}
         </CursorTooltip>
       </div>

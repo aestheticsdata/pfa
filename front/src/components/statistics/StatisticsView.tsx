@@ -43,7 +43,15 @@ const StatisticsView = () => {
   const [showExceptionals, setShowExceptionals] = useState(true);
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
 
-  const years = useMemo(() => Array.from(new Set([selectedYear, compareYear])), [selectedYear, compareYear]);
+  // The current-year forecast projects the rest of the year from history, so it
+  // needs N-1 and N-2 alongside the selected + compare years (COS-47). N-1 is
+  // usually already the compare year; N-2 is the extra fetch. Only added when the
+  // current year is in view — past years are complete and never projected.
+  const years = useMemo(() => {
+    const requested = [selectedYear, compareYear];
+    if (selectedYear === currentYear) requested.push(selectedYear - 1, selectedYear - 2);
+    return Array.from(new Set(requested));
+  }, [selectedYear, compareYear, currentYear]);
 
   const { statistics, categories } = useStatistics({ years });
   const { dailyStats } = useDailyStats({ year: selectedYear });
