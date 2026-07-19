@@ -1,12 +1,14 @@
 "use client";
 
 import { useAuth } from "@auth/context/AuthContext";
+import useCategoryStats from "@components/categories/services/useCategoryStats";
 import AmountField from "@components/spendings/common/spendingModal/fields/AmountField";
 import CategoryField from "@components/spendings/common/spendingModal/fields/CategoryField";
 import DateField from "@components/spendings/common/spendingModal/fields/DateField";
 import LabelField from "@components/spendings/common/spendingModal/fields/LabelField";
 import ReceiptField from "@components/spendings/common/spendingModal/fields/ReceiptField";
 import { mockLabelSuggestions } from "@components/spendings/common/spendingModal/mockSuggestions";
+import { rankFrequentCategories } from "@components/spendings/common/spendingModal/rankFrequentCategories";
 import { spendingSchema } from "@components/spendings/common/spendingModal/schema";
 import Toggle from "@components/spendings/common/spendingModal/Toggle";
 import useSpendingSubmit from "@components/spendings/common/spendingModal/useSpendingSubmit";
@@ -59,6 +61,10 @@ const SpendingModal = ({
   if (categoriesError) {
     throw categoriesError;
   }
+  // All-time per-category usage (shared source with the Categories page, COS-20)
+  // — ranks the "Fréquentes" quick-picks. Never blocks the modal: while stats
+  // load (or on error) the section is simply empty until real usage arrives.
+  const { categoryStats } = useCategoryStats();
 
   const categoryOptions: CategoryOption[] = (categories ?? []).map((c) => ({
     ID: c.ID,
@@ -66,6 +72,8 @@ const SpendingModal = ({
     name: c.name,
     color: c.color,
   }));
+
+  const frequentCategories = rankFrequentCategories(categoryOptions, categoryStats?.byCategory);
 
   const isSpendingItem = (v: SpendingListItem | null): v is SpendingItem => !!v && "date" in v;
 
@@ -214,6 +222,7 @@ const SpendingModal = ({
           {!asRecurring && (
             <CategoryField
               categoryOptions={categoryOptions}
+              frequentCategories={frequentCategories}
               selectedCategory={selectedCategory}
               setSelectedCategory={setSelectedCategory}
               comboboxOpen={comboboxOpen}
