@@ -1,4 +1,4 @@
-import { projectedRemainingRegular } from "@components/statistics/helpers/projection";
+import { projectedCurrentMonthRemainder, projectedRemainingRegular } from "@components/statistics/helpers/projection";
 
 import type { YearMonthly } from "@components/statistics/helpers/projection";
 
@@ -75,5 +75,42 @@ describe("projectedRemainingRegular", () => {
     const result = projectedRemainingRegular(empty, lastYear, twoAgo, midDecember);
     // N-1's real 0 wins over N-2's 999 → the December remainder is 0, not null.
     expect(result).toBe(0);
+  });
+});
+
+describe("projectedCurrentMonthRemainder", () => {
+  const midJuly = new Date(2026, 6, 19); // 12 of July's 31 days remain
+  const julyShare = 12 / 31;
+
+  it("prorates the current month's same month last year (N-1)", () => {
+    const result = projectedCurrentMonthRemainder(empty, ym(rising, allTrue), empty, midJuly);
+    expect(result).toBeCloseTo(70 * julyShare, 6); // July N-1 = 70
+  });
+
+  it("falls back N-2 then M-1, and returns null with no reference", () => {
+    // N-2 fallback: N-1 missing July, N-2 has it.
+    const n1NoJuly = ym(
+      rising,
+      allTrue.map((_, i) => i !== 6),
+    );
+    const n2July = ym(
+      [...zeros].map((_, i) => (i === 6 ? 900 : 0)),
+      allTrue.map((_, i) => i === 6),
+    );
+    expect(projectedCurrentMonthRemainder(empty, n1NoJuly, n2July, midJuly)).toBeCloseTo(900 * julyShare, 6);
+
+    // M-1 fallback: no prior years, June (previous month) present.
+    const june = ym(
+      [...zeros].map((_, i) => (i === 5 ? 600 : 0)),
+      allTrue.map((_, i) => i === 5),
+    );
+    expect(projectedCurrentMonthRemainder(june, empty, empty, midJuly)).toBeCloseTo(600 * julyShare, 6);
+
+    // No reference anywhere (first month of data) → null.
+    const julyOnly = ym(
+      zeros,
+      allTrue.map((_, i) => i === 6),
+    );
+    expect(projectedCurrentMonthRemainder(julyOnly, empty, empty, midJuly)).toBeNull();
   });
 });

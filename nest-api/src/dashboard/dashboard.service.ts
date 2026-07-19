@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 
+import type { MonthlyIncomeResponse } from "@dashboard/dto/monthly-income-response.interface";
+
 // Which historical period the sparkline projection is based on (COS-27). Follows
 // the GLOBAL projection chain; "none" is the very-first-month case (no reference
 // exists yet — the front shows no projection tail, never an average fallback).
@@ -77,6 +79,37 @@ export class DashboardService {
     }
 
     return { source: "none", referenceMonth: null, dailyTotals: [] };
+  }
+
+  /**
+   * Per-month income (dashboard initialAmount) for a year (COS-50). Reads the
+   * per-month `Dashboards` rows and returns a 12-slot array (Jan→Dec); a month
+   * with no dashboard row comes back null. Uses a half-open UTC range like the
+   * daily stats so the month bucketing is timezone-safe. Backs the monthly
+   * chart's stepped budget line — the front carries the last known value forward
+   * over the null gaps.
+   */
+  async getMonthlyIncome(yearStr: string, userID: string): Promise<MonthlyIncomeResponse> {
+    const year = parseInt(yearStr, 10);
+    if (Number.isNaN(year)) {
+      return { income: Array<number | null>(12).fill(null) };
+    }
+
+    const yearStart = new Date(Date.UTC(year, 0, 1));
+    const nextYearStart = new Date(Date.UTC(year + 1, 0, 1));
+
+    const rows = await this.prisma.dashboards.findMany({
+      where: { userID, dateFrom: { gte: yearStart, lt: nextYearStart } },
+      select: { dateFrom: true, initialAmount: true },
+    });
+
+    const income = Array<number | null>(12).fill(null);
+    for (const row of rows) {
+      const month = row.dateFrom.getUTCMonth();
+      if (month >= 0 && month < 12) income[month] = Number(row.initialAmount);
+    }
+
+    return { income };
   }
 
   async getDashboard(start: string, userID: string) {

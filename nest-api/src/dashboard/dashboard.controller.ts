@@ -2,6 +2,7 @@ import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from "
 import type { Response } from "express";
 import { DashboardService } from "@dashboard/dashboard.service";
 import { DashboardQueryDto } from "@dashboard/dto/dashboard-query.dto";
+import { MonthlyIncomeQueryDto } from "@dashboard/dto/monthly-income-query.dto";
 import { CreateDashboardDto } from "@dashboard/dto/create-dashboard.dto";
 import { UpdateDashboardDto } from "@dashboard/dto/update-dashboard.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
@@ -25,6 +26,13 @@ export class DashboardController {
   @Get("projection")
   async getDailyProjection(@Query() query: DashboardQueryDto, @GetUserId() userID: string) {
     return this.dashboardService.getDailyProjection(query.start, userID);
+  }
+
+  // Per-month income (dashboard initialAmount) for a year (COS-50), backing the
+  // monthly chart's stepped budget line.
+  @Get("monthly-income")
+  async getMonthlyIncome(@Query() query: MonthlyIncomeQueryDto, @GetUserId() userID: string) {
+    return this.dashboardService.getMonthlyIncome(query.year, userID);
   }
 
   @Post()

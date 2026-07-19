@@ -9,6 +9,7 @@ export const QUERY_KEYS = {
   INITIAL_AMOUNT: "initialAmount",
   DASHBOARD: "dashboard",
   DAILY_PROJECTION: "dailyProjection",
+  MONTHLY_INCOME: "monthlyIncome",
   CHARTS: "charts",
   WEEKLY_STATS: "weeklyStats",
   DAILY_STATS: "dailyStats",

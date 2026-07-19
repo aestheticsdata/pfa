@@ -60,6 +60,32 @@ export const monthlyPresence = (data: StatData | undefined, year: number): boole
   return present;
 };
 
+/**
+ * Turns a sparse 12-slot monthly income series (null where the user has no
+ * dashboard row) into a continuous one by carrying the last known value forward
+ * and back-filling the leading gap — income is assumed to persist until changed.
+ * Returns null when there is no income at all, so the caller draws no line
+ * (COS-50 budget line).
+ */
+export const filledMonthlyIncome = (income: (number | null)[]): number[] | null => {
+  if (!income.some((v) => v !== null)) return null;
+  const out: (number | null)[] = income.slice(0, 12);
+  while (out.length < 12) out.push(null);
+
+  let carry: number | null = null;
+  for (let i = 0; i < 12; i += 1) {
+    if (out[i] !== null) carry = out[i];
+    else out[i] = carry;
+  }
+  // Back-fill any leading months before the first known value.
+  carry = null;
+  for (let i = 11; i >= 0; i -= 1) {
+    if (out[i] !== null) carry = out[i];
+    else out[i] = carry;
+  }
+  return out as number[];
+};
+
 /** Round up to a "nice" axis ceiling (1, 1.5, 2, 3, 4, 5, 7.5, 10 × 10ⁿ). */
 export const niceCeil = (value: number): number => {
   if (value <= 0) return 1;
