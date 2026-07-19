@@ -82,7 +82,7 @@ const useSpendings = () => {
     await queryClient.invalidateQueries([QUERY_KEYS.CATEGORIES]);
     await queryClient.invalidateQueries([QUERY_KEYS.CATEGORY_STATS]);
     await queryClient.invalidateQueries([QUERY_KEYS.INITIAL_AMOUNT, monthBeginning]);
-    await queryClient.invalidateQueries([QUERY_KEYS.CHARTS, monthBeginning]);
+    await queryClient.invalidateQueries([QUERY_KEYS.CATEGORY_TRENDS, monthBeginning]);
     // Whole-history search results (COS-114) can include the mutated row — refresh
     // them too. Inactive when the search modal is closed, so this is a no-op then.
     await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_SEARCH]);

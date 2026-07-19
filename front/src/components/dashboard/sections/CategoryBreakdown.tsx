@@ -7,7 +7,8 @@ import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
 import GlowCard from "@components/shared/GlowCard";
 import { MONTHLY } from "@components/spendings/config/constants";
-import useCharts from "@components/spendings/services/useCharts";
+import { categoryTrend } from "@components/spendings/helpers/categoryTrend";
+import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useSpendings from "@components/spendings/services/useSpendings";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { CategoryBarTooltip, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
@@ -17,27 +18,17 @@ import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { useMemo, useState } from "react";
 
-import type { BarHover, CategoryTrendData } from "@lib/dataviz";
-import type { ChartsCategory } from "@src/schemas/stats";
+import type { BarHover } from "@lib/dataviz";
+import type { CategoryTrendPoint } from "@src/schemas/stats";
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
-
-// MOCK — the month-over-month trend needs the previous month's per-category
-// totals (not fetched here). Deterministic placeholder derived from the label.
-// De-mocks with COS-41 (monthly), not COS-35 (weekly).
-const mockTrend = (name: string): CategoryTrendData => {
-  const hash = Array.from(name).reduce((a, c) => a + c.charCodeAt(0), 0);
-  const n = (hash % 83) - 40; // -40..+42
-  if (Math.abs(n) < 3) return { direction: "flat", label: dashboardText.categoryBreakdown.trendStable };
-  return n > 0 ? { direction: "up", label: `+${n}%` } : { direction: "down", label: `−${Math.abs(n)}%` };
-};
 
 /** Monthly category breakdown — stacked bar + list, click a row for details. */
 const CategoryBreakdown = () => {
   const { from } = useDatePickerWrapperStore();
-  const { data: charts, error } = useCharts(MONTHLY);
+  const { data: trends, error } = useCategoryTrends(MONTHLY);
   const { spendingsByMonth } = useSpendings();
-  const [selected, setSelected] = useState<ChartsCategory | null>(null);
+  const [selected, setSelected] = useState<CategoryTrendPoint | null>(null);
   const [hover, setHover] = useState<BarHover<number> | null>(null);
   const { categoryBreakdown: t } = dashboardText;
 
@@ -54,7 +45,7 @@ const CategoryBreakdown = () => {
     return map;
   }, [spendingsByMonth]);
 
-  const list = charts ?? [];
+  const list = trends ?? [];
   const total = list.reduce((a, c) => a + c.value, 0) || 1;
   const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: fr });
 
@@ -69,7 +60,7 @@ const CategoryBreakdown = () => {
       count: counts.get(name.toLowerCase()) ?? 0,
       pct: (category.value / total) * 100,
       total: category.value,
-      trend: mockTrend(name),
+      trend: categoryTrend(category.value, category.previousValue, { stable: t.trendStable, fresh: t.trendNew }),
     };
   });
 

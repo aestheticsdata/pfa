@@ -26,6 +26,7 @@ const dashboard = {
     barAria: "Répartition mensuelle par catégorie",
     uncategorized: "sans catégorie",
     trendStable: "stable",
+    trendNew: "nouv.",
     empty: "Aucune dépense ce mois.",
   },
   dailySparkline: {
@@ -69,7 +70,7 @@ const dashboard = {
   insightsRibbon: {
     paceLabel: "Sur le rythme",
     risingLabel: "Catégorie en hausse",
-    risingEmpty: "Aucune catégorie ce mois.",
+    risingEmpty: "Aucune hausse ce mois.",
     remainingLabel: "Reste à vivre",
   },
   weeklyCeiling: {

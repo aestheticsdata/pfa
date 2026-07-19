@@ -119,6 +119,124 @@ describe("StatsService.getCategoryStats", () => {
 });
 
 /**
+ * Unit tests for StatsService.getCategoryTrends — the per-category two-window
+ * aggregate backing the dashboard's monthly trend column + "Catégorie en hausse"
+ * insight (COS-41). Prisma is mocked, so these assert the two query shapes, the
+ * category-name resolution, and the current↔previous pairing (incl. the null
+ * "nouv." case) without touching the DB. The delta % lives on the front.
+ */
+describe("StatsService.getCategoryTrends", () => {
+  // groupBy is called twice (current window then previous); findMany resolves
+  // names/colours for the current window's categories.
+  const makeService = (current: unknown[], previous: unknown[], categories: unknown[] = []) => {
+    const groupBy = jest.fn().mockResolvedValueOnce(current).mockResolvedValueOnce(previous);
+    const findMany = jest.fn().mockResolvedValue(categories);
+    const prisma = { spendings: { groupBy }, categories: { findMany } } as unknown as never;
+    return { service: new StatsService(prisma), groupBy, findMany };
+  };
+
+  const args = ["user-1", "2026-07-01", "2026-07-31", "2026-06-01", "2026-06-30"] as const;
+
+  it("groups current + previous windows by category over half-open UTC ranges, ordering only the current one", async () => {
+    const { service, groupBy } = makeService([], []);
+
+    await service.getCategoryTrends(...args);
+
+    expect(groupBy).toHaveBeenNthCalledWith(1, {
+      by: ["categoryID"],
+      where: { userID: "user-1", date: { gte: new Date(Date.UTC(2026, 6, 1)), lt: new Date(Date.UTC(2026, 7, 1)) } },
+      _sum: { amount: true },
+      orderBy: { _sum: { amount: "desc" } },
+    });
+    expect(groupBy).toHaveBeenNthCalledWith(2, {
+      by: ["categoryID"],
+      where: { userID: "user-1", date: { gte: new Date(Date.UTC(2026, 5, 1)), lt: new Date(Date.UTC(2026, 6, 1)) } },
+      _sum: { amount: true },
+    });
+  });
+
+  it("resolves names/colours for the current window's categories only", async () => {
+    const { service, findMany } = makeService(
+      [
+        { categoryID: "cat-a", _sum: { amount: 120 } },
+        { categoryID: "cat-b", _sum: { amount: 80 } },
+      ],
+      [],
+      [
+        { ID: "cat-a", name: "abonnements", color: "#7c3aed" },
+        { ID: "cat-b", name: "transports", color: "#0ea5e9" },
+      ],
+    );
+
+    await service.getCategoryTrends(...args);
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: { ID: { in: ["cat-a", "cat-b"] }, OR: [{ userID: "user-1" }, { userID: null }] },
+      select: { ID: true, name: true, color: true },
+    });
+  });
+
+  it("pairs each current category with its previous total, and null when it is new to the window", async () => {
+    const { service } = makeService(
+      [
+        { categoryID: "cat-a", _sum: { amount: 120 } },
+        { categoryID: "cat-b", _sum: { amount: 80 } },
+      ],
+      [
+        { categoryID: "cat-a", _sum: { amount: 100 } },
+        { categoryID: "cat-c", _sum: { amount: 50 } },
+      ],
+      [
+        { ID: "cat-a", name: "abonnements", color: "#7c3aed" },
+        { ID: "cat-b", name: "transports", color: "#0ea5e9" },
+      ],
+    );
+
+    const { trends } = await service.getCategoryTrends(...args);
+
+    // cat-c is only in the previous window → not a current row; cat-b has no
+    // previous total → previousValue null ("nouv."). Order follows the current query.
+    expect(trends).toEqual([
+      { category: "abonnements", categoryColor: "#7c3aed", value: 120, previousValue: 100 },
+      { category: "transports", categoryColor: "#0ea5e9", value: 80, previousValue: null },
+    ]);
+  });
+
+  it("keeps uncategorized spendings with their own previous bucket and no category lookup", async () => {
+    const { service, findMany } = makeService(
+      [{ categoryID: null, _sum: { amount: 40 } }],
+      [{ categoryID: null, _sum: { amount: 30 } }],
+    );
+
+    const { trends } = await service.getCategoryTrends(...args);
+
+    expect(trends).toEqual([{ category: null, categoryColor: null, value: 40, previousValue: 30 }]);
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it("returns no trends and skips the category lookup when the current window is empty", async () => {
+    const { service, findMany } = makeService([], [{ categoryID: "cat-a", _sum: { amount: 100 } }]);
+
+    await expect(service.getCategoryTrends(...args)).resolves.toEqual({ trends: [] });
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it("rounds summed Prisma Decimals to the cent in both windows", async () => {
+    const decimal = (value: string) => ({ toString: () => value });
+    const { service } = makeService(
+      [{ categoryID: "cat-a", _sum: { amount: decimal("120.005") } }],
+      [{ categoryID: "cat-a", _sum: { amount: decimal("99.994") } }],
+      [{ ID: "cat-a", name: "abonnements", color: "#7c3aed" }],
+    );
+
+    const { trends } = await service.getCategoryTrends(...args);
+
+    expect(trends[0]?.value).toBeCloseTo(120.01, 2);
+    expect(trends[0]?.previousValue).toBeCloseTo(99.99, 2);
+  });
+});
+
+/**
  * Unit tests for StatsService.getDailyStats — the per-day spending totals for a
  * year backing the daily heatmap (COS-45) and the day-of-week averages (COS-48).
  * Prisma is mocked; these assert the query range/scoping and the JS bucketing.
