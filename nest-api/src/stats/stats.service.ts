@@ -149,15 +149,36 @@ export class StatsService {
   }
 
   /**
-   * All-time usage aggregate per category: number of spendings and total amount
-   * spent, grouped by category over the user's whole history (no date filter).
-   * `totalSpent` sums every spending (incl. uncategorized) so the front can derive
-   * each category's share of total spending.
+   * Turns inclusive calendar-date bounds (yyyy-MM-dd) into a half-open UTC range
+   * (`gte`/`lt`), matching how spending dates are stored (calendar date at UTC
+   * midnight) and how the daily/yearly stats query. `to` is made inclusive by
+   * advancing the exclusive upper bound to the next UTC day. Returns undefined
+   * when neither bound is given (all-time).
    */
-  async getCategoryStats(userID: string): Promise<CategoryStatsResponse> {
+  private dateWindow(from?: string, to?: string): { gte?: Date; lt?: Date } | undefined {
+    const window: { gte?: Date; lt?: Date } = {};
+    if (from) {
+      window.gte = new Date(`${from}T00:00:00.000Z`);
+    }
+    if (to) {
+      window.lt = new Date(new Date(`${to}T00:00:00.000Z`).getTime() + 24 * 60 * 60 * 1000);
+    }
+    return window.gte || window.lt ? window : undefined;
+  }
+
+  /**
+   * Usage aggregate per category: number of spendings and total amount spent,
+   * grouped by category. With no date bounds it covers the user's whole history
+   * (Categories page); with `from`/`to` it scopes to that window — the spending
+   * modal passes the current year to date so its "Fréquentes" quick-picks rank
+   * on recent usage (COS-137). `totalSpent` sums every spending in scope (incl.
+   * uncategorized) so the front can derive each category's share.
+   */
+  async getCategoryStats(userID: string, from?: string, to?: string): Promise<CategoryStatsResponse> {
+    const date = this.dateWindow(from, to);
     const grouped = await this.prisma.spendings.groupBy({
       by: ["categoryID"],
-      where: { userID },
+      where: { userID, ...(date ? { date } : {}) },
       _sum: { amount: true },
       _count: true,
     });

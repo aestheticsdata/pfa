@@ -23,6 +23,7 @@ import spendings from "@text/spendings";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import startOfMonth from "date-fns/startOfMonth";
+import startOfYear from "date-fns/startOfYear";
 import subMonths from "date-fns/subMonths";
 import { Copy } from "lucide-react";
 import { useState } from "react";
@@ -61,10 +62,13 @@ const SpendingModal = ({
   if (categoriesError) {
     throw categoriesError;
   }
-  // All-time per-category usage (shared source with the Categories page, COS-20)
-  // — ranks the "Fréquentes" quick-picks. Never blocks the modal: while stats
-  // load (or on error) the section is simply empty until real usage arrives.
-  const { categoryStats } = useCategoryStats();
+  // Per-category usage scoped to the current year to date (client-side "today",
+  // cf COS-73) — ranks the "Fréquentes" quick-picks on recent habits, not
+  // all-time cumulative usage (COS-137). Never blocks the modal: while stats load
+  // (or on error) the section is simply empty until real usage arrives.
+  const now = new Date();
+  const frequentRange = { from: format(startOfYear(now), "yyyy-MM-dd"), to: format(now, "yyyy-MM-dd") };
+  const { categoryStats } = useCategoryStats(frequentRange);
 
   const categoryOptions: CategoryOption[] = (categories ?? []).map((c) => ({
     ID: c.ID,
