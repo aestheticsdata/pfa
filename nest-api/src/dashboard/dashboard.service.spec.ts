@@ -102,3 +102,50 @@ describe("DashboardService.getDailyProjection", () => {
     expect(result.dailyTotals[30]).toBe(9); // day 31
   });
 });
+
+/**
+ * Unit tests for DashboardService.getMonthlyIncome — the per-month income series
+ * backing the monthly chart's stepped budget line (COS-50). Prisma is mocked, so
+ * these assert the query window and the month-of-year bucketing.
+ */
+describe("DashboardService.getMonthlyIncome", () => {
+  const makeService = (findMany: jest.Mock) => {
+    const prisma = { dashboards: { findMany } } as unknown as never;
+    return new DashboardService(prisma);
+  };
+
+  const row = (dateFrom: string, initialAmount: number | string) => ({ dateFrom: new Date(dateFrom), initialAmount });
+
+  it("returns a 12-slot array keyed by the dashboard month, null where absent", async () => {
+    const findMany = jest.fn().mockResolvedValue([row("2026-01-01", 3000), row("2026-03-01", 3200), row("2026-12-01", 3500)]);
+    const service = makeService(findMany);
+
+    const result = await service.getMonthlyIncome("2026", "user-1");
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: { userID: "user-1", dateFrom: { gte: new Date(Date.UTC(2026, 0, 1)), lt: new Date(Date.UTC(2027, 0, 1)) } },
+      select: { dateFrom: true, initialAmount: true },
+    });
+    expect(result.income).toEqual([3000, null, 3200, null, null, null, null, null, null, null, null, 3500]);
+  });
+
+  it("returns all nulls for an invalid year without querying", async () => {
+    const findMany = jest.fn();
+    const service = makeService(findMany);
+
+    const result = await service.getMonthlyIncome("nope", "user-1");
+
+    expect(findMany).not.toHaveBeenCalled();
+    expect(result.income).toEqual(Array(12).fill(null));
+  });
+
+  it("coerces Prisma Decimal amounts (and keeps a real zero)", async () => {
+    const findMany = jest.fn().mockResolvedValue([row("2026-06-01", 0), row("2026-07-01", "2750.50")]);
+    const service = makeService(findMany);
+
+    const result = await service.getMonthlyIncome("2026", "user-1");
+
+    expect(result.income[5]).toBe(0);
+    expect(result.income[6]).toBe(2750.5);
+  });
+});

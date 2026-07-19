@@ -4,6 +4,7 @@ import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { exceptionalMonthly } from "@components/statistics/helpers/exceptionalsData";
+import { projectedCurrentMonthRemainder, toYearMonthly } from "@components/statistics/helpers/projection";
 import {
   categoryMonthly,
   elapsedMonths,
@@ -21,6 +22,7 @@ import StatisticsMonthlyChart from "@components/statistics/StatisticsMonthlyChar
 import StatisticsTopCategories from "@components/statistics/StatisticsTopCategories";
 import useBiggestRegularExpense from "@components/statistics/services/useBiggestRegularExpense";
 import useDailyStats from "@components/statistics/services/useDailyStats";
+import useMonthlyIncome from "@components/statistics/services/useMonthlyIncome";
 import useStatistics from "@components/statistics/services/useStatistics";
 import { useMemo, useState } from "react";
 
@@ -62,13 +64,26 @@ const StatisticsView = () => {
   });
   const dashboard = useDashboard();
   const { recurrings } = useReccurings();
+  const { monthlyIncome } = useMonthlyIncome({ year: selectedYear });
 
   const data = statistics?.data;
   const colors = statistics?.colors ?? {};
   const regularMonthly = monthlyTotals(data, selectedYear);
   const excMonthly = exceptionalMonthly(exceptionals);
   const compareMonthly = monthlyTotals(data, compareYear);
-  const monthlyBudget = dashboard.get.data ? Number(dashboard.get.data.initialAmount) || null : null;
+  // Real end-of-month projection for the in-progress month (COS-50): its regular
+  // remainder estimated from history (chain N-1 → N-2 → M-1), null at the very
+  // first month of data. Only the current year is projected — past years are
+  // complete. The chart adds the realized total (exceptionals not extrapolated).
+  const projectedRemainder =
+    selectedYear === currentYear
+      ? projectedCurrentMonthRemainder(
+          toYearMonthly(data, selectedYear),
+          toYearMonthly(data, selectedYear - 1),
+          toYearMonthly(data, selectedYear - 2),
+          now,
+        )
+      : null;
 
   const prevTotals = perCategoryTotals(data, colors, compareYear);
   const prevByName = new Map(prevTotals.map((c) => [c.name, c.value]));
@@ -156,7 +171,8 @@ const StatisticsView = () => {
         regularMonthly={regularMonthly}
         exceptionalMonthly={excMonthly}
         compareMonthly={compareMonthly}
-        monthlyBudget={monthlyBudget}
+        monthlyIncome={monthlyIncome ?? []}
+        projectedRemainder={projectedRemainder}
         compareEnabled={compareEnabled}
         showExceptionals={showExceptionals}
         now={now}

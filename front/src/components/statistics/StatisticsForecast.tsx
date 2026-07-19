@@ -3,8 +3,8 @@
 import GlowCard from "@components/shared/GlowCard";
 import { Overline } from "@components/shared/Overline";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
-import { projectedRemainingRegular } from "@components/statistics/helpers/projection";
-import { monthlyPresence, monthlyTotals, yearTotal } from "@components/statistics/helpers/statisticsData";
+import { projectedRemainingRegular, toYearMonthly } from "@components/statistics/helpers/projection";
+import { yearTotal } from "@components/statistics/helpers/statisticsData";
 import { AnimatedNumber, CursorTooltip, ProgressTrack, useCursorHover } from "@lib/dataviz";
 import { euro, euro0 } from "@lib/format";
 import statisticsText from "@text/statistics";
@@ -13,14 +13,8 @@ import getDayOfYear from "date-fns/getDayOfYear";
 import fr from "date-fns/locale/fr";
 import { useState } from "react";
 
-import type { YearMonthly } from "@components/statistics/helpers/projection";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { StatisticsResponse } from "@src/schemas/stats";
-
-const yearMonthly = (data: StatisticsResponse["data"] | undefined, year: number): YearMonthly => ({
-  totals: monthlyTotals(data, year),
-  present: monthlyPresence(data, year),
-});
 
 interface StatisticsForecastProps {
   statistics: StatisticsResponse | undefined;
@@ -59,7 +53,12 @@ const StatisticsForecast = ({
   // so its projection is just its actual total. `null` remaining = the user's very
   // first month of data (no reference) → no projection shown.
   const remaining = isCurrent
-    ? projectedRemainingRegular(yearMonthly(data, year), yearMonthly(data, year - 1), yearMonthly(data, year - 2), now)
+    ? projectedRemainingRegular(
+        toYearMonthly(data, year),
+        toYearMonthly(data, year - 1),
+        toYearMonthly(data, year - 2),
+        now,
+      )
     : 0;
   const projection = remaining === null ? null : spent + remaining;
   const delta = projection === null ? 0 : projection - compareTotal;

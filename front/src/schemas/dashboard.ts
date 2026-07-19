@@ -46,6 +46,15 @@ export const DailyProjectionSchema = z.object({
 
 export type DailyProjection = z.infer<typeof DailyProjectionSchema>;
 
+// Per-month income (dashboard initialAmount) for a year (COS-50) — GET
+// /dashboard/monthly-income. 12-slot Jan→Dec; null where the user has no
+// dashboard row for that month. Backs the monthly chart's stepped budget line.
+export const MonthlyIncomeResponseSchema = z.object({
+  income: z.array(z.number().finite().nullable()),
+});
+
+export type MonthlyIncomeResponse = z.infer<typeof MonthlyIncomeResponseSchema>;
+
 export const MonthlyStatsSchema = z.object({
   spendingsSum: z.object({
     amount: numberLikeSchema,

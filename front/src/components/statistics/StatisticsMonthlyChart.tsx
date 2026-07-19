@@ -1,19 +1,12 @@
 "use client";
 
-// The exceptional caps, the 2026 bars and the compare-year line are all real
-// (from /statistics + /exceptionals). Two things are marked MOCK: the flat
-// "budget mensuel" reference (the real monthly income drawn flat across the
-// year — there is no per-month budget endpoint) and the current-month
-// end-of-month projection (an average-forward estimate).
-
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
-import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
+import { filledMonthlyIncome, MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
 import useElementWidth from "@lib/dataviz/useElementWidth";
 import { euro0 } from "@lib/format";
 import statistics from "@text/statistics";
-import getDaysInMonth from "date-fns/getDaysInMonth";
 
 interface StatisticsMonthlyChartProps {
   year: number;
@@ -24,8 +17,12 @@ interface StatisticsMonthlyChartProps {
   exceptionalMonthly: number[];
   /** 12-slot Jan→Dec total spend for `compareYear`. */
   compareMonthly: number[];
-  /** Real monthly income, drawn as a flat reference line (MOCK: flat). */
-  monthlyBudget: number | null;
+  /** 12-slot Jan→Dec monthly income (dashboard initialAmount); null where the
+   *  user has no dashboard row. Drawn as a stepped "budget mensuel" line. */
+  monthlyIncome: (number | null)[];
+  /** Projected regular remainder of the in-progress month (chain N-1 → N-2 →
+   *  M-1), or null when there's no reference. Added to the realized total. */
+  projectedRemainder: number | null;
   compareEnabled: boolean;
   showExceptionals: boolean;
   now: Date;
@@ -63,7 +60,8 @@ const StatisticsMonthlyChart = ({
   regularMonthly,
   exceptionalMonthly,
   compareMonthly,
-  monthlyBudget,
+  monthlyIncome,
+  projectedRemainder,
   compareEnabled,
   showExceptionals,
   now,
@@ -79,17 +77,20 @@ const StatisticsMonthlyChart = ({
   const exc = regularMonthly.map((_, i) => (showExceptionals ? (exceptionalMonthly[i] ?? 0) : 0));
   const total = regularMonthly.map((v, i) => v + exc[i]);
 
-  // current-month end-of-month projection (MOCK — average-forward)
-  const dayOfMonth = now.getDate();
-  const daysInMonth = getDaysInMonth(now);
+  // current-month end-of-month projection: realized so far + the regular
+  // remainder estimated from history (chain N-1 → N-2 → M-1), exceptionals not
+  // extrapolated. A null remainder = the user's first month of data → no
+  // projection.
   const realizedCM = total[cm] ?? 0;
-  const projectedCM = isCurrentYear && dayOfMonth > 0 ? (realizedCM / dayOfMonth) * daysInMonth : 0;
-  const hasProjection = isCurrentYear && realizedCount > 0 && projectedCM > realizedCM + 1;
+  const projectedCM = realizedCM + (projectedRemainder ?? 0);
+  const hasProjection = isCurrentYear && realizedCount > 0 && projectedRemainder !== null && projectedRemainder > 1;
+
+  const budgetSeries = filledMonthlyIncome(monthlyIncome);
 
   const scaleValues = [
     ...range(realizedCount).map((m) => total[m]),
     ...(compareEnabled ? compareMonthly : []),
-    ...(monthlyBudget ? [monthlyBudget] : []),
+    ...(budgetSeries ?? []),
     ...(hasProjection ? [projectedCM] : []),
     1,
   ];
@@ -106,7 +107,17 @@ const StatisticsMonthlyChart = ({
     value: (yMax * (4 - i)) / 4,
   }));
 
-  const budgetY = monthlyBudget ? yFor(monthlyBudget) : null;
+  // Stepped budget line: one horizontal segment per month at that month's income,
+  // stepping vertically where income changes (income assumed constant within a
+  // month). Spans the full plot width like the old flat line.
+  const budgetStepPath = budgetSeries
+    ? range(12)
+        .map((m) => {
+          const y = yFor(budgetSeries[m]);
+          return `${m === 0 ? "M" : "L"} ${PAD_L + slotW * m} ${y} L ${PAD_L + slotW * (m + 1)} ${y}`;
+        })
+        .join(" ")
+    : null;
   const showCompare = compareEnabled && compareMonthly.some((v) => v > 0);
   const comparePath = range(12)
     .map((m) => `${m === 0 ? "M" : "L"} ${cx(m)} ${yFor(compareMonthly[m])}`)
@@ -214,21 +225,19 @@ const StatisticsMonthlyChart = ({
               </g>
             ))}
 
-            {/* budget mensuel (flat reference) */}
-            {budgetY != null && (
+            {/* budget mensuel (per-month stepped reference) */}
+            {budgetSeries && (
               <>
-                <line
-                  x1={PAD_L}
-                  x2={width - PAD_R}
-                  y1={budgetY}
-                  y2={budgetY}
+                <path
+                  d={budgetStepPath ?? ""}
+                  fill="none"
                   stroke="var(--ink-3)"
                   strokeWidth={1}
                   strokeDasharray="3 5"
                 />
                 <text
                   x={width - PAD_R}
-                  y={budgetY - 6}
+                  y={yFor(budgetSeries[11]) - 6}
                   fontSize={10}
                   textAnchor="end"
                   fill="var(--ink-3)"
@@ -342,7 +351,7 @@ const StatisticsMonthlyChart = ({
               );
             })}
 
-            {/* current-month projection (MOCK) */}
+            {/* current-month projection (realized + history-based remainder) */}
             {hasProjection && (
               <g>
                 <rect
