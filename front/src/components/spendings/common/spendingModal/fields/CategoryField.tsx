@@ -13,6 +13,7 @@ import type { Dispatch, SetStateAction } from "react";
 
 interface CategoryFieldProps {
   categoryOptions: CategoryOption[];
+  frequentCategories: CategoryOption[];
   selectedCategory: CategoryOption | null;
   setSelectedCategory: Dispatch<SetStateAction<CategoryOption | null>>;
   comboboxOpen: boolean;
@@ -24,6 +25,7 @@ interface CategoryFieldProps {
 
 const CategoryField = ({
   categoryOptions,
+  frequentCategories,
   selectedCategory,
   setSelectedCategory,
   comboboxOpen,
@@ -33,11 +35,6 @@ const CategoryField = ({
   userId,
 }: CategoryFieldProps) => {
   const { modal: t } = spendings;
-
-  // MOCK — "Fréquentes" quick-picks: the SELECTION is real, but the ranking
-  // (first N categories) stands in for real per-category usage counts.
-  // De-mock tracked in COS-22.
-  const frequentCategories = categoryOptions.filter((c) => c.name).slice(0, 6);
 
   const exactMatch = categoryOptions.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());
 

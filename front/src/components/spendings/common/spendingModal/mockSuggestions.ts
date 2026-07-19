@@ -1,9 +1,9 @@
-// MOCK — placeholders for data the backend does not expose yet:
-//   • "Fréquentes" category ranking → needs per-category usage counts
-//   • label autocomplete → needs the user's past spending labels
-// NOTE: the category SELECTION and the label FILL these drive are REAL — only
-// the ranking / suggestion source is fake. Deterministic and self-contained so
-// it is trivial to swap for a real endpoint later. See REFACTO_NOTES.md §6.
+// MOCK — label autocomplete: needs the user's past spending labels, which the
+// backend does not expose yet.
+// NOTE: the label FILL this drives is REAL — only the suggestion source is fake.
+// Deterministic and self-contained so it is trivial to swap for a real endpoint
+// later. See REFACTO_NOTES.md §6.
+// ("Fréquentes" category ranking is now real — see rankFrequentCategories, COS-22.)
 
 export interface LabelSuggestion {
   label: string;
