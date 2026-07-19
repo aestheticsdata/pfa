@@ -40,7 +40,7 @@ const WeekdayBulletBar = ({ value, dayBudget, scaleMax, height }: WeekdayBulletB
       {segments.map((seg) => (
         <span
           key={seg.level}
-          className="absolute inset-y-0"
+          className="absolute inset-y-0 rounded-sm"
           style={{
             left: `${seg.start * 100}%`,
             width: `${seg.width * 100}%`,
