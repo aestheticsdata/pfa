@@ -28,6 +28,37 @@ describe("StatsService.getCategoryStats", () => {
     });
   });
 
+  it("scopes to a half-open UTC window when from/to are given, with `to` inclusive", async () => {
+    const { service, groupBy } = makeService([]);
+
+    await service.getCategoryStats("user-1", "2026-01-01", "2026-07-19");
+
+    // `to` is made inclusive by pushing the exclusive upper bound to the next UTC day.
+    expect(groupBy).toHaveBeenCalledWith({
+      by: ["categoryID"],
+      where: {
+        userID: "user-1",
+        date: { gte: new Date(Date.UTC(2026, 0, 1)), lt: new Date(Date.UTC(2026, 6, 20)) },
+      },
+      _sum: { amount: true },
+      _count: true,
+    });
+  });
+
+  it("supports an open-ended window (only `from`, or only `to`)", async () => {
+    const { service, groupBy } = makeService([]);
+
+    await service.getCategoryStats("user-1", "2026-01-01");
+    expect(groupBy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ where: { userID: "user-1", date: { gte: new Date(Date.UTC(2026, 0, 1)) } } }),
+    );
+
+    await service.getCategoryStats("user-1", undefined, "2026-07-19");
+    expect(groupBy).toHaveBeenLastCalledWith(
+      expect.objectContaining({ where: { userID: "user-1", date: { lt: new Date(Date.UTC(2026, 6, 20)) } } }),
+    );
+  });
+
   it("returns zeros when the user has no spendings", async () => {
     const { service } = makeService([]);
 
