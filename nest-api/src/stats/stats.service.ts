@@ -6,6 +6,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
 import type { CategoryStat, CategoryStatsResponse } from "@stats/dto/category-stats-response.interface";
 import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-response.interface";
+import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-expense-response.interface";
 
 /** Rounds to 2 decimal places to avoid JS float precision issues. */
 const roundCurrency = (n: number): number => Math.round(n);
@@ -210,6 +211,44 @@ export class StatsService {
       .sort((a, b) => a.date.localeCompare(b.date));
 
     return { days };
+  }
+
+  /**
+   * The single biggest one-off (non-exceptional) expense of a year (COS-46).
+   * Reads the `Spendings` table only, so recurrings and exceptionals — which live
+   * in their own tables — are excluded by construction; no itemType filter needed.
+   * Amounts are stored positive, so the max-amount row is the biggest expense.
+   * Uses the same half-open UTC range as the daily stats. Returns a null expense
+   * when the user has no spending that year. Backs the "courante" row of the
+   * "Plus grosse dépense" KPI card.
+   */
+  async getBiggestRegularExpense(yearStr: string, userID: string): Promise<BiggestRegularExpenseResponse> {
+    const year = parseInt(yearStr, 10);
+    if (Number.isNaN(year)) {
+      return { expense: null };
+    }
+
+    const yearStart = new Date(Date.UTC(year, 0, 1));
+    const nextYearStart = new Date(Date.UTC(year + 1, 0, 1));
+
+    const row = await this.prisma.spendings.findFirst({
+      where: { userID, date: { gte: yearStart, lt: nextYearStart } },
+      orderBy: { amount: "desc" },
+      include: { category: true },
+    });
+    if (!row) {
+      return { expense: null };
+    }
+
+    return {
+      expense: {
+        label: row.label,
+        amount: round2(Number(row.amount)),
+        date: row.date.toISOString().slice(0, 10),
+        categoryName: row.category?.name ?? null,
+        categoryColor: row.category?.color ?? null,
+      },
+    };
   }
 
   async getStatistics(categoryIDs: string[], years: string[], userID: string): Promise<StatisticsResponse> {

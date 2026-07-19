@@ -42,3 +42,22 @@ export const DailyStatsResponseSchema = z.object({
 });
 
 export type DailyStatsResponse = z.infer<typeof DailyStatsResponseSchema>;
+
+// Biggest single one-off (non-exceptional) expense of a year (COS-46) — GET
+// /biggest-regular-expense. `expense` is null when the user has no spending that
+// year. Backs the "courante" row of the "Plus grosse dépense" KPI card.
+export const BiggestRegularExpenseSchema = z.object({
+  label: z.string(),
+  amount: numberLikeSchema,
+  date: z.string(),
+  categoryName: z.string().nullable(),
+  categoryColor: z.string().nullable(),
+});
+
+export type BiggestRegularExpense = z.infer<typeof BiggestRegularExpenseSchema>;
+
+export const BiggestRegularExpenseResponseSchema = z.object({
+  expense: BiggestRegularExpenseSchema.nullable(),
+});
+
+export type BiggestRegularExpenseResponse = z.infer<typeof BiggestRegularExpenseResponseSchema>;

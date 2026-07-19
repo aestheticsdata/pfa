@@ -19,6 +19,7 @@ import StatisticsHeatmap from "@components/statistics/StatisticsHeatmap";
 import StatisticsKpis from "@components/statistics/StatisticsKpis";
 import StatisticsMonthlyChart from "@components/statistics/StatisticsMonthlyChart";
 import StatisticsTopCategories from "@components/statistics/StatisticsTopCategories";
+import useBiggestRegularExpense from "@components/statistics/services/useBiggestRegularExpense";
 import useDailyStats from "@components/statistics/services/useDailyStats";
 import useStatistics from "@components/statistics/services/useStatistics";
 import { useMemo, useState } from "react";
@@ -46,6 +47,7 @@ const StatisticsView = () => {
 
   const { statistics, categories } = useStatistics({ years });
   const { dailyStats } = useDailyStats({ year: selectedYear });
+  const { biggestRegular } = useBiggestRegularExpense({ year: selectedYear });
   const { exceptionals } = useExceptionals({ year: selectedYear });
   const { exceptionals: compareExceptionals } = useExceptionals({
     year: compareYear,
@@ -127,6 +129,7 @@ const StatisticsView = () => {
         compareYear={compareYear}
         exceptionals={exceptionals}
         compareExceptionals={compareExceptionals}
+        biggestRegular={biggestRegular}
         showExceptionals={showExceptionals}
       />
 
