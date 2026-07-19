@@ -16,13 +16,16 @@ const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : us
 export interface CategoryTooltipDatum {
   color: string;
   name: string;
-  count: number;
+  /** Item count pill. Omit for data that has no count (e.g. the budget donut's
+   *  Fixes / Variables segments) — the pill is then hidden. */
+  count?: number;
   /** Share of the total, 0-100 (already computed — the tooltip only formats). */
   pct: number;
   /** Amount in euros. */
   total: number;
-  /** Trend data — the page computes it from its own source (weekly vs monthly). */
-  trend: CategoryTrendData;
+  /** Trend data — the page computes it from its own source (weekly vs monthly).
+   *  Omit for data with no trend — the "Tendance" row is then hidden. */
+  trend?: CategoryTrendData;
 }
 
 export interface CategoryBarTooltipProps {
@@ -110,17 +113,23 @@ const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
           style={{ background: datum.color }}
         />
         <span className="truncate text-sm font-medium capitalize text-ink">{datum.name}</span>
-        <span className="num ml-auto shrink-0 rounded-full border border-line-soft bg-surface-base px-2 text-2xs leading-normal text-ink-3">
-          {datum.count}
-        </span>
+        {datum.count != null && (
+          <span className="num ml-auto shrink-0 rounded-full border border-line-soft bg-surface-base px-2 text-2xs leading-normal text-ink-3">
+            {datum.count}
+          </span>
+        )}
       </div>
       <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-1 text-xs">
         <span className="text-ink-4">Part</span>
         <span className="num text-right text-ink-2">{datum.pct.toFixed(1).replace(".", ",")} %</span>
         <span className="text-ink-4">Montant</span>
         <span className="num text-right text-ink">{euro(datum.total)} €</span>
-        <span className="text-ink-4">Tendance</span>
-        <CategoryTrend {...datum.trend} />
+        {datum.trend && (
+          <>
+            <span className="text-ink-4">Tendance</span>
+            <CategoryTrend {...datum.trend} />
+          </>
+        )}
       </div>
     </div>,
     document.body,
