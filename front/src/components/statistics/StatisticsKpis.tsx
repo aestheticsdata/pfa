@@ -13,7 +13,6 @@ import {
   MONTHS_FR,
   maxIndex,
   monthlyTotals,
-  perCategoryTotals,
   yearTotal,
 } from "@components/statistics/helpers/statisticsData";
 import StatMiniChart from "@components/statistics/StatMiniChart";
@@ -27,7 +26,7 @@ import parseISO from "date-fns/parseISO";
 import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
-import type { StatisticsResponse } from "@src/schemas/stats";
+import type { BiggestRegularExpense, StatisticsResponse } from "@src/schemas/stats";
 
 interface StatisticsKpisProps {
   statistics: StatisticsResponse | undefined;
@@ -35,6 +34,7 @@ interface StatisticsKpisProps {
   compareYear: number;
   exceptionals: ExceptionalItem[];
   compareExceptionals: ExceptionalItem[];
+  biggestRegular: BiggestRegularExpense | null;
   showExceptionals: boolean;
 }
 
@@ -132,15 +132,16 @@ const CmpRow = ({
   );
 };
 
-/** The four Statistiques KPI cards. Totals / averages / biggest month are real
- *  (from /statistics + /exceptionals); the "courante" biggest single expense in
- *  card 4 is MOCK — there is no per-transaction yearly endpoint. */
+/** The four Statistiques KPI cards, all real: totals / averages / biggest month
+ *  from /statistics + /exceptionals, and card 4's biggest single expenses from
+ *  /exceptionals (exceptional) + /biggest-regular-expense (courante). */
 const StatisticsKpis = ({
   statistics,
   year,
   compareYear,
   exceptionals,
   compareExceptionals,
+  biggestRegular,
   showExceptionals,
 }: StatisticsKpisProps) => {
   const [now] = useState(() => new Date());
@@ -174,12 +175,10 @@ const StatisticsKpis = ({
 
   // biggest single expense
   const topExc = biggestExceptional(exceptionals);
-  const topCategory = perCategoryTotals(data, statistics?.colors ?? {}, year)[0];
-  // MOCK — no per-transaction yearly endpoint; approximated from the top category
-  const mockRegularBiggest = topCategory
-    ? { label: cap(topCategory.name), amount: Math.round(topCategory.value / months) }
-    : { label: t.regularExpenseFallback, amount: 0 };
-  const expenseScale = Math.max(Number(topExc?.amount ?? 0), mockRegularBiggest.amount, 1);
+  const regularBiggest = biggestRegular
+    ? { label: cap(biggestRegular.label), amount: Number(biggestRegular.amount), date: biggestRegular.date }
+    : { label: t.regularExpenseFallback, amount: 0, date: null as string | null };
+  const expenseScale = Math.max(Number(topExc?.amount ?? 0), regularBiggest.amount, 1);
 
   return (
     <section className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 min-[768px]:grid-cols-4">
@@ -266,11 +265,19 @@ const StatisticsKpis = ({
           <CmpRow
             tag={t.tag.regular}
             kind="reg"
-            title={mockRegularBiggest.label}
+            title={regularBiggest.label}
             titleVariant="expense"
-            amount={mockRegularBiggest.amount}
-            regWidth={mockRegularBiggest.amount / expenseScale}
+            amount={regularBiggest.amount}
+            regWidth={regularBiggest.amount / expenseScale}
             excWidth={0}
+            titleTooltip={
+              regularBiggest.date
+                ? t.tooltip.expenseInfo(
+                    regularBiggest.label,
+                    format(parseISO(regularBiggest.date), "d MMM yyyy", { locale: fr }),
+                  )
+                : undefined
+            }
           />
         </div>
       </Card>

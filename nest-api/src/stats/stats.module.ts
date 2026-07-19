@@ -7,6 +7,7 @@ import {
   RegularMonthlyAverageController,
   CategoryStatsController,
   DailyStatsController,
+  BiggestRegularExpenseController,
 } from "@stats/stats.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
@@ -20,6 +21,7 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
     RegularMonthlyAverageController,
     CategoryStatsController,
     DailyStatsController,
+    BiggestRegularExpenseController,
   ],
   providers: [StatsService, SessionAuthGuard],
 })

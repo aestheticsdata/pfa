@@ -163,3 +163,96 @@ describe("StatsService.getDailyStats", () => {
     expect(result.days).toEqual([{ date: "2023-02-01", total: 10.01, count: 2 }]);
   });
 });
+
+/**
+ * Unit tests for StatsService.getBiggestRegularExpense — the single biggest
+ * one-off (non-exceptional) expense of a year, backing the "courante" row of the
+ * Statistiques "Plus grosse dépense" KPI card (COS-46). Prisma is mocked; these
+ * assert the query shape (max-amount row in the Spendings table only) and the
+ * mapping to the response envelope.
+ */
+describe("StatsService.getBiggestRegularExpense", () => {
+  const makeService = (findFirstResult: unknown) => {
+    const findFirst = jest.fn().mockResolvedValue(findFirstResult);
+    const prisma = { spendings: { findFirst } } as unknown as never;
+    return { service: new StatsService(prisma), findFirst };
+  };
+
+  it("returns a null expense and skips the query for a non-numeric year", async () => {
+    const { service, findFirst } = makeService(null);
+
+    await expect(service.getBiggestRegularExpense("not-a-year", "user-1")).resolves.toEqual({ expense: null });
+    expect(findFirst).not.toHaveBeenCalled();
+  });
+
+  it("queries the year's max-amount spending as a half-open UTC range, scoped to the user", async () => {
+    const { service, findFirst } = makeService(null);
+
+    await service.getBiggestRegularExpense("2023", "user-1");
+
+    // Spendings table only (exceptionals/recurrings live elsewhere), biggest
+    // amount first, with the category joined for the label/color.
+    expect(findFirst).toHaveBeenCalledWith({
+      where: {
+        userID: "user-1",
+        date: { gte: new Date(Date.UTC(2023, 0, 1)), lt: new Date(Date.UTC(2024, 0, 1)) },
+      },
+      orderBy: { amount: "desc" },
+      include: { category: true },
+    });
+  });
+
+  it("returns a null expense when the user has no spending that year", async () => {
+    const { service } = makeService(null);
+
+    await expect(service.getBiggestRegularExpense("2023", "user-1")).resolves.toEqual({ expense: null });
+  });
+
+  it("maps the biggest row to label / amount / UTC date / category", async () => {
+    const { service } = makeService({
+      label: "Canapé",
+      amount: 899.9,
+      date: new Date("2023-06-15T00:00:00.000Z"),
+      category: { name: "Maison", color: "#abcdef" },
+    });
+
+    await expect(service.getBiggestRegularExpense("2023", "user-1")).resolves.toEqual({
+      expense: {
+        label: "Canapé",
+        amount: 899.9,
+        date: "2023-06-15",
+        categoryName: "Maison",
+        categoryColor: "#abcdef",
+      },
+    });
+  });
+
+  it("returns null category fields for an uncategorized spending", async () => {
+    const { service } = makeService({
+      label: "Divers",
+      amount: 300,
+      date: new Date("2023-02-01T00:00:00.000Z"),
+      category: null,
+    });
+
+    const result = await service.getBiggestRegularExpense("2023", "user-1");
+
+    expect(result).toEqual({
+      expense: { label: "Divers", amount: 300, date: "2023-02-01", categoryName: null, categoryColor: null },
+    });
+  });
+
+  it("coerces a Prisma Decimal amount (object with toString) to a number", async () => {
+    const decimal = { toString: () => "1499.99" };
+    const { service } = makeService({
+      label: "Frigo",
+      amount: decimal,
+      date: new Date("2023-11-20T00:00:00.000Z"),
+      category: { name: "Maison", color: "#000000" },
+    });
+
+    const result = await service.getBiggestRegularExpense("2023", "user-1");
+
+    expect(result.expense?.amount).toBeCloseTo(1499.99, 2);
+  });
+});

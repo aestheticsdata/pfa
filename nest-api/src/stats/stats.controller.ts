@@ -5,6 +5,7 @@ import { MonthlyStatsQueryDto } from "@stats/dto/monthly-stats-query.dto";
 import { StatisticsQueryDto } from "@stats/dto/statistics-query.dto";
 import { RegularMonthlyAverageQueryDto } from "@stats/dto/regular-monthly-average-query.dto";
 import { DailyStatsQueryDto } from "@stats/dto/daily-stats-query.dto";
+import { BiggestRegularExpenseQueryDto } from "@stats/dto/biggest-regular-expense-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
@@ -79,5 +80,16 @@ export class DailyStatsController {
   @Get()
   async getDailyStats(@Query() query: DailyStatsQueryDto, @GetUserId() userID: string) {
     return this.statsService.getDailyStats(query.year, userID);
+  }
+}
+
+@Controller("biggest-regular-expense")
+@UseGuards(SessionAuthGuard)
+export class BiggestRegularExpenseController {
+  constructor(private readonly statsService: StatsService) {}
+
+  @Get()
+  async getBiggestRegularExpense(@Query() query: BiggestRegularExpenseQueryDto, @GetUserId() userID: string) {
+    return this.statsService.getBiggestRegularExpense(query.year, userID);
   }
 }
