@@ -10,6 +10,17 @@ export const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: nu
 };
 
 /**
+ * Inverse of {@link polarToCartesian}'s angle: an offset from the center
+ * (`dx` right, `dy` down) → its angle in degrees, measured clockwise from
+ * 12 o'clock and normalized to [0, 360). Used to hit-test a cursor against
+ * the ring's segments (which run clockwise from the top).
+ */
+export const angleFromCenter = (dx: number, dy: number): number => {
+  const deg = (Math.atan2(dx, -dy) * 180) / Math.PI;
+  return deg < 0 ? deg + 360 : deg;
+};
+
+/**
  * Filled pie-wedge path from `startAngle` to `endAngle` (degrees, clockwise).
  * NOTE: this is the canonical `describeArc` pattern — the arc endpoints are
  * intentionally computed from the *opposite* angles and drawn with sweep-flag 0.

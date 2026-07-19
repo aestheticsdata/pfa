@@ -18,6 +18,7 @@ const dashboard = {
     donutAria: "Répartition du budget consommé",
     fixed: "Fixes",
     variables: "Variables",
+    available: "Restant",
   },
   categoryBreakdown: {
     title: "Répartition par catégorie",

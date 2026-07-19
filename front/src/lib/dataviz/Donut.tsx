@@ -1,11 +1,11 @@
 "use client";
 
-import { annularSectorPath, wedgePath } from "@lib/dataviz/arcPaths";
+import { angleFromCenter, annularSectorPath, wedgePath } from "@lib/dataviz/arcPaths";
 import { cn } from "@lib/utils";
 import { useId } from "react";
 
 import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, MouseEvent, ReactNode } from "react";
 
 interface DonutProps {
   segments: DonutSegment[];
@@ -29,6 +29,13 @@ interface DonutProps {
   /** Stroke color of the dotted "available" band (ring gauge, when `capacity`
    *  is set). */
   availableColor?: string;
+  /** Fires on pointer move over a ring segment, with its index and the event —
+   *  mirrors `StackedBar` so a caller can drive a follow-cursor tooltip. The empty
+   *  "available" band reports `index === segments.length` (when `capacity` leaves a
+   *  leftover); the center hole and outside the band report a leave. */
+  onSegmentHover?: (index: number, event: MouseEvent) => void;
+  /** Fires when the pointer leaves the ring band (or lands where no segment is). */
+  onSegmentLeave?: () => void;
   /** Center overlay (e.g. a big % for a gauge). */
   children?: ReactNode;
   className?: string;
@@ -49,6 +56,9 @@ const REMAINING_INSET = 0.75;
  *  angular end, so the growing mask never clips the dotted outline. */
 const REMAINING_MASK_PAD = 3;
 const REMAINING_MASK_ARC = 1.5;
+/** Radial slack (viewBox units) around the ring band when hit-testing the cursor,
+ *  so the thin stroke stays comfortably hoverable. */
+const HIT_TOL = 4;
 
 /**
  * Donut / gauge / camembert. `ring` (default) draws stroked arcs — ideal for a
@@ -65,13 +75,57 @@ const Donut = ({
   trackColor = "var(--surface-hi)",
   capacity,
   availableColor = "var(--accent-strong)",
+  onSegmentHover,
+  onSegmentLeave,
   children,
   className,
   ariaLabel,
 }: DonutProps) => {
   const segmentsTotal = segments.reduce((sum, seg) => sum + Math.max(0, seg.value), 0);
+  // Gauge full-scale denominator (ring): segments + the leftover "available" band,
+  // so a segment's angular share = value / ringTotal — the same fraction the arc
+  // is drawn with, and what the hover hit-test maps the cursor angle against.
+  const isRing = variant !== "pie";
+  const leftover = isRing && capacity != null ? Math.max(0, capacity - segmentsTotal) : 0;
+  const ringTotal = segmentsTotal + leftover || 1;
   // Stable prefix for the reveal-mask id (unique across mounted Donuts).
   const uid = useId();
+
+  // Hit-test the cursor against the ring band: resolve its angle to a segment
+  // (clockwise from 12 o'clock, same as the arcs), reporting the segment with the
+  // event so the caller can drive a follow-cursor tooltip — no per-arc handlers,
+  // so the SVG stays a single labelled image. The center hole, the empty
+  // "available" band, and outside the band all report a leave (no tooltip).
+  const handleMove = (event: MouseEvent<SVGSVGElement>) => {
+    if (!onSegmentHover || !isRing) {
+      return;
+    }
+    const rect = event.currentTarget.getBoundingClientRect();
+    const scale = (rect.width || 1) / 100; // viewBox spans 100 units
+    const dx = (event.clientX - (rect.left + CX * scale)) / scale;
+    const dy = (event.clientY - (rect.top + CY * scale)) / scale;
+    const radius = Math.hypot(dx, dy);
+    if (radius < 50 - thickness - HIT_TOL || radius > 50 + HIT_TOL) {
+      onSegmentLeave?.();
+      return;
+    }
+    const fraction = angleFromCenter(dx, dy) / 360;
+    let acc = 0;
+    for (let i = 0; i < segments.length; i++) {
+      acc += Math.max(0, segments[i].value) / ringTotal;
+      if (fraction <= acc) {
+        onSegmentHover(i, event);
+        return;
+      }
+    }
+    // Past the solid segments: the empty "available" band (index === segments.length)
+    // when there is a leftover, else no target.
+    if (leftover > 0) {
+      onSegmentHover(segments.length, event);
+    } else {
+      onSegmentLeave?.();
+    }
+  };
 
   // cumulative geometry computed imperatively (no reassignment inside JSX)
   let body: ReactNode;
@@ -100,17 +154,13 @@ const Donut = ({
   } else {
     const r = 50 - thickness / 2;
     const circumference = 2 * Math.PI * r;
-    // Optional gauge leftover: capacity beyond the summed segments renders as the
-    // empty dotted "available" band that completes the ring.
-    const leftover = capacity != null ? Math.max(0, capacity - segmentsTotal) : 0;
-    const total = segmentsTotal + leftover || 1;
     const growStyle = (dash: number) =>
       ({ "--pfa-circ": circumference, "--pfa-dash": dash, "--pfa-gap": circumference - dash }) as CSSProperties;
 
     const solidArcs: { dash: number; offset: number; color: string }[] = [];
     let offset = 0;
     for (const seg of segments) {
-      const dash = (Math.max(0, seg.value) / total) * circumference;
+      const dash = (Math.max(0, seg.value) / ringTotal) * circumference;
       if (dash > 0) {
         solidArcs.push({ dash, offset, color: seg.color });
       }
@@ -122,7 +172,7 @@ const Donut = ({
     // Its own dash array carries the dot pattern, so it can't grow via that; instead
     // it's revealed through a mask whose band grows with the same pfa-donut-grow
     // keyframe — the empty band fills in lockstep with the solid arcs.
-    const emptyDash = (leftover / total) * circumference;
+    const emptyDash = (leftover / ringTotal) * circumference;
     const emptyFull = emptyDash >= circumference - 0.01;
     const rInner = 50 - thickness + REMAINING_INSET;
     const rOuter = 50 - REMAINING_INSET;
@@ -237,16 +287,23 @@ const Donut = ({
       className={cn("relative inline-grid place-items-center", className)}
       style={{ width: size, height: size }}
     >
+      {/* Hover lives on the <svg> (the labelled graphic) so it stays a single
+          role="img" for assistive tech; the center overlay is pointer-transparent
+          so the cursor reaches the ring underneath it. */}
       <svg
         viewBox="0 0 100 100"
         width={size}
         height={size}
         role="img"
         aria-label={ariaLabel}
+        onMouseMove={onSegmentHover ? handleMove : undefined}
+        onMouseLeave={onSegmentHover ? onSegmentLeave : undefined}
       >
         {body}
       </svg>
-      {children && <div className="absolute inset-0 grid place-content-center text-center">{children}</div>}
+      {children && (
+        <div className="pointer-events-none absolute inset-0 grid place-content-center text-center">{children}</div>
+      )}
     </div>
   );
 };

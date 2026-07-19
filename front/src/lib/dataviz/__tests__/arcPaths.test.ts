@@ -1,4 +1,4 @@
-import { annularSectorPath, polarToCartesian } from "@lib/dataviz/arcPaths";
+import { angleFromCenter, annularSectorPath, polarToCartesian } from "@lib/dataviz/arcPaths";
 import { describe, expect, it } from "vitest";
 
 // All numbers a path string lands on, in order (handles decimals + sci notation).
@@ -17,6 +17,20 @@ describe("polarToCartesian", () => {
     const bottom = polarToCartesian(50, 50, 40, 180);
     expect(bottom.x).toBeCloseTo(50);
     expect(bottom.y).toBeCloseTo(90);
+  });
+});
+
+describe("angleFromCenter", () => {
+  it("inverts polarToCartesian: clockwise from 12 o'clock, normalized to [0, 360)", () => {
+    expect(angleFromCenter(0, -1)).toBeCloseTo(0); // up
+    expect(angleFromCenter(1, 0)).toBeCloseTo(90); // right
+    expect(angleFromCenter(0, 1)).toBeCloseTo(180); // down
+    expect(angleFromCenter(-1, 0)).toBeCloseTo(270); // left (normalized, not -90)
+  });
+
+  it("round-trips a point produced by polarToCartesian", () => {
+    const p = polarToCartesian(50, 50, 40, 123);
+    expect(angleFromCenter(p.x - 50, p.y - 50)).toBeCloseTo(123);
   });
 });
 

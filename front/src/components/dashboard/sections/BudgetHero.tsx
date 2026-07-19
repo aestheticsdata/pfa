@@ -9,7 +9,7 @@ import { MoneyAmount } from "@components/shared/MoneyAmount";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { Input } from "@components/ui/input";
-import { Donut, useCountUp } from "@lib/dataviz";
+import { CategoryBarTooltip, Donut, useCountUp } from "@lib/dataviz";
 import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
 import dashboardText from "@text/dashboard";
@@ -18,6 +18,7 @@ import fr from "date-fns/locale/fr";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import type { BarHover, CategoryTooltipDatum } from "@lib/dataviz";
 import type { FocusEvent, KeyboardEvent } from "react";
 
 interface SalaryForm {
@@ -36,6 +37,7 @@ const BudgetHero = () => {
   } = useDashboard();
   const { recurrings } = useReccurings();
   const [editing, setEditing] = useState(false);
+  const [hover, setHover] = useState<BarHover<number> | null>(null);
   const { register, handleSubmit, setFocus } = useForm<SalaryForm>();
   const { budgetHero: t } = dashboardText;
 
@@ -57,13 +59,35 @@ const BudgetHero = () => {
   // remount key → replays the donut grow-from-zero on month change
   const monthKey = format(from ?? new Date(), "yyyy-MM");
 
-  const segments =
+  // One source of truth for the two budget segments → the donut arcs AND the
+  // hover tooltip render identical values (same order → hover index maps back).
+  const budgetSegments =
     initialAmount > 0
       ? [
-          { label: t.fixed, value: fixed, color: "var(--accent-d)" },
-          { label: t.variables, value: variable, color: "var(--accent-strong)" },
+          { name: t.fixed, value: fixed, color: "var(--accent-d)" },
+          { name: t.variables, value: variable, color: "var(--accent-strong)" },
         ]
       : [];
+  const segments = budgetSegments.map((s) => ({ label: s.name, value: s.value, color: s.color }));
+  // `pct` = share of the whole budget (value / initialAmount), i.e. the fraction
+  // of the ring the arc actually occupies post-COS-134 — so the tooltip % matches
+  // the hovered arc, not the "% utilisé" of the center.
+  const tooltipData: CategoryTooltipDatum[] = budgetSegments.map((s) => ({
+    color: s.color,
+    name: s.name,
+    pct: (s.value / initialAmount) * 100,
+    total: s.value,
+  }));
+  // The empty "available" band (donut reports it as index === segments.length) →
+  // the remaining amount and its share of the budget (100 − % utilisé).
+  if (initialAmount > 0 && remaining > 0) {
+    tooltipData.push({
+      color: "var(--accent-strong)",
+      name: t.available,
+      pct: (remaining / initialAmount) * 100,
+      total: remaining,
+    });
+  }
 
   const onSubmit = (v: SalaryForm) => {
     setEditing(false);
@@ -165,6 +189,8 @@ const BudgetHero = () => {
             thickness={7}
             animate
             ariaLabel={t.donutAria}
+            onSegmentHover={(index, e) => setHover({ target: index, x: e.clientX, y: e.clientY })}
+            onSegmentLeave={() => setHover(null)}
           >
             <div>
               <div className="num text-3xl font-medium leading-none tracking-tight text-ink">
@@ -184,6 +210,13 @@ const BudgetHero = () => {
           </div>
         </div>
       </div>
+
+      {hover && tooltipData[hover.target] && (
+        <CategoryBarTooltip
+          point={{ x: hover.x, y: hover.y }}
+          datum={tooltipData[hover.target]}
+        />
+      )}
 
       <DailySparkline />
     </GlowCard>
