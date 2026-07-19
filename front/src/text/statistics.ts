@@ -42,10 +42,12 @@ const statistics = {
     endOfYear: "31 déc.",
     projectionAxis: "— projection —",
     projectionTitle: "Projection fin d'année",
+    noProjection: "Historique insuffisant",
     vsCompare: (compareYear: number, total: string) => `vs ${compareYear} (${total} €)`,
     tooltip: {
-      projectionModel: (perDay: string, days: number) => `Au rythme actuel · ${perDay} €/jour × ${days} jours`,
+      projectionModel: "Reste de l'année estimé d'après l'historique (même mois N-1) · exceptionnels non extrapolés",
       projectionActual: "Total réalisé sur l'année",
+      noProjection: "Aucun historique pour projeter — première période de données",
     },
   },
   monthlyChart: {

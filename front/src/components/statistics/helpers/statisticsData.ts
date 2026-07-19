@@ -45,6 +45,21 @@ export const monthlyTotals = (data: StatData | undefined, year: number): number[
 export const yearTotal = (data: StatData | undefined, year: number): number =>
   monthlyTotals(data, year).reduce((a, b) => a + b, 0);
 
+/**
+ * 12-slot mask (Jan→Dec) of which months `year` has any data for. `/statistics`
+ * only emits a row for a month once it has a spending, so this tells a real
+ * zero-spend month apart from a no-data one — the projection chain needs the
+ * distinction to know whether a reference month actually exists.
+ */
+export const monthlyPresence = (data: StatData | undefined, year: number): boolean[] => {
+  const present = Array<boolean>(12).fill(false);
+  rowsForYear(data, year).forEach((row, i) => {
+    const idx = MONTHS_FR.indexOf(String(row.month));
+    present[idx >= 0 ? idx : i] = true;
+  });
+  return present;
+};
+
 /** Round up to a "nice" axis ceiling (1, 1.5, 2, 3, 4, 5, 7.5, 10 × 10ⁿ). */
 export const niceCeil = (value: number): number => {
   if (value <= 0) return 1;
