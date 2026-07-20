@@ -23,6 +23,7 @@ import StatisticsTopCategories from "@components/statistics/StatisticsTopCategor
 import useBiggestRegularExpense from "@components/statistics/services/useBiggestRegularExpense";
 import useDailyStats from "@components/statistics/services/useDailyStats";
 import useMonthlyIncome from "@components/statistics/services/useMonthlyIncome";
+import useRecurringsDrawn from "@components/statistics/services/useRecurringsDrawn";
 import useStatistics from "@components/statistics/services/useStatistics";
 import { useMemo, useState } from "react";
 
@@ -65,6 +66,9 @@ const StatisticsView = () => {
   const dashboard = useDashboard();
   const { recurrings } = useReccurings();
   const { monthlyIncome } = useMonthlyIncome({ year: selectedYear });
+  // "Déjà prélevé" is always the real current-year-to-date sum, independent of the
+  // selected stats year — the widget's per-line breakdown stays on the current month.
+  const { drawn } = useRecurringsDrawn({ year: currentYear, month: now.getMonth() });
 
   const data = statistics?.data;
   const colors = statistics?.colors ?? {};
@@ -202,6 +206,7 @@ const StatisticsView = () => {
 
       <StatisticsFixedExpenses
         recurrings={recurrings ?? []}
+        drawn={drawn ?? 0}
         now={now}
       />
 

@@ -6,6 +6,7 @@ export const QUERY_OPTIONS = {
 export const QUERY_KEYS = {
   SPENDINGS_BY_MONTH: "spendingsByMonth",
   RECURRINGS: "recurrings",
+  RECURRINGS_DRAWN: "recurringsDrawn",
   INITIAL_AMOUNT: "initialAmount",
   DASHBOARD: "dashboard",
   DAILY_PROJECTION: "dailyProjection",

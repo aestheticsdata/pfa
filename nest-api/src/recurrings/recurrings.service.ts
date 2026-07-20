@@ -16,6 +16,31 @@ export class RecurringsService {
     });
   }
 
+  /**
+   * Real year-to-date "déjà prélevé" (COS-49): the sum of the actual per-month
+   * recurring rows from January through the client's current month (inclusive).
+   * Recurrings are stored one row per month (copied forward), so this reflects
+   * what was really committed each month — no calendar estimate, no `dateFrom`
+   * charge-day proxy. A half-open UTC range keeps the month bound timezone-safe.
+   */
+  async getDrawn(yearStr: string, monthStr: string, userID: string): Promise<{ drawn: number }> {
+    const year = parseInt(yearStr, 10);
+    const month = parseInt(monthStr, 10);
+    if (Number.isNaN(year) || Number.isNaN(month) || month < 0 || month > 11) {
+      return { drawn: 0 };
+    }
+
+    const yearStart = new Date(Date.UTC(year, 0, 1));
+    const throughMonthEnd = new Date(Date.UTC(year, month + 1, 1));
+
+    const result = await this.prisma.recurrings.aggregate({
+      _sum: { amount: true },
+      where: { userID, dateFrom: { gte: yearStart, lt: throughMonthEnd } },
+    });
+
+    return { drawn: Number(result._sum.amount ?? 0) };
+  }
+
   async createRecurring(
     dto: { start: string; end: string; label: string; amount: number; currency?: string },
     userID: string,

@@ -15,6 +15,7 @@ import { RecurringsService } from "@recurrings/recurrings.service";
 import { CreateRecurringDto } from "@recurrings/dto/create-recurring.dto";
 import { UpdateRecurringDto } from "@recurrings/dto/update-recurring.dto";
 import { RecurringsQueryDto } from "@recurrings/dto/recurrings-query.dto";
+import { RecurringsDrawnQueryDto } from "@recurrings/dto/recurrings-drawn-query.dto";
 import { CopyRecurringsDto } from "@recurrings/dto/copy-recurrings.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
@@ -28,6 +29,13 @@ export class RecurringsController {
   @Get()
   async getRecurrings(@Query() query: RecurringsQueryDto, @GetUserId() userID: string) {
     return this.recurringsService.getRecurrings(query.start, userID);
+  }
+
+  // Real year-to-date "déjà prélevé" for the Statistics fixed-expenses widget
+  // (COS-49) — sums the per-month recurring rows Jan → the client's current month.
+  @Get("drawn")
+  async getDrawn(@Query() query: RecurringsDrawnQueryDto, @GetUserId() userID: string): Promise<{ drawn: number }> {
+    return this.recurringsService.getDrawn(query.year, query.month, userID);
   }
 
   @Post()
