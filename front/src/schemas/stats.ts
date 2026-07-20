@@ -96,3 +96,20 @@ export const BusiestWeekResponseSchema = z.object({
 });
 
 export type BusiestWeekResponse = z.infer<typeof BusiestWeekResponseSchema>;
+
+// Totals of the three months before the displayed month (COS-40) — GET
+// /spending-pace. Newest→oldest (M-1, M-2, M-3); `month` is the month's first day
+// (YYYY-MM-DD). Feeds the dashboard's "Sur le rythme" insight, which turns these
+// into daily rates and compares them to the current month's pace.
+export const MonthlyTotalSchema = z.object({
+  month: z.string(),
+  total: numberLikeSchema,
+});
+
+export type MonthlyTotal = z.infer<typeof MonthlyTotalSchema>;
+
+export const SpendingPaceResponseSchema = z.object({
+  months: z.array(MonthlyTotalSchema),
+});
+
+export type SpendingPaceResponse = z.infer<typeof SpendingPaceResponseSchema>;

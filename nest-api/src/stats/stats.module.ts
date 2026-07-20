@@ -8,6 +8,7 @@ import {
   CategoryStatsController,
   CategoryTrendsController,
   BusiestWeekController,
+  SpendingPaceController,
   DailyStatsController,
   BiggestRegularExpenseController,
 } from "@stats/stats.controller";
@@ -24,6 +25,7 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
     CategoryStatsController,
     CategoryTrendsController,
     BusiestWeekController,
+    SpendingPaceController,
     DailyStatsController,
     BiggestRegularExpenseController,
   ],

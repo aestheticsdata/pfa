@@ -9,6 +9,7 @@ import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-respo
 import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-expense-response.interface";
 import type { CategoryTrendPoint, CategoryTrendsResponse } from "@stats/dto/category-trends-response.interface";
 import type { BusiestWeekResponse } from "@stats/dto/busiest-week-response.interface";
+import type { SpendingPaceResponse } from "@stats/dto/spending-pace-response.interface";
 
 /** Rounds to 2 decimal places to avoid JS float precision issues. */
 const roundCurrency = (n: number): number => Math.round(n);
@@ -148,6 +149,37 @@ export class StatsService {
       sliceLength = 7;
     }
     return ranges;
+  }
+
+  /**
+   * The total one-off spending of each of the three months before the reference
+   * month (COS-40), so the dashboard's "Sur le rythme" insight can compare the
+   * current month's daily pace to the recent average. Reads the one-off
+   * `Spendings` table only (recurrings/exceptionals live in their own tables), the
+   * same basis as the projection and the other ribbon insights. Sums each month
+   * over a half-open UTC range so month keys are timezone-safe; `Date.UTC`
+   * normalizes negative months, so no manual year wrap is needed. Returned
+   * newest→oldest (M-1, M-2, M-3); an empty month comes back as total 0 and is
+   * excluded — not averaged in — on the front.
+   */
+  async getSpendingPace(start: string, userID: string): Promise<SpendingPaceResponse> {
+    const startDate = new Date(start);
+    const year = startDate.getUTCFullYear();
+    const month = startDate.getUTCMonth();
+
+    const months = await Promise.all(
+      [1, 2, 3].map(async (monthsBack) => {
+        const gte = new Date(Date.UTC(year, month - monthsBack, 1));
+        const lt = new Date(Date.UTC(year, month - monthsBack + 1, 1));
+        const result = await this.prisma.spendings.aggregate({
+          where: { userID, date: { gte, lt } },
+          _sum: { amount: true },
+        });
+        return { month: gte.toISOString().slice(0, 10), total: round2(Number(result._sum.amount ?? 0)) };
+      }),
+    );
+
+    return { months };
   }
 
   async getRegularMonthlyAverage(yearStr: string, userID: string): Promise<{ monthlyAverage: number }> {
