@@ -8,6 +8,7 @@ import type { CategoryStat, CategoryStatsResponse } from "@stats/dto/category-st
 import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-response.interface";
 import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-expense-response.interface";
 import type { CategoryTrendPoint, CategoryTrendsResponse } from "@stats/dto/category-trends-response.interface";
+import type { BusiestWeekResponse } from "@stats/dto/busiest-week-response.interface";
 
 /** Rounds to 2 decimal places to avoid JS float precision issues. */
 const roundCurrency = (n: number): number => Math.round(n);
@@ -70,6 +71,83 @@ export class StatsService {
       dayShifter += ranges[slice_i];
     }
     return totalsByWeek;
+  }
+
+  /**
+   * The calendar week-range of a month with the most one-off spendings (COS-139).
+   * "Week" = the month's calendar-aligned Sun→Sat ranges, truncated at the month
+   * edges — the same slices the rest of the app uses (datepicker, Dépenses,
+   * weekly ceiling), NOT a rolling window. Reads the one-off `Spendings` table
+   * only, so recurrings and exceptionals — which live in their own tables — are
+   * excluded by construction. Counts per day over a half-open UTC month range and
+   * buckets in JS (like the daily stats) so day keys are timezone-safe. Ties
+   * resolve to the earliest range; returns count 0 / null bounds for a month with
+   * no spending. Backs the dashboard's 4th ribbon insight.
+   */
+  async getBusiestWeek(start: string, userID: string): Promise<BusiestWeekResponse> {
+    const startDate = new Date(start);
+    const year = startDate.getUTCFullYear();
+    const month = startDate.getUTCMonth();
+
+    const grouped = await this.prisma.spendings.groupBy({
+      by: ["date"],
+      where: { userID, date: { gte: new Date(Date.UTC(year, month, 1)), lt: new Date(Date.UTC(year, month + 1, 1)) } },
+      _count: true,
+    });
+
+    const ranges = this.weekRangesOfMonth(year, month);
+    const counts = new Array<number>(ranges.length).fill(0);
+    for (const group of grouped) {
+      const day = group.date.getUTCDate();
+      const index = ranges.findIndex((range) => day >= range.startDay && day <= range.endDay);
+      if (index !== -1) {
+        counts[index] += group._count;
+      }
+    }
+
+    // Strict `>` keeps the earliest range on ties.
+    let bestIndex = -1;
+    let bestCount = 0;
+    for (let i = 0; i < ranges.length; i += 1) {
+      if (counts[i] > bestCount) {
+        bestCount = counts[i];
+        bestIndex = i;
+      }
+    }
+
+    if (bestIndex === -1) {
+      return { count: 0, from: null, to: null };
+    }
+
+    const { startDay, endDay } = ranges[bestIndex];
+    return {
+      count: bestCount,
+      from: new Date(Date.UTC(year, month, startDay)).toISOString().slice(0, 10),
+      to: new Date(Date.UTC(year, month, endDay)).toISOString().slice(0, 10),
+    };
+  }
+
+  /**
+   * A month's calendar-aligned week slices as inclusive day-of-month ranges: a
+   * (possibly short) first slice from day 1 to the first Saturday, full Sun→Sat
+   * weeks, then a (possibly short) trailing slice. Same slicing as `makeRange`,
+   * but the first slice is derived from the 1st of the month (UTC) so it is
+   * correct whatever day `start` falls on.
+   */
+  private weekRangesOfMonth(year: number, month: number): { startDay: number; endDay: number }[] {
+    const firstWeekday = new Date(Date.UTC(year, month, 1)).getUTCDay();
+    const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+
+    const ranges: { startDay: number; endDay: number }[] = [];
+    let day = 1;
+    let sliceLength = 7 - firstWeekday;
+    while (day <= daysInMonth) {
+      const endDay = Math.min(day + sliceLength - 1, daysInMonth);
+      ranges.push({ startDay: day, endDay });
+      day = endDay + 1;
+      sliceLength = 7;
+    }
+    return ranges;
   }
 
   async getRegularMonthlyAverage(yearStr: string, userID: string): Promise<{ monthlyAverage: number }> {

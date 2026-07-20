@@ -11,6 +11,7 @@ export const QUERY_KEYS = {
   DAILY_PROJECTION: "dailyProjection",
   MONTHLY_INCOME: "monthlyIncome",
   CATEGORY_TRENDS: "categoryTrends",
+  BUSIEST_WEEK: "busiestWeek",
   WEEKLY_STATS: "weeklyStats",
   DAILY_STATS: "dailyStats",
   BIGGEST_REGULAR_EXPENSE: "biggestRegularExpense",
