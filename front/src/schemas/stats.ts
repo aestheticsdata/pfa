@@ -41,6 +41,10 @@ export type CategoryTrendPoint = z.infer<typeof CategoryTrendPointSchema>;
 
 export const CategoryTrendsResponseSchema = z.object({
   trends: z.array(CategoryTrendPointSchema),
+  // Total spent across every category in the comparison window (incl. ones
+  // absent from the current window). Drives the Dépenses "moyenne / jour vs sem.
+  // dernière" delta (COS-35); unused by the dashboard monthly breakdown.
+  previousTotal: numberLikeSchema,
 });
 
 export type CategoryTrendsResponse = z.infer<typeof CategoryTrendsResponseSchema>;

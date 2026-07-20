@@ -26,8 +26,8 @@ interface SpendingSummaryProps {
   weekTotal: number;
   txCount: number;
   weeklyCeiling: number | null;
-  /** MOCK — average-per-day delta vs last week (euros). */
-  avgDailyDelta: number;
+  /** Average-per-day delta vs last week (euros); null until it has loaded. */
+  avgDailyDelta: number | null;
   biggest: Biggest | null;
 }
 
@@ -75,9 +75,11 @@ const SpendingSummary = ({
       t.ceilingUndefined
     );
 
-  const roundedDelta = Math.round(avgDailyDelta);
+  // Cross-week delta caption (COS-35): red when up (spent more), green when down,
+  // grey when stable. null until the previous-week total loads → caption hidden.
+  const roundedDelta = avgDailyDelta === null ? null : Math.round(avgDailyDelta);
   const avgSub =
-    roundedDelta === 0 ? (
+    roundedDelta === null ? null : roundedDelta === 0 ? (
       <span className="text-ink-4">{t.deltaStable}</span>
     ) : roundedDelta > 0 ? (
       <span className="text-neg">{t.deltaUp(roundedDelta)}</span>
@@ -125,7 +127,6 @@ const SpendingSummary = ({
             decimalClassName="text-lg"
           />
         }
-        // MOCK sub — cross-week delta (see mockSpending.ts)
         sub={avgSub}
       />
       <Cell

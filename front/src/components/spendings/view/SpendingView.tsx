@@ -3,11 +3,12 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
+import { WEEKLY } from "@components/spendings/config/constants";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
 import useEnsureWeekRange from "@components/spendings/helpers/useEnsureWeekRange";
+import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendings from "@components/spendings/services/useSpendings";
-import { mockAvgDailyDelta } from "@components/spendings/view/helpers/mockSpending";
 import SpendingCategoryBreakdown from "@components/spendings/view/SpendingCategoryBreakdown";
 import SpendingCategoryFilter from "@components/spendings/view/SpendingCategoryFilter";
 import SpendingDayCard from "@components/spendings/view/SpendingDayCard";
@@ -57,6 +58,11 @@ const SpendingView = () => {
 
   const { spendingsByWeek, isLoading, error } = useSpendings();
   const { get: dashboardQuery, remaining } = useDashboard();
+  // Previous-week aggregates for the "vs sem. dernière" deltas (COS-35): the
+  // per-category totals feed the breakdown trend arrows, `previousTotal` the
+  // avg/day delta below. Same GET /category-trends the dashboard uses, windowed
+  // to the picked week vs the 7 days before it.
+  const { data: trendsData } = useCategoryTrends(WEEKLY);
 
   const groups = useMemo<SpendingDayGroup[]>(() => spendingsByWeek ?? [], [spendingsByWeek]);
 
@@ -146,10 +152,25 @@ const SpendingView = () => {
   const ceilingPerDay = weeklyCeiling != null && groups.length > 0 ? weeklyCeiling / groups.length : null;
 
   const grand = weekTotal || 1;
+  const trends = trendsData?.trends;
+  // Match previous-week totals to the current-week rows by category name (both
+  // sides collapse user+global same-name categories the same way). While the
+  // trends query is still loading, `previousValue` stays `undefined` so the trend
+  // badge is hidden rather than flashing a wrong "nouv.".
+  const previousByCategory = new Map<string | null, number | null>(
+    (trends ?? []).map((tr) => [tr.category, tr.previousValue]),
+  );
   const breakdownRows: BreakdownRow[] = categoryAgg.map((c) => ({
     ...c,
     pct: (c.total / grand) * 100,
+    previousValue: trends === undefined ? undefined : (previousByCategory.get(c.category) ?? null),
   }));
+
+  // Δ average/day vs last week: this week's avg/day (weekTotal / 7, the figure the
+  // tile shows) minus last week's (previousTotal / 7). null until previousTotal
+  // loads → the caption is hidden meanwhile, never a placeholder number.
+  const previousTotal = trendsData?.previousTotal;
+  const avgDailyDelta = previousTotal == null ? null : weekTotal / 7 - previousTotal / 7;
   const filterCategories: FilterCategory[] = categoryAgg.map(({ key, name, color, count }) => ({
     key,
     name,
@@ -192,7 +213,7 @@ const SpendingView = () => {
           weekTotal={weekTotal}
           txCount={txCount}
           weeklyCeiling={weeklyCeiling}
-          avgDailyDelta={mockAvgDailyDelta(from.toISOString().slice(0, 10))}
+          avgDailyDelta={avgDailyDelta}
           biggest={biggest}
         />
 

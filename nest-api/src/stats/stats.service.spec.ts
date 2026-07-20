@@ -121,9 +121,11 @@ describe("StatsService.getCategoryStats", () => {
 /**
  * Unit tests for StatsService.getCategoryTrends — the per-category two-window
  * aggregate backing the dashboard's monthly trend column + "Catégorie en hausse"
- * insight (COS-41). Prisma is mocked, so these assert the two query shapes, the
- * category-name resolution, and the current↔previous pairing (incl. the null
- * "nouv." case) without touching the DB. The delta % lives on the front.
+ * insight (COS-41) and the Dépenses weekly breakdown + avg/day delta (COS-35).
+ * Prisma is mocked, so these assert the two query shapes, the category-name
+ * resolution, the current↔previous pairing (incl. the null "nouv." case), and
+ * the comparison-window `previousTotal` — without touching the DB. The delta %
+ * lives on the front.
  */
 describe("StatsService.getCategoryTrends", () => {
   // groupBy is called twice (current window then previous); findMany resolves
@@ -217,11 +219,29 @@ describe("StatsService.getCategoryTrends", () => {
   it("returns no trends and skips the category lookup when the current window is empty", async () => {
     const { service, findMany } = makeService([], [{ categoryID: "cat-a", _sum: { amount: 100 } }]);
 
-    await expect(service.getCategoryTrends(...args)).resolves.toEqual({ trends: [] });
+    // previousTotal still reflects the (non-empty) comparison window.
+    await expect(service.getCategoryTrends(...args)).resolves.toEqual({ trends: [], previousTotal: 100 });
     expect(findMany).not.toHaveBeenCalled();
   });
 
-  it("rounds summed Prisma Decimals to the cent in both windows", async () => {
+  it("sums previousTotal over the whole comparison window, incl. categories absent from the current one", async () => {
+    const { service } = makeService(
+      [{ categoryID: "cat-a", _sum: { amount: 120 } }],
+      [
+        { categoryID: "cat-a", _sum: { amount: 100 } },
+        { categoryID: "cat-c", _sum: { amount: 50 } },
+        { categoryID: null, _sum: { amount: 30 } },
+      ],
+      [{ ID: "cat-a", name: "abonnements", color: "#7c3aed" }],
+    );
+
+    const { previousTotal } = await service.getCategoryTrends(...args);
+
+    // 100 (cat-a) + 50 (cat-c, gone this week) + 30 (uncategorized) = 180.
+    expect(previousTotal).toBe(180);
+  });
+
+  it("rounds summed Prisma Decimals to the cent in both windows and in previousTotal", async () => {
     const decimal = (value: string) => ({ toString: () => value });
     const { service } = makeService(
       [{ categoryID: "cat-a", _sum: { amount: decimal("120.005") } }],
@@ -229,10 +249,11 @@ describe("StatsService.getCategoryTrends", () => {
       [{ ID: "cat-a", name: "abonnements", color: "#7c3aed" }],
     );
 
-    const { trends } = await service.getCategoryTrends(...args);
+    const { trends, previousTotal } = await service.getCategoryTrends(...args);
 
     expect(trends[0]?.value).toBeCloseTo(120.01, 2);
     expect(trends[0]?.previousValue).toBeCloseTo(99.99, 2);
+    expect(previousTotal).toBeCloseTo(99.99, 2);
   });
 });
 

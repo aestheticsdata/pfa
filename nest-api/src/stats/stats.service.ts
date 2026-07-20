@@ -283,8 +283,10 @@ export class StatsService {
    * for the current window, and returns one row per category present in the
    * CURRENT window, sorted by current amount desc (matching the breakdown
    * bar/list order). `previousValue` is null when the category had no spending in
-   * the comparison window ("nouv."). Amounts are rounded to the cent; the delta %
-   * is derived on the front.
+   * the comparison window ("nouv."). Also returns `previousTotal` — the whole
+   * comparison window's spending across every category — which the Dépenses page
+   * turns into the "moyenne / jour vs sem. dernière" delta (COS-35). Amounts are
+   * rounded to the cent; the delta % is derived on the front.
    */
   async getCategoryTrends(
     userID: string,
@@ -317,6 +319,11 @@ export class StatsService {
       previousByCategory.set(group.categoryID, round2(Number(group._sum.amount ?? 0)));
     }
 
+    // Comparison-window total across every category — summed from the full
+    // `previous` groupBy (not from `trends`, which drops categories absent this
+    // week) so the avg/day delta is not undercounted.
+    const previousTotal = round2(previous.reduce((sum, group) => sum + Number(group._sum.amount ?? 0), 0));
+
     const categoryIDs = current.map((g) => g.categoryID).filter((id): id is string => id !== null);
     const categories =
       categoryIDs.length > 0
@@ -339,7 +346,7 @@ export class StatsService {
       };
     });
 
-    return { trends };
+    return { trends, previousTotal };
   }
 
   async getStatistics(categoryIDs: string[], years: string[], userID: string): Promise<StatisticsResponse> {

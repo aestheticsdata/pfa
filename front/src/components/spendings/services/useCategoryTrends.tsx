@@ -55,10 +55,12 @@ const windows = (periodType: string, from?: Date | null, to?: Date | null) => {
 
 /**
  * Per-category spending totals for a period and the one before it, so the UI can
- * show a per-category trend (delta %). One row per category with spending in the
- * current period, sorted by amount desc; `previousValue` is null for a category
- * new to the comparison period. Backs the dashboard's monthly breakdown trend
- * column + "Catégorie en hausse" insight (COS-41); COS-35 reuses it weekly.
+ * show a per-category trend (delta %). `trends` has one row per category with
+ * spending in the current period, sorted by amount desc; `previousValue` is null
+ * for a category new to the comparison period. `previousTotal` is the whole
+ * comparison period's spending — the Dépenses avg/day delta uses it (COS-35).
+ * Backs the dashboard's monthly breakdown trend column + "Catégorie en hausse"
+ * insight (COS-41), and the Dépenses weekly breakdown (COS-35).
  */
 const useCategoryTrends = (periodType: string) => {
   const { privateRequest } = useRequestHelper();
@@ -67,8 +69,8 @@ const useCategoryTrends = (periodType: string) => {
   const userID = user?.id;
   const range = windows(periodType, from, to);
 
-  const getCategoryTrends = async () => {
-    if (!range || !userID) return [];
+  const getCategoryTrends = async (): Promise<{ trends: CategoryTrendPoint[]; previousTotal: number }> => {
+    if (!range || !userID) return { trends: [], previousTotal: 0 };
     const { current, previous } = range;
     // userID is read from the session (@GetUserId()) server-side, not the query.
     const query = new URLSearchParams({
@@ -79,7 +81,7 @@ const useCategoryTrends = (periodType: string) => {
     });
     const response = await privateRequest(`/category-trends?${query}`);
     const parsed = CategoryTrendsResponseSchema.parse(response.data);
-    return aggregateByCategory(parsed.trends);
+    return { trends: aggregateByCategory(parsed.trends), previousTotal: parsed.previousTotal };
   };
 
   return useQuery([QUERY_KEYS.CATEGORY_TRENDS, range?.current.from, range?.current.to], getCategoryTrends, {

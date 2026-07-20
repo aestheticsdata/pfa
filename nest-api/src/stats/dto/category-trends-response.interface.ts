@@ -16,7 +16,8 @@
  *     { category: "abonnements", categoryColor: "#7c3aed", value: 128.4, previousValue: 103.5 },
  *     { category: "transports", categoryColor: "#0ea5e9", value: 42, previousValue: null },
  *     { category: null, categoryColor: null, value: 12.9, previousValue: 30 },
- *   ]
+ *   ],
+ *   previousTotal: 133.5
  * }
  */
 export interface CategoryTrendPoint {
@@ -32,4 +33,12 @@ export interface CategoryTrendPoint {
 
 export interface CategoryTrendsResponse {
   trends: CategoryTrendPoint[];
+  /**
+   * Total spent across ALL categories in the comparison window — including
+   * uncategorized and categories absent from the current window (so summing
+   * `trends[].previousValue` would undercount it). Rounded to the cent. Backs
+   * the Dépenses "moyenne / jour vs sem. dernière" delta (COS-35); the dashboard
+   * monthly breakdown ignores it.
+   */
+  previousTotal: number;
 }
