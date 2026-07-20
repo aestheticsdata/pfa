@@ -69,6 +69,7 @@ const dashboard = {
   },
   insightsRibbon: {
     paceLabel: "Sur le rythme",
+    paceEmpty: "En attente de plus de données pour comparer le rythme.",
     risingLabel: "Catégorie en hausse",
     risingEmpty: "Aucune hausse ce mois.",
     remainingLabel: "Reste à vivre",

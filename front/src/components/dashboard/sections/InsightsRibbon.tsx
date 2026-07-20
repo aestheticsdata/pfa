@@ -1,9 +1,9 @@
 "use client";
 
-// Partly MOCK — the pace framing ("~16% moins vite") is still a placeholder
-// needing real 3-month history. The end-of-month conclusion, the rising category
-// (name + real % vs last month) and "reste à vivre" are derived from real data.
-// See REFACTO_NOTES.md §6.
+// All four insights are derived from real data: the pace vs the preceding
+// months' daily average and the end-of-month budget conclusion (COS-40), the top
+// rising category (name + real % vs last month), "reste à vivre", and the
+// busiest week.
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DividedStrip } from "@components/shared/DividedStrip";
@@ -11,9 +11,11 @@ import { Overline } from "@components/shared/Overline";
 import { MONTHLY } from "@components/spendings/config/constants";
 import { categoryDeltaPct, STABLE_TREND_THRESHOLD } from "@components/spendings/helpers/categoryTrend";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
+import { spendingPaceDelta } from "@components/spendings/helpers/spendingPace";
 import useBusiestWeek from "@components/spendings/services/useBusiestWeek";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useDashboard from "@components/spendings/services/useDashboard";
+import useSpendingPace from "@components/spendings/services/useSpendingPace";
 import { buildSpendingsPath } from "@helpers/dateRoute";
 import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
@@ -60,6 +62,7 @@ const InsightsRibbon = () => {
   const { data: trendsData } = useCategoryTrends(MONTHLY);
   const trends = trendsData?.trends;
   const { data: busiest } = useBusiestWeek();
+  const { data: pace } = useSpendingPace();
   const { insightsRibbon: t } = dashboardText;
 
   const budget = Number(dashboard?.initialAmount ?? 0);
@@ -70,6 +73,20 @@ const InsightsRibbon = () => {
   const dayOfMonth = isThisMonth ? getDate(now) : daysInMonth;
   const projection = dayOfMonth > 0 ? (monthlyTotal / dayOfMonth) * daysInMonth : monthlyTotal;
   const underBudget = budget <= 0 || projection <= budget;
+  // The budget line is a forecast only while the month is still running; on its
+  // last day and for past months there are no days left to project, so it reads
+  // as a bilan instead ("projection" then equals the month's actual total).
+  const inProgress = isThisMonth && dayOfMonth < daysInMonth;
+  const budgetLead = inProgress
+    ? "À ce rythme, le mois se termine"
+    : isThisMonth
+      ? "Le mois se termine aujourd'hui,"
+      : "Le mois s'est terminé";
+  // Real pace vs the preceding months' daily average (COS-40); null when there is
+  // not enough to compare (no prior month with spending, or too few days elapsed
+  // this month), in which case we show a waiting note instead of a figure.
+  const paceComparison = spendingPaceDelta(monthlyTotal, dayOfMonth, pace?.months ?? []);
+  const paceDelta = paceComparison ? Math.round(Math.abs(paceComparison.deltaPct)) : 0;
   // same figure as the Dépenses "Budget du jour maximum" (shared helper)
   const perDay = dailyRemainingBudget(remaining, isThisMonth ? now : endOfMonth(monthRef));
   // The named category whose spending rose the most vs last month. Gated on the
@@ -98,9 +115,20 @@ const InsightsRibbon = () => {
         icon={<TrendingUp className="size-3.5" />}
         label={t.paceLabel}
       >
-        Consommation <b className="font-semibold text-ink">~16% moins vite</b> {/* MOCK pace */}que la moyenne 3 mois. À
-        ce rythme, le mois se termine{" "}
-        <b className="font-semibold text-ink">{underBudget ? "sous le budget" : "au-dessus du budget"}</b>.
+        {paceComparison ? (
+          <>
+            Consommation{" "}
+            <b className="font-semibold text-ink">
+              {paceDelta === 0
+                ? "au même rythme"
+                : `~${paceDelta}% ${paceComparison.faster ? "plus vite" : "moins vite"}`}
+            </b>{" "}
+            que la moyenne 3 mois.{" "}
+          </>
+        ) : (
+          <>{t.paceEmpty} </>
+        )}
+        {budgetLead} <b className="font-semibold text-ink">{underBudget ? "sous le budget" : "au-dessus du budget"}</b>.
       </Insight>
       <Insight
         tone="bg-neg/10 text-neg"

@@ -517,3 +517,76 @@ describe("StatsService.getBusiestWeek", () => {
     });
   });
 });
+
+/**
+ * Unit tests for StatsService.getSpendingPace — the totals of the three months
+ * before a reference month, backing the dashboard's "Sur le rythme" insight
+ * (COS-40). Prisma is mocked, so these assert the (half-open, UTC) query shape
+ * and the newest→oldest transformation without a DB.
+ */
+describe("StatsService.getSpendingPace", () => {
+  const makeService = (totals: number[]) => {
+    // One aggregate call per month back (M-1, M-2, M-3), resolved in call order.
+    const aggregate = jest.fn();
+    totals.forEach((total) => aggregate.mockResolvedValueOnce({ _sum: { amount: total } }));
+    const prisma = { spendings: { aggregate } } as unknown as never;
+    return { service: new StatsService(prisma), aggregate };
+  };
+
+  it("sums each of the three preceding months over a half-open UTC range, scoped to the user", async () => {
+    const { service, aggregate } = makeService([0, 0, 0]);
+
+    await service.getSpendingPace("2026-06-01", "user-1");
+
+    expect(aggregate).toHaveBeenCalledTimes(3);
+    expect(aggregate).toHaveBeenNthCalledWith(1, {
+      where: { userID: "user-1", date: { gte: new Date(Date.UTC(2026, 4, 1)), lt: new Date(Date.UTC(2026, 5, 1)) } },
+      _sum: { amount: true },
+    });
+    expect(aggregate).toHaveBeenNthCalledWith(2, {
+      where: { userID: "user-1", date: { gte: new Date(Date.UTC(2026, 3, 1)), lt: new Date(Date.UTC(2026, 4, 1)) } },
+      _sum: { amount: true },
+    });
+    expect(aggregate).toHaveBeenNthCalledWith(3, {
+      where: { userID: "user-1", date: { gte: new Date(Date.UTC(2026, 2, 1)), lt: new Date(Date.UTC(2026, 3, 1)) } },
+      _sum: { amount: true },
+    });
+  });
+
+  it("returns the three totals newest→oldest with their month's first day", async () => {
+    const { service } = makeService([1240.5, 1310, 980.25]);
+
+    await expect(service.getSpendingPace("2026-06-01", "user-1")).resolves.toEqual({
+      months: [
+        { month: "2026-05-01", total: 1240.5 },
+        { month: "2026-04-01", total: 1310 },
+        { month: "2026-03-01", total: 980.25 },
+      ],
+    });
+  });
+
+  it("wraps across the year boundary and reports 0 for an empty month", async () => {
+    // Reference January 2026 → M-1 Dec, M-2 Nov, M-3 Oct 2025.
+    const { service } = makeService([0, 500, 300]);
+
+    await expect(service.getSpendingPace("2026-01-01", "user-1")).resolves.toEqual({
+      months: [
+        { month: "2025-12-01", total: 0 },
+        { month: "2025-11-01", total: 500 },
+        { month: "2025-10-01", total: 300 },
+      ],
+    });
+  });
+
+  it("coerces a null Prisma sum to 0", async () => {
+    const { service } = makeService([null as unknown as number, null as unknown as number, null as unknown as number]);
+
+    await expect(service.getSpendingPace("2026-06-01", "user-1")).resolves.toEqual({
+      months: [
+        { month: "2026-05-01", total: 0 },
+        { month: "2026-04-01", total: 0 },
+        { month: "2026-03-01", total: 0 },
+      ],
+    });
+  });
+});

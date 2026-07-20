@@ -12,6 +12,7 @@ export const QUERY_KEYS = {
   MONTHLY_INCOME: "monthlyIncome",
   CATEGORY_TRENDS: "categoryTrends",
   BUSIEST_WEEK: "busiestWeek",
+  SPENDING_PACE: "spendingPace",
   WEEKLY_STATS: "weeklyStats",
   DAILY_STATS: "dailyStats",
   BIGGEST_REGULAR_EXPENSE: "biggestRegularExpense",
