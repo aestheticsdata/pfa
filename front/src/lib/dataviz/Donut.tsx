@@ -2,7 +2,7 @@
 
 import { angleFromCenter, annularSectorPath, wedgePath } from "@lib/dataviz/arcPaths";
 import { cn } from "@lib/utils";
-import { useId } from "react";
+import { useId, useState } from "react";
 
 import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
 import type { CSSProperties, MouseEvent, ReactNode } from "react";
@@ -36,6 +36,10 @@ interface DonutProps {
   onSegmentHover?: (index: number, event: MouseEvent) => void;
   /** Fires when the pointer leaves the ring band (or lands where no segment is). */
   onSegmentLeave?: () => void;
+  /** Opt-in: emphasize the ring segment under the cursor (soft glow in its own
+   *  colour) and dim the others, driven by the same hit-test as `onSegmentHover`.
+   *  Ring variant only. */
+  emphasizeOnHover?: boolean;
   /** Center overlay (e.g. a big % for a gauge). */
   children?: ReactNode;
   className?: string;
@@ -59,6 +63,12 @@ const REMAINING_MASK_ARC = 1.5;
 /** Radial slack (viewBox units) around the ring band when hit-testing the cursor,
  *  so the thin stroke stays comfortably hoverable. */
 const HIT_TOL = 4;
+/** Hover emphasis (opt-in via `emphasizeOnHover`): the segment under the cursor
+ *  thickens symmetrically — it grows on both edges with its centre-line fixed, so
+ *  it stays aligned with its neighbours — while the others are left untouched.
+ *  Extra ring thickness in viewBox units. */
+const EMPHASIS_GROW = 2;
+const EMPHASIS_TRANSITION = "stroke-width 150ms ease, d 150ms ease, r 150ms ease";
 
 /**
  * Donut / gauge / camembert. `ring` (default) draws stroked arcs — ideal for a
@@ -77,6 +87,7 @@ const Donut = ({
   availableColor = "var(--accent-strong)",
   onSegmentHover,
   onSegmentLeave,
+  emphasizeOnHover = false,
   children,
   className,
   ariaLabel,
@@ -90,6 +101,24 @@ const Donut = ({
   const ringTotal = segmentsTotal + leftover || 1;
   // Stable prefix for the reveal-mask id (unique across mounted Donuts).
   const uid = useId();
+  // Which segment the cursor is over (segments.length === the empty "available"
+  // band). Only tracked when `emphasizeOnHover` — feeds the arc highlight.
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  // Report a hovered segment to the caller (e.g. a tooltip) and, when emphasis is
+  // on, track it internally to drive the arc highlight — one hit-test feeds both.
+  const reportHover = (index: number, event: MouseEvent<SVGSVGElement>) => {
+    onSegmentHover?.(index, event);
+    if (emphasizeOnHover) {
+      setHoveredIndex(index);
+    }
+  };
+  const reportLeave = () => {
+    onSegmentLeave?.();
+    if (emphasizeOnHover) {
+      setHoveredIndex(null);
+    }
+  };
 
   // Hit-test the cursor against the ring band: resolve its angle to a segment
   // (clockwise from 12 o'clock, same as the arcs), reporting the segment with the
@@ -97,7 +126,7 @@ const Donut = ({
   // so the SVG stays a single labelled image. The center hole, the empty
   // "available" band, and outside the band all report a leave (no tooltip).
   const handleMove = (event: MouseEvent<SVGSVGElement>) => {
-    if (!onSegmentHover || !isRing) {
+    if ((!onSegmentHover && !emphasizeOnHover) || !isRing) {
       return;
     }
     const rect = event.currentTarget.getBoundingClientRect();
@@ -106,7 +135,7 @@ const Donut = ({
     const dy = (event.clientY - (rect.top + CY * scale)) / scale;
     const radius = Math.hypot(dx, dy);
     if (radius < 50 - thickness - HIT_TOL || radius > 50 + HIT_TOL) {
-      onSegmentLeave?.();
+      reportLeave();
       return;
     }
     const fraction = angleFromCenter(dx, dy) / 360;
@@ -114,16 +143,16 @@ const Donut = ({
     for (let i = 0; i < segments.length; i++) {
       acc += Math.max(0, segments[i].value) / ringTotal;
       if (fraction <= acc) {
-        onSegmentHover(i, event);
+        reportHover(i, event);
         return;
       }
     }
     // Past the solid segments: the empty "available" band (index === segments.length)
     // when there is a leftover, else no target.
     if (leftover > 0) {
-      onSegmentHover(segments.length, event);
+      reportHover(segments.length, event);
     } else {
-      onSegmentLeave?.();
+      reportLeave();
     }
   };
 
@@ -157,12 +186,15 @@ const Donut = ({
     const growStyle = (dash: number) =>
       ({ "--pfa-circ": circumference, "--pfa-dash": dash, "--pfa-gap": circumference - dash }) as CSSProperties;
 
-    const solidArcs: { dash: number; offset: number; color: string }[] = [];
+    // Keep each arc's original segment index: zero-value segments are skipped here
+    // but the hover hit-test still reports positions against the full `segments`
+    // array, so the highlight must match on that index, not the arc's position.
+    const solidArcs: { dash: number; offset: number; color: string; index: number }[] = [];
     let offset = 0;
-    for (const seg of segments) {
-      const dash = (Math.max(0, seg.value) / ringTotal) * circumference;
+    for (let si = 0; si < segments.length; si++) {
+      const dash = (Math.max(0, segments[si].value) / ringTotal) * circumference;
       if (dash > 0) {
-        solidArcs.push({ dash, offset, color: seg.color });
+        solidArcs.push({ dash, offset, color: segments[si].color, index: si });
       }
       offset += dash;
     }
@@ -176,6 +208,13 @@ const Donut = ({
     const emptyFull = emptyDash >= circumference - 0.01;
     const rInner = 50 - thickness + REMAINING_INSET;
     const rOuter = 50 - REMAINING_INSET;
+    // When the empty "available" band is the hovered segment, widen it on both edges
+    // (the same symmetric grow as the solid arcs) so its dotted outline reads thicker.
+    const bandActive = emphasizeOnHover && hoveredIndex === segments.length;
+    const bandGrow = bandActive ? EMPHASIS_GROW / 2 : 0;
+    const rInnerHover = rInner - bandGrow;
+    const rOuterHover = rOuter + bandGrow;
+    const bandStyle: CSSProperties | undefined = emphasizeOnHover ? { transition: EMPHASIS_TRANSITION } : undefined;
     const maskId = `${uid}-available`;
     // Mask arc runs a touch longer than the band so its butt ends never clip the
     // outline's end caps; the mask stroke is a touch wider for the radial edges.
@@ -189,7 +228,6 @@ const Donut = ({
       strokeLinecap: "round" as const,
       vectorEffect: "non-scaling-stroke" as const,
     };
-
     body = (
       <>
         <g transform={`rotate(-90 ${CX} ${CY})`}>
@@ -201,23 +239,37 @@ const Donut = ({
             stroke={trackColor}
             strokeWidth={thickness}
           />
-          {solidArcs.map((a, i) => (
-            <circle
-              // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional ring arcs with no stable unique field
-              key={i}
-              cx={CX}
-              cy={CY}
-              r={r}
-              fill="none"
-              stroke={a.color}
-              strokeWidth={thickness}
-              strokeDasharray={`${a.dash} ${circumference - a.dash}`}
-              strokeDashoffset={-a.offset}
-              strokeLinecap={rounded ? "round" : "butt"}
-              className={animate ? "pfa-anim-donut" : undefined}
-              style={animate ? growStyle(a.dash) : undefined}
-            />
-          ))}
+          {solidArcs.map((a, i) => {
+            const active = emphasizeOnHover && hoveredIndex === a.index;
+            const arcStyle: CSSProperties = {
+              ...(animate ? growStyle(a.dash) : {}),
+              ...(emphasizeOnHover
+                ? {
+                    // thicken in place (centre-line stays at r) → grows on both edges
+                    // and stays aligned with the neighbouring arc at their junction
+                    strokeWidth: active ? thickness + EMPHASIS_GROW : thickness,
+                    transition: EMPHASIS_TRANSITION,
+                  }
+                : {}),
+            };
+            return (
+              <circle
+                // biome-ignore lint/suspicious/noArrayIndexKey: fixed positional ring arcs with no stable unique field
+                key={i}
+                cx={CX}
+                cy={CY}
+                r={r}
+                fill="none"
+                stroke={a.color}
+                strokeWidth={thickness}
+                strokeDasharray={`${a.dash} ${circumference - a.dash}`}
+                strokeDashoffset={-a.offset}
+                strokeLinecap={rounded ? "round" : "butt"}
+                className={animate ? "pfa-anim-donut" : undefined}
+                style={arcStyle}
+              />
+            );
+          })}
         </g>
         {emptyDash > 0 && (
           <g>
@@ -252,14 +304,16 @@ const Donut = ({
                 <circle
                   cx={CX}
                   cy={CY}
-                  r={rOuter}
+                  r={rOuterHover}
                   {...dotProps}
+                  style={bandStyle}
                 />
                 <circle
                   cx={CX}
                   cy={CY}
-                  r={rInner}
+                  r={rInnerHover}
                   {...dotProps}
+                  style={bandStyle}
                 />
               </g>
             ) : (
@@ -267,13 +321,14 @@ const Donut = ({
                 d={annularSectorPath(
                   CX,
                   CY,
-                  rInner,
-                  rOuter,
+                  rInnerHover,
+                  rOuterHover,
                   (offset / circumference) * 360,
                   ((offset + emptyDash) / circumference) * 360,
                 )}
                 {...dotProps}
                 {...maskProps}
+                style={bandStyle}
               />
             )}
           </g>
@@ -296,8 +351,10 @@ const Donut = ({
         height={size}
         role="img"
         aria-label={ariaLabel}
-        onMouseMove={onSegmentHover ? handleMove : undefined}
-        onMouseLeave={onSegmentHover ? onSegmentLeave : undefined}
+        // overflow visible so the hovered arc's zoom isn't clipped by the viewBox edge
+        style={emphasizeOnHover ? { overflow: "visible" } : undefined}
+        onMouseMove={onSegmentHover || emphasizeOnHover ? handleMove : undefined}
+        onMouseLeave={onSegmentHover || emphasizeOnHover ? reportLeave : undefined}
       >
         {body}
       </svg>
