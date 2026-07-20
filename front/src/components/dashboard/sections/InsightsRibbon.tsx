@@ -11,6 +11,7 @@ import { Overline } from "@components/shared/Overline";
 import { MONTHLY } from "@components/spendings/config/constants";
 import { categoryDeltaPct, STABLE_TREND_THRESHOLD } from "@components/spendings/helpers/categoryTrend";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
+import overspendLevel from "@components/spendings/helpers/overspendLevel";
 import { spendingPaceDelta } from "@components/spendings/helpers/spendingPace";
 import useBusiestWeek from "@components/spendings/services/useBusiestWeek";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
@@ -89,6 +90,9 @@ const InsightsRibbon = () => {
   const paceDelta = paceComparison ? Math.round(Math.abs(paceComparison.deltaPct)) : 0;
   // same figure as the Dépenses "Budget du jour maximum" (shared helper)
   const perDay = dailyRemainingBudget(remaining, isThisMonth ? now : endOfMonth(monthRef));
+  // Colour of the finished-month leftover: green while it closed with money left,
+  // then amber → red as the overspend deepens (shared OVERSPEND_DANGER_RATIO).
+  const balanceLevel = overspendLevel(monthlyTotal, budget);
   // The named category whose spending rose the most vs last month. Gated on the
   // same threshold as the breakdown's trend badge, so a rise the list still shows
   // as "stable" is never headlined here. New/uncategorized categories are skipped.
@@ -149,9 +153,28 @@ const InsightsRibbon = () => {
         icon={<Wallet className="size-3.5" />}
         label={t.remainingLabel}
       >
-        Il reste <b className="num font-semibold text-ink">{euro0(perDay)} €</b>
-        /jour à dépenser d&apos;ici le <b className="font-semibold text-ink">{lastDayLabel}</b> pour rester dans le
-        budget.
+        {/* Forecast only while the month runs; once closed the per-day deadline is
+            meaningless, so show the month's leftover as a bilan instead (COS-150). */}
+        {inProgress ? (
+          <>
+            Il reste <b className="num font-semibold text-ink">{euro0(perDay)} €</b>
+            /jour à dépenser d&apos;ici le <b className="font-semibold text-ink">{lastDayLabel}</b> pour rester dans le
+            budget.
+          </>
+        ) : remaining < 0 ? (
+          <>
+            Budget dépassé de{" "}
+            <b className={cn("num font-semibold", balanceLevel === "danger" ? "text-neg" : "text-warn")}>
+              {euro0(-remaining)} €
+            </b>{" "}
+            sur le mois.
+          </>
+        ) : (
+          <>
+            <b className="num font-semibold text-accent-strong">{euro0(remaining)} €</b> de budget non dépensé sur le
+            mois.
+          </>
+        )}
       </Insight>
       <Insight
         tone="bg-surface-hi text-ink-2"
