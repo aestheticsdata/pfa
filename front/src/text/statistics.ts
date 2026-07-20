@@ -86,13 +86,11 @@ const statistics = {
     meta: (count: number) => `annualisé · ${count} lignes récurrentes · sans catégorie`,
     annualTotal: "Total sur l'année",
     monthly: "Mensuel",
-    drawn: (date: string) => `Déjà prélevé · au ${date}`,
+    drawn: (year: number) => `Déjà prélevé · ${year}`,
     note: (topName: string, topShare: number) =>
       `Les dépenses fixes ne portent pas de catégorie — elles sont totalisées par nom. Le ${topName} représente à lui seul ${topShare} % du total annuel des récurrents.`,
     tooltip: {
-      row: (monthly: string, day: number) => `${monthly} €/mois · prélevé le ${day}`,
-      drawn:
-        "Estimation : une ligne est comptée prélevée si son jour de prélèvement (jour du mois de la date de début) est passé.",
+      row: (monthly: string) => `${monthly} €/mois`,
     },
   },
   heatmap: {

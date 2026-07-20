@@ -1,9 +1,9 @@
 "use client";
 
-// All figures are real (from /reccurings). Recurrings carry no category, so —
-// exactly as the mockup notes — they are totalled by name. The only estimate is
-// "déjà prélevé", derived from each line's charge-day vs today (MOCK: recurrings
-// have no dedicated charge-day field, so the day-of-month of `dateFrom` is used).
+// All figures are real (from /recurrings). Recurrings carry no category, so —
+// exactly as the mockup notes — they are totalled by name. "Déjà prélevé" is the
+// real year-to-date sum of the per-month recurring rows (Jan → current month),
+// computed server-side (GET /recurrings/drawn) and passed in as `drawn`.
 
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
@@ -12,23 +12,14 @@ import { Overline } from "@components/shared/Overline";
 import { CursorTooltip, useCursorHover } from "@lib/dataviz";
 import { euro, splitAmount } from "@lib/format";
 import statistics from "@text/statistics";
-import format from "date-fns/format";
-import getDate from "date-fns/getDate";
-import fr from "date-fns/locale/fr";
-import parseISO from "date-fns/parseISO";
 
 import type { RecurringItem } from "@src/schemas/spendings";
 
 interface StatisticsFixedExpensesProps {
   recurrings: RecurringItem[];
+  drawn: number;
   now: Date;
 }
-
-/** Charge day-of-month, from the recurring's `dateFrom` (best real proxy). */
-const chargeDay = (r: RecurringItem): number => {
-  const d = getDate(parseISO(r.dateFrom));
-  return Number.isNaN(d) ? 1 : d;
-};
 
 const Stat = ({
   label,
@@ -61,8 +52,8 @@ const Stat = ({
 
 /** "Dépenses fixes" — recurrings annualised, with per-line share and the
  *  year-to-date drawn amount. */
-const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesProps) => {
-  const rowTip = useCursorHover<{ monthly: string; day: number }>();
+const StatisticsFixedExpenses = ({ recurrings, drawn, now }: StatisticsFixedExpensesProps) => {
+  const rowTip = useCursorHover<{ monthly: string }>();
   if (recurrings.length === 0) return null;
 
   const { fixedExpenses: t } = statistics;
@@ -71,10 +62,6 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
   const monthlyTotal = list.reduce((sum, r) => sum + Number(r.amount), 0);
   const annualTotal = monthlyTotal * 12;
   const maxAmount = Number(list[0].amount) || 1;
-
-  const monthsElapsed = now.getMonth(); // fully-elapsed months before this one
-  const today = getDate(now);
-  const drawn = list.reduce((sum, r) => sum + Number(r.amount) * (monthsElapsed + (chargeDay(r) <= today ? 1 : 0)), 0);
   const topShare = Math.round((Number(list[0].amount) / monthlyTotal) * 100);
 
   return (
@@ -98,7 +85,7 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
           small
         />
         <Stat
-          label={t.drawn(format(now, "d MMM", { locale: fr }))}
+          label={t.drawn(now.getFullYear())}
           value={drawn}
           small
           className="ml-auto text-right"
@@ -120,7 +107,7 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
                   className="text-ink"
                   role="img"
                   aria-label={r.label}
-                  onMouseMove={rowTip.move({ monthly: euro(Number(r.amount)), day: chargeDay(r) })}
+                  onMouseMove={rowTip.move({ monthly: euro(Number(r.amount)) })}
                   onMouseLeave={rowTip.clear}
                 >
                   {r.label}
@@ -142,7 +129,7 @@ const StatisticsFixedExpenses = ({ recurrings, now }: StatisticsFixedExpensesPro
       <p className="mt-5 border-t border-line-soft pt-4.5 text-xs text-ink-4">{t.note(list[0].label, topShare)}</p>
 
       <CursorTooltip point={rowTip.hover}>
-        {rowTip.hover ? t.tooltip.row(rowTip.hover.data.monthly, rowTip.hover.data.day) : null}
+        {rowTip.hover ? t.tooltip.row(rowTip.hover.data.monthly) : null}
       </CursorTooltip>
     </GlowCard>
   );

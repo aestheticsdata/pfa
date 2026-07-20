@@ -58,6 +58,11 @@ export const RecurringItemSchema = z.object({
 export const RecurringListSchema = z.array(RecurringItemSchema);
 export type RecurringItem = z.infer<typeof RecurringItemSchema>;
 
+// Real year-to-date "déjà prélevé" (COS-49) — GET /recurrings/drawn. The server
+// sums the actual per-month recurring rows from January through the current month.
+export const RecurringsDrawnSchema = z.object({ drawn: numberLikeSchema });
+export type RecurringsDrawn = z.infer<typeof RecurringsDrawnSchema>;
+
 export const SpendingMutationPayloadSchema = z.object({
   date: z.string().nullable().optional(),
   label: z.string().min(1),
