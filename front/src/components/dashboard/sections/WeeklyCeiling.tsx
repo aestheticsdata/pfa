@@ -9,6 +9,7 @@ import useWeeklyStatsHelper from "@components/spendings/helpers/useWeeklyStatsHe
 import useDashboard from "@components/spendings/services/useDashboard";
 import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
 import { Input } from "@components/ui/input";
+import { buildSpendingsPath, formatIsoDate } from "@helpers/dateRoute";
 import { ProgressTrack } from "@lib/dataviz";
 import { euro, euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
@@ -18,6 +19,7 @@ import getDate from "date-fns/getDate";
 import isAfter from "date-fns/isAfter";
 import isBefore from "date-fns/isBefore";
 import startOfMonth from "date-fns/startOfMonth";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -129,14 +131,20 @@ const WeeklyCeiling = () => {
           const over = ceiling > 0 && weekTotal > ceiling;
           const future = isFutureWeek(slices[i]);
           const delta = weekTotal - ceiling;
-          return (
-            <div
-              key={`${monthKey}-${weekLabel}`}
-              className={cn(
-                "grid grid-cols-[52px_1fr_74px] items-center gap-3 border-b border-line-soft py-3 text-sm last:border-b-0",
-                current && "font-semibold",
-              )}
-            >
+          // Past/current weeks drill into that week on the Dépenses page; future
+          // weeks have nothing to open, so they stay inert — no link, no hover,
+          // default cursor (COS-151). Start day of the range doubles as the ?date=.
+          const startDay = typeof weekLabel === "number" ? weekLabel : parseInt(String(weekLabel), 10);
+          const href =
+            !future && from != null && Number.isFinite(startDay)
+              ? buildSpendingsPath(formatIsoDate(new Date(from.getFullYear(), from.getMonth(), startDay)))
+              : null;
+          const rowClass = cn(
+            "grid grid-cols-[52px_1fr_74px] items-center gap-3 border-b border-line-soft py-3 text-sm last:border-b-0",
+            current && "font-semibold",
+          );
+          const cells = (
+            <>
               <span className="num text-xs text-ink-2">{slices[i] ?? `S${i + 1}`}</span>
               <ProgressTrack
                 key={`${monthKey}-${weekLabel}-${weekTotal > 0 ? "d" : "e"}`}
@@ -163,6 +171,25 @@ const WeeklyCeiling = () => {
                   )
                 )}
               </span>
+            </>
+          );
+          return href ? (
+            <Link
+              key={`${monthKey}-${weekLabel}`}
+              href={href}
+              className={cn(
+                rowClass,
+                "-mx-2 cursor-pointer rounded-md px-2 transition-colors duration-100 hover:bg-surface-hi",
+              )}
+            >
+              {cells}
+            </Link>
+          ) : (
+            <div
+              key={`${monthKey}-${weekLabel}`}
+              className={rowClass}
+            >
+              {cells}
             </div>
           );
         })}
