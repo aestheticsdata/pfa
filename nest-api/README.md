@@ -19,6 +19,25 @@ pnpm run start:dev
 pnpm run start:prod
 ```
 
+## Seed data
+
+Populate the local demo account (`abc@abc.com`) with realistic mock data over a date range:
+
+```bash
+# append data since a given date (up to today), non-destructive
+pnpm seed -- --from 2026-07-17
+
+# backfill a specific window
+pnpm seed -- --from 2025-01-01 --to 2025-03-31
+
+# full rebuild: wipe this account's seeded rows first, then regenerate
+pnpm seed -- --wipe --from 2023-01-01
+```
+
+**Why the `--`?** It's the standard npm/pnpm separator: everything before it is for pnpm, everything after it is forwarded verbatim to the `seed` script. Without it, pnpm could try to interpret `--from` as one of its own options instead of passing it through. So `pnpm seed -- --from 2026-07-17` runs the `seed` script and hands it `--from 2026-07-17`.
+
+`--from` is required, `--to` defaults to today, and `--wipe` deletes the account's seeded rows before regenerating. See [`scripts/seeding-guide.md`](scripts/seeding-guide.md) for the full guide.
+
 ## Tests
 
 ```bash
