@@ -105,6 +105,10 @@ const BudgetHero = () => {
     if (editing) setFocus("initialAmount", { shouldSelect: true });
   }, [editing, setFocus]);
 
+  // Mirror the donut's arc emphasis on the legend: lift the hovered segment's entry,
+  // leaving the others untouched (target 2 = the empty "available" band → neither lifts).
+  const legendEmphasis = (index: number) => (hover?.target === index ? "brightness-125" : undefined);
+
   return (
     <GlowCard
       as="section"
@@ -189,6 +193,7 @@ const BudgetHero = () => {
             thickness={7}
             animate
             ariaLabel={t.donutAria}
+            emphasizeOnHover
             onSegmentHover={(index, e) => setHover({ target: index, x: e.clientX, y: e.clientY })}
             onSegmentLeave={() => setHover(null)}
           >
@@ -201,10 +206,16 @@ const BudgetHero = () => {
             </div>
           </Donut>
           <div className="flex gap-4 text-2xs text-ink-3">
-            <LegendItem swatch={<span className="size-2 rounded-xs bg-accent-d" />}>
+            <LegendItem
+              className={cn("transition", legendEmphasis(0))}
+              swatch={<span className="size-2 rounded-xs bg-accent-d" />}
+            >
               {t.fixed} <span className="num text-ink-2">{euro0(fixed)} €</span>
             </LegendItem>
-            <LegendItem swatch={<span className="size-2 rounded-xs bg-accent-strong" />}>
+            <LegendItem
+              className={cn("transition", legendEmphasis(1))}
+              swatch={<span className="size-2 rounded-xs bg-accent-strong" />}
+            >
               {t.variables} <span className="num text-ink-2">{euro0(variable)} €</span>
             </LegendItem>
           </div>
