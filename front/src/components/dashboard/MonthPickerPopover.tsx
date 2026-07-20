@@ -50,11 +50,12 @@ const MonthPickerPopover = ({ month, currentMonthStart, onSelectMonth }: MonthPi
       onOpenChange={handleOpenChange}
     >
       {/* Trigger = the month label itself (no caret — matches the datepicker).
-          Fixed width (fits the longest month, "septembre") so the control never
-          resizes as the month changes. */}
+          Fixed width from the spacing scale (w-36 holds the longest "MMMM yyyy",
+          "septembre 2025", in mono) so the control never resizes between months;
+          whitespace-nowrap keeps it on one line — a wrapped label grows the navbar. */}
       <PopoverTrigger
         aria-label={text.chooseMonth(label)}
-        className="num w-[116px] cursor-pointer rounded-sm px-1 py-0.5 text-center text-sm capitalize tracking-normal text-ink-2 transition-colors hover:text-ink"
+        className="num w-36 cursor-pointer whitespace-nowrap rounded-sm px-1 py-0.5 text-center text-sm capitalize tracking-normal text-ink-2 transition-colors hover:text-ink"
       >
         {label}
       </PopoverTrigger>
