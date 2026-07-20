@@ -8,6 +8,7 @@ import { DailyStatsQueryDto } from "@stats/dto/daily-stats-query.dto";
 import { CategoryStatsQueryDto } from "@stats/dto/category-stats-query.dto";
 import { BiggestRegularExpenseQueryDto } from "@stats/dto/biggest-regular-expense-query.dto";
 import { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
+import { BusiestWeekQueryDto } from "@stats/dto/busiest-week-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
@@ -82,6 +83,17 @@ export class CategoryTrendsController {
   @Get()
   async getCategoryTrends(@Query() query: CategoryTrendsQueryDto, @GetUserId() userID: string) {
     return this.statsService.getCategoryTrends(userID, query.from, query.to, query.prevFrom, query.prevTo);
+  }
+}
+
+@Controller("busiest-week")
+@UseGuards(SessionAuthGuard)
+export class BusiestWeekController {
+  constructor(private readonly statsService: StatsService) {}
+
+  @Get()
+  async getBusiestWeek(@Query() query: BusiestWeekQueryDto, @GetUserId() userID: string) {
+    return this.statsService.getBusiestWeek(query.start, userID);
   }
 }
 

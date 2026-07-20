@@ -426,3 +426,94 @@ describe("StatsService.getBiggestRegularExpense", () => {
     expect(result.expense?.amount).toBeCloseTo(1499.99, 2);
   });
 });
+
+/**
+ * Unit tests for StatsService.getBusiestWeek — the calendar week-range of a month
+ * with the most one-off spendings, backing the dashboard's 4th ribbon insight
+ * (COS-139). "Week" = the month's calendar-aligned Sun→Sat ranges truncated at
+ * the month edges (the same slices the app shows everywhere), NOT a rolling
+ * window. Prisma is mocked; these assert the query shape (per-day counts over a
+ * half-open UTC month range) and the JS bucketing/max/tie-break.
+ */
+describe("StatsService.getBusiestWeek", () => {
+  const makeService = (groupByResult: { date: Date; _count: number }[]) => {
+    const groupBy = jest.fn().mockResolvedValue(groupByResult);
+    const prisma = { spendings: { groupBy } } as unknown as never;
+    return { service: new StatsService(prisma), groupBy };
+  };
+
+  it("counts spendings per day over a half-open UTC month range, scoped to the user", async () => {
+    const { service, groupBy } = makeService([]);
+
+    await service.getBusiestWeek("2026-06-01", "user-1");
+
+    expect(groupBy).toHaveBeenCalledWith({
+      by: ["date"],
+      where: { userID: "user-1", date: { gte: new Date(Date.UTC(2026, 5, 1)), lt: new Date(Date.UTC(2026, 6, 1)) } },
+      _count: true,
+    });
+  });
+
+  it("returns the calendar week-range with the most spendings (Sun→Sat, truncated at the month edges)", async () => {
+    // June 2026 starts on a Monday → ranges 1–6, 7–13, 14–20, 21–27, 28–30.
+    const { service } = makeService([
+      { date: new Date(Date.UTC(2026, 5, 3)), _count: 1 }, // range 1–6
+      { date: new Date(Date.UTC(2026, 5, 8)), _count: 5 }, // range 7–13
+      { date: new Date(Date.UTC(2026, 5, 10)), _count: 4 }, // range 7–13
+      { date: new Date(Date.UTC(2026, 5, 15)), _count: 2 }, // range 14–20
+    ]);
+
+    await expect(service.getBusiestWeek("2026-06-01", "user-1")).resolves.toEqual({
+      count: 9,
+      from: "2026-06-07",
+      to: "2026-06-13",
+    });
+  });
+
+  it("aligns the partial first week on the 1st of the month, whatever day `start` falls on", async () => {
+    // start is June 4th (a Thursday), but the first slice must still be 1–6 (the
+    // month starts on Monday), not 1–3. A single spending on the 8th belongs to
+    // the 7–13 range, not the buggy 4–10 one.
+    const { service } = makeService([{ date: new Date(Date.UTC(2026, 5, 8)), _count: 3 }]);
+
+    await expect(service.getBusiestWeek("2026-06-04", "user-1")).resolves.toEqual({
+      count: 3,
+      from: "2026-06-07",
+      to: "2026-06-13",
+    });
+  });
+
+  it("treats a month whose 1st is a Sunday as four full Sun→Sat weeks", async () => {
+    // February 2026 starts on a Sunday → ranges 1–7, 8–14, 15–21, 22–28.
+    const { service } = makeService([{ date: new Date(Date.UTC(2026, 1, 10)), _count: 4 }]);
+
+    await expect(service.getBusiestWeek("2026-02-01", "user-1")).resolves.toEqual({
+      count: 4,
+      from: "2026-02-08",
+      to: "2026-02-14",
+    });
+  });
+
+  it("breaks ties toward the earliest range", async () => {
+    const { service } = makeService([
+      { date: new Date(Date.UTC(2026, 5, 3)), _count: 2 }, // range 1–6
+      { date: new Date(Date.UTC(2026, 5, 8)), _count: 2 }, // range 7–13
+    ]);
+
+    await expect(service.getBusiestWeek("2026-06-01", "user-1")).resolves.toEqual({
+      count: 2,
+      from: "2026-06-01",
+      to: "2026-06-06",
+    });
+  });
+
+  it("returns count 0 and null bounds for a month with no spending", async () => {
+    const { service } = makeService([]);
+
+    await expect(service.getBusiestWeek("2026-06-01", "user-1")).resolves.toEqual({
+      count: 0,
+      from: null,
+      to: null,
+    });
+  });
+});

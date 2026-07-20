@@ -84,3 +84,15 @@ export const BiggestRegularExpenseResponseSchema = z.object({
 });
 
 export type BiggestRegularExpenseResponse = z.infer<typeof BiggestRegularExpenseResponseSchema>;
+
+// Busiest calendar week-range of a month by transaction count (COS-139) — GET
+// /busiest-week. "Week" = the month's calendar-aligned Sun→Sat slices, truncated
+// at the month edges (not a rolling window). `from`/`to` are null when the month
+// has no spending. Backs the dashboard's 4th ribbon insight.
+export const BusiestWeekResponseSchema = z.object({
+  count: numberLikeSchema,
+  from: z.string().nullable(),
+  to: z.string().nullable(),
+});
+
+export type BusiestWeekResponse = z.infer<typeof BusiestWeekResponseSchema>;

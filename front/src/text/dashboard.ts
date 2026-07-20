@@ -72,6 +72,8 @@ const dashboard = {
     risingLabel: "Catégorie en hausse",
     risingEmpty: "Aucune hausse ce mois.",
     remainingLabel: "Reste à vivre",
+    busiestLabel: "Semaine la plus active",
+    busiestEmpty: "Aucune transaction ce mois.",
   },
   weeklyCeiling: {
     title: "Plafond hebdomadaire",

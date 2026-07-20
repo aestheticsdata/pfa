@@ -11,8 +11,10 @@ import { Overline } from "@components/shared/Overline";
 import { MONTHLY } from "@components/spendings/config/constants";
 import { categoryDeltaPct, STABLE_TREND_THRESHOLD } from "@components/spendings/helpers/categoryTrend";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
+import useBusiestWeek from "@components/spendings/services/useBusiestWeek";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useDashboard from "@components/spendings/services/useDashboard";
+import { buildSpendingsPath } from "@helpers/dateRoute";
 import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
 import dashboardText from "@text/dashboard";
@@ -22,7 +24,9 @@ import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import isSameMonth from "date-fns/isSameMonth";
 import fr from "date-fns/locale/fr";
-import { TrendingUp, TriangleAlert, Wallet } from "lucide-react";
+import parseISO from "date-fns/parseISO";
+import { ArrowRightLeft, TrendingUp, TriangleAlert, Wallet } from "lucide-react";
+import Link from "next/link";
 
 import type { ReactNode } from "react";
 
@@ -55,6 +59,7 @@ const InsightsRibbon = () => {
   } = useDashboard();
   const { data: trendsData } = useCategoryTrends(MONTHLY);
   const trends = trendsData?.trends;
+  const { data: busiest } = useBusiestWeek();
   const { insightsRibbon: t } = dashboardText;
 
   const budget = Number(dashboard?.initialAmount ?? 0);
@@ -79,9 +84,15 @@ const InsightsRibbon = () => {
     })
     .sort((a, b) => b.delta - a.delta)[0];
   const lastDayLabel = format(endOfMonth(monthRef), "d MMMM", { locale: fr });
+  // The month's calendar week-range with the most transactions (COS-139); from/to
+  // come back as ISO strings — parseISO keeps them on the client's calendar day.
+  const busiestRange =
+    busiest && busiest.count > 0 && busiest.from && busiest.to
+      ? { count: busiest.count, fromIso: busiest.from, from: parseISO(busiest.from), to: parseISO(busiest.to) }
+      : null;
 
   return (
-    <DividedStrip className="grid-cols-1 sm:grid-cols-3">
+    <DividedStrip className="grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
       <Insight
         tone="bg-accent-strong/10 text-accent-strong"
         icon={<TrendingUp className="size-3.5" />}
@@ -113,6 +124,29 @@ const InsightsRibbon = () => {
         Il reste <b className="num font-semibold text-ink">{euro0(perDay)} €</b>
         /jour à dépenser d&apos;ici le <b className="font-semibold text-ink">{lastDayLabel}</b> pour rester dans le
         budget.
+      </Insight>
+      <Insight
+        tone="bg-surface-hi text-ink-2"
+        icon={<ArrowRightLeft className="size-3.5" />}
+        label={t.busiestLabel}
+      >
+        {busiestRange ? (
+          <>
+            <b className="num font-semibold text-ink">
+              {busiestRange.count} transaction{busiestRange.count > 1 ? "s" : ""}
+            </b>{" "}
+            du{" "}
+            <Link
+              href={buildSpendingsPath(busiestRange.fromIso)}
+              className="cursor-pointer font-semibold text-ink underline-offset-4 transition-colors hover:text-accent-strong hover:underline"
+            >
+              {format(busiestRange.from, "d", { locale: fr })} au {format(busiestRange.to, "d MMMM", { locale: fr })}
+            </Link>
+            .
+          </>
+        ) : (
+          t.busiestEmpty
+        )}
       </Insight>
     </DividedStrip>
   );
