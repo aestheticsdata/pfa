@@ -3,8 +3,8 @@
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { WEEKLY } from "@components/spendings/config/constants";
+import { categoryTrend } from "@components/spendings/helpers/categoryTrend";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
-import { mockCategoryTrend } from "@components/spendings/view/helpers/mockSpending";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
 import { CategoryBarTooltip, CategoryTrend } from "@lib/dataviz";
 import { euro } from "@lib/format";
@@ -14,10 +14,11 @@ import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
 import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
-import type { BarHover } from "@lib/dataviz";
+import type { BarHover, CategoryTrendData } from "@lib/dataviz";
 
-// MOCK — needs previous-week data (see mockSpending.ts). De-mocks with COS-35.
-const Trend = ({ name }: { name: string }) => <CategoryTrend {...mockCategoryTrend(name)} />;
+/** A breakdown row plus its derived trend badge — undefined while previous-week
+ *  data is still loading (badge hidden until then). */
+type BreakdownRowWithTrend = BreakdownRow & { trend?: CategoryTrendData };
 
 // Persisted open/closed state of the detail list (COS-112). The segment bar stays
 // visible whatever the state — it IS the collapsed summary (hover gives per-category
@@ -50,13 +51,13 @@ interface SpendingCategoryBreakdownProps {
 
 /**
  * Full-width "Répartition par catégorie" pane for the current week.
- * Stacked bar + per-category swatch / name / count / % / amount / trend.
- * (Trend column is MOCK.)
+ * Stacked bar + per-category swatch / name / count / % / amount / trend (the
+ * trend compares each category to the previous week — COS-35).
  */
 const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdownProps) => {
   const { breakdown: t } = spendings;
   const [selected, setSelected] = useState<BreakdownRow | null>(null);
-  const [hover, setHover] = useState<BarHover<BreakdownRow> | null>(null);
+  const [hover, setHover] = useState<BarHover<BreakdownRowWithTrend> | null>(null);
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [hasStoredPref, setHasStoredPref] = useState(initialHasStoredPref);
 
@@ -74,6 +75,16 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
   // First-visit discoverability nudge: only until a choice is stored, and only
   // when there is hidden detail to reveal.
   const showHint = !hasStoredPref && collapsed;
+
+  // One derived row per category carrying its trend badge — shared by the list
+  // AND the hover tooltip so both render the identical badge (no recompute). The
+  // badge stays hidden while the previous-week data is still loading
+  // (`previousValue` undefined) rather than flashing a wrong "nouv." (COS-35).
+  const trendLabels = { stable: t.trendStable, fresh: t.trendNew };
+  const rowsWithTrend: BreakdownRowWithTrend[] = rows.map((r) => ({
+    ...r,
+    trend: r.previousValue === undefined ? undefined : categoryTrend(r.total, r.previousValue, trendLabels),
+  }));
 
   const caret = (
     <button
@@ -122,7 +133,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
       />
 
       <div className="mb-2.5 flex h-2 overflow-hidden rounded-sm">
-        {rows.map((r) => (
+        {rowsWithTrend.map((r) => (
           <span
             key={r.key}
             role="img"
@@ -147,7 +158,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
           {/* min(400px,100%) so a narrow phone gets ONE full-width column instead of a
               forced 400px track overflowing to the right. */}
           <div className="grid grid-cols-[repeat(auto-fill,minmax(min(400px,100%),1fr))] gap-x-11 max-[520px]:grid-cols-1 max-[520px]:gap-x-0">
-            {rows.map((r) => (
+            {rowsWithTrend.map((r) => (
               <button
                 key={r.key}
                 type="button"
@@ -171,7 +182,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
                   {euro(r.total)} €
                 </span>
                 <span className="max-[520px]:col-start-3 max-[520px]:row-start-2 max-[520px]:justify-self-end">
-                  <Trend name={r.name} />
+                  {r.trend && <CategoryTrend {...r.trend} />}
                 </span>
               </button>
             ))}
@@ -182,7 +193,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
       {hover && (
         <CategoryBarTooltip
           point={{ x: hover.x, y: hover.y }}
-          datum={{ ...hover.target, trend: mockCategoryTrend(hover.target.name) }}
+          datum={hover.target}
         />
       )}
 

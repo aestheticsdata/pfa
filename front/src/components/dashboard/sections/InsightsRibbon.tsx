@@ -53,7 +53,8 @@ const InsightsRibbon = () => {
     monthlyTotal,
     get: { data: dashboard },
   } = useDashboard();
-  const { data: trends } = useCategoryTrends(MONTHLY);
+  const { data: trendsData } = useCategoryTrends(MONTHLY);
+  const trends = trendsData?.trends;
   const { insightsRibbon: t } = dashboardText;
 
   const budget = Number(dashboard?.initialAmount ?? 0);

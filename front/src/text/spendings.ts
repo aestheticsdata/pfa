@@ -66,6 +66,9 @@ const spendings = {
     expandAria: "Afficher le détail par catégorie",
     collapseAria: "Masquer le détail par catégorie",
     expandHint: "Déplier pour voir le détail",
+    // Per-category trend badge vs the previous week (COS-35).
+    trendStable: "stable",
+    trendNew: "nouv.",
   },
   summary: {
     remaining: "Budget restant",
