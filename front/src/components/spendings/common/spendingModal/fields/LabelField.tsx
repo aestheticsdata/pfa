@@ -2,8 +2,8 @@ import { TextInput } from "@components/shared/TextInput";
 import { Label } from "@components/ui/label";
 import spendings from "@text/spendings";
 
-import type { LabelSuggestion } from "@components/spendings/common/spendingModal/mockSuggestions";
 import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
+import type { LabelSuggestion } from "@src/schemas/spendings";
 import type { Dispatch, SetStateAction } from "react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
@@ -40,9 +40,8 @@ const LabelField = ({
       })}
     />
     {errors.spendingLabel && <p className="text-xs text-neg">{errors.spendingLabel.message}</p>}
+    {/* Suggestions are spending-specific, hidden for recurrings. */}
     {!asRecurring && labelSuggestions.length > 0 && (
-      // MOCK suggestions — spending-specific, hidden for recurrings.
-      // (see mockSuggestions.ts) — de-mock tracked in COS-23.
       <div className="flex flex-wrap gap-1.5">
         {labelSuggestions.map((s) => (
           <button
@@ -52,7 +51,7 @@ const LabelField = ({
             className="rounded-md border border-line bg-surface-hi px-2 py-1 text-2xs text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
           >
             {s.label}
-            <span className="text-ink-4"> — {s.category}</span>
+            {s.category && <span className="text-ink-4"> — {s.category}</span>}
           </button>
         ))}
       </div>

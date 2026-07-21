@@ -9,6 +9,7 @@ import sharp from "sharp";
 import { AppConfig } from "@config/app.config";
 import { SshBackupService } from "@infrastructure/ssh-backup/ssh-backup.service";
 import { isValidImageFile } from "@spendings/upload/upload.config";
+import type { SpendingLabelSuggestion } from "@spendings/dto/spending-label-suggestion.interface";
 import { PrismaService } from "../prisma/prisma.service";
 
 const MIME_BY_EXT: Record<string, string> = {
@@ -23,6 +24,10 @@ const MIME_BY_EXT: Record<string, string> = {
 // can't scan the entire table, and stream results a page at a time.
 const MIN_SEARCH_LENGTH = 2;
 const SEARCH_PAGE_SIZE = 50;
+
+// Label autocomplete (COS-23): the modal shows a small chip row under the field,
+// so only the top few labels are returned. Matches the maquette's three chips.
+const LABEL_SUGGESTIONS_LIMIT = 3;
 
 @Injectable()
 export class SpendingsService {
@@ -337,6 +342,79 @@ export class SpendingsService {
       years.push(y);
     }
     return years;
+  }
+
+  // Label autocomplete for the spending modal (COS-23). Returns the user's own
+  // past spending labels ranked by how often they've used each, filtered by the
+  // typed prefix, each carrying its most-used category so selecting one can
+  // pre-fill the category. An empty query returns the most frequent labels (shown
+  // when the field is empty); the exact current input is excluded so we never
+  // suggest what's already fully typed. Category resolution honors the owned-or-
+  // global rule used across the app; a label only ever used uncategorized yields a
+  // null category.
+  async getLabelSuggestions(query: string, userID: string): Promise<SpendingLabelSuggestion[]> {
+    const q = query.trim();
+    // Escape LIKE metacharacters so a literal % or _ in the prefix matches
+    // literally instead of acting as a wildcard (same guard as searchSpendings).
+    const escaped = q.replace(/[\\%_]/g, "\\$&");
+
+    const grouped = await this.prisma.spendings.groupBy({
+      by: ["label", "categoryID"],
+      where: { userID, ...(q ? { label: { startsWith: escaped } } : {}) },
+      _count: true,
+    });
+
+    // Fold the (label, category) groups into one bucket per label: total uses,
+    // plus — among the categorized uses only — the tally per category.
+    const buckets = new Map<string, { total: number; byCategory: Map<string, number> }>();
+    for (const group of grouped) {
+      const bucket = buckets.get(group.label) ?? { total: 0, byCategory: new Map<string, number>() };
+      bucket.total += group._count;
+      if (group.categoryID) {
+        bucket.byCategory.set(group.categoryID, (bucket.byCategory.get(group.categoryID) ?? 0) + group._count);
+      }
+      buckets.set(group.label, bucket);
+    }
+
+    // Rank by total use (then alphabetically), drop the exact current input, and
+    // keep the top few — the modal shows a small chip row.
+    const qLower = q.toLowerCase();
+    const ranked = [...buckets.entries()]
+      .filter(([label]) => label.toLowerCase() !== qLower)
+      .sort((a, b) => b[1].total - a[1].total || a[0].localeCompare(b[0]))
+      .slice(0, LABEL_SUGGESTIONS_LIMIT);
+
+    // Dominant category id per surviving label (most-used; null if only ever
+    // uncategorized).
+    const dominantCategoryId = (byCategory: Map<string, number>): string | null => {
+      let winnerId: string | null = null;
+      let winnerCount = 0;
+      for (const [categoryID, count] of byCategory) {
+        if (count > winnerCount) {
+          winnerCount = count;
+          winnerId = categoryID;
+        }
+      }
+      return winnerId;
+    };
+
+    const labelToCategoryId = new Map(ranked.map(([label, bucket]) => [label, dominantCategoryId(bucket.byCategory)]));
+
+    // Resolve those ids to names in one query, honoring the owned-or-global rule.
+    const ids = [...new Set([...labelToCategoryId.values()].filter((id): id is string => id !== null))];
+    const categories =
+      ids.length > 0
+        ? await this.prisma.categories.findMany({
+            where: { ID: { in: ids }, OR: [{ userID }, { userID: null }] },
+            select: { ID: true, name: true },
+          })
+        : [];
+    const nameById = new Map(categories.map((c) => [c.ID, c.name]));
+
+    return ranked.map(([label]) => {
+      const categoryID = labelToCategoryId.get(label);
+      return { label, category: categoryID ? (nameById.get(categoryID) ?? null) : null };
+    });
   }
 
   async deleteSpending(spendingID: string, userID: string): Promise<{ success: boolean }> {

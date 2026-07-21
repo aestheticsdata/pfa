@@ -21,6 +21,7 @@ import { UpdateSpendingDto } from "@spendings/dto/update-spending.dto";
 import { DeleteInvoiceImageDto } from "@spendings/dto/delete-invoice-image.dto";
 import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
 import { SpendingsSearchQueryDto } from "@spendings/dto/spendings-search-query.dto";
+import { LabelSuggestionsQueryDto } from "@spendings/dto/label-suggestions-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { invoiceUploadOptions } from "@spendings/upload/upload.config";
@@ -49,6 +50,11 @@ export class SpendingsController {
   @Get("years")
   async getSpendingYears(@GetUserId() userID: string) {
     return this.spendingsService.getSpendingYears(userID);
+  }
+
+  @Get("label-suggestions")
+  async getLabelSuggestions(@Query() query: LabelSuggestionsQueryDto, @GetUserId() userID: string) {
+    return this.spendingsService.getLabelSuggestions(query.q ?? "", userID);
   }
 
   @Delete("upload")

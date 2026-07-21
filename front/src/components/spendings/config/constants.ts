@@ -24,6 +24,7 @@ export const QUERY_KEYS = {
   EXCEPTIONAL_YEARS: "exceptionalYears",
   SPENDINGS_SEARCH: "spendingsSearch",
   SPENDINGS_YEARS: "spendingsYears",
+  LABEL_SUGGESTIONS: "labelSuggestions",
 };
 
 // Whole-history search (COS-114): minimum query length before the modal hits the

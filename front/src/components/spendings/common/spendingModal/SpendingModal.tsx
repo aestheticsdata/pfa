@@ -7,13 +7,14 @@ import CategoryField from "@components/spendings/common/spendingModal/fields/Cat
 import DateField from "@components/spendings/common/spendingModal/fields/DateField";
 import LabelField from "@components/spendings/common/spendingModal/fields/LabelField";
 import ReceiptField from "@components/spendings/common/spendingModal/fields/ReceiptField";
-import { mockLabelSuggestions } from "@components/spendings/common/spendingModal/mockSuggestions";
 import { rankFrequentCategories } from "@components/spendings/common/spendingModal/rankFrequentCategories";
 import { spendingSchema } from "@components/spendings/common/spendingModal/schema";
 import Toggle from "@components/spendings/common/spendingModal/Toggle";
 import useSpendingSubmit from "@components/spendings/common/spendingModal/useSpendingSubmit";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
+import useDebouncedValue from "@components/spendings/search/useDebouncedValue";
 import useCategories from "@components/spendings/services/useCategories";
+import useLabelSuggestions from "@components/spendings/services/useLabelSuggestions";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { Button } from "@components/ui/button";
@@ -32,6 +33,12 @@ import { useForm } from "react-hook-form";
 import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
 import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
+import type { LabelSuggestion } from "@src/schemas/spendings";
+
+// Debounce the label input before hitting the suggestions endpoint, so a
+// fast-typed label makes one request on pause, not one per keystroke (matches
+// the whole-history search, COS-114).
+const LABEL_SUGGESTIONS_DEBOUNCE_MS = 250;
 
 interface SpendingModalProps {
   date?: Date;
@@ -149,12 +156,17 @@ const SpendingModal = ({
     },
   });
 
-  const labelSuggestions = mockLabelSuggestions(labelQuery);
+  // Suggestions come from the user's real past labels (COS-23); never fetched for
+  // recurrings, which don't show them.
+  const debouncedLabelQuery = useDebouncedValue(labelQuery, LABEL_SUGGESTIONS_DEBOUNCE_MS);
+  const labelSuggestions = useLabelSuggestions(debouncedLabelQuery, !asRecurring);
 
-  const applySuggestion = (suggestion: { label: string; category: string }) => {
+  const applySuggestion = (suggestion: LabelSuggestion) => {
     setValue("spendingLabel", suggestion.label, { shouldValidate: true });
     setLabelQuery(suggestion.label);
-    const match = categoryOptions.find((c) => c.name.toLowerCase() === suggestion.category.toLowerCase());
+    const category = suggestion.category;
+    if (!category) return;
+    const match = categoryOptions.find((c) => c.name.toLowerCase() === category.toLowerCase());
     if (match) {
       setSelectedCategory(match);
     }

@@ -261,3 +261,148 @@ describe("SpendingsService.getSpendingYears", () => {
     await expect(service.getSpendingYears("user-1")).resolves.toEqual([]);
   });
 });
+
+/**
+ * Unit tests for SpendingsService.getLabelSuggestions — the label autocomplete
+ * backing the spending modal's chip row (COS-23). Prisma is mocked, so these
+ * assert the query shape and the JS aggregation (frequency ranking, dominant
+ * category, exact-match exclusion, cap) without touching the DB.
+ */
+describe("SpendingsService.getLabelSuggestions", () => {
+  const makeService = (groupByResult: unknown[], categoriesResult: unknown[] = []) => {
+    const groupBy = jest.fn().mockResolvedValue(groupByResult);
+    const findMany = jest.fn().mockResolvedValue(categoriesResult);
+    const prisma = { spendings: { groupBy }, categories: { findMany } } as unknown as never;
+    const service = new SpendingsService(prisma, {} as never, {} as never);
+    return { service, groupBy, findMany };
+  };
+
+  it("ranks the user's labels by frequency and resolves each label's dominant category, no label filter for an empty query", async () => {
+    const { service, groupBy, findMany } = makeService(
+      [
+        { label: "Monoprix", categoryID: "c-food", _count: 5 },
+        { label: "Monoprix", categoryID: null, _count: 1 },
+        { label: "Uber", categoryID: "c-transport", _count: 3 },
+        { label: "Boulangerie", categoryID: null, _count: 2 },
+      ],
+      [
+        { ID: "c-food", name: "alimentation" },
+        { ID: "c-transport", name: "transport" },
+      ],
+    );
+
+    const result = await service.getLabelSuggestions("", "user-1");
+
+    // Empty query → top labels overall, so no label predicate, only the user scope.
+    expect(groupBy).toHaveBeenCalledWith({
+      by: ["label", "categoryID"],
+      where: { userID: "user-1" },
+      _count: true,
+    });
+    // Category names resolved in one query, honoring the owned-or-global rule.
+    expect(findMany).toHaveBeenCalledWith({
+      where: { ID: { in: ["c-food", "c-transport"] }, OR: [{ userID: "user-1" }, { userID: null }] },
+      select: { ID: true, name: true },
+    });
+    // Monoprix (6 uses) > Uber (3) > Boulangerie (2, only ever uncategorized → null).
+    expect(result).toEqual([
+      { label: "Monoprix", category: "alimentation" },
+      { label: "Uber", category: "transport" },
+      { label: "Boulangerie", category: null },
+    ]);
+  });
+
+  it("filters by prefix with startsWith when a query is given", async () => {
+    const { service, groupBy } = makeService([]);
+
+    await service.getLabelSuggestions("mono", "user-1");
+
+    expect(groupBy).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { userID: "user-1", label: { startsWith: "mono" } } }),
+    );
+  });
+
+  it("trims the query before matching", async () => {
+    const { service, groupBy } = makeService([]);
+
+    await service.getLabelSuggestions("  mono  ", "user-1");
+
+    expect(groupBy).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { userID: "user-1", label: { startsWith: "mono" } } }),
+    );
+  });
+
+  it("escapes LIKE wildcards so % and _ match literally in the prefix", async () => {
+    const { service, groupBy } = makeService([]);
+
+    await service.getLabelSuggestions("100%_x", "user-1");
+
+    expect(groupBy).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { userID: "user-1", label: { startsWith: "100\\%\\_x" } } }),
+    );
+  });
+
+  it("picks the most-used category when a label has been paired with several", async () => {
+    const { service } = makeService(
+      [
+        { label: "Pharmacie", categoryID: "c-food", _count: 2 },
+        { label: "Pharmacie", categoryID: "c-health", _count: 5 },
+      ],
+      [
+        { ID: "c-food", name: "alimentation" },
+        { ID: "c-health", name: "santé" },
+      ],
+    );
+
+    const result = await service.getLabelSuggestions("pha", "user-1");
+
+    expect(result).toEqual([{ label: "Pharmacie", category: "santé" }]);
+  });
+
+  it("excludes the exact current input (case-insensitive)", async () => {
+    const { service } = makeService([
+      { label: "Monoprix", categoryID: null, _count: 3 },
+      { label: "Monoprix Express", categoryID: null, _count: 1 },
+    ]);
+
+    const result = await service.getLabelSuggestions("monoprix", "user-1");
+
+    expect(result).toEqual([{ label: "Monoprix Express", category: null }]);
+  });
+
+  it("breaks frequency ties alphabetically", async () => {
+    const { service } = makeService([
+      { label: "Zebra", categoryID: null, _count: 2 },
+      { label: "Apple", categoryID: null, _count: 2 },
+    ]);
+
+    const result = await service.getLabelSuggestions("", "user-1");
+
+    expect(result.map((s) => s.label)).toEqual(["Apple", "Zebra"]);
+  });
+
+  it("caps the number of suggestions and never resolves categories when none apply", async () => {
+    const { service, findMany } = makeService([
+      { label: "aa", categoryID: null, _count: 1 },
+      { label: "bb", categoryID: null, _count: 2 },
+      { label: "cc", categoryID: null, _count: 3 },
+      { label: "dd", categoryID: null, _count: 4 },
+      { label: "ee", categoryID: null, _count: 5 },
+    ]);
+
+    const result = await service.getLabelSuggestions("", "user-1");
+
+    expect(result.map((s) => s.label)).toEqual(["ee", "dd", "cc"]);
+    // Every dominant category is null → no category lookup at all.
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it("yields a null category when the dominant id can't be resolved (inaccessible)", async () => {
+    // groupBy names a category id, but findMany returns nothing (e.g. another user's).
+    const { service } = makeService([{ label: "Secret", categoryID: "c-other", _count: 4 }], []);
+
+    const result = await service.getLabelSuggestions("sec", "user-1");
+
+    expect(result).toEqual([{ label: "Secret", category: null }]);
+  });
+});
