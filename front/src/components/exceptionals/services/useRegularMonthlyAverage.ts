@@ -1,7 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import { QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
 const RegularMonthlyAverageSchema = z.object({
@@ -20,7 +20,9 @@ const useRegularMonthlyAverage = (year: number) => {
     return RegularMonthlyAverageSchema.parse(response.data);
   };
 
-  return useQuery(["regularMonthlyAverage", year], fetcher, {
+  return useQuery({
+    queryKey: ["regularMonthlyAverage", year],
+    queryFn: fetcher,
     retry: false,
     enabled: !!userID,
     ...QUERY_OPTIONS,

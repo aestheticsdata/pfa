@@ -11,11 +11,11 @@ import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { cn } from "@lib/utils";
+import { useQueryClient } from "@tanstack/react-query";
 import texts from "@text/spendings";
 import { Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useQueryClient } from "react-query";
 
 import type { SpendingListItem } from "@components/spendings/types";
 
@@ -68,7 +68,9 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
       });
       if ((res as { data?: { msg?: string } })?.data?.msg === "INVOICE_IMAGE_DELETED") {
         setInvoiceImage(null);
-        await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
+        await queryClient.invalidateQueries({
+          queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
+        });
         setIsLoading(false);
       }
     } catch (e) {
@@ -94,7 +96,9 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
       const uploadedImage = await privateRequest("/spendings/upload", { method: "POST", data: payload }, config);
       setInvoiceImage(uploadedImage.data);
       clearPending();
-      await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
+      await queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
+      });
       setIsLoading(false);
     } catch (e) {
       const message = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;

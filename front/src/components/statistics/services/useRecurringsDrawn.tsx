@@ -1,7 +1,7 @@
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { RecurringsDrawnSchema } from "@src/schemas/spendings";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 interface UseRecurringsDrawnOptions {
   year: number;
@@ -23,12 +23,14 @@ const useRecurringsDrawn = ({ year, month }: UseRecurringsDrawnOptions) => {
     return RecurringsDrawnSchema.parse(response.data);
   };
 
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.RECURRINGS_DRAWN, year, month], getDrawn, {
+  const { data, isPending, error } = useQuery({
+    queryKey: [QUERY_KEYS.RECURRINGS_DRAWN, year, month],
+    queryFn: getDrawn,
     retry: false,
     ...QUERY_OPTIONS,
   });
 
-  return { drawn: data?.drawn, isLoading, error };
+  return { drawn: data?.drawn, isLoading: isPending, error };
 };
 
 export default useRecurringsDrawn;

@@ -4,9 +4,9 @@ import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constant
 import useDashboard from "@components/spendings/services/useDashboard";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { WeeklyStatsSchema } from "@src/schemas/dashboard";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth } from "date-fns";
 import startOfMonth from "date-fns/startOfMonth";
-import { useMutation, useQuery, useQueryClient } from "react-query";
 
 const useWeeklyStats = () => {
   const { privateRequest } = useRequestHelper();
@@ -44,15 +44,21 @@ const useWeeklyStats = () => {
     }
   };
 
-  const get = useQuery([QUERY_KEYS.WEEKLY_STATS, monthBeginning], getWeeklyStats, {
+  const get = useQuery({
+    queryKey: [QUERY_KEYS.WEEKLY_STATS, monthBeginning],
+    queryFn: getWeeklyStats,
     retry: false,
     enabled: !!from && !!userID,
     ...QUERY_OPTIONS,
   });
 
-  const mutation = useMutation((ceiling: string) => setInitialCeiling(ceiling), {
+  const mutation = useMutation({
+    mutationFn: (ceiling: string) => setInitialCeiling(ceiling),
+
     onSuccess: async () => {
-      await queryClient.invalidateQueries([QUERY_KEYS.DASHBOARD, startOfMonth(from!)]);
+      await queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.DASHBOARD, startOfMonth(from!)],
+      });
     },
   });
 

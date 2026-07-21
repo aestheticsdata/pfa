@@ -3,12 +3,12 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY, QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { CategoryTrendsResponseSchema } from "@src/schemas/stats";
+import { useQuery } from "@tanstack/react-query";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import startOfMonth from "date-fns/startOfMonth";
 import subDays from "date-fns/subDays";
 import subMonths from "date-fns/subMonths";
-import { useQuery } from "react-query";
 
 import type { CategoryTrendPoint } from "@src/schemas/stats";
 
@@ -84,7 +84,9 @@ const useCategoryTrends = (periodType: string) => {
     return { trends: aggregateByCategory(parsed.trends), previousTotal: parsed.previousTotal };
   };
 
-  return useQuery([QUERY_KEYS.CATEGORY_TRENDS, range?.current.from, range?.current.to], getCategoryTrends, {
+  return useQuery({
+    queryKey: [QUERY_KEYS.CATEGORY_TRENDS, range?.current.from, range?.current.to],
+    queryFn: getCategoryTrends,
     retry: false,
     enabled: !!range && !!userID,
     ...QUERY_OPTIONS,

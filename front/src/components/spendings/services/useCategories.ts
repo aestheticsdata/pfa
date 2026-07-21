@@ -2,7 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { CategoryListSchema, UpdateCategoryPayloadSchema } from "@src/schemas/categories";
-import { useMutation, useQuery, useQueryClient } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { UpdateCategoryPayload } from "@src/schemas/categories";
 import type { AxiosError } from "axios";
@@ -16,10 +16,18 @@ const useCategories = () => {
   type DeleteCategoryVariables = { categoryID: string };
 
   const invalidation = async () => {
-    await queryClient.invalidateQueries([QUERY_KEYS.CATEGORIES]);
-    await queryClient.invalidateQueries([QUERY_KEYS.CATEGORY_STATS]);
-    await queryClient.invalidateQueries([QUERY_KEYS.SPENDINGS_BY_MONTH]);
-    await queryClient.invalidateQueries([QUERY_KEYS.CATEGORY_TRENDS]);
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.CATEGORIES],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.CATEGORY_STATS],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.CATEGORY_TRENDS],
+    });
   };
 
   const getCategoriesService = async () => {
@@ -31,7 +39,9 @@ const useCategories = () => {
       throw e; // Re-throw pour que React Query gère l'erreur correctement
     }
   };
-  const { data: categories, error } = useQuery(QUERY_KEYS.CATEGORIES, getCategoriesService, {
+  const { data: categories, error } = useQuery({
+    queryKey: [QUERY_KEYS.CATEGORIES],
+    queryFn: getCategoriesService,
     retry: 2, // Retry 2 fois en cas d'erreur
     enabled: !!userID,
     ...QUERY_OPTIONS,
@@ -48,38 +58,38 @@ const useCategories = () => {
       console.log(e);
     }
   };
-  const updateCategory = useMutation<unknown, AxiosError, UpdateCategoryVariables>(
-    ({ singleCategory: category }) => {
+  const updateCategory = useMutation<unknown, AxiosError, UpdateCategoryVariables>({
+    mutationFn: ({ singleCategory: category }) => {
       return updateCategoryService(category);
     },
-    {
-      onSuccess: async () => {
-        await invalidation();
-      },
-      onError: (e) => {
-        console.log("error updating category", e);
-      },
+
+    onSuccess: async () => {
+      await invalidation();
     },
-  );
+
+    onError: (e) => {
+      console.log("error updating category", e);
+    },
+  });
 
   const deleteCategoryService = async (categoryID: string) => {
     return privateRequest(`/categories/${categoryID}`, {
       method: "DELETE",
     });
   };
-  const deleteCategory = useMutation<unknown, unknown, DeleteCategoryVariables>(
-    ({ categoryID }) => {
+  const deleteCategory = useMutation<unknown, unknown, DeleteCategoryVariables>({
+    mutationFn: ({ categoryID }) => {
       return deleteCategoryService(categoryID);
     },
-    {
-      onSuccess: async () => {
-        await invalidation();
-      },
-      onError: (e) => {
-        console.log("error deleting category", e);
-      },
+
+    onSuccess: async () => {
+      await invalidation();
     },
-  );
+
+    onError: (e) => {
+      console.log("error deleting category", e);
+    },
+  });
 
   return {
     categories,

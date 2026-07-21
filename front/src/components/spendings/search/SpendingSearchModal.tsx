@@ -27,7 +27,7 @@ const SEARCH_DEBOUNCE_MS = 250;
 // Scroll offset of the results list, stashed when the user leaves for a spending
 // so browser Back can restore the list where they were. Module-level so it
 // survives the modal unmounting during SPA navigation; lost on hard refresh
-// (fine — the react-query page cache is gone then too).
+// (fine — the TanStack Query page cache is gone then too).
 let savedScroll: { q: string; year: number | null; top: number } | null = null;
 
 /**

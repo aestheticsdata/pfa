@@ -2,7 +2,7 @@ import { QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useCategories from "@components/spendings/services/useCategories";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { StatisticsResponseSchema } from "@src/schemas/stats";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
 
@@ -30,7 +30,9 @@ const useStatistics = ({ years }: UseStatisticsOptions) => {
     return StatisticsResponseSchema.parse(response.data);
   };
 
-  const { data, isLoading, error } = useQuery(queryKey, getStatistics, {
+  const { data, isPending, error } = useQuery({
+    queryKey: queryKey,
+    queryFn: getStatistics,
     retry: true,
     ...QUERY_OPTIONS,
     enabled: categoryIds.length > 0 && sortedYears.length > 0,
@@ -40,7 +42,7 @@ const useStatistics = ({ years }: UseStatisticsOptions) => {
     statistics: data,
     colors: data?.colors ?? {},
     categories: categories ?? [],
-    isLoading,
+    isLoading: isPending,
     error,
   };
 };
