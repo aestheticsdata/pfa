@@ -1,4 +1,4 @@
-import { formatMonthParam, parseMonthParam, resolveMonthParam } from "@helpers/dateRoute";
+import { formatMonthParam, parseAsSpendingsDate, parseMonthParam, resolveMonthParam } from "@helpers/dateRoute";
 import { describe, expect, it } from "vitest";
 
 describe("formatMonthParam / parseMonthParam", () => {
@@ -28,5 +28,25 @@ describe("resolveMonthParam", () => {
   it("returns the YYYY-MM of any other month", () => {
     expect(resolveMonthParam(new Date(2025, 8, 10), currentMonthStart)).toBe("2025-09");
     expect(resolveMonthParam(new Date(2027, 0, 1), currentMonthStart)).toBe("2027-01");
+  });
+});
+
+describe("parseAsSpendingsDate", () => {
+  it("keeps a valid ISO calendar day as a plain local string (never a Date)", () => {
+    const parsed = parseAsSpendingsDate.parse("2026-07-12");
+    expect(parsed).toBe("2026-07-12");
+    expect(typeof parsed).toBe("string");
+  });
+
+  it("rejects malformed or out-of-range values to null (page falls back to today)", () => {
+    expect(parseAsSpendingsDate.parse("")).toBeNull();
+    expect(parseAsSpendingsDate.parse("2026-7-2")).toBeNull();
+    expect(parseAsSpendingsDate.parse("20260712")).toBeNull();
+    expect(parseAsSpendingsDate.parse("not-a-date")).toBeNull();
+    expect(parseAsSpendingsDate.parse("2026-13-01")).toBeNull();
+  });
+
+  it("serializes back to the untouched ISO string", () => {
+    expect(parseAsSpendingsDate.serialize("2026-07-12")).toBe("2026-07-12");
   });
 });

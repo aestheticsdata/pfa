@@ -3,9 +3,10 @@
 import useBlur from "@components/common/helpers/blurHelper";
 import { getWeekDays, getWeekRange } from "@components/datePickerWrapper/helpers";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { DATE_QUERY_PARAM, SPENDINGS_PATH } from "@helpers/dateRoute";
+import { DATE_QUERY_PARAM, parseAsSpendingsDate, SPENDINGS_PATH } from "@helpers/dateRoute";
 import formatISO from "date-fns/formatISO";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useState } from "react";
 
 import type { Days, HoverRange } from "@components/datePickerWrapper/types";
@@ -17,9 +18,8 @@ const useDatePickerState = () => {
   const [hoverRange, setHoverRange] = useState<HoverRange>(null);
   const [selectedDays, setSelectedDays] = useState<Days>([]);
 
-  const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const [dateInUrl, setDateInUrl] = useQueryState(DATE_QUERY_PARAM, parseAsSpendingsDate);
 
   const { setFrom, setTo, setRange, setSelectedDateIso, setScrollToDayIso } = useDatePickerWrapperStore();
 
@@ -47,13 +47,10 @@ const useDatePickerState = () => {
     if (updateUrl) {
       setScrollToDayIso(null);
     }
-    if (updateUrl && normalizePath(pathname) === SPENDINGS_PATH) {
-      const dateInUrl = searchParams.get(DATE_QUERY_PARAM);
-      if (dateInUrl !== dateISO) {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set(DATE_QUERY_PARAM, dateISO);
-        router.push(`${SPENDINGS_PATH}?${params.toString()}`);
-      }
+    // A deliberate week pick pushes a new history entry so Back returns to the
+    // previous week; nuqs leaves any other query param on /spendings untouched.
+    if (updateUrl && normalizePath(pathname) === SPENDINGS_PATH && dateInUrl !== dateISO) {
+      setDateInUrl(dateISO, { history: "push" });
     }
 
     const weekRange = getWeekRange(date);

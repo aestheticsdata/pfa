@@ -1,5 +1,6 @@
 import formatISO from "date-fns/formatISO";
 import startOfMonth from "date-fns/startOfMonth";
+import { createParser } from "nuqs";
 
 export const DATE_QUERY_PARAM = "date";
 // The Dépenses (weekly) page carries the selected week as a ?date= query param.
@@ -22,6 +23,19 @@ export const isValidIsoDate = (value?: string): value is string => {
 };
 
 export const buildSpendingsPath = (date = getTodayIsoDate()): string => `${SPENDINGS_PATH}?${DATE_QUERY_PARAM}=${date}`;
+
+/**
+ * nuqs parser for the Dépenses `?date=` param: a validated ISO calendar day
+ * ("YYYY-MM-DD") kept as a LOCAL string — the whole app treats the selected week
+ * as this string, never a Date. Deliberately NOT nuqs' built-in `parseAsIsoDate`,
+ * which decodes to `new Date("YYYY-MM-DD")` (UTC midnight) and would reintroduce
+ * the west-of-UTC off-by-one-day bug (COS-73). An invalid value parses to null so
+ * the page falls back to today, matching the former isValidIsoDate guard.
+ */
+export const parseAsSpendingsDate = createParser({
+  parse: (value) => (isValidIsoDate(value) ? value : null),
+  serialize: (value) => value,
+});
 
 // The Dashboard carries its viewed month as a ?month=YYYY-MM query param (COS-118).
 // Absent = current month (resolved client-side, COS-73), keeping /dashboard clean.

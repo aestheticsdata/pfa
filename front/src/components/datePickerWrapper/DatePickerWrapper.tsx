@@ -2,13 +2,13 @@
 
 import { parseDateParam } from "@components/datePickerWrapper/helpers";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
-import { DATE_QUERY_PARAM } from "@helpers/dateRoute";
+import { DATE_QUERY_PARAM, parseAsSpendingsDate } from "@helpers/dateRoute";
 import { cn } from "@lib/utils";
 import common from "@text/common";
 import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 import DayPicker from "react-day-picker";
 // NOTE: react-day-picker/lib/style.css is intentionally NOT imported — the pfa
@@ -32,10 +32,8 @@ const DatePickerWrapper = () => {
     handleDayLeave,
   } = useDatePickerState();
 
-  const searchParams = useSearchParams();
+  const [selectedDateParam] = useQueryState(DATE_QUERY_PARAM, parseAsSpendingsDate);
   const ref = useRef<HTMLDivElement>(null);
-
-  const selectedDateParam = searchParams.get(DATE_QUERY_PARAM);
 
   const daysAreSelected = selectedDays.length > 0;
 
