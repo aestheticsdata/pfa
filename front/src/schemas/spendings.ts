@@ -44,6 +44,17 @@ export type SpendingSearchPage = z.infer<typeof SpendingSearchPageSchema>;
 // Years the user has spendings in (newest first) — the search modal's year filter.
 export const SpendingYearsSchema = z.array(z.number());
 
+// Label autocomplete for the spending modal (COS-23): the user's own past
+// spending labels, filtered by prefix and ranked by frequency, each with its
+// most-used category so selecting one can pre-fill it. `category` is null when
+// the label was only ever used uncategorized.
+export const LabelSuggestionSchema = z.object({
+  label: z.string(),
+  category: z.string().nullable(),
+});
+export const LabelSuggestionListSchema = z.array(LabelSuggestionSchema);
+export type LabelSuggestion = z.infer<typeof LabelSuggestionSchema>;
+
 export const RecurringItemSchema = z.object({
   ID: z.string(),
   amount: numberLikeSchema,
