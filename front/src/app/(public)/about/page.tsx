@@ -4,15 +4,15 @@ import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
 import app from "@text/app";
 
-const { about: t } = app;
+const { about } = app;
 
-const LEGAL = [t.legal.host, t.legal.address, t.legal.ape, t.legal.vat];
+const LEGAL = [about.legal.host, about.legal.address, about.legal.ape, about.legal.vat];
 
 export default function About() {
   return (
     <AuthCard>
       <AuthBrand
-        title={t.title}
+        title={about.title}
         subtitle="Personal Finance Assistant"
       />
 

@@ -8,12 +8,7 @@ import useElementWidth from "@lib/dataviz/useElementWidth";
 import { euro0 } from "@lib/format";
 import statistics from "@text/statistics";
 
-export interface CategorySeries {
-  name: string;
-  color: string;
-  /** 12-slot Jan→Dec monthly spend for this category. */
-  monthly: number[];
-}
+import type { CategorySeries } from "@components/statistics/interfaces/statisticsCategoryChartTypes";
 
 interface StatisticsCategoryChartProps {
   year: number;

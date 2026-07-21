@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 import type { DailyStat, WeekdayCategory } from "@src/schemas/stats";
 import type { ReactNode } from "react";
 
-const { dayOfWeek: t } = statistics;
+const { dayOfWeek } = statistics;
 
 // Row layout: fixed day-name and amount columns around the elastic bar column.
 const GRID_COLS = "grid grid-cols-[92px_1fr_152px] gap-3";
@@ -76,7 +76,7 @@ const DeltaBadge = ({ pct }: { pct: number }) => {
   const up = pct >= 0;
   return (
     <span className={up ? "text-neg" : "text-accent-strong"}>
-      {up ? "↑" : "↓"} {t.deltaPct(String(Math.abs(Math.round(pct))))}
+      {up ? "↑" : "↓"} {dayOfWeek.deltaPct(String(Math.abs(Math.round(pct))))}
     </span>
   );
 };
@@ -194,8 +194,8 @@ const StatisticsDayOfWeek = ({
         className="px-6 py-5.5"
       >
         <CardSectionHeader
-          title={t.title}
-          meta={t.meta(year)}
+          title={dayOfWeek.title}
+          meta={dayOfWeek.meta(year)}
         />
         <div className="grid place-items-center py-10 text-sm text-ink-4">{common.loading}</div>
       </GlowCard>
@@ -231,11 +231,11 @@ const StatisticsDayOfWeek = ({
       className="px-6 py-5.5"
     >
       <CardSectionHeader
-        title={t.title}
+        title={dayOfWeek.title}
         meta={
           <>
             <span className="font-semibold text-ink">{year}</span>{" "}
-            {t.subtitle(pct1(overall.avgTx), euro(overall.avgAmount))}
+            {dayOfWeek.subtitle(pct1(overall.avgTx), euro(overall.avgAmount))}
           </>
         }
       />
@@ -244,28 +244,28 @@ const StatisticsDayOfWeek = ({
         <div className="mt-3.5 flex flex-wrap items-center gap-2 text-ink-4">
           {peakDow != null && (
             <Chip dot="var(--neg)">
-              {t.chips.peak}{" "}
+              {dayOfWeek.chips.peak}{" "}
               <span className="num text-neg">
-                {t.chips.dayAmount(t.days[peakDow].toLowerCase(), euro0(stats[peakDow].avgAmount))}
+                {dayOfWeek.chips.dayAmount(dayOfWeek.days[peakDow].toLowerCase(), euro0(stats[peakDow].avgAmount))}
               </span>
             </Chip>
           )}
           {troughDow != null && troughDow !== peakDow && (
             <Chip dot="var(--accent-strong)">
-              {t.chips.trough}{" "}
+              {dayOfWeek.chips.trough}{" "}
               <span className="num text-accent-strong">
-                {t.chips.dayAmount(t.days[troughDow].toLowerCase(), euro0(stats[troughDow].avgAmount))}
+                {dayOfWeek.chips.dayAmount(dayOfWeek.days[troughDow].toLowerCase(), euro0(stats[troughDow].avgAmount))}
               </span>
             </Chip>
           )}
           {weekendDeltaPct != null && (
             <Chip dot="var(--ink-4)">
-              {t.chips.weekend}{" "}
+              {dayOfWeek.chips.weekend}{" "}
               <span className="num text-accent-strong">
                 {weekendDeltaPct >= 0 ? "+" : "−"}
-                {t.deltaPct(String(Math.abs(Math.round(weekendDeltaPct))))}
+                {dayOfWeek.deltaPct(String(Math.abs(Math.round(weekendDeltaPct))))}
               </span>{" "}
-              {t.chips.weekendVsWeek}
+              {dayOfWeek.chips.weekendVsWeek}
             </Chip>
           )}
         </div>
@@ -279,7 +279,7 @@ const StatisticsDayOfWeek = ({
             className="num absolute top-0 -translate-x-1/2 whitespace-nowrap text-2xs text-accent-strong"
             style={{ left: `${avgFrac * 100}%` }}
           >
-            {t.averageLine(euro0(overall.avgAmount))}
+            {dayOfWeek.averageLine(euro0(overall.avgAmount))}
           </span>
         </div>
         <span aria-hidden />
@@ -292,7 +292,7 @@ const StatisticsDayOfWeek = ({
         <div
           className="flex flex-col gap-2"
           role="img"
-          aria-label={t.title}
+          aria-label={dayOfWeek.title}
           onMouseMove={(e) => {
             const row = (e.target as HTMLElement).closest<HTMLElement>("[data-dow]");
             if (row?.dataset.dow) {
@@ -315,13 +315,13 @@ const StatisticsDayOfWeek = ({
               ) : null;
             return (
               <div
-                key={t.days[dow]}
+                key={dayOfWeek.days[dow]}
                 data-dow={dow}
                 className={`${ROW_GRID} text-sm`}
               >
                 <span className="flex items-center gap-1.5 text-ink-2">
                   <span className="inline-flex w-2 justify-center text-2xs leading-none">{marker}</span>
-                  {t.days[dow]}
+                  {dayOfWeek.days[dow]}
                 </span>
                 <div className="flex flex-col justify-center">
                   <div className="relative">
@@ -360,7 +360,9 @@ const StatisticsDayOfWeek = ({
                 </div>
                 <div className="num text-right">
                   <div className={`font-medium ${overspendTextClass(level)}`}>{euro(s.avgAmount)} €</div>
-                  <small className="block text-2xs font-normal text-ink-4">{t.transactionsPerDay(pct1(s.avgTx))}</small>
+                  <small className="block text-2xs font-normal text-ink-4">
+                    {dayOfWeek.transactionsPerDay(pct1(s.avgTx))}
+                  </small>
                   {hasCompareData && cs && (
                     <small
                       className="mt-0.5 flex items-center justify-end gap-1 whitespace-nowrap text-2xs font-normal text-accent-d"
@@ -452,7 +454,7 @@ const StatisticsDayOfWeek = ({
                 />
               }
             >
-              {t.legend.under(euro0(dayBudget))}
+              {dayOfWeek.legend.under(euro0(dayBudget))}
             </LegendItem>
             <LegendItem
               swatch={
@@ -462,7 +464,7 @@ const StatisticsDayOfWeek = ({
                 />
               }
             >
-              {t.legend.between(euro0(dayBudget), euro0(dangerBudget))}
+              {dayOfWeek.legend.between(euro0(dayBudget), euro0(dangerBudget))}
             </LegendItem>
             <LegendItem
               swatch={
@@ -472,7 +474,7 @@ const StatisticsDayOfWeek = ({
                 />
               }
             >
-              {t.legend.over(euro0(dangerBudget))}
+              {dayOfWeek.legend.over(euro0(dangerBudget))}
             </LegendItem>
           </>
         )}
@@ -485,10 +487,10 @@ const StatisticsDayOfWeek = ({
             </span>
           }
         >
-          {t.legend.range}
+          {dayOfWeek.legend.range}
         </LegendItem>
         <LegendItem swatch={<span className="inline-block h-0 w-4 border-t-2 border-dashed border-accent-strong/80" />}>
-          {t.legend.average}
+          {dayOfWeek.legend.average}
         </LegendItem>
         {hasCompareData && (
           <span
@@ -503,7 +505,7 @@ const StatisticsDayOfWeek = ({
                 />
               }
             >
-              {t.legend.comparedYear(compareYear)}
+              {dayOfWeek.legend.comparedYear(compareYear)}
             </LegendItem>
           </span>
         )}
@@ -524,23 +526,25 @@ const StatisticsDayOfWeek = ({
             return (
               <div className="min-w-45">
                 <div className="flex items-baseline justify-between gap-6 border-b border-line pb-1.5">
-                  <span className="font-medium text-ink">{t.days[dow]}</span>
+                  <span className="font-medium text-ink">{dayOfWeek.days[dow]}</span>
                   <span className={`num font-semibold ${overspendTextClass(level)}`}>{euro(s.avgAmount)} €</span>
                 </div>
                 <div className="mt-1.5 flex flex-col gap-0.5">
                   <TipRow
-                    label={t.tooltip.range}
+                    label={dayOfWeek.tooltip.range}
                     value={
-                      <span className="num whitespace-nowrap">{t.tooltip.rangeValue(euro0(s.min), euro0(s.max))}</span>
+                      <span className="num whitespace-nowrap">
+                        {dayOfWeek.tooltip.rangeValue(euro0(s.min), euro0(s.max))}
+                      </span>
                     }
                   />
                   <TipRow
-                    label={t.tooltip.txPerDay}
+                    label={dayOfWeek.tooltip.txPerDay}
                     value={<span className="num">{pct1(s.avgTx)}</span>}
                   />
                   <TipRow
-                    label={t.tooltip.dominantCategory}
-                    value={category?.name ?? t.tooltip.none}
+                    label={dayOfWeek.tooltip.dominantCategory}
+                    value={category?.name ?? dayOfWeek.tooltip.none}
                   />
                 </div>
                 {cs && (
@@ -549,13 +553,13 @@ const StatisticsDayOfWeek = ({
                       label={String(compareYear)}
                       value={
                         <span className="num text-accent-d">
-                          {t.tooltip.compareValue(euro(cs.avgAmount), pct1(cs.avgTx))}
+                          {dayOfWeek.tooltip.compareValue(euro(cs.avgAmount), pct1(cs.avgTx))}
                         </span>
                       }
                     />
                     {compareDelta != null && (
                       <TipRow
-                        label={t.tooltip.compareDelta}
+                        label={dayOfWeek.tooltip.compareDelta}
                         value={
                           <span className="num">
                             <DeltaBadge pct={compareDelta} />

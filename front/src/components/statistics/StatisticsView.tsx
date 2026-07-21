@@ -28,6 +28,9 @@ import useStatistics from "@components/statistics/services/useStatistics";
 import useWeekdayCategories from "@components/statistics/services/useWeekdayCategories";
 import { useMemo, useState } from "react";
 
+import type { CategorySeries } from "@components/statistics/interfaces/statisticsCategoryChartTypes";
+import type { TopCategoryRow } from "@components/statistics/interfaces/statisticsTopCategoriesTypes";
+
 const MAX_CATEGORIES = 3;
 
 const yearOptions = (currentYear: number): number[] => Array.from({ length: 7 }, (_, i) => currentYear - i);
@@ -101,7 +104,7 @@ const StatisticsView = () => {
 
   const prevTotals = perCategoryTotals(data, colors, compareYear);
   const prevByName = new Map(prevTotals.map((c) => [c.name, c.value]));
-  const topCategoryRows = perCategoryTotals(data, colors, selectedYear)
+  const topCategoryRows: TopCategoryRow[] = perCategoryTotals(data, colors, selectedYear)
     .slice(0, 8)
     .map((c) => {
       const prev = prevByName.get(c.name) ?? 0;
@@ -114,7 +117,7 @@ const StatisticsView = () => {
       };
     });
 
-  const categorySeries = selectedCategoryIds
+  const categorySeries: CategorySeries[] = selectedCategoryIds
     .map((id) => categories.find((c) => c.ID === id))
     .filter((c): c is (typeof categories)[number] => Boolean(c))
     .map((category) => ({

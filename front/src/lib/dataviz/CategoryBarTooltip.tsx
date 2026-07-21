@@ -5,47 +5,17 @@ import { euro } from "@lib/format";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import type { CategoryTrendData } from "@lib/dataviz/CategoryTrend";
+import type { CategoryTooltipDatum } from "@lib/dataviz/dataVizTypes";
 
 // Measure-then-position must run before paint to clamp the tooltip at the
 // viewport edge without a flash; fall back to useEffect on the server, where
 // layout effects warn (and never run) anyway.
 const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-/** One category's display data — mirrors its list row. */
-export interface CategoryTooltipDatum {
-  color: string;
-  name: string;
-  /** Item count pill. Omit for data that has no count (e.g. the budget donut's
-   *  Fixes / Variables segments) — the pill is then hidden. */
-  count?: number;
-  /** Share of the total, 0-100 (already computed — the tooltip only formats). */
-  pct: number;
-  /** Amount in euros. */
-  total: number;
-  /** Trend data — the page computes it from its own source (weekly vs monthly).
-   *  Omit for data with no trend — the "Tendance" row is then hidden. */
-  trend?: CategoryTrendData;
-}
-
-export interface CategoryBarTooltipProps {
+interface CategoryBarTooltipProps {
   /** Cursor position in viewport coords, or null when the tooltip is hidden. */
   point: { x: number; y: number } | null;
   datum: CategoryTooltipDatum;
-}
-
-/**
- * Local hover state a consumer keeps to drive this tooltip: viewport coords
- * plus the hovered target. `T` is whatever resolves the datum — the row object
- * itself, or its index into a rows array.
- */
-export interface BarHover<T> {
-  /** Cursor X in viewport coords (clientX). */
-  x: number;
-  /** Cursor Y in viewport coords (clientY). */
-  y: number;
-  /** The hovered target (a row, an index, …). */
-  target: T;
 }
 
 /**

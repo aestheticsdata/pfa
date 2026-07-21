@@ -3,12 +3,7 @@
 import { cn } from "@lib/utils";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
-export type TrendDirection = "up" | "down" | "flat";
-
-export interface CategoryTrendData {
-  direction: TrendDirection;
-  label: string;
-}
+import type { CategoryTrendData } from "@lib/dataviz/dataVizTypes";
 
 interface CategoryTrendProps extends CategoryTrendData {
   /** Extra classes (e.g. responsive show/hide when it sits in a grid cell). */
