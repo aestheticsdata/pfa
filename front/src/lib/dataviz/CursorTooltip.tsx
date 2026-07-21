@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+import type { CursorPoint } from "@lib/dataviz/dataVizTypes";
 import type { ReactNode } from "react";
 
 // Measure-then-position must run before paint to clamp the tooltip at the
@@ -11,13 +12,6 @@ const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : us
 
 /** Tooltip appear/disappear fade duration (ms). Tune here — applies everywhere. */
 export const TOOLTIP_FADE_MS = 150;
-
-export interface CursorPoint {
-  /** Cursor X in viewport coords (clientX). */
-  x: number;
-  /** Cursor Y in viewport coords (clientY). */
-  y: number;
-}
 
 interface CursorTooltipProps {
   /** Cursor position, or null when hidden (triggers the fade-out). */

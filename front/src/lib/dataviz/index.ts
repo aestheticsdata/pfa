@@ -20,18 +20,14 @@ export { default as useElementWidth } from "@lib/dataviz/useElementWidth";
 export { default as useTween } from "@lib/dataviz/useTween";
 
 export type {
-  BarHover,
-  CategoryTooltipDatum,
-} from "@lib/dataviz/CategoryBarTooltip";
-export type {
-  CategoryTrendData,
-  TrendDirection,
-} from "@lib/dataviz/CategoryTrend";
-export type {
   AxisMarker,
   BarDatum,
+  BarHover,
+  CategoryTooltipDatum,
+  CategoryTrendData,
   DonutSegment,
   LinePoint,
   LineSeries,
   SeriesDot,
+  TrendDirection,
 } from "@lib/dataviz/dataVizTypes";

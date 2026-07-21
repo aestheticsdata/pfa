@@ -7,17 +7,9 @@ import { euro0 } from "@lib/format";
 import statistics from "@text/statistics";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const { topCategories: t } = statistics;
+import type { TopCategoryRow } from "@components/statistics/interfaces/statisticsTopCategoriesTypes";
 
-export interface TopCategoryRow {
-  name: string;
-  color: string;
-  value: number;
-  /** Year-over-year change in %, or null when the category is new this year. */
-  deltaPct: number | null;
-  /** The compare-year total for this category (0 when absent that year). */
-  compareValue: number;
-}
+const { topCategories } = statistics;
 
 interface StatisticsTopCategoriesProps {
   rows: TopCategoryRow[];
@@ -38,7 +30,7 @@ const Trend = ({
   const trendTip = useCursorHover();
   let inner: React.ReactNode;
   if (deltaPct == null) {
-    inner = <span className="text-ink-4">{t.new}</span>;
+    inner = <span className="text-ink-4">{topCategories.new}</span>;
   } else {
     const rounded = Math.round(deltaPct);
     if (rounded === 0) {
@@ -69,8 +61,12 @@ const Trend = ({
   const diff = value - compareValue;
   const tooltip =
     deltaPct == null
-      ? t.tooltip.newCategory(compareYear)
-      : t.tooltip.trend(compareYear, euro0(compareValue), `${diff >= 0 ? "+" : "−"}${euro0(Math.abs(diff))}`);
+      ? topCategories.tooltip.newCategory(compareYear)
+      : topCategories.tooltip.trend(
+          compareYear,
+          euro0(compareValue),
+          `${diff >= 0 ? "+" : "−"}${euro0(Math.abs(diff))}`,
+        );
 
   return (
     <>
@@ -94,16 +90,16 @@ const StatisticsTopCategories = ({ rows, compareYear }: StatisticsTopCategoriesP
   return (
     <GlowCard className="flex flex-col px-6 py-5.5">
       <CardSectionHeader
-        title={t.title}
-        meta={t.meta(compareYear)}
+        title={topCategories.title}
+        meta={topCategories.meta(compareYear)}
       />
 
       <div className="mt-4.5 flex flex-col">
         <div className="mb-0.5 grid grid-cols-[14px_1fr_90px_80px] items-center gap-2.5 border-b border-line pb-2 text-2xs font-medium uppercase tracking-caps text-ink-4">
           <span />
-          <span>{t.colCategory}</span>
-          <span className="text-right">{t.colTotal}</span>
-          <span className="text-right">{t.colVs(compareYear)}</span>
+          <span>{topCategories.colCategory}</span>
+          <span className="text-right">{topCategories.colTotal}</span>
+          <span className="text-right">{topCategories.colVs(compareYear)}</span>
         </div>
 
         {rows.map((row) => (
