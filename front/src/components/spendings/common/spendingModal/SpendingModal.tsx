@@ -65,10 +65,7 @@ const SpendingModal = ({
   const { user } = useAuth();
   const { createSpending, updateSpending } = useSpendings();
   const { recurrings, createRecurring, updateRecurring, copyRecurrings } = useReccurings();
-  const { categories, error: categoriesError } = useCategories();
-  if (categoriesError) {
-    throw categoriesError;
-  }
+  const { categories } = useCategories();
   // Per-category usage scoped to the current year to date (client-side "today",
   // cf COS-73) — ranks the "Fréquentes" quick-picks on recent habits, not
   // all-time cumulative usage (COS-137). Never blocks the modal: while stats load

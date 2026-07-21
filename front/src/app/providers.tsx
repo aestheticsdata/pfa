@@ -8,7 +8,24 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { useState } from "react";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  // App-wide query behavior (COS-157): data is month-scoped and refreshed by
+  // explicit invalidation after mutations, hence the long staleTime and no
+  // focus refetch. Errors surface through error.tsx via throwOnError; hooks
+  // whose UI degrades gracefully (search modal, label suggestions…) opt out
+  // locally. Expired sessions never get here — the 401 redirects to /login at
+  // the request layer (COS-26).
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            staleTime: 60 * 60 * 1000, // 1 hour
+            throwOnError: true,
+          },
+        },
+      }),
+  );
 
   return (
     <ThemeProvider

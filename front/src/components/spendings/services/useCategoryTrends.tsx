@@ -1,6 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { DATE_FORMAT, MONTHLY, QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
+import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
+import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { CategoryTrendsResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
@@ -89,7 +90,6 @@ const useCategoryTrends = (periodType: string) => {
     queryFn: getCategoryTrends,
     retry: false,
     enabled: !!range && !!userID,
-    ...QUERY_OPTIONS,
   });
 };
 

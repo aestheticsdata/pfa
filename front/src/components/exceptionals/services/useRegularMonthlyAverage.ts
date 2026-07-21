@@ -1,6 +1,6 @@
 import { useAuth } from "@auth/context/AuthContext";
-import { QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
 
@@ -21,11 +21,10 @@ const useRegularMonthlyAverage = (year: number) => {
   };
 
   return useQuery({
-    queryKey: ["regularMonthlyAverage", year],
+    queryKey: [QUERY_KEYS.REGULAR_MONTHLY_AVERAGE, year],
     queryFn: fetcher,
     retry: false,
     enabled: !!userID,
-    ...QUERY_OPTIONS,
   });
 };
 

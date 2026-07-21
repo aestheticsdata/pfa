@@ -40,13 +40,11 @@ const dayOf = (r: RecurringItem): number | null => {
 
 /** Fixed expenses (recurrings) — monthly/annualised totals + échéancier list. */
 const FixedExpenses = ({ month }: FixedExpensesProps) => {
-  const { recurrings, deleteRecurring, error } = useReccurings();
+  const { recurrings, deleteRecurring } = useReccurings();
   const { isModalVisible, spending, isEditing, addSpending, closeModal, editSpending } = useSpendingDayItem();
   const [invoiceFor, setInvoiceFor] = useState<RecurringItem | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const { fixedExpenses: t } = dashboardText;
-
-  if (error) throw error;
 
   const now = new Date();
   const viewingCurrentMonth = isSameMonth(month.start, now);

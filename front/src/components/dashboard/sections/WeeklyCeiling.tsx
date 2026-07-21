@@ -34,18 +34,15 @@ const WeeklyCeiling = () => {
   const { from } = useDatePickerWrapperStore();
   const { makeSlices, makeRange, isCurrentWeek } = useWeeklyStatsHelper();
   const {
-    get: { data: weeklyStats, error: wsError },
+    get: { data: weeklyStats },
     mutation,
   } = useWeeklyStats();
   const {
-    get: { data: dashboard, error: dbError },
+    get: { data: dashboard },
   } = useDashboard();
   const [editing, setEditing] = useState(false);
   const { register, handleSubmit, setFocus } = useForm<CeilingForm>();
   const { weeklyCeiling: t } = dashboardText;
-
-  if (wsError) throw wsError;
-  if (dbError) throw dbError;
 
   const now = new Date();
   const ceiling = dashboard ? Number(dashboard.initialCeiling) : 0;

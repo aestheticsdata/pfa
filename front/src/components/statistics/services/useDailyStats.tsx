@@ -1,4 +1,4 @@
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
+import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DailyStatsResponseSchema } from "@src/schemas/stats";
 import { keepPreviousData as keepPreviousDataFn, useQuery } from "@tanstack/react-query";
@@ -27,16 +27,15 @@ const useDailyStats = ({ year, enabled = true, keepPreviousData = false }: UseDa
     return DailyStatsResponseSchema.parse(response.data);
   };
 
-  const { data, isPending, error } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: [QUERY_KEYS.DAILY_STATS, year],
     queryFn: getDailyStats,
     retry: false,
     enabled,
     placeholderData: keepPreviousData ? keepPreviousDataFn : undefined,
-    ...QUERY_OPTIONS,
   });
 
-  return { dailyStats: data, isLoading: isPending, error };
+  return { dailyStats: data, isLoading: isPending };
 };
 
 export default useDailyStats;

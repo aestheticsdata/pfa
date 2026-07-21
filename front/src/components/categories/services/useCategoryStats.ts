@@ -1,6 +1,6 @@
 import { useAuth } from "@auth/context/AuthContext";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { CategoryStatsResponseSchema } from "@src/schemas/categoryStats";
 import { useQuery } from "@tanstack/react-query";
 
@@ -38,7 +38,10 @@ const useCategoryStats = (range?: CategoryStatsRange) => {
     queryFn: getCategoryStatsService,
     retry: 2,
     enabled: !!userID,
-    ...QUERY_OPTIONS,
+    // The spending modal's "Fréquentes" quick-picks must never block the modal
+    // on a stats failure (COS-137), so this opts out of the global throwOnError;
+    // the Categories page rethrows the returned error itself.
+    throwOnError: false,
   });
 
   return { categoryStats, error };

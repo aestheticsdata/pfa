@@ -30,7 +30,7 @@ interface SalaryForm {
 const BudgetHero = () => {
   const { from } = useDatePickerWrapperStore();
   const {
-    get: { data: dashboard, error },
+    get: { data: dashboard },
     mutation,
     remaining,
     monthlyTotal,
@@ -40,10 +40,6 @@ const BudgetHero = () => {
   const [hover, setHover] = useState<BarHover<number> | null>(null);
   const { register, handleSubmit, setFocus } = useForm<SalaryForm>();
   const { budgetHero: t } = dashboardText;
-
-  if (error) {
-    throw error;
-  }
 
   const initialAmount = Number(dashboard?.initialAmount ?? 0);
   const fixed = recurrings?.reduce((a, r) => a + Number(r.amount), 0) ?? 0;

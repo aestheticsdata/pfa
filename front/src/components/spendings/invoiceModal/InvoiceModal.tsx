@@ -5,11 +5,11 @@ import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors
 import Spinner from "@components/common/Spinner";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { Dropzone } from "@components/shared/Dropzone";
-import { QUERY_KEYS } from "@components/spendings/config/constants";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { cn } from "@lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import texts from "@text/spendings";

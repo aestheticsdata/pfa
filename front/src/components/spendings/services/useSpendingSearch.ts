@@ -1,6 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
-import { QUERY_KEYS, QUERY_OPTIONS, SEARCH_MIN_LENGTH } from "@components/spendings/config/constants";
+import { SEARCH_MIN_LENGTH } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { SpendingSearchPageSchema } from "@src/schemas/spendings";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
@@ -35,7 +36,10 @@ const useSpendingSearch = (query: string, year: number | null) => {
     placeholderData: keepPreviousData,
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    ...QUERY_OPTIONS,
+    // The modal surfaces failures inline (empty-state message) instead of the
+    // error boundary — a broken search must not take down the whole page (opts
+    // out of the global throwOnError).
+    throwOnError: false,
     // Keep the loaded pages around longer than the default 5 min so returning
     // to the modal (browser Back) after a detour restores the full list, not
     // just the first page (COS-114).

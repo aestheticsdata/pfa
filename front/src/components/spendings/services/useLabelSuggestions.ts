@@ -1,6 +1,6 @@
 import { useAuth } from "@auth/context/AuthContext";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { LabelSuggestionListSchema } from "@src/schemas/spendings";
 import { useQuery } from "@tanstack/react-query";
 
@@ -30,7 +30,10 @@ const useLabelSuggestions = (query: string, enabled = true): LabelSuggestion[] =
     queryFn: fetchSuggestions,
     enabled: enabled && !!userID,
     retry: false,
-    ...QUERY_OPTIONS,
+    // Autocomplete is a nice-to-have inside the spending modal — a failure just
+    // means no suggestions, never an error screen (opts out of the global
+    // throwOnError).
+    throwOnError: false,
   });
 
   return data ?? [];
