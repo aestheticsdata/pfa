@@ -10,6 +10,7 @@ import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-e
 import type { CategoryTrendPoint, CategoryTrendsResponse } from "@stats/dto/category-trends-response.interface";
 import type { BusiestWeekResponse } from "@stats/dto/busiest-week-response.interface";
 import type { SpendingPaceResponse } from "@stats/dto/spending-pace-response.interface";
+import type { WeekdayCategoriesResponse, WeekdayCategory } from "@stats/dto/weekday-categories-response.interface";
 
 /** Rounds to 2 decimal places to avoid JS float precision issues. */
 const roundCurrency = (n: number): number => Math.round(n);
@@ -343,6 +344,73 @@ export class StatsService {
       .sort((a, b) => a.date.localeCompare(b.date));
 
     return { days };
+  }
+
+  /**
+   * Dominant spending category per weekday for a year (COS-127): the category
+   * with the highest total one-off spend on each weekday (Mon..Sun). Reads the
+   * `Spendings` table only (recurrings/exceptionals live elsewhere), scoped to the
+   * user, over the same half-open UTC year range as the daily stats. Buckets by
+   * UTC weekday in JS so day keys are timezone-safe, resolves the winner's
+   * name/colour, and ignores uncategorized spend — a weekday with no categorized
+   * spending yields a null category. Backs the day-of-week widget's tooltip.
+   */
+  async getWeekdayCategories(yearStr: string, userID: string): Promise<WeekdayCategoriesResponse> {
+    const emptyWeekdays = (): WeekdayCategory[] => Array.from({ length: 7 }, () => ({ name: null, color: null }));
+    const year = parseInt(yearStr, 10);
+    if (Number.isNaN(year)) {
+      return { weekdays: emptyWeekdays() };
+    }
+
+    const yearStart = new Date(Date.UTC(year, 0, 1));
+    const nextYearStart = new Date(Date.UTC(year + 1, 0, 1));
+
+    const rows = await this.prisma.spendings.findMany({
+      where: { userID, date: { gte: yearStart, lt: nextYearStart }, categoryID: { not: null } },
+      select: { date: true, amount: true, categoryID: true },
+    });
+
+    // Sum spend per (weekday, category). Monday-based weekday (0 = Mon … 6 = Sun)
+    // from the UTC date, matching the daily stats' UTC day keys.
+    const totalsByWeekday: Array<Map<string, number>> = Array.from({ length: 7 }, () => new Map());
+    for (const row of rows) {
+      if (!row.categoryID) {
+        continue;
+      }
+      const dow = (row.date.getUTCDay() + 6) % 7;
+      const totals = totalsByWeekday[dow];
+      totals.set(row.categoryID, (totals.get(row.categoryID) ?? 0) + Number(row.amount));
+    }
+
+    // Winner category id per weekday (highest total; null when the weekday is empty).
+    const winnerIds = totalsByWeekday.map((totals) => {
+      let winnerId: string | null = null;
+      let winnerTotal = 0;
+      for (const [categoryID, total] of totals) {
+        if (total > winnerTotal) {
+          winnerTotal = total;
+          winnerId = categoryID;
+        }
+      }
+      return winnerId;
+    });
+
+    const ids = [...new Set(winnerIds.filter((id): id is string => id !== null))];
+    const categories =
+      ids.length > 0
+        ? await this.prisma.categories.findMany({
+            where: { ID: { in: ids }, OR: [{ userID }, { userID: null }] },
+            select: { ID: true, name: true, color: true },
+          })
+        : [];
+    const categoryMap = new Map(categories.map((c) => [c.ID, c]));
+
+    const weekdays = winnerIds.map((id) => {
+      const category = id ? categoryMap.get(id) : null;
+      return { name: category?.name ?? null, color: category?.color ?? null };
+    });
+
+    return { weekdays };
   }
 
   /**

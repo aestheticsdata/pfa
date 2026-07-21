@@ -30,6 +30,8 @@ interface CursorTooltipProps {
   /** Border colour — defaults to the hairline token. Pass a light tint of the
    *  background for coloured tooltips so the edge stays coherent and visible. */
   borderColor?: string;
+  /** Max width in px (default 240) — widen for tooltips with longer rows. */
+  maxWidth?: number;
 }
 
 interface Snapshot {
@@ -47,7 +49,7 @@ interface Snapshot {
  * shown content, so consumers can render it unconditionally and pass
  * `point={hover}` (null to hide) with the body guarded by the same hover.
  */
-const CursorTooltip = ({ point, children, background, color, borderColor }: CursorTooltipProps) => {
+const CursorTooltip = ({ point, children, background, color, borderColor, maxWidth }: CursorTooltipProps) => {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [visible, setVisible] = useState(false);
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
@@ -101,7 +103,7 @@ const CursorTooltip = ({ point, children, background, color, borderColor }: Curs
         top: pos ? pos.top : snapshot.point.y + 16,
         opacity: visible ? 1 : 0,
         transition: `opacity ${TOOLTIP_FADE_MS}ms ease-out`,
-        maxWidth: 240,
+        maxWidth: maxWidth ?? 240,
         padding: "8px 10px",
         fontSize: "12px",
         lineHeight: 1.35,

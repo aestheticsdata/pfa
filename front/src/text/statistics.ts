@@ -78,8 +78,40 @@ const statistics = {
   dayOfWeek: {
     title: "Dépenses par jour de la semaine (moyenne sur l'année)",
     meta: (year: number) => `${year}`,
+    // Header subtitle tail after the bold year — the year's overall daily rhythm (COS-127).
+    subtitle: (avgTx: string, avgAmount: string) => `· ${avgTx} transactions/j · ${avgAmount} €/j en moyenne`,
     days: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
     transactionsPerDay: (value: string) => `${value} transactions/j`,
+    // Full-height reference line at the year's average daily spend.
+    averageLine: (amount: string) => `moy. ${amount} €`,
+    // Header insight chips (COS-127) — priciest/cheapest weekday, weekend vs week.
+    chips: {
+      peak: "Pic",
+      trough: "Creux",
+      dayAmount: (day: string, amount: string) => `${day} · ${amount} €`,
+      weekend: "Week-end",
+      weekendVsWeek: "vs semaine",
+    },
+    // Signed delta % suffix (e.g. the tooltip's Écart badge).
+    deltaPct: (pct: string) => `${pct} %`,
+    tooltip: {
+      range: "Fourchette (semaines)",
+      rangeValue: (min: string, max: string) => `${min} € - ${max} €`,
+      txPerDay: "Transactions / jour",
+      dominantCategory: "Catégorie dominante",
+      none: "—",
+      // Compared-year row in the tooltip: average amount + average tx/day.
+      compareValue: (amount: string, avgTx: string) => `${amount} € · ${avgTx}/j`,
+      compareDelta: "Écart",
+    },
+    legend: {
+      under: (budget: string) => `≤ ${budget} €`,
+      between: (budget: string, danger: string) => `${budget} – ${danger} €`,
+      over: (danger: string) => `> ${danger} €`,
+      range: "min – max sur l'année",
+      average: "moyenne",
+      comparedYear: (year: number) => `année comparée (${year})`,
+    },
   },
   fixedExpenses: {
     title: "Dépenses fixes",

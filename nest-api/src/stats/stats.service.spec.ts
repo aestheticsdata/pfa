@@ -590,3 +590,98 @@ describe("StatsService.getSpendingPace", () => {
     });
   });
 });
+
+/**
+ * Unit tests for StatsService.getWeekdayCategories — the dominant spending
+ * category per weekday for a year, backing the day-of-week widget's hover tooltip
+ * (COS-127). Prisma is mocked; these assert the query shape (categorized
+ * Spendings over a half-open UTC year range) and the JS weekday×category
+ * bucketing / winner selection.
+ */
+describe("StatsService.getWeekdayCategories", () => {
+  const emptyWeekdays = () => Array.from({ length: 7 }, () => ({ name: null, color: null }));
+
+  const makeService = (spendingRows: unknown[], categories: unknown[] = []) => {
+    const spendingsFindMany = jest.fn().mockResolvedValue(spendingRows);
+    const categoriesFindMany = jest.fn().mockResolvedValue(categories);
+    const prisma = {
+      spendings: { findMany: spendingsFindMany },
+      categories: { findMany: categoriesFindMany },
+    } as unknown as never;
+    return { service: new StatsService(prisma), spendingsFindMany, categoriesFindMany };
+  };
+
+  it("returns seven null weekdays and skips the query for a non-numeric year", async () => {
+    const { service, spendingsFindMany } = makeService([]);
+
+    await expect(service.getWeekdayCategories("nope", "user-1")).resolves.toEqual({ weekdays: emptyWeekdays() });
+    expect(spendingsFindMany).not.toHaveBeenCalled();
+  });
+
+  it("queries the year's categorized spendings as a half-open UTC range, scoped to the user", async () => {
+    const { service, spendingsFindMany } = makeService([]);
+
+    await service.getWeekdayCategories("2023", "user-1");
+
+    expect(spendingsFindMany).toHaveBeenCalledWith({
+      where: {
+        userID: "user-1",
+        date: { gte: new Date(Date.UTC(2023, 0, 1)), lt: new Date(Date.UTC(2024, 0, 1)) },
+        categoryID: { not: null },
+      },
+      select: { date: true, amount: true, categoryID: true },
+    });
+  });
+
+  it("picks the highest-total category per weekday (index 0 = Monday) and resolves its name/colour", async () => {
+    // Jan 1 2023 is a Sunday, so Jan 2/9/16 are Mondays.
+    const { service, categoriesFindMany } = makeService(
+      [
+        { date: new Date("2023-01-02T00:00:00.000Z"), amount: 70, categoryID: "cat-a" }, // Mon
+        { date: new Date("2023-01-09T00:00:00.000Z"), amount: 40, categoryID: "cat-a" }, // Mon → cat-a = 110
+        { date: new Date("2023-01-16T00:00:00.000Z"), amount: 90, categoryID: "cat-b" }, // Mon → cat-b = 90
+        { date: new Date("2023-01-01T00:00:00.000Z"), amount: 50, categoryID: "cat-b" }, // Sun
+      ],
+      [
+        { ID: "cat-a", name: "Alimentation", color: "#22c55e" },
+        { ID: "cat-b", name: "Transports", color: "#0ea5e9" },
+      ],
+    );
+
+    const { weekdays } = await service.getWeekdayCategories("2023", "user-1");
+
+    expect(weekdays[0]).toEqual({ name: "Alimentation", color: "#22c55e" }); // Monday: cat-a (110) beats cat-b (90)
+    expect(weekdays[6]).toEqual({ name: "Transports", color: "#0ea5e9" }); // Sunday: cat-b
+    expect(weekdays[1]).toEqual({ name: null, color: null }); // Tuesday: no spending
+    expect(categoriesFindMany).toHaveBeenCalledWith({
+      where: { ID: { in: ["cat-a", "cat-b"] }, OR: [{ userID: "user-1" }, { userID: null }] },
+      select: { ID: true, name: true, color: true },
+    });
+  });
+
+  it("skips the category lookup and returns all-null weekdays with no categorized spending", async () => {
+    const { service, categoriesFindMany } = makeService([]);
+
+    await expect(service.getWeekdayCategories("2023", "user-1")).resolves.toEqual({ weekdays: emptyWeekdays() });
+    expect(categoriesFindMany).not.toHaveBeenCalled();
+  });
+
+  it("coerces Prisma Decimal amounts and breaks ties toward the first-seen category", async () => {
+    const decimal = (v: string) => ({ toString: () => v });
+    const { service } = makeService(
+      [
+        { date: new Date("2023-01-02T00:00:00.000Z"), amount: decimal("50"), categoryID: "cat-a" }, // Mon
+        { date: new Date("2023-01-09T00:00:00.000Z"), amount: decimal("50"), categoryID: "cat-b" }, // Mon, ties cat-a
+      ],
+      [
+        { ID: "cat-a", name: "Alimentation", color: "#22c55e" },
+        { ID: "cat-b", name: "Transports", color: "#0ea5e9" },
+      ],
+    );
+
+    const { weekdays } = await service.getWeekdayCategories("2023", "user-1");
+
+    // Ties use strict-greater, so cat-a (seen first) keeps Monday.
+    expect(weekdays[0]).toEqual({ name: "Alimentation", color: "#22c55e" });
+  });
+});
