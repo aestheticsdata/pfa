@@ -26,16 +26,12 @@ const FALLBACK_COLOR = CATEGORY_FALLBACK;
 /** Monthly category breakdown — stacked bar + list, click a row for details. */
 const CategoryBreakdown = () => {
   const { from } = useDatePickerWrapperStore();
-  const { data, error } = useCategoryTrends(MONTHLY);
+  const { data } = useCategoryTrends(MONTHLY);
   const trends = data?.trends;
   const { spendingsByMonth } = useSpendings();
   const [selected, setSelected] = useState<CategoryTrendPoint | null>(null);
   const [hover, setHover] = useState<BarHover<number> | null>(null);
   const { categoryBreakdown: t } = dashboardText;
-
-  if (error) {
-    throw error;
-  }
 
   const counts = useMemo(() => {
     const map = new Map<string, number>();

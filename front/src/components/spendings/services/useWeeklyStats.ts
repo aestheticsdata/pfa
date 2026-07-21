@@ -1,8 +1,8 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { WeeklyStatsSchema } from "@src/schemas/dashboard";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth } from "date-fns";
@@ -49,7 +49,6 @@ const useWeeklyStats = () => {
     queryFn: getWeeklyStats,
     retry: false,
     enabled: !!from && !!userID,
-    ...QUERY_OPTIONS,
   });
 
   const mutation = useMutation({

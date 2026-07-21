@@ -1,7 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useInitialAmount from "@components/spendings/services/useInitialAmount";
+import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DashboardResponseSchema } from "@src/schemas/dashboard";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,7 +66,6 @@ const useDashboard = (): UseDashboard => {
     queryFn: getDashboard,
     retry: false,
     enabled: !!from && !!userID,
-    ...QUERY_OPTIONS,
   });
 
   const totalOfMonth =

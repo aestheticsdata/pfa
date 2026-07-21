@@ -17,7 +17,7 @@ import type { Category } from "@src/schemas/categories";
 const isMock = (id: string) => id.startsWith("mock-");
 
 const CategoriesListcontainer = () => {
-  const { categories, error, updateCategory, deleteCategory } = useCategories();
+  const { categories, updateCategory, deleteCategory } = useCategories();
   const { categoryStats, error: statsError } = useCategoryStats();
   const { user } = useAuth();
   const { list } = categoriesText;
@@ -43,10 +43,8 @@ const CategoriesListcontainer = () => {
       .filter((c) => !q || c.name.toLowerCase().includes(q));
   }, [allCats, query]);
 
-  if (error) {
-    throw error;
-  }
-
+  // useCategoryStats opts out of the global throwOnError (the spending modal
+  // must survive a stats failure) — this page still wants the error screen.
   if (statsError) {
     throw statsError;
   }

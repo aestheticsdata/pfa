@@ -23,7 +23,7 @@ const Exceptionals = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<ExceptionalItem | null>(null);
 
-  const { exceptionals, isLoading, error, years } = useExceptionals({
+  const { exceptionals, isLoading, years } = useExceptionals({
     year: selectedYear ?? undefined,
   });
   const { data: monthlyAverageData } = useRegularMonthlyAverage(selectedYear ?? currentYear);
@@ -70,10 +70,6 @@ const Exceptionals = () => {
     setModalOpen(false);
     setEditing(null);
   };
-
-  if (error) {
-    throw error;
-  }
 
   return (
     <div className="flex flex-col gap-4">

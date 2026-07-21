@@ -1,5 +1,5 @@
-import { QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useCategories from "@components/spendings/services/useCategories";
+import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { StatisticsResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
@@ -23,18 +23,17 @@ const useStatistics = ({ years }: UseStatisticsOptions) => {
 
   const sortedYears = [...years].sort((a, b) => a - b);
   const yearsParam = sortedYears.join(",");
-  const queryKey = ["statistics", yearsParam, categoryIds.join(",")];
+  const queryKey = [QUERY_KEYS.STATISTICS, yearsParam, categoryIds.join(",")];
 
   const getStatistics = async (): Promise<StatisticsResponse> => {
     const response = await privateRequest(`/statistics?years=${yearsParam}&categories=${categoryIds.join(",")}`);
     return StatisticsResponseSchema.parse(response.data);
   };
 
-  const { data, isPending, error } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: queryKey,
     queryFn: getStatistics,
     retry: true,
-    ...QUERY_OPTIONS,
     enabled: categoryIds.length > 0 && sortedYears.length > 0,
   });
 
@@ -43,7 +42,6 @@ const useStatistics = ({ years }: UseStatisticsOptions) => {
     colors: data?.colors ?? {},
     categories: categories ?? [],
     isLoading: isPending,
-    error,
   };
 };
 

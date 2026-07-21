@@ -1,6 +1,6 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
+import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DailyProjectionSchema } from "@src/schemas/dashboard";
 import { useQuery } from "@tanstack/react-query";
@@ -38,7 +38,6 @@ const useDailyProjection = (): UseQueryResult<DailyProjection> => {
     queryFn: getDailyProjection,
     retry: false,
     enabled: isCurrentMonth && !!userID,
-    ...QUERY_OPTIONS,
   });
 };
 

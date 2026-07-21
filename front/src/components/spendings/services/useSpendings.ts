@@ -1,8 +1,8 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { SpendingListSchema, SpendingMutationPayloadSchema } from "@src/schemas/spendings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import spendingsText from "@text/spendings";
@@ -57,7 +57,7 @@ const useSpendings = () => {
     return SpendingListSchema.parse(response.data);
   };
 
-  const { data, isPending, error } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH, monthStart, monthEnd],
     queryFn: getSpendings,
     retry: false,
@@ -69,8 +69,6 @@ const useSpendings = () => {
     // hence this query to fail
     // so enable below
     enabled: !!from && !!to && !!userID,
-
-    ...QUERY_OPTIONS,
   });
 
   const spendingsByMonth = data;
@@ -180,7 +178,6 @@ const useSpendings = () => {
     spendingsByWeek,
     spendingsByMonth,
     isLoading: isPending,
-    error,
     deleteSpending,
     createSpending,
     updateSpending,

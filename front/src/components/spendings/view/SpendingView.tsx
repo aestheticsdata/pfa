@@ -56,7 +56,7 @@ const SpendingView = () => {
 
   useEnsureWeekRange();
 
-  const { spendingsByWeek, isLoading, error } = useSpendings();
+  const { spendingsByWeek, isLoading } = useSpendings();
   const { get: dashboardQuery, remaining } = useDashboard();
   // Previous-week aggregates for the "vs sem. dernière" deltas (COS-35): the
   // per-category totals feed the breakdown trend arrows, `previousTotal` the
@@ -127,10 +127,6 @@ const SpendingView = () => {
   // Drop any pending scroll request when leaving the page so it can't fire on a
   // later visit (COS-38).
   useEffect(() => () => setScrollToDayIso(null), [setScrollToDayIso]);
-
-  if (error) {
-    throw error;
-  }
 
   if (!from || !to || !range) {
     return null;

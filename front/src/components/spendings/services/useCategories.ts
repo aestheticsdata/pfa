@@ -1,6 +1,6 @@
 import { useAuth } from "@auth/context/AuthContext";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { CategoryListSchema, UpdateCategoryPayloadSchema } from "@src/schemas/categories";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -39,12 +39,11 @@ const useCategories = () => {
       throw e; // Re-throw pour que React Query gère l'erreur correctement
     }
   };
-  const { data: categories, error } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: [QUERY_KEYS.CATEGORIES],
     queryFn: getCategoriesService,
     retry: 2, // Retry 2 fois en cas d'erreur
     enabled: !!userID,
-    ...QUERY_OPTIONS,
   });
 
   const updateCategoryService = async (category: UpdateCategoryPayload) => {
@@ -93,7 +92,6 @@ const useCategories = () => {
 
   return {
     categories,
-    error,
     deleteCategory,
     updateCategory,
   };

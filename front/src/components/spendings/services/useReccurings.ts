@@ -1,8 +1,8 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import {
   RecurringListSchema,
   RecurringMutationPayloadSchema,
@@ -54,12 +54,11 @@ const useReccurings = () => {
     return RecurringListSchema.parse(response.data);
   };
 
-  const { data, isPending, error } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: [QUERY_KEYS.RECURRINGS, monthBeginning],
     queryFn: getRecurrings,
     retry: false,
     enabled: !!from && !!userID,
-    ...QUERY_OPTIONS,
   });
 
   const queryClient = useQueryClient();
@@ -150,7 +149,6 @@ const useReccurings = () => {
   return {
     recurrings: data ?? [],
     isLoading: isPending,
-    error,
     deleteRecurring,
     createRecurring,
     updateRecurring,

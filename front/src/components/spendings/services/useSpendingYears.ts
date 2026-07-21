@@ -1,6 +1,6 @@
 import { useAuth } from "@auth/context/AuthContext";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import { SpendingYearsSchema } from "@src/schemas/spendings";
 import { useQuery } from "@tanstack/react-query";
 
@@ -24,7 +24,9 @@ const useSpendingYears = () => {
     queryFn: fetchYears,
     enabled: !!userID,
     retry: false,
-    ...QUERY_OPTIONS,
+    // On failure the year chips simply don't render; the search modal surfaces
+    // its own errors inline (opts out of the global throwOnError).
+    throwOnError: false,
   });
 
   return data ?? [];

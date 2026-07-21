@@ -1,7 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
-import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { QUERY_KEYS } from "@lib/query/keys";
 import {
   ExceptionalListSchema,
   ExceptionalMutationPayloadSchema,
@@ -48,7 +48,6 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     queryFn: getExceptionals,
     retry: false,
     enabled: !!userID,
-    ...QUERY_OPTIONS,
   });
 
   const getYears = async () => {
@@ -61,7 +60,6 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     queryFn: getYears,
     retry: false,
     enabled: !!userID,
-    ...QUERY_OPTIONS,
   });
 
   const createExceptionalService = async (payload: ExceptionalMutationPayload) => {
@@ -114,7 +112,6 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   return {
     exceptionals: list.data ?? [],
     isLoading: list.isPending,
-    error: list.error,
     years: years.data ?? [],
     createExceptional,
     updateExceptional,
