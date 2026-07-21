@@ -4,7 +4,7 @@ import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
 import useSpendings from "@components/spendings/services/useSpendings";
-import { DATE_QUERY_PARAM, SPENDINGS_PATH } from "@helpers/dateRoute";
+import { buildSpendingsPath } from "@helpers/dateRoute";
 import { euro } from "@lib/format";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import texts from "@text/spendings";
@@ -12,7 +12,7 @@ import format from "date-fns/format";
 import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 import { ChevronRight, Search, X } from "lucide-react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import type { SpendingItem } from "@components/spendings/types";
@@ -48,8 +48,6 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
   const [searchTerm, setSearchTerm] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
 
   const { spendingsListModal: t } = texts;
   const isMonthly = periodType === MONTHLY;
@@ -78,14 +76,12 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
       ? `${format(from, "dd")} — ${format(to, "dd MMM yyyy", { locale: fr })}`
       : "";
 
-  // Click a day → jump to the Dépenses page on the week that contains it.
+  // Click a day → jump to the Dépenses page on the week that contains it. This is
+  // a cross-page navigation (the modal opens from the Dashboard too), so it keeps
+  // building a real href via buildSpendingsPath rather than an in-page nuqs setter.
   const goToDayWeek = (date: string) => {
     const dateISO = format(parseISO(date), DATE_FORMAT);
-    const normalizedPath = pathname.replace(/\/+$/, "") || "/";
-    const params =
-      normalizedPath === SPENDINGS_PATH ? new URLSearchParams(searchParams.toString()) : new URLSearchParams();
-    params.set(DATE_QUERY_PARAM, dateISO);
-    router.push(`${SPENDINGS_PATH}?${params.toString()}`);
+    router.push(buildSpendingsPath(dateISO));
     handleClickOutside();
   };
 
