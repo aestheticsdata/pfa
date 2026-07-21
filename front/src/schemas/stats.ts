@@ -66,6 +66,23 @@ export const DailyStatsResponseSchema = z.object({
 
 export type DailyStatsResponse = z.infer<typeof DailyStatsResponseSchema>;
 
+// Dominant spending category per weekday for a year (COS-127) — GET
+// /weekday-categories. `weekdays` is length 7, index 0 = Monday … 6 = Sunday;
+// each entry's name/color is null when that weekday has no categorized spending.
+// Backs the day-of-week widget's hover tooltip.
+export const WeekdayCategorySchema = z.object({
+  name: z.string().nullable(),
+  color: z.string().nullable(),
+});
+
+export type WeekdayCategory = z.infer<typeof WeekdayCategorySchema>;
+
+export const WeekdayCategoriesResponseSchema = z.object({
+  weekdays: z.array(WeekdayCategorySchema),
+});
+
+export type WeekdayCategoriesResponse = z.infer<typeof WeekdayCategoriesResponseSchema>;
+
 // Biggest single one-off (non-exceptional) expense of a year (COS-46) — GET
 // /biggest-regular-expense. `expense` is null when the user has no spending that
 // year. Backs the "courante" row of the "Plus grosse dépense" KPI card.

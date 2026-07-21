@@ -25,6 +25,7 @@ import useDailyStats from "@components/statistics/services/useDailyStats";
 import useMonthlyIncome from "@components/statistics/services/useMonthlyIncome";
 import useRecurringsDrawn from "@components/statistics/services/useRecurringsDrawn";
 import useStatistics from "@components/statistics/services/useStatistics";
+import useWeekdayCategories from "@components/statistics/services/useWeekdayCategories";
 import { useMemo, useState } from "react";
 
 const MAX_CATEGORIES = 3;
@@ -58,6 +59,15 @@ const StatisticsView = () => {
 
   const { statistics, categories } = useStatistics({ years });
   const { dailyStats } = useDailyStats({ year: selectedYear });
+  // Compare-year daily series for the day-of-week widget (COS-127) — only fetched
+  // when "Comparer à" is on.
+  const { dailyStats: compareDailyStats } = useDailyStats({
+    year: compareYear,
+    enabled: compareEnabled,
+    keepPreviousData: true,
+  });
+  // Dominant category per weekday, for that widget's hover tooltip (COS-127).
+  const { weekdayCategories } = useWeekdayCategories({ year: selectedYear });
   const { biggestRegular } = useBiggestRegularExpense({ year: selectedYear });
   const { exceptionals } = useExceptionals({ year: selectedYear });
   const { exceptionals: compareExceptionals } = useExceptionals({
@@ -214,6 +224,12 @@ const StatisticsView = () => {
         year={selectedYear}
         now={now}
         days={dailyStats?.days}
+        // The cached compare series is passed even when the toggle is off so the
+        // widget can animate the compare marks out; the fetch itself stays gated.
+        compareDays={compareDailyStats?.days}
+        compareYear={compareYear}
+        compareEnabled={compareEnabled}
+        weekdayCategories={weekdayCategories?.weekdays}
         weeklyCeiling={dashboard.get.data?.initialCeiling ?? null}
       />
     </div>

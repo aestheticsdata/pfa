@@ -11,6 +11,7 @@ import {
   SpendingPaceController,
   DailyStatsController,
   BiggestRegularExpenseController,
+  WeekdayCategoriesController,
 } from "@stats/stats.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
@@ -28,6 +29,7 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
     SpendingPaceController,
     DailyStatsController,
     BiggestRegularExpenseController,
+    WeekdayCategoriesController,
   ],
   providers: [StatsService, SessionAuthGuard],
 })

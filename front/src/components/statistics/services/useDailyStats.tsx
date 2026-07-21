@@ -7,6 +7,11 @@ import type { DailyStatsResponse } from "@src/schemas/stats";
 
 interface UseDailyStatsOptions {
   year: number;
+  /** Gate the request — skips the compare-year fetch when comparison is off (COS-127). */
+  enabled?: boolean;
+  /** Keep the previous year's data while a new year loads, so a year switch doesn't
+   *  flash undefined — used by the day-of-week compare series for a smooth swap. */
+  keepPreviousData?: boolean;
 }
 
 /**
@@ -14,7 +19,7 @@ interface UseDailyStatsOptions {
  * cached like the other stats queries. Feeds the daily heatmap and, later, the
  * day-of-week averages (COS-48) — both read the same daily series.
  */
-const useDailyStats = ({ year }: UseDailyStatsOptions) => {
+const useDailyStats = ({ year, enabled = true, keepPreviousData = false }: UseDailyStatsOptions) => {
   const { privateRequest } = useRequestHelper();
 
   const getDailyStats = async (): Promise<DailyStatsResponse> => {
@@ -24,6 +29,8 @@ const useDailyStats = ({ year }: UseDailyStatsOptions) => {
 
   const { data, isLoading, error } = useQuery([QUERY_KEYS.DAILY_STATS, year], getDailyStats, {
     retry: false,
+    enabled,
+    keepPreviousData,
     ...QUERY_OPTIONS,
   });
 

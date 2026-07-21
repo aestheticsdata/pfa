@@ -10,6 +10,7 @@ import { BiggestRegularExpenseQueryDto } from "@stats/dto/biggest-regular-expens
 import { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
 import { BusiestWeekQueryDto } from "@stats/dto/busiest-week-query.dto";
 import { SpendingPaceQueryDto } from "@stats/dto/spending-pace-query.dto";
+import { WeekdayCategoriesQueryDto } from "@stats/dto/weekday-categories-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
@@ -128,5 +129,16 @@ export class BiggestRegularExpenseController {
   @Get()
   async getBiggestRegularExpense(@Query() query: BiggestRegularExpenseQueryDto, @GetUserId() userID: string) {
     return this.statsService.getBiggestRegularExpense(query.year, userID);
+  }
+}
+
+@Controller("weekday-categories")
+@UseGuards(SessionAuthGuard)
+export class WeekdayCategoriesController {
+  constructor(private readonly statsService: StatsService) {}
+
+  @Get()
+  async getWeekdayCategories(@Query() query: WeekdayCategoriesQueryDto, @GetUserId() userID: string) {
+    return this.statsService.getWeekdayCategories(query.year, userID);
   }
 }

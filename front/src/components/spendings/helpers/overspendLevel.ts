@@ -26,3 +26,13 @@ export default function overspendLevel(value: number, budget: number | null): Ov
   }
   return value > budget * OVERSPEND_DANGER_RATIO ? "danger" : "warn";
 }
+
+/**
+ * Amount-text colour for an overspend level — the single source of truth for
+ * colouring a total by how far it is over budget (COS-34 Dépenses day cards,
+ * COS-127 weekday averages): under budget stays neutral `ink`, over budget goes
+ * amber, well over goes red. Only warn/danger stand out, so the column never
+ * turns into a rainbow.
+ */
+export const overspendTextClass = (level: OverspendLevel): string =>
+  level === "warn" ? "text-warn" : level === "danger" ? "text-neg" : "text-ink";
