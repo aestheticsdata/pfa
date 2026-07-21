@@ -2,7 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { SpendingYearsSchema } from "@src/schemas/spendings";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * Years the user has spendings in (newest first), backing the search modal's year
@@ -19,7 +19,9 @@ const useSpendingYears = () => {
     return SpendingYearsSchema.parse(response.data);
   };
 
-  const { data } = useQuery([QUERY_KEYS.SPENDINGS_YEARS], fetchYears, {
+  const { data } = useQuery({
+    queryKey: [QUERY_KEYS.SPENDINGS_YEARS],
+    queryFn: fetchYears,
     enabled: !!userID,
     retry: false,
     ...QUERY_OPTIONS,

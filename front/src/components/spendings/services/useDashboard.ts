@@ -4,14 +4,14 @@ import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constant
 import useInitialAmount from "@components/spendings/services/useInitialAmount";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DashboardResponseSchema } from "@src/schemas/dashboard";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import endOfMonth from "date-fns/endOfMonth";
 import formatISO from "date-fns/formatISO";
 import startOfMonth from "date-fns/startOfMonth";
-import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import type { DashboardResponse } from "@src/schemas/dashboard";
+import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import type { UseMutationResult, UseQueryResult } from "react-query";
 
 interface UseDashboard {
   get: UseQueryResult<DashboardResponse>;
@@ -61,7 +61,9 @@ const useDashboard = (): UseDashboard => {
     });
   };
 
-  const get = useQuery([QUERY_KEYS.DASHBOARD, monthBeginning], getDashboard, {
+  const get = useQuery({
+    queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
+    queryFn: getDashboard,
     retry: false,
     enabled: !!from && !!userID,
     ...QUERY_OPTIONS,
@@ -74,20 +76,21 @@ const useDashboard = (): UseDashboard => {
   const monthlyTotal = Number(totalOfMonth.toFixed(2));
   const remaining = get.data ? Number((Number(get.data.initialAmount) - totalOfMonth).toFixed(2)) : 0;
 
-  const mutation = useMutation<unknown, AxiosError, DashboardMutationVariables>(
-    ({ dashboardID, initialAmount }) => {
+  const mutation = useMutation<unknown, AxiosError, DashboardMutationVariables>({
+    mutationFn: ({ dashboardID, initialAmount }) => {
       if (dashboardID) {
         return updateInitialSalary(dashboardID, initialAmount);
       } else {
         return setInitialSalary(initialAmount);
       }
     },
-    {
-      onSuccess: async () => {
-        await queryClient.invalidateQueries([QUERY_KEYS.DASHBOARD, monthBeginning]);
-      },
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
+      });
     },
-  );
+  });
 
   return {
     get,

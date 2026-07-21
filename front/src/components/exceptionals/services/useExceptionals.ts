@@ -7,8 +7,8 @@ import {
   ExceptionalMutationPayloadSchema,
   ExceptionalYearsSchema,
 } from "@src/schemas/exceptionals";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import exceptionals from "@text/exceptionals";
-import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import type { ExceptionalMutationPayload } from "@src/schemas/exceptionals";
 import type { AxiosError } from "axios";
@@ -24,8 +24,12 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   const queryClient = useQueryClient();
 
   const invalidate = async () => {
-    await queryClient.invalidateQueries([QUERY_KEYS.EXCEPTIONALS]);
-    await queryClient.invalidateQueries([QUERY_KEYS.EXCEPTIONAL_YEARS]);
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.EXCEPTIONALS],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.EXCEPTIONAL_YEARS],
+    });
   };
 
   const onSuccess = async (action: string) => {
@@ -39,7 +43,9 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     return ExceptionalListSchema.parse(response.data);
   };
 
-  const list = useQuery([QUERY_KEYS.EXCEPTIONALS, year ?? "all"], getExceptionals, {
+  const list = useQuery({
+    queryKey: [QUERY_KEYS.EXCEPTIONALS, year ?? "all"],
+    queryFn: getExceptionals,
     retry: false,
     enabled: !!userID,
     ...QUERY_OPTIONS,
@@ -50,7 +56,9 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     return ExceptionalYearsSchema.parse(response.data);
   };
 
-  const years = useQuery([QUERY_KEYS.EXCEPTIONAL_YEARS], getYears, {
+  const years = useQuery({
+    queryKey: [QUERY_KEYS.EXCEPTIONAL_YEARS],
+    queryFn: getYears,
     retry: false,
     enabled: !!userID,
     ...QUERY_OPTIONS,
@@ -64,15 +72,14 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     });
   };
 
-  const createExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>(
-    (payload) => createExceptionalService(payload),
-    {
-      onSuccess: () => onSuccess("créée"),
-      onError: (e) => {
-        console.log("error creating exceptional", e);
-      },
+  const createExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>({
+    mutationFn: (payload) => createExceptionalService(payload),
+    onSuccess: () => onSuccess("créée"),
+
+    onError: (e) => {
+      console.log("error creating exceptional", e);
     },
-  );
+  });
 
   const updateExceptionalService = async (payload: ExceptionalMutationPayload) => {
     const parsed = ExceptionalMutationPayloadSchema.parse(payload);
@@ -82,22 +89,23 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     });
   };
 
-  const updateExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>(
-    (payload) => updateExceptionalService(payload),
-    {
-      onSuccess: () => onSuccess("mise à jour"),
-      onError: (e) => {
-        console.log("error updating exceptional", e);
-      },
+  const updateExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>({
+    mutationFn: (payload) => updateExceptionalService(payload),
+    onSuccess: () => onSuccess("mise à jour"),
+
+    onError: (e) => {
+      console.log("error updating exceptional", e);
     },
-  );
+  });
 
   const deleteExceptionalService = async (id: string) => {
     return privateRequest(`/exceptionals/${id}`, { method: "DELETE" });
   };
 
-  const deleteExceptional = useMutation<unknown, AxiosError, { id: string }>(({ id }) => deleteExceptionalService(id), {
+  const deleteExceptional = useMutation<unknown, AxiosError, { id: string }>({
+    mutationFn: ({ id }) => deleteExceptionalService(id),
     onSuccess: () => onSuccess("supprimée"),
+
     onError: (e) => {
       console.log("error deleting exceptional", e);
     },
@@ -105,7 +113,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
 
   return {
     exceptionals: list.data ?? [],
-    isLoading: list.isLoading,
+    isLoading: list.isPending,
     error: list.error,
     years: years.data ?? [],
     createExceptional,

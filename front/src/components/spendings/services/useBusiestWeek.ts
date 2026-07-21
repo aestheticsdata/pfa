@@ -3,9 +3,9 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { BusiestWeekResponseSchema } from "@src/schemas/stats";
+import { useQuery } from "@tanstack/react-query";
 import format from "date-fns/format";
 import startOfMonth from "date-fns/startOfMonth";
-import { useQuery } from "react-query";
 
 import type { BusiestWeekResponse } from "@src/schemas/stats";
 
@@ -30,7 +30,9 @@ const useBusiestWeek = () => {
     return BusiestWeekResponseSchema.parse(response.data);
   };
 
-  return useQuery([QUERY_KEYS.BUSIEST_WEEK, monthBeginning], getBusiestWeek, {
+  return useQuery({
+    queryKey: [QUERY_KEYS.BUSIEST_WEEK, monthBeginning],
+    queryFn: getBusiestWeek,
     retry: false,
     enabled: !!monthBeginning && !!userID,
     ...QUERY_OPTIONS,

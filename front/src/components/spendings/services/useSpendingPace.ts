@@ -3,9 +3,9 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { SpendingPaceResponseSchema } from "@src/schemas/stats";
+import { useQuery } from "@tanstack/react-query";
 import format from "date-fns/format";
 import startOfMonth from "date-fns/startOfMonth";
-import { useQuery } from "react-query";
 
 import type { SpendingPaceResponse } from "@src/schemas/stats";
 
@@ -30,7 +30,9 @@ const useSpendingPace = () => {
     return SpendingPaceResponseSchema.parse(response.data);
   };
 
-  return useQuery([QUERY_KEYS.SPENDING_PACE, monthBeginning], getSpendingPace, {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SPENDING_PACE, monthBeginning],
+    queryFn: getSpendingPace,
     retry: false,
     enabled: !!monthBeginning && !!userID,
     ...QUERY_OPTIONS,

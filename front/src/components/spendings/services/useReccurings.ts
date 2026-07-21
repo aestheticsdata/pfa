@@ -8,8 +8,8 @@ import {
   RecurringMutationPayloadSchema,
   SpendingMutationPayloadSchema,
 } from "@src/schemas/spendings";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import startOfMonth from "date-fns/startOfMonth";
-import { useMutation, useQuery, useQueryClient } from "react-query";
 
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
 import type { AxiosError } from "axios";
@@ -38,9 +38,15 @@ const useReccurings = () => {
 
   const recurringsActionOnSuccess = async (message: string) => {
     displayPopup({ text: `recurring ${message}` });
-    await queryClient.invalidateQueries([QUERY_KEYS.RECURRINGS, monthBeginning]);
-    await queryClient.invalidateQueries([QUERY_KEYS.DASHBOARD, monthBeginning]);
-    await queryClient.invalidateQueries([QUERY_KEYS.INITIAL_AMOUNT, monthBeginning]);
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.RECURRINGS, monthBeginning],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
+    });
+    await queryClient.invalidateQueries({
+      queryKey: [QUERY_KEYS.INITIAL_AMOUNT, monthBeginning],
+    });
   };
 
   const getRecurrings = async () => {
@@ -48,7 +54,9 @@ const useReccurings = () => {
     return RecurringListSchema.parse(response.data);
   };
 
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.RECURRINGS, monthBeginning], getRecurrings, {
+  const { data, isPending, error } = useQuery({
+    queryKey: [QUERY_KEYS.RECURRINGS, monthBeginning],
+    queryFn: getRecurrings,
     retry: false,
     enabled: !!from && !!userID,
     ...QUERY_OPTIONS,
@@ -60,17 +68,17 @@ const useReccurings = () => {
     return privateRequest(`/recurrings/${recurring.ID}`, { method: "DELETE" });
   };
 
-  const deleteRecurring = useMutation(
-    ({ recurring }: { recurring: DeletableRecurring }) => {
+  const deleteRecurring = useMutation({
+    mutationFn: ({ recurring }: { recurring: DeletableRecurring }) => {
       return deleteRecurringService(recurring);
     },
-    {
-      onSuccess: () => recurringsActionOnSuccess("supprimé"),
-      onError: (e) => {
-        console.log("error deleting recurring", e);
-      },
+
+    onSuccess: () => recurringsActionOnSuccess("supprimé"),
+
+    onError: (e) => {
+      console.log("error deleting recurring", e);
     },
-  );
+  });
 
   const createRecurringService = async (recurring: SpendingMutationPayload, formattedMonth: FormattedMonth) => {
     const payload = SpendingMutationPayloadSchema.parse(recurring);
@@ -93,17 +101,17 @@ const useReccurings = () => {
     });
   };
 
-  const createRecurring = useMutation<unknown, AxiosError, CreateRecurring>(
-    ({ spendingEdited, formattedMonth }: CreateRecurring) => {
+  const createRecurring = useMutation<unknown, AxiosError, CreateRecurring>({
+    mutationFn: ({ spendingEdited, formattedMonth }: CreateRecurring) => {
       return createRecurringService(spendingEdited, formattedMonth);
     },
-    {
-      onSuccess: () => recurringsActionOnSuccess("créé"),
-      onError: (e) => {
-        console.log("error creating recurring", e);
-      },
+
+    onSuccess: () => recurringsActionOnSuccess("créé"),
+
+    onError: (e) => {
+      console.log("error creating recurring", e);
     },
-  );
+  });
 
   const updateRecurringService = async (recurring: SpendingMutationPayload) => {
     const payload = RecurringMutationPayloadSchema.parse(recurring);
@@ -113,35 +121,35 @@ const useReccurings = () => {
     });
   };
 
-  const updateRecurring = useMutation<unknown, AxiosError, SpendingMutationPayload>(
-    (recurring) => {
+  const updateRecurring = useMutation<unknown, AxiosError, SpendingMutationPayload>({
+    mutationFn: (recurring) => {
       return updateRecurringService(recurring);
     },
-    {
-      onSuccess: () => {
-        recurringsActionOnSuccess("mis à jour");
-      },
-      onError: (e) => {
-        console.log("error updating recurring ", e);
-      },
-    },
-  );
 
-  const copyRecurrings = useMutation<unknown, unknown, { userID: string; dates: Dates }>(
-    ({ userID, dates }) => {
+    onSuccess: () => {
+      recurringsActionOnSuccess("mis à jour");
+    },
+
+    onError: (e) => {
+      console.log("error updating recurring ", e);
+    },
+  });
+
+  const copyRecurrings = useMutation<unknown, unknown, { userID: string; dates: Dates }>({
+    mutationFn: ({ userID, dates }) => {
       return copyRecurringsService(userID, dates);
     },
-    {
-      onSuccess: () => recurringsActionOnSuccess("créés"),
-      onError: (e) => {
-        console.log("error copying recurrings", e);
-      },
+
+    onSuccess: () => recurringsActionOnSuccess("créés"),
+
+    onError: (e) => {
+      console.log("error copying recurrings", e);
     },
-  );
+  });
 
   return {
     recurrings: data ?? [],
-    isLoading,
+    isLoading: isPending,
     error,
     deleteRecurring,
     createRecurring,

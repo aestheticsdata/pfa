@@ -1,7 +1,7 @@
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { MonthlyIncomeResponseSchema } from "@src/schemas/dashboard";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import type { MonthlyIncomeResponse } from "@src/schemas/dashboard";
 
@@ -22,12 +22,14 @@ const useMonthlyIncome = ({ year }: UseMonthlyIncomeOptions) => {
     return MonthlyIncomeResponseSchema.parse(response.data);
   };
 
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.MONTHLY_INCOME, year], getMonthlyIncome, {
+  const { data, isPending, error } = useQuery({
+    queryKey: [QUERY_KEYS.MONTHLY_INCOME, year],
+    queryFn: getMonthlyIncome,
     retry: false,
     ...QUERY_OPTIONS,
   });
 
-  return { monthlyIncome: data?.income, isLoading, error };
+  return { monthlyIncome: data?.income, isLoading: isPending, error };
 };
 
 export default useMonthlyIncome;

@@ -3,8 +3,8 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { MonthlyStatsSchema } from "@src/schemas/dashboard";
+import { useQuery } from "@tanstack/react-query";
 import startOfMonth from "date-fns/startOfMonth";
-import { useQuery } from "react-query";
 
 const useInitialAmount = () => {
   const { privateRequest } = useRequestHelper();
@@ -27,7 +27,9 @@ const useInitialAmount = () => {
     }
   };
 
-  return useQuery([QUERY_KEYS.INITIAL_AMOUNT, monthBeginning], getInitialAmount, {
+  return useQuery({
+    queryKey: [QUERY_KEYS.INITIAL_AMOUNT, monthBeginning],
+    queryFn: getInitialAmount,
     retry: false,
     enabled: !!from && !!userID,
     ...QUERY_OPTIONS,

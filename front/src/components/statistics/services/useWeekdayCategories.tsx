@@ -1,7 +1,7 @@
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { WeekdayCategoriesResponseSchema } from "@src/schemas/stats";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import type { WeekdayCategoriesResponse } from "@src/schemas/stats";
 
@@ -22,12 +22,14 @@ const useWeekdayCategories = ({ year }: UseWeekdayCategoriesOptions) => {
     return WeekdayCategoriesResponseSchema.parse(response.data);
   };
 
-  const { data, isLoading, error } = useQuery([QUERY_KEYS.WEEKDAY_CATEGORIES, year], getWeekdayCategories, {
+  const { data, isPending, error } = useQuery({
+    queryKey: [QUERY_KEYS.WEEKDAY_CATEGORIES, year],
+    queryFn: getWeekdayCategories,
     retry: false,
     ...QUERY_OPTIONS,
   });
 
-  return { weekdayCategories: data, isLoading, error };
+  return { weekdayCategories: data, isLoading: isPending, error };
 };
 
 export default useWeekdayCategories;

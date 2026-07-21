@@ -2,7 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { CategoryStatsResponseSchema } from "@src/schemas/categoryStats";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 /** Inclusive calendar-date window (yyyy-MM-dd) to scope the aggregate. */
 interface CategoryStatsRange {
@@ -33,15 +33,13 @@ const useCategoryStats = (range?: CategoryStatsRange) => {
     }
   };
 
-  const { data: categoryStats, error } = useQuery(
-    [QUERY_KEYS.CATEGORY_STATS, userID, range?.from ?? null, range?.to ?? null],
-    getCategoryStatsService,
-    {
-      retry: 2,
-      enabled: !!userID,
-      ...QUERY_OPTIONS,
-    },
-  );
+  const { data: categoryStats, error } = useQuery({
+    queryKey: [QUERY_KEYS.CATEGORY_STATS, userID, range?.from ?? null, range?.to ?? null],
+    queryFn: getCategoryStatsService,
+    retry: 2,
+    enabled: !!userID,
+    ...QUERY_OPTIONS,
+  });
 
   return { categoryStats, error };
 };

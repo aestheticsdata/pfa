@@ -3,13 +3,13 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DailyProjectionSchema } from "@src/schemas/dashboard";
+import { useQuery } from "@tanstack/react-query";
 import formatISO from "date-fns/formatISO";
 import isSameMonth from "date-fns/isSameMonth";
 import startOfMonth from "date-fns/startOfMonth";
-import { useQuery } from "react-query";
 
 import type { DailyProjection } from "@src/schemas/dashboard";
-import type { UseQueryResult } from "react-query";
+import type { UseQueryResult } from "@tanstack/react-query";
 
 // Reference-period data backing the sparkline's projected tail (COS-27). The
 // projection only applies to the in-progress current month — past/complete
@@ -33,7 +33,9 @@ const useDailyProjection = (): UseQueryResult<DailyProjection> => {
     return DailyProjectionSchema.parse(response.data);
   };
 
-  return useQuery([QUERY_KEYS.DAILY_PROJECTION, monthBeginning], getDailyProjection, {
+  return useQuery({
+    queryKey: [QUERY_KEYS.DAILY_PROJECTION, monthBeginning],
+    queryFn: getDailyProjection,
     retry: false,
     enabled: isCurrentMonth && !!userID,
     ...QUERY_OPTIONS,

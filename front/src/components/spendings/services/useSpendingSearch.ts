@@ -2,7 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { QUERY_KEYS, QUERY_OPTIONS, SEARCH_MIN_LENGTH } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { SpendingSearchPageSchema } from "@src/schemas/spendings";
-import { useInfiniteQuery } from "react-query";
+import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 /**
  * Whole-history spending search (COS-114), keyset-paginated. Hits
@@ -27,21 +27,20 @@ const useSpendingSearch = (query: string, year: number | null) => {
     return SpendingSearchPageSchema.parse(response.data);
   };
 
-  const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage, error } = useInfiniteQuery(
-    [QUERY_KEYS.SPENDINGS_SEARCH, trimmed, year],
-    fetchPage,
-    {
-      enabled,
-      retry: false,
-      keepPreviousData: true,
-      getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-      ...QUERY_OPTIONS,
-      // Keep the loaded pages around longer than the default 5 min so returning
-      // to the modal (browser Back) after a detour restores the full list, not
-      // just the first page (COS-114).
-      cacheTime: 30 * 60 * 1000,
-    },
-  );
+  const { data, isPending, isFetchingNextPage, hasNextPage, fetchNextPage, error } = useInfiniteQuery({
+    queryKey: [QUERY_KEYS.SPENDINGS_SEARCH, trimmed, year],
+    queryFn: fetchPage,
+    enabled,
+    retry: false,
+    placeholderData: keepPreviousData,
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    ...QUERY_OPTIONS,
+    // Keep the loaded pages around longer than the default 5 min so returning
+    // to the modal (browser Back) after a detour restores the full list, not
+    // just the first page (COS-114).
+    gcTime: 30 * 60 * 1000,
+  });
 
   const results = data?.pages.flatMap((page) => page.items) ?? [];
   const total = data?.pages[0]?.total ?? results.length;
@@ -49,7 +48,7 @@ const useSpendingSearch = (query: string, year: number | null) => {
   return {
     results,
     total,
-    isSearching: enabled && isLoading,
+    isSearching: enabled && isPending,
     isFetchingNextPage,
     hasNextPage: !!hasNextPage,
     fetchNextPage,

@@ -2,7 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { QUERY_KEYS, QUERY_OPTIONS } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { LabelSuggestionListSchema } from "@src/schemas/spendings";
-import { useQuery } from "react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import type { LabelSuggestion } from "@src/schemas/spendings";
 
@@ -25,7 +25,9 @@ const useLabelSuggestions = (query: string, enabled = true): LabelSuggestion[] =
     return LabelSuggestionListSchema.parse(response.data);
   };
 
-  const { data } = useQuery([QUERY_KEYS.LABEL_SUGGESTIONS, trimmed], fetchSuggestions, {
+  const { data } = useQuery({
+    queryKey: [QUERY_KEYS.LABEL_SUGGESTIONS, trimmed],
+    queryFn: fetchSuggestions,
     enabled: enabled && !!userID,
     retry: false,
     ...QUERY_OPTIONS,
