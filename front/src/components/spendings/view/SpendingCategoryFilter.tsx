@@ -8,12 +8,7 @@ import spendings from "@text/spendings";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-export interface FilterCategory {
-  key: string;
-  name: string;
-  color: string;
-  count: number;
-}
+import type { FilterCategory } from "@components/spendings/interfaces/spendingCategoryFilterTypes";
 
 interface SpendingCategoryFilterProps {
   categories: FilterCategory[];
