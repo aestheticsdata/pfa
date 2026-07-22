@@ -20,23 +20,29 @@ import { niceCeil } from "@components/statistics/helpers/statisticsData";
 import { searchTimelineParsers, searchTimelineUrlOptions } from "@components/statistics/searchTimelineParams";
 import useStatisticsSearchTimeline from "@components/statistics/services/useStatisticsSearchTimeline";
 import { buildSpendingsPath } from "@helpers/dateRoute";
+import { interpolate } from "@i18n/interpolate";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { BarChart, LineChart, useElementWidth } from "@lib/dataviz";
+import { BarChart, CursorTooltip, LineChart, useCursorHover, useElementWidth } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import { Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
+import { Fragment } from "react";
 
 import type { SpendingItem } from "@components/spendings/types";
+import type { ReactNode } from "react";
 
 const AMOUNT_BAND_H = 128;
 const FREQ_BAND_H = 76;
 const LATEST_MATCHES = 3;
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** A figure inside a summary sentence — bright against the muted words framing it. */
+const Figure = ({ children }: { children: ReactNode }) => <span className="font-medium text-ink">{children}</span>;
 
 /**
  * Search-timeline widget (COS-160), the exploration block closing /statistics:
@@ -67,6 +73,8 @@ const StatisticsSearchTimeline = () => {
   // so the two features can never disagree on what matches.
   const { results } = useSpendingSearch(debounced, null);
   const [chartRef, width] = useElementWidth<HTMLDivElement>();
+  // Hovered bucket index, shared by the crosshair line and the tooltip.
+  const cursor = useCursorHover<number>();
 
   const t = statistics.searchTimeline;
 
@@ -111,23 +119,57 @@ const StatisticsSearchTimeline = () => {
         )
       : null;
 
-  // "≈ 1 fois tous les N jours · X € en moyenne · dernière le …" — the window
-  // span over the match count, like the hero numbers a range-scoped figure.
+  // Cadence · average basket · last occurrence — three distinct facts, so each
+  // carries its figure highlighted rather than dissolving into one flat run of
+  // muted text. Cadence is the window span over the match count, a range-scoped
+  // figure like the hero numbers.
   const spanDays = Math.max(1, Math.round((parseISO(to).getTime() - parseISO(from).getTime()) / DAY_MS));
-  const frequencyLine = hasMatches
+  const everyDays = hasMatches ? Math.round(spanDays / summary.count) : 0;
+  const summaryFacts: { id: string; node: ReactNode }[] = hasMatches
     ? [
-        summary.count === 1 ? t.frequencyOnce : t.frequencyEvery(Math.round(spanDays / summary.count)),
-        t.averageBasket(euro0(summary.total / summary.count)),
-        summary.lastDate ? t.lastOn(format(parseISO(summary.lastDate), "d MMM yyyy", { locale: dateLocale })) : null,
+        {
+          id: "cadence",
+          node:
+            summary.count === 1
+              ? t.frequencyOnce
+              : everyDays <= 1
+                ? t.frequencyDaily
+                : interpolate(t.frequencyEvery, { days: <Figure>{everyDays}</Figure> }),
+        },
+        {
+          id: "basket",
+          node: interpolate(t.averageBasket, { amount: <Figure>{euro0(summary.total / summary.count)} €</Figure> }),
+        },
+        ...(summary.lastDate
+          ? [
+              {
+                id: "last",
+                node: interpolate(t.lastOn, {
+                  date: <Figure>{format(parseISO(summary.lastDate), "d MMM yyyy", { locale: dateLocale })}</Figure>,
+                }),
+              },
+            ]
+          : []),
       ]
-        .filter(Boolean)
-        .join(" · ")
-    : null;
+    : [];
 
   // Fine bars: width-proportional slot, clamped so a year of daily buckets stays
   // legible and a month's bars don't balloon.
   const slot = points.length > 0 ? width / points.length : 0;
   const barWidth = Math.max(1.3, Math.min(6, slot * 0.66));
+
+  // Both bands share one time axis, so they share ONE crosshair: hovering
+  // anywhere over the chart resolves the same bucket, and amount and frequency
+  // read at the same instant. A hovered index can outlive a range switch, hence
+  // the bounds-checked lookup.
+  const hoveredIndex = cursor.hover?.data ?? null;
+  const hoveredPoint = hoveredIndex !== null ? (points[hoveredIndex] ?? null) : null;
+  const hoveredRolling = hoveredIndex !== null ? (rolling[hoveredIndex] ?? 0) : 0;
+  // Bucket centre, the same anchor the bars and the date labels use.
+  const crosshairLeft = hoveredIndex !== null && hoveredPoint ? ((hoveredIndex + 0.5) / points.length) * 100 : null;
+
+  const hoverBucketAt = (clientX: number, rect: DOMRect): number =>
+    Math.min(points.length - 1, Math.max(0, Math.floor(((clientX - rect.left) / rect.width) * points.length)));
 
   // Same jump as the search modal: Spendings page on the week of the spending.
   const goToSpendingWeek = (spending: SpendingItem) => {
@@ -135,6 +177,22 @@ const StatisticsSearchTimeline = () => {
     setScrollToDayIso(dateISO);
     router.push(buildSpendingsPath(dateISO));
   };
+
+  // The amount band doubles as a jump target: clicking a bucket opens the
+  // Spendings page on its week, the same destination as a result row. The
+  // clickable unit is the bucket's whole column, not the 1.3px bar — the bar is
+  // unaimable on the year view, and the crosshair already tells the user which
+  // bucket is under the cursor. Only the frequency band is left inert: it reads
+  // a rolling window, not one dated bucket. A bucket's start day already is a
+  // DATE_FORMAT string (a week bucket's Sunday lands in the right week).
+  const goToBucketWeek = (index: number) => {
+    const point = points[index];
+    if (!point || point.count === 0) return;
+    setScrollToDayIso(point.date);
+    router.push(buildSpendingsPath(point.date));
+  };
+  // Empty buckets have nothing to open, so they keep the default cursor.
+  const bucketIsClickable = hoveredPoint !== null && hoveredPoint.count > 0;
 
   return (
     <GlowCard
@@ -212,7 +270,18 @@ const StatisticsSearchTimeline = () => {
         </div>
       </div>
 
-      <p className="num mt-3.5 text-xs text-ink-3">{statusMessage ?? frequencyLine}</p>
+      {statusMessage !== null ? (
+        <p className="num mt-3.5 text-xs text-ink-3">{statusMessage}</p>
+      ) : (
+        <p className="num mt-3.5 flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-xs text-ink-4">
+          {summaryFacts.map((fact, i) => (
+            <Fragment key={fact.id}>
+              {i > 0 && <span className="text-ink-5">·</span>}
+              <span>{fact.node}</span>
+            </Fragment>
+          ))}
+        </p>
+      )}
 
       <div
         ref={chartRef}
@@ -220,61 +289,103 @@ const StatisticsSearchTimeline = () => {
       >
         {width > 0 && (
           <>
-            {/* Left→right draw of both bands, like the Dashboard daily curve.
-                The remount key replays it when a new search resolves ("e"→"d"
-                once data lands) and on every range hop. */}
+            {/* Hover host spanning both bands. The crosshair and its capture
+                layer are SIBLINGS of the animated block, never children: the
+                draw-in animation clips its own subtree and would clip them. */}
+            {/* One hover handler on the host resolves the bucket by position
+                (like the heatmap grid), so the crosshair tracks the cursor
+                across both bands without a hit-testing layer per element. */}
             <div
-              key={`${debounced}-${range}-${hasMatches ? "d" : "e"}`}
-              className="pfa-anim-draw-x"
+              className="relative"
+              role="img"
+              aria-label={t.chartAria(debounced)}
+              onMouseMove={
+                hasMatches
+                  ? (e) =>
+                      cursor.show(
+                        e.clientX,
+                        e.clientY,
+                        hoverBucketAt(e.clientX, e.currentTarget.getBoundingClientRect()),
+                      )
+                  : undefined
+              }
+              onMouseLeave={cursor.clear}
             >
-              {/* Amount band — € gridlines at the rounded max and its half. */}
-              <div className="relative border-b border-line">
-                <div className="pointer-events-none absolute inset-x-0 top-0 border-t border-line-soft" />
-                <div className="pointer-events-none absolute inset-x-0 top-1/2 border-t border-line-soft" />
-                <BarChart
-                  id="stat-search-bars"
-                  bars={points.map((p) => ({ label: p.date, value: p.total }))}
-                  width={width}
-                  height={AMOUNT_BAND_H}
-                  max={yMax}
-                  gap={slot > 0 ? 1 - barWidth / slot : 0.35}
-                  radius={Math.min(1.5, barWidth / 2)}
-                  minBarSize={1.5}
-                  gradient={["var(--accent-d)", "var(--accent-strong)"]}
-                  ariaLabel={t.chartAria(debounced)}
-                />
-                {hasMatches && (
-                  <>
-                    <span className="num pointer-events-none absolute right-0 top-0 -translate-y-1/2 text-3xs text-ink-4">
-                      {euro0(yMax)} €
-                    </span>
-                    <span className="num pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-3xs text-ink-4">
-                      {euro0(yMax / 2)} €
-                    </span>
-                  </>
-                )}
+              {/* Left→right draw of both bands, like the Dashboard daily curve.
+                  The remount key replays it when a new search resolves ("e"→"d"
+                  once data lands) and on every range hop. */}
+              <div
+                key={`${debounced}-${range}-${hasMatches ? "d" : "e"}`}
+                className="pfa-anim-draw-x"
+              >
+                {/* Amount band — € gridlines at the rounded max and its half.
+                    Also the click surface: mouse-only, and duplicated by the
+                    keyboard-reachable "latest matches" rows below. */}
+                {/* biome-ignore lint/a11y/useKeyWithClickEvents: pointing at a bucket has no keyboard equivalent; the same navigation is exposed as real buttons in the matches list */}
+                <div
+                  className={cn("relative border-b border-line", bucketIsClickable && "cursor-pointer")}
+                  role="img"
+                  aria-label={t.legendAmount}
+                  onClick={
+                    hasMatches
+                      ? (e) => goToBucketWeek(hoverBucketAt(e.clientX, e.currentTarget.getBoundingClientRect()))
+                      : undefined
+                  }
+                >
+                  <div className="pointer-events-none absolute inset-x-0 top-0 border-t border-line-soft" />
+                  <div className="pointer-events-none absolute inset-x-0 top-1/2 border-t border-line-soft" />
+                  <BarChart
+                    id="stat-search-bars"
+                    bars={points.map((p) => ({ label: p.date, value: p.total }))}
+                    width={width}
+                    height={AMOUNT_BAND_H}
+                    max={yMax}
+                    gap={slot > 0 ? 1 - barWidth / slot : 0.35}
+                    radius={Math.min(1.5, barWidth / 2)}
+                    minBarSize={1.5}
+                    gradient={["var(--accent-d)", "var(--accent-strong)"]}
+                    ariaLabel={t.legendAmount}
+                  />
+                  {hasMatches && (
+                    <>
+                      <span className="num pointer-events-none absolute right-0 top-0 -translate-y-1/2 text-3xs text-ink-4">
+                        {euro0(yMax)} €
+                      </span>
+                      <span className="num pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-3xs text-ink-4">
+                        {euro0(yMax / 2)} €
+                      </span>
+                    </>
+                  )}
+                </div>
+
+                {/* Frequency band — rolling occurrence count, same green and
+                  area gradient as the Dashboard "budget restant" chart. */}
+                <div className="num mt-4 flex items-baseline justify-between text-3xs text-ink-4">
+                  <span>{t.windowLabel(windowDays)}</span>
+                  {hasMatches && <span>{t.windowMax(maxRolling)}</span>}
+                </div>
+                <div className="mt-1 border-b border-line">
+                  <LineChart
+                    id="stat-search-freq"
+                    width={width}
+                    height={FREQ_BAND_H}
+                    padding={{ top: 4, right: slot / 2, bottom: 1, left: slot / 2 }}
+                    xDomain={[0, points.length - 1]}
+                    yDomain={[0, maxRolling]}
+                    series={
+                      hasMatches ? [{ points: rolling, color: "var(--accent-strong)", area: true, smooth: true }] : []
+                    }
+                    ariaLabel={t.legendFrequency}
+                  />
+                </div>
               </div>
 
-              {/* Frequency band — rolling occurrence count, same green and
-                  area gradient as the Dashboard "budget restant" chart. */}
-              <div className="num mt-4 flex items-baseline justify-between text-3xs text-ink-4">
-                <span>{t.windowLabel(windowDays)}</span>
-                {hasMatches && <span>{t.windowMax(maxRolling)}</span>}
-              </div>
-              <div className="mt-1 border-b border-line">
-                <LineChart
-                  id="stat-search-freq"
-                  width={width}
-                  height={FREQ_BAND_H}
-                  padding={{ top: 4, right: slot / 2, bottom: 1, left: slot / 2 }}
-                  xDomain={[0, points.length - 1]}
-                  yDomain={[0, maxRolling]}
-                  series={
-                    hasMatches ? [{ points: rolling, color: "var(--accent-strong)", area: true, smooth: true }] : []
-                  }
-                  ariaLabel={t.legendFrequency}
+              {crosshairLeft !== null && (
+                <div
+                  className="pointer-events-none absolute inset-y-0 border-l border-dashed border-ink-3"
+                  style={{ left: `${crosshairLeft}%` }}
                 />
-              </div>
+              )}
             </div>
 
             <div className="relative mt-1.5 h-4">
@@ -323,6 +434,24 @@ const StatisticsSearchTimeline = () => {
           </div>
         </div>
       )}
+
+      <CursorTooltip point={cursor.hover}>
+        {hoveredPoint && (
+          <>
+            <div className="font-medium capitalize">
+              {bucket === "day"
+                ? format(parseISO(hoveredPoint.date), "EEE d MMM yyyy", { locale: dateLocale })
+                : t.tooltip.weekOf(format(parseISO(hoveredPoint.date), "d MMM yyyy", { locale: dateLocale }))}
+            </div>
+            <div className="mt-0.5">
+              {hoveredPoint.count > 0
+                ? `${euro0(hoveredPoint.total)} € · ${t.tooltip.spendings(hoveredPoint.count)}`
+                : t.tooltip.noSpend}
+            </div>
+            <div className="text-ink-3">{t.tooltip.rolling(hoveredRolling, windowDays)}</div>
+          </>
+        )}
+      </CursorTooltip>
     </GlowCard>
   );
 };

@@ -170,10 +170,19 @@ const statistics = {
     },
     peakDay: (amount: string, date: string) => `pic : ${amount} € · le ${date}`,
     peakWeek: (amount: string, date: string) => `pic : ${amount} € · sem. du ${date}`,
-    frequencyEvery: (days: number) => (days > 1 ? `≈ 1 fois tous les ${days} jours` : "≈ 1 fois par jour"),
-    frequencyOnce: "1 seule fois",
-    averageBasket: (amount: string) => `${amount} € en moyenne`,
-    lastOn: (date: string) => `dernière le ${date}`,
+    // Sentence templates — the {token} carries the figure, highlighted by the
+    // component so the three facts of the summary line don't read as one flat run.
+    frequencyEvery: "≈ 1 fois tous les {days} jours",
+    frequencyDaily: "≈ 1 fois par jour",
+    frequencyOnce: "1 seule fois sur la période",
+    averageBasket: "{amount} en moyenne",
+    lastOn: "dernière le {date}",
+    tooltip: {
+      weekOf: (date: string) => `Semaine du ${date}`,
+      noSpend: "Aucune dépense",
+      spendings: (n: number) => `${n} dépense${n > 1 ? "s" : ""}`,
+      rolling: (count: number, days: number) => `${count} fois sur ${days} j glissants`,
+    },
     windowLabel: (days: number) => `fréquence · ${days} j glissants`,
     windowMax: (n: number) => `max ${n} fois`,
     legendAmount: "montant dépensé",
