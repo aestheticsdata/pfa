@@ -266,7 +266,7 @@ describe("SpendingsService.getSpendingYears", () => {
  * Unit tests for SpendingsService.getLabelSuggestions — the label autocomplete
  * backing the spending modal's chip row (COS-23). Prisma is mocked, so these
  * assert the query shape and the JS aggregation (frequency ranking, dominant
- * category, exact-match exclusion, cap) without touching the DB.
+ * category, empty-result fallback, cap) without touching the DB.
  */
 describe("SpendingsService.getLabelSuggestions", () => {
   const makeService = (groupByResult: unknown[], categoriesResult: unknown[] = []) => {
@@ -359,7 +359,7 @@ describe("SpendingsService.getLabelSuggestions", () => {
     expect(result).toEqual([{ label: "Pharmacie", category: "santé" }]);
   });
 
-  it("excludes the exact current input (case-insensitive)", async () => {
+  it("keeps the label equal to the current input (COS-159: the chip row must not empty out)", async () => {
     const { service } = makeService([
       { label: "Monoprix", categoryID: null, _count: 3 },
       { label: "Monoprix Express", categoryID: null, _count: 1 },
@@ -367,7 +367,39 @@ describe("SpendingsService.getLabelSuggestions", () => {
 
     const result = await service.getLabelSuggestions("monoprix", "user-1");
 
-    expect(result).toEqual([{ label: "Monoprix Express", category: null }]);
+    expect(result).toEqual([
+      { label: "Monoprix", category: null },
+      { label: "Monoprix Express", category: null },
+    ]);
+  });
+
+  it("falls back to the global ranking when the prefix matches nothing", async () => {
+    const { service, groupBy } = makeService([]);
+    groupBy.mockResolvedValueOnce([]).mockResolvedValueOnce([
+      { label: "Monoprix", categoryID: null, _count: 3 },
+      { label: "Uber", categoryID: null, _count: 1 },
+    ]);
+
+    const result = await service.getLabelSuggestions("zzz", "user-1");
+
+    expect(groupBy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ where: { userID: "user-1", label: { startsWith: "zzz" } } }),
+    );
+    // Second pass drops the label predicate → most frequent labels overall.
+    expect(groupBy).toHaveBeenNthCalledWith(2, expect.objectContaining({ where: { userID: "user-1" } }));
+    expect(result).toEqual([
+      { label: "Monoprix", category: null },
+      { label: "Uber", category: null },
+    ]);
+  });
+
+  it("does not re-query when the empty query itself yields nothing", async () => {
+    const { service, groupBy } = makeService([]);
+
+    await expect(service.getLabelSuggestions("", "user-1")).resolves.toEqual([]);
+
+    expect(groupBy).toHaveBeenCalledTimes(1);
   });
 
   it("breaks frequency ties alphabetically", async () => {

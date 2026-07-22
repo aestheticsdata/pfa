@@ -348,21 +348,28 @@ export class SpendingsService {
   // past spending labels ranked by how often they've used each, filtered by the
   // typed prefix, each carrying its most-used category so selecting one can
   // pre-fill the category. An empty query returns the most frequent labels (shown
-  // when the field is empty); the exact current input is excluded so we never
-  // suggest what's already fully typed. Category resolution honors the owned-or-
-  // global rule used across the app; a label only ever used uncategorized yields a
-  // null category.
+  // when the field is empty), and a prefix matching nothing falls back to that
+  // same global ranking: the modal's chip row must never go empty, since an
+  // appearing/disappearing row resizes the dialog mid-typing (COS-159). The label
+  // equal to the current input is kept for the same reason — clicking it still
+  // pre-fills the category. Category resolution honors the owned-or-global rule
+  // used across the app; a label only ever used uncategorized yields a null
+  // category.
   async getLabelSuggestions(query: string, userID: string): Promise<SpendingLabelSuggestion[]> {
     const q = query.trim();
     // Escape LIKE metacharacters so a literal % or _ in the prefix matches
     // literally instead of acting as a wildcard (same guard as searchSpendings).
     const escaped = q.replace(/[\\%_]/g, "\\$&");
 
-    const grouped = await this.prisma.spendings.groupBy({
-      by: ["label", "categoryID"],
-      where: { userID, ...(q ? { label: { startsWith: escaped } } : {}) },
-      _count: true,
-    });
+    const groupLabels = (prefix?: string) =>
+      this.prisma.spendings.groupBy({
+        by: ["label", "categoryID"],
+        where: { userID, ...(prefix ? { label: { startsWith: prefix } } : {}) },
+        _count: true,
+      });
+
+    const matched = await groupLabels(q ? escaped : undefined);
+    const grouped = q && matched.length === 0 ? await groupLabels() : matched;
 
     // Fold the (label, category) groups into one bucket per label: total uses,
     // plus — among the categorized uses only — the tally per category.
@@ -376,11 +383,9 @@ export class SpendingsService {
       buckets.set(group.label, bucket);
     }
 
-    // Rank by total use (then alphabetically), drop the exact current input, and
-    // keep the top few — the modal shows a small chip row.
-    const qLower = q.toLowerCase();
+    // Rank by total use (then alphabetically) and keep the top few — the modal
+    // shows a small chip row.
     const ranked = [...buckets.entries()]
-      .filter(([label]) => label.toLowerCase() !== qLower)
       .sort((a, b) => b[1].total - a[1].total || a[0].localeCompare(b[0]))
       .slice(0, LABEL_SUGGESTIONS_LIMIT);
 
