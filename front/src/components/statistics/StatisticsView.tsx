@@ -19,6 +19,7 @@ import StatisticsForecast from "@components/statistics/StatisticsForecast";
 import StatisticsHeatmap from "@components/statistics/StatisticsHeatmap";
 import StatisticsKpis from "@components/statistics/StatisticsKpis";
 import StatisticsMonthlyChart from "@components/statistics/StatisticsMonthlyChart";
+import StatisticsSearchTimeline from "@components/statistics/StatisticsSearchTimeline";
 import StatisticsTopCategories from "@components/statistics/StatisticsTopCategories";
 import useBiggestRegularExpense from "@components/statistics/services/useBiggestRegularExpense";
 import useDailyStats from "@components/statistics/services/useDailyStats";
@@ -235,6 +236,11 @@ const StatisticsView = () => {
         weekdayCategories={weekdayCategories?.weekdays}
         weeklyCeiling={dashboard.get.data?.initialCeiling ?? null}
       />
+
+      {/* Exploration tool, last on purpose: it must not push the synthesis
+          widgets below the fold. Autonomous — own search field, own range,
+          blind to the page filters (a term is orthogonal to them). */}
+      <StatisticsSearchTimeline />
     </div>
   );
 };

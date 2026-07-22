@@ -24,6 +24,7 @@ export const QUERY_KEYS = {
   EXCEPTIONAL_YEARS: "exceptionalYears",
   REGULAR_MONTHLY_AVERAGE: "regularMonthlyAverage",
   SPENDINGS_SEARCH: "spendingsSearch",
+  SEARCH_TIMELINE: "searchTimeline",
   SPENDINGS_YEARS: "spendingsYears",
   LABEL_SUGGESTIONS: "labelSuggestions",
 };

@@ -3,7 +3,7 @@
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { EmptyState } from "@components/shared/EmptyState";
 import { FilterChip } from "@components/shared/FilterChip";
-import { DATE_FORMAT } from "@components/spendings/config/constants";
+import { DATE_FORMAT, SEARCH_DEBOUNCE_MS } from "@components/spendings/config/constants";
 import { groupSpendingsByMonth } from "@components/spendings/search/groupByMonth";
 import SpendingSearchResultRow from "@components/spendings/search/SpendingSearchResultRow";
 import { spendingSearchParsers, spendingSearchUrlOptions } from "@components/spendings/search/searchParams";
@@ -22,8 +22,6 @@ import { useQueryStates } from "nuqs";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 import type { SpendingItem } from "@components/spendings/types";
-
-const SEARCH_DEBOUNCE_MS = 250;
 
 // Scroll offset of the results list, stashed when the user leaves for a spending
 // so browser Back can restore the list where they were. Module-level so it

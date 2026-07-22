@@ -33,8 +33,12 @@ export const smoothPath = (pts: LinePoint[]): string => {
   return d;
 };
 
-/** Closed area path: the line, dropped to `baseY`, closed back to the start. */
-export const areaPath = (pts: LinePoint[], baseY: number): string => {
+/**
+ * Closed area path: the line, dropped to `baseY`, closed back to the start.
+ * `smooth` makes the top edge follow `smoothPath` so a smoothed series' fill
+ * hugs its stroke instead of the angular polyline (COS-160).
+ */
+export const areaPath = (pts: LinePoint[], baseY: number, smooth = false): string => {
   if (pts.length === 0) return "";
-  return `${linePath(pts)} L ${pts[pts.length - 1].x} ${baseY} L ${pts[0].x} ${baseY} Z`;
+  return `${smooth ? smoothPath(pts) : linePath(pts)} L ${pts[pts.length - 1].x} ${baseY} L ${pts[0].x} ${baseY} Z`;
 };
