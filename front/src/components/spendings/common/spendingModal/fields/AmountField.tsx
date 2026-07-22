@@ -2,21 +2,22 @@ import { FieldShell } from "@components/shared/FieldShell";
 import useTranslations from "@i18n/useTranslations";
 
 import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
-import type { FieldErrors, UseFormRegister } from "react-hook-form";
+import type { UseFormRegister } from "react-hook-form";
 
 interface AmountFieldProps {
   register: UseFormRegister<SpendingForm>;
-  errors: FieldErrors<SpendingForm>;
+  /** Message string, not RHF's in-place-mutated `errors` object — see LabelField (COS-164). */
+  error: string | undefined;
 }
 
-const AmountField = ({ register, errors }: AmountFieldProps) => {
+const AmountField = ({ register, error }: AmountFieldProps) => {
   const spendings = useTranslations("spendings");
 
   return (
     <FieldShell
       label={spendings.modal.fields.amount}
       htmlFor="spendingAmount"
-      error={errors.spendingAmount?.message}
+      error={error}
     >
       <div className="flex items-baseline gap-2 rounded-md border border-line bg-surface-base px-3 py-2.5 transition-colors focus-within:border-accent-d">
         <input
