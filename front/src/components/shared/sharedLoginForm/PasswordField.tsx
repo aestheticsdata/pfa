@@ -2,8 +2,8 @@
 
 import { overlineClass } from "@components/shared/Overline";
 import { authInputClass } from "@components/shared/sharedLoginForm/authInputClass";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import login from "@text/login";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
@@ -19,6 +19,7 @@ interface PasswordFieldProps {
 
 /** Auth password input with its own show/hide toggle. */
 const PasswordField = ({ id, label, autoComplete, invalid, registration }: PasswordFieldProps) => {
+  const login = useTranslations("login");
   const [show, setShow] = useState(false);
 
   return (

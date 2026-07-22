@@ -1,8 +1,9 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Req, Res, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { UsersService } from "@users/users.service";
 import { SignInDto } from "@users/dto/sign-in.dto";
 import { AddUserDto } from "@users/dto/add-user.dto";
+import { UpdateUserDto } from "@users/dto/update-user.dto";
 import { RedisService } from "@redis/redis.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { CsrfGuard } from "@users/guards/csrf.guard";
@@ -26,6 +27,14 @@ export class UsersController {
       ...response,
       csrfToken: getOrCreateCsrfToken(req),
     };
+  }
+
+  @Patch("me")
+  @UseGuards(SessionAuthGuard, CsrfGuard)
+  @HttpCode(HttpStatus.OK)
+  async updateMe(@Body() dto: UpdateUserDto, @Req() req: Request): Promise<SignInResponse> {
+    const userId = (req as Request & { user: { id: string } }).user.id;
+    return this.usersService.updateUser(userId, dto);
   }
 
   @Get("csrf")

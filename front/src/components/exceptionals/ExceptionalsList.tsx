@@ -2,10 +2,10 @@
 
 import ExceptionalItem from "@components/exceptionals/ExceptionalItem";
 import GlowCard from "@components/shared/GlowCard";
-import { euro } from "@lib/format";
-import exceptionals from "@text/exceptionals";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import format from "date-fns/format";
-import { fr } from "date-fns/locale";
 import parseISO from "date-fns/parseISO";
 import { useMemo } from "react";
 
@@ -25,12 +25,15 @@ interface ExceptionalsListProps {
 }
 
 const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListProps) => {
+  const { euro } = useFormat();
+  const exceptionals = useTranslations("exceptionals");
+  const dateLocale = useDateLocale();
   const groups = useMemo<MonthGroup[]>(() => {
     const map = new Map<string, MonthGroup>();
     for (const item of items) {
       const date = parseISO(item.date);
       const key = format(date, "yyyy-MM");
-      const label = format(date, "MMMM yyyy", { locale: fr });
+      const label = format(date, "MMMM yyyy", { locale: dateLocale });
       let group = map.get(key);
       if (!group) {
         group = { key, label, total: 0, items: [] };
@@ -40,7 +43,7 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
       group.total += Number(item.amount);
     }
     return Array.from(map.values()).sort((a, b) => (a.key < b.key ? 1 : -1));
-  }, [items]);
+  }, [items, dateLocale]);
 
   const { list: t } = exceptionals;
 

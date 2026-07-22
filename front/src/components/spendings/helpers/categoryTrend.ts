@@ -14,8 +14,8 @@ export const categoryDeltaPct = (value: number, previousValue: number | null): n
  * Trend badge data (direction + label) for a category, from its current vs
  * comparison-period totals. Spend-oriented semantics: more spending is "up"
  * (rendered red), less is "down" (green); a small change is "stable" and a
- * category absent from the comparison period is "nouv." — both grey. Shared by
- * the dashboard breakdown + insight (COS-41) and, later, the Dépenses weekly
+ * category absent from the comparison period is "new" — both grey. Shared by
+ * the dashboard breakdown + insight (COS-41) and, later, the Spendings weekly
  * breakdown (COS-35), so the badge reads identically everywhere.
  */
 export const categoryTrend = (

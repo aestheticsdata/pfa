@@ -4,8 +4,8 @@ import { Overline } from "@components/shared/Overline";
 import { FALLBACK_COLOR, getRandomHexColor } from "@components/spendings/common/spendingModal/helpers";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import spendings from "@text/spendings";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
@@ -34,6 +34,7 @@ const CategoryField = ({
   setComboboxQuery,
   userId,
 }: CategoryFieldProps) => {
+  const spendings = useTranslations("spendings");
   const { modal: t } = spendings;
 
   const exactMatch = categoryOptions.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());

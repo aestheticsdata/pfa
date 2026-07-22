@@ -10,14 +10,15 @@
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useDailyProjection from "@components/spendings/services/useDailyProjection";
 import useSpendings from "@components/spendings/services/useSpendings";
+import { interpolate } from "@i18n/interpolate";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { LineChart } from "@lib/dataviz";
-import { euro } from "@lib/format";
-import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import isSameMonth from "date-fns/isSameMonth";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 import { useMemo } from "react";
 
@@ -25,6 +26,9 @@ import type { LinePoint } from "@lib/dataviz";
 import type { ProjectionSource } from "@src/schemas/dashboard";
 
 const DailySparkline = () => {
+  const { euro } = useFormat();
+  const dashboardText = useTranslations("dashboard");
+  const dateLocale = useDateLocale();
   const { from } = useDatePickerWrapperStore();
   const { spendingsByMonth } = useSpendings();
   const { data: projectionData } = useDailyProjection();
@@ -100,11 +104,11 @@ const DailySparkline = () => {
   const dotLeftPct = 1 + ((todayX - 1) / (daysInMonth - 1)) * 98;
   const dotTopPct = yTop > 0 ? ((104 - (todayY / yTop) * 98) / 110) * 100 : 50;
   const avgTopPct = yTop > 0 ? ((104 - (avg / yTop) * 98) / 110) * 100 : 50;
-  const todayLabel = format(new Date(), "d MMM", { locale: fr });
+  const todayLabel = format(new Date(), "d MMM", { locale: dateLocale });
   const peakLabel =
     peakDay > 0
       ? format(new Date(2000, monthRef.getMonth(), peakDay), "dd MMM", {
-          locale: fr,
+          locale: dateLocale,
         })
       : "—";
   // remount key → replays the left→right draw on month change / data load
@@ -116,7 +120,9 @@ const DailySparkline = () => {
         <h3 className="text-xs font-medium tracking-normal text-ink-2">{t.title}</h3>
         <div className="flex gap-5 text-xs text-ink-3">
           <span>
-            {t.average} <span className="num text-ink">{euro(avg)} €</span>/jour
+            {interpolate(t.averageLine, {
+              avg: <span className="num text-ink">{euro(avg)} €</span>,
+            })}
           </span>
           <span>
             {t.peak} <span className="num text-ink">{euro(peak)} €</span> · {peakLabel}

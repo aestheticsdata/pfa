@@ -5,8 +5,8 @@ import useLoginService from "@auth/useLoginService";
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
 import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
+import useTranslations from "@i18n/useTranslations";
 import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
-import login from "@text/login";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -14,6 +14,7 @@ import type { LoginValues } from "@src/components/shared/sharedLoginForm/interfa
 import type { AxiosError } from "axios";
 
 export default function LoginFormClient() {
+  const login = useTranslations("login");
   const { loginService } = useLoginService();
   const { setCredentials } = useCredentials();
   const [serverError, setServerError] = useState<string | null>(null);

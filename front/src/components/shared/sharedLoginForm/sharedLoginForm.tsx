@@ -6,27 +6,34 @@ import { PasswordField } from "@components/shared/sharedLoginForm/PasswordField"
 import { Button } from "@components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
+import useTranslations from "@i18n/useTranslations";
 import currencyCodes from "@src/currency-codes.json";
-import login from "@text/login";
 import getSymbolFromCurrency from "currency-symbol-map";
 import { ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { SharedLoginFormProps } from "@src/components/shared/sharedLoginForm/interfaces";
+import type { Dictionary } from "@text/index";
 
-const buildSchema = (needEmail: boolean, needPassword: boolean, needConfirm: boolean, needCurrency: boolean) =>
+const buildSchema = (
+  needEmail: boolean,
+  needPassword: boolean,
+  needConfirm: boolean,
+  needCurrency: boolean,
+  validation: Dictionary["login"]["validation"],
+) =>
   z
     .object({
       email: needEmail
-        ? z.string().min(1, login.validation.emailRequired).email(login.validation.emailInvalid)
+        ? z.string().min(1, validation.emailRequired).email(validation.emailInvalid)
         : z.string().optional(),
-      password: needPassword ? z.string().min(1, login.validation.passwordRequired) : z.string().optional(),
-      confirmPassword: needConfirm ? z.string().min(1, login.validation.confirmRequired) : z.string().optional(),
+      password: needPassword ? z.string().min(1, validation.passwordRequired) : z.string().optional(),
+      confirmPassword: needConfirm ? z.string().min(1, validation.confirmRequired) : z.string().optional(),
       currency: needCurrency ? z.string().min(1) : z.string().optional(),
     })
     .refine((d) => !needConfirm || d.password === d.confirmPassword, {
-      message: login.validation.passwordMismatch,
+      message: validation.passwordMismatch,
       path: ["confirmPassword"],
     });
 
@@ -58,11 +65,13 @@ const SharedLoginForm = ({
   serverError,
   onDismissError,
 }: SharedLoginFormProps) => {
+  const login = useTranslations("login");
   const schema = buildSchema(
     !!displayEmailField,
     !!displayPasswordField,
     !!displayConfirmPasswordField,
     !!displayCurrencyField,
+    login.validation,
   );
 
   type FormValues = z.infer<typeof schema>;

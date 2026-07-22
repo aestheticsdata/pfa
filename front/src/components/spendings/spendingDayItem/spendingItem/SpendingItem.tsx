@@ -4,8 +4,9 @@ import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendings from "@components/spendings/services/useSpendings";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import spendings from "@text/spendings";
 import { Edit2, ImageIcon, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -19,6 +20,8 @@ interface SpendingItemProps {
 }
 
 const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }: SpendingItemProps) => {
+  const spendings = useTranslations("spendings");
+  const { euro } = useFormat();
   const { item } = spendings;
   const [isDeleteConfirmVisible, setIsDeleteConfirmVisible] = useState(false);
   const [isInvoiceModalVisible, setIsInvoiceModalVisible] = useState(false);
@@ -92,7 +95,7 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
           </span>
 
           <span className="text-ink text-sm shrink-0 tabular-nums sm:hidden">
-            {Number(spending.amount).toFixed(2)} €
+            {euro(spending.amount)} €
           </span>
         </div>
 
@@ -143,7 +146,7 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
           </div>
 
           <span className="hidden sm:inline text-ink text-sm shrink-0 min-w-[70px] text-right tabular-nums">
-            {Number(spending.amount).toFixed(2)} €
+            {euro(spending.amount)} €
           </span>
         </div>
       </div>

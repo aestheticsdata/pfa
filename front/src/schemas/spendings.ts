@@ -33,7 +33,7 @@ export type SpendingItem = z.infer<typeof SpendingItemSchema>;
 
 // Whole-history search page (COS-114): one keyset page of matches, the cursor to
 // fetch the next page (null at the end), and the unbounded total — sent only on
-// the first page, so the UI can say "N résultats" without recounting every page.
+// the first page, so the UI can say "N results" without recounting every page.
 export const SpendingSearchPageSchema = z.object({
   items: SpendingListSchema,
   nextCursor: z.string().nullable(),
@@ -69,7 +69,7 @@ export const RecurringItemSchema = z.object({
 export const RecurringListSchema = z.array(RecurringItemSchema);
 export type RecurringItem = z.infer<typeof RecurringItemSchema>;
 
-// Real year-to-date "déjà prélevé" (COS-49) — GET /recurrings/drawn. The server
+// Real year-to-date "Already debited" (COS-49) — GET /recurrings/drawn. The server
 // sums the actual per-month recurring rows from January through the current month.
 export const RecurringsDrawnSchema = z.object({ drawn: numberLikeSchema });
 export type RecurringsDrawn = z.infer<typeof RecurringsDrawnSchema>;

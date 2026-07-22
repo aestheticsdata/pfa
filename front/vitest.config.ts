@@ -16,6 +16,7 @@ export default defineConfig({
       "@helpers": abs("./src/helpers"),
       "@lib": abs("./src/lib"),
       "@text": abs("./src/text"),
+      "@i18n": abs("./src/i18n"),
       "@src": abs("./src"),
     },
   },

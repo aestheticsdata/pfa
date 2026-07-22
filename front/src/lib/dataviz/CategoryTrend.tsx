@@ -11,10 +11,10 @@ interface CategoryTrendProps extends CategoryTrendData {
 }
 
 /**
- * Per-category trend badge (arrow + % / label). Shared by the Dépenses and
+ * Per-category trend badge (arrow + % / label). Shared by the Spendings and
  * Dashboard breakdowns and their hover tooltips, so the trend renders
- * identically everywhere. Colours: hausse = rouge, baisse = vert,
- * stable/nouv. = gris. Pure presentation — the caller computes
+ * identically everywhere. Colours: up = red, down = green,
+ * stable/new = grey. Pure presentation — the caller computes
  * `direction`/`label` from its own source (weekly vs monthly).
  */
 const CategoryTrend = ({ direction, label, className }: CategoryTrendProps) => (

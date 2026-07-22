@@ -1,6 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
+import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
 import {
   ExceptionalListSchema,
@@ -8,7 +9,6 @@ import {
   ExceptionalYearsSchema,
 } from "@src/schemas/exceptionals";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import exceptionals from "@text/exceptionals";
 
 import type { ExceptionalMutationPayload } from "@src/schemas/exceptionals";
 import type { AxiosError } from "axios";
@@ -18,6 +18,7 @@ interface UseExceptionalsOptions {
 }
 
 const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
+  const exceptionals = useTranslations("exceptionals");
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
@@ -32,8 +33,8 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     });
   };
 
-  const onSuccess = async (action: string) => {
-    displayPopup({ text: exceptionals.toast.mutated(action) });
+  const onSuccess = async (message: string) => {
+    displayPopup({ text: message });
     await invalidate();
   };
 
@@ -72,7 +73,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
 
   const createExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>({
     mutationFn: (payload) => createExceptionalService(payload),
-    onSuccess: () => onSuccess("créée"),
+    onSuccess: () => onSuccess(exceptionals.toast.created),
 
     onError: (e) => {
       console.log("error creating exceptional", e);
@@ -89,7 +90,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
 
   const updateExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>({
     mutationFn: (payload) => updateExceptionalService(payload),
-    onSuccess: () => onSuccess("mise à jour"),
+    onSuccess: () => onSuccess(exceptionals.toast.updated),
 
     onError: (e) => {
       console.log("error updating exceptional", e);
@@ -102,7 +103,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
 
   const deleteExceptional = useMutation<unknown, AxiosError, { id: string }>({
     mutationFn: ({ id }) => deleteExceptionalService(id),
-    onSuccess: () => onSuccess("supprimée"),
+    onSuccess: () => onSuccess(exceptionals.toast.deleted),
 
     onError: (e) => {
       console.log("error deleting exceptional", e);

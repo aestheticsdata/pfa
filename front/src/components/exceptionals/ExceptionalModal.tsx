@@ -11,7 +11,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { zodResolver } from "@hookform/resolvers/zod";
-import exceptionals from "@text/exceptionals";
+import useTranslations from "@i18n/useTranslations";
 import format from "date-fns/format";
 import { Check, ChevronsUpDown } from "lucide-react";
 import Mexp from "math-expression-evaluator";
@@ -20,15 +20,17 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
+import type { Dictionary } from "@text/index";
 
-const formSchema = z.object({
-  label: z.string().min(1, exceptionals.modal.errors.labelRequired),
-  amount: z.string().min(1, exceptionals.modal.errors.amountRequired),
-  date: z.string().min(1, exceptionals.modal.errors.dateRequired),
-  description: z.string().optional(),
-});
+const makeFormSchema = (errors: Dictionary["exceptionals"]["modal"]["errors"]) =>
+  z.object({
+    label: z.string().min(1, errors.labelRequired),
+    amount: z.string().min(1, errors.amountRequired),
+    date: z.string().min(1, errors.dateRequired),
+    description: z.string().optional(),
+  });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<ReturnType<typeof makeFormSchema>>;
 
 interface CategoryOption {
   name: string;
@@ -57,7 +59,9 @@ const getRandomHexColor = () => {
 };
 
 const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories }: ExceptionalModalProps) => {
+  const exceptionals = useTranslations("exceptionals");
   const { modal, actions } = exceptionals;
+  const formSchema = makeFormSchema(modal.errors);
   const [open, setOpen] = useState(true);
   const closeModal = () => {
     setOpen(false);

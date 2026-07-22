@@ -4,8 +4,8 @@ import { cssColorToHex, paletteHex } from "@components/categories/helpers/catego
 import { Overline, overlineClass } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import categories from "@text/categories";
 import { useMemo, useState } from "react";
 
 const LABEL = overlineClass;
@@ -38,6 +38,7 @@ const CategoryFormBody = ({
 }: Omit<CategoryFormModalProps, "open" | "onOpenChange"> & {
   onCancel: () => void;
 }) => {
+  const categories = useTranslations("categories");
   const { form } = categories;
   const swatches = useMemo(() => paletteHex(), []);
   const [name, setName] = useState(initialName);

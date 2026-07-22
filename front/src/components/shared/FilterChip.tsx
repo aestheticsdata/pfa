@@ -20,7 +20,7 @@ const INACTIVE = "border-line bg-surface-hi text-ink-2 hover:bg-surface-hover ho
 /**
  * Toggle filter chip shared by the filter bars. The inactive recipe is identical
  * everywhere; the active state is tinted either by a semantic `accent` (green /
- * exceptionnels orange) or by a dynamic `accentColor` (e.g. a category colour).
+ * exceptionals orange) or by a dynamic `accentColor` (e.g. a category colour).
  * Shape/spacing (`rounded-*`, `px-*`, `gap-*`, `capitalize`) is passed via `className`.
  */
 function FilterChip({ active, accent = "accent", accentColor, className, children, ...props }: FilterChipProps) {

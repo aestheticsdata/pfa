@@ -10,22 +10,19 @@ import overspendLevel, {
 import { scaleFrac } from "@components/statistics/helpers/weekdayBullet";
 import { overallDailyAverage, weekdayAverages, weekdayInsights } from "@components/statistics/helpers/weekdayStats";
 import WeekdayBulletBar from "@components/statistics/WeekdayBulletBar";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { AnimatedNumber, CursorTooltip, useCursorHover } from "@lib/dataviz";
-import { euro, euro0, pct1 } from "@lib/format";
-import common from "@text/common";
-import statistics from "@text/statistics";
 import { useEffect, useState } from "react";
 
 import type { DailyStat, WeekdayCategory } from "@src/schemas/stats";
 import type { ReactNode } from "react";
 
-const { dayOfWeek } = statistics;
-
 // Row layout: fixed day-name and amount columns around the elastic bar column.
 const GRID_COLS = "grid grid-cols-[92px_1fr_152px] gap-3";
 const ROW_GRID = `${GRID_COLS} items-center`;
 
-// Bar-column geometry, mirrored by the full-height overlays (the moyenne line) so
+// Bar-column geometry, mirrored by the full-height overlays (the average line) so
 // they span the plot and line up with the bars. Must match GRID_COLS: a 92px
 // day-name column and a 152px amount column, each separated from the elastic bar
 // column by gap-3 (12px).
@@ -48,7 +45,7 @@ const COMPARE_FILL =
 const BAND_FILL = { under: "var(--bar-fill)", between: "var(--warn)", over: "var(--neg)" } as const;
 
 // Enter/exit duration (ms) for the compare-year marks collapsing + fading in and
-// out when "Comparer à" is toggled.
+// out when "Compare to" is toggled.
 const COMPARE_ANIM_MS = 280;
 
 interface StatisticsDayOfWeekProps {
@@ -56,7 +53,7 @@ interface StatisticsDayOfWeekProps {
   now: Date;
   /** Per-day spending totals for the year (COS-45); `undefined` while the request is in flight. */
   days: DailyStat[] | undefined;
-  /** Compare-year daily totals; `undefined` when "Comparer à" is off (COS-127). */
+  /** Compare-year daily totals; `undefined` when "Compare to" is off (COS-127). */
   compareDays?: DailyStat[];
   /** The year being compared against, shown on each compare row + the legend. */
   compareYear: number;
@@ -73,6 +70,8 @@ const deltaPct = (value: number, base: number): number | null => (base > 0 ? (va
 
 /** Year-over-year delta coloured by direction: spending up = worse (red), down = better (green). */
 const DeltaBadge = ({ pct }: { pct: number }) => {
+  const { dayOfWeek } = useTranslations("statistics");
+
   const up = pct >= 0;
   return (
     <span className={up ? "text-neg" : "text-accent-strong"}>
@@ -105,7 +104,7 @@ const ThresholdGuide = ({ frac }: { frac: number }) => (
   />
 );
 
-/** min→max "fourchette" whisker: a thin connector with end caps, over the main bar. */
+/** min→max "range" whisker: a thin connector with end caps, over the main bar. */
 const Whisker = ({ minFrac, maxFrac }: { minFrac: number; maxFrac: number }) => (
   <div
     className="pointer-events-none absolute inset-0"
@@ -153,7 +152,7 @@ const TipRow = ({ label, value }: { label: string; value: ReactNode }) => (
   </div>
 );
 
-/** "Dépenses par jour de la semaine" — real weekday spending rhythm (COS-48, COS-132, COS-127). */
+/** "Spendings by day of the week" — real weekday spending rhythm (COS-48, COS-132, COS-127). */
 const StatisticsDayOfWeek = ({
   year,
   now,
@@ -164,11 +163,14 @@ const StatisticsDayOfWeek = ({
   weekdayCategories,
   weeklyCeiling,
 }: StatisticsDayOfWeekProps) => {
+  const { euro, euro0, pct1 } = useFormat();
+  const { dayOfWeek } = useTranslations("statistics");
+  const common = useTranslations("common");
   const rowTip = useCursorHover<number>();
 
   // Compare-year marks: `hasCompareData` (the compared year has spending, and the
   // fetch keeps it cached even when the toggle is off) reserves their layout space,
-  // so toggling "Comparer à" only fades them in/out and the widget keeps its height.
+  // so toggling "Compare to" only fades them in/out and the widget keeps its height.
   // `showCompare` (fade state) additionally requires the toggle to be on.
   const compareStats = compareDays ? weekdayAverages(compareDays, compareYear, now) : null;
   const hasCompareData = compareStats?.some((s) => s.avgAmount > 0) ?? false;
@@ -210,7 +212,7 @@ const StatisticsDayOfWeek = ({
   const dayBudget = weeklyCeiling != null && weeklyCeiling > 0 ? weeklyCeiling / 7 : null;
 
   // One euro scale shared by every mark — both years' averages, the selected
-  // year's whisker maxes and the budget markers — so bars, whiskers, the moyenne
+  // year's whisker maxes and the budget markers — so bars, whiskers, the average
   // line and the ticks are all directly comparable (COS-127).
   const rawMax = Math.max(
     ...stats.map((s) => s.avgAmount),
@@ -271,7 +273,7 @@ const StatisticsDayOfWeek = ({
         </div>
       )}
 
-      {/* moyenne reference-line label, positioned over the bar column at its fraction. */}
+      {/* average reference-line label, positioned over the bar column at its fraction. */}
       <div className={`${ROW_GRID} mt-4`}>
         <span aria-hidden />
         <div className="relative h-4">
@@ -398,7 +400,7 @@ const StatisticsDayOfWeek = ({
         </div>
 
         {/* Full-height reference lines over the bar column: the optional colour-zone
-            guides at the budget thresholds, plus the moyenne line. */}
+            guides at the budget thresholds, plus the average line. */}
         <div
           className="pointer-events-none absolute inset-y-0"
           style={{ left: DAY_COL_PX + COL_GAP_PX, right: AMOUNT_COL_PX + COL_GAP_PX }}

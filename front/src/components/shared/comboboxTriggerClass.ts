@@ -2,7 +2,7 @@ import { cn } from "@lib/utils";
 
 /**
  * Shared className for the category combobox trigger button, identical between the
- * spending modal and the exceptionnels modal. `open` swaps the border accent.
+ * spending modal and the exceptionals modal. `open` swaps the border accent.
  */
 export const comboboxTriggerClass = (open: boolean) =>
   cn(

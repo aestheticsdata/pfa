@@ -17,8 +17,8 @@ export const scaleFrac = (amount: number, scaleMax: number): number =>
 /**
  * Split a weekday's average into the green / orange / red segments of its bullet
  * bar (COS-132). The junctions are the daily budget (green→orange) and
- * `OVERSPEND_DANGER_RATIO`× that budget (orange→red) — the exact same seuils as
- * the Dépenses overspend indicators (COS-34 / COS-36). Only the zones the value
+ * `OVERSPEND_DANGER_RATIO`× that budget (orange→red) — the exact same thresholds
+ * as the Spendings overspend indicators (COS-34 / COS-36). Only the zones the value
  * actually reaches are returned, each as a start/width fraction of the shared
  * fixed scale; the strictly-greater tests mirror `overspendLevel` (at a boundary
  * the value stays in the lower zone).

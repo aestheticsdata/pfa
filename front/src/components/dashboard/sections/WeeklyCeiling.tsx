@@ -10,10 +10,10 @@ import useDashboard from "@components/spendings/services/useDashboard";
 import useWeeklyStats from "@components/spendings/services/useWeeklyStats";
 import { Input } from "@components/ui/input";
 import { buildSpendingsPath, formatIsoDate } from "@helpers/dateRoute";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { ProgressTrack } from "@lib/dataviz";
-import { euro, euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
-import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import isAfter from "date-fns/isAfter";
@@ -31,6 +31,8 @@ interface CeilingForm {
 
 /** Weekly spend vs a fixed ceiling, per week of the month + inline ceiling edit. */
 const WeeklyCeiling = () => {
+  const { euro, euro0 } = useFormat();
+  const dashboardText = useTranslations("dashboard");
   const { from } = useDatePickerWrapperStore();
   const { makeSlices, makeRange, isCurrentWeek } = useWeeklyStatsHelper();
   const {
@@ -128,7 +130,7 @@ const WeeklyCeiling = () => {
           const over = ceiling > 0 && weekTotal > ceiling;
           const future = isFutureWeek(slices[i]);
           const delta = weekTotal - ceiling;
-          // Past/current weeks drill into that week on the Dépenses page; future
+          // Past/current weeks drill into that week on the Spendings page; future
           // weeks have nothing to open, so they stay inert — no link, no hover,
           // default cursor (COS-151). Start day of the range doubles as the ?date=.
           const startDay = typeof weekLabel === "number" ? weekLabel : parseInt(String(weekLabel), 10);

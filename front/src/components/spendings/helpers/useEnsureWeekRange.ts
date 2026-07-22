@@ -7,7 +7,7 @@ import { useEffect } from "react";
 /**
  * Ensures the shared date-picker store has a week range (from/to/range) set,
  * initializing it to the current week if the store is empty (e.g. landing on a
- * page before DatePickerWrapper mounts). Shared by the Dépenses (weekly) and
+ * page before DatePickerWrapper mounts). Shared by the Spendings (weekly) and
  * Dashboard (monthly) pages.
  */
 const useEnsureWeekRange = () => {

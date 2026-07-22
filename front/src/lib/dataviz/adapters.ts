@@ -6,16 +6,16 @@ import type { ChartsCategory } from "@src/schemas/stats";
 
 const FALLBACK_COLOR = "#94a3b8";
 
-export const categoriesToSegments = (categories: ChartsCategory[]): DonutSegment[] =>
+export const categoriesToSegments = (categories: ChartsCategory[], fallbackLabel: string): DonutSegment[] =>
   categories.map((c) => ({
-    label: c.category ?? "sans catégorie",
+    label: c.category ?? fallbackLabel,
     value: c.value,
     color: c.categoryColor ?? FALLBACK_COLOR,
   }));
 
-export const categoriesToBars = (categories: ChartsCategory[]): BarDatum[] =>
+export const categoriesToBars = (categories: ChartsCategory[], fallbackLabel: string): BarDatum[] =>
   categories.map((c) => ({
-    label: c.category ?? "sans catégorie",
+    label: c.category ?? fallbackLabel,
     value: c.value,
     color: c.categoryColor ?? FALLBACK_COLOR,
   }));

@@ -1,5 +1,5 @@
 /**
- * One row of the "Top catégories" table — built by StatisticsView, rendered by
+ * One row of the "Top categories" table — built by StatisticsView, rendered by
  * StatisticsTopCategories.
  */
 export interface TopCategoryRow {

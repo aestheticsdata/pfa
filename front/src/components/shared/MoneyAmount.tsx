@@ -1,4 +1,6 @@
-import { splitAmount } from "@lib/format";
+"use client";
+
+import useFormat from "@i18n/useFormat";
 import { cn } from "@lib/utils";
 
 interface MoneyAmountProps {
@@ -18,12 +20,14 @@ interface MoneyAmountProps {
  * `decimalClassName`.
  */
 function MoneyAmount({ value, unit = " €", decimalClassName, className }: MoneyAmountProps) {
-  const { int, dec } = splitAmount(value);
+  const { splitAmount } = useFormat();
+  const { int, dec, separator } = splitAmount(value);
   return (
     <span className={className}>
       {int}
       <span className={cn("font-normal text-ink-3", decimalClassName)}>
-        ,{dec}
+        {separator}
+        {dec}
         {unit}
       </span>
     </span>

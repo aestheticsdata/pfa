@@ -5,7 +5,9 @@ import CategoryFormModal from "@components/categories/CategoryFormModal";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import GlowCard from "@components/shared/GlowCard";
 import { IconButton } from "@components/shared/IconButton";
-import categories from "@text/categories";
+import { interpolate } from "@i18n/interpolate";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -23,9 +25,9 @@ interface CategoryItemProps {
   onDelete: () => void;
 }
 
-const pct1 = (value: number): string => value.toFixed(1).replace(".", ",");
-
 const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: CategoryItemProps) => {
+  const { pct1, numberLocale } = useFormat();
+  const categories = useTranslations("categories");
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { item: t } = categories;
@@ -65,15 +67,13 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
         </div>
 
         <span className="font-mono text-2xs text-ink-4">
-          {used === 0 ? (
-            t.neverUsed
-          ) : (
-            <>
-              <b className="font-medium text-ink-2">{pct1(share)} %</b> des dépenses{" "}
-              <span className="mx-1.5 text-ink-5">·</span>
-              <b className="font-medium text-ink-2">{used.toLocaleString("fr-FR")}</b> fois
-            </>
-          )}
+          {used === 0
+            ? t.neverUsed
+            : interpolate(t.usage(used), {
+                share: <b className="font-medium text-ink-2">{pct1(share)} %</b>,
+                dot: <span className="mx-1.5 text-ink-5">·</span>,
+                count: <b className="font-medium text-ink-2">{used.toLocaleString(numberLocale)}</b>,
+              })}
         </span>
       </GlowCard>
 

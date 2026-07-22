@@ -5,9 +5,9 @@ import { IconButton } from "@components/shared/IconButton";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
-import { euro } from "@lib/format";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import spendings from "@text/spendings";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
@@ -21,11 +21,13 @@ interface SpendingTxRowProps {
 }
 
 /**
- * A single transaction row in a Dépenses day-card: colour pill + label
+ * A single transaction row in a Spendings day-card: colour pill + label
  * (+ receipt indicator) · category tag · amount, with hover actions
  * (receipt / edit / delete) and an inline delete confirmation.
  */
 const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
+  const { euro } = useFormat();
+  const spendings = useTranslations("spendings");
   const { txRow, item } = spendings;
   const [confirming, setConfirming] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);

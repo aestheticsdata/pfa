@@ -11,11 +11,11 @@ import { categoryTrend } from "@components/spendings/helpers/categoryTrend";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useSpendings from "@components/spendings/services/useSpendings";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { CategoryBarTooltip, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
-import { euro, pct1 } from "@lib/format";
-import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import { useMemo, useState } from "react";
 
 import type { BarHover } from "@lib/dataviz";
@@ -25,6 +25,10 @@ const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 /** Monthly category breakdown — stacked bar + list, click a row for details. */
 const CategoryBreakdown = () => {
+  const { euro, pct1 } = useFormat();
+  const dashboardText = useTranslations("dashboard");
+  const common = useTranslations("common");
+  const dateLocale = useDateLocale();
   const { from } = useDatePickerWrapperStore();
   const { data } = useCategoryTrends(MONTHLY);
   const trends = data?.trends;
@@ -40,11 +44,11 @@ const CategoryBreakdown = () => {
       map.set(key, (map.get(key) ?? 0) + 1);
     }
     return map;
-  }, [spendingsByMonth]);
+  }, [spendingsByMonth, t.uncategorized]);
 
   const list = trends ?? [];
   const total = list.reduce((a, c) => a + c.value, 0) || 1;
-  const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: fr });
+  const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: dateLocale });
 
   // One derived row per category, shared by the list AND the hover tooltip so
   // both render identical values (no recompute). Order matches the bar segments.
@@ -74,7 +78,7 @@ const CategoryBreakdown = () => {
       {list.length > 0 ? (
         <>
           <StackedBar
-            segments={categoriesToSegments(list)}
+            segments={categoriesToSegments(list, common.category.uncategorized)}
             height={8}
             radius={4}
             ariaLabel={t.barAria}

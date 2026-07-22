@@ -62,6 +62,9 @@ const statistics = {
   categoryChart: {
     title: "Dépenses mensuelles par catégorie",
     ariaLabel: (year: number) => `Dépenses mensuelles par catégorie ${year}`,
+    tooltipShare: "Part",
+    tooltipAmount: "Montant",
+    tooltipTrend: "Tendance",
   },
   topCategories: {
     title: "Top catégories",
@@ -92,7 +95,7 @@ const statistics = {
       weekend: "Week-end",
       weekendVsWeek: "vs semaine",
     },
-    // Signed delta % suffix (e.g. the tooltip's Écart badge).
+    // Signed delta % suffix (e.g. the tooltip's Delta badge).
     deltaPct: (pct: string) => `${pct} %`,
     tooltip: {
       range: "Fourchette (semaines)",

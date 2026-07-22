@@ -7,11 +7,17 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@components/ui/dropdown-menu";
 import useRequestHelper from "@helpers/useRequestHelper";
-import text from "@text/navBar";
-import { ChevronDown, KeyRound, LogOut } from "lucide-react";
+import { LOCALE_LABELS, SUPPORTED_LOCALES } from "@i18n/config";
+import { useLocale } from "@i18n/LocaleContext";
+import useTranslations from "@i18n/useTranslations";
+import useUpdateLanguage from "@i18n/useUpdateLanguage";
+import { Check, ChevronDown, Globe, KeyRound, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const initialsFromEmail = (email?: string): string => {
@@ -25,6 +31,9 @@ const initialsFromEmail = (email?: string): string => {
 const UserMenu = () => {
   const { user } = useAuth();
   const { privateRequest } = useRequestHelper();
+  const { locale } = useLocale();
+  const { updateLanguage } = useUpdateLanguage();
+  const text = useTranslations("navBar");
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -63,6 +72,28 @@ const UserMenu = () => {
           <KeyRound className="size-4 text-primary" />
           {text.userMenu.changePassword}
         </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger className="cursor-pointer gap-3 px-3 py-2.5 text-sm text-ink-2">
+            <Globe className="size-4 text-primary" />
+            {text.userMenu.language}
+            <span className="ml-auto text-ink-3">{LOCALE_LABELS[locale]}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent
+            sideOffset={8}
+            className="w-44 p-1"
+          >
+            {SUPPORTED_LOCALES.map((availableLocale) => (
+              <DropdownMenuItem
+                key={availableLocale}
+                onClick={() => updateLanguage(availableLocale)}
+                className="cursor-pointer gap-3 px-3 py-2.5 text-sm text-ink-2"
+              >
+                {LOCALE_LABELS[availableLocale]}
+                {availableLocale === locale && <Check className="ml-auto size-4 text-primary" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         <DropdownMenuSeparator className="my-1" />
         <DropdownMenuItem
           onClick={handleLogout}

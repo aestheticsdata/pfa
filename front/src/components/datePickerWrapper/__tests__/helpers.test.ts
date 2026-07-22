@@ -2,7 +2,7 @@ import { getWeekRange, parseDateParam } from "@components/datePickerWrapper/help
 import format from "date-fns/format";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-// The Dépenses week bug (COS-73) only surfaces in timezones WEST of UTC, where
+// The Spendings week bug (COS-73) only surfaces in timezones WEST of UTC, where
 // `new Date("2026-07-12")` (parsed as UTC midnight) rolls back to the previous
 // local day. Force such a timezone so the regression is caught regardless of the
 // CI machine's timezone. Node honours runtime `process.env.TZ` changes.

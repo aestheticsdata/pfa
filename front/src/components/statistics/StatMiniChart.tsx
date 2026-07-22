@@ -1,8 +1,9 @@
 "use client";
 
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { areaPath, linePath } from "@lib/dataviz/linePaths";
 import { linearScale } from "@lib/dataviz/scales";
-import statistics from "@text/statistics";
 
 interface StatMiniChartProps {
   /** Stable, unique gradient id. */
@@ -10,7 +11,7 @@ interface StatMiniChartProps {
   /** Full 12-month series; only the first `count` points are plotted. */
   values: number[];
   count: number;
-  /** Draws a dashed horizontal reference line + "moy." label at this value. */
+  /** Draws a dashed horizontal reference line + "avg." label at this value. */
   average?: number;
   height?: number;
 }
@@ -25,9 +26,6 @@ const niceCeil = (value: number): number => {
   return step * magnitude;
 };
 
-const kFormat = (value: number): string =>
-  value >= 1000 ? `${(value / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}k` : `${Math.round(value)}`;
-
 const W = 300;
 const PAD = { top: 12, right: 8, bottom: 12, left: 8 };
 
@@ -39,6 +37,14 @@ const PAD = { top: 12, right: 8, bottom: 12, left: 8 };
  * distorted by the stretched viewBox — the end dot is HTML for the same reason).
  */
 const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniChartProps) => {
+  const { numberLocale } = useFormat();
+  const statistics = useTranslations("statistics");
+
+  const kFormat = (value: number): string =>
+    value >= 1000
+      ? `${(value / 1000).toLocaleString(numberLocale, { maximumFractionDigits: 1 })}k`
+      : `${Math.round(value)}`;
+
   const points = values.slice(0, count).map((y, x) => ({ x, y }));
   if (points.length < 2) return <div style={{ height }} />;
 

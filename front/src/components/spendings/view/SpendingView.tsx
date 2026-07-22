@@ -15,11 +15,10 @@ import SpendingDayCard from "@components/spendings/view/SpendingDayCard";
 import SpendingSummary from "@components/spendings/view/SpendingSummary";
 import SpendingToolbar from "@components/spendings/view/SpendingToolbar";
 import { Button } from "@components/ui/button";
-import common from "@text/common";
-import spendings from "@text/spendings";
+import useDateLocale from "@i18n/useDateLocale";
+import useTranslations from "@i18n/useTranslations";
 import { endOfMonth, isSameDay } from "date-fns";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 import startOfMonth from "date-fns/startOfMonth";
 import { Plus } from "lucide-react";
@@ -43,11 +42,14 @@ interface CategoryAggregate {
 }
 
 /**
- * Dépenses (weekly) page — redesigned in Phase 3b. Toolbar, weekly summary,
+ * Spendings (weekly) page — redesigned in Phase 3b. Toolbar, weekly summary,
  * per-category breakdown, a global category filter and the new glow day-cards
  * timeline. Reuses the existing data layer (useSpendings / useDashboard).
  */
 const SpendingView = () => {
+  const common = useTranslations("common");
+  const spendings = useTranslations("spendings");
+  const dateLocale = useDateLocale();
   const { from, to, range, scrollToDayIso, setScrollToDayIso } = useDatePickerWrapperStore();
   const [now] = useState(() => new Date());
   const [search, setSearch] = useState("");
@@ -58,7 +60,7 @@ const SpendingView = () => {
 
   const { spendingsByWeek, isLoading } = useSpendings();
   const { get: dashboardQuery, remaining } = useDashboard();
-  // Previous-week aggregates for the "vs sem. dernière" deltas (COS-35): the
+  // Previous-week aggregates for the "vs last week" deltas (COS-35): the
   // per-category totals feed the breakdown trend arrows, `previousTotal` the
   // avg/day delta below. Same GET /category-trends the dashboard uses, windowed
   // to the picked week vs the 7 days before it.
@@ -104,10 +106,10 @@ const SpendingView = () => {
       biggest: largest,
       categoryAgg: Array.from(map.values()).sort((a, b) => b.total - a.total),
     };
-  }, [groups]);
+  }, [groups, spendings.noCategory]);
 
   // Auto-scroll the timeline to a requested day card (COS-38). Both the NavBar
-  // "Aujourd'hui" button and a fresh spending creation set `scrollToDayIso`; we
+  // "Today" button and a fresh spending creation set `scrollToDayIso`; we
   // scroll as soon as the matching `[data-sp-day]` card is in the DOM. That can
   // be immediately (already the right week) or after a re-render triggered by a
   // week navigation (`range`) or the initial data load (`isLoading`), so the
@@ -138,13 +140,13 @@ const SpendingView = () => {
   };
 
   const weeklyCeiling = dashboardQuery.data?.initialCeiling ?? null;
-  // "Budget du jour maximum" — remaining monthly budget spread over the days left
-  // in the month (today included). Shared with the Dashboard "reste à vivre" so
+  // "Maximum daily budget" — remaining monthly budget spread over the days left
+  // in the month (today included). Shared with the Dashboard "Left to spend" so
   // the two always match; only rendered on today's card (see SpendingDayCard).
   const dailyBudget = dashboardQuery.data ? dailyRemainingBudget(remaining, now) : null;
   // Threshold for each day-card total colour (COS-34): the weekly ceiling split
   // over the number of cards actually shown (not always 7). The same ceiling the
-  // weekly "vs plafond" widget uses, so day and week colours stay consistent.
+  // weekly "vs ceiling" widget uses, so day and week colours stay consistent.
   const ceilingPerDay = weeklyCeiling != null && groups.length > 0 ? weeklyCeiling / groups.length : null;
 
   const grand = weekTotal || 1;
@@ -152,7 +154,7 @@ const SpendingView = () => {
   // Match previous-week totals to the current-week rows by category name (both
   // sides collapse user+global same-name categories the same way). While the
   // trends query is still loading, `previousValue` stays `undefined` so the trend
-  // badge is hidden rather than flashing a wrong "nouv.".
+  // badge is hidden rather than flashing a wrong "new".
   const previousByCategory = new Map<string | null, number | null>(
     (trends ?? []).map((tr) => [tr.category, tr.previousValue]),
   );
@@ -175,7 +177,7 @@ const SpendingView = () => {
   }));
 
   const rangeLabel = `${format(from, "dd")} — ${format(to, "dd MMM yyyy", {
-    locale: fr,
+    locale: dateLocale,
   })}`;
 
   const isInitialLoading = isLoading && !spendingsByWeek;

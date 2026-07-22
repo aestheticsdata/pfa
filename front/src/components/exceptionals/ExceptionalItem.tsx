@@ -4,10 +4,11 @@ import { CategoryTag } from "@components/categories/CategoryTag";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { IconButton } from "@components/shared/IconButton";
-import { euro } from "@lib/format";
-import exceptionals from "@text/exceptionals";
+import { interpolate } from "@i18n/interpolate";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import format from "date-fns/format";
-import { fr } from "date-fns/locale";
 import parseISO from "date-fns/parseISO";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -21,13 +22,16 @@ interface ExceptionalItemProps {
 }
 
 const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps) => {
+  const { euro, pct1 } = useFormat();
+  const exceptionals = useTranslations("exceptionals");
+  const dateLocale = useDateLocale();
   const { deleteExceptional } = useExceptionals();
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const { actions } = exceptionals;
 
-  const dateLabel = format(parseISO(item.date), "dd MMM", { locale: fr });
+  const dateLabel = format(parseISO(item.date), "dd MMM", { locale: dateLocale });
   const amount = euro(item.amount);
-  const budgetMonths = monthlyAverage > 0 ? (Number(item.amount) / monthlyAverage).toFixed(1) : null;
+  const budgetMonths = monthlyAverage > 0 ? pct1(Number(item.amount) / monthlyAverage) : null;
 
   const onDelete = () => {
     deleteExceptional.mutate({ id: item.ID });
@@ -61,7 +65,9 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
           )}
           {budgetMonths && (
             <span className="text-xs text-ink-3">
-              ≈ <b className="font-medium text-ink-2">{budgetMonths}</b> mois de budget régulier
+              {interpolate(exceptionals.item.budgetMonths, {
+                months: <b className="font-medium text-ink-2">{budgetMonths}</b>,
+              })}
             </span>
           )}
         </div>

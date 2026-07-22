@@ -3,7 +3,7 @@
 import MonthPickerPopover from "@components/dashboard/MonthPickerPopover";
 import { IconButton } from "@components/shared/IconButton";
 import { isValidMonthParam, MONTH_QUERY_PARAM, parseMonthParam, resolveMonthParam } from "@helpers/dateRoute";
-import dashboardText from "@text/dashboard";
+import useTranslations from "@i18n/useTranslations";
 import addMonths from "date-fns/addMonths";
 import startOfMonth from "date-fns/startOfMonth";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
@@ -18,6 +18,7 @@ import { useState, useSyncExternalStore } from "react";
  * the ‹ › arrows step one month at a time.
  */
 const MonthSelector = () => {
+  const dashboardText = useTranslations("dashboard");
   const [monthParam, setMonthParam] = useQueryState(MONTH_QUERY_PARAM, parseAsString);
   const isClientHydrated = useSyncExternalStore(
     () => () => {},

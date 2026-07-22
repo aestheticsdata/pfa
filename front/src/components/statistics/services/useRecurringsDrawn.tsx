@@ -10,7 +10,7 @@ interface UseRecurringsDrawnOptions {
 }
 
 /**
- * Real year-to-date "déjà prélevé" (COS-49): the sum of the actual per-month
+ * Real year-to-date "already debited" (COS-49): the sum of the actual per-month
  * recurring rows from January through the client's current month, computed
  * server-side (GET /recurrings/drawn). Replaces the old calendar estimate that
  * projected the current month's list backward from a `dateFrom` charge-day proxy.

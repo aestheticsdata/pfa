@@ -26,6 +26,9 @@ const categories = {
     editAction: "Modifier le nom et la couleur",
     deleteAction: "Supprimer la catégorie",
     neverUsed: "nouvelle catégorie · jamais utilisée",
+    // FR is plural-invariant here; the param exists so EN (typed `typeof fr`)
+    // can select its singular/plural template variant.
+    usage: (_count: number) => "{share} des dépenses{dot}{count} fois",
     deleteConfirmTitle: (name: string) => `Supprimer la catégorie « ${name} » ?`,
     deleteConfirmDescription: "Cette action est irréversible. Les dépenses associées n'auront plus de catégorie.",
   },

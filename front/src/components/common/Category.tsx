@@ -1,5 +1,5 @@
 import adjustFontColor from "@components/common/helpers/adjustFontColor";
-import common from "@text/common";
+import useTranslations from "@i18n/useTranslations";
 
 import type { CategoryProps } from "@src/interfaces/category";
 
@@ -11,6 +11,7 @@ interface CategoryComponentProps {
 }
 
 const CategoryComponent = ({ item, customCss = "", isDynamic = false, isClicked = false }: CategoryComponentProps) => {
+  const common = useTranslations("common");
   const resolvedColor = item.categoryColor ?? "#ffffff";
 
   const getBackgroundColor = () => {

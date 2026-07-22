@@ -1,8 +1,15 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
+import format from "date-fns/format";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
+import type { Locale } from "date-fns";
 
-/** French month abbreviations, matching the labels the /statistics API returns. */
+/**
+ * WIRE FORMAT — not UI copy. `/statistics` emits its `month` key as a French
+ * date-fns `MMM` label, so this table stays French in every app locale; it is
+ * only ever used to map a row back to its month index. Displayed month labels
+ * come from `monthShortLabels` (COS-155).
+ */
 export const MONTHS_FR = [
   "janv.",
   "févr.",
@@ -17,6 +24,10 @@ export const MONTHS_FR = [
   "nov.",
   "déc.",
 ];
+
+/** Short month labels (Jan→Dec) in the given date-fns locale, for axes/titles. */
+export const monthShortLabels = (locale: Locale): string[] =>
+  Array.from({ length: 12 }, (_, month) => format(new Date(2000, month, 1), "MMM", { locale }));
 
 type StatData = StatisticsResponse["data"];
 type Row = StatData[string][number];

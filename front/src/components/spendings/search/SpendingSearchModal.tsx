@@ -12,7 +12,8 @@ import useSpendingSearch from "@components/spendings/services/useSpendingSearch"
 import useSpendingYears from "@components/spendings/services/useSpendingYears";
 import { Dialog, DialogContent, DialogTitle } from "@components/ui/dialog";
 import { buildSpendingsPath } from "@helpers/dateRoute";
-import spendingSearch from "@text/spendingSearch";
+import useDateLocale from "@i18n/useDateLocale";
+import useTranslations from "@i18n/useTranslations";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import { Search } from "lucide-react";
@@ -35,9 +36,11 @@ let savedScroll: { q: string; year: number | null; top: number } | null = null;
  * year — lives in the URL (nuqs), so browser Back reopens it where the user left
  * off. A debounced query (optionally scoped to a year) hits the backend, results
  * are grouped by month (newest-first) and paged in on scroll. Picking a result
- * navigates to the Dépenses page on the week that contains it.
+ * navigates to the Spendings page on the week that contains it.
  */
 const SpendingSearchModal = () => {
+  const spendingSearch = useTranslations("spendingSearch");
+  const dateLocale = useDateLocale();
   const [{ search, q, year }, setSearchState] = useQueryStates(spendingSearchParsers, spendingSearchUrlOptions);
   const debounced = useDebouncedValue(q, SEARCH_DEBOUNCE_MS);
   const { results, total, isSearching, isFetchingNextPage, hasNextPage, fetchNextPage, hasQuery, error } =
@@ -99,7 +102,7 @@ const SpendingSearchModal = () => {
     savedScroll = null;
   }, [search, q, year, results.length]);
 
-  const groups = groupSpendingsByMonth(results);
+  const groups = groupSpendingsByMonth(results, dateLocale);
 
   // A single placeholder message (or null when there are rows) so the scroll area
   // keeps its fixed height and the modal never resizes as the query starts empty,
@@ -112,7 +115,7 @@ const SpendingSearchModal = () => {
   };
   const emptyMessage = resolveEmptyMessage();
 
-  // Picking a result jumps to the Dépenses page on the week that contains it (and
+  // Picking a result jumps to the Spendings page on the week that contains it (and
   // asks that page to scroll the day into view). We stash the scroll offset first
   // and leave the URL search state intact, so Back restores the modal + list.
   const goToSpendingWeek = (spending: SpendingItem) => {

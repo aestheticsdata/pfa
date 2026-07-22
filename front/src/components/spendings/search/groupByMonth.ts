@@ -1,8 +1,8 @@
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 
 import type { SpendingItem } from "@components/spendings/types";
+import type { Locale } from "date-fns";
 
 export interface SpendingMonthGroup {
   key: string;
@@ -15,9 +15,10 @@ const capitalize = (value: string): string => (value ? value.charAt(0).toUpperCa
 /**
  * Buckets spendings by calendar month, preserving the incoming order. The search
  * API returns matches newest-first, so both the buckets and the rows inside them
- * stay newest-first (COS-114). Each group carries a "Juillet 2026"-style label.
+ * stay newest-first (COS-114). Each group carries a "July 2026"-style label,
+ * rendered in the date-fns locale passed by the caller.
  */
-export const groupSpendingsByMonth = (items: SpendingItem[]): SpendingMonthGroup[] => {
+export const groupSpendingsByMonth = (items: SpendingItem[], locale: Locale): SpendingMonthGroup[] => {
   const groups: SpendingMonthGroup[] = [];
   const byKey = new Map<string, SpendingMonthGroup>();
 
@@ -26,7 +27,7 @@ export const groupSpendingsByMonth = (items: SpendingItem[]): SpendingMonthGroup
     const key = format(date, "yyyy-MM");
     let group = byKey.get(key);
     if (!group) {
-      group = { key, label: capitalize(format(date, "MMMM yyyy", { locale: fr })), items: [] };
+      group = { key, label: capitalize(format(date, "MMMM yyyy", { locale })), items: [] };
       byKey.set(key, group);
       groups.push(group);
     }

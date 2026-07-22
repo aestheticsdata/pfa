@@ -2,7 +2,7 @@
 
 // All four insights are derived from real data: the pace vs the preceding
 // months' daily average and the end-of-month budget conclusion (COS-40), the top
-// rising category (name + real % vs last month), "reste à vivre", and the
+// rising category (name + real % vs last month), "Left to spend", and the
 // busiest week.
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
@@ -18,15 +18,16 @@ import useCategoryTrends from "@components/spendings/services/useCategoryTrends"
 import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendingPace from "@components/spendings/services/useSpendingPace";
 import { buildSpendingsPath } from "@helpers/dateRoute";
-import { euro0 } from "@lib/format";
+import { interpolate } from "@i18n/interpolate";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import dashboardText from "@text/dashboard";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import isSameMonth from "date-fns/isSameMonth";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 import { ArrowRightLeft, TrendingUp, TriangleAlert, Wallet } from "lucide-react";
 import Link from "next/link";
@@ -54,6 +55,9 @@ const Insight = ({
 );
 
 const InsightsRibbon = () => {
+  const { euro0 } = useFormat();
+  const dashboardText = useTranslations("dashboard");
+  const dateLocale = useDateLocale();
   const { from } = useDatePickerWrapperStore();
   const {
     remaining,
@@ -76,19 +80,19 @@ const InsightsRibbon = () => {
   const underBudget = budget <= 0 || projection <= budget;
   // The budget line is a forecast only while the month is still running; on its
   // last day and for past months there are no days left to project, so it reads
-  // as a bilan instead ("projection" then equals the month's actual total).
+  // as a summary instead ("projection" then equals the month's actual total).
   const inProgress = isThisMonth && dayOfMonth < daysInMonth;
-  const budgetLead = inProgress
-    ? "À ce rythme, le mois se termine"
+  const budgetOutcome = inProgress
+    ? t.budgetOutcomeInProgress
     : isThisMonth
-      ? "Le mois se termine aujourd'hui,"
-      : "Le mois s'est terminé";
+      ? t.budgetOutcomeLastDay
+      : t.budgetOutcomePast;
   // Real pace vs the preceding months' daily average (COS-40); null when there is
   // not enough to compare (no prior month with spending, or too few days elapsed
   // this month), in which case we show a waiting note instead of a figure.
   const paceComparison = spendingPaceDelta(monthlyTotal, dayOfMonth, pace?.months ?? []);
   const paceDelta = paceComparison ? Math.round(Math.abs(paceComparison.deltaPct)) : 0;
-  // same figure as the Dépenses "Budget du jour maximum" (shared helper)
+  // same figure as the Spendings "Maximum daily budget" (shared helper)
   const perDay = dailyRemainingBudget(remaining, isThisMonth ? now : endOfMonth(monthRef));
   // Colour of the finished-month leftover: green while it closed with money left,
   // then amber → red as the overspend deepens (shared OVERSPEND_DANGER_RATIO).
@@ -104,7 +108,7 @@ const InsightsRibbon = () => {
         : [];
     })
     .sort((a, b) => b.delta - a.delta)[0];
-  const lastDayLabel = format(endOfMonth(monthRef), "d MMMM", { locale: fr });
+  const lastDayLabel = format(endOfMonth(monthRef), "d MMMM", { locale: dateLocale });
   // The month's calendar week-range with the most transactions (COS-139); from/to
   // come back as ISO strings — parseISO keeps them on the client's calendar day.
   const busiestRange =
@@ -119,34 +123,34 @@ const InsightsRibbon = () => {
         icon={<TrendingUp className="size-3.5" />}
         label={t.paceLabel}
       >
-        {paceComparison ? (
-          <>
-            Consommation{" "}
-            <b className="font-semibold text-ink">
-              {paceDelta === 0
-                ? "au même rythme"
-                : `~${paceDelta}% ${paceComparison.faster ? "plus vite" : "moins vite"}`}
-            </b>{" "}
-            que la moyenne 3 mois.{" "}
-          </>
-        ) : (
-          <>{t.paceEmpty} </>
-        )}
-        {budgetLead} <b className="font-semibold text-ink">{underBudget ? "sous le budget" : "au-dessus du budget"}</b>.
+        {paceComparison
+          ? interpolate(t.paceSentence, {
+              pace: (
+                <b className="font-semibold text-ink">
+                  {paceDelta === 0
+                    ? t.paceSame
+                    : paceComparison.faster
+                      ? t.paceFaster(paceDelta)
+                      : t.paceSlower(paceDelta)}
+                </b>
+              ),
+            })
+          : t.paceEmpty}
+        {interpolate(budgetOutcome, {
+          state: <b className="font-semibold text-ink">{underBudget ? t.underBudget : t.overBudget}</b>,
+        })}
       </Insight>
       <Insight
         tone="bg-neg/10 text-neg"
         icon={<TriangleAlert className="size-3.5" />}
         label={t.risingLabel}
       >
-        {topRiser ? (
-          <>
-            <b className="font-semibold capitalize text-ink">{topRiser.category}</b> à{" "}
-            <b className="num font-semibold text-ink">+{Math.round(topRiser.delta)}%</b> vs le mois dernier.
-          </>
-        ) : (
-          t.risingEmpty
-        )}
+        {topRiser
+          ? interpolate(t.risingSentence, {
+              category: <b className="font-semibold capitalize text-ink">{topRiser.category}</b>,
+              delta: <b className="num font-semibold text-ink">+{Math.round(topRiser.delta)}%</b>,
+            })
+          : t.risingEmpty}
       </Insight>
       <Insight
         tone="bg-surface-hi text-ink-2"
@@ -154,50 +158,45 @@ const InsightsRibbon = () => {
         label={t.remainingLabel}
       >
         {/* Forecast only while the month runs; once closed the per-day deadline is
-            meaningless, so show the month's leftover as a bilan instead (COS-150). */}
-        {inProgress ? (
-          <>
-            Il reste <b className="num font-semibold text-ink">{euro0(perDay)} €</b>
-            /jour à dépenser d&apos;ici le <b className="font-semibold text-ink">{lastDayLabel}</b> pour rester dans le
-            budget.
-          </>
-        ) : remaining < 0 ? (
-          <>
-            Budget dépassé de{" "}
-            <b className={cn("num font-semibold", balanceLevel === "danger" ? "text-neg" : "text-warn")}>
-              {euro0(-remaining)} €
-            </b>{" "}
-            sur le mois.
-          </>
-        ) : (
-          <>
-            <b className="num font-semibold text-accent-strong">{euro0(remaining)} €</b> de budget non dépensé sur le
-            mois.
-          </>
-        )}
+            meaningless, so show the month's leftover as a summary instead (COS-150). */}
+        {inProgress
+          ? interpolate(t.remainingSentence, {
+              perDay: <b className="num font-semibold text-ink">{euro0(perDay)} €</b>,
+              date: <b className="font-semibold text-ink">{lastDayLabel}</b>,
+            })
+          : remaining < 0
+            ? interpolate(t.overspentSentence, {
+                amount: (
+                  <b className={cn("num font-semibold", balanceLevel === "danger" ? "text-neg" : "text-warn")}>
+                    {euro0(-remaining)} €
+                  </b>
+                ),
+              })
+            : interpolate(t.unspentSentence, {
+                amount: <b className="num font-semibold text-accent-strong">{euro0(remaining)} €</b>,
+              })}
       </Insight>
       <Insight
         tone="bg-surface-hi text-ink-2"
         icon={<ArrowRightLeft className="size-3.5" />}
         label={t.busiestLabel}
       >
-        {busiestRange ? (
-          <>
-            <b className="num font-semibold text-ink">
-              {busiestRange.count} transaction{busiestRange.count > 1 ? "s" : ""}
-            </b>{" "}
-            du{" "}
-            <Link
-              href={buildSpendingsPath(busiestRange.fromIso)}
-              className="cursor-pointer font-semibold text-ink underline-offset-4 transition-colors hover:text-accent-strong hover:underline"
-            >
-              {format(busiestRange.from, "d", { locale: fr })} au {format(busiestRange.to, "d MMMM", { locale: fr })}
-            </Link>
-            .
-          </>
-        ) : (
-          t.busiestEmpty
-        )}
+        {busiestRange
+          ? interpolate(t.busiestSentence, {
+              transactions: <b className="num font-semibold text-ink">{t.transactions(busiestRange.count)}</b>,
+              range: (
+                <Link
+                  href={buildSpendingsPath(busiestRange.fromIso)}
+                  className="cursor-pointer font-semibold text-ink underline-offset-4 transition-colors hover:text-accent-strong hover:underline"
+                >
+                  {t.busiestRange(
+                    format(busiestRange.from, "d", { locale: dateLocale }),
+                    format(busiestRange.to, "d MMMM", { locale: dateLocale }),
+                  )}
+                </Link>
+              ),
+            })
+          : t.busiestEmpty}
       </Insight>
     </DividedStrip>
   );

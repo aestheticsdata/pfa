@@ -5,12 +5,12 @@ import { Overline } from "@components/shared/Overline";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
 import { projectedRemainingRegular, toYearMonthly } from "@components/statistics/helpers/projection";
 import { yearTotal } from "@components/statistics/helpers/statisticsData";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { AnimatedNumber, CursorTooltip, ProgressTrack, useCursorHover } from "@lib/dataviz";
-import { euro, euro0 } from "@lib/format";
-import statisticsText from "@text/statistics";
 import format from "date-fns/format";
 import getDayOfYear from "date-fns/getDayOfYear";
-import fr from "date-fns/locale/fr";
 import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
@@ -33,6 +33,9 @@ const StatisticsForecast = ({
   compareExceptionals,
   showExceptionals,
 }: StatisticsForecastProps) => {
+  const { euro, euro0 } = useFormat();
+  const statisticsText = useTranslations("statistics");
+  const dateLocale = useDateLocale();
   const [now] = useState(() => new Date());
   const projectionTip = useCursorHover();
   const { forecast: t } = statisticsText;
@@ -45,7 +48,7 @@ const StatisticsForecast = ({
   const daysInYear = getDayOfYear(new Date(year, 11, 31));
   const daysElapsed = isCurrent ? getDayOfYear(now) : daysInYear;
   const perDay = daysElapsed > 0 ? spent / daysElapsed : 0;
-  const asOfLabel = isCurrent ? format(now, "d MMM", { locale: fr }) : t.endOfYear;
+  const asOfLabel = isCurrent ? format(now, "d MMM", { locale: dateLocale }) : t.endOfYear;
 
   // Real end-of-year projection: cumulative-to-date + the rest of the year
   // estimated month by month from history (same month N-1 → N-2 → previous

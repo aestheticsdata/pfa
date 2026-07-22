@@ -4,13 +4,12 @@ import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
 import { buildHeatmap, LEVEL, monthColumns, SPEND_BANDS } from "@components/statistics/helpers/heatmapData";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { CursorTooltip, useCursorHover } from "@lib/dataviz";
-import { euro0, pct1 } from "@lib/format";
 import { cn } from "@lib/utils";
-import common from "@text/common";
-import statistics from "@text/statistics";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 
 import type { FilledLevel, HeatmapCell } from "@components/statistics/helpers/heatmapData";
@@ -64,8 +63,12 @@ const TIP_FG: Record<FilledLevel, string> = {
   [LEVEL.NEG]: "var(--surface-base)",
 };
 
-/** "Carte de chaleur — quotidienne" — daily-spend intensity calendar (COS-45). */
+/** "Heatmap — daily" — daily-spend intensity calendar (COS-45). */
 const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapProps) => {
+  const { euro0, pct1 } = useFormat();
+  const statistics = useTranslations("statistics");
+  const common = useTranslations("common");
+  const dateLocale = useDateLocale();
   const { heatmap: t } = statistics;
   const cellTip = useCursorHover<HeatmapCell>();
   const distributionTip = useCursorHover<FilledLevel>();
@@ -132,7 +135,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
           className="num mb-1 grid text-3xs text-ink-4"
           style={{ gridTemplateColumns: gridColumns }}
         >
-          {monthColumns(year).map((m) => (
+          {monthColumns(year, dateLocale).map((m) => (
             <span
               key={m.name}
               style={{ gridColumn: `${m.col} / span 4`, gridRow: 1 }}
@@ -292,7 +295,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
         {cellTip.hover && (
           <>
             <div className="font-medium capitalize">
-              {format(parseISO(cellTip.hover.data.date), "EEE d MMM", { locale: fr })}
+              {format(parseISO(cellTip.hover.data.date), "EEE d MMM", { locale: dateLocale })}
             </div>
             <div>{cellTip.hover.data.amount > 0 ? `${euro0(cellTip.hover.data.amount)} €` : t.tooltip.noSpend}</div>
             {cellTip.hover.data.exceptionals.length > 0 && (

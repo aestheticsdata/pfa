@@ -14,7 +14,7 @@ interface CategoryStatsRange {
  * Usage aggregate per category (count of spendings + total spent). Without a
  * range it covers the whole history (Categories page); with one it scopes to
  * that window — the spending modal passes the current year to date so its
- * "Fréquentes" quick-picks rank on recent usage (COS-137). Each window is a
+ * "Frequent" quick-picks rank on recent usage (COS-137). Each window is a
  * separate cache entry.
  */
 const useCategoryStats = (range?: CategoryStatsRange) => {
@@ -29,7 +29,7 @@ const useCategoryStats = (range?: CategoryStatsRange) => {
       return CategoryStatsResponseSchema.parse(response.data);
     } catch (e) {
       console.log("get category stats error : ", e);
-      throw e; // Re-throw pour que React Query gère l'erreur correctement
+      throw e; // Re-throw so React Query handles the error properly
     }
   };
 
@@ -38,7 +38,7 @@ const useCategoryStats = (range?: CategoryStatsRange) => {
     queryFn: getCategoryStatsService,
     retry: 2,
     enabled: !!userID,
-    // The spending modal's "Fréquentes" quick-picks must never block the modal
+    // The spending modal's "Frequent" quick-picks must never block the modal
     // on a stats failure (COS-137), so this opts out of the global throwOnError;
     // the Categories page rethrows the returned error itself.
     throwOnError: false,
