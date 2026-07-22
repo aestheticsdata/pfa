@@ -1,9 +1,8 @@
 import { cn } from "@lib/utils";
 
 /**
- * Centered "Aucune… / Pas encore de données" placeholder shown inside a card
- * when a list is empty. Defaults to `py-6`; pass `className="py-10"` for the
- * roomier variant.
+ * Centered "No… / No data yet" placeholder shown inside a card when a list is
+ * empty. Defaults to `py-6`; pass `className="py-10"` for the roomier variant.
  */
 function EmptyState({ className, ...props }: React.ComponentProps<"div">) {
   return (

@@ -3,7 +3,7 @@ import startOfMonth from "date-fns/startOfMonth";
 import { createParser } from "nuqs";
 
 export const DATE_QUERY_PARAM = "date";
-// The Dépenses (weekly) page carries the selected week as a ?date= query param.
+// The Spendings (weekly) page carries the selected week as a ?date= query param.
 export const SPENDINGS_PATH = "/spendings";
 
 const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -25,7 +25,7 @@ export const isValidIsoDate = (value?: string): value is string => {
 export const buildSpendingsPath = (date = getTodayIsoDate()): string => `${SPENDINGS_PATH}?${DATE_QUERY_PARAM}=${date}`;
 
 /**
- * nuqs parser for the Dépenses `?date=` param: a validated ISO calendar day
+ * nuqs parser for the Spendings `?date=` param: a validated ISO calendar day
  * ("YYYY-MM-DD") kept as a LOCAL string — the whole app treats the selected week
  * as this string, never a Date. Deliberately NOT nuqs' built-in `parseAsIsoDate`,
  * which decodes to `new Date("YYYY-MM-DD")` (UTC midnight) and would reintroduce

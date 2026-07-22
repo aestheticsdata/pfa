@@ -21,7 +21,7 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
  * Dashboard (monthly) page. The viewed month is the URL's ?month=YYYY-MM param
  * (single source of truth), defaulting to the current month resolved CLIENT-side
  * (COS-73) — so /dashboard always shows the current month and is never polluted
- * by the week a previous Dépenses visit left in the shared store (COS-118). We
+ * by the week a previous Spendings visit left in the shared store (COS-118). We
  * sync that store (the monthly hooks read from/to) and only render once it
  * reflects the URL month, so the hooks never fire against a stale week.
  */

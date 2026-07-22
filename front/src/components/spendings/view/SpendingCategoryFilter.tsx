@@ -3,8 +3,8 @@
 import { FilterChip } from "@components/shared/FilterChip";
 import { Overline } from "@components/shared/Overline";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@components/ui/popover";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import spendings from "@text/spendings";
 import { ChevronDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -49,17 +49,18 @@ const Chip = ({
 );
 
 /**
- * Global category filter for the Dépenses timeline (null = all). Boxed and sized
+ * Global category filter for the Spendings timeline (null = all). Boxed and sized
  * exactly like the toolbar search inputs. Only on WIDE screens (xl+, where it sits
  * inline with real room) do the chips stay on a single clipped line
  * (`xl:h-[38px] xl:overflow-hidden`); a ResizeObserver measures how many actually
  * fit so the caret's overflow popover lists ONLY the hidden ones — never a chip
- * already visible on the line. "Toutes" and the active category are pinned, so the
+ * already visible on the line. "All" and the active category are pinned, so the
  * current filter is always in view. Below xl (narrow desktop → mobile) the inline
  * line would crush to an unusable sliver, so the box goes full-width and wraps the
  * chips to the height it needs instead (COS-118).
  */
 const SpendingCategoryFilter = ({ categories, total, selected, onSelect }: SpendingCategoryFilterProps) => {
+  const spendings = useTranslations("spendings");
   const [open, setOpen] = useState(false);
   const rowRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(categories.length);

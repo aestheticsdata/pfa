@@ -5,11 +5,11 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { buildSpendingsPath } from "@helpers/dateRoute";
-import { euro } from "@lib/format";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import texts from "@text/spendings";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 import { ChevronRight, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -36,13 +36,16 @@ const groupByDate = (spendings: SpendingItem[]): Record<string, SpendingItem[]> 
 };
 
 /**
- * "Détail catégorie" drill-down modal — shared by the Dashboard (monthly) and
- * Dépenses (weekly) "Répartition par catégorie" widgets. Lists the clicked
+ * "Category detail" drill-down modal — shared by the Dashboard (monthly) and
+ * Spendings (weekly) "Breakdown by category" widgets. Lists the clicked
  * category's spendings grouped by day, with running cumulative totals. Each day
  * card links back to the week that contains it. Design ported from
  * design_handoff_pfa/designs/assets/cat-detail.{js,css} onto pfa tokens.
  */
 const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, total }: SpendingsListModalProps) => {
+  const { euro, pct1 } = useFormat();
+  const texts = useTranslations("spendings");
+  const dateLocale = useDateLocale();
   const { spendingsByWeek, spendingsByMonth } = useSpendings();
   const { from, to } = useDatePickerWrapperStore();
   const [searchTerm, setSearchTerm] = useState("");
@@ -70,13 +73,13 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
 
   const periodLabel = isMonthly
     ? from
-      ? format(from, "MMMM yyyy", { locale: fr })
+      ? format(from, "MMMM yyyy", { locale: dateLocale })
       : ""
     : from && to
-      ? `${format(from, "dd")} — ${format(to, "dd MMM yyyy", { locale: fr })}`
+      ? `${format(from, "dd")} — ${format(to, "dd MMM yyyy", { locale: dateLocale })}`
       : "";
 
-  // Click a day → jump to the Dépenses page on the week that contains it. This is
+  // Click a day → jump to the Spendings page on the week that contains it. This is
   // a cross-page navigation (the modal opens from the Dashboard too), so it keeps
   // building a real href via buildSpendingsPath rather than an in-page nuqs setter.
   const goToDayWeek = (date: string) => {
@@ -174,7 +177,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                       <div className="flex items-start justify-between gap-4 px-4.5 pt-3.75 group-hover:bg-[linear-gradient(180deg,oklch(0.72_0.15_230/0.06),transparent)] max-[640px]:flex-col max-[640px]:gap-2.5">
                         <div className="flex items-center gap-2 pt-0.75 text-base font-bold uppercase text-ink group-hover:text-elec">
                           {format(parseISO(date), "EEEE dd MMMM", {
-                            locale: fr,
+                            locale: dateLocale,
                           })}
                           <ChevronRight
                             className="-translate-x-1 text-elec opacity-0 transition duration-150 group-hover:translate-x-0 group-hover:opacity-100"
@@ -205,7 +208,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                       </div>
 
                       <div className="px-4.5 pb-3.25 pt-2.25 text-right font-mono text-xs font-medium tabular-nums text-accent-strong">
-                        {Math.round(pct)}% {pctWord} ({pct.toFixed(1)}%)
+                        {Math.round(pct)}% {pctWord} ({pct1(pct)}%)
                       </div>
 
                       <div className="border-t border-line-soft bg-surface-base px-4.5 py-1.5">

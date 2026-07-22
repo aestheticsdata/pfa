@@ -12,7 +12,7 @@ interface UseBiggestRegularExpenseOptions {
 /**
  * The biggest single one-off (non-exceptional) expense of the given year
  * (COS-46). One request per year, cached like the other stats queries. Feeds the
- * "courante" row of the "Plus grosse dépense" KPI card.
+ * "regular" row of the "Biggest expense" KPI card.
  */
 const useBiggestRegularExpense = ({ year }: UseBiggestRegularExpenseOptions) => {
   const { privateRequest } = useRequestHelper();

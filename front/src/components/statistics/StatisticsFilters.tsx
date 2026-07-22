@@ -4,9 +4,8 @@ import ExportButton from "@components/shared/ExportButton";
 import { Input } from "@components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { Switch } from "@components/ui/switch";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import common from "@text/common";
-import statistics from "@text/statistics";
 import { Calendar, Check, ChevronDown, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 
@@ -82,8 +81,8 @@ const YearMenu = ({
   );
 };
 
-/** Statistiques filter bar — year, compare-year, exceptionals toggle, category
- *  picker (max N) and a mock export, per the Statistiques 2026 mockup. */
+/** Statistics filter bar — year, compare-year, exceptionals toggle, category
+ *  picker (max N) and a mock export, per the Statistics 2026 mockup. */
 const StatisticsFilters = ({
   years,
   selectedYear,
@@ -99,6 +98,8 @@ const StatisticsFilters = ({
   onToggleCategory,
   maxCategories,
 }: StatisticsFiltersProps) => {
+  const statistics = useTranslations("statistics");
+  const common = useTranslations("common");
   const [catOpen, setCatOpen] = useState(false);
   const [query, setQuery] = useState("");
 

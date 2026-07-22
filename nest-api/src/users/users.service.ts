@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import type { Users } from "../../generated/prisma/client";
 import type { AddUserDto } from "./dto/add-user.dto";
+import type { UpdateUserDto } from "./dto/update-user.dto";
 import * as bcrypt from "bcryptjs";
 
 export interface SignInResponse {
@@ -64,6 +65,18 @@ export class UsersService {
 
     const user = await this.prisma.users.findUniqueOrThrow({
       where: { ID: id },
+    });
+    return this.buildSignInResponse(user);
+  }
+
+  async updateUser(userId: string, dto: UpdateUserDto): Promise<SignInResponse> {
+    const data: { language?: string } = {};
+    if (dto.language !== undefined) {
+      data.language = dto.language;
+    }
+    const user = await this.prisma.users.update({
+      where: { ID: userId },
+      data,
     });
     return this.buildSignInResponse(user);
   }

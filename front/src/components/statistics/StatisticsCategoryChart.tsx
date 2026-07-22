@@ -3,10 +3,11 @@
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
-import { MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
+import { monthShortLabels, niceCeil } from "@components/statistics/helpers/statisticsData";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import useElementWidth from "@lib/dataviz/useElementWidth";
-import { euro0 } from "@lib/format";
-import statistics from "@text/statistics";
 
 import type { CategorySeries } from "@components/statistics/interfaces/statisticsCategoryChartTypes";
 
@@ -28,9 +29,13 @@ const PLOT_H = Y0 - PAD_T; // 258
 
 const range = (n: number): number[] => Array.from({ length: n }, (_, i) => i);
 
-/** "Dépenses mensuelles par catégorie" — grouped bars, one group per month and
+/** "Monthly spendings by category" — grouped bars, one group per month and
  *  one bar per selected category. All data is real (from /statistics). */
 const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsCategoryChartProps) => {
+  const { euro0 } = useFormat();
+  const statistics = useTranslations("statistics");
+  const dateLocale = useDateLocale();
+  const monthLabels = monthShortLabels(dateLocale);
   const [ref, width] = useElementWidth<HTMLDivElement>();
 
   const months = Math.max(1, monthsCount);
@@ -56,7 +61,7 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
     value: (yMax * i) / 4,
   }));
 
-  const subtitle = isCurrentYear ? statistics.ytdSubtitle(year, MONTHS_FR[months - 1]) : `${year}`;
+  const subtitle = isCurrentYear ? statistics.ytdSubtitle(year, monthLabels[months - 1]) : `${year}`;
 
   return (
     <GlowCard
@@ -171,7 +176,7 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
                 textAnchor="middle"
                 fill={isCurrentYear && m === cm ? "var(--ink)" : "var(--ink-3)"}
               >
-                {MONTHS_FR[m]}
+                {monthLabels[m]}
               </text>
             ))}
           </svg>

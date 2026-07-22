@@ -2,6 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
+import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
 import {
   RecurringListSchema,
@@ -35,9 +36,10 @@ const useReccurings = () => {
   const userID = user?.id;
   const { from } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
+  const spendingsText = useTranslations("spendings");
 
   const recurringsActionOnSuccess = async (message: string) => {
-    displayPopup({ text: `recurring ${message}` });
+    displayPopup({ text: message });
     await queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.RECURRINGS, monthBeginning],
     });
@@ -72,7 +74,7 @@ const useReccurings = () => {
       return deleteRecurringService(recurring);
     },
 
-    onSuccess: () => recurringsActionOnSuccess("supprimé"),
+    onSuccess: () => recurringsActionOnSuccess(spendingsText.toasts.recurringDeleted),
 
     onError: (e) => {
       console.log("error deleting recurring", e);
@@ -105,7 +107,7 @@ const useReccurings = () => {
       return createRecurringService(spendingEdited, formattedMonth);
     },
 
-    onSuccess: () => recurringsActionOnSuccess("créé"),
+    onSuccess: () => recurringsActionOnSuccess(spendingsText.toasts.recurringCreated),
 
     onError: (e) => {
       console.log("error creating recurring", e);
@@ -126,7 +128,7 @@ const useReccurings = () => {
     },
 
     onSuccess: () => {
-      recurringsActionOnSuccess("mis à jour");
+      recurringsActionOnSuccess(spendingsText.toasts.recurringUpdated);
     },
 
     onError: (e) => {
@@ -139,7 +141,7 @@ const useReccurings = () => {
       return copyRecurringsService(userID, dates);
     },
 
-    onSuccess: () => recurringsActionOnSuccess("créés"),
+    onSuccess: () => recurringsActionOnSuccess(spendingsText.toasts.recurringsCopied),
 
     onError: (e) => {
       console.log("error copying recurrings", e);

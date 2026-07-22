@@ -2,10 +2,10 @@ import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
+import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { SpendingListSchema, SpendingMutationPayloadSchema } from "@src/schemas/spendings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import spendingsText from "@text/spendings";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
@@ -21,6 +21,7 @@ interface DeletableSpending {
 }
 
 const useSpendings = () => {
+  const spendingsText = useTranslations("spendings");
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
@@ -77,7 +78,7 @@ const useSpendings = () => {
   const queryClient = useQueryClient();
 
   const spendingsActionOnSuccess = async (message: string) => {
-    displayPopup({ text: spendingsText.toasts.spending(message) });
+    displayPopup({ text: message });
 
     await queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH, from, to],
@@ -114,7 +115,7 @@ const useSpendings = () => {
     },
 
     onSuccess: () => {
-      spendingsActionOnSuccess("supprimée");
+      spendingsActionOnSuccess(spendingsText.toasts.spendingDeleted);
     },
   });
 
@@ -132,7 +133,7 @@ const useSpendings = () => {
     },
 
     onSuccess: async (_data, variables) => {
-      await spendingsActionOnSuccess("créée");
+      await spendingsActionOnSuccess(spendingsText.toasts.spendingCreated);
       // COS-38: once the list has refreshed, recenter the timeline on the day of
       // the spending just created — but only when that day belongs to the week
       // CURRENTLY on screen. We read the live range from the store rather than the
@@ -166,7 +167,7 @@ const useSpendings = () => {
     },
 
     onSuccess: () => {
-      spendingsActionOnSuccess("mise à jour");
+      spendingsActionOnSuccess(spendingsText.toasts.spendingUpdated);
     },
 
     onError: (e) => {

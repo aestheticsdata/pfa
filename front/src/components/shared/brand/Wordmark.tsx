@@ -8,7 +8,7 @@ import { cn } from "@lib/utils";
  * stays on Geist. Kept beside Logo so the two brand marks live — and are reused
  * — together.
  *
- * Colour: the primary-button (« Nouvelle dépense ») gradient, built from the
+ * Colour: the primary-button ("New spending") gradient, built from the
  * same design tokens (`--accent-strong` → `--chart-2` → `--chart-3`) so the CTA
  * and the wordmark share one accent. For a plain variant, pass
  * `className="text-ink"` (or drop the gradient classes below).

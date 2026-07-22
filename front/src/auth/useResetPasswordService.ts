@@ -2,13 +2,14 @@
 
 import { useAuth } from "@auth/context/AuthContext";
 import useRequestHelper from "@helpers/useRequestHelper";
-import login from "@text/login";
+import useTranslations from "@i18n/useTranslations";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import type { AxiosError } from "axios";
 
 const useResetPasswordService = () => {
+  const login = useTranslations("login");
   const { request } = useRequestHelper();
   const router = useRouter();
   const { clearAuth } = useAuth();

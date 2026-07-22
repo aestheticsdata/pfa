@@ -7,8 +7,8 @@ export interface DatePickerWrapperStoreProps {
   to: Date | null;
   range: Date[] | null;
   selectedDateIso: string | null;
-  // Cross-tree "scroll the Dépenses timeline to this day" request (COS-38). Set
-  // by the NavBar "Aujourd'hui" button and by a fresh spending creation; read
+  // Cross-tree "scroll the Spendings timeline to this day" request (COS-38). Set
+  // by the NavBar "Today" button and by a fresh spending creation; read
   // and consumed (reset to null) by SpendingView once the matching card mounts.
   scrollToDayIso: string | null;
   setFrom: (from: Date) => void;
@@ -20,9 +20,9 @@ export interface DatePickerWrapperStoreProps {
 
 // This store is intentionally NOT persisted. The selected week is carried by the
 // `?date=` URL param (see SpendingPageClient), so it already survives reloads —
-// and the picker is only shown on Dépenses. Persisting `selectedDateIso` in
+// and the picker is only shown on Spendings. Persisting `selectedDateIso` in
 // localStorage leaked a stale day across sessions, which made the NavBar
-// "Dépenses" link reopen a past week instead of today (COS-73). "Today" must be
+// "Spendings" link reopen a past week instead of today (COS-73). "Today" must be
 // resolved fresh, client-side, on each new visit.
 const useStore = create<DatePickerWrapperStoreProps>()(
   devtools((set) => ({

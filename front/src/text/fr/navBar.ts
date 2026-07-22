@@ -16,6 +16,8 @@ const navBar = {
   },
   userMenu: {
     changePassword: "Modifier le mot de passe",
+    language: "Langue",
+    languageUpdateError: "Impossible d'enregistrer la langue",
     logout: "Se déconnecter",
   },
 };

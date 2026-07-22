@@ -1,8 +1,8 @@
 import { FieldShell } from "@components/shared/FieldShell";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
 import { Input } from "@components/ui/input";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import spendings from "@text/spendings";
 import addDays from "date-fns/addDays";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
@@ -19,6 +19,7 @@ interface DateFieldProps {
 }
 
 const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProps) => {
+  const spendings = useTranslations("spendings");
   const { modal: t } = spendings;
 
   const stepDate = (delta: number) => {
@@ -32,7 +33,7 @@ const DateField = ({ register, getValues, setValue, asRecurring }: DateFieldProp
   return (
     // Date is not applicable to a recurring (no single charge date), so
     // it is disabled — not removed or swapped for a month stepper — when
-    // "Récurrente mensuelle" is on.
+    // "Monthly recurring" is on.
     <FieldShell
       label={t.fields.date}
       htmlFor="spendingDate"

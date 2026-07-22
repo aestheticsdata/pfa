@@ -8,7 +8,7 @@ import DateField from "@components/spendings/common/spendingModal/fields/DateFie
 import LabelField from "@components/spendings/common/spendingModal/fields/LabelField";
 import ReceiptField from "@components/spendings/common/spendingModal/fields/ReceiptField";
 import { rankFrequentCategories } from "@components/spendings/common/spendingModal/rankFrequentCategories";
-import { spendingSchema } from "@components/spendings/common/spendingModal/schema";
+import { makeSpendingSchema } from "@components/spendings/common/spendingModal/schema";
 import Toggle from "@components/spendings/common/spendingModal/Toggle";
 import useSpendingSubmit from "@components/spendings/common/spendingModal/useSpendingSubmit";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
@@ -20,7 +20,7 @@ import useSpendings from "@components/spendings/services/useSpendings";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import { zodResolver } from "@hookform/resolvers/zod";
-import spendings from "@text/spendings";
+import useTranslations from "@i18n/useTranslations";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import startOfMonth from "date-fns/startOfMonth";
@@ -57,6 +57,7 @@ const SpendingModal = ({
   isEditing,
   month = null,
 }: SpendingModalProps) => {
+  const spendings = useTranslations("spendings");
   const [open, setOpen] = useState(true);
   const closeModal = () => {
     setOpen(false);
@@ -67,7 +68,7 @@ const SpendingModal = ({
   const { recurrings, createRecurring, updateRecurring, copyRecurrings } = useReccurings();
   const { categories } = useCategories();
   // Per-category usage scoped to the current year to date (client-side "today",
-  // cf COS-73) — ranks the "Fréquentes" quick-picks on recent habits, not
+  // cf COS-73) — ranks the "Frequent" quick-picks on recent habits, not
   // all-time cumulative usage (COS-137). Never blocks the modal: while stats load
   // (or on error) the section is simply empty until real usage arrives.
   const now = new Date();
@@ -99,7 +100,7 @@ const SpendingModal = ({
   const [comboboxOpen, setComboboxOpen] = useState(false);
   const [comboboxQuery, setComboboxQuery] = useState("");
   const [labelQuery, setLabelQuery] = useState(spending?.label ?? "");
-  // "Récurrente mensuelle" toggle — only offered when creating a plain spending
+  // "Monthly recurring" toggle — only offered when creating a plain spending
   // from the timeline (never in edit mode, never when already a recurring).
   const [isRecurringToggle, setIsRecurringToggle] = useState(false);
   const asRecurring = recurringType || isRecurringToggle;
@@ -144,7 +145,7 @@ const SpendingModal = ({
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<SpendingForm>({
-    resolver: zodResolver(spendingSchema),
+    resolver: zodResolver(makeSpendingSchema(spendings.modal.validation)),
     mode: "onChange",
     defaultValues: {
       spendingLabel: spending?.label ?? "",
@@ -186,8 +187,8 @@ const SpendingModal = ({
     closeModal,
   });
 
-  // Title tracks recurringType (dashboard "dépense fixe" entry) only, NOT the
-  // in-modal toggle — so ticking "Récurrente mensuelle" keeps the title stable
+  // Title tracks recurringType (dashboard "fixed expense" entry) only, NOT the
+  // in-modal toggle — so ticking "Monthly recurring" keeps the title stable
   // instead of making the modal look like a different one.
   const { modal } = spendings;
   const title = isEditing ? modal.title.edit(recurringType) : modal.title.create(recurringType);

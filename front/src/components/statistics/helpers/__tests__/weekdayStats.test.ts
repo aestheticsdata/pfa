@@ -88,7 +88,7 @@ describe("weekdayInsights", () => {
   });
 
   it("ignores zero-spend weekdays when picking the trough", () => {
-    // Tuesday has no spending (0) — it must not be flagged as the creux.
+    // Tuesday has no spending (0) — it must not be flagged as the trough.
     const stats = [40, 0, 80, 30, 40, 60, 60].map(s);
     expect(weekdayInsights(stats).troughDow).toBe(3); // Thursday (30), not Tuesday (0)
   });

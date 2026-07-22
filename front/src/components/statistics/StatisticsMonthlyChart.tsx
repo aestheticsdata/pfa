@@ -3,10 +3,11 @@
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
-import { filledMonthlyIncome, MONTHS_FR, niceCeil } from "@components/statistics/helpers/statisticsData";
+import { filledMonthlyIncome, monthShortLabels, niceCeil } from "@components/statistics/helpers/statisticsData";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import useElementWidth from "@lib/dataviz/useElementWidth";
-import { euro0 } from "@lib/format";
-import statistics from "@text/statistics";
 
 interface StatisticsMonthlyChartProps {
   year: number;
@@ -18,7 +19,7 @@ interface StatisticsMonthlyChartProps {
   /** 12-slot Jan→Dec total spend for `compareYear`. */
   compareMonthly: number[];
   /** 12-slot Jan→Dec monthly income (dashboard initialAmount); null where the
-   *  user has no dashboard row. Drawn as a stepped "budget mensuel" line. */
+   *  user has no dashboard row. Drawn as a stepped "monthly budget" line. */
   monthlyIncome: (number | null)[];
   /** Projected regular remainder of the in-progress month (chain N-1 → N-2 →
    *  M-1), or null when there's no reference. Added to the realized total. */
@@ -52,7 +53,7 @@ const DashSwatch = ({ color, opacity = 1 }: { color: string; opacity?: number })
   />
 );
 
-/** "Dépenses mensuelles" — 2026 bars with exceptional caps, the compare-year
+/** "Monthly spendings" — 2026 bars with exceptional caps, the compare-year
  *  dashed line, the flat budget reference and the current-month projection. */
 const StatisticsMonthlyChart = ({
   year,
@@ -66,6 +67,10 @@ const StatisticsMonthlyChart = ({
   showExceptionals,
   now,
 }: StatisticsMonthlyChartProps) => {
+  const { euro0 } = useFormat();
+  const statistics = useTranslations("statistics");
+  const dateLocale = useDateLocale();
+  const monthLabels = monthShortLabels(dateLocale);
   const [ref, width] = useElementWidth<HTMLDivElement>();
 
   const { monthlyChart } = statistics;
@@ -126,7 +131,7 @@ const StatisticsMonthlyChart = ({
   const subtitle = compareEnabled
     ? monthlyChart.subtitleCompare(year, compareYear)
     : isCurrentYear
-      ? statistics.ytdSubtitle(year, MONTHS_FR[cm])
+      ? statistics.ytdSubtitle(year, monthLabels[cm])
       : `${year}`;
 
   return (
@@ -225,7 +230,7 @@ const StatisticsMonthlyChart = ({
               </g>
             ))}
 
-            {/* budget mensuel (per-month stepped reference) */}
+            {/* monthly budget (per-month stepped reference) */}
             {budgetSeries && (
               <>
                 <path
@@ -409,7 +414,7 @@ const StatisticsMonthlyChart = ({
               ))}
 
             {/* x labels */}
-            {MONTHS_FR.map((label, m) => (
+            {monthLabels.map((label, m) => (
               <text
                 key={label}
                 x={cx(m)}

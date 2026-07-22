@@ -17,7 +17,7 @@ const Exceptionals = () => {
   const { setIsCalendarVisible } = useGlobalStore();
   // Computed once per instance (stable across re-renders).
   const [currentYear] = useState(() => new Date().getFullYear());
-  // null = "Toutes les années" (backend fetches all when no year param)
+  // null = "All years" (backend fetches all when no year param)
   const [selectedYear, setSelectedYear] = useState<number | null>(currentYear);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);

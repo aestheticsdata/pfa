@@ -1,6 +1,7 @@
 "use client";
 
 import { Toaster } from "@components/ui/sonner";
+import { LocaleProvider } from "@i18n/LocaleContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ThemeProvider } from "next-themes";
@@ -36,7 +37,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     >
       <NuqsAdapter>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <LocaleProvider>{children}</LocaleProvider>
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </NuqsAdapter>

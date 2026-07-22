@@ -6,11 +6,12 @@ import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
 import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
 import SharedLoginForm from "@components/shared/sharedLoginForm/sharedLoginForm";
-import login from "@text/login";
+import useTranslations from "@i18n/useTranslations";
 
 import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 
 export default function SignUp() {
+  const login = useTranslations("login");
   const { signupService } = useSignupService();
   const { setCredentials } = useCredentials();
   const { actions } = login;

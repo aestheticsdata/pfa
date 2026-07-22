@@ -9,12 +9,13 @@ import { MoneyAmount } from "@components/shared/MoneyAmount";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { Input } from "@components/ui/input";
+import { interpolate } from "@i18n/interpolate";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { CategoryBarTooltip, Donut, useCountUp } from "@lib/dataviz";
-import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
-import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -28,6 +29,9 @@ interface SalaryForm {
 /** Hero — remaining budget + fixed/variable gauge + inline salary edit, with the
  *  daily sparkline nested below (single card, per the mockup). */
 const BudgetHero = () => {
+  const { euro0 } = useFormat();
+  const dashboardText = useTranslations("dashboard");
+  const dateLocale = useDateLocale();
   const { from } = useDatePickerWrapperStore();
   const {
     get: { data: dashboard },
@@ -51,7 +55,7 @@ const BudgetHero = () => {
   const animatedPct = useCountUp(usedPct);
   const animatedRemaining = useCountUp(Math.abs(remaining));
 
-  const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: fr });
+  const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: dateLocale });
   // remount key → replays the donut grow-from-zero on month change
   const monthKey = format(from ?? new Date(), "yyyy-MM");
 
@@ -67,7 +71,7 @@ const BudgetHero = () => {
   const segments = budgetSegments.map((s) => ({ label: s.name, value: s.value, color: s.color }));
   // `pct` = share of the whole budget (value / initialAmount), i.e. the fraction
   // of the ring the arc actually occupies post-COS-134 — so the tooltip % matches
-  // the hovered arc, not the "% utilisé" of the center.
+  // the hovered arc, not the "% used" of the center.
   const tooltipData: CategoryTooltipDatum[] = budgetSegments.map((s) => ({
     color: s.color,
     name: s.name,
@@ -75,7 +79,7 @@ const BudgetHero = () => {
     total: s.value,
   }));
   // The empty "available" band (donut reports it as index === segments.length) →
-  // the remaining amount and its share of the budget (100 − % utilisé).
+  // the remaining amount and its share of the budget (100 − % used).
   if (initialAmount > 0 && remaining > 0) {
     tooltipData.push({
       color: "var(--accent-strong)",
@@ -131,18 +135,20 @@ const BudgetHero = () => {
           <div className="mt-2.5 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-sm text-ink-3">
             {!editing ? (
               <span className="inline-flex items-center gap-1.5">
-                sur
-                <button
-                  type="button"
-                  onClick={() => setEditing(true)}
-                  className="group inline-flex items-center gap-1 border-b border-dashed border-ink-4 pb-px leading-tight transition-colors hover:border-accent-strong"
-                  aria-label={t.editBudgetAria}
-                  title={t.editAmountTitle}
-                >
-                  <span className="num text-ink-2">{euro0(initialAmount)} €</span>
-                  <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />
-                </button>
-                alloués
+                {interpolate(t.allocated, {
+                  amount: (
+                    <button
+                      type="button"
+                      onClick={() => setEditing(true)}
+                      className="group inline-flex items-center gap-1 border-b border-dashed border-ink-4 pb-px leading-tight transition-colors hover:border-accent-strong"
+                      aria-label={t.editBudgetAria}
+                      title={t.editAmountTitle}
+                    >
+                      <span className="num text-ink-2">{euro0(initialAmount)} €</span>
+                      <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />
+                    </button>
+                  ),
+                })}
               </span>
             ) : (
               <form
@@ -151,17 +157,22 @@ const BudgetHero = () => {
                 onSubmit={handleSubmit(onSubmit)}
                 className="inline-flex items-center gap-1.5"
               >
-                sur
-                <Input
-                  defaultValue={initialAmount}
-                  className="num h-7 w-24 border-accent-d bg-surface-base text-ink"
-                  onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
-                    if (e.key === "Escape") setEditing(false);
-                  }}
-                  autoFocus
-                  {...register("initialAmount")}
-                />
-                € alloués
+                {interpolate(t.allocated, {
+                  amount: (
+                    <>
+                      <Input
+                        defaultValue={initialAmount}
+                        className="num h-7 w-24 border-accent-d bg-surface-base text-ink"
+                        onKeyDown={(e: KeyboardEvent<HTMLInputElement>) => {
+                          if (e.key === "Escape") setEditing(false);
+                        }}
+                        autoFocus
+                        {...register("initialAmount")}
+                      />
+                      {" €"}
+                    </>
+                  ),
+                })}
               </form>
             )}
 
@@ -198,7 +209,7 @@ const BudgetHero = () => {
                 {Math.round(animatedPct)}
                 <span className="text-lg text-ink-3">%</span>
               </div>
-              <div className="mt-0.5 text-2xs uppercase tracking-widest text-ink-4">utilisé</div>
+              <div className="mt-0.5 text-2xs uppercase tracking-widest text-ink-4">{t.donutUsed}</div>
             </div>
           </Donut>
           <div className="flex gap-4 text-2xs text-ink-3">

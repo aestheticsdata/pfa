@@ -8,19 +8,22 @@ import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
 import { Overline } from "@components/shared/Overline";
 import useDashboard from "@components/spendings/services/useDashboard";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
-import { euro0 } from "@lib/format";
-import dashboardText from "@text/dashboard";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import isBefore from "date-fns/isBefore";
 import isSameMonth from "date-fns/isSameMonth";
-import fr from "date-fns/locale/fr";
 import startOfMonth from "date-fns/startOfMonth";
 
 const ForecastStrip = () => {
+  const { euro0 } = useFormat();
+  const dashboardText = useTranslations("dashboard");
+  const dateLocale = useDateLocale();
   const { from } = useDatePickerWrapperStore();
   const {
     get: { data: dashboard },
@@ -36,7 +39,7 @@ const ForecastStrip = () => {
   // day-of-month is relative to the VIEWED month: elapsed for the current month,
   // the whole month for a past (complete) one, none for a future one.
   const dayOfMonth = isThisMonth ? getDate(now) : isPastMonth ? daysInMonth : 0;
-  // "as of" date shown next to "Dépensé"
+  // "as of" date shown next to "Spent"
   const asOf = isThisMonth ? now : isPastMonth ? endOfMonth(monthRef) : startOfMonth(monthRef);
   const projection = dayOfMonth > 0 ? (monthlyTotal / dayOfMonth) * daysInMonth : monthlyTotal; // MOCK
   const spentPct = budget > 0 ? Math.round((monthlyTotal / budget) * 100) : 0;
@@ -48,7 +51,7 @@ const ForecastStrip = () => {
       className="grid grid-cols-1 items-center gap-6 px-6 py-5 sm:grid-cols-[200px_1fr_200px] sm:gap-8"
     >
       <div className="flex flex-col gap-1">
-        <Overline>{t.spent(format(asOf, "d MMM", { locale: fr }))}</Overline>
+        <Overline>{t.spent(format(asOf, "d MMM", { locale: dateLocale }))}</Overline>
         <AnimatedNumber
           value={monthlyTotal}
           decimals={0}
@@ -100,7 +103,10 @@ const ForecastStrip = () => {
               {t.projection}
             </LegendItem>
           </span>
-          <span className="num">{euro0(budget)} € budget</span>
+          <span className="num">
+            {euro0(budget)}
+            {t.budgetLabel}
+          </span>
         </div>
       </div>
 

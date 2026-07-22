@@ -2,14 +2,12 @@
 
 import { IconButton } from "@components/shared/IconButton";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
+import useDateLocale from "@i18n/useDateLocale";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-
-const { monthSelector: text } = dashboardText;
 
 type MonthPickerPopoverProps = {
   /** First day of the currently viewed month, or `null` before hydration. */
@@ -27,12 +25,15 @@ type MonthPickerPopoverProps = {
  * requests. Bounds mirror the arrows (unbounded), adding no new reachability.
  */
 const MonthPickerPopover = ({ month, currentMonthStart, onSelectMonth }: MonthPickerPopoverProps) => {
+  const dashboardText = useTranslations("dashboard");
+  const { monthSelector: text } = dashboardText;
+  const dateLocale = useDateLocale();
   const [open, setOpen] = useState(false);
   // Year shown in the grid header. Reset to the viewed month's year on every open
   // so the panel always starts where the user currently is.
   const [gridYear, setGridYear] = useState(() => (month ?? currentMonthStart).getFullYear());
 
-  const label = month ? format(month, "MMMM yyyy", { locale: fr }) : "";
+  const label = month ? format(month, "MMMM yyyy", { locale: dateLocale }) : "";
 
   const handleOpenChange = (next: boolean) => {
     if (next) setGridYear((month ?? currentMonthStart).getFullYear());
@@ -98,7 +99,7 @@ const MonthPickerPopover = ({ month, currentMonthStart, onSelectMonth }: MonthPi
                   type="button"
                   onClick={() => selectMonth(cellDate)}
                   aria-current={isSelected ? "date" : undefined}
-                  aria-label={text.goToMonth(format(cellDate, "MMMM yyyy", { locale: fr }))}
+                  aria-label={text.goToMonth(format(cellDate, "MMMM yyyy", { locale: dateLocale }))}
                   className={cn(
                     "cursor-pointer rounded-sm py-1.5 text-sm capitalize tracking-normal transition-colors",
                     isSelected
@@ -107,7 +108,7 @@ const MonthPickerPopover = ({ month, currentMonthStart, onSelectMonth }: MonthPi
                     !isSelected && isCurrent && "text-elec ring-1 ring-inset ring-elec/40",
                   )}
                 >
-                  {format(cellDate, "MMM", { locale: fr })}
+                  {format(cellDate, "MMM", { locale: dateLocale })}
                 </button>
               );
             })}

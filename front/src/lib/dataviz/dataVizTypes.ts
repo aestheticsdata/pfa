@@ -68,7 +68,7 @@ export interface CategoryTooltipDatum {
   /** Amount in euros. */
   total: number;
   /** Trend data — the page computes it from its own source (weekly vs monthly).
-   *  Omit for data with no trend — the "Tendance" row is then hidden. */
+   *  Omit for data with no trend — the "Trend" row is then hidden. */
   trend?: CategoryTrendData;
 }
 

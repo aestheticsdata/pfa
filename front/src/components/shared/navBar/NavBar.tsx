@@ -22,8 +22,8 @@ import {
   parseMonthParam,
   SPENDINGS_PATH,
 } from "@helpers/dateRoute";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import text from "@text/navBar";
 import parseISO from "date-fns/parseISO";
 import startOfMonth from "date-fns/startOfMonth";
 import { BarChart3, LayoutDashboard, Menu, Receipt, Sparkles, Tag, X } from "lucide-react";
@@ -32,9 +32,10 @@ import { usePathname, useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
+import type { NavLabelKey } from "@components/shared/config/constants";
 import type { LucideIcon } from "lucide-react";
 
-type NavRoute = { path: string; label: string };
+type NavRoute = { path: string; labelKey: NavLabelKey };
 
 const NAV_ROUTES: NavRoute[] = [
   ROUTES.dashboard,
@@ -62,6 +63,7 @@ const normalizePath = (path: string): string => {
 };
 
 const NavBar = () => {
+  const text = useTranslations("navBar");
   const { user } = useAuth();
   const { isCalendarVisible } = useGlobalStore();
   const { selectedDateIso, setScrollToDayIso } = useDatePickerWrapperStore();
@@ -115,8 +117,8 @@ const NavBar = () => {
   const hrefFor = (route: NavRoute): string => {
     const storedDate = selectedDateIso ?? undefined;
     if (route.path === ROUTES.spendings.path && isClientHydrated) {
-      // On the Dashboard, the Dépenses link follows the viewed month (?month=) so
-      // "Mois en cours" / month stepping can't strand you on an old searched week
+      // On the Dashboard, the Spendings link follows the viewed month (?month=) so
+      // "Current month" / month stepping can't strand you on an old searched week
       // (COS-119). Keep the exact selected day when it falls inside that month;
       // otherwise today for the current month, else the month's first day.
       if (isDashboard) {
@@ -151,7 +153,7 @@ const NavBar = () => {
     // Ask the timeline to scroll to today's card. Set this before the
     // early-return below: when we are already on the current week no navigation
     // happens, so the scroll request is the only thing that recenters the view
-    // (COS-38). Shared by both the desktop and mobile "Aujourd'hui" buttons.
+    // (COS-38). Shared by both the desktop and mobile "Today" buttons.
     setScrollToDayIso(today);
     if (normalizePath(pathname) === SPENDINGS_PATH && selectedDateIso === today) {
       return;
@@ -199,7 +201,7 @@ const NavBar = () => {
                 isActiveRoute(route.path) ? cn(ACTIVE_BG, "text-ink") : "text-ink-3 hover:text-ink-2",
               )}
             >
-              {route.label}
+              {text.links[route.labelKey]}
             </Link>
           ))}
         </nav>
@@ -303,7 +305,7 @@ const NavBar = () => {
                 )}
               >
                 {Icon && <Icon className="size-4" />}
-                {route.label}
+                {text.links[route.labelKey]}
               </Link>
             );
           })}

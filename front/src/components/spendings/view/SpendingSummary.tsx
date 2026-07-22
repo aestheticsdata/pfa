@@ -5,12 +5,12 @@ import { MoneyAmount } from "@components/shared/MoneyAmount";
 import { Overline } from "@components/shared/Overline";
 import { StatTile } from "@components/shared/StatTile";
 import overspendLevel from "@components/spendings/helpers/overspendLevel";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { AnimatedNumber } from "@lib/dataviz";
-import { splitAmount } from "@lib/format";
 import { cn } from "@lib/utils";
-import spendings from "@text/spendings";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 
 import type { ReactNode } from "react";
 
@@ -48,15 +48,18 @@ const SpendingSummary = ({
   avgDailyDelta,
   biggest,
 }: SpendingSummaryProps) => {
+  const { pct1, splitAmount } = useFormat();
+  const spendings = useTranslations("spendings");
+  const dateLocale = useDateLocale();
   const { summary: t } = spendings;
-  const perDay = (txCount / 7).toFixed(1).replace(".", ",");
+  const perDay = pct1(txCount / 7);
   const average = weekTotal / 7;
 
-  // Hero "budget restant" — big number, split integer/decimals like the Dashboard
+  // Hero "Remaining budget" — big number, split integer/decimals like the Dashboard
   // BudgetHero, red when over budget. The integer counts up via the reusable
   // AnimatedNumber component; the cents stay fixed beside it.
   const over = remaining < 0;
-  const { int: remainingInt, dec: remainingDec } = splitAmount(Math.abs(remaining));
+  const { int: remainingInt, dec: remainingDec, separator: remainingSeparator } = splitAmount(Math.abs(remaining));
   const remainingIntValue = Number(remainingInt.replace(/\D/g, ""));
 
   // Green under the ceiling, then an orange (warn) step before red (danger),
@@ -101,7 +104,10 @@ const SpendingSummary = ({
         >
           {over && "−"}
           <AnimatedNumber value={remainingIntValue} />
-          <span className="text-lg font-normal text-ink-3 min-[1100px]:text-2xl">,{remainingDec} €</span>
+          <span className="text-lg font-normal text-ink-3 min-[1100px]:text-2xl">
+            {remainingSeparator}
+            {remainingDec} €
+          </span>
         </div>
       </div>
       <Cell
@@ -141,7 +147,7 @@ const SpendingSummary = ({
             "—"
           )
         }
-        sub={biggest ? `${biggest.label} · ${format(biggest.date, "dd MMM", { locale: fr })}` : "—"}
+        sub={biggest ? `${biggest.label} · ${format(biggest.date, "dd MMM", { locale: dateLocale })}` : "—"}
       />
     </DividedStrip>
   );

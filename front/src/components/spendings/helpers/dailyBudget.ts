@@ -2,11 +2,11 @@ import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 
 /**
- * "Budget du jour maximum" / "reste à vivre" — the remaining monthly budget
+ * "Maximum daily budget" / "left to spend" — the remaining monthly budget
  * spread over the days left in the month (the reference day included).
  *
- * Single source of truth shared by the Dépenses day-card and the Dashboard
- * "reste à vivre" insight so the two always show the exact same figure.
+ * Single source of truth shared by the Spendings day-card and the Dashboard
+ * "Left to spend" insight so the two always show the exact same figure.
  * Rounded to the nearest euro and clamped at 0 (never negative).
  */
 export default function dailyRemainingBudget(remaining: number, reference: Date): number {

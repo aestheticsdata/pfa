@@ -42,7 +42,7 @@ const useDatePickerState = () => {
     const dateISO = formatISO(date, { representation: "date" });
     // A deliberate week pick (updateUrl is only true for a user calendar click,
     // never the programmatic URL sync) supersedes any pending "scroll to a day"
-    // request — e.g. an "Aujourd'hui" scroll that never got consumed — so it
+    // request — e.g. a "Today" scroll that never got consumed — so it
     // can't fire later on an unrelated navigation (COS-38).
     if (updateUrl) {
       setScrollToDayIso(null);

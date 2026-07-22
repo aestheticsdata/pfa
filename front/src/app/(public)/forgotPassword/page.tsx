@@ -3,14 +3,15 @@
 import useResetPasswordService from "@auth/useResetPasswordService";
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
+import useTranslations from "@i18n/useTranslations";
 import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
-import login from "@text/login";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
 
 export default function ForgotPassword() {
+  const login = useTranslations("login");
   const { resetPasswordService } = useResetPasswordService();
   const { forgotPassword: t } = login;
 

@@ -1,7 +1,8 @@
 "use client";
 
 import useRequestHelper from "@helpers/useRequestHelper";
-import login from "@text/login";
+import { pickSupportedLocale } from "@i18n/pickSupportedLocale";
+import useTranslations from "@i18n/useTranslations";
 import { toast } from "sonner";
 
 import type { AuthResponse } from "@auth/types";
@@ -10,6 +11,7 @@ import type { AxiosError } from "axios";
 
 const useSignupService = () => {
   const { request } = useRequestHelper();
+  const { signup: t } = useTranslations("login");
 
   const signupService = async (user: LoginValues): Promise<AuthResponse | undefined> => {
     const { email, password } = user;
@@ -22,13 +24,13 @@ const useSignupService = () => {
           password,
           registerDate: new Date(),
           baseCurrency: "EUR",
-          language: "fr",
+          language: pickSupportedLocale(navigator.languages ?? []),
         },
       });
       return res.data as AuthResponse;
     } catch (e) {
       const status = (e as AxiosError)?.response?.status;
-      toast.error(status === 409 ? login.signup.emailAlreadyExists : login.signup.error);
+      toast.error(status === 409 ? t.emailAlreadyExists : t.error);
     }
   };
 

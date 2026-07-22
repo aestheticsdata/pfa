@@ -2,13 +2,14 @@
 
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
-import app from "@text/app";
-
-const { about } = app;
-
-const LEGAL = [about.legal.host, about.legal.address, about.legal.ape, about.legal.vat];
+import useTranslations from "@i18n/useTranslations";
 
 export default function About() {
+  const app = useTranslations("app");
+  const { about } = app;
+
+  const LEGAL = [about.legal.host, about.legal.address, about.legal.ape, about.legal.vat];
+
   return (
     <AuthCard>
       <AuthBrand

@@ -3,10 +3,12 @@
 import { parseDateParam } from "@components/datePickerWrapper/helpers";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
 import { DATE_QUERY_PARAM, parseAsSpendingsDate } from "@helpers/dateRoute";
+import { useLocale } from "@i18n/LocaleContext";
+import useDateLocale from "@i18n/useDateLocale";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import common from "@text/common";
+import localesDates from "@src/i18n/locales-dates";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
@@ -16,11 +18,15 @@ import DayPicker from "react-day-picker";
 // (loaded after globals) would otherwise win and reintroduce the blue band,
 // triangle nav arrows and white hover box.
 import useOnClickOutside from "use-onclickoutside";
-import { MONTHS, WEEKDAYS_LONG, WEEKDAYS_SHORT } from "./locale-fr";
 
 import type { Modifiers } from "react-day-picker";
 
 const DatePickerWrapper = () => {
+  const common = useTranslations("common");
+  const dateLocale = useDateLocale();
+  const { locale } = useLocale();
+  const { MONTHS, WEEKDAYS_LONG, WEEKDAYS_SHORT } = localesDates[locale];
+
   const {
     isCalendarVisible,
     hoverRange,
@@ -86,10 +92,10 @@ const DatePickerWrapper = () => {
         <CalendarIcon className="size-4 shrink-0 text-ink-4" />
         {selectedDays.length > 0 ? (
           <span className="num text-sm tracking-snug">
-            {format(selectedDays[0], "dd MMM yyyy", { locale: fr })}
+            {format(selectedDays[0], "dd MMM yyyy", { locale: dateLocale })}
             <span className="mx-1 text-ink-5">—</span>
             {format(selectedDays[selectedDays.length - 1], "dd MMM yyyy", {
-              locale: fr,
+              locale: dateLocale,
             })}
           </span>
         ) : (
@@ -103,7 +109,7 @@ const DatePickerWrapper = () => {
         <div className="absolute right-0 top-[calc(100%+8px)] z-50 lg:right-auto">
           <DayPicker
             initialMonth={selectedDays[0]}
-            locale="fr"
+            locale={locale}
             months={MONTHS}
             weekdaysLong={WEEKDAYS_LONG}
             weekdaysShort={WEEKDAYS_SHORT}

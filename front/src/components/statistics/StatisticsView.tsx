@@ -36,7 +36,7 @@ const MAX_CATEGORIES = 3;
 const yearOptions = (currentYear: number): number[] => Array.from({ length: 7 }, (_, i) => currentYear - i);
 
 /**
- * Statistiques (/statistics) — redesigned on the custom dataviz lib (Phase 6).
+ * Statistics (/statistics) — redesigned on the custom dataviz lib (Phase 6).
  * A single /statistics fetch (all categories, the selected + compare years)
  * feeds the KPIs, forecast and charts; /exceptionals adds the exceptional layer.
  */
@@ -63,7 +63,7 @@ const StatisticsView = () => {
   const { statistics, categories } = useStatistics({ years });
   const { dailyStats } = useDailyStats({ year: selectedYear });
   // Compare-year daily series for the day-of-week widget (COS-127) — only fetched
-  // when "Comparer à" is on.
+  // when "Compare to" is on.
   const { dailyStats: compareDailyStats } = useDailyStats({
     year: compareYear,
     enabled: compareEnabled,
@@ -79,7 +79,7 @@ const StatisticsView = () => {
   const dashboard = useDashboard();
   const { recurrings } = useReccurings();
   const { monthlyIncome } = useMonthlyIncome({ year: selectedYear });
-  // "Déjà prélevé" is always the real current-year-to-date sum, independent of the
+  // "Already debited" is always the real current-year-to-date sum, independent of the
   // selected stats year — the widget's per-line breakdown stays on the current month.
   const { drawn } = useRecurringsDrawn({ year: currentYear, month: now.getMonth() });
 
@@ -139,7 +139,7 @@ const StatisticsView = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Filter bar as its own bordered sticky card. Dépenses uses a full-bleed
+      {/* Filter bar as its own bordered sticky card. Spendings uses a full-bleed
           sticky band (it needs the gutter bleed for the timeline cards'
           rings/glows); Stats' toolbar stands alone, so a contained card reads
           better — the two look close but aren't pixel-identical (accepted). Shadow

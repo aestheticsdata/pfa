@@ -7,11 +7,11 @@ import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingIt
 import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
 import useDaySort from "@components/spendings/view/helpers/useDaySort";
 import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
-import { euro } from "@lib/format";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import spendings from "@text/spendings";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import { Plus } from "lucide-react";
 import { useMemo } from "react";
 
@@ -74,7 +74,7 @@ interface SpendingDayCardProps {
 }
 
 /**
- * New glow day-card for the redesigned Dépenses timeline (Phase 3b).
+ * New glow day-card for the redesigned Spendings timeline (Phase 3b).
  * Intentionally separate from the shared `SpendingDayItem` (which the
  * recurrings/overview view reuses) — see REFACTO_NOTES.md §9.
  */
@@ -90,6 +90,9 @@ const SpendingDayCard = ({
   search,
   onSelectCategory,
 }: SpendingDayCardProps) => {
+  const { euro } = useFormat();
+  const spendings = useTranslations("spendings");
+  const dateLocale = useDateLocale();
   const { sortItem, dayCard } = spendings;
   const { isModalVisible, addSpendingEnabled, spending, isEditing, addSpending, closeModal, editSpending } =
     useSpendingDayItem();
@@ -136,7 +139,7 @@ const SpendingDayCard = ({
       }
     }
     return Array.from(map.values());
-  }, [items]);
+  }, [items, spendings.noCategory]);
 
   const emptyLabel = items.length === 0 ? spendings.list.empty : dayCard.noResults;
 
@@ -158,9 +161,9 @@ const SpendingDayCard = ({
       >
         <div className="flex items-baseline justify-between gap-3">
           <div className={cn("text-base font-semibold tracking-snug", isToday ? "text-elec" : "text-ink")}>
-            {format(date, "dd MMM", { locale: fr })}
+            {format(date, "dd MMM", { locale: dateLocale })}
             <span className={cn("ml-2 text-xs font-normal capitalize", isToday ? "text-elec/85" : "text-ink-4")}>
-              {format(date, "EEEE", { locale: fr })}
+              {format(date, "EEEE", { locale: dateLocale })}
             </span>
           </div>
           <div

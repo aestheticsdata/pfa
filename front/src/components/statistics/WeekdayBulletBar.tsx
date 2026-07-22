@@ -15,7 +15,7 @@ interface WeekdayBulletBarProps {
 
 // Fill per overspend zone: the green base keeps the accent gradient (it is
 // anchored at 0), the overspend zones are the flat warn / neg tokens — same
-// palette as the Dépenses overspend indicators (COS-34 / COS-36).
+// palette as the Spendings overspend indicators (COS-34 / COS-36).
 const SEGMENT_FILL: Record<OverspendLevel, string> = {
   normal: "var(--bar-fill)",
   warn: "var(--warn)",

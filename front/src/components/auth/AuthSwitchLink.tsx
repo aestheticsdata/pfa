@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 interface AuthSwitchLinkProps {
-  /** Question preceding the link, e.g. "Pas encore de compte ?". */
+  /** Question preceding the link, e.g. "No account yet?". */
   prompt: string;
   href: string;
   label: string;

@@ -36,7 +36,7 @@ const useCategories = () => {
       return CategoryListSchema.parse(response.data);
     } catch (e) {
       console.log("get categories error : ", e);
-      throw e; // Re-throw pour que React Query gère l'erreur correctement
+      throw e; // Re-throw so React Query handles the error properly
     }
   };
   const { data: categories } = useQuery({

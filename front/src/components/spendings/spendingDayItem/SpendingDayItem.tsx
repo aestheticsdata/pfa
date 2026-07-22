@@ -6,11 +6,12 @@ import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
 import SpendingSort from "@components/spendings/spendingSort/SpendingSort";
 import SpendingsListContainer from "@components/spendings/spendingsListContainer/SpendingListContainer";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import spendingsText from "@text/spendings";
 import { endOfMonth, getDayOfYear } from "date-fns";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
@@ -36,6 +37,9 @@ const SpendingDayItem = ({
   month = null,
   total = 0,
 }: SpendingDayItemProps) => {
+  const spendingsText = useTranslations("spendings");
+  const { euro } = useFormat();
+  const dateLocale = useDateLocale();
   const { dayItem } = spendingsText;
   const { remaining: remainingAmount } = useDashboard();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -86,11 +90,11 @@ const SpendingDayItem = ({
       <div className="bg-linear-to-r from-surface-hi/60 to-surface-hi/40 px-4 py-2.5 border-b border-line shrink-0">
         <div className="flex items-center justify-between mb-2">
           <div className={cn("text-sm", isToday ? "text-elec font-semibold" : "text-ink-2")}>
-            {date ? format(date, "dd MMM yyyy", { locale: fr }) : "—"}
+            {date ? format(date, "dd MMM yyyy", { locale: dateLocale }) : "—"}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-ink-4 text-xs uppercase tracking-wide">{dayItem.total}</span>
-            <span className="text-ink text-sm tabular-nums">{Number(displayTotal).toFixed(2)} €</span>
+            <span className="text-ink text-sm tabular-nums">{euro(displayTotal)} €</span>
           </div>
         </div>
 

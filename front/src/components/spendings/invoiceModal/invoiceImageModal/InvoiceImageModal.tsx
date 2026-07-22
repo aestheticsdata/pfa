@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogContent, DialogTitle } from "@components/ui/dialog";
-import spendings from "@text/spendings";
+import useTranslations from "@i18n/useTranslations";
 import Image from "next/image";
 import { useState } from "react";
 
@@ -11,6 +11,7 @@ interface InvoiceImageModalProps {
 }
 
 const InvoiceImageModal = ({ image, closeImage: closeImageProp }: InvoiceImageModalProps) => {
+  const spendings = useTranslations("spendings");
   const [open, setOpen] = useState(true);
   const closeImage = () => {
     setOpen(false);

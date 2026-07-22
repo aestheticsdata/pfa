@@ -3,7 +3,7 @@
 import { FilterChip } from "@components/shared/FilterChip";
 import { Overline } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
-import exceptionals from "@text/exceptionals";
+import useTranslations from "@i18n/useTranslations";
 import { Plus } from "lucide-react";
 
 interface CategoryChip {
@@ -41,6 +41,7 @@ const ExceptionalFilters = ({
   onSelectCategory,
   onAdd,
 }: ExceptionalFiltersProps) => {
+  const exceptionals = useTranslations("exceptionals");
   const { filters } = exceptionals;
   return (
     <div className="flex flex-col gap-3">

@@ -13,7 +13,7 @@ interface DaySortState {
 
 /**
  * Per-day-card sort with EXPOSED state (field + direction), so the new
- * Dépenses day cards can render the active button + arrow glyph. Same
+ * Spendings day cards can render the active button + arrow glyph. Same
  * sorting behaviour as `useClickSort` but returns the current state.
  *
  * (The shared `useClickSort` — still used by the recurrings/overview

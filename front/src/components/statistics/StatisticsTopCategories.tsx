@@ -2,14 +2,12 @@
 
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { CursorTooltip, useCursorHover } from "@lib/dataviz";
-import { euro0 } from "@lib/format";
-import statistics from "@text/statistics";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import type { TopCategoryRow } from "@components/statistics/interfaces/statisticsTopCategoriesTypes";
-
-const { topCategories } = statistics;
 
 interface StatisticsTopCategoriesProps {
   rows: TopCategoryRow[];
@@ -27,6 +25,8 @@ const Trend = ({
   compareValue: number;
   compareYear: number;
 }) => {
+  const { euro0 } = useFormat();
+  const { topCategories } = useTranslations("statistics");
   const trendTip = useCursorHover();
   let inner: React.ReactNode;
   if (deltaPct == null) {
@@ -83,9 +83,11 @@ const Trend = ({
   );
 };
 
-/** "Top catégories" — the year's largest categories with their real
+/** "Top categories" — the year's largest categories with their real
  *  year-over-year trend (all figures from /statistics). */
 const StatisticsTopCategories = ({ rows, compareYear }: StatisticsTopCategoriesProps) => {
+  const { euro0 } = useFormat();
+  const { topCategories } = useTranslations("statistics");
   const nameTip = useCursorHover<string>();
   return (
     <GlowCard className="flex flex-col px-6 py-5.5">

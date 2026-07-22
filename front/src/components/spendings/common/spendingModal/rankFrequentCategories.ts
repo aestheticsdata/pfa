@@ -4,7 +4,7 @@ import type { CategoryStat } from "@src/schemas/categoryStats";
 export const FREQUENT_LIMIT = 6;
 
 /**
- * Ranks the "Fréquentes" quick-picks by real all-time usage (COS-20's
+ * Ranks the "Frequent" quick-picks by real all-time usage (COS-20's
  * per-category aggregate) and keeps only categories the user has actually
  * used. Ordering: number of spendings attached (desc), then total amount
  * spent (desc), then name (asc) as a deterministic tie-break. Never-used

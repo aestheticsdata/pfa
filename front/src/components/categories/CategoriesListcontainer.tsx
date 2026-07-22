@@ -7,7 +7,7 @@ import useCategoryStats from "@components/categories/services/useCategoryStats";
 import Spinner from "@components/common/Spinner";
 import useCategories from "@components/spendings/services/useCategories";
 import { Button } from "@components/ui/button";
-import categoriesText from "@text/categories";
+import useTranslations from "@i18n/useTranslations";
 import { Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -17,6 +17,7 @@ import type { Category } from "@src/schemas/categories";
 const isMock = (id: string) => id.startsWith("mock-");
 
 const CategoriesListcontainer = () => {
+  const categoriesText = useTranslations("categories");
   const { categories, updateCategory, deleteCategory } = useCategories();
   const { categoryStats, error: statsError } = useCategoryStats();
   const { user } = useAuth();

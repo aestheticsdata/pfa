@@ -13,6 +13,7 @@ const exceptionals = {
     delete: "Supprimer",
   },
   item: {
+    budgetMonths: "≈ {months} mois de budget régulier",
     deleteConfirmTitle: (label: string) => `Supprimer ${label} ?`,
   },
   modal: {
@@ -59,7 +60,9 @@ const exceptionals = {
     total: "Total",
   },
   toast: {
-    mutated: (action: string) => `dépense exceptionnelle ${action}`,
+    created: "dépense exceptionnelle créée",
+    updated: "dépense exceptionnelle mise à jour",
+    deleted: "dépense exceptionnelle supprimée",
   },
 };
 

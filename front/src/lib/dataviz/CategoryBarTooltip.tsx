@@ -1,7 +1,8 @@
 "use client";
 
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import CategoryTrend from "@lib/dataviz/CategoryTrend";
-import { euro } from "@lib/format";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -21,9 +22,11 @@ interface CategoryBarTooltipProps {
 /**
  * Mouse-following tooltip for a stacked category bar. Follows the cursor,
  * clamps inside the viewport, and mirrors the list row (swatch / name / count
- * / % / amount / trend). Shared by the Dépenses and Dashboard breakdowns.
+ * / % / amount / trend). Shared by the Spendings and Dashboard breakdowns.
  */
 const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
+  const { euro, pct1 } = useFormat();
+  const { categoryChart: t } = useTranslations("statistics");
   const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -90,13 +93,13 @@ const CategoryBarTooltip = ({ point, datum }: CategoryBarTooltipProps) => {
         )}
       </div>
       <div className="grid grid-cols-[auto_1fr] items-center gap-x-5 gap-y-1 text-xs">
-        <span className="text-ink-4">Part</span>
-        <span className="num text-right text-ink-2">{datum.pct.toFixed(1).replace(".", ",")} %</span>
-        <span className="text-ink-4">Montant</span>
+        <span className="text-ink-4">{t.tooltipShare}</span>
+        <span className="num text-right text-ink-2">{pct1(datum.pct)} %</span>
+        <span className="text-ink-4">{t.tooltipAmount}</span>
         <span className="num text-right text-ink">{euro(datum.total)} €</span>
         {datum.trend && (
           <>
-            <span className="text-ink-4">Tendance</span>
+            <span className="text-ink-4">{t.tooltipTrend}</span>
             <CategoryTrend {...datum.trend} />
           </>
         )}

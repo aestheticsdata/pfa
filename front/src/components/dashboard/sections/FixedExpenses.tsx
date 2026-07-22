@@ -10,13 +10,14 @@ import SpendingModal from "@components/spendings/common/spendingModal/SpendingMo
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useReccurings from "@components/spendings/services/useReccurings";
 import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
-import { euro } from "@lib/format";
+import { interpolate } from "@i18n/interpolate";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import dashboardText from "@text/dashboard";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import isSameMonth from "date-fns/isSameMonth";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 import { ImageIcon, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -31,15 +32,18 @@ interface FixedExpensesProps {
 // invoicefile is returned by the API but not (yet) in RecurringItemSchema
 const hasInvoice = (r: RecurringItem) => Boolean((r as { invoicefile?: string | null }).invoicefile);
 
-// échéance day-of-month = day of the recurring's dateFrom (best real proxy;
+// due-date day-of-month = day of the recurring's dateFrom (best real proxy;
 // recurrings carry no dedicated charge-day field).
 const dayOf = (r: RecurringItem): number | null => {
   const d = getDate(parseISO(r.dateFrom));
   return Number.isNaN(d) ? null : d;
 };
 
-/** Fixed expenses (recurrings) — monthly/annualised totals + échéancier list. */
+/** Fixed expenses (recurrings) — monthly/annualised totals + due-date schedule list. */
 const FixedExpenses = ({ month }: FixedExpensesProps) => {
+  const { euro } = useFormat();
+  const dashboardText = useTranslations("dashboard");
+  const dateLocale = useDateLocale();
   const { recurrings, deleteRecurring } = useReccurings();
   const { isModalVisible, spending, isEditing, addSpending, closeModal, editSpending } = useSpendingDayItem();
   const [invoiceFor, setInvoiceFor] = useState<RecurringItem | null>(null);
@@ -70,7 +74,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
         <div>
           <CardTitle>{t.title}</CardTitle>
           <span className="text-xs text-ink-4">
-            {t.linesSchedule(list.length, format(month.start, "MMMM", { locale: fr }))}
+            {t.linesSchedule(list.length, format(month.start, "MMMM", { locale: dateLocale }))}
           </span>
         </div>
         <IconButton
@@ -107,10 +111,12 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
 
       {upcoming.length > 0 && (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-line-soft bg-surface-hi px-3 py-2.5 text-xs text-ink-3">
-          <span>{t.upcomingBy(format(month.end, "d MMMM", { locale: fr }))}</span>
+          <span>{t.upcomingBy(format(month.end, "d MMMM", { locale: dateLocale }))}</span>
           <span className="text-ink-2">
-            <span className="num font-semibold text-accent-strong">{upcoming.length}</span> prélèvements ·{" "}
-            <span className="num font-semibold text-accent-strong">{euro(upcomingSum)} €</span>
+            {interpolate(t.debitsLine(upcoming.length), {
+              count: <span className="num font-semibold text-accent-strong">{upcoming.length}</span>,
+              sum: <span className="num font-semibold text-accent-strong">{euro(upcomingSum)} €</span>,
+            })}
           </span>
         </div>
       )}

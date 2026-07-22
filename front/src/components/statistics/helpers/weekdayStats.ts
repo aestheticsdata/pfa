@@ -49,7 +49,7 @@ function realizedWindow(year: number, now: Date): { realizedDays: number; lastRe
  * /daily-stats series (COS-45, COS-48, COS-127). Zero-spend days count toward the
  * average: the sparse `days` only carries spending days, so the denominator is
  * each weekday's real occurrence count (not `days.length`). The min/max range,
- * however, spans only the days that actually had spending (the "fourchette"
+ * however, spans only the days that actually had spending (the "range"
  * whisker). Future-dated spendings (current year) are excluded, matching the heatmap.
  */
 export function weekdayAverages(days: DailyStat[], year: number, now: Date): WeekdayStat[] {
@@ -112,9 +112,9 @@ export function overallDailyAverage(days: DailyStat[], year: number, now: Date):
 }
 
 export interface WeekdayInsights {
-  /** Weekday (0 = Mon) with the highest average spend — the "pic"; null when no weekday has spending. */
+  /** Weekday (0 = Mon) with the highest average spend — the "Peak"; null when no weekday has spending. */
   peakDow: number | null;
-  /** Weekday with the lowest positive average spend — the "creux"; null when no weekday has spending. */
+  /** Weekday with the lowest positive average spend — the "Low"; null when no weekday has spending. */
   troughDow: number | null;
   /** Weekend (Sat+Sun) vs weekday (Mon–Fri) daily-average, as a signed %; null when weekdays have no spending. */
   weekendDeltaPct: number | null;
@@ -124,7 +124,7 @@ export interface WeekdayInsights {
  * Header-chip insights derived from the weekday averages (COS-127): the priciest
  * and cheapest weekdays and how weekend days compare to the working week. Only
  * weekdays that actually had spending are ranked, so an all-zero weekday is never
- * flagged as the "creux". All from the same real averages, no extra source.
+ * flagged as the "Low". All from the same real averages, no extra source.
  */
 export function weekdayInsights(stats: WeekdayStat[]): WeekdayInsights {
   let peakDow: number | null = null;

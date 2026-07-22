@@ -1,9 +1,9 @@
 "use client";
 
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
-import { euro } from "@lib/format";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 
 import type { SpendingItem } from "@components/spendings/types";
@@ -20,9 +20,11 @@ interface SpendingSearchResultRowProps {
  * SpendingTxRow it isn't tied to the day-card grid or delete flow.
  */
 const SpendingSearchResultRow = ({ spending, onSelect }: SpendingSearchResultRowProps) => {
+  const { euro } = useFormat();
+  const dateLocale = useDateLocale();
   const color = spending.categoryColor || CATEGORY_FALLBACK;
   const category = spending.category ?? null;
-  const dateLabel = format(parseISO(spending.date), "d MMM", { locale: fr });
+  const dateLabel = format(parseISO(spending.date), "d MMM", { locale: dateLocale });
 
   return (
     <button

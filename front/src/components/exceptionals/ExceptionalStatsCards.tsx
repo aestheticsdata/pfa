@@ -3,10 +3,10 @@
 import { computeExceptionalStats } from "@components/exceptionals/helpers/exceptionalStats";
 import GlowCard from "@components/shared/GlowCard";
 import { StatTile } from "@components/shared/StatTile";
-import { euro } from "@lib/format";
-import exceptionals from "@text/exceptionals";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import format from "date-fns/format";
-import { fr } from "date-fns/locale";
 import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
@@ -31,6 +31,9 @@ const Kpi = ({ label, value, sub }: { label: string; value: ReactNode; sub: Reac
 const cur = (unit: string) => <span className="text-lg font-normal text-ink-3">{unit}</span>;
 
 const ExceptionalStatsCards = ({ items, year, monthlyAverage }: ExceptionalStatsCardsProps) => {
+  const { euro } = useFormat();
+  const exceptionals = useTranslations("exceptionals");
+  const dateLocale = useDateLocale();
   // Stable across re-renders so the elapsed-month count doesn't drift mid-session.
   const [now] = useState(() => new Date());
   const stats = computeExceptionalStats(items, year, now);
@@ -80,7 +83,7 @@ const ExceptionalStatsCards = ({ items, year, monthlyAverage }: ExceptionalStats
         sub={
           stats.biggest
             ? `${stats.biggest.label} · ${format(stats.biggest.date, "MMMM", {
-                locale: fr,
+                locale: dateLocale,
               })}`
             : "—"
         }

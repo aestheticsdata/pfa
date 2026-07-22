@@ -2,14 +2,14 @@
 
 import SpendingSearchModal from "@components/spendings/search/SpendingSearchModal";
 import { spendingSearchParsers, spendingSearchUrlOptions } from "@components/spendings/search/searchParams";
-import spendingSearch from "@text/spendingSearch";
+import useTranslations from "@i18n/useTranslations";
 import { Search } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { useEffect } from "react";
 
 /**
  * Whole-history spending search entry point (COS-114/COS-118), rendered in the
- * Dépenses toolbar next to the week filter. Opening writes the modal's open flag
+ * Spendings toolbar next to the week filter. Opening writes the modal's open flag
  * to the URL (a pushed history entry) so browser Back can restore it; the modal
  * itself reads that state. Two presentations of the same click target: a compact
  * labelled button with a ⌘K hint on desktop (md+), and a full-width field styled
@@ -17,6 +17,7 @@ import { useEffect } from "react";
  * icon. ⌘K / Ctrl+K is an optional desktop shortcut.
  */
 const SpendingSearchTrigger = () => {
+  const spendingSearch = useTranslations("spendingSearch");
   const [, setSearchState] = useQueryStates(spendingSearchParsers, spendingSearchUrlOptions);
 
   useEffect(() => {

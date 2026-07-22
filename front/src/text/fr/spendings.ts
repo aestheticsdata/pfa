@@ -66,6 +66,8 @@ const spendings = {
     expandAria: "Afficher le détail par catégorie",
     collapseAria: "Masquer le détail par catégorie",
     expandHint: "Déplier pour voir le détail",
+    // Suffix appended after the week range label in the pane header.
+    rangeSuffix: " · semaine",
     // Per-category trend badge vs the previous week (COS-35).
     trendStable: "stable",
     trendNew: "nouv.",
@@ -95,6 +97,11 @@ const spendings = {
     },
     recurringToggle: "Récurrente mensuelle",
     attachReceipt: "Joindre un reçu",
+    fileSize: {
+      bytes: "o",
+      kilobytes: "Ko",
+      megabytes: "Mo",
+    },
     copyPreviousMonth: "Copier les dépenses fixes du mois précédent",
     fields: {
       amount: "Montant",
@@ -167,8 +174,16 @@ const spendings = {
     noMatch: "Aucune dépense ne correspond.",
     close: "Fermer",
   },
+  // One key per action: injecting a participle into a sentence template does
+  // not survive translation (gender/agreement, word order).
   toasts: {
-    spending: (message: string) => `dépense ${message}`,
+    spendingCreated: "dépense créée",
+    spendingUpdated: "dépense mise à jour",
+    spendingDeleted: "dépense supprimée",
+    recurringCreated: "dépense fixe créée",
+    recurringUpdated: "dépense fixe mise à jour",
+    recurringDeleted: "dépense fixe supprimée",
+    recurringsCopied: "dépenses fixes créées",
   },
 };
 

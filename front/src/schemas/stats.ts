@@ -26,9 +26,9 @@ export const ChartsCategorySchema = z.object({
 export type ChartsCategory = z.infer<typeof ChartsCategorySchema>;
 
 // Per-category totals for the current period and the one it is compared against
-// (GET /category-trends). Feeds the dashboard's monthly "Répartition par
-// catégorie" trend column + "Catégorie en hausse" insight (COS-41); the delta %
-// and its hausse/baisse/stable/nouv. styling are derived on the front.
+// (GET /category-trends). Feeds the dashboard's monthly "Breakdown by
+// category" trend column + "Rising category" insight (COS-41); the delta %
+// and its up/down/stable/new styling are derived on the front.
 // `previousValue` is null when the category is new to the comparison window.
 export const CategoryTrendPointSchema = z.object({
   category: z.string().nullable(),
@@ -42,8 +42,8 @@ export type CategoryTrendPoint = z.infer<typeof CategoryTrendPointSchema>;
 export const CategoryTrendsResponseSchema = z.object({
   trends: z.array(CategoryTrendPointSchema),
   // Total spent across every category in the comparison window (incl. ones
-  // absent from the current window). Drives the Dépenses "moyenne / jour vs sem.
-  // dernière" delta (COS-35); unused by the dashboard monthly breakdown.
+  // absent from the current window). Drives the Spendings "Average / day vs last
+  // week" delta (COS-35); unused by the dashboard monthly breakdown.
   previousTotal: numberLikeSchema,
 });
 
@@ -85,7 +85,7 @@ export type WeekdayCategoriesResponse = z.infer<typeof WeekdayCategoriesResponse
 
 // Biggest single one-off (non-exceptional) expense of a year (COS-46) — GET
 // /biggest-regular-expense. `expense` is null when the user has no spending that
-// year. Backs the "courante" row of the "Plus grosse dépense" KPI card.
+// year. Backs the "regular" row of the "Biggest expense" KPI card.
 export const BiggestRegularExpenseSchema = z.object({
   label: z.string(),
   amount: numberLikeSchema,
@@ -116,7 +116,7 @@ export type BusiestWeekResponse = z.infer<typeof BusiestWeekResponseSchema>;
 
 // Totals of the three months before the displayed month (COS-40) — GET
 // /spending-pace. Newest→oldest (M-1, M-2, M-3); `month` is the month's first day
-// (YYYY-MM-DD). Feeds the dashboard's "Sur le rythme" insight, which turns these
+// (YYYY-MM-DD). Feeds the dashboard's "On pace" insight, which turns these
 // into daily rates and compares them to the current month's pace.
 export const MonthlyTotalSchema = z.object({
   month: z.string(),

@@ -10,8 +10,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@components/ui/alert-dialog";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import common from "@text/common";
 
 import type { ReactNode } from "react";
 
@@ -30,7 +30,7 @@ interface ConfirmDeleteDialogProps {
 
 /**
  * Shared delete-confirmation modal: title + irreversible warning + cancel / danger
- * action. Unifies the near-identical AlertDialogs across Catégories, Exceptionnels
+ * action. Unifies the near-identical AlertDialogs across Categories, Exceptionals
  * and the invoice modal so the destructive action reads the same everywhere.
  *
  * The action overrides the AlertDialogAction default variant with the danger tokens
@@ -40,32 +40,38 @@ const ConfirmDeleteDialog = ({
   open,
   onOpenChange,
   title,
-  description = common.confirmDelete.description,
-  confirmLabel = common.actions.delete,
-  cancelLabel = common.actions.cancel,
+  description,
+  confirmLabel,
+  cancelLabel,
   titleClassName,
   onConfirm,
-}: ConfirmDeleteDialogProps) => (
-  <AlertDialog
-    open={open}
-    onOpenChange={onOpenChange}
-  >
-    <AlertDialogContent className="border-line bg-surface-elev">
-      <AlertDialogHeader>
-        <AlertDialogTitle className={cn("text-ink", titleClassName)}>{title}</AlertDialogTitle>
-        <AlertDialogDescription className="text-ink-3">{description}</AlertDialogDescription>
-      </AlertDialogHeader>
-      <AlertDialogFooter>
-        <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
-        <AlertDialogAction
-          onClick={onConfirm}
-          className="bg-danger-solid text-on-danger hover:bg-danger-solid hover:brightness-110"
-        >
-          {confirmLabel}
-        </AlertDialogAction>
-      </AlertDialogFooter>
-    </AlertDialogContent>
-  </AlertDialog>
-);
+}: ConfirmDeleteDialogProps) => {
+  const common = useTranslations("common");
+
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={onOpenChange}
+    >
+      <AlertDialogContent className="border-line bg-surface-elev">
+        <AlertDialogHeader>
+          <AlertDialogTitle className={cn("text-ink", titleClassName)}>{title}</AlertDialogTitle>
+          <AlertDialogDescription className="text-ink-3">
+            {description ?? common.confirmDelete.description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{cancelLabel ?? common.actions.cancel}</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onConfirm}
+            className="bg-danger-solid text-on-danger hover:bg-danger-solid hover:brightness-110"
+          >
+            {confirmLabel ?? common.actions.delete}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+};
 
 export default ConfirmDeleteDialog;

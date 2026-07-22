@@ -9,10 +9,11 @@ import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageMo
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { cn } from "@lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import texts from "@text/spendings";
 import { Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -33,6 +34,8 @@ const FILE_SIZE_LIMIT = 32_097_152;
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: InvoiceModalProps) => {
+  const texts = useTranslations("spendings");
+  const { euro } = useFormat();
   const [open, setOpen] = useState(true);
   const handleClickOutside = () => {
     setOpen(false);
@@ -212,7 +215,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
               </span>
             )}
             <span className="num shrink-0 whitespace-nowrap text-lg font-semibold tracking-tight text-elec">
-              {Number(spending.amount).toFixed(2)} €
+              {euro(spending.amount)} €
             </span>
           </DialogHeader>
 

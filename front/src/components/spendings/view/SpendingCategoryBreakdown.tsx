@@ -6,10 +6,10 @@ import { WEEKLY } from "@components/spendings/config/constants";
 import { categoryTrend } from "@components/spendings/helpers/categoryTrend";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { CategoryBarTooltip, CategoryTrend } from "@lib/dataviz";
-import { euro } from "@lib/format";
 import { cn } from "@lib/utils";
-import spendings from "@text/spendings";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 
@@ -50,11 +50,13 @@ interface SpendingCategoryBreakdownProps {
 }
 
 /**
- * Full-width "Répartition par catégorie" pane for the current week.
+ * Full-width "Breakdown by category" pane for the current week.
  * Stacked bar + per-category swatch / name / count / % / amount / trend (the
  * trend compares each category to the previous week — COS-35).
  */
 const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdownProps) => {
+  const { euro, pct1 } = useFormat();
+  const spendings = useTranslations("spendings");
   const { breakdown: t } = spendings;
   const [selected, setSelected] = useState<BreakdownRow | null>(null);
   const [hover, setHover] = useState<BarHover<BreakdownRowWithTrend> | null>(null);
@@ -79,7 +81,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
   // One derived row per category carrying its trend badge — shared by the list
   // AND the hover tooltip so both render the identical badge (no recompute). The
   // badge stays hidden while the previous-week data is still loading
-  // (`previousValue` undefined) rather than flashing a wrong "nouv." (COS-35).
+  // (`previousValue` undefined) rather than flashing a wrong "new" (COS-35).
   const trendLabels = { stable: t.trendStable, fresh: t.trendNew };
   const rowsWithTrend: BreakdownRowWithTrend[] = rows.map((r) => ({
     ...r,
@@ -114,7 +116,10 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
         title={t.title}
         action={
           <div className="flex items-center gap-3 self-center">
-            <span className="text-xs text-ink-4">{rangeLabel} · semaine</span>
+            <span className="text-xs text-ink-4">
+              {rangeLabel}
+              {t.rangeSuffix}
+            </span>
             {showHint ? (
               <Tooltip>
                 <TooltipTrigger asChild>{caret}</TooltipTrigger>
@@ -138,7 +143,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
             key={r.key}
             role="img"
             className="block h-full"
-            aria-label={`${r.name} : ${r.pct.toFixed(1).replace(".", ",")} % (${euro(r.total)} €)`}
+            aria-label={`${r.name} : ${pct1(r.pct)} % (${euro(r.total)} €)`}
             style={{ width: `${r.pct.toFixed(2)}%`, background: r.color }}
             onMouseMove={(e) => setHover({ target: r, x: e.clientX, y: e.clientY })}
             onMouseLeave={() => setHover(null)}
@@ -176,7 +181,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
                   </span>
                 </span>
                 <span className="num text-right text-ink-2 max-[520px]:col-start-2 max-[520px]:row-start-2 max-[520px]:justify-self-start max-[520px]:text-left">
-                  {r.pct.toFixed(1).replace(".", ",")} %
+                  {pct1(r.pct)} %
                 </span>
                 <span className="num text-right text-ink max-[520px]:col-start-3 max-[520px]:row-start-1 max-[520px]:justify-self-end">
                   {euro(r.total)} €

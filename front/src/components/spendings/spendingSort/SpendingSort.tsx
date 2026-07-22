@@ -1,5 +1,5 @@
 import { SORT_BY_AMOUNT, SORT_BY_CATEGORY, SORT_BY_LABEL } from "@components/spendings/helpers/sortConstants";
-import spendingsText from "@text/spendings";
+import useTranslations from "@i18n/useTranslations";
 import { ArrowDownUp } from "lucide-react";
 
 type SortField = typeof SORT_BY_LABEL | typeof SORT_BY_CATEGORY | typeof SORT_BY_AMOUNT;
@@ -21,6 +21,7 @@ const SortPill = ({ label, onClick }: { label: string; onClick: () => void }) =>
 );
 
 const SpendingSort = ({ recurringType, onClickSort }: SpendingSortProps) => {
+  const spendingsText = useTranslations("spendings");
   const { sortItem } = spendingsText;
   return (
     <div className="flex gap-2">

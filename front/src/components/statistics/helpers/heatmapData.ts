@@ -1,8 +1,10 @@
+import format from "date-fns/format";
 import getDay from "date-fns/getDay";
 import getDayOfYear from "date-fns/getDayOfYear";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { DailyStat } from "@src/schemas/stats";
+import type { Locale } from "date-fns";
 
 /**
  * The single source of truth for heat-map intensity levels: the `empty`/`future`
@@ -57,7 +59,7 @@ export interface HeatmapModel {
   scaleMax: number;
   /** The single heaviest non-exceptional day, or null when there is no spending. */
   busiest: { amount: number; date: string } | null;
-  /** Realized exceptional purchase labels, biggest first (for the "pics" subtext). */
+  /** Realized exceptional purchase labels, biggest first (for the "Exceptional peaks" subtext). */
   exceptionalLabels: string[];
   /** Day-of-year of the last realized day (today, or Dec 31 for a past year). */
   realizedDays: number;
@@ -130,7 +132,7 @@ export const buildHeatmap = (
 
   // Colour scale + busiest day: the heaviest realized, non-exceptional day.
   // Future-dated spendings are ignored (they render as "future" cells), and
-  // exceptional days are shown separately (lvl-neg) — "busiest" is hors exceptionnel.
+  // exceptional days are shown separately (lvl-neg) — "busiest" excludes exceptionals.
   let scaleMax = 0;
   let busiest: { amount: number; date: string } | null = null;
   for (const [date, total] of totalByDate) {
@@ -192,13 +194,12 @@ export const buildHeatmap = (
 };
 
 /** Month labels positioned at the grid column of each month's first day. */
-export const monthColumns = (year: number): { name: string; col: number }[] => {
-  const names = ["jan", "fév", "mar", "avr", "mai", "jun", "jul", "aoû", "sep", "oct", "nov", "déc"];
+export const monthColumns = (year: number, locale: Locale): { name: string; col: number }[] => {
   const firstOffset = mondayDow(new Date(year, 0, 1));
-  return names.map((name, month) => {
+  return Array.from({ length: 12 }, (_, month) => {
     const doy = getDayOfYear(new Date(year, month, 1));
     const col = Math.floor((doy - 1 + firstOffset) / 7);
     // +2: grid track 1 is the 16px dow-label column, so week 0 lives in track 2.
-    return { name, col: col + 2 };
+    return { name: format(new Date(year, month, 1), "MMM", { locale }), col: col + 2 };
   });
 };

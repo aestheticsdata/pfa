@@ -1,6 +1,6 @@
 import Spinner from "@components/common/Spinner";
 import SpendingItem from "@components/spendings/spendingDayItem/spendingItem/SpendingItem";
-import spendings from "@text/spendings";
+import useTranslations from "@i18n/useTranslations";
 
 import type { SpendingsListContainerType } from "@components/spendings/types";
 
@@ -11,6 +11,8 @@ const SpendingsListContainer = ({
   isLoading,
   recurringType,
 }: SpendingsListContainerType) => {
+  const spendings = useTranslations("spendings");
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[120px]">

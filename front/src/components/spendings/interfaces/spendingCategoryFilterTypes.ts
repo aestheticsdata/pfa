@@ -1,5 +1,5 @@
 /**
- * One selectable category in the Dépenses global filter — built by
+ * One selectable category in the Spendings global filter — built by
  * SpendingView, rendered by SpendingCategoryFilter.
  */
 export interface FilterCategory {

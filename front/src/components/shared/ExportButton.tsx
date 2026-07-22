@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@components/ui/button";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import common from "@text/common";
 import { Download } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,9 +10,10 @@ interface ExportButtonProps {
   className?: string;
 }
 
-/** The shared "Exporter" action — identical on every page. MOCK: export is not
+/** The shared "Export" action — identical on every page. MOCK: export is not
  *  implemented yet, so it only surfaces a toast. */
 const ExportButton = ({ className }: ExportButtonProps) => {
+  const common = useTranslations("common");
   const { export: t } = common;
 
   return (

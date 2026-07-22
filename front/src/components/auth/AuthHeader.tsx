@@ -3,27 +3,29 @@
 import Logo from "@components/shared/brand/Logo";
 import Wordmark from "@components/shared/brand/Wordmark";
 import { ROUTES } from "@components/shared/config/constants";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import login from "@text/login";
 import { Info, LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import type { Dictionary } from "@text/index";
 import type { LucideIcon } from "lucide-react";
 
-type Tab = { path: string; label: string; icon: LucideIcon };
+type Tab = { path: string; label: (header: Dictionary["login"]["header"]) => string; icon: LucideIcon };
 
 const TABS: Tab[] = [
-  { path: ROUTES.login.path, label: "Login", icon: LogIn },
-  { path: ROUTES.signup.path, label: "Signup", icon: UserPlus },
-  { path: ROUTES.about.path, label: login.header.aboutTab, icon: Info },
+  { path: ROUTES.login.path, label: () => "Login", icon: LogIn },
+  { path: ROUTES.signup.path, label: () => "Signup", icon: UserPlus },
+  { path: ROUTES.about.path, label: (header) => header.aboutTab, icon: Info },
 ];
 
 const normalize = (p: string) => p.replace(/\/+$/, "") || "/";
 
-/** Dedicated auth-screen header: brand + Login / Signup / À propos tabs. */
+/** Dedicated auth-screen header: brand + Login / Signup / About tabs. */
 export default function AuthHeader() {
   const pathname = usePathname();
+  const { header } = useTranslations("login");
 
   return (
     <header className="relative z-[2] flex flex-wrap items-center gap-x-4 gap-y-3 px-5 py-4 sm:gap-x-6.5 sm:px-8 sm:py-4.5">
@@ -49,7 +51,7 @@ export default function AuthHeader() {
                 className="size-3.5"
                 strokeWidth={2}
               />
-              {label}
+              {label(header)}
               {active && (
                 <span
                   aria-hidden

@@ -16,7 +16,7 @@ export interface ExceptionalStats {
  *
  * The monthly average is smoothed over the months actually elapsed: the current
  * year counts only its elapsed months (not a full 12), reusing `elapsedMonths`
- * so the "Moyenne / mois" figure stays aligned with the Statistiques page. For
+ * so the "Average / month" figure stays aligned with the Statistics page. For
  * "all years" (`year == null`), the divisor is the sum of the elapsed months of
  * every year the data spans, floored at 1 to avoid a division by zero.
  */

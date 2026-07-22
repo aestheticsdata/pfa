@@ -17,7 +17,7 @@ interface ProgressTrackProps {
   radius?: number;
   color?: string;
   /** Render the fill as a left→right accent gradient at reduced opacity
-   *  (the forecast "réalisé" look) instead of a flat colour. */
+   *  (the forecast "actual" look) instead of a flat colour. */
   gradient?: boolean;
   /** Animate the segments. On mount / remount (via a `key`) they grow from zero;
    *  on a live value change they ease from their current width to the new one. */

@@ -1,5 +1,6 @@
 "use client";
 
+import useFormat from "@i18n/useFormat";
 import useCountUp from "@lib/dataviz/useCountUp";
 import { cn } from "@lib/utils";
 
@@ -12,7 +13,7 @@ interface AnimatedNumberProps {
   decimals?: number;
   /** Animation duration in ms. */
   duration?: number;
-  /** Locale for grouping/decimal separators. */
+  /** Locale for grouping/decimal separators. Defaults to the active app locale. */
   locale?: string;
   prefix?: string;
   suffix?: string;
@@ -36,7 +37,7 @@ const AnimatedNumber = ({
   value,
   decimals = 0,
   duration = 850,
-  locale = "fr-FR",
+  locale,
   prefix = "",
   suffix = "",
   color,
@@ -46,12 +47,14 @@ const AnimatedNumber = ({
   style,
   ariaLabel,
 }: AnimatedNumberProps) => {
+  const { numberLocale } = useFormat();
+  const activeLocale = locale ?? numberLocale;
   const animated = useCountUp(value, duration);
-  const text = animated.toLocaleString(locale, {
+  const text = animated.toLocaleString(activeLocale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
-  const finalText = value.toLocaleString(locale, {
+  const finalText = value.toLocaleString(activeLocale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });

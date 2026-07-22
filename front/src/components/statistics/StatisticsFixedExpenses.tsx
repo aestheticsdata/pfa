@@ -1,7 +1,7 @@
 "use client";
 
 // All figures are real (from /recurrings). Recurrings carry no category, so —
-// exactly as the mockup notes — they are totalled by name. "Déjà prélevé" is the
+// exactly as the mockup notes — they are totalled by name. "Already debited" is the
 // real year-to-date sum of the per-month recurring rows (Jan → current month),
 // computed server-side (GET /recurrings/drawn) and passed in as `drawn`.
 
@@ -9,9 +9,9 @@ import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { MeterBar } from "@components/shared/MeterBar";
 import { Overline } from "@components/shared/Overline";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { CursorTooltip, useCursorHover } from "@lib/dataviz";
-import { euro, splitAmount } from "@lib/format";
-import statistics from "@text/statistics";
 
 import type { RecurringItem } from "@src/schemas/spendings";
 
@@ -32,7 +32,9 @@ const Stat = ({
   small?: boolean;
   className?: string;
 }) => {
-  const { int, dec } = splitAmount(value);
+  const { splitAmount } = useFormat();
+
+  const { int, dec, separator } = splitAmount(value);
   return (
     <div className={className}>
       <Overline className="block">{label}</Overline>
@@ -44,15 +46,20 @@ const Stat = ({
         }
       >
         {int}
-        <span className={small ? "text-sm font-normal text-ink-3" : "text-xl font-normal text-ink-3"}>,{dec} €</span>
+        <span className={small ? "text-sm font-normal text-ink-3" : "text-xl font-normal text-ink-3"}>
+          {separator}
+          {dec} €
+        </span>
       </div>
     </div>
   );
 };
 
-/** "Dépenses fixes" — recurrings annualised, with per-line share and the
+/** "Fixed expenses" — recurrings annualised, with per-line share and the
  *  year-to-date drawn amount. */
 const StatisticsFixedExpenses = ({ recurrings, drawn, now }: StatisticsFixedExpensesProps) => {
+  const { euro } = useFormat();
+  const statistics = useTranslations("statistics");
   const rowTip = useCursorHover<{ monthly: string }>();
   if (recurrings.length === 0) return null;
 

@@ -16,7 +16,7 @@ import type { CategoryTrendPoint } from "@src/schemas/stats";
 // A user category and a global one can share a name; merge those rows by name —
 // summing both period totals — then sort by current amount desc, mirroring
 // useCharts' old aggregateByCategory but carrying the comparison-period value.
-// `previousValue` stays null (a "nouv." category) only when every merged row was.
+// `previousValue` stays null (a "new" category) only when every merged row was.
 const aggregateByCategory = (items: CategoryTrendPoint[]): CategoryTrendPoint[] => {
   const map = new Map<string, CategoryTrendPoint>();
   for (const item of items) {
@@ -37,7 +37,7 @@ const aggregateByCategory = (items: CategoryTrendPoint[]): CategoryTrendPoint[] 
 // The current period plus the one it is compared against, per period type. The
 // front owns this math (server-timezone-agnostic): monthly = the selected month
 // vs the one before it (dashboard, COS-41); weekly = the picked range vs the 7
-// days before it (Dépenses, COS-35).
+// days before it (Spendings, COS-35).
 const windows = (periodType: string, from?: Date | null, to?: Date | null) => {
   if (periodType === MONTHLY) {
     if (!from) return null;
@@ -59,9 +59,9 @@ const windows = (periodType: string, from?: Date | null, to?: Date | null) => {
  * show a per-category trend (delta %). `trends` has one row per category with
  * spending in the current period, sorted by amount desc; `previousValue` is null
  * for a category new to the comparison period. `previousTotal` is the whole
- * comparison period's spending — the Dépenses avg/day delta uses it (COS-35).
- * Backs the dashboard's monthly breakdown trend column + "Catégorie en hausse"
- * insight (COS-41), and the Dépenses weekly breakdown (COS-35).
+ * comparison period's spending — the Spendings avg/day delta uses it (COS-35).
+ * Backs the dashboard's monthly breakdown trend column + "Rising category"
+ * insight (COS-41), and the Spendings weekly breakdown (COS-35).
  */
 const useCategoryTrends = (periodType: string) => {
   const { privateRequest } = useRequestHelper();

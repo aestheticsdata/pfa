@@ -1,4 +1,5 @@
 import { groupSpendingsByMonth } from "@components/spendings/search/groupByMonth";
+import { DATE_FNS_LOCALES } from "@i18n/useDateLocale";
 
 import type { SpendingItem } from "@components/spendings/types";
 
@@ -7,7 +8,7 @@ const makeItem = (ID: string, date: string): SpendingItem =>
 
 describe("groupSpendingsByMonth", () => {
   it("returns an empty array for no items", () => {
-    expect(groupSpendingsByMonth([])).toEqual([]);
+    expect(groupSpendingsByMonth([], DATE_FNS_LOCALES.fr)).toEqual([]);
   });
 
   it("groups consecutive items of the same month into one bucket, newest-first order preserved", () => {
@@ -18,7 +19,7 @@ describe("groupSpendingsByMonth", () => {
       makeItem("d", "2026-02-09"),
     ];
 
-    const groups = groupSpendingsByMonth(items);
+    const groups = groupSpendingsByMonth(items, DATE_FNS_LOCALES.fr);
 
     expect(groups.map((g) => g.key)).toEqual(["2026-07", "2026-05", "2026-02"]);
     expect(groups[0].label).toBe("Juillet 2026");
@@ -28,7 +29,10 @@ describe("groupSpendingsByMonth", () => {
   });
 
   it("keeps a separate bucket per year even for the same month number", () => {
-    const groups = groupSpendingsByMonth([makeItem("a", "2026-01-10"), makeItem("b", "2025-01-10")]);
+    const groups = groupSpendingsByMonth(
+      [makeItem("a", "2026-01-10"), makeItem("b", "2025-01-10")],
+      DATE_FNS_LOCALES.fr,
+    );
 
     expect(groups.map((g) => g.key)).toEqual(["2026-01", "2025-01"]);
     expect(groups.map((g) => g.label)).toEqual(["Janvier 2026", "Janvier 2025"]);

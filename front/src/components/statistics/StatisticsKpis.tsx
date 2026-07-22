@@ -10,18 +10,18 @@ import {
 import {
   cumulative,
   elapsedMonths,
-  MONTHS_FR,
   maxIndex,
   monthlyTotals,
+  monthShortLabels,
   yearTotal,
 } from "@components/statistics/helpers/statisticsData";
 import StatMiniChart from "@components/statistics/StatMiniChart";
+import useDateLocale from "@i18n/useDateLocale";
+import useFormat from "@i18n/useFormat";
+import useTranslations from "@i18n/useTranslations";
 import { CursorTooltip, useCursorHover } from "@lib/dataviz";
-import { euro0 } from "@lib/format";
 import { cn } from "@lib/utils";
-import statisticsText from "@text/statistics";
 import format from "date-fns/format";
-import fr from "date-fns/locale/fr";
 import parseISO from "date-fns/parseISO";
 import { useState } from "react";
 
@@ -47,12 +47,15 @@ const Card = ({ label, children }: { label: string; children: React.ReactNode })
   </GlowCard>
 );
 
-const Value = ({ amount }: { amount: number }) => (
-  <div className="num mb-1 mt-2.5 text-3xl font-medium leading-none tracking-tight text-ink">
-    {euro0(amount)}
-    <span className="text-xl font-normal text-ink-3"> €</span>
-  </div>
-);
+const Value = ({ amount }: { amount: number }) => {
+  const { euro0 } = useFormat();
+  return (
+    <div className="num mb-1 mt-2.5 text-3xl font-medium leading-none tracking-tight text-ink">
+      {euro0(amount)}
+      <span className="text-xl font-normal text-ink-3"> €</span>
+    </div>
+  );
+};
 
 const Delta = ({ down, children }: { down: boolean; children: React.ReactNode }) => (
   <span className={down ? "text-accent-strong" : "text-neg"}>
@@ -83,6 +86,7 @@ const CmpRow = ({
   /** Optional hover detail for the regular/exceptional split bar. */
   barTooltip?: React.ReactNode;
 }) => {
+  const { euro0 } = useFormat();
   const rowTip = useCursorHover<"title" | "bar">();
   return (
     <div className="flex flex-col gap-1.5">
@@ -132,9 +136,9 @@ const CmpRow = ({
   );
 };
 
-/** The four Statistiques KPI cards, all real: totals / averages / biggest month
+/** The four Statistics KPI cards, all real: totals / averages / biggest month
  *  from /statistics + /exceptionals, and card 4's biggest single expenses from
- *  /exceptionals (exceptional) + /biggest-regular-expense (courante). */
+ *  /exceptionals (exceptional) + /biggest-regular-expense (regular). */
 const StatisticsKpis = ({
   statistics,
   year,
@@ -144,6 +148,10 @@ const StatisticsKpis = ({
   biggestRegular,
   showExceptionals,
 }: StatisticsKpisProps) => {
+  const { euro0 } = useFormat();
+  const statisticsText = useTranslations("statistics");
+  const dateLocale = useDateLocale();
+  const monthLabels = monthShortLabels(dateLocale);
   const [now] = useState(() => new Date());
   const compareTotalTip = useCursorHover();
 
@@ -227,7 +235,7 @@ const StatisticsKpis = ({
             <CmpRow
               tag={t.tag.withExceptional}
               kind="exc"
-              title={cap(MONTHS_FR[totalIdx])}
+              title={cap(monthLabels[totalIdx])}
               amount={totalMonthly[totalIdx]}
               regWidth={regMonthly[totalIdx] / cmpScale}
               excWidth={excMonthly[totalIdx] / cmpScale}
@@ -237,7 +245,7 @@ const StatisticsKpis = ({
           <CmpRow
             tag={t.tag.withoutExceptional}
             kind="reg"
-            title={cap(MONTHS_FR[regIdx])}
+            title={cap(monthLabels[regIdx])}
             amount={regMonthly[regIdx]}
             regWidth={regMonthly[regIdx] / cmpScale}
             excWidth={0}
@@ -258,7 +266,7 @@ const StatisticsKpis = ({
               excWidth={Number(topExc.amount) / expenseScale}
               titleTooltip={t.tooltip.expenseInfo(
                 cap(topExc.label),
-                format(parseISO(topExc.date), "d MMM yyyy", { locale: fr }),
+                format(parseISO(topExc.date), "d MMM yyyy", { locale: dateLocale }),
               )}
             />
           )}
@@ -274,7 +282,7 @@ const StatisticsKpis = ({
               regularBiggest.date
                 ? t.tooltip.expenseInfo(
                     regularBiggest.label,
-                    format(parseISO(regularBiggest.date), "d MMM yyyy", { locale: fr }),
+                    format(parseISO(regularBiggest.date), "d MMM yyyy", { locale: dateLocale }),
                   )
                 : undefined
             }
