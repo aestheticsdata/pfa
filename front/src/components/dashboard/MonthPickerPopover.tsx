@@ -66,6 +66,8 @@ const MonthPickerPopover = ({ month, currentMonthStart, onSelectMonth }: MonthPi
         align="center"
         sideOffset={8}
         collisionPadding={8}
+        // Marks this panel as a navbar overlay: raises the page blur (COS-161).
+        data-nav-overlay
         className="w-auto border-0 bg-transparent p-0 shadow-none"
       >
         <div className="pfa-card w-[248px] p-3">

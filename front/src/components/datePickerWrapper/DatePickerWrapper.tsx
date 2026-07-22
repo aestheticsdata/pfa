@@ -2,6 +2,7 @@
 
 import { parseDateParam } from "@components/datePickerWrapper/helpers";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
+import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { DATE_QUERY_PARAM, parseAsSpendingsDate } from "@helpers/dateRoute";
 import { useLocale } from "@i18n/LocaleContext";
 import useDateLocale from "@i18n/useDateLocale";
@@ -11,13 +12,12 @@ import localesDates from "@src/i18n/locales-dates";
 import format from "date-fns/format";
 import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
 import { useQueryState } from "nuqs";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import DayPicker from "react-day-picker";
 // NOTE: react-day-picker/lib/style.css is intentionally NOT imported — the pfa
 // "Capsule" styling in globals.css fully styles the DayPicker, and the lib CSS
 // (loaded after globals) would otherwise win and reintroduce the blue band,
 // triangle nav arrows and white hover box.
-import useOnClickOutside from "use-onclickoutside";
 
 import type { Modifiers } from "react-day-picker";
 
@@ -31,15 +31,13 @@ const DatePickerWrapper = () => {
     isCalendarVisible,
     hoverRange,
     selectedDays,
-    toggleCalendar,
-    handleClickOutside,
+    setIsCalendarVisible,
     handleDayChange,
     handleDayEnter,
     handleDayLeave,
   } = useDatePickerState();
 
   const [selectedDateParam] = useQueryState(DATE_QUERY_PARAM, parseAsSpendingsDate);
-  const ref = useRef<HTMLDivElement>(null);
 
   const daysAreSelected = selectedDays.length > 0;
 
@@ -58,8 +56,6 @@ const DatePickerWrapper = () => {
     modifiers.selectedRangeEnd = selectedDays[selectedDays.length - 1];
   }
 
-  useOnClickOutside(ref as React.RefObject<HTMLElement>, handleClickOutside);
-
   useEffect(() => {
     if (selectedDateParam) {
       const date = parseDateParam(selectedDateParam);
@@ -75,38 +71,54 @@ const DatePickerWrapper = () => {
   }, [selectedDateParam]);
 
   return (
-    <div
-      ref={ref}
-      className="relative"
-    >
-      <button
-        type="button"
-        onClick={toggleCalendar}
-        className={cn(
-          "inline-flex select-none items-center gap-2.5 whitespace-nowrap rounded-lg border px-3.5 py-2 text-sm text-ink-2 shadow-lg transition-colors hover:cursor-pointer",
-          isCalendarVisible
-            ? "border-accent-d bg-surface-elev"
-            : "border-line bg-surface-base hover:border-ink-4 hover:bg-surface-elev",
-        )}
+    /* The wrapper no longer positions anything (the panel is portalled) — it
+       stays because it is what absorbs the stretch of the mobile flex-col
+       column, leaving the trigger at its intrinsic width. */
+    <div>
+      <Popover
+        open={isCalendarVisible}
+        onOpenChange={setIsCalendarVisible}
       >
-        <CalendarIcon className="size-4 shrink-0 text-ink-4" />
-        {selectedDays.length > 0 ? (
-          <span className="num text-sm tracking-snug">
-            {format(selectedDays[0], "dd MMM yyyy", { locale: dateLocale })}
-            <span className="mx-1 text-ink-5">—</span>
-            {format(selectedDays[selectedDays.length - 1], "dd MMM yyyy", {
-              locale: dateLocale,
-            })}
-          </span>
-        ) : (
-          <span className="text-sm">{common.datePicker.placeholder}</span>
-        )}
-        <ChevronDown
-          className={cn("size-3.5 shrink-0 text-ink-5 transition-transform", isCalendarVisible && "rotate-180")}
-        />
-      </button>
-      {isCalendarVisible && (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 lg:right-auto">
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={cn(
+              "inline-flex select-none items-center gap-2.5 whitespace-nowrap rounded-lg border px-3.5 py-2 text-sm text-ink-2 shadow-lg transition-colors hover:cursor-pointer",
+              isCalendarVisible
+                ? "border-accent-d bg-surface-elev"
+                : "border-line bg-surface-base hover:border-ink-4 hover:bg-surface-elev",
+            )}
+          >
+            <CalendarIcon className="size-4 shrink-0 text-ink-4" />
+            {selectedDays.length > 0 ? (
+              <span className="num text-sm tracking-snug">
+                {format(selectedDays[0], "dd MMM yyyy", { locale: dateLocale })}
+                <span className="mx-1 text-ink-5">—</span>
+                {format(selectedDays[selectedDays.length - 1], "dd MMM yyyy", {
+                  locale: dateLocale,
+                })}
+              </span>
+            ) : (
+              <span className="text-sm">{common.datePicker.placeholder}</span>
+            )}
+            <ChevronDown
+              className={cn("size-3.5 shrink-0 text-ink-5 transition-transform", isCalendarVisible && "rotate-180")}
+            />
+          </button>
+        </PopoverTrigger>
+        {/* Strip the ui/popover chrome (bg/border/padding/shadow): the DayPicker
+            owns its own "Capsule" surface in daypicker.css, same arrangement as
+            MonthPickerPopover. align="start" reproduces the previous desktop
+            anchoring; collisionPadding shifts it back into view on mobile, where
+            it used to be hard-coded to right-0. */}
+        <PopoverContent
+          align="start"
+          sideOffset={8}
+          collisionPadding={8}
+          // Marks this panel as a navbar overlay: raises the page blur (COS-161).
+          data-nav-overlay
+          className="w-auto border-0 bg-transparent p-0 shadow-none"
+        >
           <DayPicker
             initialMonth={selectedDays[0]}
             locale={locale}
@@ -122,8 +134,8 @@ const DatePickerWrapper = () => {
             onDayMouseLeave={handleDayLeave}
             onWeekClick={() => {}}
           />
-        </div>
-      )}
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };

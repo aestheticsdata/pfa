@@ -137,6 +137,39 @@
   }
 }
 
+/* Blur behind an open navbar overlay — user menu, Dashboard month picker,
+   Dépenses calendar (COS-161). Declarative on purpose: each of those panels
+   tags itself with `data-nav-overlay` and `:has` raises the scrim while one is
+   open, so there is no open-counter to keep in sync. The `:has` root is `body`,
+   not the shell: Radix portals every panel out of the shell subtree.
+   Matching `[data-state="open"]` (not the mere presence of the panel) starts
+   the fade-out with the panel's own exit animation, instead of waiting for it
+   to unmount.
+   z-34: over the page content and the Dépenses band (z-30), UNDER the shell
+   mask (z-35, so the strip above the header stays crisp), the header (z-40) and
+   the portalled panels (z-50) — only the page dims, the chrome stays sharp.
+   pointer-events stay `none` even when visible: Radix already closes on an
+   outside click, and a click-catching scrim would swallow that first click. */
+.pfa-nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 34;
+  background: oklch(0.02 0.004 250 / 0.38);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+body:has([data-nav-overlay][data-state="open"]) .pfa-nav-scrim {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pfa-nav-scrim {
+    transition: none;
+  }
+}
+
 /* Auth screens — faint fixed grain layer behind the card */
 .auth-grain {
   position: fixed;
