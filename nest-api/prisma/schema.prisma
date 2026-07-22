@@ -49,6 +49,10 @@ model Spendings {
   currency   String?     @db.VarChar(3)
   invoicefile String?    @db.VarChar(255)
   category   Categories? @relation(fields: [categoryID], references: [ID])
+
+  // MySQL auto-creates this index with the FK constraint; declaring it (same
+  // name) keeps `migrate diff` clean instead of reporting it as drift forever.
+  @@index([categoryID], map: "Spendings_categoryID_fkey")
 }
 
 model Exceptionals {
