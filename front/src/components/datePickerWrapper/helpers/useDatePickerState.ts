@@ -1,6 +1,5 @@
 "use client";
 
-import useBlur from "@components/common/helpers/blurHelper";
 import { getWeekDays, getWeekRange } from "@components/datePickerWrapper/helpers";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_QUERY_PARAM, parseAsSpendingsDate, SPENDINGS_PATH } from "@helpers/dateRoute";
@@ -12,8 +11,6 @@ import { useState } from "react";
 import type { Days, HoverRange } from "@components/datePickerWrapper/types";
 
 const useDatePickerState = () => {
-  const { toggleBlur } = useBlur();
-
   const [isCalendarVisible, setIsCalendarVisible] = useState<boolean>(false);
   const [hoverRange, setHoverRange] = useState<HoverRange>(null);
   const [selectedDays, setSelectedDays] = useState<Days>([]);
@@ -28,15 +25,9 @@ const useDatePickerState = () => {
     return normalized === "" ? "/" : normalized;
   };
 
-  const toggleCalendar = () => {
-    toggleBlur();
-    setIsCalendarVisible(!isCalendarVisible);
-  };
-
-  const handleClickOutside = () => {
-    isCalendarVisible && toggleBlur();
-    setIsCalendarVisible(false);
-  };
+  // Open/close is owned by the Radix popover (trigger click, outside click,
+  // Escape) — the hook only holds the state it drives (COS-161).
+  const closeCalendar = () => setIsCalendarVisible(false);
 
   const handleDayChange = (date: Date, updateUrl = true) => {
     const dateISO = formatISO(date, { representation: "date" });
@@ -62,7 +53,7 @@ const useDatePickerState = () => {
     setSelectedDateIso(dateISO);
     setSelectedDays(dateRange);
 
-    handleClickOutside();
+    closeCalendar();
   };
 
   const handleDayEnter = (date: Date) => {
@@ -79,8 +70,7 @@ const useDatePickerState = () => {
     selectedDays,
     setHoverRange,
     setSelectedDays,
-    toggleCalendar,
-    handleClickOutside,
+    setIsCalendarVisible,
     handleDayChange,
     handleDayEnter,
     handleDayLeave,

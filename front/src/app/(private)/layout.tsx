@@ -23,6 +23,13 @@ export default async function PrivateLayout({ children }: { children: React.Reac
         <div className="pfa-shell mx-auto w-full max-w-[2000px] px-4 pt-4 pb-16 sm:px-6 lg:px-8">
           <NavBar />
           <main>{children}</main>
+          {/* Dims + blurs the page while a navbar overlay is open (COS-161).
+              Driven entirely from CSS (`:has([data-nav-overlay])`), so it stays
+              a static node here with no state to wire. */}
+          <div
+            className="pfa-nav-scrim"
+            aria-hidden
+          />
         </div>
       </div>
     </AuthProvider>
