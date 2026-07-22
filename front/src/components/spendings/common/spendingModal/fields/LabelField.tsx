@@ -16,6 +16,11 @@ interface LabelFieldProps {
   setLabelQuery: Dispatch<SetStateAction<string>>;
 }
 
+// Shared by the real chips and the invisible placeholder, so an empty row keeps
+// the exact same height as a filled one (COS-159).
+const CHIP_CLASSNAME =
+  "min-w-0 shrink truncate rounded-md border border-line bg-surface-hi px-2 py-1 text-2xs text-ink-2";
+
 const LabelField = ({
   register,
   errors,
@@ -25,6 +30,8 @@ const LabelField = ({
   setLabelQuery,
 }: LabelFieldProps) => {
   const spendings = useTranslations("spendings");
+  // Suggestions are spending-specific, hidden for recurrings.
+  const suggestions = asRecurring ? [] : labelSuggestions;
 
   return (
     <div className="flex flex-col gap-2">
@@ -42,23 +49,35 @@ const LabelField = ({
           onChange: (e) => setLabelQuery(e.target.value),
         })}
       />
-      {errors.spendingLabel && <p className="text-xs text-neg">{errors.spendingLabel.message}</p>}
-      {/* Suggestions are spending-specific, hidden for recurrings. */}
-      {!asRecurring && labelSuggestions.length > 0 && (
-        <div className="flex flex-wrap gap-1.5">
-          {labelSuggestions.map((s) => (
+      {/* Always mounted: an error appearing must not push the rest of the modal down. */}
+      <p className="min-h-4 text-xs text-neg">{errors.spendingLabel?.message}</p>
+      {/*
+        Suggestion row: always mounted and always one line high (no wrap, chips
+        truncate), so the dialog keeps a constant height while typing — the list
+        shrinks and grows on every keystroke (COS-159).
+      */}
+      <div className="flex gap-1.5">
+        {suggestions.length > 0 ? (
+          suggestions.map((s) => (
             <button
               key={s.label}
               type="button"
               onClick={() => applySuggestion(s)}
-              className="rounded-md border border-line bg-surface-hi px-2 py-1 text-2xs text-ink-2 transition-colors hover:border-ink-4 hover:text-ink"
+              className={`${CHIP_CLASSNAME} cursor-pointer transition-colors hover:border-ink-4 hover:text-ink`}
             >
               {s.label}
               {s.category && <span className="text-ink-4"> — {s.category}</span>}
             </button>
-          ))}
-        </div>
-      )}
+          ))
+        ) : (
+          <span
+            aria-hidden
+            className={`${CHIP_CLASSNAME} invisible`}
+          >
+            &nbsp;
+          </span>
+        )}
+      </div>
     </div>
   );
 };
