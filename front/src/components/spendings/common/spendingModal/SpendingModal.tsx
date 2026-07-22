@@ -143,6 +143,7 @@ const SpendingModal = ({
     handleSubmit,
     getValues,
     setValue,
+    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<SpendingForm>({
     resolver: zodResolver(makeSpendingSchema(spendings.modal.validation)),
@@ -217,7 +218,8 @@ const SpendingModal = ({
 
           <LabelField
             register={register}
-            errors={errors}
+            error={errors.spendingLabel?.message}
+            clearErrors={clearErrors}
             asRecurring={asRecurring}
             labelSuggestions={labelSuggestions}
             applySuggestion={applySuggestion}
@@ -226,7 +228,7 @@ const SpendingModal = ({
 
           <AmountField
             register={register}
-            errors={errors}
+            error={errors.spendingAmount?.message}
           />
 
           {/* Category is hidden for recurrings: the backend/DB have no notion of
