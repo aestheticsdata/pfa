@@ -63,6 +63,8 @@ const UserMenu = () => {
       <DropdownMenuContent
         align="end"
         sideOffset={12}
+        // Marks this panel as a navbar overlay: raises the page blur (COS-161).
+        data-nav-overlay
         className="w-64 p-1"
       >
         <DropdownMenuItem
