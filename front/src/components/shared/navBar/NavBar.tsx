@@ -9,6 +9,7 @@ import Wordmark from "@components/shared/brand/Wordmark";
 import { ROUTES } from "@components/shared/config/constants";
 import useGlobalStore from "@components/shared/globalStore";
 import { IconButton } from "@components/shared/IconButton";
+import DrawerAccountSection from "@components/shared/navBar/userMenu/DrawerAccountSection";
 import UserMenu from "@components/shared/navBar/userMenu/UserMenu";
 import {
   buildDashboardPath,
@@ -233,17 +234,22 @@ const NavBar = () => {
               </div>
             )
           )}
-          <UserMenu />
+          {/* Below lg the same actions live at the bottom of the drawer (COS-163). */}
+          <div className="hidden lg:block">
+            <UserMenu />
+          </div>
         </div>
 
         {isDashboard ? (
-          <div className="flex w-full items-center gap-2 md:hidden">
+          <div className="flex w-full flex-col gap-2 md:hidden">
+            {/* Stacked like the Dépenses variant below: side by side, the button
+                overflowed the viewport on narrow screens (COS-163). */}
             <MonthSelector />
             <button
               type="button"
               onClick={goToCurrentMonth}
               disabled={currentMonthDisabled}
-              className={currentMonthButtonClass}
+              className={cn(currentMonthButtonClass, "self-start")}
             >
               {text.currentMonth}
             </button>
@@ -310,6 +316,10 @@ const NavBar = () => {
             );
           })}
         </nav>
+        <DrawerAccountSection
+          drawerOpen={drawerOpen}
+          onNavigate={() => setDrawerOpen(false)}
+        />
       </aside>
     </>
   );
