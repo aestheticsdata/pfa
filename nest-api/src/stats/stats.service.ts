@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { endOfMonth, format, getDay, getDaysInMonth, getMonth, getYear, parse, startOfMonth } from "date-fns";
 import { fr } from "date-fns/locale";
+import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
 import { PrismaService } from "../prisma/prisma.service";
 
 import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
@@ -11,6 +12,7 @@ import type { CategoryTrendPoint, CategoryTrendsResponse } from "@stats/dto/cate
 import type { BusiestWeekResponse } from "@stats/dto/busiest-week-response.interface";
 import type { SpendingPaceResponse } from "@stats/dto/spending-pace-response.interface";
 import type { WeekdayCategoriesResponse, WeekdayCategory } from "@stats/dto/weekday-categories-response.interface";
+import type { SearchTimelineBucket, SearchTimelineResponse } from "@stats/dto/search-timeline-response.interface";
 
 /** Rounds to 2 decimal places to avoid JS float precision issues. */
 const roundCurrency = (n: number): number => Math.round(n);
@@ -623,5 +625,86 @@ export class StatsService {
     }
 
     return output;
+  }
+
+  /**
+   * Time distribution of the spendings matching a search term (COS-160) — the
+   * aggregate behind the Statistics search-timeline widget. Matching reuses the
+   * whole-history search clause (label OR accessible category name, LIKE
+   * metacharacters escaped — see @spendings/search-where.helper) so the widget
+   * and the Dashboard search never disagree for the same term. `Spendings`
+   * table only (recurrings/exceptionals live in their own tables), scoped to
+   * the user, over an inclusive [from, to] calendar window.
+   *
+   * Buckets by UTC day, or by calendar week keyed on its Sunday (weeks run
+   * Sun→Sat across the app). Prisma's groupBy can't group on a truncated date,
+   * so this selects {date, amount} and aggregates in memory — fine at
+   * single-user volumes ($queryRaw with DATE()/YEARWEEK stays the fallback if
+   * it ever gets heavy). Only non-empty buckets are returned; the front fills
+   * the gaps.
+   */
+  async getSearchTimeline(
+    query: string,
+    from: string,
+    to: string,
+    bucket: "day" | "week",
+    userID: string,
+  ): Promise<SearchTimelineResponse> {
+    const emptySummary = { total: 0, count: 0, firstDate: null, lastDate: null };
+    const q = query.trim();
+    if (q.length < MIN_SEARCH_LENGTH) {
+      return { buckets: [], summary: emptySummary };
+    }
+
+    // Inclusive [from, to] window as a half-open UTC range (`to` pushed to the
+    // next UTC day), like the category-stats window.
+    const fromDate = new Date(`${from}T00:00:00.000Z`);
+    const toExclusive = new Date(new Date(`${to}T00:00:00.000Z`).getTime() + 24 * 60 * 60 * 1000);
+
+    const rows = await this.prisma.spendings.findMany({
+      where: {
+        userID,
+        ...spendingSearchTextWhere(escapeLikeQuery(q)),
+        date: { gte: fromDate, lt: toExclusive },
+      },
+      select: { date: true, amount: true },
+    });
+
+    // A week bucket is keyed by the UTC date of its Sunday.
+    const bucketKey = (date: Date): string => {
+      if (bucket === "day") {
+        return date.toISOString().slice(0, 10);
+      }
+      const sunday = new Date(date.getTime());
+      sunday.setUTCHours(0, 0, 0, 0);
+      sunday.setUTCDate(sunday.getUTCDate() - sunday.getUTCDay());
+      return sunday.toISOString().slice(0, 10);
+    };
+
+    const byBucket = new Map<string, { total: number; count: number }>();
+    let total = 0;
+    let firstDate: string | null = null;
+    let lastDate: string | null = null;
+    for (const row of rows) {
+      const key = bucketKey(row.date);
+      const entry = byBucket.get(key) ?? { total: 0, count: 0 };
+      entry.total += Number(row.amount);
+      entry.count += 1;
+      byBucket.set(key, entry);
+
+      total += Number(row.amount);
+      const day = row.date.toISOString().slice(0, 10);
+      if (firstDate === null || day < firstDate) firstDate = day;
+      if (lastDate === null || day > lastDate) lastDate = day;
+    }
+
+    const buckets: SearchTimelineBucket[] = Array.from(byBucket.entries())
+      .map(([date, entry]) => ({ date, total: round2(entry.total), count: entry.count }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    return {
+      buckets,
+      summary: { total: round2(total), count: rows.length, firstDate, lastDate },
+    };
   }
 }

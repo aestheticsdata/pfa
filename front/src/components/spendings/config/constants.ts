@@ -2,6 +2,10 @@
 // backend, kept in sync with the server-side guard.
 export const SEARCH_MIN_LENGTH = 2;
 
+// Debounce applied to search-as-you-type fields (the Dashboard search modal,
+// the Statistics search timeline) before the query hits the backend.
+export const SEARCH_DEBOUNCE_MS = 250;
+
 export const DATE_FORMAT = "yyyy-MM-dd";
 
 // Period-type discriminators (formerly in the removed spendingDashboard tree).

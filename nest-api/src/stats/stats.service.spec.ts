@@ -685,3 +685,108 @@ describe("StatsService.getWeekdayCategories", () => {
     expect(weekdays[0]).toEqual({ name: "Alimentation", color: "#22c55e" });
   });
 });
+
+/**
+ * Unit tests for StatsService.getSearchTimeline — the time distribution of the
+ * spendings matching a search term (COS-160). Prisma is mocked; these assert
+ * the shared search where clause, the day/week bucketisation and the summary.
+ */
+describe("StatsService.getSearchTimeline", () => {
+  const makeService = (rows: { date: Date; amount: unknown }[]) => {
+    const findMany = jest.fn().mockResolvedValue(rows);
+    // Only spendings.findMany is exercised; cast keeps the mock minimal.
+    const prisma = { spendings: { findMany } } as unknown as never;
+    return { service: new StatsService(prisma), findMany };
+  };
+
+  const emptyResponse = { buckets: [], summary: { total: 0, count: 0, firstDate: null, lastDate: null } };
+
+  it("returns empty without hitting the DB when the trimmed query is shorter than 2 chars", async () => {
+    const { service, findMany } = makeService([]);
+
+    await expect(service.getSearchTimeline(" a ", "2026-01-01", "2026-12-31", "day", "user-1")).resolves.toEqual(
+      emptyResponse,
+    );
+    expect(findMany).not.toHaveBeenCalled();
+  });
+
+  it("queries the shared search clause, scoped to the user, over an inclusive UTC window", async () => {
+    const { service, findMany } = makeService([]);
+
+    await service.getSearchTimeline(" librairie ", "2026-01-01", "2026-07-19", "day", "user-1");
+
+    // Same label-OR-category clause as /spendings/search (trimmed term); `to`
+    // is made inclusive by pushing the exclusive upper bound to the next UTC day.
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        userID: "user-1",
+        OR: [{ label: { contains: "librairie" } }, { category: { is: { name: { contains: "librairie" } } } }],
+        date: { gte: new Date(Date.UTC(2026, 0, 1)), lt: new Date(Date.UTC(2026, 6, 20)) },
+      },
+      select: { date: true, amount: true },
+    });
+  });
+
+  it("escapes LIKE wildcards so % and _ match literally", async () => {
+    const { service, findMany } = makeService([]);
+
+    await service.getSearchTimeline("100%_x", "2026-01-01", "2026-12-31", "day", "user-1");
+
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: expect.objectContaining({
+          OR: [
+            { label: { contains: "100\\%\\_x" } },
+            { category: { is: { name: { contains: "100\\%\\_x" } } } },
+          ],
+        }),
+      }),
+    );
+  });
+
+  it("buckets by UTC day, skipping empty days, chronologically, with a rounded summary", async () => {
+    const decimal = (v: string) => ({ toString: () => v });
+    const { service } = makeService([
+      { date: new Date("2026-03-10T09:30:00.000Z"), amount: decimal("10.10") },
+      { date: new Date("2026-03-10T18:00:00.000Z"), amount: decimal("0.20") },
+      { date: new Date("2026-03-02T00:00:00.000Z"), amount: decimal("5") },
+    ]);
+
+    const result = await service.getSearchTimeline("libr", "2026-03-01", "2026-03-31", "day", "user-1");
+
+    // Sparse (no 2026-03-03..09 zero buckets), sorted, same-day rows folded.
+    expect(result.buckets).toEqual([
+      { date: "2026-03-02", total: 5, count: 1 },
+      { date: "2026-03-10", total: 10.3, count: 2 },
+    ]);
+    expect(result.summary).toEqual({ total: 15.3, count: 3, firstDate: "2026-03-02", lastDate: "2026-03-10" });
+  });
+
+  it("buckets by calendar week keyed on its Sunday (Sun→Sat, like the rest of the app)", async () => {
+    const decimal = (v: string) => ({ toString: () => v });
+    const { service } = makeService([
+      // 2026-03-02 is a Monday → week of Sunday 2026-03-01.
+      { date: new Date("2026-03-02T12:00:00.000Z"), amount: decimal("10") },
+      // 2026-03-07 is the Saturday of that same week.
+      { date: new Date("2026-03-07T12:00:00.000Z"), amount: decimal("20") },
+      // 2026-03-08 is the next Sunday → its own week.
+      { date: new Date("2026-03-08T00:00:00.000Z"), amount: decimal("40") },
+    ]);
+
+    const result = await service.getSearchTimeline("libr", "2026-03-01", "2026-03-31", "week", "user-1");
+
+    expect(result.buckets).toEqual([
+      { date: "2026-03-01", total: 30, count: 2 },
+      { date: "2026-03-08", total: 40, count: 1 },
+    ]);
+    expect(result.summary).toEqual({ total: 70, count: 3, firstDate: "2026-03-02", lastDate: "2026-03-08" });
+  });
+
+  it("returns the empty summary when nothing matches in the window", async () => {
+    const { service } = makeService([]);
+
+    await expect(service.getSearchTimeline("libr", "2026-01-01", "2026-12-31", "week", "user-1")).resolves.toEqual(
+      emptyResponse,
+    );
+  });
+});

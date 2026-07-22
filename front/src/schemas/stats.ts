@@ -130,3 +130,27 @@ export const SpendingPaceResponseSchema = z.object({
 });
 
 export type SpendingPaceResponse = z.infer<typeof SpendingPaceResponseSchema>;
+
+// Time distribution of the spendings matching a search term (COS-160) — GET
+// /search-timeline. Sparse: only buckets with at least one match come back (the
+// widget fills the gaps), each keyed by its start day (the day itself, or the
+// Sunday of the Sun→Sat week). Backs the Statistics search-timeline widget.
+export const SearchTimelineBucketSchema = z.object({
+  date: z.string(),
+  total: numberLikeSchema,
+  count: numberLikeSchema,
+});
+
+export type SearchTimelineBucket = z.infer<typeof SearchTimelineBucketSchema>;
+
+export const SearchTimelineResponseSchema = z.object({
+  buckets: z.array(SearchTimelineBucketSchema),
+  summary: z.object({
+    total: numberLikeSchema,
+    count: numberLikeSchema,
+    firstDate: z.string().nullable(),
+    lastDate: z.string().nullable(),
+  }),
+});
+
+export type SearchTimelineResponse = z.infer<typeof SearchTimelineResponseSchema>;

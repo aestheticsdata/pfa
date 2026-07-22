@@ -11,6 +11,7 @@ import { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
 import { BusiestWeekQueryDto } from "@stats/dto/busiest-week-query.dto";
 import { SpendingPaceQueryDto } from "@stats/dto/spending-pace-query.dto";
 import { WeekdayCategoriesQueryDto } from "@stats/dto/weekday-categories-query.dto";
+import { SearchTimelineQueryDto } from "@stats/dto/search-timeline-query.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
@@ -140,5 +141,16 @@ export class WeekdayCategoriesController {
   @Get()
   async getWeekdayCategories(@Query() query: WeekdayCategoriesQueryDto, @GetUserId() userID: string) {
     return this.statsService.getWeekdayCategories(query.year, userID);
+  }
+}
+
+@Controller("search-timeline")
+@UseGuards(SessionAuthGuard)
+export class SearchTimelineController {
+  constructor(private readonly statsService: StatsService) {}
+
+  @Get()
+  async getSearchTimeline(@Query() query: SearchTimelineQueryDto, @GetUserId() userID: string) {
+    return this.statsService.getSearchTimeline(query.q, query.from, query.to, query.bucket, userID);
   }
 }

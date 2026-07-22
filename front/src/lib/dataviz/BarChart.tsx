@@ -17,6 +17,17 @@ interface BarChartProps {
   gap?: number;
   radius?: number;
   trackColor?: string;
+  /** Minimum rendered size (viewBox units) of a non-zero bar, so a tiny value
+   *  stays visible among fine bars. Zero-value bars render nothing. */
+  minBarSize?: number;
+  /**
+   * Stable id prefix; when set with `gradient`, bars fill with a vertical
+   * gradient. Must be unique per mounted chart and deterministic (avoids
+   * hydration mismatch — do NOT pass a random value).
+   */
+  id?: string;
+  /** [baseline, tip] colors of the vertical gradient used as the default fill. */
+  gradient?: [string, string];
   className?: string;
   ariaLabel?: string;
 }
@@ -34,11 +45,15 @@ const BarChart = ({
   gap = 0.35,
   radius = 2,
   trackColor,
+  minBarSize = 0.5,
+  id,
+  gradient,
   className,
   ariaLabel,
 }: BarChartProps) => {
   const domainMax = max ?? Math.max(1, ...bars.map((b) => b.value));
   const n = Math.max(1, bars.length);
+  const defaultFill = id && gradient ? `url(#${id}-g)` : color;
 
   return (
     <svg
@@ -50,9 +65,30 @@ const BarChart = ({
       aria-label={ariaLabel}
       className={cn("block", className)}
     >
+      {id && gradient && (
+        <defs>
+          <linearGradient
+            id={`${id}-g`}
+            x1="0"
+            y1="1"
+            x2="0"
+            y2="0"
+          >
+            <stop
+              offset="0%"
+              stopColor={gradient[0]}
+            />
+            <stop
+              offset="100%"
+              stopColor={gradient[1]}
+            />
+          </linearGradient>
+        </defs>
+      )}
+
       {bars.map((b, i) => {
         const frac = Math.max(0, b.value) / domainMax;
-        const fill = b.color ?? color;
+        const fill = b.color ?? defaultFill;
         if (orientation === "horizontal") {
           const band = height / n;
           const barH = band * (1 - gap);
@@ -70,14 +106,16 @@ const BarChart = ({
                   fill={trackColor}
                 />
               )}
-              <rect
-                x={0}
-                y={y}
-                width={Math.max(w, 0.5)}
-                height={barH}
-                rx={radius}
-                fill={fill}
-              />
+              {b.value > 0 && (
+                <rect
+                  x={0}
+                  y={y}
+                  width={Math.max(w, minBarSize)}
+                  height={barH}
+                  rx={radius}
+                  fill={fill}
+                />
+              )}
             </g>
           );
         }
@@ -97,14 +135,16 @@ const BarChart = ({
                 fill={trackColor}
               />
             )}
-            <rect
-              x={x}
-              y={height - h}
-              width={barW}
-              height={Math.max(h, 0.5)}
-              rx={radius}
-              fill={fill}
-            />
+            {b.value > 0 && (
+              <rect
+                x={x}
+                y={height - Math.max(h, minBarSize)}
+                width={barW}
+                height={Math.max(h, minBarSize)}
+                rx={radius}
+                fill={fill}
+              />
+            )}
           </g>
         );
       })}

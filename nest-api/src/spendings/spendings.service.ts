@@ -9,6 +9,7 @@ import sharp from "sharp";
 import { AppConfig } from "@config/app.config";
 import { SshBackupService } from "@infrastructure/ssh-backup/ssh-backup.service";
 import { isValidImageFile } from "@spendings/upload/upload.config";
+import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
 import type { SpendingLabelSuggestion } from "@spendings/dto/spending-label-suggestion.interface";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -20,9 +21,9 @@ const MIME_BY_EXT: Record<string, string> = {
   gif: "image/gif",
 };
 
-// Whole-history search (COS-114): require a minimal query so a stray keystroke
-// can't scan the entire table, and stream results a page at a time.
-const MIN_SEARCH_LENGTH = 2;
+// Whole-history search (COS-114) streams results a page at a time. The minimum
+// query length and the text-match clause live in search-where.helper.ts, shared
+// with the statistics search timeline (COS-160).
 const SEARCH_PAGE_SIZE = 50;
 
 // Label autocomplete (COS-23): the modal shows a small chip row under the field,
@@ -269,16 +270,9 @@ export class SpendingsService {
       return { items: [], nextCursor: null, total: 0 };
     }
 
-    // Escape LIKE metacharacters so a literal % or _ in the term (e.g. "100%",
-    // "T_Mobile") matches literally instead of acting as a wildcard. MySQL's
-    // default LIKE escape is backslash; the single pass escapes the backslash too.
-    const escaped = q.replace(/[\\%_]/g, "\\$&");
-
     const where = {
       userID,
-      ...(hasText
-        ? { OR: [{ label: { contains: escaped } }, { category: { is: { name: { contains: escaped } } } }] }
-        : {}),
+      ...(hasText ? spendingSearchTextWhere(escapeLikeQuery(q)) : {}),
       // Year filter: half-open [year-01-01, next-year-01-01) covers the whole year
       // regardless of any time component on the date column.
       ...(hasYear
@@ -359,7 +353,7 @@ export class SpendingsService {
     const q = query.trim();
     // Escape LIKE metacharacters so a literal % or _ in the prefix matches
     // literally instead of acting as a wildcard (same guard as searchSpendings).
-    const escaped = q.replace(/[\\%_]/g, "\\$&");
+    const escaped = escapeLikeQuery(q);
 
     const groupLabels = (prefix?: string) =>
       this.prisma.spendings.groupBy({

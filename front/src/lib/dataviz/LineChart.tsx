@@ -161,7 +161,7 @@ const LineChart = ({
           <g key={`s-${i}`}>
             {s.area && pixels.length > 1 && (
               <path
-                d={areaPath(pixels, baseY)}
+                d={areaPath(pixels, baseY, s.smooth)}
                 fill={id ? `url(#${id}-a${i})` : color}
                 fillOpacity={id ? 1 : 0.14}
                 stroke="none"
