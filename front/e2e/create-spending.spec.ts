@@ -1,6 +1,7 @@
+import { API, getCsrfToken } from "@e2e/helpers/api";
+import { daysInWeekOf } from "@e2e/helpers/week";
 import { expect, test } from "@playwright/test";
 
-const API = "http://localhost:6100/api";
 // Sentinel prefix identifying spendings created by this suite (cleaned up in afterEach).
 const SENTINEL_PREFIX = "E2E ";
 
@@ -13,11 +14,7 @@ function isoDay(d: Date): string {
 // Residue guard: even if the test fails midway, no sentinel spending survives
 // in the demo account. page.request shares the browser session cookie.
 test.afterEach(async ({ page }) => {
-  const csrfResponse = await page.request.get(`${API}/users/csrf`);
-  if (!csrfResponse.ok()) {
-    throw new Error(`Nettoyage E2E impossible : /users/csrf a répondu ${csrfResponse.status()}`);
-  }
-  const { csrfToken } = await csrfResponse.json();
+  const csrfToken = await getCsrfToken(page);
 
   const now = new Date();
   const from = isoDay(new Date(now.getFullYear(), now.getMonth(), 1));
@@ -38,7 +35,7 @@ test.afterEach(async ({ page }) => {
 test("create then delete a spending through the modal", async ({ page }) => {
   const label = `${SENTINEL_PREFIX}${Date.now()}`;
   await page.goto("/spendings");
-  await expect(page.locator("[data-sp-day]")).toHaveCount(7);
+  await expect(page.locator("[data-sp-day]")).toHaveCount(daysInWeekOf(new Date()));
 
   // Create via the floating button (defaults to today's date)
   await page.getByRole("button", { name: "Nouvelle dépense" }).click();

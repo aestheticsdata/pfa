@@ -1,3 +1,4 @@
+import { API, getCsrfToken } from "@e2e/helpers/api";
 import { expect, test as setup } from "@playwright/test";
 
 const AUTH_FILE = "e2e/.auth/user.json";
@@ -17,6 +18,17 @@ setup("login and persist session", async ({ page }) => {
   await page.getByRole("button", { name: "Se connecter" }).click();
 
   await page.waitForURL(/\/dashboard/);
+
+  // The suite asserts French copy, but LocaleUserSync applies the language
+  // persisted on the account (COS-155), which wins over the browser locale.
+  // Pin it to French so switching the app to English by hand doesn't turn
+  // every locator into a miss.
+  await page.request.patch(`${API}/users/me`, {
+    headers: { "x-csrf-token": await getCsrfToken(page) },
+    data: { language: "fr" },
+  });
+  await page.reload();
+
   await expect(page.getByRole("heading", { name: "Plafond hebdomadaire" })).toBeVisible();
 
   await page.context().storageState({ path: AUTH_FILE });

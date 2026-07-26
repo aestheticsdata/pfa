@@ -1,3 +1,4 @@
+import { daysInWeekOf } from "@e2e/helpers/week";
 import { expect, test } from "@playwright/test";
 
 // Text of the global error boundary (src/app/error.tsx) — a broken query throws into it.
@@ -15,8 +16,8 @@ test.describe("private pages smoke", () => {
 
   test("spendings renders the week with data", async ({ page }) => {
     await page.goto("/spendings");
-    // The 7 day cards only render once the spendings query resolved
-    await expect(page.locator("[data-sp-day]")).toHaveCount(7);
+    // The day cards only render once the spendings query resolved
+    await expect(page.locator("[data-sp-day]")).toHaveCount(daysInWeekOf(new Date()));
     await expect(page.getByRole("button", { name: "Nouvelle dépense" })).toBeVisible();
     await expect(page.getByText(ERROR_BOUNDARY)).toBeHidden();
   });

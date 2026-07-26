@@ -19,7 +19,9 @@ reuses them (`reuseExistingServer: true`). Otherwise it starts both itself.
 ## Structure
 
 - `auth.setup.ts` — logs in once through the real login form, saves the session to `.auth/user.json`
-  (git-ignored). Doubles as the login E2E test.
+  (git-ignored). Doubles as the login E2E test. Also pins the account language to French, since
+  every locator below asserts French copy and the persisted language wins over the browser locale.
+- `helpers/` — shared test utilities (API base + CSRF token, week length). Not collected as tests.
 - `public.spec.ts` — unauthenticated smoke: login and signup forms render.
 - `smoke.spec.ts` — every private page loads and shows its data (not the error boundary,
   not a stuck skeleton). The regression net for the TanStack Query migration (COS-52).
