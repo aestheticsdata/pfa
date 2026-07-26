@@ -10,6 +10,7 @@ import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-respo
 import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-expense-response.interface";
 import type { CategoryTrendPoint, CategoryTrendsResponse } from "@stats/dto/category-trends-response.interface";
 import type { BusiestWeekResponse } from "@stats/dto/busiest-week-response.interface";
+import type { MonthlyStatsResponse } from "@stats/dto/monthly-stats-response.interface";
 import type { SpendingPaceResponse } from "@stats/dto/spending-pace-response.interface";
 import type { WeekdayCategoriesResponse, WeekdayCategory } from "@stats/dto/weekday-categories-response.interface";
 import type { SearchTimelineBucket, SearchTimelineResponse } from "@stats/dto/search-timeline-response.interface";
@@ -223,10 +224,7 @@ export class StatsService {
     return { monthlyAverage: total / monthsElapsed };
   }
 
-  async getMonthlyStats(
-    from: string,
-    userID: string,
-  ): Promise<{ spendingsSum: { amount: string }; recurringsSum: { amount: string } }> {
+  async getMonthlyStats(from: string, userID: string): Promise<MonthlyStatsResponse> {
     const fromDate = new Date(from);
     const start = format(startOfMonth(fromDate), "yyyy-MM-dd");
     const end = format(endOfMonth(fromDate), "yyyy-MM-dd");
@@ -252,14 +250,10 @@ export class StatsService {
       }),
     ]);
 
-    const recurringsSum = {
-      amount: String(recurringsResult._sum.amount ?? 0),
+    return {
+      spendingsSum: round2(Number(spendingsResult._sum.amount ?? 0)),
+      recurringsSum: round2(Number(recurringsResult._sum.amount ?? 0)),
     };
-    const spendingsSum = {
-      amount: String(spendingsResult._sum.amount ?? 0),
-    };
-
-    return { spendingsSum, recurringsSum };
   }
 
   /**

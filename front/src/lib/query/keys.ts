@@ -6,7 +6,7 @@ export const QUERY_KEYS = {
   SPENDINGS_BY_MONTH: "spendingsByMonth",
   RECURRINGS: "recurrings",
   RECURRINGS_DRAWN: "recurringsDrawn",
-  INITIAL_AMOUNT: "initialAmount",
+  MONTHLY_STATS: "monthlyStats",
   DASHBOARD: "dashboard",
   DAILY_PROJECTION: "dailyProjection",
   MONTHLY_INCOME: "monthlyIncome",

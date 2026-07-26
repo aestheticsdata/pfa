@@ -41,13 +41,15 @@ export const MonthlyIncomeResponseSchema = z.object({
 
 export type MonthlyIncomeResponse = z.infer<typeof MonthlyIncomeResponseSchema>;
 
+// The two halves of a month's total spend — GET /monthlystats. One-off spendings
+// on one side, the month's fixed expenses on the other; the dashboard adds them
+// up for "spent this month" and for the remaining-budget delta. Both arrive as
+// bare numbers since COS-179 (they were `{ amount }` wrappers carrying nothing).
 export const MonthlyStatsSchema = z.object({
-  spendingsSum: z.object({
-    amount: numberLikeSchema,
-  }),
-  recurringsSum: z.object({
-    amount: numberLikeSchema,
-  }),
+  spendingsSum: numberLikeSchema,
+  recurringsSum: numberLikeSchema,
 });
+
+export type MonthlyStats = z.infer<typeof MonthlyStatsSchema>;
 
 export const WeeklyStatsSchema = z.array(numberLikeSchema);

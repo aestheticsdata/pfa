@@ -93,7 +93,7 @@ const useSpendings = () => {
       queryKey: [QUERY_KEYS.CATEGORY_STATS],
     });
     await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.INITIAL_AMOUNT, monthBeginning],
+      queryKey: [QUERY_KEYS.MONTHLY_STATS, monthBeginning],
     });
     await queryClient.invalidateQueries({
       queryKey: [QUERY_KEYS.CATEGORY_TRENDS, monthBeginning],
