@@ -7,5 +7,3 @@ export type HoverRange = {
   from: Date;
   to: Date;
 } | null;
-
-export type Days = Date[];

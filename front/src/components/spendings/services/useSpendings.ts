@@ -63,12 +63,9 @@ const useSpendings = () => {
     queryFn: getSpendings,
     retry: false,
 
-    // date store is available when coming from login because DatePicker
-    // mounts before Spendings
-    // but I don't know why when already logged in, and coming directly to spendings
-    // Spendings mounts before DatePickerWrapper, causing from to be undefined and
-    // hence this query to fail
-    // so enable below
+    // The week lands in the store from the page's `?date=` sync effect, i.e. one
+    // commit after this component first renders — until then from/to are null and
+    // the query must not fire against an undefined month (COS-99).
     enabled: !!from && !!to && !!userID,
   });
 
