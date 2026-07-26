@@ -1,19 +1,5 @@
+import { numberLikeSchema, numberLikeWithZeroFallbackSchema } from "@src/schemas/primitives";
 import { z } from "zod";
-
-const numberLikeSchema = z.preprocess(
-  (value) => (typeof value === "number" || typeof value === "string" ? value : NaN),
-  z.coerce.number().finite(),
-);
-
-const numberLikeWithZeroFallbackSchema = z.preprocess((value) => {
-  if (value === null || value === undefined) {
-    return 0;
-  }
-  if (typeof value === "string" && value.trim() === "") {
-    return 0;
-  }
-  return value;
-}, z.coerce.number().finite());
 
 export const DashboardSchema = z.object({
   ID: z.string(),
@@ -64,7 +50,4 @@ export const MonthlyStatsSchema = z.object({
   }),
 });
 
-export type MonthlyStats = z.infer<typeof MonthlyStatsSchema>;
-
 export const WeeklyStatsSchema = z.array(numberLikeSchema);
-export type WeeklyStats = z.infer<typeof WeeklyStatsSchema>;

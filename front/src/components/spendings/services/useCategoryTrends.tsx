@@ -11,6 +11,7 @@ import startOfMonth from "date-fns/startOfMonth";
 import subDays from "date-fns/subDays";
 import subMonths from "date-fns/subMonths";
 
+import type { PeriodType } from "@components/spendings/config/constants";
 import type { CategoryTrendPoint } from "@src/schemas/stats";
 
 // A user category and a global one can share a name; merge those rows by name —
@@ -38,7 +39,7 @@ const aggregateByCategory = (items: CategoryTrendPoint[]): CategoryTrendPoint[] 
 // front owns this math (server-timezone-agnostic): monthly = the selected month
 // vs the one before it (dashboard, COS-41); weekly = the picked range vs the 7
 // days before it (Spendings, COS-35).
-const windows = (periodType: string, from?: Date | null, to?: Date | null) => {
+const windows = (periodType: PeriodType, from?: Date | null, to?: Date | null) => {
   if (periodType === MONTHLY) {
     if (!from) return null;
     const previousMonth = subMonths(from, 1);
@@ -63,7 +64,7 @@ const windows = (periodType: string, from?: Date | null, to?: Date | null) => {
  * Backs the dashboard's monthly breakdown trend column + "Rising category"
  * insight (COS-41), and the Spendings weekly breakdown (COS-35).
  */
-const useCategoryTrends = (periodType: string) => {
+const useCategoryTrends = (periodType: PeriodType) => {
   const { privateRequest } = useRequestHelper();
   const { from, to } = useDatePickerWrapperStore();
   const { user } = useAuth();

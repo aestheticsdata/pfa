@@ -69,11 +69,9 @@ const useDashboard = (): UseDashboard => {
   });
 
   const totalOfMonth =
-    get.data && initialAmount
-      ? Number(initialAmount.spendingsSum.amount) + Number(initialAmount.recurringsSum.amount)
-      : 0;
+    get.data && initialAmount ? initialAmount.spendingsSum.amount + initialAmount.recurringsSum.amount : 0;
   const monthlyTotal = Number(totalOfMonth.toFixed(2));
-  const remaining = get.data ? Number((Number(get.data.initialAmount) - totalOfMonth).toFixed(2)) : 0;
+  const remaining = get.data ? Number((get.data.initialAmount - totalOfMonth).toFixed(2)) : 0;
 
   const mutation = useMutation<unknown, AxiosError, DashboardMutationVariables>({
     mutationFn: ({ dashboardID, initialAmount }) => {

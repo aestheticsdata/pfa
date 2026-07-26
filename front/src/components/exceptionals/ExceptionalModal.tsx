@@ -12,9 +12,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { zodResolver } from "@hookform/resolvers/zod";
 import useTranslations from "@i18n/useTranslations";
+import evaluateAmountExpression from "@lib/amountExpression";
 import format from "date-fns/format";
 import { Check, ChevronsUpDown } from "lucide-react";
-import Mexp from "math-expression-evaluator";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -107,18 +107,8 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
       return;
     }
 
-    let amountEvaluated: number;
-    try {
-      const mexp = new Mexp();
-      const lexed = mexp.lex(values.amount.trim());
-      const postfixed = mexp.toPostfix(lexed);
-      amountEvaluated = mexp.postfixEval(postfixed);
-    } catch (error) {
-      console.error("Invalid amount expression", error);
-      return;
-    }
-
-    if (Number.isNaN(amountEvaluated)) {
+    const amountEvaluated = evaluateAmountExpression(values.amount);
+    if (amountEvaluated === null) {
       return;
     }
 

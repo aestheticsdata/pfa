@@ -1,9 +1,5 @@
+import { itemTypeSchema, numberLikeSchema } from "@src/schemas/primitives";
 import { z } from "zod";
-
-const numberLikeSchema = z.preprocess(
-  (value) => (typeof value === "number" || typeof value === "string" ? value : NaN),
-  z.coerce.number().finite(),
-);
 
 export const SpendingCategoryInputSchema = z.object({
   ID: z.string().nullable(),
@@ -12,18 +8,20 @@ export const SpendingCategoryInputSchema = z.object({
   color: z.string().nullable(),
 });
 
-export type SpendingCategoryInput = z.infer<typeof SpendingCategoryInputSchema>;
-
+// Response shape of GET /spendings and the search page. Every field below is a
+// real column returned by an unprojected Prisma `findMany`, so nullable fields
+// arrive as `null`, never absent — hence `.nullable()` without `.optional()`
+// (COS-107).
 export const SpendingItemSchema = z.object({
   ID: z.string(),
   amount: numberLikeSchema,
-  category: z.string().nullable().optional(),
-  categoryColor: z.string().nullable().optional(),
-  categoryID: z.string().nullable().optional(),
-  currency: z.string().nullable().optional(),
+  category: z.string().nullable(),
+  categoryColor: z.string().nullable(),
+  categoryID: z.string().nullable(),
+  currency: z.string().nullable(),
   date: z.string(),
-  invoicefile: z.string().nullable().optional(),
-  itemType: z.string(),
+  invoicefile: z.string().nullable(),
+  itemType: itemTypeSchema,
   label: z.string(),
   userID: z.string(),
 });
@@ -39,7 +37,6 @@ export const SpendingSearchPageSchema = z.object({
   nextCursor: z.string().nullable(),
   total: z.number().optional(),
 });
-export type SpendingSearchPage = z.infer<typeof SpendingSearchPageSchema>;
 
 // Years the user has spendings in (newest first) — the search modal's year filter.
 export const SpendingYearsSchema = z.array(z.number());
@@ -58,10 +55,10 @@ export type LabelSuggestion = z.infer<typeof LabelSuggestionSchema>;
 export const RecurringItemSchema = z.object({
   ID: z.string(),
   amount: numberLikeSchema,
-  currency: z.string().nullable().optional(),
+  currency: z.string().nullable(),
   dateFrom: z.string(),
   dateTo: z.string(),
-  itemType: z.string(),
+  itemType: itemTypeSchema,
   label: z.string(),
   userID: z.string(),
 });
@@ -72,7 +69,6 @@ export type RecurringItem = z.infer<typeof RecurringItemSchema>;
 // Real year-to-date "Already debited" (COS-49) — GET /recurrings/drawn. The server
 // sums the actual per-month recurring rows from January through the current month.
 export const RecurringsDrawnSchema = z.object({ drawn: numberLikeSchema });
-export type RecurringsDrawn = z.infer<typeof RecurringsDrawnSchema>;
 
 export const SpendingMutationPayloadSchema = z.object({
   date: z.string().nullable().optional(),
@@ -91,5 +87,3 @@ export const RecurringMutationPayloadSchema = z.object({
   amount: numberLikeSchema,
   id: z.string().optional(),
 });
-
-export type RecurringMutationPayload = z.infer<typeof RecurringMutationPayloadSchema>;

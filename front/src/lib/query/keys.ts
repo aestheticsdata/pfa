@@ -27,4 +27,4 @@ export const QUERY_KEYS = {
   SEARCH_TIMELINE: "searchTimeline",
   SPENDINGS_YEARS: "spendingsYears",
   LABEL_SUGGESTIONS: "labelSuggestions",
-};
+} as const;

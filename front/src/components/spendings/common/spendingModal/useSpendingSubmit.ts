@@ -1,8 +1,8 @@
 import { getRandomHexColor } from "@components/spendings/common/spendingModal/helpers";
+import evaluateAmountExpression from "@lib/amountExpression";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import startOfMonth from "date-fns/startOfMonth";
-import Mexp from "math-expression-evaluator";
 
 import type { AuthUser } from "@auth/types";
 import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";
@@ -57,18 +57,8 @@ const useSpendingSubmit = ({
       return;
     }
 
-    let amountEvaluatedExpr: number;
-    try {
-      const mexp = new Mexp();
-      const lexed = mexp.lex(values.spendingAmount.trim());
-      const postfixed = mexp.toPostfix(lexed);
-      amountEvaluatedExpr = mexp.postfixEval(postfixed);
-    } catch (error) {
-      console.error("Invalid amount expression", error);
-      return;
-    }
-
-    if (Number.isNaN(amountEvaluatedExpr)) {
+    const amountEvaluatedExpr = evaluateAmountExpression(values.spendingAmount);
+    if (amountEvaluatedExpr === null) {
       return;
     }
 
