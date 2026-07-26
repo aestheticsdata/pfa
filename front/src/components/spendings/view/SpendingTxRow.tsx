@@ -11,7 +11,7 @@ import { cn } from "@lib/utils";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import type { SpendingItem } from "@components/spendings/types";
+import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 

@@ -22,8 +22,8 @@ import parseISO from "date-fns/parseISO";
 import { ImageIcon, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
-import type { RecurringItem } from "@components/spendings/types";
+import type { RecurringItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
 
 interface FixedExpensesProps {
   month: MonthRange;

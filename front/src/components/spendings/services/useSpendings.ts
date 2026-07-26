@@ -12,7 +12,7 @@ import getDate from "date-fns/getDate";
 import parseISO from "date-fns/parseISO";
 import startOfMonth from "date-fns/startOfMonth";
 
-import type { SpendingDayGroup, SpendingItem } from "@components/spendings/types";
+import type { SpendingDayGroup, SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
 import type { AxiosError } from "axios";
 

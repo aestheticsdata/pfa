@@ -1,7 +1,7 @@
 import { groupSpendingsByMonth } from "@components/spendings/search/groupByMonth";
 import { DATE_FNS_LOCALES } from "@i18n/useDateLocale";
 
-import type { SpendingItem } from "@components/spendings/types";
+import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 const makeItem = (ID: string, date: string): SpendingItem =>
   ({ ID, date, label: ID, amount: 1, itemType: "spending", userID: "u1" }) as SpendingItem;

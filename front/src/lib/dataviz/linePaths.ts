@@ -2,7 +2,7 @@
 // Consume pixel-space points (already scaled — see scales.ts) and emit `d`
 // attribute strings for line, smoothed-line and filled-area series.
 
-import type { LinePoint } from "@lib/dataviz/dataVizTypes";
+import type { LinePoint } from "@lib/dataviz/interfaces/dataVizTypes";
 
 /** Polyline `M/L` path through pixel-space points. */
 export const linePath = (pts: LinePoint[]): string =>

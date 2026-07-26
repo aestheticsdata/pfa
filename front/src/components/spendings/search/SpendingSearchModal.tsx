@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { useEffect, useLayoutEffect, useRef } from "react";
 
-import type { SpendingItem } from "@components/spendings/types";
+import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 // Scroll offset of the results list, stashed when the user leaves for a spending
 // so browser Back can restore the list where they were. Module-level so it

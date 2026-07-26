@@ -7,7 +7,7 @@ import ForecastStrip from "@components/dashboard/sections/ForecastStrip";
 import InsightsRibbon from "@components/dashboard/sections/InsightsRibbon";
 import WeeklyCeiling from "@components/dashboard/sections/WeeklyCeiling";
 
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
 
 // Layout mirrors design_handoff_pfa/designs/Dashboard 2026.html: the month
 // selector lives in the app header (NavBar), so no page title here. Two 8fr/4fr

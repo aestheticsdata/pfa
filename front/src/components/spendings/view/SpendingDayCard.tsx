@@ -15,9 +15,9 @@ import format from "date-fns/format";
 import { Plus } from "lucide-react";
 import { useMemo } from "react";
 
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
-import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
+import type { SpendingItem, SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { DaySortField } from "@components/spendings/view/helpers/useDaySort";
+import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 const UNCATEGORIZED_KEY = "none";

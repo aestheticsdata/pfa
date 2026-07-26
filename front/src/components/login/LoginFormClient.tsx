@@ -10,7 +10,7 @@ import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginF
 import Link from "next/link";
 import { useState } from "react";
 
-import type { LoginValues } from "@src/components/shared/sharedLoginForm/interfaces";
+import type { LoginValues } from "@components/shared/interfaces/sharedLoginFormTypes";
 import type { AxiosError } from "axios";
 
 export default function LoginFormClient() {

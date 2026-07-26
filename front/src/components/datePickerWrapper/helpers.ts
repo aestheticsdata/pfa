@@ -10,7 +10,7 @@ import startOfMonth from "date-fns/startOfMonth";
 import startOfWeek from "date-fns/startOfWeek";
 import subDays from "date-fns/subDays";
 
-import type { WeekRange } from "./types";
+import type { WeekRange } from "@components/datePickerWrapper/interfaces/datePickerTypes";
 
 /**
  * Parse a date-only ISO string (e.g. the `?date=` URL param "2026-07-12") as a

@@ -30,4 +30,4 @@ export type {
   LineSeries,
   SeriesDot,
   TrendDirection,
-} from "@lib/dataviz/dataVizTypes";
+} from "@lib/dataviz/interfaces/dataVizTypes";

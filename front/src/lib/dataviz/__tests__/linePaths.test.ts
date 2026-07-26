@@ -1,7 +1,7 @@
 import { linePath, smoothPath } from "@lib/dataviz/linePaths";
 import { describe, expect, it } from "vitest";
 
-import type { LinePoint } from "@lib/dataviz/dataVizTypes";
+import type { LinePoint } from "@lib/dataviz/interfaces/dataVizTypes";
 
 // Pull the final "x y" pair each path command lands on. For M/C commands the
 // last two numbers of each segment are the on-curve anchor point, so this yields

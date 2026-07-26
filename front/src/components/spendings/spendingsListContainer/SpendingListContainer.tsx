@@ -2,7 +2,7 @@ import Spinner from "@components/common/Spinner";
 import SpendingItem from "@components/spendings/spendingDayItem/spendingItem/SpendingItem";
 import useTranslations from "@i18n/useTranslations";
 
-import type { SpendingsListContainerType } from "@components/spendings/types";
+import type { SpendingsListContainerType } from "@components/spendings/interfaces/spendingListTypes";
 
 const SpendingsListContainer = ({
   spendingsByDaySorted,

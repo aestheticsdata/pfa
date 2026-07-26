@@ -4,9 +4,9 @@ import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import startOfMonth from "date-fns/startOfMonth";
 
-import type { AuthUser } from "@auth/types";
+import type { AuthUser } from "@auth/interfaces/authTypes";
 import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";
-import type { SpendingListItem } from "@components/spendings/types";
+import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
 
 interface MutationLike<TPayload> {

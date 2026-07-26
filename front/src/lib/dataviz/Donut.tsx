@@ -4,7 +4,7 @@ import { angleFromCenter, annularSectorPath, wedgePath } from "@lib/dataviz/arcP
 import { cn } from "@lib/utils";
 import { useId, useState } from "react";
 
-import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
+import type { DonutSegment } from "@lib/dataviz/interfaces/dataVizTypes";
 import type { CSSProperties, MouseEvent, ReactNode } from "react";
 
 interface DonutProps {

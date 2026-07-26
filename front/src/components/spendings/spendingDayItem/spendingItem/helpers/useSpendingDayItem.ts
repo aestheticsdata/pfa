@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { SpendingListItem } from "@components/spendings/types";
+import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 
 const useSpendingDayItem = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);

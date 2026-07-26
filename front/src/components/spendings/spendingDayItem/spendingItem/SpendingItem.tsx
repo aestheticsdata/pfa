@@ -10,7 +10,7 @@ import { cn } from "@lib/utils";
 import { Edit2, ImageIcon, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import type { SpendingListItem } from "@components/spendings/types";
+import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 
 interface SpendingItemProps {
   spending: SpendingListItem;
@@ -94,9 +94,7 @@ const SpendingItem = ({ spending, editCallback, toggleAddSpending, isRecurring }
             {spendingLabel}
           </span>
 
-          <span className="text-ink text-sm shrink-0 tabular-nums sm:hidden">
-            {euro(spending.amount)} €
-          </span>
+          <span className="text-ink text-sm shrink-0 tabular-nums sm:hidden">{euro(spending.amount)} €</span>
         </div>
 
         <div className="flex items-center gap-2 pl-3 sm:pl-0 sm:contents">

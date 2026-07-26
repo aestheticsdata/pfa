@@ -3,7 +3,7 @@
 import useRequestHelper from "@helpers/useRequestHelper";
 import { AuthResponseSchema } from "@src/schemas/auth";
 
-import type { AuthResponse } from "@auth/types";
+import type { AuthResponse } from "@auth/interfaces/authTypes";
 
 const useLoginService = () => {
   const { request } = useRequestHelper();

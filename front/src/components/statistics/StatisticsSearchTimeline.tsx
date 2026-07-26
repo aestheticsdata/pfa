@@ -33,7 +33,7 @@ import { useRouter } from "next/navigation";
 import { useQueryStates } from "nuqs";
 import { Fragment } from "react";
 
-import type { SpendingItem } from "@components/spendings/types";
+import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { ReactNode } from "react";
 
 const AMOUNT_BAND_H = 128;

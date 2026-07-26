@@ -4,7 +4,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { ROUTES } from "@components/shared/config/constants";
 import { usePathname, useRouter } from "next/navigation";
 
-import type { AuthResponse } from "@auth/types";
+import type { AuthResponse } from "@auth/interfaces/authTypes";
 
 const useCredentials = () => {
   const router = useRouter();

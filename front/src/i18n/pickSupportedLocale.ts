@@ -1,6 +1,6 @@
 import { DEFAULT_LOCALE, isSupportedLocale } from "@i18n/config";
 
-import type { LangKeys } from "@src/interfaces/locales";
+import type { LangKeys } from "@i18n/interfaces/localesTypes";
 
 /**
  * First browser language tag that maps to a supported locale, FR otherwise

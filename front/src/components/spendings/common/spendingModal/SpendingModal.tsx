@@ -31,8 +31,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
-import type { SpendingItem, SpendingListItem } from "@components/spendings/types";
+import type { SpendingItem, SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
 import type { LabelSuggestion } from "@src/schemas/spendings";
 
 // Debounce the label input before hitting the suggestions endpoint, so a

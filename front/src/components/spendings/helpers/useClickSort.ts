@@ -3,7 +3,7 @@ import _ from "lodash";
 import { useState } from "react";
 
 import type { SORT_BY_AMOUNT } from "@components/spendings/helpers/sortConstants";
-import type { SpendingListItem } from "@components/spendings/types";
+import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 
 type SortOrder = "asc" | "desc";
 type SortField = typeof SORT_BY_LABEL | typeof SORT_BY_CATEGORY | typeof SORT_BY_AMOUNT;

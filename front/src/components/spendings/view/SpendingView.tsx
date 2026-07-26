@@ -26,8 +26,8 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
 import type { FilterCategory } from "@components/spendings/interfaces/spendingCategoryFilterTypes";
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
-import type { SpendingDayGroup } from "@components/spendings/types";
+import type { SpendingDayGroup } from "@components/spendings/interfaces/spendingListTypes";
+import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 const UNCATEGORIZED_KEY = "none";
