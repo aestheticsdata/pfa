@@ -14,6 +14,11 @@ const item = (date: string, amount: number, label = "Achat"): ExceptionalItem =>
   itemType: "exceptional",
   label,
   amount,
+  description: null,
+  currency: null,
+  categoryName: null,
+  categoryColor: null,
+  invoicefile: null,
 });
 
 describe("computeExceptionalStats — monthly average (COS-51)", () => {
