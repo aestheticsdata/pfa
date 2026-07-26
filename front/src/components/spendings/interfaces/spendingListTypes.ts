@@ -8,14 +8,3 @@ export interface SpendingDayGroup {
   total: number;
   items: SpendingItem[];
 }
-
-interface SpendingsPartial {
-  spendingsByDaySorted: SpendingListItem[];
-  isLoading: boolean;
-  recurringType?: boolean;
-}
-
-export interface SpendingsListContainerType extends SpendingsPartial {
-  toggleAddSpending: () => void;
-  editSpending: (spending: SpendingListItem) => void;
-}

@@ -30,11 +30,7 @@ const spendings: typeof frSpendings = {
     },
   },
   dayItem: {
-    recurringTitle: "Fixed expenses",
-    total: "Total",
     remainingBudget: "Maximum daily budget",
-    filterResetLabel: "all",
-    addSpending: "Add a spending",
   },
   dayCard: {
     noResults: "No results",
@@ -137,7 +133,6 @@ const spendings: typeof frSpendings = {
   item: {
     deleteConfirm: "Delete this spending?",
     actions: {
-      receipt: "Receipt",
       edit: "Edit",
       delete: "Delete",
     },

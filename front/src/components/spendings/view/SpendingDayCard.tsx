@@ -3,7 +3,7 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import overspendLevel from "@components/spendings/helpers/overspendLevel";
-import useSpendingDayItem from "@components/spendings/spendingDayItem/spendingItem/helpers/useSpendingDayItem";
+import useSpendingDayItem from "@components/spendings/helpers/useSpendingDayItem";
 import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
 import useDaySort from "@components/spendings/view/helpers/useDaySort";
 import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
@@ -74,9 +74,7 @@ interface SpendingDayCardProps {
 }
 
 /**
- * New glow day-card for the redesigned Spendings timeline (Phase 3b).
- * Intentionally separate from the shared `SpendingDayItem` (which the
- * recurrings/overview view reuses) — see REFACTO_NOTES.md §9.
+ * Glow day-card of the Spendings timeline (Phase 3b) — see REFACTO_NOTES.md §9.
  */
 const SpendingDayCard = ({
   date,

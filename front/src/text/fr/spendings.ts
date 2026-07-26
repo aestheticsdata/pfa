@@ -28,11 +28,7 @@ const spendings = {
     },
   },
   dayItem: {
-    recurringTitle: "Dépenses fixes",
-    total: "Total",
     remainingBudget: "Budget du jour maximum",
-    filterResetLabel: "tout",
-    addSpending: "Ajouter une dépense",
   },
   dayCard: {
     noResults: "Aucun résultat",
@@ -135,7 +131,6 @@ const spendings = {
   item: {
     deleteConfirm: "Supprimer cette dépense ?",
     actions: {
-      receipt: "Facture",
       edit: "Modifier",
       delete: "Supprimer",
     },

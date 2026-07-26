@@ -12,13 +12,8 @@ interface DaySortState {
 }
 
 /**
- * Per-day-card sort with EXPOSED state (field + direction), so the new
- * Spendings day cards can render the active button + arrow glyph. Same
- * sorting behaviour as `useClickSort` but returns the current state.
- *
- * (The shared `useClickSort` — still used by the recurrings/overview
- * `SpendingDayItem` — does not expose its state, so this is kept separate
- * rather than modifying shared code.)
+ * Per-day-card sort with EXPOSED state (field + direction), so the
+ * Spendings day cards can render the active button + arrow glyph.
  */
 const useDaySort = (spendings: SpendingListItem[]) => {
   const [sort, setSort] = useState<DaySortState>({ field: null, dir: "asc" });

@@ -181,7 +181,6 @@ body:has([data-nav-overlay][data-state="open"]) .pfa-nav-scrim {
 }
 
 /* Thin scrollbar for spending lists — stable gutter, no content shift */
-.spendings-list-container,
 .recurrings-list-container,
 .charts-categories-list {
   scrollbar-gutter: stable;
@@ -189,26 +188,22 @@ body:has([data-nav-overlay][data-state="open"]) .pfa-nav-scrim {
   scrollbar-color: rgba(75, 85, 99, 0.55) transparent;
 }
 
-.spendings-list-container::-webkit-scrollbar,
 .recurrings-list-container::-webkit-scrollbar,
 .charts-categories-list::-webkit-scrollbar {
   width: 5px;
 }
 
-.spendings-list-container::-webkit-scrollbar-track,
 .recurrings-list-container::-webkit-scrollbar-track,
 .charts-categories-list::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.spendings-list-container::-webkit-scrollbar-thumb,
 .recurrings-list-container::-webkit-scrollbar-thumb,
 .charts-categories-list::-webkit-scrollbar-thumb {
   background-color: rgba(75, 85, 99, 0.55);
   border-radius: 3px;
 }
 
-.spendings-list-container::-webkit-scrollbar-thumb:hover,
 .recurrings-list-container::-webkit-scrollbar-thumb:hover,
 .charts-categories-list::-webkit-scrollbar-thumb:hover {
   background-color: rgba(107, 114, 128, 0.8);
