@@ -790,3 +790,74 @@ describe("StatsService.getSearchTimeline", () => {
     );
   });
 });
+
+/**
+ * Unit tests for StatsService.getMonthlyStats — the two halves of a month's
+ * total spend (one-off spendings + that month's fixed expenses), backing the
+ * dashboard's "spent this month" and remaining-budget figures. Prisma is mocked;
+ * these assert the query shape and the flat `{ spendingsSum, recurringsSum }`
+ * contract introduced by COS-179.
+ */
+describe("StatsService.getMonthlyStats", () => {
+  const makeService = (spendingsTotal: unknown, recurringsTotal: unknown) => {
+    const spendingsAggregate = jest.fn().mockResolvedValue({ _sum: { amount: spendingsTotal } });
+    const recurringsAggregate = jest.fn().mockResolvedValue({ _sum: { amount: recurringsTotal } });
+    const prisma = {
+      spendings: { aggregate: spendingsAggregate },
+      recurrings: { aggregate: recurringsAggregate },
+    } as unknown as never;
+    return { service: new StatsService(prisma), spendingsAggregate, recurringsAggregate };
+  };
+
+  it("sums the month's spendings over an inclusive range and its recurrings on their exact bounds", async () => {
+    const { service, spendingsAggregate, recurringsAggregate } = makeService(0, 0);
+
+    await service.getMonthlyStats("2026-06-15", "user-1");
+
+    // Recurrings carry the month bounds as their own columns — matched exactly,
+    // not as a range, since one row spans the whole month.
+    expect(recurringsAggregate).toHaveBeenCalledWith({
+      where: {
+        userID: "user-1",
+        dateFrom: new Date(Date.UTC(2026, 5, 1)),
+        dateTo: new Date(Date.UTC(2026, 5, 30)),
+      },
+      _sum: { amount: true },
+    });
+    expect(spendingsAggregate).toHaveBeenCalledWith({
+      where: {
+        userID: "user-1",
+        date: { gte: new Date(Date.UTC(2026, 5, 1)), lte: new Date(Date.UTC(2026, 5, 30)) },
+      },
+      _sum: { amount: true },
+    });
+  });
+
+  it("returns both totals as bare numbers", async () => {
+    const { service } = makeService(842.17, 1250);
+
+    await expect(service.getMonthlyStats("2026-06-15", "user-1")).resolves.toEqual({
+      spendingsSum: 842.17,
+      recurringsSum: 1250,
+    });
+  });
+
+  it("reports 0 on each side when the month is empty", async () => {
+    const { service } = makeService(null, null);
+
+    await expect(service.getMonthlyStats("2026-06-15", "user-1")).resolves.toEqual({
+      spendingsSum: 0,
+      recurringsSum: 0,
+    });
+  });
+
+  it("coerces Prisma Decimal sums and rounds them to the cent", async () => {
+    const decimal = (value: string) => ({ toString: () => value }) as unknown as number;
+    const { service } = makeService(decimal("120.005"), decimal("99.999"));
+
+    await expect(service.getMonthlyStats("2026-06-15", "user-1")).resolves.toEqual({
+      spendingsSum: 120.01,
+      recurringsSum: 100,
+    });
+  });
+});

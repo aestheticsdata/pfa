@@ -47,7 +47,7 @@ const useReccurings = () => {
       queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
     });
     await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.INITIAL_AMOUNT, monthBeginning],
+      queryKey: [QUERY_KEYS.MONTHLY_STATS, monthBeginning],
     });
   };
 

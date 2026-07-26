@@ -1,6 +1,6 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import useInitialAmount from "@components/spendings/services/useInitialAmount";
+import useMonthlyStats from "@components/spendings/services/useMonthlyStats";
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DashboardResponseSchema } from "@src/schemas/dashboard";
@@ -32,7 +32,7 @@ const useDashboard = (): UseDashboard => {
   const { from } = useDatePickerWrapperStore();
   const monthBeginning = startOfMonth(from!);
   const queryClient = useQueryClient();
-  const { data: initialAmount } = useInitialAmount();
+  const { data: monthlyStats } = useMonthlyStats();
 
   const getDashboard = async () => {
     const response = await privateRequest(`/dashboard?userID=${userID}&start=${startOfMonth(from!)}`);
@@ -68,8 +68,7 @@ const useDashboard = (): UseDashboard => {
     enabled: !!from && !!userID,
   });
 
-  const totalOfMonth =
-    get.data && initialAmount ? initialAmount.spendingsSum.amount + initialAmount.recurringsSum.amount : 0;
+  const totalOfMonth = get.data && monthlyStats ? monthlyStats.spendingsSum + monthlyStats.recurringsSum : 0;
   const monthlyTotal = Number(totalOfMonth.toFixed(2));
   const remaining = get.data ? Number((get.data.initialAmount - totalOfMonth).toFixed(2)) : 0;
 
