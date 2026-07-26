@@ -16,7 +16,7 @@ export default function ForgotPassword() {
   const { forgotPassword: t } = login;
 
   const onSubmit = async (values: LoginValues) => {
-    await resetPasswordService(values.email!);
+    await resetPasswordService(values.email);
   };
 
   return (

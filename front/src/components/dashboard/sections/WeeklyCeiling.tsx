@@ -23,11 +23,15 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
+import type { WeekSlice } from "@components/spendings/interfaces/weeklyStatsTypes";
 import type { FocusEvent, KeyboardEvent } from "react";
 
 interface CeilingForm {
   initialCeiling: string;
 }
+
+/** "5 - 11" for a range, "5" for a slice the month edges cut down to a single day. */
+const formatWeekSlice = ({ start, end }: WeekSlice): string => (start === end ? String(start) : `${start} - ${end}`);
 
 /** Weekly spend vs a fixed ceiling, per week of the month + inline ceiling edit. */
 const WeeklyCeiling = () => {
@@ -60,11 +64,10 @@ const WeeklyCeiling = () => {
   const monthIsFuture = from ? isAfter(startOfMonth(from), startOfMonth(now)) : false;
   const monthIsPast = from ? isBefore(startOfMonth(from), startOfMonth(now)) : false;
 
-  const isFutureWeek = (slice: string | number): boolean => {
+  const isFutureWeek = (slice: WeekSlice | undefined): boolean => {
     if (monthIsFuture) return true;
     if (monthIsPast) return false;
-    const startDay = typeof slice === "number" ? slice : parseInt(String(slice), 10);
-    return Number.isFinite(startDay) && startDay > getDate(now);
+    return slice != null && slice.start > getDate(now);
   };
 
   const onSubmit = (v: CeilingForm) => {
@@ -125,18 +128,18 @@ const WeeklyCeiling = () => {
 
       <div className="flex flex-col">
         {stats.map((weekTotal, i) => {
-          const weekLabel = slices[i] ?? `S${i + 1}`;
-          const current = from ? isCurrentWeek(slices[i], from) : false;
+          const slice = slices[i];
+          const weekLabel = slice ? formatWeekSlice(slice) : `S${i + 1}`;
+          const current = from ? isCurrentWeek(slice, from) : false;
           const over = ceiling > 0 && weekTotal > ceiling;
-          const future = isFutureWeek(slices[i]);
+          const future = isFutureWeek(slice);
           const delta = weekTotal - ceiling;
           // Past/current weeks drill into that week on the Spendings page; future
           // weeks have nothing to open, so they stay inert — no link, no hover,
           // default cursor (COS-151). Start day of the range doubles as the ?date=.
-          const startDay = typeof weekLabel === "number" ? weekLabel : parseInt(String(weekLabel), 10);
           const href =
-            !future && from != null && Number.isFinite(startDay)
-              ? buildSpendingsPath(formatIsoDate(new Date(from.getFullYear(), from.getMonth(), startDay)))
+            !future && from != null && slice != null
+              ? buildSpendingsPath(formatIsoDate(new Date(from.getFullYear(), from.getMonth(), slice.start)))
               : null;
           const rowClass = cn(
             "grid grid-cols-[52px_1fr_74px] items-center gap-3 border-b border-line-soft py-3 text-sm last:border-b-0",
@@ -144,7 +147,7 @@ const WeeklyCeiling = () => {
           );
           const cells = (
             <>
-              <span className="num text-xs text-ink-2">{slices[i] ?? `S${i + 1}`}</span>
+              <span className="num text-xs text-ink-2">{weekLabel}</span>
               <ProgressTrack
                 key={`${monthKey}-${weekLabel}-${weekTotal > 0 ? "d" : "e"}`}
                 value={weekTotal}

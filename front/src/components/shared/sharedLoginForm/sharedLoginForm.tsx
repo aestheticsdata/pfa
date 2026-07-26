@@ -25,12 +25,15 @@ const buildSchema = (
 ) =>
   z
     .object({
-      email: needEmail
-        ? z.string().min(1, validation.emailRequired).email(validation.emailInvalid)
-        : z.string().optional(),
-      password: needPassword ? z.string().min(1, validation.passwordRequired) : z.string().optional(),
-      confirmPassword: needConfirm ? z.string().min(1, validation.confirmRequired) : z.string().optional(),
-      currency: needCurrency ? z.string().min(1) : z.string().optional(),
+      // A hidden field validates as a plain `z.string()`, never `.optional()`:
+      // `defaultValues` below always supplies "" for it, so the value is present
+      // either way. Keeping it required is what makes `z.infer` resolve to all
+      // required strings instead of collapsing every field to `string | undefined`
+      // — the root cause of the `values.email!` assertions in the callers (COS-109).
+      email: needEmail ? z.string().min(1, validation.emailRequired).email(validation.emailInvalid) : z.string(),
+      password: needPassword ? z.string().min(1, validation.passwordRequired) : z.string(),
+      confirmPassword: needConfirm ? z.string().min(1, validation.confirmRequired) : z.string(),
+      currency: needCurrency ? z.string().min(1) : z.string(),
     })
     .refine((d) => !needConfirm || d.password === d.confirmPassword, {
       message: validation.passwordMismatch,

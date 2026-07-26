@@ -3,6 +3,8 @@ import getDay from "date-fns/getDay";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import startOfMonth from "date-fns/startOfMonth";
 
+import type { WeekSlice } from "@components/spendings/interfaces/weeklyStatsTypes";
+
 const useWeeklyStatsHelper = () => {
   const makeRange = (from: Date) => {
     const ranges: number[] = [];
@@ -21,26 +23,18 @@ const useWeeklyStatsHelper = () => {
     return ranges;
   };
 
-  const getSliceDates = (idx: number, ranges: number[]) => {
+  const getSliceDates = (idx: number, ranges: number[]): WeekSlice => {
     const getSumDays = (i: number) => ranges.slice(0, i + 1).reduce((acc, curr) => acc + curr, 0);
-    const sliceStart = idx === 0 ? 1 : getSumDays(idx - 1) + 1;
-    const sliceEnd = getSumDays(idx);
 
-    return sliceStart === sliceEnd ? sliceStart : `${sliceStart} - ${sliceEnd}`;
+    return {
+      start: idx === 0 ? 1 : getSumDays(idx - 1) + 1,
+      end: getSumDays(idx),
+    };
   };
 
-  const makeSlices = (ranges: number[]) =>
-    ranges.reduce(
-      (acc: Array<string | number>, _curr, idx, arr) => {
-        acc.push(getSliceDates(idx, arr));
-        return acc;
-      },
-      [] as Array<string | number>,
-    );
+  const makeSlices = (ranges: number[]): WeekSlice[] => ranges.map((_curr, idx, arr) => getSliceDates(idx, arr));
 
-  const isCurrentWeek = (slice: string | number, from: Date) => {
-    return typeof slice === "string" ? +slice.split(" - ")[0] === getDate(from) : +slice === getDate(from);
-  };
+  const isCurrentWeek = (slice: WeekSlice | undefined, from: Date) => slice?.start === getDate(from);
 
   return {
     makeRange,

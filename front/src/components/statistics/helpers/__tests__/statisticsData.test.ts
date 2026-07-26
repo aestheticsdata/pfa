@@ -1,11 +1,17 @@
-import { filledMonthlyIncome, monthlyPresence, monthlyTotals } from "@components/statistics/helpers/statisticsData";
+import {
+  categoryMonthly,
+  filledMonthlyIncome,
+  monthlyPresence,
+  monthlyTotals,
+  perCategoryTotals,
+} from "@components/statistics/helpers/statisticsData";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
 
 const data: StatisticsResponse["data"] = {
   "2026": [
-    { month: "janv.", food: 10, rent: 5 },
-    { month: "mars", food: 0 }, // present, but a genuine zero total
+    { month: "janv.", totals: { food: 10, rent: 5 } },
+    { month: "mars", totals: { food: 0 } }, // present, but a genuine zero total
   ],
 };
 
@@ -28,6 +34,52 @@ describe("monthlyPresence", () => {
 
   it("returns an all-false mask for a year with no data", () => {
     expect(monthlyPresence(data, 2020)).toEqual(Array(12).fill(false));
+  });
+});
+
+// These two read every per-category total on a row. They had no coverage while
+// the row was still a flat map keyed by category name with the month label mixed
+// in, so the split into { month, totals } (COS-109) is pinned down here.
+describe("perCategoryTotals", () => {
+  const colors = { food: "#111", rent: "#222" };
+
+  it("sums each category across the year's months, sorted descending", () => {
+    expect(perCategoryTotals(data, colors, 2026)).toEqual([
+      { name: "food", value: 10, color: "#111" },
+      { name: "rent", value: 5, color: "#222" },
+    ]);
+  });
+
+  it("never counts the month label as a category", () => {
+    expect(perCategoryTotals(data, colors, 2026).map((c) => c.name)).not.toContain("month");
+  });
+
+  it("falls back to the placeholder colour for an unknown category", () => {
+    const [food] = perCategoryTotals(data, {}, 2026);
+    expect(food.color).toBeTruthy();
+    expect(food.color).not.toBe("#111");
+  });
+
+  it("returns nothing for a year with no data", () => {
+    expect(perCategoryTotals(data, colors, 2020)).toEqual([]);
+  });
+});
+
+describe("categoryMonthly", () => {
+  it("places each month's value at its calendar index", () => {
+    const series = categoryMonthly(data, 2026, "food");
+    expect(series[0]).toBe(10); // janv.
+    expect(series[2]).toBe(0); // mars — a real zero
+    expect(series).toHaveLength(12);
+  });
+
+  it("yields 0 for a month where the category is absent", () => {
+    // "rent" only appears in janv., so mars must read 0 rather than undefined.
+    expect(categoryMonthly(data, 2026, "rent")[2]).toBe(0);
+  });
+
+  it("yields an all-zero series for an unknown category", () => {
+    expect(categoryMonthly(data, 2026, "nope")).toEqual(Array(12).fill(0));
   });
 });
 

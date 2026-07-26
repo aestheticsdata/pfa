@@ -1,6 +1,7 @@
 "use client";
 
 import useRequestHelper from "@helpers/useRequestHelper";
+import { AuthResponseSchema } from "@src/schemas/auth";
 
 import type { AuthResponse } from "@auth/types";
 
@@ -17,7 +18,7 @@ const useLoginService = () => {
         password,
       },
     });
-    return result.data as AuthResponse;
+    return AuthResponseSchema.parse(result.data);
   };
 
   return {

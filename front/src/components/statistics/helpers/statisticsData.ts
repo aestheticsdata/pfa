@@ -32,14 +32,7 @@ export const monthShortLabels = (locale: Locale): string[] =>
 type StatData = StatisticsResponse["data"];
 type Row = StatData[string][number];
 
-const toNumber = (value: string | number | undefined): number =>
-  typeof value === "number" ? value : Number(value) || 0;
-
-const rowTotal = (row: Row): number =>
-  Object.entries(row).reduce(
-    (sum, [key, value]) => (key === "month" ? sum : sum + toNumber(value as string | number)),
-    0,
-  );
+const rowTotal = (row: Row): number => Object.values(row.totals).reduce((sum, value) => sum + value, 0);
 
 const rowsForYear = (data: StatData | undefined, year: number): Row[] => data?.[String(year)] ?? [];
 
@@ -47,7 +40,7 @@ const rowsForYear = (data: StatData | undefined, year: number): Row[] => data?.[
 export const monthlyTotals = (data: StatData | undefined, year: number): number[] => {
   const totals = Array<number>(12).fill(0);
   rowsForYear(data, year).forEach((row, i) => {
-    const idx = MONTHS_FR.indexOf(String(row.month));
+    const idx = MONTHS_FR.indexOf(row.month);
     totals[idx >= 0 ? idx : i] = rowTotal(row);
   });
   return totals;
@@ -65,7 +58,7 @@ export const yearTotal = (data: StatData | undefined, year: number): number =>
 export const monthlyPresence = (data: StatData | undefined, year: number): boolean[] => {
   const present = Array<boolean>(12).fill(false);
   rowsForYear(data, year).forEach((row, i) => {
-    const idx = MONTHS_FR.indexOf(String(row.month));
+    const idx = MONTHS_FR.indexOf(row.month);
     present[idx >= 0 ? idx : i] = true;
   });
   return present;
@@ -136,9 +129,8 @@ export const perCategoryTotals = (
 ): CategoryTotal[] => {
   const totals = new Map<string, number>();
   rowsForYear(data, year).forEach((row) => {
-    Object.entries(row).forEach(([key, value]) => {
-      if (key === "month") return;
-      totals.set(key, (totals.get(key) ?? 0) + toNumber(value as string | number));
+    Object.entries(row.totals).forEach(([key, value]) => {
+      totals.set(key, (totals.get(key) ?? 0) + value);
     });
   });
   return Array.from(totals.entries())
@@ -150,8 +142,8 @@ export const perCategoryTotals = (
 export const categoryMonthly = (data: StatData | undefined, year: number, name: string): number[] => {
   const out = Array<number>(12).fill(0);
   rowsForYear(data, year).forEach((row, i) => {
-    const idx = MONTHS_FR.indexOf(String(row.month));
-    out[idx >= 0 ? idx : i] = toNumber(row[name] as string | number);
+    const idx = MONTHS_FR.indexOf(row.month);
+    out[idx >= 0 ? idx : i] = row.totals[name] ?? 0;
   });
   return out;
 };
