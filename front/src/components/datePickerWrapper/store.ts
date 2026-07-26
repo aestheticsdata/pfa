@@ -1,3 +1,5 @@
+import { getWeekDays, getWeekRange } from "@components/datePickerWrapper/helpers";
+import { formatIsoDate } from "@helpers/dateRoute";
 import produce from "immer";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
@@ -11,10 +13,10 @@ export interface DatePickerWrapperStoreProps {
   // by the NavBar "Today" button and by a fresh spending creation; read
   // and consumed (reset to null) by SpendingView once the matching card mounts.
   scrollToDayIso: string | null;
+  setWeek: (date: Date) => void;
   setFrom: (from: Date) => void;
   setTo: (from: Date) => void;
   setRange: (from: Date[]) => void;
-  setSelectedDateIso: (dateIso: string | null) => void;
   setScrollToDayIso: (dateIso: string | null) => void;
 }
 
@@ -31,6 +33,41 @@ const useStore = create<DatePickerWrapperStoreProps>()(
     range: null,
     selectedDateIso: null,
     scrollToDayIso: null,
+    /**
+     * Single entry point for "select the week containing this day" — the only
+     * writer of from/to/range/selectedDateIso (COS-99). It replaces the four
+     * setters the picker used to fire in a row (four notifications, so four
+     * renders of every consumer, none of which uses a selector) and, above all,
+     * it is idempotent:
+     *  - same week, same day  → nothing is written at all;
+     *  - same week, other day → only `selectedDateIso` moves, so `range` KEEPS
+     *    its identity and effects keyed on it don't re-run (COS-97);
+     *  - another week         → the whole period is replaced, once.
+     * That is what makes the two mounted DatePickerWrappers harmless: a second
+     * caller asking for the week already loaded is a no-op, not a re-write.
+     * The week is identified by its calendar bounds rather than by getTime:
+     * getWeekRange carries over the time of day of its argument on
+     * month-truncated weeks, so the same week reached from `new Date()` and from
+     * a `?date=` param would otherwise compare as two different weeks.
+     */
+    setWeek: (date: Date) =>
+      set(
+        produce((draft: DatePickerWrapperStoreProps) => {
+          const weekRange = getWeekRange(date);
+          const isSameWeek =
+            draft.from !== null &&
+            draft.to !== null &&
+            formatIsoDate(draft.from) === formatIsoDate(weekRange.from) &&
+            formatIsoDate(draft.to) === formatIsoDate(weekRange.to);
+
+          if (!isSameWeek) {
+            draft.from = weekRange.from;
+            draft.to = weekRange.to;
+            draft.range = getWeekDays(weekRange.from, date);
+          }
+          draft.selectedDateIso = formatIsoDate(date);
+        }),
+      ),
     setFrom: (from: Date) =>
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
@@ -47,12 +84,6 @@ const useStore = create<DatePickerWrapperStoreProps>()(
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
           draft.range = range;
-        }),
-      ),
-    setSelectedDateIso: (dateIso: string | null) =>
-      set(
-        produce((draft: DatePickerWrapperStoreProps) => {
-          draft.selectedDateIso = dateIso;
         }),
       ),
     setScrollToDayIso: (dateIso: string | null) =>

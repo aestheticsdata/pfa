@@ -1,9 +1,7 @@
 "use client";
 
-import { parseDateParam } from "@components/datePickerWrapper/helpers";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
-import { DATE_QUERY_PARAM, parseAsSpendingsDate } from "@helpers/dateRoute";
 import { useLocale } from "@i18n/LocaleContext";
 import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
@@ -11,8 +9,6 @@ import { cn } from "@lib/utils";
 import localesDates from "@src/i18n/locales-dates";
 import format from "date-fns/format";
 import { Calendar as CalendarIcon, ChevronDown } from "lucide-react";
-import { useQueryState } from "nuqs";
-import { useEffect } from "react";
 import DayPicker from "react-day-picker";
 // NOTE: react-day-picker/lib/style.css is intentionally NOT imported — the pfa
 // "Capsule" styling in globals.css fully styles the DayPicker, and the lib CSS
@@ -21,6 +17,13 @@ import DayPicker from "react-day-picker";
 
 import type { Modifiers } from "react-day-picker";
 
+/**
+ * Presentational only: it renders the week held by the shared store and never
+ * writes it on its own (the URL → store sync lives in useSyncWeekFromUrl, mounted
+ * once by the page). The NavBar renders this component TWICE — a desktop and a
+ * mobile copy, hidden from each other by CSS, so both are always mounted — which
+ * is harmless precisely because it owns no derived state (COS-99).
+ */
 const DatePickerWrapper = () => {
   const common = useTranslations("common");
   const dateLocale = useDateLocale();
@@ -36,8 +39,6 @@ const DatePickerWrapper = () => {
     handleDayEnter,
     handleDayLeave,
   } = useDatePickerState();
-
-  const [selectedDateParam] = useQueryState(DATE_QUERY_PARAM, parseAsSpendingsDate);
 
   const daysAreSelected = selectedDays.length > 0;
 
@@ -55,20 +56,6 @@ const DatePickerWrapper = () => {
     modifiers.selectedRangeStart = selectedDays[0];
     modifiers.selectedRangeEnd = selectedDays[selectedDays.length - 1];
   }
-
-  useEffect(() => {
-    if (selectedDateParam) {
-      const date = parseDateParam(selectedDateParam);
-      if (
-        !Number.isNaN(date.getTime()) &&
-        (selectedDays.length === 0 || selectedDays[0].getTime() !== date.getTime())
-      ) {
-        handleDayChange(date, false);
-      }
-    } else if (selectedDays.length === 0) {
-      handleDayChange(new Date(), false);
-    }
-  }, [selectedDateParam]);
 
   return (
     /* The wrapper no longer positions anything (the panel is portalled) — it

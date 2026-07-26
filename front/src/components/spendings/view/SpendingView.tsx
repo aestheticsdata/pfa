@@ -5,7 +5,6 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import { WEEKLY } from "@components/spendings/config/constants";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
-import useEnsureWeekRange from "@components/spendings/helpers/useEnsureWeekRange";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendings from "@components/spendings/services/useSpendings";
@@ -55,8 +54,6 @@ const SpendingView = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
-
-  useEnsureWeekRange();
 
   const { spendingsByWeek, isLoading } = useSpendings();
   const { get: dashboardQuery, remaining } = useDashboard();
