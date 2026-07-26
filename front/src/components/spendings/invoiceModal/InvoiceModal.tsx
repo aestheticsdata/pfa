@@ -18,7 +18,7 @@ import { Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
-import type { SpendingListItem } from "@components/spendings/types";
+import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 
 interface InvoiceModalProps {
   handleClickOutside: () => void;

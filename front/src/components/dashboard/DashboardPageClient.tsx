@@ -11,7 +11,7 @@ import startOfMonth from "date-fns/startOfMonth";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useLayoutEffect, useState } from "react";
 
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
+import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
 
 // Sync the store before paint on the client so stepping months / Back never flash
 // a stale month; a plain effect on the server (layout effects don't run in SSR).

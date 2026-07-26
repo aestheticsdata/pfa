@@ -1,7 +1,7 @@
 import { AuthResponseSchema } from "@src/schemas/auth";
 import { cookies, headers } from "next/headers";
 
-import type { AuthResponse } from "@auth/types";
+import type { AuthResponse } from "@auth/interfaces/authTypes";
 
 const trimTrailingSlash = (value: string): string => value.replace(/\/+$/, "");
 

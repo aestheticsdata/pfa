@@ -6,7 +6,7 @@ import CategoryTrend from "@lib/dataviz/CategoryTrend";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import type { CategoryTooltipDatum, CursorPoint } from "@lib/dataviz/dataVizTypes";
+import type { CategoryTooltipDatum, CursorPoint } from "@lib/dataviz/interfaces/dataVizTypes";
 
 // Measure-then-position must run before paint to clamp the tooltip at the
 // viewport edge without a flash; fall back to useEffect on the server, where

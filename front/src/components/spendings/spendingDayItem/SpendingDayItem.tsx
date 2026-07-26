@@ -15,9 +15,12 @@ import format from "date-fns/format";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
-import type { AuthUser } from "@auth/types";
-import type { MonthRange } from "@components/spendings/interfaces/spendingDashboardTypes";
-import type { SpendingItem as SpendingItemType, SpendingListItem } from "@components/spendings/types";
+import type { AuthUser } from "@auth/interfaces/authTypes";
+import type {
+  SpendingItem as SpendingItemType,
+  SpendingListItem,
+} from "@components/spendings/interfaces/spendingListTypes";
+import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
 
 interface SpendingDayItemProps {
   spendingsByDay: SpendingListItem[];

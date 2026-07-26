@@ -24,7 +24,7 @@ import frSpendingSearch from "@text/fr/spendingSearch";
 import frSpendings from "@text/fr/spendings";
 import frStatistics from "@text/fr/statistics";
 
-import type { LangKeys } from "@src/interfaces/locales";
+import type { LangKeys } from "@i18n/interfaces/localesTypes";
 
 const fr = {
   app: frApp,

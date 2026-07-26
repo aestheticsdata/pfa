@@ -13,7 +13,7 @@ import { ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import type { SharedLoginFormProps } from "@src/components/shared/sharedLoginForm/interfaces";
+import type { SharedLoginFormProps } from "@components/shared/interfaces/sharedLoginFormTypes";
 import type { Dictionary } from "@text/index";
 
 const buildSchema = (

@@ -1,7 +1,7 @@
 import adjustFontColor from "@components/common/helpers/adjustFontColor";
 import useTranslations from "@i18n/useTranslations";
 
-import type { CategoryProps } from "@src/interfaces/category";
+import type { CategoryProps } from "@components/common/interfaces/categoryTypes";
 
 interface CategoryComponentProps {
   item: CategoryProps;

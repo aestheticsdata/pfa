@@ -1,7 +1,7 @@
 import orderBy from "lodash/orderBy";
 import { useMemo, useState } from "react";
 
-import type { SpendingListItem } from "@components/spendings/types";
+import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 
 export type DaySortField = "label" | "category" | "amount";
 type SortDir = "asc" | "desc";

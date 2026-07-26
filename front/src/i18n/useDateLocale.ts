@@ -4,7 +4,7 @@ import { useLocale } from "@i18n/LocaleContext";
 import enUS from "date-fns/locale/en-US";
 import fr from "date-fns/locale/fr";
 
-import type { LangKeys } from "@src/interfaces/locales";
+import type { LangKeys } from "@i18n/interfaces/localesTypes";
 import type { Locale } from "date-fns";
 
 /** date-fns locale per app locale — for non-hook code taking a locale param. */

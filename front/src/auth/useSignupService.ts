@@ -6,8 +6,8 @@ import useTranslations from "@i18n/useTranslations";
 import { AuthResponseSchema } from "@src/schemas/auth";
 import { toast } from "sonner";
 
-import type { AuthResponse } from "@auth/types";
-import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
+import type { AuthResponse } from "@auth/interfaces/authTypes";
+import type { LoginValues } from "@components/shared/interfaces/sharedLoginFormTypes";
 import type { AxiosError } from "axios";
 
 const useSignupService = () => {

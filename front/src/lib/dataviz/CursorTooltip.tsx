@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import type { CursorPoint } from "@lib/dataviz/dataVizTypes";
+import type { CursorPoint } from "@lib/dataviz/interfaces/dataVizTypes";
 import type { ReactNode } from "react";
 
 // Measure-then-position must run before paint to clamp the tooltip at the

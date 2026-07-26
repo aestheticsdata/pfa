@@ -8,7 +8,7 @@ import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginF
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
+import type { LoginValues } from "@components/shared/interfaces/sharedLoginFormTypes";
 
 export default function ForgotPassword() {
   const login = useTranslations("login");

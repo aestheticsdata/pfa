@@ -1,7 +1,7 @@
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 
-import type { SpendingItem } from "@components/spendings/types";
+import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { Locale } from "date-fns";
 
 export interface SpendingMonthGroup {

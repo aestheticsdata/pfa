@@ -1,7 +1,7 @@
 // pfa data-viz lib — radial (donut / pie) geometry (pure, no React).
 // Polar-coordinate helpers and the wedge path builder used by the Donut chart.
 
-import type { LinePoint } from "@lib/dataviz/dataVizTypes";
+import type { LinePoint } from "@lib/dataviz/interfaces/dataVizTypes";
 
 /** Angle in degrees (0 = 12 o'clock, clockwise) → point on a circle. */
 export const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: number): LinePoint => {

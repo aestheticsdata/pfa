@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import type { CursorPoint } from "@lib/dataviz/dataVizTypes";
+import type { CursorPoint } from "@lib/dataviz/interfaces/dataVizTypes";
 
 export interface CursorHover<T> extends CursorPoint {
   data: T;

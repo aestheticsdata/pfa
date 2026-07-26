@@ -2,7 +2,7 @@ import { AuthProvider } from "@auth/context/AuthContext";
 import { getServerSession } from "@auth/server/getServerSession";
 import AuthHeader from "@components/auth/AuthHeader";
 
-import type { AuthResponse } from "@auth/types";
+import type { AuthResponse } from "@auth/interfaces/authTypes";
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   let session: AuthResponse | null = null;

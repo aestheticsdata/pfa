@@ -15,9 +15,9 @@ import { ChevronRight, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
+import type { CategoryProps } from "@components/common/interfaces/categoryTypes";
 import type { PeriodType } from "@components/spendings/config/constants";
-import type { SpendingItem } from "@components/spendings/types";
-import type { CategoryProps } from "@src/interfaces/category";
+import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 interface SpendingsListModalProps {
   handleClickOutside: () => void;

@@ -8,7 +8,7 @@ import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
 import SharedLoginForm from "@components/shared/sharedLoginForm/sharedLoginForm";
 import useTranslations from "@i18n/useTranslations";
 
-import type { LoginValues } from "@components/shared/sharedLoginForm/interfaces";
+import type { LoginValues } from "@components/shared/interfaces/sharedLoginFormTypes";
 
 export default function SignUp() {
   const login = useTranslations("login");

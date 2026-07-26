@@ -6,7 +6,7 @@ import { useLocale } from "@i18n/LocaleContext";
 import useTranslations from "@i18n/useTranslations";
 import { toast } from "sonner";
 
-import type { LangKeys } from "@src/interfaces/locales";
+import type { LangKeys } from "@i18n/interfaces/localesTypes";
 
 /**
  * Switches the app locale and persists it: optimistic context updates (locale +

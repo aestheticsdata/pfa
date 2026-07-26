@@ -2,7 +2,7 @@
 
 import { cn } from "@lib/utils";
 
-import type { DonutSegment } from "@lib/dataviz/dataVizTypes";
+import type { DonutSegment } from "@lib/dataviz/interfaces/dataVizTypes";
 import type { MouseEvent } from "react";
 
 interface StackedBarProps {

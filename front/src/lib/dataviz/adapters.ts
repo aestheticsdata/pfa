@@ -1,7 +1,7 @@
 // Thin mappers from the project's real API shapes onto the generic dataviz
 // contracts — so the lib stays reusable but ergonomic for pfa data.
 
-import type { BarDatum, DonutSegment } from "@lib/dataviz/dataVizTypes";
+import type { BarDatum, DonutSegment } from "@lib/dataviz/interfaces/dataVizTypes";
 import type { ChartsCategory } from "@src/schemas/stats";
 
 const FALLBACK_COLOR = "#94a3b8";

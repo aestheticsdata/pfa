@@ -4,7 +4,7 @@ import { areaPath, linePath, smoothPath } from "@lib/dataviz/linePaths";
 import { extent, linearScale, normalizePoints } from "@lib/dataviz/scales";
 import { cn } from "@lib/utils";
 
-import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@lib/dataviz/dataVizTypes";
+import type { AxisMarker, LinePoint, LineSeries, SeriesDot } from "@lib/dataviz/interfaces/dataVizTypes";
 
 interface Padding {
   top?: number;

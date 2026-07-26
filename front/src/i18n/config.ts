@@ -1,4 +1,4 @@
-import type { LangKeys } from "@src/interfaces/locales";
+import type { LangKeys } from "@i18n/interfaces/localesTypes";
 
 export const SUPPORTED_LOCALES: readonly LangKeys[] = ["fr", "en"];
 export const DEFAULT_LOCALE: LangKeys = "fr";

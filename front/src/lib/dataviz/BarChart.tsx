@@ -2,7 +2,7 @@
 
 import { cn } from "@lib/utils";
 
-import type { BarDatum } from "@lib/dataviz/dataVizTypes";
+import type { BarDatum } from "@lib/dataviz/interfaces/dataVizTypes";
 
 interface BarChartProps {
   bars: BarDatum[];

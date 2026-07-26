@@ -4,7 +4,7 @@ import { DEFAULT_LOCALE, isSupportedLocale, LOCALE_STORAGE_KEY } from "@i18n/con
 import { pickSupportedLocale } from "@i18n/pickSupportedLocale";
 import { createContext, useContext, useEffect, useState } from "react";
 
-import type { LangKeys } from "@src/interfaces/locales";
+import type { LangKeys } from "@i18n/interfaces/localesTypes";
 
 interface LocaleContextValue {
   locale: LangKeys;

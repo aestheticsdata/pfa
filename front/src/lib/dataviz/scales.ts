@@ -2,7 +2,7 @@
 // The coordinate-system layer: turn raw series data into the numbers the path
 // builders (linePaths / arcPaths) draw with.
 
-import type { LinePoint } from "@lib/dataviz/dataVizTypes";
+import type { LinePoint } from "@lib/dataviz/interfaces/dataVizTypes";
 
 /** Coerce a number[] | LinePoint[] into LinePoint[] (index as x for numbers). */
 export const normalizePoints = (points: LinePoint[] | number[]): LinePoint[] =>

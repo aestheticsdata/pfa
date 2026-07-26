@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 
-import type { Days, HoverRange } from "@components/datePickerWrapper/types";
+import type { Days, HoverRange } from "@components/datePickerWrapper/interfaces/datePickerTypes";
 
 const useDatePickerState = () => {
   const [isCalendarVisible, setIsCalendarVisible] = useState<boolean>(false);
