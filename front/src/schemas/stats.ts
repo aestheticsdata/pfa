@@ -1,8 +1,28 @@
 import { numberLikeSchema } from "@src/schemas/primitives";
 import { z } from "zod";
 
-const statisticsMonthEntrySchema = z.record(z.string(), z.union([z.string(), z.number()]));
+// A statistics row arrives flat from the backend — the month label sits among the
+// per-category totals: { month: "janv.", food: 10, rent: 5 }. Splitting it at the
+// parse boundary is what lets every consumer read `totals` as plain numbers,
+// instead of walking the row re-discriminating the "month" key and casting the
+// rest to `string | number` (COS-109).
+//
+// The coercion stays lenient — a malformed cell becomes 0 rather than throwing.
+// The entire Statistics page (KPIs, forecast, charts) renders off this single
+// parse, so one bad value must degrade a cell, not blank the page.
+const statisticsMonthEntrySchema = z.record(z.string(), z.union([z.string(), z.number()])).transform((row) => {
+  const { month, ...categories } = row;
+  const totals: Record<string, number> = {};
+  for (const [name, value] of Object.entries(categories)) {
+    totals[name] = typeof value === "number" ? value : Number(value) || 0;
+  }
+  return { month: String(month ?? ""), totals };
+});
 
+// The two outer `z.record`s stay dynamically keyed on purpose (COS-109): the keys
+// are the user's own category names and the years they have data for, both only
+// known at runtime. Typing them further is impossible without changing the
+// backend contract, which is out of scope here.
 export const StatisticsResponseSchema = z.object({
   colors: z.record(z.string(), z.string()),
   data: z.record(z.string(), z.array(statisticsMonthEntrySchema)),

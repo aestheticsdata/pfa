@@ -1,3 +1,4 @@
+import { AuthResponseSchema } from "@src/schemas/auth";
 import { cookies, headers } from "next/headers";
 
 import type { AuthResponse } from "@auth/types";
@@ -50,5 +51,5 @@ export const getServerSession = async (): Promise<AuthResponse | null> => {
     throw new Error(`users/me failed with status ${response.status}`);
   }
 
-  return (await response.json()) as AuthResponse;
+  return AuthResponseSchema.parse(await response.json());
 };

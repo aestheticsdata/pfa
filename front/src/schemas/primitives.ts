@@ -36,3 +36,17 @@ export const numberLikeWithZeroFallbackSchema = z.preprocess((value) => {
  * API before it) emits one of these three, and no read path rewrites the value.
  */
 export const itemTypeSchema = z.enum(["spending", "exceptional", "recurring"]);
+
+// ---------------------------------------------------------------------------
+// Deliberate choices in these schemas — please don't "fix" them (COS-109).
+//
+// * `currency: z.string()` stays a free string, never an enum. It is a per-user
+//   `baseCurrency`, and multi-currency support is a deferred decision; hardcoding
+//   EUR here would have to be undone. `z.string().length(3)` is the most that
+//   would ever be justified.
+//
+// * `ID` / `userID` / `categoryID` keep their capitalisation. It comes straight
+//   from the Prisma/MySQL column names and Nest ships the rows unmapped (no DTO,
+//   no serializer), so renaming them front-side would just paper over the wire
+//   format. If it is ever changed, it starts from a Prisma `@map`, not from here.
+// ---------------------------------------------------------------------------

@@ -25,6 +25,8 @@ import type { Dictionary } from "@text/index";
 const makeFormSchema = (errors: Dictionary["exceptionals"]["modal"]["errors"]) =>
   z.object({
     label: z.string().min(1, errors.labelRequired),
+    // As in the spending modal, a string on purpose: it holds a Mexp expression,
+    // evaluated on submit by @lib/amountExpression (COS-109).
     amount: z.string().min(1, errors.amountRequired),
     date: z.string().min(1, errors.dateRequired),
     description: z.string().optional(),
@@ -179,7 +181,12 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
               />
             </FieldShell>
           </div>
-          {errors.amount && <p className="-mt-3 text-xs text-neg">{errors.amount.message}</p>}
+          {/* Date and amount share a 2-column grid row, so their error line sits
+              below the row rather than inside either FieldShell — otherwise the
+              two columns stop lining up (same pattern as COS-164). */}
+          {(errors.date || errors.amount) && (
+            <p className="-mt-3 text-xs text-neg">{errors.date?.message ?? errors.amount?.message}</p>
+          )}
 
           <FieldShell
             label={modal.fields.label}

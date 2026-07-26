@@ -6,7 +6,7 @@ import CategoryTrend from "@lib/dataviz/CategoryTrend";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-import type { CategoryTooltipDatum } from "@lib/dataviz/dataVizTypes";
+import type { CategoryTooltipDatum, CursorPoint } from "@lib/dataviz/dataVizTypes";
 
 // Measure-then-position must run before paint to clamp the tooltip at the
 // viewport edge without a flash; fall back to useEffect on the server, where
@@ -15,7 +15,7 @@ const useIsomorphicLayoutEffect = typeof window === "undefined" ? useEffect : us
 
 interface CategoryBarTooltipProps {
   /** Cursor position in viewport coords, or null when the tooltip is hidden. */
-  point: { x: number; y: number } | null;
+  point: CursorPoint | null;
   datum: CategoryTooltipDatum;
 }
 

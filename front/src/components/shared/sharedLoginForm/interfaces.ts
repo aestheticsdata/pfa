@@ -1,7 +1,10 @@
+// What `SharedLoginForm` hands to its `onSubmit`. Every field is present: the
+// form renders a subset of the inputs depending on the mode, but the hidden ones
+// still carry their "" default, so callers never have to assert (COS-109).
 export interface LoginValues {
-  currency?: string;
-  email?: string;
-  password?: string;
+  currency: string;
+  email: string;
+  password: string;
 }
 
 export interface SharedLoginFormProps {

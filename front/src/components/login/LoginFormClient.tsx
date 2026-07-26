@@ -21,7 +21,7 @@ export default function LoginFormClient() {
 
   const onSubmit = async (values: LoginValues) => {
     try {
-      const result = await loginService(values.email!, values.password!);
+      const result = await loginService(values.email, values.password);
       if (result?.user && result.csrfToken) {
         setServerError(null);
         await setCredentials(result);
