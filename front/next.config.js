@@ -1,4 +1,3 @@
-const isStaticExport = process.env.NEXT_OUTPUT_MODE === 'export';
 const isDev = process.env.NODE_ENV !== "production";
 const localApiHost = process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST;
 
@@ -44,8 +43,6 @@ const contentSecurityPolicy = Object.entries(cspDirectives)
 const nextConfig = {
   reactStrictMode: false,
   reactCompiler: true,
-  // Static export is now opt-in (NEXT_OUTPUT_MODE=export).
-  ...(isStaticExport && { output: 'export' }),
   trailingSlash: true,
   typescript: {
     // !! WARN !!
