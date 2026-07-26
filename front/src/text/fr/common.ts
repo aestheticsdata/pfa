@@ -28,6 +28,10 @@ const common = {
   category: {
     uncategorized: "sans catégorie",
   },
+  validation: {
+    /** Shared by every bounded text field — the bound comes from its DB column (COS-180). */
+    tooLong: (max: number) => `${max} caractères maximum`,
+  },
   loading: "Chargement…",
   searchPlaceholder: "Rechercher…",
   optional: "(optionnel)",

@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { Type } from "class-transformer";
+import { FIELD_LIMITS } from "@config/field-limits";
 
 export class CreateExceptionalDto {
   @IsString()
@@ -8,10 +9,12 @@ export class CreateExceptionalDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(FIELD_LIMITS.label)
   label: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(FIELD_LIMITS.description)
   description?: string;
 
   @IsNumber()
@@ -20,13 +23,16 @@ export class CreateExceptionalDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(FIELD_LIMITS.currency)
   currency?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(FIELD_LIMITS.exceptionalCategoryName)
   categoryName?: string;
 
   @IsOptional()
   @IsString()
+  @MaxLength(FIELD_LIMITS.color)
   categoryColor?: string;
 }

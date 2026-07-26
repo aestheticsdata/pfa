@@ -30,6 +30,9 @@ const common: typeof frCommon = {
   category: {
     uncategorized: "uncategorized",
   },
+  validation: {
+    tooLong: (max: number) => `${max} characters max`,
+  },
   loading: "Loading…",
   searchPlaceholder: "Search…",
   optional: "(optional)",

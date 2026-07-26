@@ -2,6 +2,7 @@
 
 import { useAuth } from "@auth/context/AuthContext";
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
+import { makeExceptionalSchema } from "@components/exceptionals/schema";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import { comboboxTriggerClass } from "@components/shared/comboboxTriggerClass";
 import { FieldShell } from "@components/shared/FieldShell";
@@ -13,26 +14,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover"
 import { zodResolver } from "@hookform/resolvers/zod";
 import useTranslations from "@i18n/useTranslations";
 import evaluateAmountExpression from "@lib/amountExpression";
+import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import format from "date-fns/format";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
+import type { ExceptionalForm } from "@components/exceptionals/schema";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
-import type { Dictionary } from "@text/index";
-
-const makeFormSchema = (errors: Dictionary["exceptionals"]["modal"]["errors"]) =>
-  z.object({
-    label: z.string().min(1, errors.labelRequired),
-    // As in the spending modal, a string on purpose: it holds a Mexp expression,
-    // evaluated on submit by @lib/amountExpression (COS-109).
-    amount: z.string().min(1, errors.amountRequired),
-    date: z.string().min(1, errors.dateRequired),
-    description: z.string().optional(),
-  });
-
-type FormValues = z.infer<ReturnType<typeof makeFormSchema>>;
 
 interface CategoryOption {
   name: string;
@@ -62,8 +51,9 @@ const getRandomHexColor = () => {
 
 const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories }: ExceptionalModalProps) => {
   const exceptionals = useTranslations("exceptionals");
+  const common = useTranslations("common");
   const { modal, actions } = exceptionals;
-  const formSchema = makeFormSchema(modal.errors);
+  const formSchema = makeExceptionalSchema(modal.errors, common.validation);
   const [open, setOpen] = useState(true);
   const closeModal = () => {
     setOpen(false);
@@ -88,7 +78,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
     register,
     handleSubmit,
     formState: { errors, isSubmitting, isValid },
-  } = useForm<FormValues>({
+  } = useForm<ExceptionalForm>({
     resolver: zodResolver(formSchema),
     mode: "onChange",
     defaultValues: {
@@ -103,7 +93,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
 
   const exactMatch = categoryOptions.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());
 
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = (values: ExceptionalForm) => {
     if (!user) {
       console.error("User is not available");
       return;
@@ -207,6 +197,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
               </>
             }
             htmlFor="exceptional-description"
+            error={errors.description?.message}
           >
             <TextInput
               id="exceptional-description"
@@ -251,6 +242,10 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                     placeholder={modal.category.searchPlaceholder}
                     value={comboboxQuery}
                     onValueChange={setComboboxQuery}
+                    // The typed name is committed as-is, and this combobox has no
+                    // error slot — so the bound is enforced at the keystroke
+                    // rather than reported after the fact (COS-180).
+                    maxLength={FIELD_LIMITS.exceptionalCategoryName}
                     className="text-ink"
                   />
                   <CommandList>

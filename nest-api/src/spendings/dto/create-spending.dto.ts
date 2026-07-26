@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
+import { FIELD_LIMITS } from "@config/field-limits";
 import { CreateSpendingCategoryDto } from "./create-spending-category.dto";
 
 export class CreateSpendingDto {
@@ -9,6 +10,7 @@ export class CreateSpendingDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(FIELD_LIMITS.label)
   label: string;
 
   @IsNumber()
@@ -21,5 +23,6 @@ export class CreateSpendingDto {
   category?: CreateSpendingCategoryDto;
 
   @IsString()
+  @MaxLength(FIELD_LIMITS.currency)
   currency: string;
 }

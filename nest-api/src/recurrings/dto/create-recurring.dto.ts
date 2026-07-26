@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
 import { Type } from "class-transformer";
+import { FIELD_LIMITS } from "@config/field-limits";
 
 export class CreateRecurringDto {
   @IsString()
@@ -12,6 +13,7 @@ export class CreateRecurringDto {
 
   @IsString()
   @IsNotEmpty()
+  @MaxLength(FIELD_LIMITS.label)
   label: string;
 
   @IsNumber()
@@ -20,5 +22,6 @@ export class CreateRecurringDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(FIELD_LIMITS.currency)
   currency?: string;
 }

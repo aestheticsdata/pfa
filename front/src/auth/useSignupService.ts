@@ -4,6 +4,7 @@ import useRequestHelper from "@helpers/useRequestHelper";
 import { pickSupportedLocale } from "@i18n/pickSupportedLocale";
 import useTranslations from "@i18n/useTranslations";
 import { AuthResponseSchema } from "@src/schemas/auth";
+import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import { toast } from "sonner";
 
 import type { AuthResponse } from "@auth/interfaces/authTypes";
@@ -20,7 +21,10 @@ const useSignupService = () => {
       const res = await request("/users/add", {
         method: "POST",
         data: {
-          name: email.split("@")[0],
+          // Users.name is a VarChar(20) and the signup form has no name field:
+          // a long email local part used to reach the insert and fail as a raw
+          // SQL error, with nothing the user could fix (COS-180).
+          name: email.split("@")[0].slice(0, FIELD_LIMITS.userName),
           email,
           password,
           registerDate: new Date(),
