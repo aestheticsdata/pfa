@@ -6,6 +6,7 @@ import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
+import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import { useMemo, useState } from "react";
 
 const LABEL = overlineClass;
@@ -39,6 +40,7 @@ const CategoryFormBody = ({
   onCancel: () => void;
 }) => {
   const categories = useTranslations("categories");
+  const common = useTranslations("common");
   const { form } = categories;
   const swatches = useMemo(() => paletteHex(), []);
   const [name, setName] = useState(initialName);
@@ -49,6 +51,10 @@ const CategoryFormBody = ({
     const trimmed = name.trim().toLowerCase();
     if (!trimmed) {
       setError(form.errorNameRequired);
+      return;
+    }
+    if (trimmed.length > FIELD_LIMITS.categoryName) {
+      setError(common.validation.tooLong(FIELD_LIMITS.categoryName));
       return;
     }
     if (takenNames.includes(trimmed)) {

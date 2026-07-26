@@ -1,11 +1,18 @@
+import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import { z } from "zod";
 
 import type { SpendingCategoryInputSchema } from "@src/schemas/spendings";
 import type { Dictionary } from "@text/index";
 
-export const makeSpendingSchema = (validation: Dictionary["spendings"]["modal"]["validation"]) =>
+export const makeSpendingSchema = (
+  validation: Dictionary["spendings"]["modal"]["validation"],
+  common: Dictionary["common"]["validation"],
+) =>
   z.object({
-    spendingLabel: z.string().min(1, validation.labelRequired),
+    spendingLabel: z
+      .string()
+      .min(1, validation.labelRequired)
+      .max(FIELD_LIMITS.label, common.tooLong(FIELD_LIMITS.label)),
     // Deliberately a string, not a number (COS-109): the field accepts an
     // arithmetic expression ("12+3"), evaluated on submit by @lib/amountExpression.
     spendingAmount: z.string().min(1, validation.amountRequired),

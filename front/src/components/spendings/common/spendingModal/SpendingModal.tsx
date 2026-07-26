@@ -58,6 +58,7 @@ const SpendingModal = ({
   month = null,
 }: SpendingModalProps) => {
   const spendings = useTranslations("spendings");
+  const common = useTranslations("common");
   const [open, setOpen] = useState(true);
   const closeModal = () => {
     setOpen(false);
@@ -146,7 +147,7 @@ const SpendingModal = ({
     clearErrors,
     formState: { errors, isSubmitting },
   } = useForm<SpendingForm>({
-    resolver: zodResolver(makeSpendingSchema(spendings.modal.validation)),
+    resolver: zodResolver(makeSpendingSchema(spendings.modal.validation, common.validation)),
     mode: "onChange",
     defaultValues: {
       spendingLabel: spending?.label ?? "",

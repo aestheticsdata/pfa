@@ -6,6 +6,7 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
+import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
@@ -117,6 +118,11 @@ const CategoryField = ({
               placeholder={t.category.searchPlaceholder}
               value={comboboxQuery}
               onValueChange={setComboboxQuery}
+              // Whatever is typed is committed as a category name — on selection
+              // or simply on close — and this combobox has no error slot, so the
+              // bound is enforced at the keystroke rather than reported after the
+              // fact (COS-180).
+              maxLength={FIELD_LIMITS.categoryName}
               className="text-ink"
             />
             <CommandList>

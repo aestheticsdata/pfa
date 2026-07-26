@@ -1,11 +1,14 @@
-import { IsEmail, IsOptional, IsString, MinLength } from "class-validator";
+import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { FIELD_LIMITS } from "@config/field-limits";
 
 export class AddUserDto {
   @IsString()
   @MinLength(1, { message: "Name is required" })
+  @MaxLength(FIELD_LIMITS.userName)
   name: string;
 
   @IsEmail()
+  @MaxLength(FIELD_LIMITS.email)
   email: string;
 
   @IsString()
@@ -14,6 +17,7 @@ export class AddUserDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(FIELD_LIMITS.currency)
   baseCurrency?: string;
 
   @IsOptional()
@@ -21,5 +25,6 @@ export class AddUserDto {
 
   @IsOptional()
   @IsString()
+  @MaxLength(FIELD_LIMITS.language)
   language?: string;
 }

@@ -3,6 +3,7 @@
 import { overlineClass } from "@components/shared/Overline";
 import { authInputClass } from "@components/shared/sharedLoginForm/authInputClass";
 import { PasswordField } from "@components/shared/sharedLoginForm/PasswordField";
+import { makeLoginSchema } from "@components/shared/sharedLoginForm/schema";
 import { Button } from "@components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@components/ui/select";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,34 +12,9 @@ import currencyCodes from "@src/currency-codes.json";
 import getSymbolFromCurrency from "currency-symbol-map";
 import { ArrowRight } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 
 import type { SharedLoginFormProps } from "@components/shared/interfaces/sharedLoginFormTypes";
-import type { Dictionary } from "@text/index";
-
-const buildSchema = (
-  needEmail: boolean,
-  needPassword: boolean,
-  needConfirm: boolean,
-  needCurrency: boolean,
-  validation: Dictionary["login"]["validation"],
-) =>
-  z
-    .object({
-      // A hidden field validates as a plain `z.string()`, never `.optional()`:
-      // `defaultValues` below always supplies "" for it, so the value is present
-      // either way. Keeping it required is what makes `z.infer` resolve to all
-      // required strings instead of collapsing every field to `string | undefined`
-      // — the root cause of the `values.email!` assertions in the callers (COS-109).
-      email: needEmail ? z.string().min(1, validation.emailRequired).email(validation.emailInvalid) : z.string(),
-      password: needPassword ? z.string().min(1, validation.passwordRequired) : z.string(),
-      confirmPassword: needConfirm ? z.string().min(1, validation.confirmRequired) : z.string(),
-      currency: needCurrency ? z.string().min(1) : z.string(),
-    })
-    .refine((d) => !needConfirm || d.password === d.confirmPassword, {
-      message: validation.passwordMismatch,
-      path: ["confirmPassword"],
-    });
+import type { LoginForm } from "@components/shared/sharedLoginForm/schema";
 
 const LABEL = overlineClass;
 
@@ -69,15 +45,15 @@ const SharedLoginForm = ({
   onDismissError,
 }: SharedLoginFormProps) => {
   const login = useTranslations("login");
-  const schema = buildSchema(
+  const common = useTranslations("common");
+  const schema = makeLoginSchema(
     !!displayEmailField,
     !!displayPasswordField,
     !!displayConfirmPasswordField,
     !!displayCurrencyField,
     login.validation,
+    common.validation,
   );
-
-  type FormValues = z.infer<typeof schema>;
 
   const {
     register,
@@ -86,7 +62,7 @@ const SharedLoginForm = ({
     watch,
     clearErrors,
     formState: { errors, isSubmitting },
-  } = useForm<FormValues>({
+  } = useForm<LoginForm>({
     resolver: zodResolver(schema),
     defaultValues: {
       email: "",
@@ -106,7 +82,7 @@ const SharedLoginForm = ({
     errors.email?.message || errors.password?.message || errors.confirmPassword?.message || errors.currency?.message;
   const formMessage = serverError || (fieldError ? String(fieldError) : null);
 
-  const clearFieldError = (field: keyof FormValues) => () => {
+  const clearFieldError = (field: keyof LoginForm) => () => {
     clearErrors(field);
     onDismissError?.();
   };
