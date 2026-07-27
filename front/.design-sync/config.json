@@ -102,9 +102,6 @@
     "TextInput": "src/components/shared/TextInput.tsx",
     "Toaster": "src/components/ui/sonner.tsx",
     "Tooltip": "src/components/ui/tooltip.tsx",
-    "TooltipContent": null,
-    "TooltipProvider": null,
-    "TooltipTrigger": null,
     "Spinner": null
   },
   "cssEntry": ".design-sync/.cache/pfa-styles.css",

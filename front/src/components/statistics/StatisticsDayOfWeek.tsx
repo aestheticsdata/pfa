@@ -10,9 +10,10 @@ import overspendLevel, {
 import { scaleFrac } from "@components/statistics/helpers/weekdayBullet";
 import { overallDailyAverage, weekdayAverages, weekdayInsights } from "@components/statistics/helpers/weekdayStats";
 import WeekdayBulletBar from "@components/statistics/WeekdayBulletBar";
+import { Tooltip } from "@components/ui/tooltip";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { AnimatedNumber, CursorTooltip, useCursorHover } from "@lib/dataviz";
+import { AnimatedNumber, useCursorHover } from "@lib/dataviz";
 import { useEffect, useState } from "react";
 
 import type { DailyStat, WeekdayCategory } from "@src/schemas/stats";
@@ -513,7 +514,8 @@ const StatisticsDayOfWeek = ({
         )}
       </div>
 
-      <CursorTooltip
+      <Tooltip
+        mode="cursor"
         point={rowTip.hover}
         maxWidth={270}
       >
@@ -574,7 +576,7 @@ const StatisticsDayOfWeek = ({
               </div>
             );
           })()}
-      </CursorTooltip>
+      </Tooltip>
     </GlowCard>
   );
 };

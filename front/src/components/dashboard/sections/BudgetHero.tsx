@@ -9,11 +9,12 @@ import { MoneyAmount } from "@components/shared/MoneyAmount";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { Input } from "@components/ui/input";
+import { Tooltip } from "@components/ui/tooltip";
 import { interpolate } from "@i18n/interpolate";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { CategoryBarTooltip, Donut, useCountUp } from "@lib/dataviz";
+import { CategoryTooltipContent, Donut, useCountUp } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import { useEffect, useState } from "react";
@@ -108,6 +109,8 @@ const BudgetHero = () => {
   // Mirror the donut's arc emphasis on the legend: lift the hovered segment's entry,
   // leaving the others untouched (target 2 = the empty "available" band → neither lifts).
   const legendEmphasis = (index: number) => (hover?.target === index ? "brightness-125" : undefined);
+
+  const hoveredDatum = hover ? tooltipData[hover.target] : undefined;
 
   return (
     <GlowCard
@@ -229,12 +232,14 @@ const BudgetHero = () => {
         </div>
       </div>
 
-      {hover && tooltipData[hover.target] && (
-        <CategoryBarTooltip
-          point={{ x: hover.x, y: hover.y }}
-          datum={tooltipData[hover.target]}
-        />
-      )}
+      {/* Rendered unconditionally: the tooltip owns its fade in AND out, so it
+          needs to outlive the hover it is fading away from. */}
+      <Tooltip
+        mode="cursor"
+        point={hover && hoveredDatum ? { x: hover.x, y: hover.y } : null}
+      >
+        {hoveredDatum && <CategoryTooltipContent datum={hoveredDatum} />}
+      </Tooltip>
 
       <DailySparkline />
     </GlowCard>

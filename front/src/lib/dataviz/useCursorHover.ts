@@ -9,7 +9,7 @@ export interface CursorHover<T> extends CursorPoint {
 }
 
 /**
- * Local hover state driving a {@link CursorTooltip}: viewport coords + an
+ * Local hover state driving a `<Tooltip mode="cursor">`: viewport coords + an
  * optional hovered datum. `T` defaults to `void` for tooltips whose content is
  * fixed (no per-item data) — call `move()` / `show(x, y)` with no datum. For
  * data-driven tooltips pass the datum type, e.g. `useCursorHover<HeatmapCell>()`.

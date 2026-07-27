@@ -5,10 +5,11 @@ import { Overline } from "@components/shared/Overline";
 import { exceptionalTotal } from "@components/statistics/helpers/exceptionalsData";
 import { projectedRemainingRegular, toYearMonthly } from "@components/statistics/helpers/projection";
 import { yearTotal } from "@components/statistics/helpers/statisticsData";
+import { Tooltip } from "@components/ui/tooltip";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { AnimatedNumber, CursorTooltip, ProgressTrack, useCursorHover } from "@lib/dataviz";
+import { AnimatedNumber, ProgressTrack, useCursorHover } from "@lib/dataviz";
 import format from "date-fns/format";
 import getDayOfYear from "date-fns/getDayOfYear";
 import { useState } from "react";
@@ -135,7 +136,10 @@ const StatisticsForecast = ({
             </span>
           </>
         )}
-        <CursorTooltip point={projectionTip.hover}>
+        <Tooltip
+          mode="cursor"
+          point={projectionTip.hover}
+        >
           {projectionTip.hover
             ? projection === null
               ? noHistory
@@ -145,7 +149,7 @@ const StatisticsForecast = ({
                 ? t.tooltip.projectionModel
                 : t.tooltip.projectionActual
             : null}
-        </CursorTooltip>
+        </Tooltip>
       </div>
     </GlowCard>
   );

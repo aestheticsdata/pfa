@@ -1,34 +1,36 @@
-import { IconButton, MoneyAmount, Tooltip, TooltipContent, TooltipTrigger } from "pfa-next";
+import { IconButton, MoneyAmount, Tooltip } from "pfa-next";
 import { Info } from "lucide-react";
 
 /**
- * The canonical story: the info affordance next to a computed stat. `Tooltip`
- * mounts its own `TooltipProvider`, so there is nothing to wrap; `defaultOpen`
- * pins the portalled content (and its arrow) open for the capture.
+ * The canonical story: the info affordance next to a computed stat. `mode="anchor"`
+ * pins the bubble to its trigger and keeps Radix's keyboard/focus/Escape behaviour;
+ * `defaultOpen` pins the portalled content open for the capture.
  */
 export const Default = () => (
   // `pt-12` buys the `side="top"` content its clearance: without it the tooltip
   // collides with the viewport edge and Radix flips it under the row.
   <div className="flex items-center gap-2 pt-12">
     <span className="text-2xs tracking-caps text-ink-4">RESTE À VIVRE</span>
-    <Tooltip defaultOpen>
-      <TooltipTrigger asChild>
-        <IconButton
-          variant="ghost"
-          size={5}
-          aria-label="Comment est calculé le reste à vivre ?"
-        >
-          <Info />
-        </IconButton>
-      </TooltipTrigger>
-      <TooltipContent side="top">Revenus moins les dépenses fixes du mois.</TooltipContent>
+    <Tooltip
+      mode="anchor"
+      side="top"
+      defaultOpen
+      content="Revenus moins les dépenses fixes du mois."
+    >
+      <IconButton
+        variant="ghost"
+        size={5}
+        aria-label="Comment est calculé le reste à vivre ?"
+      >
+        <Info />
+      </IconButton>
     </Tooltip>
     <MoneyAmount value={780} />
   </div>
 );
 
 /**
- * `TooltipContent`'s variant axis: `side` — the arrow follows the placement.
+ * The anchored mode's variant axis: `side` — where the bubble sits around its trigger.
  *
  * `avoidCollisions={false}` is load-bearing: the capture viewport is 620x300, so
  * Radix's collision detection otherwise flips every side back toward the middle
@@ -50,23 +52,21 @@ export const Sides = () => (
         key={side}
         className={`flex ${justify}`}
       >
-        <Tooltip defaultOpen>
-          <TooltipTrigger asChild>
-            <IconButton
-              variant="bordered"
-              size={7}
-              aria-label={`Aide — ${side}`}
-            >
-              <Info />
-            </IconButton>
-          </TooltipTrigger>
-          <TooltipContent
-            side={side}
-            sideOffset={6}
-            avoidCollisions={false}
+        <Tooltip
+          mode="anchor"
+          side={side}
+          sideOffset={6}
+          avoidCollisions={false}
+          defaultOpen
+          content="Plafond hebdomadaire"
+        >
+          <IconButton
+            variant="bordered"
+            size={7}
+            aria-label={`Aide — ${side}`}
           >
-            Plafond hebdomadaire
-          </TooltipContent>
+            <Info />
+          </IconButton>
         </Tooltip>
       </div>
     ))}
@@ -74,28 +74,26 @@ export const Sides = () => (
 );
 
 /**
- * A longer explanation — `TooltipContent` is `w-fit` with `text-balance`, so a
- * full sentence wraps evenly instead of running off. `className` caps the width.
+ * A longer explanation — the bubble is `w-fit` and caps at 240px, so a full
+ * sentence wraps evenly instead of running off. `maxWidth` widens that cap.
  */
 export const LongContent = () => (
   <div className="flex items-center gap-2">
     <span className="text-2xs tracking-caps text-ink-4">PROJECTION</span>
-    <Tooltip defaultOpen>
-      <TooltipTrigger asChild>
-        <IconButton
-          variant="ghost"
-          size={5}
-          aria-label="D'où vient cette projection ?"
-        >
-          <Info />
-        </IconButton>
-      </TooltipTrigger>
-      <TooltipContent
-        side="bottom"
-        className="max-w-64"
+    <Tooltip
+      mode="anchor"
+      side="bottom"
+      defaultOpen
+      maxWidth={256}
+      content="Projection basée sur mai 2025. À défaut, le même mois de l'année précédente, puis le mois précédent."
+    >
+      <IconButton
+        variant="ghost"
+        size={5}
+        aria-label="D'où vient cette projection ?"
       >
-        Projection basée sur mai 2025. À défaut, le même mois de l'année précédente, puis le mois précédent.
-      </TooltipContent>
+        <Info />
+      </IconButton>
     </Tooltip>
     <MoneyAmount value={1240.5} />
   </div>
