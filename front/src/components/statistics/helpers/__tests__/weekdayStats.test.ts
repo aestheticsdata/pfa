@@ -1,9 +1,43 @@
-import { overallDailyAverage, weekdayAverages, weekdayInsights } from "@components/statistics/helpers/weekdayStats";
+import {
+  overallDailyAverage,
+  percentile,
+  weekdayAverages,
+  weekdayInsights,
+} from "@components/statistics/helpers/weekdayStats";
 
 import type { WeekdayStat } from "@components/statistics/helpers/weekdayStats";
 import type { DailyStat } from "@src/schemas/stats";
 
 const day = (date: string, total: number, count: number): DailyStat => ({ date, total, count });
+
+/** Local calendar date as YYYY-MM-DD, matching the API's day keys. */
+const iso = (date: Date): string =>
+  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+
+describe("percentile", () => {
+  it("returns 0 for an empty series", () => {
+    expect(percentile([], 0.1)).toBe(0);
+    expect(percentile([], 0.9)).toBe(0);
+  });
+
+  it("returns the only value of a single-value series", () => {
+    expect(percentile([42], 0.1)).toBe(42);
+    expect(percentile([42], 0.9)).toBe(42);
+  });
+
+  it("interpolates linearly between the surrounding values", () => {
+    // Two values: p10 sits a tenth of the way from 10 to 30, p90 nine tenths.
+    expect(percentile([10, 30], 0.1)).toBeCloseTo(12, 10);
+    expect(percentile([10, 30], 0.9)).toBeCloseTo(28, 10);
+    // Exact positions need no interpolation.
+    expect(percentile([0, 10, 20, 30, 40], 0.5)).toBe(20);
+  });
+
+  it("clamps the fraction to the series bounds", () => {
+    expect(percentile([5, 10, 15], -1)).toBe(5);
+    expect(percentile([5, 10, 15], 2)).toBe(15);
+  });
+});
 
 describe("weekdayAverages", () => {
   // Current year, only Jan 1–8 realized. Jan 1 2023 is a Sunday, so the window
@@ -18,23 +52,49 @@ describe("weekdayAverages", () => {
 
   it("averages amount and tx per weekday over the weekday's real occurrences", () => {
     const result = weekdayAverages(days, 2023, now);
-    expect(result[0]).toEqual({ avgAmount: 100, avgTx: 2, min: 100, max: 100 }); // Monday: 100 over 1 occurrence
-    expect(result[6]).toEqual({ avgAmount: 20, avgTx: 1, min: 10, max: 30 }); // Sunday: (10+30)/2, (1+1)/2, range 10–30
-    expect(result[1]).toEqual({ avgAmount: 0, avgTx: 0, min: 0, max: 0 }); // Tuesday: no spending
+    // Monday: 100 over 1 occurrence — a one-value series, so every percentile is 100.
+    expect(result[0]).toEqual({ avgAmount: 100, avgTx: 2, min: 100, max: 100, p10: 100, p90: 100 });
+    // Sunday: (10+30)/2, (1+1)/2, extremes 10–30, typical range interpolated between them.
+    expect(result[6]).toEqual({ avgAmount: 20, avgTx: 1, min: 10, max: 30, p10: 12, p90: 28 });
+    // Tuesday: no spending at all.
+    expect(result[1]).toEqual({ avgAmount: 0, avgTx: 0, min: 0, max: 0, p10: 0, p90: 0 });
   });
 
   it("ranges min/max over that weekday's spending days only (not zero-spend occurrences)", () => {
     // Sunday has two spending days (10 and 30) among more Sunday occurrences; the
-    // whisker spans the actual spend, not a 0 floor.
+    // extremes span the actual spend, not a 0 floor.
     const result = weekdayAverages(days, 2023, now);
     expect(result[6].min).toBe(10);
     expect(result[6].max).toBe(30);
   });
 
+  it("counts realized zero-spend days in the typical range", () => {
+    // Five Sundays realized (Jan 1, 8, 15, 22, 29), only two with spending: the
+    // percentile series is [0, 0, 0, 100, 200], same population as the average.
+    const sundays = [day("2023-01-01", 100, 1), day("2023-01-08", 200, 1)];
+    const result = weekdayAverages(sundays, 2023, new Date(2023, 0, 29));
+    expect(result[6].p10).toBe(0); // three empty Sundays sit at the bottom of the series
+    expect(result[6].p90).toBeCloseTo(160, 10); // 100 + (200 − 100) × 0.6
+    expect(result[6].min).toBe(100); // extremes still ignore the empty days
+    expect(result[6].max).toBe(200);
+  });
+
+  it("keeps the typical range clear of a single outlier day", () => {
+    // 52 Mondays of 2022 at 50 € each, except one 5 000 € day: p90 stays at the
+    // usual level while max follows the outlier — this is what keeps the chart's
+    // scale (built on p90) readable on a real account.
+    const mondays = Array.from({ length: 52 }, (_, week) =>
+      day(iso(new Date(2022, 0, 3 + week * 7)), week === 0 ? 5000 : 50, 1),
+    );
+    const result = weekdayAverages(mondays, 2022, new Date(2023, 0, 8));
+    expect(result[0].p90).toBe(50);
+    expect(result[0].max).toBe(5000);
+  });
+
   it("excludes future-dated spendings from the averages", () => {
     const result = weekdayAverages(days, 2023, now);
     // 2023-06-01 (Thursday, index 3) is in the future → must not inflate Thursday.
-    expect(result[3]).toEqual({ avgAmount: 0, avgTx: 0, min: 0, max: 0 });
+    expect(result[3]).toEqual({ avgAmount: 0, avgTx: 0, min: 0, max: 0, p10: 0, p90: 0 });
   });
 
   it("returns zeros for every weekday when there is no spending", () => {
@@ -75,7 +135,7 @@ describe("overallDailyAverage", () => {
 });
 
 describe("weekdayInsights", () => {
-  const s = (avgAmount: number): WeekdayStat => ({ avgAmount, avgTx: 0, min: 0, max: 0 });
+  const s = (avgAmount: number): WeekdayStat => ({ avgAmount, avgTx: 0, min: 0, max: 0, p10: 0, p90: 0 });
 
   it("flags the priciest and cheapest weekdays and the weekend delta", () => {
     // Mon40 Tue40 Wed80 Thu20 Fri40 Sat60 Sun60
