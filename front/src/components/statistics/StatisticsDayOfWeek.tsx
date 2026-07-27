@@ -19,17 +19,23 @@ import { useEffect, useState } from "react";
 import type { DailyStat, WeekdayCategory } from "@src/schemas/stats";
 import type { ReactNode } from "react";
 
-// Row layout: fixed day-name and amount columns around the elastic bar column.
-const GRID_COLS = "grid grid-cols-[92px_1fr_152px] gap-3";
-const ROW_GRID = `${GRID_COLS} items-center`;
+// Row layout (COS-182). From `md` up: fixed day-name and amount columns around the
+// elastic bar column. Below it those two columns would leave the bar a few dozen
+// pixels, so the row stacks instead — day name and amount share the first line, the
+// bar spans the full width underneath.
+const MD_COLS = "md:grid-cols-[92px_1fr_152px]";
+const ROW_GRID = `grid grid-cols-[1fr_auto] items-start gap-x-3 gap-y-1.5 ${MD_COLS} md:items-center md:gap-y-0`;
 
-// Bar-column geometry, mirrored by the full-height overlays (the average line) so
-// they span the plot and line up with the bars. Must match GRID_COLS: a 92px
-// day-name column and a 152px amount column, each separated from the elastic bar
-// column by gap-3 (12px).
-const DAY_COL_PX = 92;
-const AMOUNT_COL_PX = 152;
-const COL_GAP_PX = 12;
+// Bands that must line up with the bar column alone (the average-line label, the
+// budget ticks, the full-height reference lines): full width while the bar is, then
+// the middle column from `md` up. `BAND_COLS` carries no `display`, so an overlay
+// can turn the band on at a breakpoint without fighting `grid` over one property.
+const BAND_COLS = `grid-cols-1 gap-x-3 ${MD_COLS}`;
+const BAND_GRID = `grid ${BAND_COLS}`;
+
+// How close to an edge the average line has to be for its label to stop being
+// centred on it and go flush instead, so the label never overflows the plot.
+const LABEL_EDGE_FRAC = 0.15;
 
 // Fixed-scale headroom so the top marker (2×budget, or the widest whisker) always
 // sits inside the plot with a little air past it (COS-132, COS-127).
@@ -96,8 +102,8 @@ const CompareBar = ({ frac, expanded }: { frac: number; expanded: boolean }) => 
   />
 );
 
-/** A dashed grey guide delimiting a colour zone, running the full height of the plot.
- *  1px to match the budget ticks at the bottom. */
+/** A dashed grey guide delimiting a colour zone, spanning the height of one row's
+ *  bar. 1px to match the budget ticks at the bottom. */
 const ThresholdGuide = ({ frac }: { frac: number }) => (
   <span
     className="absolute inset-y-0"
@@ -105,24 +111,96 @@ const ThresholdGuide = ({ frac }: { frac: number }) => (
   />
 );
 
-/** min→max "range" whisker: a thin connector with end caps, over the main bar. */
-const Whisker = ({ minFrac, maxFrac }: { minFrac: number; maxFrac: number }) => (
+interface GuidesProps {
+  /** Budget-threshold positions on the shared scale; null when no ceiling is set. */
+  budgetFrac: number | null;
+  dangerFrac: number | null;
+  /** The year's average daily spend, on the same scale. */
+  avgFrac: number;
+}
+
+/** The plot's vertical references — the optional colour-zone guides at the budget
+ *  thresholds, plus the year's average. Absolutely positioned, so the caller's
+ *  element decides how far down they run. */
+const Guides = ({ budgetFrac, dangerFrac, avgFrac }: GuidesProps) => (
+  <>
+    {budgetFrac != null && <ThresholdGuide frac={budgetFrac} />}
+    {dangerFrac != null && <ThresholdGuide frac={dangerFrac} />}
+    <span
+      className="absolute inset-y-0"
+      style={{ left: `${avgFrac * 100}%`, marginLeft: -1, borderLeft: "2px dashed var(--accent-strong)", opacity: 0.7 }}
+    />
+  </>
+);
+
+/**
+ * The references as one unbroken line down the whole plot, from `md` up: a band
+ * mirroring the row grid puts its middle cell exactly over the bar column, so a
+ * single full-height element spans every row — no dash ever restarts mid-plot.
+ */
+const PlotGuides = (props: GuidesProps) => (
+  <div
+    className={`${BAND_COLS} pointer-events-none absolute inset-0 hidden md:grid`}
+    aria-hidden
+  >
+    <BandSpacer />
+    <div className="relative">
+      <Guides {...props} />
+    </div>
+    <BandSpacer />
+  </div>
+);
+
+/** The same references over a single row's bar, below `md` only: the stacked row
+ *  puts a day name and an amount beside each bar, which a plot-height line would
+ *  strike through. */
+const RowGuides = (props: GuidesProps) => (
+  <div
+    className="pointer-events-none absolute inset-0 md:hidden"
+    aria-hidden
+  >
+    <Guides {...props} />
+  </div>
+);
+
+/** Typical-range whisker (p10→p90): a thin connector with end caps, over the main bar. */
+const Whisker = ({ lowFrac, highFrac }: { lowFrac: number; highFrac: number }) => (
   <div
     className="pointer-events-none absolute inset-0"
     aria-hidden
   >
     <span
       className="absolute top-1/2 h-px -translate-y-1/2 bg-ink-2/45"
-      style={{ left: `${minFrac * 100}%`, width: `${Math.max(0, maxFrac - minFrac) * 100}%` }}
+      style={{ left: `${lowFrac * 100}%`, width: `${Math.max(0, highFrac - lowFrac) * 100}%` }}
     />
     <span
       className="absolute inset-y-1 w-px bg-ink-2/80"
-      style={{ left: `${minFrac * 100}%` }}
+      style={{ left: `${lowFrac * 100}%` }}
     />
     <span
       className="absolute inset-y-1 w-px bg-ink-2/80"
-      style={{ left: `${maxFrac * 100}%` }}
+      style={{ left: `${highFrac * 100}%` }}
     />
+  </div>
+);
+
+/** Placeholder holding a band's day-name / amount column, from `md` up. */
+const BandSpacer = () => (
+  <span
+    aria-hidden
+    className="hidden md:block"
+  />
+);
+
+/** A budget threshold tick + its amount, under the bar column. `display` carries the
+ *  breakpoint at which the tick shows, so the two never crowd each other. */
+const BudgetTick = ({ frac, label, display }: { frac: number; label: string; display: string }) => (
+  <div
+    className={`absolute top-0 -translate-x-1/2 flex-col items-center ${display}`}
+    style={{ left: `${frac * 100}%` }}
+  >
+    <span className="h-1.5 w-px bg-ink-4" />
+    <span className="num mt-1 whitespace-nowrap text-2xs text-ink-4">{label}</span>
   </div>
 );
 
@@ -213,11 +291,13 @@ const StatisticsDayOfWeek = ({
   const dayBudget = weeklyCeiling != null && weeklyCeiling > 0 ? weeklyCeiling / 7 : null;
 
   // One euro scale shared by every mark — both years' averages, the selected
-  // year's whisker maxes and the budget markers — so bars, whiskers, the average
-  // line and the ticks are all directly comparable (COS-127).
+  // year's typical-range highs and the budget markers — so bars, whiskers, the
+  // average line and the ticks are all directly comparable (COS-127). The scale
+  // reads p90, never the yearly max (COS-182): a single expensive day would
+  // otherwise stretch it far enough to squash all seven bars against the left edge.
   const rawMax = Math.max(
     ...stats.map((s) => s.avgAmount),
-    ...stats.map((s) => s.max),
+    ...stats.map((s) => s.p90),
     ...(compareStats?.map((s) => s.avgAmount) ?? []),
     1,
   );
@@ -227,6 +307,15 @@ const StatisticsDayOfWeek = ({
   const avgFrac = scaleFrac(overall.avgAmount, scaleMax);
   const hasInsights = peakDow != null;
   const dangerBudget = dayBudget != null ? dayBudget * OVERSPEND_DANGER_RATIO : null;
+  const budgetFrac = dayBudget != null ? scaleFrac(dayBudget, scaleMax) : null;
+  const dangerFrac = dangerBudget != null ? scaleFrac(dangerBudget, scaleMax) : null;
+  // Centred on the average line, unless that would push the label out of the plot.
+  const avgLabelAlign =
+    avgFrac < LABEL_EDGE_FRAC
+      ? "translate-x-0"
+      : avgFrac > 1 - LABEL_EDGE_FRAC
+        ? "-translate-x-full"
+        : "-translate-x-1/2";
 
   return (
     <GlowCard
@@ -275,17 +364,17 @@ const StatisticsDayOfWeek = ({
       )}
 
       {/* average reference-line label, positioned over the bar column at its fraction. */}
-      <div className={`${ROW_GRID} mt-4`}>
-        <span aria-hidden />
+      <div className={`${BAND_GRID} mt-4`}>
+        <BandSpacer />
         <div className="relative h-4">
           <span
-            className="num absolute top-0 -translate-x-1/2 whitespace-nowrap text-2xs text-accent-strong"
+            className={`num absolute top-0 whitespace-nowrap text-2xs text-accent-strong ${avgLabelAlign}`}
             style={{ left: `${avgFrac * 100}%` }}
           >
             {dayOfWeek.averageLine(euro0(overall.avgAmount))}
           </span>
         </div>
-        <span aria-hidden />
+        <BandSpacer />
       </div>
 
       <div className="relative mt-1">
@@ -293,7 +382,7 @@ const StatisticsDayOfWeek = ({
             data-dow attribute (like the heatmap), so the tooltip follows the
             cursor across the rows without making each row separately interactive. */}
         <div
-          className="flex flex-col gap-2"
+          className="flex flex-col gap-4 md:gap-2"
           role="img"
           aria-label={dayOfWeek.title}
           onMouseMove={(e) => {
@@ -322,11 +411,11 @@ const StatisticsDayOfWeek = ({
                 data-dow={dow}
                 className={`${ROW_GRID} text-sm`}
               >
-                <span className="flex items-center gap-1.5 text-ink-2">
+                <span className="col-start-1 row-start-1 flex items-center gap-1.5 text-ink-2">
                   <span className="inline-flex w-2 justify-center text-2xs leading-none">{marker}</span>
                   {dayOfWeek.days[dow]}
                 </span>
-                <div className="flex flex-col justify-center">
+                <div className="relative col-start-1 col-end-3 row-start-2 flex flex-col justify-center md:col-start-2 md:row-start-1">
                   <div className="relative">
                     {dayBudget != null ? (
                       <WeekdayBulletBar
@@ -342,10 +431,10 @@ const StatisticsDayOfWeek = ({
                         opacity={0.85}
                       />
                     )}
-                    {s.max > 0 && (
+                    {s.p90 > s.p10 && (
                       <Whisker
-                        minFrac={scaleFrac(s.min, scaleMax)}
-                        maxFrac={scaleFrac(s.max, scaleMax)}
+                        lowFrac={scaleFrac(s.p10, scaleMax)}
+                        highFrac={scaleFrac(s.p90, scaleMax)}
                       />
                     )}
                   </div>
@@ -360,8 +449,13 @@ const StatisticsDayOfWeek = ({
                       />
                     </div>
                   )}
+                  <RowGuides
+                    budgetFrac={budgetFrac}
+                    dangerFrac={dangerFrac}
+                    avgFrac={avgFrac}
+                  />
                 </div>
-                <div className="num text-right">
+                <div className="num col-start-2 row-start-1 text-right md:col-start-3">
                   <div className={`font-medium ${overspendTextClass(level)}`}>{euro(s.avgAmount)} €</div>
                   <small className="block text-2xs font-normal text-ink-4">
                     {dayOfWeek.transactionsPerDay(pct1(s.avgTx))}
@@ -400,48 +494,32 @@ const StatisticsDayOfWeek = ({
           })}
         </div>
 
-        {/* Full-height reference lines over the bar column: the optional colour-zone
-            guides at the budget thresholds, plus the average line. */}
-        <div
-          className="pointer-events-none absolute inset-y-0"
-          style={{ left: DAY_COL_PX + COL_GAP_PX, right: AMOUNT_COL_PX + COL_GAP_PX }}
-          aria-hidden
-        >
-          {dayBudget != null && dangerBudget != null && (
-            <>
-              <ThresholdGuide frac={scaleFrac(dayBudget, scaleMax)} />
-              <ThresholdGuide frac={scaleFrac(dangerBudget, scaleMax)} />
-            </>
-          )}
-          <span
-            className="absolute inset-y-0"
-            style={{
-              left: `${avgFrac * 100}%`,
-              marginLeft: -1,
-              borderLeft: "2px dashed var(--accent-strong)",
-              opacity: 0.7,
-            }}
-          />
-        </div>
+        <PlotGuides
+          budgetFrac={budgetFrac}
+          dangerFrac={dangerFrac}
+          avgFrac={avgFrac}
+        />
       </div>
 
-      {/* Budget thresholds as small ticks beneath the bar column (36 € / 71 €). */}
-      {dayBudget != null && dangerBudget != null && (
-        <div className={`${ROW_GRID} mt-2`}>
-          <span aria-hidden />
+      {/* Budget thresholds as small ticks beneath the bar column. Stacked rows put the
+          two close enough to overlap on a narrow screen, so only the danger threshold
+          is kept below `md` — the legend spells out both amounts either way. */}
+      {budgetFrac != null && dangerFrac != null && dayBudget != null && dangerBudget != null && (
+        <div className={`${BAND_GRID} mt-2`}>
+          <BandSpacer />
           <div className="relative h-5">
-            {[dayBudget, dangerBudget].map((amount) => (
-              <div
-                key={amount}
-                className="absolute top-0 flex -translate-x-1/2 flex-col items-center"
-                style={{ left: `${scaleFrac(amount, scaleMax) * 100}%` }}
-              >
-                <span className="h-1.5 w-px bg-ink-4" />
-                <span className="num mt-1 whitespace-nowrap text-2xs text-ink-4">{euro0(amount)} €</span>
-              </div>
-            ))}
+            <BudgetTick
+              frac={budgetFrac}
+              label={`${euro0(dayBudget)} €`}
+              display="hidden md:flex"
+            />
+            <BudgetTick
+              frac={dangerFrac}
+              label={`${euro0(dangerBudget)} €`}
+              display="flex"
+            />
           </div>
-          <span aria-hidden />
+          <BandSpacer />
         </div>
       )}
 
@@ -490,7 +568,7 @@ const StatisticsDayOfWeek = ({
             </span>
           }
         >
-          {dayOfWeek.legend.range}
+          {dayOfWeek.legend.typicalRange}
         </LegendItem>
         <LegendItem swatch={<span className="inline-block h-0 w-4 border-t-2 border-dashed border-accent-strong/80" />}>
           {dayOfWeek.legend.average}
@@ -535,7 +613,15 @@ const StatisticsDayOfWeek = ({
                 </div>
                 <div className="mt-1.5 flex flex-col gap-0.5">
                   <TipRow
-                    label={dayOfWeek.tooltip.range}
+                    label={dayOfWeek.tooltip.typicalRange}
+                    value={
+                      <span className="num whitespace-nowrap">
+                        {dayOfWeek.tooltip.rangeValue(euro0(s.p10), euro0(s.p90))}
+                      </span>
+                    }
+                  />
+                  <TipRow
+                    label={dayOfWeek.tooltip.extremes}
                     value={
                       <span className="num whitespace-nowrap">
                         {dayOfWeek.tooltip.rangeValue(euro0(s.min), euro0(s.max))}

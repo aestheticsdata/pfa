@@ -102,7 +102,9 @@ const statistics: typeof frStatistics = {
     // Signed delta % suffix (e.g. the tooltip's Delta badge).
     deltaPct: (pct: string) => `${pct}%`,
     tooltip: {
-      range: "Range (weeks)",
+      // The p10–p90 whisker drawn on the bar, then the year's absolute extremes (COS-182).
+      typicalRange: "Typical range",
+      extremes: "Min / max over the year",
       rangeValue: (min: string, max: string) => `${min} € - ${max} €`,
       txPerDay: "Transactions / day",
       dominantCategory: "Dominant category",
@@ -115,7 +117,7 @@ const statistics: typeof frStatistics = {
       under: (budget: string) => `≤ ${budget} €`,
       between: (budget: string, danger: string) => `${budget} – ${danger} €`,
       over: (danger: string) => `> ${danger} €`,
-      range: "min – max over the year",
+      typicalRange: "typical range (8 days out of 10)",
       average: "average",
       comparedYear: (year: number) => `compared year (${year})`,
     },

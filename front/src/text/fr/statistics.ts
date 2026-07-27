@@ -98,7 +98,9 @@ const statistics = {
     // Signed delta % suffix (e.g. the tooltip's Delta badge).
     deltaPct: (pct: string) => `${pct} %`,
     tooltip: {
-      range: "Fourchette (semaines)",
+      // The p10–p90 whisker drawn on the bar, then the year's absolute extremes (COS-182).
+      typicalRange: "Fourchette habituelle",
+      extremes: "Min / max sur l'année",
       rangeValue: (min: string, max: string) => `${min} € - ${max} €`,
       txPerDay: "Transactions / jour",
       dominantCategory: "Catégorie dominante",
@@ -111,7 +113,7 @@ const statistics = {
       under: (budget: string) => `≤ ${budget} €`,
       between: (budget: string, danger: string) => `${budget} – ${danger} €`,
       over: (danger: string) => `> ${danger} €`,
-      range: "min – max sur l'année",
+      typicalRange: "fourchette habituelle (8 jours sur 10)",
       average: "moyenne",
       comparedYear: (year: number) => `année comparée (${year})`,
     },

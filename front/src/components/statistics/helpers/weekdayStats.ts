@@ -17,7 +17,15 @@ export interface WeekdayStat extends DailyAverage {
   min: number;
   /** Highest single-day total among that weekday's spending days (0 when none). */
   max: number;
+  /** Low end of the typical range — 10th percentile of that weekday's realized days. */
+  p10: number;
+  /** High end of the typical range — 90th percentile of the same series. */
+  p90: number;
 }
+
+/** The typical-range whisker spans the middle 80 % of a weekday's realized days. */
+const TYPICAL_LOW_P = 0.1;
+const TYPICAL_HIGH_P = 0.9;
 
 /** Monday-based day of week: 0 = Monday … 6 = Sunday (date-fns getDay is 0=Sunday). */
 const mondayDow = (date: Date): number => (getDay(date) + 6) % 7;
@@ -30,6 +38,22 @@ const isoOf = (date: Date): string => {
 };
 
 const mean = (values: number[]): number => (values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0);
+
+/**
+ * Linear-interpolated percentile of an ascending-sorted series; `p` is a 0–1
+ * fraction, clamped. Returns 0 for an empty series. It backs the weekday
+ * "typical range" whisker (COS-182): unlike a raw min/max, a single outlier day
+ * can no longer stretch the range — and with it the whole chart's scale.
+ */
+export function percentile(sorted: number[], p: number): number {
+  if (sorted.length === 0) {
+    return 0;
+  }
+  const position = (sorted.length - 1) * Math.max(0, Math.min(1, p));
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
+}
 
 /**
  * Elapsed (non-future) window of a year: how many days are realized and the ISO
@@ -45,12 +69,14 @@ function realizedWindow(year: number, now: Date): { realizedDays: number; lastRe
 
 /**
  * Average spend + transaction count per weekday (Mon..Sun) over the realized part
- * of `year`, plus each weekday's min/max single-day total, from the shared
- * /daily-stats series (COS-45, COS-48, COS-127). Zero-spend days count toward the
- * average: the sparse `days` only carries spending days, so the denominator is
- * each weekday's real occurrence count (not `days.length`). The min/max range,
- * however, spans only the days that actually had spending (the "range"
- * whisker). Future-dated spendings (current year) are excluded, matching the heatmap.
+ * of `year`, plus each weekday's typical range and its absolute extremes, from the
+ * shared /daily-stats series (COS-45, COS-48, COS-127). Zero-spend days count toward
+ * the average: the sparse `days` only carries spending days, so the denominator is
+ * each weekday's real occurrence count (not `days.length`). The p10/p90 typical
+ * range (COS-182) is drawn from that same full population, so the whisker describes
+ * exactly what the bar averages; `min`/`max` keep their narrower meaning — the
+ * extremes among the days that actually had spending, shown in the tooltip only.
+ * Future-dated spendings (current year) are excluded, matching the heatmap.
  */
 export function weekdayAverages(days: DailyStat[], year: number, now: Date): WeekdayStat[] {
   const { realizedDays, lastRealizedIso } = realizedWindow(year, now);
@@ -62,8 +88,7 @@ export function weekdayAverages(days: DailyStat[], year: number, now: Date): Wee
 
   const sumAmount = new Array<number>(7).fill(0);
   const sumTx = new Array<number>(7).fill(0);
-  const minAmount = new Array<number>(7).fill(Number.POSITIVE_INFINITY);
-  const maxAmount = new Array<number>(7).fill(0);
+  const spendingTotals: number[][] = Array.from({ length: 7 }, () => []);
   for (const day of days) {
     if (day.date.slice(0, 10) > lastRealizedIso) {
       continue; // future-dated spending
@@ -71,20 +96,25 @@ export function weekdayAverages(days: DailyStat[], year: number, now: Date): Wee
     const w = mondayDow(parseISO(day.date));
     sumAmount[w] += day.total;
     sumTx[w] += day.count;
-    if (day.total < minAmount[w]) {
-      minAmount[w] = day.total;
-    }
-    if (day.total > maxAmount[w]) {
-      maxAmount[w] = day.total;
-    }
+    spendingTotals[w].push(day.total);
   }
 
-  return occurrences.map((occ, w) => ({
-    avgAmount: occ > 0 ? sumAmount[w] / occ : 0,
-    avgTx: occ > 0 ? sumTx[w] / occ : 0,
-    min: Number.isFinite(minAmount[w]) ? minAmount[w] : 0,
-    max: maxAmount[w],
-  }));
+  return occurrences.map((occ, w) => {
+    const spending = spendingTotals[w].sort((a, b) => a - b);
+    // The realized days *without* spending belong to the distribution just as they
+    // belong to the average's denominator. They are all 0, so prepending them to the
+    // sorted spending totals yields the full ascending series without a second sort.
+    const zeroDays = Math.max(0, occ - spending.length);
+    const series = [...new Array<number>(zeroDays).fill(0), ...spending];
+    return {
+      avgAmount: occ > 0 ? sumAmount[w] / occ : 0,
+      avgTx: occ > 0 ? sumTx[w] / occ : 0,
+      min: spending[0] ?? 0,
+      max: spending[spending.length - 1] ?? 0,
+      p10: percentile(series, TYPICAL_LOW_P),
+      p90: percentile(series, TYPICAL_HIGH_P),
+    };
+  });
 }
 
 /**
