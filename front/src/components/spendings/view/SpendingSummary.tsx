@@ -91,10 +91,10 @@ const SpendingSummary = ({
     );
 
   return (
-    <DividedStrip className="grid-cols-2 min-[760px]:grid-cols-5">
+    <DividedStrip className="grid-cols-2 md:grid-cols-5">
       {/* Hero — full-width banner on mobile, one equal-width cell (1/5) on desktop
           like the other four. Its font stays big; the four keep theirs too. */}
-      <div className="col-span-2 bg-card px-5 py-4 min-[760px]:col-span-1">
+      <div className="col-span-2 bg-card px-5 py-4 md:col-span-1">
         <Overline className="mb-2 block">{t.remaining}</Overline>
         <div
           className={cn(

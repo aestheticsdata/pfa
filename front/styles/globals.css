@@ -7,6 +7,7 @@ layer(base);
 @custom-variant dark (&:is(.dark *));
 
 /* Design tokens — by type */
+@import './tokens/breakpoints.css';
 @import './tokens/colors.css';
 @import './tokens/radius.css';
 @import './tokens/typography.css';

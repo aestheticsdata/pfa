@@ -43,7 +43,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
   };
 
   return (
-    <div className="group relative grid grid-cols-[minmax(0,1fr)_auto_78px] items-center gap-3 border-t border-line-soft py-2.75 first:border-t-0 before:pointer-events-none before:absolute before:inset-x-0 before:inset-y-px before:z-0 before:rounded-lg before:transition-colors before:duration-100 before:content-[''] hover:before:bg-surface-hi max-[759px]:grid-cols-[minmax(0,1fr)_auto] max-[759px]:grid-rows-[auto_auto] max-[759px]:gap-y-1.5">
+    <div className="group relative grid grid-cols-[minmax(0,1fr)_auto_78px] items-center gap-3 border-t border-line-soft py-2.75 first:border-t-0 before:pointer-events-none before:absolute before:inset-x-0 before:inset-y-px before:z-0 before:rounded-lg before:transition-colors before:duration-100 before:content-[''] hover:before:bg-surface-hi max-md:grid-cols-[minmax(0,1fr)_auto] max-md:grid-rows-[auto_auto] max-md:gap-y-1.5">
       {confirming ? (
         <div
           className="relative z-10 col-span-full flex items-center gap-3 rounded-lg border border-danger-border-soft bg-danger-surface py-2 pl-3.75 pr-2.5 shadow-[0_6px_20px_oklch(0.3_0.16_25/0.28)]"
@@ -70,13 +70,13 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
         </div>
       ) : (
         <>
-          <span className="relative z-10 flex min-w-0 items-center gap-2.5 text-sm text-ink max-[759px]:col-start-1 max-[759px]:row-start-1 max-[759px]:text-base">
+          <span className="relative z-10 flex min-w-0 items-center gap-2.5 text-sm text-ink max-md:col-start-1 max-md:row-start-1 max-md:text-base">
             <span
               className="h-5.5 w-0.75 shrink-0 rounded-xs"
               style={{ background: color }}
             />
             <span
-              className="truncate max-[759px]:line-clamp-2 max-[759px]:whitespace-normal"
+              className="truncate max-md:line-clamp-2 max-md:whitespace-normal"
               title={spending.label}
             >
               {spending.label}
@@ -93,9 +93,9 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
           </span>
 
           {category && (
-            <span className="relative z-10 justify-self-end max-[759px]:col-start-1 max-[759px]:row-start-2 max-[759px]:justify-self-start">
+            <span className="relative z-10 justify-self-end max-md:col-start-1 max-md:row-start-2 max-md:justify-self-start">
               <span
-                className={cn(TAG_CHIP, "max-[759px]:border-transparent max-[759px]:bg-transparent max-[759px]:p-0")}
+                className={cn(TAG_CHIP, "max-md:border-transparent max-md:bg-transparent max-md:p-0")}
                 style={{ color }}
               >
                 {category}
@@ -103,12 +103,12 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             </span>
           )}
 
-          <span className="relative z-10 justify-self-end whitespace-nowrap text-right font-mono text-sm font-medium tabular-nums text-ink max-[759px]:col-start-2 max-[759px]:row-start-1 max-[759px]:self-center">
+          <span className="relative z-10 justify-self-end whitespace-nowrap text-right font-mono text-sm font-medium tabular-nums text-ink max-md:col-start-2 max-md:row-start-1 max-md:self-center">
             {euro(spending.amount)}
             <span className="text-xs font-normal text-ink-3"> €</span>
           </span>
 
-          <span className="absolute right-22 top-1/2 z-20 hidden -translate-y-1/2 items-center gap-1.5 bg-[linear-gradient(90deg,transparent,var(--surface-hi)_26px)] pl-7.5 group-hover:flex max-[759px]:static max-[759px]:col-start-2 max-[759px]:row-start-2 max-[759px]:flex max-[759px]:translate-y-0 max-[759px]:justify-self-end max-[759px]:bg-none max-[759px]:p-0">
+          <span className="absolute right-22 top-1/2 z-20 hidden -translate-y-1/2 items-center gap-1.5 bg-[linear-gradient(90deg,transparent,var(--surface-hi)_26px)] pl-7.5 group-hover:flex max-md:static max-md:col-start-2 max-md:row-start-2 max-md:flex max-md:translate-y-0 max-md:justify-self-end max-md:bg-none max-md:p-0">
             <IconButton
               variant="bordered"
               size={7}

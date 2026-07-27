@@ -221,7 +221,7 @@ const SpendingView = () => {
       {isInitialLoading ? (
         <div className="grid place-items-center py-16 text-sm text-ink-4">{common.loading}</div>
       ) : (
-        <section className="grid grid-cols-1 items-start gap-4 min-[760px]:grid-cols-[repeat(auto-fill,minmax(500px,1fr))]">
+        <section className="grid grid-cols-1 items-start gap-4 md:grid-cols-[repeat(auto-fill,minmax(500px,1fr))]">
           {groups.map((group, i) => (
             <SpendingDayCard
               key={group.dayOfMonth}

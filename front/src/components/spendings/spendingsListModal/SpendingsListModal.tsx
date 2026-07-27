@@ -98,16 +98,16 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
     >
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-[200] bg-[oklch(0.02_0.004_250/0.62)] backdrop-blur-sm animate-in fade-in duration-150 ease-out" />
-        <div className="pointer-events-none fixed inset-0 z-[201] grid place-items-center p-8 max-[640px]:p-3.5">
+        <div className="pointer-events-none fixed inset-0 z-[201] grid place-items-center p-8 max-sm:p-3.5">
           <DialogPrimitive.Content
-            className="pfa-card shadow-modal! pointer-events-auto flex max-h-[88vh] w-[min(1000px,94vw)] flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-3.5 zoom-in-95 duration-200 max-[640px]:max-h-[92vh]"
+            className="pfa-card shadow-modal! pointer-events-auto flex max-h-[88vh] w-[min(1000px,94vw)] flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-3.5 zoom-in-95 duration-200 max-sm:max-h-[92vh]"
             aria-describedby={undefined}
             onOpenAutoFocus={(e) => {
               e.preventDefault();
               searchRef.current?.focus({ preventScroll: true });
             }}
           >
-            <div className="flex shrink-0 items-center gap-3.5 border-b border-line bg-[linear-gradient(180deg,oklch(1_0_0/0.045),oklch(1_0_0/0.018))] px-5.5 py-4.5 max-[640px]:flex-wrap max-[640px]:gap-x-3 max-[640px]:gap-y-2.5">
+            <div className="flex shrink-0 items-center gap-3.5 border-b border-line bg-[linear-gradient(180deg,oklch(1_0_0/0.045),oklch(1_0_0/0.018))] px-5.5 py-4.5 max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-2.5">
               <span
                 className="size-7.5 shrink-0 rounded-md shadow-[inset_0_1px_0_oklch(1_0_0/0.25)]"
                 style={{ background: categoryColor }}
@@ -121,9 +121,9 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                 <span className="text-2xs font-medium uppercase tracking-widest text-ink-4">{t.total}&nbsp;:</span>
                 <span className="font-mono text-base font-semibold tabular-nums text-ink">{euro(total)} €</span>
               </span>
-              <span className="flex-1 max-[640px]:order-5 max-[640px]:h-0 max-[640px]:basis-full" />
+              <span className="flex-1 max-sm:order-5 max-sm:h-0 max-sm:basis-full" />
               {periodLabel && (
-                <span className="whitespace-nowrap text-xs font-medium uppercase tracking-widest text-ink-3 max-[640px]:order-6">
+                <span className="whitespace-nowrap text-xs font-medium uppercase tracking-widest text-ink-3 max-sm:order-6">
                   {periodLabel}
                 </span>
               )}
@@ -175,7 +175,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                       title={t.seeWeek}
                       onClick={() => goToDayWeek(date)}
                     >
-                      <div className="flex items-start justify-between gap-4 px-4.5 pt-3.75 group-hover:bg-[linear-gradient(180deg,oklch(0.72_0.15_230/0.06),transparent)] max-[640px]:flex-col max-[640px]:gap-2.5">
+                      <div className="flex items-start justify-between gap-4 px-4.5 pt-3.75 group-hover:bg-[linear-gradient(180deg,oklch(0.72_0.15_230/0.06),transparent)] max-sm:flex-col max-sm:gap-2.5">
                         <div className="flex items-center gap-2 pt-0.75 text-base font-bold uppercase text-ink group-hover:text-elec">
                           {format(parseISO(date), "EEEE dd MMMM", {
                             locale: dateLocale,
@@ -186,7 +186,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                             strokeWidth={2.5}
                           />
                         </div>
-                        <div className="flex gap-5 max-[640px]:justify-between max-[640px]:self-stretch">
+                        <div className="flex gap-5 max-sm:justify-between max-sm:self-stretch">
                           <div className="text-right">
                             <span className="mb-1.5 block text-2xs font-medium tracking-wider text-ink-4">
                               {t.dayTotal}

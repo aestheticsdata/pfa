@@ -1,0 +1,10 @@
+/* Breakpoint scale — the responsive vocabulary of the app (COS-135). Tailwind's
+ * `sm` (640), `md` (768) and `lg` (1024) defaults are kept as-is; only the phone
+ * step below `sm` is missing, so `xs` is added here. Declaring a `--breakpoint-*`
+ * gives both the min-width variant (`xs:`) and its max-width mirror (`max-xs:`).
+ * Two one-off widths stay arbitrary on their single site — `min-[1000px]` on the
+ * Dashboard grid and `min-[1100px]` on the Dépenses summary type — they are not
+ * a shared step; promote them only if a second usage shows up. */
+@theme {
+  --breakpoint-xs: 32.5rem; /* 520px — phone */
+}
