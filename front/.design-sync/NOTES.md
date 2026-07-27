@@ -139,12 +139,42 @@ the DS surface, so it shares the bundle's sonner instance).
 
 ## Known render warns
 
-- `[RENDER_SKIPPED]` — the render check has **never** run. The user declined the playwright/chromium
-  install on the first sync, so the bundle is machine-unverified. A future sync that installs
-  playwright will produce genuinely new information; treat the first real run's findings as new, not
-  as regressions.
-- `[FONT_REMOTE]` — expected, see Fonts above.
-- `tokens: 3 missing, below threshold` — not investigated; under the converter's warn threshold.
+- `[FONT_REMOTE]` — expected, see Fonts above. Now lists Keania One too.
+- `tokens: 3 missing, below threshold` — `--pfa-circ` / `--pfa-dash` / `--pfa-gap` are set at runtime
+  by Donut/ProgressTrack inline styles, so they are EXPECTED to be absent from the static CSS. Under
+  the warn threshold since the Keania fix below removed the 4th.
+- ~~`[RENDER_SKIPPED]`~~ — the render check ran for the first time on 2026-07-27: **40/40 clean**.
+
+## Re-sync 2026-07-27 (2nd sync) — three things had rotted since the first
+
+The app moved a lot between syncs; none of this was visible until the render check finally ran.
+
+1. **`tsconfig.dts.json` needs `allowJs: true`** (was `false`). `LangKeys` is `keyof typeof` a plain-JS
+   module (`src/i18n/locales-dates.js`); with allowJs off tsc can't read it, the keyof collapses to
+   `string | number | symbol`, and `prepare.mjs` dies on `LocaleContext.tsx` (TS2345/TS2322) even
+   though the app itself typechecks clean. Symptom: `Command failed: ./node_modules/.bin/tsc -p
+   .design-sync/tsconfig.dts.json`, status 2.
+2. **`cfg.provider` = `LocaleProvider`, exported from `ds-entry.tsx`.** The i18n context landed after
+   the first sync, so 23 of 40 cards died with `useLocale must be used within a LocaleProvider` —
+   every component that formats money/dates/copy (MoneyAmount, ExportButton, ConfirmDeleteDialog,
+   PasswordField, CategoryComponent) plus every preview composing one. `componentSrcMap.LocaleProvider
+   = null` keeps it out of the card list. `conventions.md` was updated to match: it used to claim
+   "there is nothing to wrap", which is now false for generated designs too.
+   **Cost:** adding `cfg.provider` re-keys EVERY grade ("contract changed") — a 40-component regrade.
+3. **Keania One was missing from the font `@import`** (`--font-keania`, the `font-wordmark` token). No
+   card uses it, but the token ships in the DS vocabulary, so a design writing `font-wordmark` got a
+   fallback. Added to the Google-Fonts `@import` + bound on `:root` in `ds-styles.src.css`.
+
+**Playwright**: installed at 1.61.1 (matches the repo's `@playwright/test` pin). On macOS the browser
+cache is `~/Library/Caches/ms-playwright` (chromium-1228), NOT `~/.cache/ms-playwright` — the skill's
+check path is Linux-only, so it reads as "nothing cached" here.
+
+**Where this run stopped:** build + validate + capture all green (render check 40/40, no
+`[TOKENS_MISSING]`), verdict `ok: true`, `upload.any: true`, `deletePaths: []`. NOT yet done: grading
+the 40 components / 160 cells from `ds-bundle/_screenshots/review/<group>__<Name>.png` into
+`.design-sync/.cache/review/<Name>.grade.json`, then the conventions re-validation, a final driver run
+and the upload. **Nothing was uploaded** — the project still carries the first sync's anchor, which is
+the documented safe state (next run just re-verifies).
 
 ## Re-sync risks — what can silently go stale
 

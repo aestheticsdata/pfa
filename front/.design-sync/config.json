@@ -102,7 +102,11 @@
     "TextInput": "src/components/shared/TextInput.tsx",
     "Toaster": "src/components/ui/sonner.tsx",
     "Tooltip": "src/components/ui/tooltip.tsx",
-    "Spinner": null
+    "Spinner": null,
+    "LocaleProvider": null
+  },
+  "provider": {
+    "component": "LocaleProvider"
   },
   "cssEntry": ".design-sync/.cache/pfa-styles.css",
   "docsDir": ".design-sync/docs",

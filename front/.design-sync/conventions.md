@@ -2,9 +2,15 @@
 
 pfa is a personal-finance app: **dark-only**, French UI, dense numeric screens (budgets, spendings, categories, statistics).
 
-### Setup — there is nothing to wrap
+### Setup — wrap the app in `LocaleProvider`, nothing else
 
-No provider is required. The tokens are plain CSS custom properties on `:root` in `styles.css`, and **dark is the default** — do *not* add a `dark` class or a theme provider. `Tooltip` mounts its own Radix provider internally. The only global is `<Toaster />` (sonner), mounted once near the root, and only if you raise toasts.
+```jsx
+<LocaleProvider>{/* your screen */}</LocaleProvider>
+```
+
+Every component that formats money, dates or copy reads the locale from it — `MoneyAmount`, `ExportButton`, `ConfirmDeleteDialog`, `PasswordField`, `CategoryComponent` — and **throws** (`useLocale must be used within a LocaleProvider`) without it. It takes no props; the default locale is French.
+
+Nothing else needs wrapping. The tokens are plain CSS custom properties on `:root` in `styles.css`, and **dark is the default** — do *not* add a `dark` class or a theme provider. `Tooltip` mounts its own Radix provider internally. The only other global is `<Toaster />` (sonner), mounted once near the root, and only if you raise toasts.
 
 ### The styling idiom: Tailwind v4 utilities over pfa tokens
 

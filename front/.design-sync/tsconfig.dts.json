@@ -15,7 +15,11 @@
     "declaration": true,
     "emitDeclarationOnly": true,
     "declarationMap": false,
-    "allowJs": false,
+    // Must stay TRUE: `LangKeys` is `keyof typeof` a plain-JS module
+    // (`src/i18n/locales-dates.js`). With allowJs off tsc can't read it, the
+    // keyof collapses to `string | number | symbol`, and the declaration build
+    // dies on LocaleContext.tsx (TS2345/TS2322) even though the app typechecks.
+    "allowJs": true,
     "skipLibCheck": true,
     "rootDir": "..",
     "outDir": "../dist/types"
