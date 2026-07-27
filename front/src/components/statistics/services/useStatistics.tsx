@@ -30,7 +30,7 @@ const useStatistics = ({ years }: UseStatisticsOptions) => {
     return StatisticsResponseSchema.parse(response.data);
   };
 
-  const { data, isPending } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: queryKey,
     queryFn: getStatistics,
     retry: true,
@@ -41,7 +41,12 @@ const useStatistics = ({ years }: UseStatisticsOptions) => {
     statistics: data,
     colors: data?.colors ?? {},
     categories: categories ?? [],
-    isLoading: isPending,
+    // The query is gated on the category list (it feeds the `categories` param),
+    // so it sits idle — which React Query reports as "not loading" — until the
+    // categories land: hence the explicit first leg. An account with zero
+    // categories has nothing to fetch and resolves to `false`, never to an
+    // endless loading state.
+    isLoading: categories === undefined || isLoading,
   };
 };
 

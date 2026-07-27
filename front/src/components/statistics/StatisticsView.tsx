@@ -61,7 +61,7 @@ const StatisticsView = () => {
     return Array.from(new Set(requested));
   }, [selectedYear, compareYear, currentYear]);
 
-  const { statistics, categories } = useStatistics({ years });
+  const { statistics, categories, isLoading: statisticsLoading } = useStatistics({ years });
   const { dailyStats } = useDailyStats({ year: selectedYear });
   // Compare-year daily series for the day-of-week widget (COS-127) — only fetched
   // when "Compare to" is on.
@@ -72,9 +72,9 @@ const StatisticsView = () => {
   });
   // Dominant category per weekday, for that widget's hover tooltip (COS-127).
   const { weekdayCategories } = useWeekdayCategories({ year: selectedYear });
-  const { biggestRegular } = useBiggestRegularExpense({ year: selectedYear });
-  const { exceptionals } = useExceptionals({ year: selectedYear });
-  const { exceptionals: compareExceptionals } = useExceptionals({
+  const { biggestRegular, isLoading: biggestRegularLoading } = useBiggestRegularExpense({ year: selectedYear });
+  const { exceptionals, isLoading: exceptionalsLoading } = useExceptionals({ year: selectedYear });
+  const { exceptionals: compareExceptionals, isLoading: compareExceptionalsLoading } = useExceptionals({
     year: compareYear,
   });
   const dashboard = useDashboard();
@@ -172,6 +172,10 @@ const StatisticsView = () => {
         compareExceptionals={compareExceptionals}
         biggestRegular={biggestRegular}
         showExceptionals={showExceptionals}
+        // The KPI cards only render once all four of their sources are in: a
+        // partially-fed card shows a wrong value, and the two sparklines would
+        // rescale on each arrival instead of drawing once (COS-183).
+        isLoading={statisticsLoading || exceptionalsLoading || compareExceptionalsLoading || biggestRegularLoading}
       />
 
       <StatisticsForecast

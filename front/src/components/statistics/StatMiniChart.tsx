@@ -29,14 +29,20 @@ const niceCeil = (value: number): number => {
 const W = 300;
 const PAD = { top: 12, right: 8, bottom: 12, left: 8 };
 
+/** Default plot height — also what a KPI card reserves while its data loads. */
+export const MINI_CHART_HEIGHT = 150;
+
 /**
  * The KPI sparkline, shared by every stat card so they render identically:
  * a gradient area fill with solid x/y axes and a dashed grid (accent-green
  * verticals per the mockup) drawn ON TOP of the fill, an end-of-line dot, an
  * optional dashed average line, and an HTML y-axis graduation (SVG text would be
  * distorted by the stretched viewBox — the end dot is HTML for the same reason).
+ *
+ * The plot draws itself left→right on mount; give the component a `key` that
+ * changes with the series to replay that draw.
  */
-const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniChartProps) => {
+const StatMiniChart = ({ id, values, count, average, height = MINI_CHART_HEIGHT }: StatMiniChartProps) => {
   const { numberLocale } = useFormat();
   const statistics = useTranslations("statistics");
 
@@ -82,15 +88,21 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
         <span>{kFormat(max / 2)}</span>
         <span>0</span>
       </div>
-      <div className="relative min-w-0 flex-1">
+      <div
+        className="relative min-w-0 flex-1"
+        role="img"
+        aria-label={statistics.miniChart.ariaLabel}
+      >
+        {/* Three stacked layers, because only the series may animate while the
+            grid, the axes and the average line stay put — and the grid has to sit
+            between the gradient fill and the line. All three are absolute, so
+            paint order is DOM order and no z-index is needed.
+            1) gradient area — revealed left→right on mount. */}
         <svg
           viewBox={`0 0 ${W} ${height}`}
-          width="100%"
-          height={height}
           preserveAspectRatio="none"
-          className="block"
-          role="img"
-          aria-label={statistics.miniChart.ariaLabel}
+          className="pfa-anim-draw-x absolute inset-0 block size-full"
+          aria-hidden="true"
         >
           <defs>
             <linearGradient
@@ -112,14 +124,20 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
               />
             </linearGradient>
           </defs>
-
-          {/* gradient area (behind) */}
           <path
             d={areaPath(pixels, baseY)}
             fill={`url(#${id}-fill)`}
             stroke="none"
           />
+        </svg>
 
+        {/* 2) static chrome, never animated */}
+        <svg
+          viewBox={`0 0 ${W} ${height}`}
+          preserveAspectRatio="none"
+          className="absolute inset-0 block size-full"
+          aria-hidden="true"
+        >
           {/* dashed grid — drawn over the fill so it stays visible */}
           {hGrid.map((v) => (
             <line
@@ -186,18 +204,34 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
             strokeOpacity={0.7}
             vectorEffect="non-scaling-stroke"
           />
-
-          {/* series line (topmost) */}
-          <path
-            d={linePath(pixels)}
-            fill="none"
-            stroke="var(--accent-strong)"
-            strokeWidth={2}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            vectorEffect="non-scaling-stroke"
-          />
         </svg>
+
+        {/* 3) the series line and its end dot, revealed by a second clip that
+            starts with the area's — same class, same frame, so they stay in step. */}
+        <div className="pfa-anim-draw-x absolute inset-0">
+          <svg
+            viewBox={`0 0 ${W} ${height}`}
+            preserveAspectRatio="none"
+            className="absolute inset-0 block size-full"
+            aria-hidden="true"
+          >
+            <path
+              d={linePath(pixels)}
+              fill="none"
+              stroke="var(--accent-strong)"
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
+
+          {/* end dot — filled; HTML so it stays perfectly round under the stretched viewBox */}
+          <span
+            className="pointer-events-none absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-strong"
+            style={{ left: `${dotLeft}%`, top: `${dotTop}%` }}
+          />
+        </div>
 
         {avgY != null && (
           <span
@@ -207,12 +241,6 @@ const StatMiniChart = ({ id, values, count, average, height = 150 }: StatMiniCha
             {statistics.miniChart.averageShort}
           </span>
         )}
-
-        {/* end dot — filled; HTML so it stays perfectly round under the stretched viewBox */}
-        <span
-          className="pointer-events-none absolute size-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent-strong"
-          style={{ left: `${dotLeft}%`, top: `${dotTop}%` }}
-        />
       </div>
     </div>
   );
