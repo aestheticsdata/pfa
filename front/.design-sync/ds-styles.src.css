@@ -1,10 +1,13 @@
 /* DS stylesheet source for design-sync — compiled by .design-sync/build-css.mjs.
    Not used by the app; the app compiles styles/globals.css through Next/PostCSS. */
 
-/* The app gets Geist + Geist Mono from next/font/google (src/app/layout.tsx),
-   which only exists inside the Next runtime. Source the same families from the
-   font host so the bundle is self-sufficient. */
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+/* The app gets Geist + Geist Mono + Keania One from next/font/google
+   (src/app/layout.tsx), which only exists inside the Next runtime. Source the
+   same families from the font host so the bundle is self-sufficient. Keania is
+   the brand wordmark only (`font-wordmark`): no card uses it today, but the
+   token ships in the DS vocabulary, so it must resolve when a design writes it
+   (it was the `--font-keania` half of validate's [TOKENS_MISSING]). */
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Keania+One&display=swap');
 
 @import '../styles/globals.css';
 
@@ -65,6 +68,7 @@
   color-scheme: dark;
   --font-geist-sans: 'Geist';
   --font-geist-mono: 'Geist Mono';
+  --font-keania: 'Keania One';
 }
 
 /* Paint the page dark — deliberately UNLAYERED and specificity (0,0,2).

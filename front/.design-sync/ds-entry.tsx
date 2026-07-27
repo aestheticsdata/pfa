@@ -41,3 +41,9 @@ export { default as ConfirmDeleteDialog } from "../src/components/shared/Confirm
 export { default as ExportButton } from "../src/components/shared/ExportButton";
 export { default as Logo } from "../src/components/shared/brand/Logo";
 export { default as CategoryComponent } from "../src/components/common/Category";
+// The i18n root. Every component that formats money, dates or copy calls
+// useLocale() under the hood (MoneyAmount, ExportButton, ConfirmDeleteDialog,
+// PasswordField, CategoryComponent…), and throws without this provider — so it
+// ships in the bundle for previews AND for generated designs. Excluded from the
+// component list via componentSrcMap (it renders nothing itself).
+export { LocaleProvider } from "../src/i18n/LocaleContext";
