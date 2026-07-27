@@ -193,7 +193,7 @@ const StatisticsKpis = ({
   const expenseScale = Math.max(Number(topExc?.amount ?? 0), regularBiggest.amount, 1);
 
   return (
-    <section className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 min-[768px]:grid-cols-4">
+    <section className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4">
       <Card label={t.totalSpent(year)}>
         <Value amount={total} />
         <span

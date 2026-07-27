@@ -40,12 +40,12 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
 
   return (
     <>
-      <div className="group grid grid-cols-[76px_minmax(0,1fr)_auto_auto] items-center gap-x-4.5 gap-y-4.5 border-b border-line-soft px-5 py-4 last:border-b-0 max-[759px]:grid-cols-[64px_1fr_auto] max-[759px]:grid-rows-[auto_auto] max-[759px]:gap-x-3 max-[759px]:gap-y-2.5 max-[759px]:px-4 max-[759px]:py-3.5">
-        <span className="rounded-sm border border-line-soft bg-surface-hi py-1.5 text-center font-mono text-xs capitalize tabular-nums text-ink-3 max-[759px]:col-start-1 max-[759px]:row-start-1 max-[759px]:self-start">
+      <div className="group grid grid-cols-[76px_minmax(0,1fr)_auto_auto] items-center gap-x-4.5 gap-y-4.5 border-b border-line-soft px-5 py-4 last:border-b-0 max-md:grid-cols-[64px_1fr_auto] max-md:grid-rows-[auto_auto] max-md:gap-x-3 max-md:gap-y-2.5 max-md:px-4 max-md:py-3.5">
+        <span className="rounded-sm border border-line-soft bg-surface-hi py-1.5 text-center font-mono text-xs capitalize tabular-nums text-ink-3 max-md:col-start-1 max-md:row-start-1 max-md:self-start">
           {dateLabel}
         </span>
 
-        <div className="flex min-w-0 flex-col gap-0.75 max-[759px]:col-start-2 max-[759px]:col-end-4 max-[759px]:row-start-1 max-[759px]:row-end-2">
+        <div className="flex min-w-0 flex-col gap-0.75 max-md:col-start-2 max-md:col-end-4 max-md:row-start-1 max-md:row-end-2">
           <div className="flex min-w-0 items-center gap-2">
             <span
               className="truncate text-sm font-medium text-ink"
@@ -72,11 +72,11 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
           )}
         </div>
 
-        <span className="whitespace-nowrap font-mono text-base font-medium tabular-nums text-ink max-[759px]:col-start-2 max-[759px]:row-start-2 max-[759px]:justify-self-start max-[759px]:self-center">
+        <span className="whitespace-nowrap font-mono text-base font-medium tabular-nums text-ink max-md:col-start-2 max-md:row-start-2 max-md:justify-self-start max-md:self-center">
           {amount} €
         </span>
 
-        <span className="flex gap-1.5 opacity-0 transition-opacity duration-100 group-hover:opacity-100 max-[759px]:col-start-3 max-[759px]:row-start-2 max-[759px]:justify-self-end max-[759px]:opacity-100 [@media(hover:none)]:opacity-100">
+        <span className="flex gap-1.5 opacity-0 transition-opacity duration-100 group-hover:opacity-100 max-md:col-start-3 max-md:row-start-2 max-md:justify-self-end max-md:opacity-100 [@media(hover:none)]:opacity-100">
           <IconButton
             variant="bordered"
             size={7}

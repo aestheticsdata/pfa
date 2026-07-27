@@ -144,7 +144,7 @@ const SpendingDayCard = ({
   return (
     <div
       className={cn(
-        "flex h-125 flex-col overflow-hidden scroll-mt-42 rounded-2xl! min-[760px]:h-116 min-[768px]:scroll-mt-94",
+        "flex h-125 flex-col overflow-hidden scroll-mt-42 rounded-2xl! md:h-116 md:scroll-mt-94",
         isToday
           ? "border border-elec bg-surface-elev shadow-[0_0_0_1px_var(--elec),0_16px_44px_oklch(0.72_0.15_230/0.24),inset_0_1px_0_oklch(1_0_0/0.06)]"
           : "pfa-card",

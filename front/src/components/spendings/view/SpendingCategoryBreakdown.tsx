@@ -160,31 +160,31 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
         >
           {/* min(400px,100%) so a narrow phone gets ONE full-width column instead of a
               forced 400px track overflowing to the right. */}
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(400px,100%),1fr))] gap-x-11 max-[520px]:grid-cols-1 max-[520px]:gap-x-0">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(400px,100%),1fr))] gap-x-11 max-xs:grid-cols-1 max-xs:gap-x-0">
             {rowsWithTrend.map((r) => (
               <button
                 key={r.key}
                 type="button"
                 onClick={() => setSelected(r)}
-                className="-mx-2 grid w-full cursor-pointer grid-cols-[14px_minmax(0,1fr)_76px_88px_60px] items-center gap-3 rounded-md border-b border-line-soft px-2 py-1.75 text-left text-sm transition-colors duration-100 hover:bg-surface-hi max-[520px]:grid-cols-[14px_minmax(0,1fr)_auto] max-[520px]:grid-rows-[auto_auto] max-[520px]:gap-x-2.5 max-[520px]:gap-y-0.75"
+                className="-mx-2 grid w-full cursor-pointer grid-cols-[14px_minmax(0,1fr)_76px_88px_60px] items-center gap-3 rounded-md border-b border-line-soft px-2 py-1.75 text-left text-sm transition-colors duration-100 hover:bg-surface-hi max-xs:grid-cols-[14px_minmax(0,1fr)_auto] max-xs:grid-rows-[auto_auto] max-xs:gap-x-2.5 max-xs:gap-y-0.75"
               >
                 <span
-                  className="size-2 rounded-xs max-[520px]:row-span-2 max-[520px]:row-start-1 max-[520px]:self-center"
+                  className="size-2 rounded-xs max-xs:row-span-2 max-xs:row-start-1 max-xs:self-center"
                   style={{ background: r.color }}
                 />
-                <span className="flex min-w-0 items-baseline gap-2 max-[520px]:col-start-2 max-[520px]:row-start-1">
+                <span className="flex min-w-0 items-baseline gap-2 max-xs:col-start-2 max-xs:row-start-1">
                   <span className="truncate capitalize text-ink">{r.name}</span>
                   <span className="num shrink-0 rounded-full border border-line-soft bg-surface-base px-1.75 text-2xs leading-normal text-ink-3">
                     {r.count}
                   </span>
                 </span>
-                <span className="num text-right text-ink-2 max-[520px]:col-start-2 max-[520px]:row-start-2 max-[520px]:justify-self-start max-[520px]:text-left">
+                <span className="num text-right text-ink-2 max-xs:col-start-2 max-xs:row-start-2 max-xs:justify-self-start max-xs:text-left">
                   {pct1(r.pct)} %
                 </span>
-                <span className="num text-right text-ink max-[520px]:col-start-3 max-[520px]:row-start-1 max-[520px]:justify-self-end">
+                <span className="num text-right text-ink max-xs:col-start-3 max-xs:row-start-1 max-xs:justify-self-end">
                   {euro(r.total)} €
                 </span>
-                <span className="max-[520px]:col-start-3 max-[520px]:row-start-2 max-[520px]:justify-self-end">
+                <span className="max-xs:col-start-3 max-xs:row-start-2 max-xs:justify-self-end">
                   {r.trend && <CategoryTrend {...r.trend} />}
                 </span>
               </button>
