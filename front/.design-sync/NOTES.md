@@ -117,8 +117,10 @@ suspect this list first.
   has no card.
 - `src/components/ui/checkbox.tsx` has no `data-[state=indeterminate]` styling and hardcodes `CheckIcon`,
   so indeterminate would render a checkmark instead of a minus.
-- **`Tooltip` has zero real usage in `src`** — its preview is a plausible invention, not a transcription
-  of app usage. Worth design sign-off before trusting it as canon.
+- ~~**`Tooltip` has zero real usage in `src`**~~ — fixed by COS-126: `Tooltip` is now the app's single
+  tooltip (`mode="cursor"` follows the pointer, `mode="anchor"` is the Radix one), used across
+  Statistiques, Dépenses and Dashboard. The previews cover the anchored mode only — the cursor mode
+  needs a live pointer, so it cannot be captured statically.
 - `MoneyAmount` does not carry `num` itself (StatTile adds it on the value line), so standalone usages
   need `className="num …"`. Easy to miss.
 

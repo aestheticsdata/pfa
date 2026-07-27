@@ -9,9 +9,10 @@ import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { MeterBar } from "@components/shared/MeterBar";
 import { Overline } from "@components/shared/Overline";
+import { Tooltip } from "@components/ui/tooltip";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { CursorTooltip, useCursorHover } from "@lib/dataviz";
+import { useCursorHover } from "@lib/dataviz";
 
 import type { RecurringItem } from "@src/schemas/spendings";
 
@@ -135,9 +136,12 @@ const StatisticsFixedExpenses = ({ recurrings, drawn, now }: StatisticsFixedExpe
 
       <p className="mt-5 border-t border-line-soft pt-4.5 text-xs text-ink-4">{t.note(list[0].label, topShare)}</p>
 
-      <CursorTooltip point={rowTip.hover}>
+      <Tooltip
+        mode="cursor"
+        point={rowTip.hover}
+      >
         {rowTip.hover ? t.tooltip.row(rowTip.hover.data.monthly) : null}
-      </CursorTooltip>
+      </Tooltip>
     </GlowCard>
   );
 };

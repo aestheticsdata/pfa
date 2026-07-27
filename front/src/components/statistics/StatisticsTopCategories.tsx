@@ -2,9 +2,10 @@
 
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
+import { Tooltip } from "@components/ui/tooltip";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { CursorTooltip, useCursorHover } from "@lib/dataviz";
+import { useCursorHover } from "@lib/dataviz";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import type { TopCategoryRow } from "@components/statistics/interfaces/statisticsTopCategoriesTypes";
@@ -78,7 +79,12 @@ const Trend = ({
       >
         {inner}
       </span>
-      <CursorTooltip point={trendTip.hover}>{trendTip.hover ? tooltip : null}</CursorTooltip>
+      <Tooltip
+        mode="cursor"
+        point={trendTip.hover}
+      >
+        {trendTip.hover ? tooltip : null}
+      </Tooltip>
     </>
   );
 };
@@ -135,9 +141,12 @@ const StatisticsTopCategories = ({ rows, compareYear }: StatisticsTopCategoriesP
         ))}
       </div>
 
-      <CursorTooltip point={nameTip.hover}>
+      <Tooltip
+        mode="cursor"
+        point={nameTip.hover}
+      >
         {nameTip.hover ? <span className="capitalize">{nameTip.hover.data}</span> : null}
-      </CursorTooltip>
+      </Tooltip>
     </GlowCard>
   );
 };

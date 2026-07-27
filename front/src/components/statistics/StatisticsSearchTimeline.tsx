@@ -19,12 +19,13 @@ import {
 import { niceCeil } from "@components/statistics/helpers/statisticsData";
 import { searchTimelineParsers, searchTimelineUrlOptions } from "@components/statistics/searchTimelineParams";
 import useStatisticsSearchTimeline from "@components/statistics/services/useStatisticsSearchTimeline";
+import { Tooltip } from "@components/ui/tooltip";
 import { buildSpendingsPath } from "@helpers/dateRoute";
 import { interpolate } from "@i18n/interpolate";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { BarChart, CursorTooltip, LineChart, useCursorHover, useElementWidth } from "@lib/dataviz";
+import { BarChart, LineChart, useCursorHover, useElementWidth } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
@@ -435,7 +436,10 @@ const StatisticsSearchTimeline = () => {
         </div>
       )}
 
-      <CursorTooltip point={cursor.hover}>
+      <Tooltip
+        mode="cursor"
+        point={cursor.hover}
+      >
         {hoveredPoint && (
           <>
             <div className="font-medium capitalize">
@@ -451,7 +455,7 @@ const StatisticsSearchTimeline = () => {
             <div className="text-ink-3">{t.tooltip.rolling(hoveredRolling, windowDays)}</div>
           </>
         )}
-      </CursorTooltip>
+      </Tooltip>
     </GlowCard>
   );
 };

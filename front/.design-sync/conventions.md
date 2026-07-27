@@ -4,7 +4,7 @@ pfa is a personal-finance app: **dark-only**, French UI, dense numeric screens (
 
 ### Setup — there is nothing to wrap
 
-No provider is required. The tokens are plain CSS custom properties on `:root` in `styles.css`, and **dark is the default** — do *not* add a `dark` class or a theme provider. `Tooltip` mounts its own `TooltipProvider`. The only global is `<Toaster />` (sonner), mounted once near the root, and only if you raise toasts.
+No provider is required. The tokens are plain CSS custom properties on `:root` in `styles.css`, and **dark is the default** — do *not* add a `dark` class or a theme provider. `Tooltip` mounts its own Radix provider internally. The only global is `<Toaster />` (sonner), mounted once near the root, and only if you raise toasts.
 
 ### The styling idiom: Tailwind v4 utilities over pfa tokens
 

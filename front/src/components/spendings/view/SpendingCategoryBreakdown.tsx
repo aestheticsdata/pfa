@@ -5,10 +5,10 @@ import GlowCard from "@components/shared/GlowCard";
 import { WEEKLY } from "@components/spendings/config/constants";
 import { categoryTrend } from "@components/spendings/helpers/categoryTrend";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip";
+import { Tooltip } from "@components/ui/tooltip";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { CategoryBarTooltip, CategoryTrend } from "@lib/dataviz";
+import { CategoryTooltipContent, CategoryTrend } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -121,14 +121,12 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
               {t.rangeSuffix}
             </span>
             {showHint ? (
-              <Tooltip>
-                <TooltipTrigger asChild>{caret}</TooltipTrigger>
-                <TooltipContent
-                  side="bottom"
-                  sideOffset={6}
-                >
-                  {t.expandHint}
-                </TooltipContent>
+              <Tooltip
+                mode="anchor"
+                side="bottom"
+                content={t.expandHint}
+              >
+                {caret}
               </Tooltip>
             ) : (
               caret
@@ -195,12 +193,14 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
         </div>
       </div>
 
-      {hover && (
-        <CategoryBarTooltip
-          point={{ x: hover.x, y: hover.y }}
-          datum={hover.target}
-        />
-      )}
+      {/* Rendered unconditionally: the tooltip owns its fade in AND out, so it
+          needs to outlive the hover it is fading away from. */}
+      <Tooltip
+        mode="cursor"
+        point={hover ? { x: hover.x, y: hover.y } : null}
+      >
+        {hover && <CategoryTooltipContent datum={hover.target} />}
+      </Tooltip>
 
       {selected && (
         <SpendingsListModal

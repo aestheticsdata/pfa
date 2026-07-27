@@ -11,10 +11,11 @@ import { categoryTrend } from "@components/spendings/helpers/categoryTrend";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useSpendings from "@components/spendings/services/useSpendings";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
+import { Tooltip } from "@components/ui/tooltip";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { CategoryBarTooltip, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
+import { CategoryTooltipContent, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
 import format from "date-fns/format";
 import { useMemo, useState } from "react";
 
@@ -114,12 +115,14 @@ const CategoryBreakdown = () => {
         <EmptyState className="py-10">{t.empty}</EmptyState>
       )}
 
-      {hover && (
-        <CategoryBarTooltip
-          point={{ x: hover.x, y: hover.y }}
-          datum={rows[hover.target]}
-        />
-      )}
+      {/* Rendered unconditionally: the tooltip owns its fade in AND out, so it
+          needs to outlive the hover it is fading away from. */}
+      <Tooltip
+        mode="cursor"
+        point={hover ? { x: hover.x, y: hover.y } : null}
+      >
+        {hover && <CategoryTooltipContent datum={rows[hover.target]} />}
+      </Tooltip>
 
       {selected && (
         <SpendingsListModal

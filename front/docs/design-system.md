@@ -219,9 +219,9 @@ and nothing else. `xs`, `2xl` and `3xl` are Tailwind's stock defaults and don't 
 > 10px. Only `sm` (6px) agrees. So `var(--r-lg)` in a CSS partial ≠ `rounded-lg` in a component.
 > This is a known smell (§11) — until it's reconciled, check which layer you're in.
 
-In TSX, use `rounded-*`. Don't reach for `var(--r-*)` from a component — with one unavoidable
-exception: `lib/dataviz/CategoryBarTooltip.tsx:103` sets radius through an inline `style` object,
-where `rounded-*` can't reach, so it legitimately uses `var(--r-*)`. Don't "fix" it.
+In TSX, use `rounded-*`. Don't reach for `var(--r-*)` from a component — the tooltip bubble used to be
+the one exception (radius set through an inline `style` object, where `rounded-*` can't reach); since
+COS-126 its whole skin is a Tailwind class in `ui/tooltip.tsx`, so there is no exception left.
 
 ---
 
@@ -237,6 +237,7 @@ a subtle top highlight where present). Declared in `@theme`, so each is availabl
 | `shadow-card` | the standard card (what `.pfa-card` uses) |
 | `shadow-header` | sticky app header |
 | `shadow-card-hover` | card hover lift |
+| `shadow-tooltip` | the tooltip bubble (both modes) |
 | `shadow-popover` | popovers, dropdowns |
 | `shadow-drawer` | mobile nav drawer |
 | `shadow-modal` | modals |
@@ -268,8 +269,8 @@ files. This is the real, verified stacking order; place new overlays against it 
 | **30** | Dépenses sticky band `.sp-sticky-zone` — *and* the FAB | `spendings.css:107`, `SpendingView.tsx:220` |
 | **35** | viewport-top mask `.pfa-shell::before` (COS-104) | `chrome.css:50` |
 | **40** | sticky app header `.pfa-hdr` | `NavBar.tsx:116` |
-| **50** | shadcn overlay tier — dialog, popover, select, dropdown, tooltip | vendored `ui/*` defaults |
-| **60** | portaled chart tooltip (inline `zIndex`) | `CategoryBarTooltip.tsx:94` |
+| **50** | shadcn overlay tier — dialog, popover, select, dropdown | vendored `ui/*` defaults |
+| **60** | the app tooltip, both modes (`z-60` on the shared surface) | `ui/tooltip.tsx` |
 | **110 / 120** | mobile nav scrim / drawer | `chrome.css` |
 | **200 / 201** | category detail backdrop / viewport | `category-detail.css:12,26` |
 

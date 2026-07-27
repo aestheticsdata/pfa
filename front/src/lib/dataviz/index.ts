@@ -7,9 +7,8 @@ export {
   weeklyTotalsToBars,
 } from "@lib/dataviz/adapters";
 export { default as BarChart } from "@lib/dataviz/BarChart";
-export { default as CategoryBarTooltip } from "@lib/dataviz/CategoryBarTooltip";
+export { default as CategoryTooltipContent } from "@lib/dataviz/CategoryTooltipContent";
 export { default as CategoryTrend } from "@lib/dataviz/CategoryTrend";
-export { default as CursorTooltip } from "@lib/dataviz/CursorTooltip";
 export { default as Donut } from "@lib/dataviz/Donut";
 export { default as LineChart } from "@lib/dataviz/LineChart";
 export { default as ProgressTrack } from "@lib/dataviz/ProgressTrack";

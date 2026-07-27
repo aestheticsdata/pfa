@@ -16,10 +16,11 @@ import {
   yearTotal,
 } from "@components/statistics/helpers/statisticsData";
 import StatMiniChart from "@components/statistics/StatMiniChart";
+import { Tooltip } from "@components/ui/tooltip";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { CursorTooltip, useCursorHover } from "@lib/dataviz";
+import { useCursorHover } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
@@ -129,9 +130,12 @@ const CmpRow = ({
         />
         {excWidth > 0 && <span style={{ width: `${excWidth * 100}%`, background: "var(--exc)" }} />}
       </div>
-      <CursorTooltip point={rowTip.hover}>
+      <Tooltip
+        mode="cursor"
+        point={rowTip.hover}
+      >
         {rowTip.hover ? (rowTip.hover.data === "title" ? titleTooltip : barTooltip) : null}
-      </CursorTooltip>
+      </Tooltip>
     </div>
   );
 };
@@ -201,9 +205,12 @@ const StatisticsKpis = ({
         >
           <Delta down={deltaPct <= 0}>{Math.abs(Math.round(deltaPct))}%</Delta> {t.vsMonths(compareYear, months)}
         </span>
-        <CursorTooltip point={compareTotalTip.hover}>
+        <Tooltip
+          mode="cursor"
+          point={compareTotalTip.hover}
+        >
           {compareTotalTip.hover ? t.tooltip.total(compareYear, euro0(compareTotal), totalDiffStr, months) : null}
-        </CursorTooltip>
+        </Tooltip>
         <div className="mt-4">
           <StatMiniChart
             id="kpi-total"

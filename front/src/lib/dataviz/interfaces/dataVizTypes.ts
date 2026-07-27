@@ -47,7 +47,7 @@ export interface SeriesDot {
 }
 
 // Interaction contracts — hover state and tooltip data shared by the charts and
-// the mouse-following tooltips (CategoryBarTooltip / CursorTooltip).
+// the app's tooltip in cursor mode (see `@components/ui/tooltip`).
 
 export type TrendDirection = "up" | "down" | "flat";
 

@@ -4,10 +4,11 @@ import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
 import { buildHeatmap, LEVEL, monthColumns, SPEND_BANDS } from "@components/statistics/helpers/heatmapData";
+import { Tooltip } from "@components/ui/tooltip";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { CursorTooltip, useCursorHover } from "@lib/dataviz";
+import { useCursorHover } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
@@ -286,7 +287,8 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
         </div>
       </div>
 
-      <CursorTooltip
+      <Tooltip
+        mode="cursor"
         point={cellTip.hover}
         background={cellTip.hover ? tipBg(CELL_BG[cellTip.hover.data.level]) : undefined}
         color={cellTip.hover ? TIP_FG[cellTip.hover.data.level] : undefined}
@@ -308,9 +310,10 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
             )}
           </>
         )}
-      </CursorTooltip>
+      </Tooltip>
 
-      <CursorTooltip
+      <Tooltip
+        mode="cursor"
         point={distributionTip.hover}
         background={distributionTip.hover ? tipBg(DIST_BG[distributionTip.hover.data]) : undefined}
         color={distributionTip.hover ? TIP_FG[distributionTip.hover.data] : undefined}
@@ -322,7 +325,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
             groupForLevel[distributionTip.hover.data].label,
             distShare(groupForLevel[distributionTip.hover.data].n),
           )}
-      </CursorTooltip>
+      </Tooltip>
     </GlowCard>
   );
 };

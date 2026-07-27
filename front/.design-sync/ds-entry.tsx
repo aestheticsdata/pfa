@@ -20,7 +20,7 @@ export { Skeleton } from "../src/components/ui/skeleton";
 export { Toaster } from "../src/components/ui/sonner";
 export { Switch } from "../src/components/ui/switch";
 export { Tabs, TabsContent, TabsList, TabsTrigger } from "../src/components/ui/tabs";
-export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../src/components/ui/tooltip";
+export { Tooltip } from "../src/components/ui/tooltip";
 export { CardSectionHeader, CardTitle } from "../src/components/shared/CardSectionHeader";
 export { DividedStrip } from "../src/components/shared/DividedStrip";
 export { Dropzone } from "../src/components/shared/Dropzone";
