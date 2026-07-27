@@ -1,5 +1,6 @@
 "use client";
 
+import useTween from "@lib/dataviz/useTween";
 import { cn } from "@lib/utils";
 
 import type { DonutSegment } from "@lib/dataviz/interfaces/dataVizTypes";
@@ -8,7 +9,10 @@ import type { MouseEvent } from "react";
 interface StackedBarProps {
   segments: DonutSegment[];
   height?: number;
-  radius?: number;
+  /** Corner radius — a number (px) or any CSS length (e.g. a radius token). */
+  radius?: number | string;
+  /** Grow the segments from zero on mount, and ease them in place on a change. */
+  animate?: boolean;
   className?: string;
   ariaLabel?: string;
   /** Fires on pointer move over the bar with the segment index under the cursor. */
@@ -17,11 +21,23 @@ interface StackedBarProps {
   onSegmentLeave?: () => void;
 }
 
+/** One slice, in its own component so it can own a tween hook (no hooks in a `.map`). */
+const Segment = ({ fraction, color, animate }: { fraction: number; color: string; animate: boolean }) => {
+  const width = useTween(fraction, animate);
+  return (
+    <span
+      className="block h-full"
+      style={{ width: `${width * 100}%`, background: color }}
+    />
+  );
+};
+
 /** Single horizontal stacked bar (e.g. a category distribution). */
 const StackedBar = ({
   segments,
   height = 8,
   radius = 4,
+  animate = false,
   className,
   ariaLabel,
   onSegmentHover,
@@ -59,14 +75,14 @@ const StackedBar = ({
       onMouseMove={onSegmentHover ? handleMove : undefined}
       onMouseLeave={onSegmentLeave}
     >
+      {/* Every segment shares one duration and one easing curve, so the whole bar
+          grows as a block and the proportions hold at every frame. */}
       {segments.map((seg) => (
-        <span
+        <Segment
           key={`${seg.label ?? ""}-${seg.color}`}
-          className="block h-full"
-          style={{
-            width: `${(Math.max(0, seg.value) / total) * 100}%`,
-            background: seg.color,
-          }}
+          fraction={Math.max(0, seg.value) / total}
+          color={seg.color}
+          animate={animate}
         />
       ))}
     </div>

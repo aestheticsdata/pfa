@@ -8,7 +8,7 @@ import SpendingsListModal from "@components/spendings/spendingsListModal/Spendin
 import { Tooltip } from "@components/ui/tooltip";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import { CategoryTooltipContent, CategoryTrend } from "@lib/dataviz";
+import { CategoryTooltipContent, CategoryTrend, StackedBar } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -135,19 +135,20 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
         }
       />
 
-      <div className="mb-2.5 flex h-2 overflow-hidden rounded-sm">
-        {rowsWithTrend.map((r) => (
-          <span
-            key={r.key}
-            role="img"
-            className="block h-full"
-            aria-label={`${r.name} : ${pct1(r.pct)} % (${euro(r.total)} €)`}
-            style={{ width: `${r.pct.toFixed(2)}%`, background: r.color }}
-            onMouseMove={(e) => setHover({ target: r, x: e.clientX, y: e.clientY })}
-            onMouseLeave={() => setHover(null)}
-          />
-        ))}
-      </div>
+      {/* Grows from zero on mount and eases in place on a week change (COS-185).
+          Replaces a hand-rolled copy of this very bar, so the hover now goes
+          through the shared hit-testing: one labelled image for assistive tech
+          instead of one per segment, the per-category detail being read from the
+          list right below. */}
+      <StackedBar
+        animate
+        className="mb-2.5"
+        radius="var(--radius-sm)"
+        segments={rowsWithTrend.map((r) => ({ label: r.name, value: r.total, color: r.color }))}
+        ariaLabel={t.barAria}
+        onSegmentHover={(index, e) => setHover({ target: rowsWithTrend[index], x: e.clientX, y: e.clientY })}
+        onSegmentLeave={() => setHover(null)}
+      />
 
       <div
         id={DETAIL_ID}

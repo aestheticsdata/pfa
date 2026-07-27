@@ -64,6 +64,9 @@ const spendings: typeof frSpendings = {
     expandAria: "Show category breakdown",
     collapseAria: "Hide category breakdown",
     expandHint: "Expand to see details",
+    // Label of the stacked bar as a whole — the per-category detail is read from
+    // the list below it.
+    barAria: "Weekly breakdown by category",
     // Suffix appended after the week range label in the pane header.
     rangeSuffix: " · week",
     // Per-category trend badge vs the previous week (COS-35).

@@ -49,7 +49,7 @@ const AnimatedNumber = ({
 }: AnimatedNumberProps) => {
   const { numberLocale } = useFormat();
   const activeLocale = locale ?? numberLocale;
-  const animated = useCountUp(value, duration);
+  const animated = useCountUp(value, true, duration);
   const text = animated.toLocaleString(activeLocale, {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,

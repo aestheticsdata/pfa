@@ -1,12 +1,15 @@
 "use client";
 
 import useFormat from "@i18n/useFormat";
+import useCountUp from "@lib/dataviz/useCountUp";
 import { cn } from "@lib/utils";
 
 interface MoneyAmountProps {
   value: number;
   /** Trailing unit inside the de-emphasised span. */
   unit?: string;
+  /** Count the integer part up from 0 — on mount and on every value change. */
+  animate?: boolean;
   /** Classes for the de-emphasised ",decimals unit" span (usually a smaller size). */
   decimalClassName?: string;
   /** Classes for the whole figure (main size / colour / `num`). */
@@ -18,10 +21,18 @@ interface MoneyAmountProps {
  * the one place that split lives. Set the main size/colour via `className` (or an
  * ancestor); the decimals are toned down (`font-normal text-ink-3`) and sized via
  * `decimalClassName`.
+ *
+ * Under `animate`, only the integer counts up; the cents stay pinned to their
+ * final value, like the "Remaining budget" heroes — rolling that small a span
+ * reads as flicker, not as motion.
  */
-function MoneyAmount({ value, unit = " €", decimalClassName, className }: MoneyAmountProps) {
+function MoneyAmount({ value, unit = " €", animate = false, decimalClassName, className }: MoneyAmountProps) {
   const { splitAmount } = useFormat();
-  const { int, dec, separator } = splitAmount(value);
+  // The integer comes from the animated value so it keeps its locale grouping at
+  // every frame; the decimals always come from the final one.
+  const counted = useCountUp(value, animate);
+  const { int } = splitAmount(counted);
+  const { dec, separator } = splitAmount(value);
   return (
     <span className={className}>
       {int}

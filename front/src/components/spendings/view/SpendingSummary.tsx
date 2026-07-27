@@ -57,7 +57,8 @@ const SpendingSummary = ({
 
   // Hero "Remaining budget" — big number, split integer/decimals like the Dashboard
   // BudgetHero, red when over budget. The integer counts up via the reusable
-  // AnimatedNumber component; the cents stay fixed beside it.
+  // AnimatedNumber component; the cents stay fixed beside it. Every other figure in
+  // the strip counts up too (COS-185) — one lone moving number read as a glitch.
   const over = remaining < 0;
   const { int: remainingInt, dec: remainingDec, separator: remainingSeparator } = splitAmount(Math.abs(remaining));
   const remainingIntValue = Number(remainingInt.replace(/\D/g, ""));
@@ -114,6 +115,7 @@ const SpendingSummary = ({
         label={t.weekTotal}
         value={
           <MoneyAmount
+            animate
             value={weekTotal}
             decimalClassName="text-lg"
           />
@@ -122,13 +124,14 @@ const SpendingSummary = ({
       />
       <Cell
         label={t.transactions}
-        value={txCount}
+        value={<AnimatedNumber value={txCount} />}
         sub={t.transactionsSub(perDay)}
       />
       <Cell
         label={t.avgPerDay}
         value={
           <MoneyAmount
+            animate
             value={average}
             decimalClassName="text-lg"
           />
@@ -140,6 +143,7 @@ const SpendingSummary = ({
         value={
           biggest ? (
             <MoneyAmount
+              animate
               value={biggest.amount}
               decimalClassName="text-lg"
             />

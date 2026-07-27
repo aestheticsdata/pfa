@@ -62,6 +62,9 @@ const spendings = {
     expandAria: "Afficher le détail par catégorie",
     collapseAria: "Masquer le détail par catégorie",
     expandHint: "Déplier pour voir le détail",
+    // Label of the stacked bar as a whole — the per-category detail is read from
+    // the list below it.
+    barAria: "Répartition hebdomadaire par catégorie",
     // Suffix appended after the week range label in the pane header.
     rangeSuffix: " · semaine",
     // Per-category trend badge vs the previous week (COS-35).
