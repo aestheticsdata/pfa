@@ -15,7 +15,7 @@ import {
   monthShortLabels,
   yearTotal,
 } from "@components/statistics/helpers/statisticsData";
-import StatMiniChart from "@components/statistics/StatMiniChart";
+import StatMiniChart, { MINI_CHART_HEIGHT } from "@components/statistics/StatMiniChart";
 import { Tooltip } from "@components/ui/tooltip";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
@@ -37,7 +37,12 @@ interface StatisticsKpisProps {
   compareExceptionals: ExceptionalItem[];
   biggestRegular: BiggestRegularExpense | null;
   showExceptionals: boolean;
+  /** True until every source feeding the four cards has landed. */
+  isLoading: boolean;
 }
+
+const KPI_GRID = "grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4";
+const VALUE_CLASS = "num mb-1 mt-2.5 text-3xl font-medium leading-none tracking-tight";
 
 const cap = (s: string) => (s ? s.charAt(0).toUpperCase() + s.slice(1) : s);
 
@@ -48,10 +53,33 @@ const Card = ({ label, children }: { label: string; children: React.ReactNode })
   </GlowCard>
 );
 
+/** Stand-in card, shaped like its loaded counterpart so the row never jumps. */
+const LoadingCard = ({ label, chart = false }: { label: string; chart?: boolean }) => {
+  const common = useTranslations("common");
+  return (
+    <Card label={label}>
+      {chart ? (
+        <>
+          <div className={cn(VALUE_CLASS, "text-ink-4")}>—</div>
+          <span className="text-xs text-ink-4">{common.loading}</span>
+          {/* the plot's exact height, so the card doesn't grow when data lands */}
+          <div
+            className="mt-4"
+            style={{ height: MINI_CHART_HEIGHT }}
+          />
+        </>
+      ) : (
+        // stands in for the two comparison rows these cards render once loaded
+        <div className="mt-2 min-h-20 text-xs text-ink-4">{common.loading}</div>
+      )}
+    </Card>
+  );
+};
+
 const Value = ({ amount }: { amount: number }) => {
   const { euro0 } = useFormat();
   return (
-    <div className="num mb-1 mt-2.5 text-3xl font-medium leading-none tracking-tight text-ink">
+    <div className={cn(VALUE_CLASS, "text-ink")}>
       {euro0(amount)}
       <span className="text-xl font-normal text-ink-3"> €</span>
     </div>
@@ -151,6 +179,7 @@ const StatisticsKpis = ({
   compareExceptionals,
   biggestRegular,
   showExceptionals,
+  isLoading,
 }: StatisticsKpisProps) => {
   const { euro0 } = useFormat();
   const statisticsText = useTranslations("statistics");
@@ -160,6 +189,28 @@ const StatisticsKpis = ({
   const compareTotalTip = useCursorHover();
 
   const { kpis: t } = statisticsText;
+
+  // One gate for the whole row rather than one per card: the four share a row
+  // height, and rendering them on partial data is what made the two sparklines
+  // climb in steps (COS-183) — every card value, hence the plot's own y scale,
+  // was recomputed as each request landed.
+  if (isLoading) {
+    return (
+      <section className={KPI_GRID}>
+        <LoadingCard
+          label={t.totalSpent(year)}
+          chart
+        />
+        <LoadingCard
+          label={t.avgPerMonth}
+          chart
+        />
+        <LoadingCard label={t.biggestMonth} />
+        <LoadingCard label={t.biggestExpense} />
+      </section>
+    );
+  }
+
   const data = statistics?.data;
   const regMonthly = monthlyTotals(data, year);
   const excMonthly = exceptionalMonthly(exceptionals);
@@ -192,8 +243,12 @@ const StatisticsKpis = ({
     : { label: t.regularExpenseFallback, amount: 0, date: null as string | null };
   const expenseScale = Math.max(Number(topExc?.amount ?? 0), regularBiggest.amount, 1);
 
+  // Remount key → replays the left→right draw when the series really changes
+  // (year switch, exceptionals toggle), not on every re-render.
+  const chartKey = `${year}-${showExceptionals ? "e" : "r"}`;
+
   return (
-    <section className="grid grid-cols-1 gap-4 xs:grid-cols-2 md:grid-cols-4">
+    <section className={KPI_GRID}>
       <Card label={t.totalSpent(year)}>
         <Value amount={total} />
         <span
@@ -213,6 +268,7 @@ const StatisticsKpis = ({
         </Tooltip>
         <div className="mt-4">
           <StatMiniChart
+            key={chartKey}
             id="kpi-total"
             values={cumulative(totalMonthly)}
             count={months}
@@ -228,6 +284,7 @@ const StatisticsKpis = ({
         </span>
         <div className="mt-4">
           <StatMiniChart
+            key={chartKey}
             id="kpi-avg"
             values={totalMonthly}
             count={months}
