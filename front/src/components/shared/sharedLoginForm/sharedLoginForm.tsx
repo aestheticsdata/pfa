@@ -43,6 +43,7 @@ const SharedLoginForm = ({
   submitIcon,
   serverError,
   onDismissError,
+  disabled,
 }: SharedLoginFormProps) => {
   const login = useTranslations("login");
   const common = useTranslations("common");
@@ -107,6 +108,7 @@ const SharedLoginForm = ({
             autoComplete="email"
             className={authInputClass}
             aria-invalid={!!errors.email}
+            disabled={disabled}
             {...register("email", { onChange: clearFieldError("email") })}
           />
         </div>
@@ -119,6 +121,7 @@ const SharedLoginForm = ({
           autoComplete={displayConfirmPasswordField ? "new-password" : "current-password"}
           invalid={!!errors.password}
           registration={register("password", { onChange: clearFieldError("password") })}
+          disabled={disabled}
         />
       )}
 
@@ -129,6 +132,7 @@ const SharedLoginForm = ({
           autoComplete="new-password"
           invalid={!!errors.confirmPassword}
           registration={register("confirmPassword", { onChange: clearFieldError("confirmPassword") })}
+          disabled={disabled}
         />
       )}
 
@@ -169,7 +173,7 @@ const SharedLoginForm = ({
       <Button
         type="submit"
         variant="primary"
-        disabled={isSubmitting}
+        disabled={isSubmitting || disabled}
         className="h-auto w-full rounded-lg py-3 text-sm tracking-normal"
       >
         {buttonTitle}

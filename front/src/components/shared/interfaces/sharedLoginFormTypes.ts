@@ -20,4 +20,6 @@ export interface SharedLoginFormProps {
   serverError?: string | null;
   /** Called when the user edits email/password, so the parent can clear serverError. */
   onDismissError?: () => void;
+  /** Disables every field and the submit button while leaving the form in place (COS-419). */
+  disabled?: boolean;
 }
