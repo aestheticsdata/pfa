@@ -15,10 +15,11 @@ interface PasswordFieldProps {
   autoComplete: string;
   invalid: boolean;
   registration: UseFormRegisterReturn;
+  disabled?: boolean;
 }
 
 /** Auth password input with its own show/hide toggle. */
-const PasswordField = ({ id, label, autoComplete, invalid, registration }: PasswordFieldProps) => {
+const PasswordField = ({ id, label, autoComplete, invalid, registration, disabled }: PasswordFieldProps) => {
   const login = useTranslations("login");
   const [show, setShow] = useState(false);
 
@@ -38,6 +39,7 @@ const PasswordField = ({ id, label, autoComplete, invalid, registration }: Passw
           autoComplete={autoComplete}
           className={cn(authInputClass, "pr-10.5")}
           aria-invalid={invalid}
+          disabled={disabled}
           {...registration}
         />
         <button

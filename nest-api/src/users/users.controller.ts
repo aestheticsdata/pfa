@@ -7,6 +7,7 @@ import { UpdateUserDto } from "@users/dto/update-user.dto";
 import { RedisService } from "@redis/redis.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { CsrfGuard } from "@users/guards/csrf.guard";
+import { SignupGuard } from "@users/guards/signup.guard";
 import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@users/csrf-token.util";
 
 import type { SignInResponse } from "@users/users.service";
@@ -58,6 +59,7 @@ export class UsersController {
   }
 
   @Post("add")
+  @UseGuards(SignupGuard)
   @HttpCode(HttpStatus.CREATED)
   async addUser(@Body() dto: AddUserDto, @Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
     const result = await this.usersService.addUser(dto);
