@@ -1,11 +1,14 @@
-import { Module } from "@nestjs/common";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { APP_FILTER } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
+import { LoggerModule } from "nestjs-pino";
 import { AppController } from "./app.controller";
 import appConfig from "@config/app.config";
 import sshBackupConfig from "@config/ssh-backup.config";
 import dbBackupConfig from "@config/db-backup.config";
 import { validate } from "@config/env.validation";
+import { AllExceptionsFilter, buildLoggerParams, TraceIdMiddleware } from "@infrastructure/logger";
 import { RedisModule } from "@redis/redis.module";
 import { SshBackupModule } from "@infrastructure/ssh-backup/ssh-backup.module";
 import { DbBackupModule } from "@infrastructure/db-backup/db-backup.module";
@@ -20,6 +23,10 @@ import { ExceptionalsModule } from "@exceptionals/exceptionals.module";
 
 @Module({
   imports: [
+    // First in the list so Nest's own startup lines already go through pino. Together with
+    // `bufferLogs` in main.ts, that makes the very first line written to stdout parsable rather
+    // than Nest's coloured console format.
+    LoggerModule.forRoot(buildLoggerParams()),
     ScheduleModule.forRoot(),
     RedisModule,
     PrismaModule,
@@ -40,5 +47,18 @@ import { ExceptionalsModule } from "@exceptionals/exceptionals.module";
     }),
   ],
   controllers: [AppController],
+  providers: [
+    {
+      provide: APP_FILTER,
+      // Registered globally rather than controller by controller: a controller added later is
+      // covered because it exists, not because someone remembered.
+      useClass: AllExceptionsFilter,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    // Every route, so that a line written anywhere during a request carries the same trace.id.
+    consumer.apply(TraceIdMiddleware).forRoutes("*");
+  }
+}

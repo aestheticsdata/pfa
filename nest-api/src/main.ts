@@ -1,12 +1,11 @@
 import { NestFactory } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
 import { ValidationPipe } from "@nestjs/common";
-import { Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
+import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
 import { AppConfig } from "@config/app.config";
-import { formatRouteLog } from "@infrastructure/logger";
 import { RedisService } from "@redis/redis.service";
 
 import type { Application } from "express";
@@ -14,7 +13,11 @@ import type { Application } from "express";
 const SESSION_TTL_SECONDS = 10 * 60; // 10 minutes
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // bufferLogs holds Nest's startup lines until pino is attached, so the first thing written to
+  // stdout is already ECS rather than Nest's coloured console format.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
+
   (app.getHttpAdapter().getInstance() as Application).set("trust proxy", 1);
 
   const redisService = app.get<RedisService>(RedisService);
@@ -27,6 +30,8 @@ async function bootstrap() {
   // Cookie secure: en prod sans HTTPS, mettre COOKIE_SECURE=false dans .env
   const cookieSecure = process.env.COOKIE_SECURE !== "false" && process.env.NODE_ENV === "production";
 
+  // Registered before Nest initialises, so it runs ahead of the request logger — which is what
+  // lets the access line carry `user.id`.
   app.use(
     session({
       name: "pfa.sid",
@@ -56,15 +61,9 @@ async function bootstrap() {
 
   app.setGlobalPrefix("api");
 
-  app.use("/api", (req: Request, _res: Response, next: NextFunction) => {
-    const url = req.originalUrl ?? req.url ?? req.path ?? "";
-    const ip =
-      (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() ?? req.ip ?? req.socket?.remoteAddress ?? "?";
-    const userAgent = (req.headers["user-agent"] ?? "unknown").slice(0, 60);
-    console.log(formatRouteLog(req.method, url, "Nest", { ip, userAgent }));
-    next();
-  });
-
+  // The hand-rolled `console.log` access line that used to live here is gone (IKN-1). pino-http
+  // replaces it with one ECS object per request, carrying the method, path, query, status code,
+  // duration, client address, user agent and — when signed in — the user id.
   await app.listen(appConfig.port);
 }
 
