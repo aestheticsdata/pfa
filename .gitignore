@@ -27,6 +27,13 @@
 # deploy carries to ks-b, and a value that reaches every visitor is still a value nobody should
 # have to find in a diff. `front/.env.example` is the committed template.
 **/.env.production
+
+# Filled from `.env.ssh-test.example` for `pnpm test:ssh`. Holds the backup server's address, its
+# ssh user and the path to the private key — infrastructure, and it was tracked until 2026-08-20.
+**/.env.ssh-test
+
+# Editor and hand-made leftovers. A copy of an env file is still an env file.
+*.bak
 ecosystem.config.js
 
 # logs
