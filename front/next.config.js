@@ -29,6 +29,10 @@ const cspDirectives = {
   "font-src": ["'self'", "data:", "https://fonts.gstatic.com"],
   "connect-src": [
     "'self'",
+    // Browser error reporting to Iknos (IKN-29 there): `lib/report.ts` posts to another
+    // subdomain, and without this entry the page's own CSP kills the report before CORS is
+    // even consulted.
+    "https://iknos.1991computer.com",
     ...(isDev ? devConnectSources : []),
   ],
   "frame-src": ["'none'"],
