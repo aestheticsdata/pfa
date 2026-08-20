@@ -94,6 +94,15 @@ EOF
 deploy() {
   cd "$SCRIPT_DIR"
 
+  # `.env.production` is not committed, and its absence is silent in a way that matters: the
+  # NEXT_PUBLIC_ values are inlined at build time, so a missing file does not fail the build — it
+  # ships a bundle with sign-ups reopened and error reporting switched off, and says nothing.
+  # Checked before anything is uploaded, so a fresh clone fails here rather than on the server.
+  if [ ! -f "$SCRIPT_DIR/.env.production" ]; then
+    echo "❌ ERROR: missing front/.env.production — copy .env.example and fill it in. It is not committed." >&2
+    exit 1
+  fi
+
   local GIT_HASH
   GIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "no-git")
 
