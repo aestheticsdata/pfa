@@ -93,7 +93,7 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
               >
                 {s.name}
               </LegendItem>
-              <span className="num text-ink-2">{euro0(plottedTotal(s))}</span>
+              <span className="num text-ink-2">{euro0(plottedTotal(s))} €</span>
             </div>
           ))}
         </div>
