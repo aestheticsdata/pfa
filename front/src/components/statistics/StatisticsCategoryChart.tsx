@@ -53,6 +53,9 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
   const barW = n > 0 ? (groupW - gap * (n - 1)) / n : 0;
   const labelFont = n >= 3 ? 8 : 9.5;
 
+  /** Cumulated spend over the plotted months — Jan → current month, or the full year for a past one. */
+  const plottedTotal = (s: CategorySeries) => range(months).reduce((sum, m) => sum + (s.monthly[m] ?? 0), 0);
+
   const cx = (m: number) => PAD_L + slotW * (m + 0.5);
   const yFor = (v: number) => Y0 - (Math.max(0, v) / yMax) * PLOT_H;
 
@@ -73,20 +76,25 @@ const StatisticsCategoryChart = ({ year, series, monthsCount, now }: StatisticsC
           <CardTitle>{statistics.categoryChart.title}</CardTitle>
           <p className="mt-0.5 text-xs text-ink-4">{subtitle}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-4.5 text-xs text-ink-3">
+        <div className="flex flex-wrap items-start gap-4.5 text-xs text-ink-3">
           {series.map((s) => (
-            <LegendItem
+            <div
               key={s.name}
-              className="capitalize"
-              swatch={
-                <i
-                  className="inline-block size-2.5 rounded-xs"
-                  style={{ background: s.color }}
-                />
-              }
+              className="flex flex-col items-end gap-1"
             >
-              {s.name}
-            </LegendItem>
+              <LegendItem
+                className="capitalize"
+                swatch={
+                  <i
+                    className="inline-block size-2.5 rounded-xs"
+                    style={{ background: s.color }}
+                  />
+                }
+              >
+                {s.name}
+              </LegendItem>
+              <span className="num text-ink-2">{euro0(plottedTotal(s))}</span>
+            </div>
           ))}
         </div>
       </div>
