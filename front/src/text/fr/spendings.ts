@@ -182,6 +182,7 @@ const spendings = {
     recurringUpdated: "dépense fixe mise à jour",
     recurringDeleted: "dépense fixe supprimée",
     recurringsCopied: "dépenses fixes créées",
+    receiptUploadFailed: "reçu non joint — réessayer depuis la ligne de la dépense",
   },
 };
 

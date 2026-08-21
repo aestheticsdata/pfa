@@ -7,6 +7,7 @@ import startOfMonth from "date-fns/startOfMonth";
 import type { AuthUser } from "@auth/interfaces/authTypes";
 import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { CreateSpendingInput } from "@components/spendings/interfaces/spendingMutationTypes";
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
 
 interface MutationLike<TPayload> {
@@ -28,7 +29,8 @@ interface UseSpendingSubmitOptions {
   categoryOptions: CategoryOption[];
   selectedCategory: CategoryOption | null;
   comboboxQuery: string;
-  createSpending: MutationLike<SpendingMutationPayload>;
+  receiptFile: File | null;
+  createSpending: MutationLike<CreateSpendingInput>;
   updateSpending: MutationLike<SpendingMutationPayload>;
   createRecurring: MutationLike<CreateRecurringPayload>;
   updateRecurring: MutationLike<SpendingMutationPayload>;
@@ -45,6 +47,7 @@ const useSpendingSubmit = ({
   categoryOptions,
   selectedCategory,
   comboboxQuery,
+  receiptFile,
   createSpending,
   updateSpending,
   createRecurring,
@@ -97,10 +100,6 @@ const useSpendingSubmit = ({
       id: spending?.ID,
     };
 
-    // NOTE: a receiptFile attached here is NOT uploaded — receipt-at-creation is
-    // visual only (see the MOCK note on the receipt state in SpendingModal.tsx).
-    // De-mock tracked in COS-24.
-
     if (isEditing) {
       if (recurringType) {
         updateRecurring.mutate(spendingEdited);
@@ -115,7 +114,7 @@ const useSpendingSubmit = ({
         };
         createRecurring.mutate({ spendingEdited, formattedMonth });
       } else {
-        createSpending.mutate(spendingEdited);
+        createSpending.mutate({ spendingEdited, receiptFile });
       }
     }
 

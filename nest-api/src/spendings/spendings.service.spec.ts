@@ -438,3 +438,21 @@ describe("SpendingsService.getLabelSuggestions", () => {
     expect(result).toEqual([{ label: "Secret", category: null }]);
   });
 });
+
+describe("SpendingsService.createSpending", () => {
+  it("returns the created spending's ID so the front can chain the receipt upload (PFA-5)", async () => {
+    const create = jest.fn().mockResolvedValue(undefined);
+    const prisma = { spendings: { create } } as unknown as never;
+    const service = new SpendingsService(prisma, {} as never, {} as never);
+
+    const result = await service.createSpending(
+      { date: "2026-08-21", label: "lunch", amount: 12.5, currency: "EUR" },
+      "user-1",
+    );
+
+    expect(create).toHaveBeenCalledTimes(1);
+    const created = create.mock.calls[0][0].data as { ID: string; userID: string; label: string; itemType: string };
+    expect(created).toMatchObject({ userID: "user-1", label: "lunch", itemType: "spending" });
+    expect(result).toEqual({ ID: created.ID });
+  });
+});

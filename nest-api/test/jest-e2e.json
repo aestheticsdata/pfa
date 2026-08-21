@@ -13,6 +13,7 @@
     "^@recurrings/(.*)$": "<rootDir>/src/recurrings/$1",
     "^@dashboard/(.*)$": "<rootDir>/src/dashboard/$1",
     "^@stats/(.*)$": "<rootDir>/src/stats/$1",
-    "^@categories/(.*)$": "<rootDir>/src/categories/$1"
+    "^@categories/(.*)$": "<rootDir>/src/categories/$1",
+    "^@exceptionals/(.*)$": "<rootDir>/src/exceptionals/$1"
   }
 }
