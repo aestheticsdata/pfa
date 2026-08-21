@@ -1,18 +1,25 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { buildInvoiceUploadFormData } from "@components/spendings/services/invoiceUploadFormData";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
-import { SpendingListSchema, SpendingMutationPayloadSchema } from "@src/schemas/spendings";
+import {
+  CreateSpendingResponseSchema,
+  SpendingListSchema,
+  SpendingMutationPayloadSchema,
+} from "@src/schemas/spendings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import parseISO from "date-fns/parseISO";
 import startOfMonth from "date-fns/startOfMonth";
+import { toast } from "sonner";
 
 import type { SpendingDayGroup, SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { CreateSpendingInput } from "@components/spendings/interfaces/spendingMutationTypes";
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
 import type { AxiosError } from "axios";
 
@@ -124,9 +131,35 @@ const useSpendings = () => {
     });
   };
 
-  const createSpending = useMutation<unknown, AxiosError, SpendingMutationPayload>({
-    mutationFn: (spending) => {
-      return createSpendingService(spending);
+  const createSpending = useMutation<unknown, AxiosError, CreateSpendingInput>({
+    mutationFn: async ({ spendingEdited, receiptFile }) => {
+      const response = await createSpendingService(spendingEdited);
+      if (receiptFile) {
+        // Receipt-at-creation (PFA-5): chain the existing upload endpoint on the
+        // ID the create just returned. A failed upload must NOT fail the whole
+        // mutation — the row exists, so let onSuccess refresh the list and only
+        // surface a dedicated toast; the row's receipt icon is the retry path.
+        try {
+          const { ID } = CreateSpendingResponseSchema.parse(response.data);
+          await privateRequest("/spendings/upload", {
+            method: "POST",
+            data: buildInvoiceUploadFormData(
+              {
+                ID,
+                itemType: "spending",
+                label: spendingEdited.label,
+                userID: spendingEdited.userID,
+                date: spendingEdited.date,
+              },
+              receiptFile,
+            ),
+          });
+        } catch (e) {
+          console.log("error attaching receipt at creation : ", e);
+          toast.error(spendingsText.toasts.receiptUploadFailed);
+        }
+      }
+      return response;
     },
 
     onSuccess: async (_data, variables) => {
@@ -138,7 +171,7 @@ const useSpendings = () => {
       // the closure can be stale if the user changed week while the POST was in
       // flight). Creating a spending for another week must not yank the view to
       // it (product decision on the ticket's open edge case).
-      const createdDate = variables?.date;
+      const createdDate = variables?.spendingEdited.date;
       const currentRange = useDatePickerWrapperStore.getState().range;
       if (createdDate && currentRange?.some((day) => format(day, "yyyy-MM-dd") === createdDate)) {
         setScrollToDayIso(createdDate);

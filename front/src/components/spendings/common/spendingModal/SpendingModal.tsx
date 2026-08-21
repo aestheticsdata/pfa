@@ -112,10 +112,8 @@ const SpendingModal = ({
   // Date field for a month stepper — it just disables Date when recurring.
   const [recurringMonth] = useState<Date>(() => (month?.start ? startOfMonth(month.start) : startOfMonth(new Date())));
 
-  // MOCK — receipt-at-creation is visual only: POST /spendings returns no ID and
-  // /spendings/upload needs the spendingID, so the file can't be persisted at
-  // creation. Local preview only; add the receipt after creation via the row's
-  // receipt icon. De-mock tracked in COS-24. See REFACTO_NOTES.md §9.
+  // Receipt picked at creation: kept locally for the preview, then uploaded on
+  // the created row's ID by the create mutation (chained in useSpendings, PFA-5).
   const [isReceiptToggle, setIsReceiptToggle] = useState(false);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
@@ -182,6 +180,7 @@ const SpendingModal = ({
     categoryOptions,
     selectedCategory,
     comboboxQuery,
+    receiptFile,
     createSpending,
     updateSpending,
     createRecurring,
@@ -259,14 +258,24 @@ const SpendingModal = ({
                 {modal.recurringToggle}
               </Toggle>
             )}
-            {/* Receipt is not applicable to a recurring — disabled, not removed. */}
-            <Toggle
-              active={isReceiptToggle}
-              onClick={() => setIsReceiptToggle((v) => !v)}
-              disabled={asRecurring}
-            >
-              {modal.attachReceipt}
-            </Toggle>
+            {/* Receipt is not applicable to a recurring — disabled, not removed.
+                In edit mode the toggle is hidden: the modal has no view of an
+                existing receipt, so attaching here could silently overwrite one —
+                the row's receipt icon (InvoiceModal) is the edit path. */}
+            {!isEditing && (
+              <Toggle
+                active={isReceiptToggle}
+                onClick={() => {
+                  // Turning the section off drops the picked file too — a hidden
+                  // receipt must never be silently uploaded on submit.
+                  if (isReceiptToggle) clearReceipt();
+                  setIsReceiptToggle(!isReceiptToggle);
+                }}
+                disabled={asRecurring}
+              >
+                {modal.attachReceipt}
+              </Toggle>
+            )}
           </div>
 
           {!asRecurring && isReceiptToggle && (

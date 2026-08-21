@@ -70,6 +70,10 @@ export type RecurringItem = z.infer<typeof RecurringItemSchema>;
 // sums the actual per-month recurring rows from January through the current month.
 export const RecurringsDrawnSchema = z.object({ drawn: numberLikeSchema });
 
+// Response of POST /spendings: the new row's ID, so the receipt upload can
+// chain on it in the same creation flow (PFA-5).
+export const CreateSpendingResponseSchema = z.object({ ID: z.string() });
+
 export const SpendingMutationPayloadSchema = z.object({
   date: z.string().nullable().optional(),
   label: z.string().min(1),

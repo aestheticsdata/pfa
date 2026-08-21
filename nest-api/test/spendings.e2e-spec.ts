@@ -364,9 +364,10 @@ describe("SpendingsController (e2e)", () => {
   describe("POST /api/spendings", () => {
     let existingCategoryID: string | null = null;
 
-    const assertSuccess = (res: { body: unknown; text: string }) => {
-      const body = typeof res.body === "string" ? res.body : res.text;
-      expect(body).toBe("new spending added");
+    // PFA-5: the create response carries the new row's ID so the front can chain
+    // the receipt upload on it.
+    const assertSuccess = (res: { body: unknown }) => {
+      expect(res.body).toMatchObject({ ID: expect.any(String) });
     };
 
     beforeAll(async () => {

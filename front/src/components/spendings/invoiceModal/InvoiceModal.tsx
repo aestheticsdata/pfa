@@ -6,6 +6,7 @@ import Spinner from "@components/common/Spinner";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { Dropzone } from "@components/shared/Dropzone";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
+import { buildInvoiceUploadFormData } from "@components/spendings/services/invoiceUploadFormData";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
@@ -158,32 +159,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
 
   const sendInvoice = () => {
     if (!pendingFile || !userID) return;
-
-    const formData = new FormData();
-    formData.append("userID", userID);
-
-    switch (spending.itemType) {
-      case "recurring":
-        formData.append("itemType", "recurring");
-        if (spending.dateFrom) {
-          formData.append("dateFrom", spending.dateFrom);
-        }
-        break;
-      case "spending":
-        formData.append("itemType", "spending");
-        if (spending.date) {
-          formData.append("date", spending.date);
-        }
-        break;
-      default:
-        break;
-    }
-
-    formData.append("label", spending.label);
-    formData.append("spendingID", spending.ID);
-    formData.append("invoiceImageUpload", pendingFile);
-
-    uploadInvoiceImage(formData);
+    uploadInvoiceImage(buildInvoiceUploadFormData(spending, pendingFile));
   };
 
   const category = "category" in spending ? spending.category : null;

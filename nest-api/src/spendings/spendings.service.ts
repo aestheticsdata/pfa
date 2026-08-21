@@ -118,7 +118,7 @@ export class SpendingsService {
       currency: string;
     },
     userID: string,
-  ): Promise<string> {
+  ): Promise<{ ID: string }> {
     let categoryID: string | null = null;
 
     const category = dto.category;
@@ -162,7 +162,9 @@ export class SpendingsService {
       },
     });
 
-    return "new spending added";
+    // The ID lets the front chain POST /spendings/upload on the row it just
+    // created — a receipt can be attached in the same "new spending" flow (PFA-5).
+    return { ID: spendingID };
   }
 
   async updateSpending(

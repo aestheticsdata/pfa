@@ -182,6 +182,7 @@ const spendings: typeof frSpendings = {
     recurringUpdated: "Fixed expense updated",
     recurringDeleted: "Fixed expense deleted",
     recurringsCopied: "Fixed expenses created",
+    receiptUploadFailed: "Receipt not attached — retry from the spending row",
   },
 };
 
