@@ -3,7 +3,6 @@ import { APP_FILTER } from "@nestjs/core";
 import { ConfigModule } from "@nestjs/config";
 import { ScheduleModule } from "@nestjs/schedule";
 import { LoggerModule } from "nestjs-pino";
-import { AppController } from "./app.controller";
 import appConfig from "@config/app.config";
 import sshBackupConfig from "@config/ssh-backup.config";
 import dbBackupConfig from "@config/db-backup.config";
@@ -13,6 +12,7 @@ import { RedisModule } from "@redis/redis.module";
 import { SshBackupModule } from "@infrastructure/ssh-backup/ssh-backup.module";
 import { DbBackupModule } from "@infrastructure/db-backup/db-backup.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { MonitoringModule } from "./monitoring/monitoring.module";
 import { UsersModule } from "@users/users.module";
 import { SpendingsModule } from "@spendings/spendings.module";
 import { RecurringsModule } from "@recurrings/recurrings.module";
@@ -30,6 +30,7 @@ import { ExceptionalsModule } from "@exceptionals/exceptionals.module";
     ScheduleModule.forRoot(),
     RedisModule,
     PrismaModule,
+    MonitoringModule,
     UsersModule,
     SpendingsModule,
     RecurringsModule,
@@ -46,7 +47,6 @@ import { ExceptionalsModule } from "@exceptionals/exceptionals.module";
       load: [appConfig, sshBackupConfig, dbBackupConfig],
     }),
   ],
-  controllers: [AppController],
   providers: [
     {
       provide: APP_FILTER,

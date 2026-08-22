@@ -222,6 +222,28 @@ EOF
     "$REMOTE_USER_HOST":"$NEST_RELEASE_REMOTE/"
 
   ######################################
+  # Release marker (IKN-2)
+  ######################################
+  # `release.json` next to package.json is what feeds `app_build_info` in /api/metrics and the
+  # `version` field of /api/health. Written after the rsync so --delete cannot remove it.
+  log "➡️  Writing release marker (release.json)"
+
+  local PKG_VERSION
+  PKG_VERSION=$(node -p "require('$SCRIPT_DIR/package.json').version")
+
+  ssh "$REMOTE_USER_HOST" \
+    NEST_RELEASE_REMOTE="$NEST_RELEASE_REMOTE" \
+    PKG_VERSION="$PKG_VERSION" \
+    GIT_HASH="$GIT_HASH" \
+    GIT_BRANCH_RAW="$GIT_BRANCH_RAW" \
+    'bash -s' << 'EOF'
+set -Eeuo pipefail
+printf '{ "version": "%s", "commit": "%s", "branch": "%s", "deployedAt": "%s" }\n' \
+  "$PKG_VERSION" "$GIT_HASH" "$GIT_BRANCH_RAW" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+  > "$NEST_RELEASE_REMOTE/release.json"
+EOF
+
+  ######################################
   # Rsync ecosystem.config.js
   ######################################
   log "➡️  Syncing ecosystem.config.js"
