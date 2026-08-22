@@ -1,9 +1,12 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../../generated/prisma/client";
+import { capturePool, poolStats, type DbPoolStats, type MariaDbPoolLike } from "./db-pool-stats";
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  private pool: MariaDbPoolLike | null = null;
+
   constructor() {
     const url = process.env.DATABASE_URL;
     if (!url) {
@@ -22,6 +25,12 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     });
 
     super({ adapter });
+
+    // The adapter's pool only exists once Prisma calls `connect()` — lazily, at `$connect()` in
+    // onModuleInit — so patching the factory here is early enough (IKN-2).
+    capturePool(adapter, (pool) => {
+      this.pool = pool;
+    });
   }
 
   async onModuleInit() {
@@ -30,5 +39,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
 
   async onModuleDestroy() {
     await this.$disconnect();
+  }
+
+  /** `null` until the adapter has connected — the metrics gauge then omits the series. */
+  getPoolStats(): DbPoolStats | null {
+    return this.pool ? poolStats(this.pool) : null;
   }
 }
