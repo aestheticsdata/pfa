@@ -1,15 +1,22 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { createClient, type RedisClientType } from "redis";
 
 const SESSION_PREFIX = "pfa:";
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
+  private readonly logger = new Logger(RedisService.name);
   private client: RedisClientType;
 
   constructor() {
     const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
     this.client = createClient({ url: redisUrl });
+    // Without a listener, the socket error emitted when Redis goes away is an unhandled 'error'
+    // event and kills the process — a Redis outage must end up as a 503 on /api/health, not as a
+    // crash (IKN-2). node-redis reconnects on its own once the server is back.
+    this.client.on("error", (error: Error) => {
+      this.logger.error(`redis client error: ${error.message}`);
+    });
   }
 
   async onModuleInit(): Promise<void> {
