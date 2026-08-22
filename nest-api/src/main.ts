@@ -6,6 +6,7 @@ import { RedisStore } from "connect-redis";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
 import { AppConfig } from "@config/app.config";
+import { HttpMetricsMiddleware } from "./monitoring/http-metrics.middleware";
 import { RedisService } from "@redis/redis.service";
 
 import type { Application } from "express";
@@ -19,6 +20,12 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
 
   (app.getHttpAdapter().getInstance() as Application).set("trust proxy", 1);
+
+  // On the raw Express app, ahead of everything: mounted through a consumer it would sit under
+  // the global prefix and miss both a request for exactly `/api` and unmatched paths outside it,
+  // so those 404s would escape the `unknown` count (IKN-2).
+  const httpMetrics = app.get(HttpMetricsMiddleware);
+  app.use(httpMetrics.use.bind(httpMetrics));
 
   const redisService = app.get<RedisService>(RedisService);
   const redisStore = new RedisStore({
