@@ -26,6 +26,32 @@ location /api {
 - **`X-Forwarded-Proto`**: required for the `Secure` cookie to be accepted over HTTPS
 - **`Host`**: ensures the cookie is set for the correct domain
 
+## Nginx – /api/metrics stays private (IKN-2)
+
+`GET /api/metrics` (Prometheus text) is meant for the Iknos collector, which scrapes
+`127.0.0.1:6100` directly on the server — it must not be readable from the internet. Add this
+alongside the `location /api` block:
+
+```nginx
+location ~* ^/api/metrics {
+  deny all;
+}
+```
+
+Not `location = /api/metrics`: Express serves the same route for `/api/metrics/` and any case
+variant (`/api/METRICS`), and an nginx exact match would let every one of those fall through to
+the `location /api` proxy. The case-insensitive regex covers them all, and regex locations are
+checked before plain prefix locations, so `location /api` never sees these paths.
+
+`GET /api/health` stays public: it is the uptime probe, and carries no user data.
+
+## Release marker (release.json)
+
+`deploy-api.sh` writes `release.json` (version, commit, branch, deployedAt) next to
+`package.json` in each release. The API reads it at startup to expose `app_build_info` in
+`/api/metrics` and the `version` field of `/api/health`. If the file is missing the series is
+simply absent and health reports `version: null` — nothing breaks, the UI shows `—`.
+
 ## Nest Environment Variables (nest-api/.env)
 
 | Variable | Description |
