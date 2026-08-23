@@ -25,6 +25,9 @@ const SERVICE_NAME = "pfa-api";
 /**
  * Probed every 15–30 seconds by whatever is watching. Logging them would bury every line that
  * describes something a person did.
+ *
+ * Only when they answer, though — see `customLogLevel` below. A probe that *fails* is the one line
+ * on these two routes anybody would go looking for (IKN-51).
  */
 const UNLOGGED_PATHS = new Set(["/api/health", "/api/metrics"]);
 
@@ -194,8 +197,27 @@ export function buildLoggerParams(): Params {
         };
       },
 
-      autoLogging: {
-        ignore: (req: IncomingMessage) => UNLOGGED_PATHS.has((req.url ?? "").split("?")[0]),
+      /**
+       * The successful probe is the only access line dropped, and it is dropped **here** rather
+       * than in `autoLogging.ignore`, where it used to live and where it could not be done right.
+       *
+       * `ignore` is handed the request alone, from the middleware, on the way in — pino-http
+       * 11.0.0, `logger.js:183` — so it can only decide by path, before any status exists. It
+       * therefore silenced a probe that answered 500 exactly as readily as one that answered 200,
+       * which made these two routes the only ones in the API whose failure nothing recorded
+       * anywhere. That is the bug this replaces (IKN-51), and it is why the check cannot move back.
+       *
+       * `customLogLevel` runs in `onResFinished` with the status resolved, and a returned "silent"
+       * drops the line there (`logger.js:99-103`). Everything else answers "info", which is
+       * pino-http's own default `useLevel` — no other line changes level, shape or timing.
+       *
+       * `/api/metrics` follows the same rule as `/api/health` and for the same reason: Iknos
+       * scrapes it every 15 seconds, and a scrape that starts failing is exactly the line worth
+       * keeping.
+       */
+      customLogLevel(req: IncomingMessage, res: ServerResponse): "info" | "silent" {
+        const answered = res.statusCode >= 200 && res.statusCode < 300;
+        return answered && UNLOGGED_PATHS.has((req.url ?? "").split("?")[0]) ? "silent" : "info";
       },
 
       redact: { paths: REDACTED, censor: "[redacted]" },
