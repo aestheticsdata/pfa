@@ -17,6 +17,7 @@ export { default as useCountUp } from "@lib/dataviz/useCountUp";
 export { default as useCursorHover } from "@lib/dataviz/useCursorHover";
 export { default as useElementWidth } from "@lib/dataviz/useElementWidth";
 export { default as useTween } from "@lib/dataviz/useTween";
+export { default as useTweenTo } from "@lib/dataviz/useTweenTo";
 
 export type {
   AxisMarker,

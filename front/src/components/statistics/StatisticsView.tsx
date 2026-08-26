@@ -27,12 +27,16 @@ import useMonthlyIncome from "@components/statistics/services/useMonthlyIncome";
 import useRecurringsDrawn from "@components/statistics/services/useRecurringsDrawn";
 import useStatistics from "@components/statistics/services/useStatistics";
 import useWeekdayCategories from "@components/statistics/services/useWeekdayCategories";
+import { animatedScrollIntoView } from "@lib/scroll";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { CategorySeries } from "@components/statistics/interfaces/statisticsCategoryChartTypes";
 import type { TopCategoryRow } from "@components/statistics/interfaces/statisticsTopCategoriesTypes";
 
 const MAX_CATEGORIES = 3;
+/** Headroom kept above the scrolled-to card: the sticky filter bar (76px down,
+ *  ~56px tall) plus a little air, so the card's title clears it. */
+const STICKY_OFFSET = 144;
 
 const yearOptions = (currentYear: number): number[] => Array.from({ length: 7 }, (_, i) => currentYear - i);
 
@@ -142,18 +146,20 @@ const StatisticsView = () => {
     );
 
   // The category chart only exists once a category is picked, two screens below
-  // the (sticky) filter bar it is picked from — so nothing seems to happen. Bring
-  // it into view on the 0 → 1 transition only: the 2nd and 3rd category land in an
+  // the (sticky) filter bar it is picked from — so nothing seems to happen. Travel
+  // there on the 0 → 1 transition only: the 2nd and 3rd category land in an
   // already-visible widget, and yanking the page then would be hostile (PFA-162).
+  // The trip is animated by hand — the point is to *see* the page travel, and the
+  // native smooth scroll silently degrades to a jump (PFA-165). Returning the
+  // canceller as the cleanup stops it if the selection changes mid-flight.
   const categoryCardRef = useRef<HTMLDivElement>(null);
   const previousCategoryCount = useRef(0);
   useEffect(() => {
     const count = selectedCategoryIds.length;
     const appeared = previousCategoryCount.current === 0 && count === 1;
     previousCategoryCount.current = count;
-    if (!appeared) return;
-    const reduce = Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
-    categoryCardRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    if (!appeared || !categoryCardRef.current) return;
+    return animatedScrollIntoView(categoryCardRef.current, { offset: STICKY_OFFSET });
   }, [selectedCategoryIds]);
 
   return (
@@ -219,12 +225,7 @@ const StatisticsView = () => {
       />
 
       {categorySeries.length > 0 && (
-        // `scroll-mt-36` clears the sticky filter bar (top-[76px] + its height), so
-        // the scrolled-to card lands under it rather than behind it.
-        <div
-          ref={categoryCardRef}
-          className="scroll-mt-36"
-        >
+        <div ref={categoryCardRef}>
           <StatisticsCategoryChart
             year={selectedYear}
             series={categorySeries}
