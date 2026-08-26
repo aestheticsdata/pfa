@@ -27,11 +27,11 @@ const PAD_T = 28;
 const PAD_B = 54;
 const PAD_L = 52;
 const PAD_R = 16;
-/** The compare year's bar: same hue as its category, dimmed. */
-const COMPARE_OPACITY = 0.45;
-/** Air between a year and its compare bar once the pair is fully open, in px. */
-const PAIR_GAP = 2;
-/** The pair opens and closes, and the Y scale glides, over this long. */
+/** Compare-year ghost bars: same hue as their category, faded back behind it. */
+const GHOST_OPACITY = 0.25;
+/** Half the width a ghost bar gains over the bar it sits behind, in px. */
+const GHOST_BLEED = 2.5;
+/** Ghosts rise and sink, and the Y scale glides, over this long. */
 const COMPARE_ANIM_MS = 420;
 const Y0 = H - PAD_B; // 286
 const PLOT_H = Y0 - PAD_T; // 258
@@ -59,8 +59,8 @@ const StatisticsCategoryChart = ({
   const cm = now.getMonth();
 
   const plotted = (monthly: number[]) => range(months).map((m) => monthly[m] ?? 0);
-  // Same months on both years — the compare bars answer "and last year, over this
-  // very period?", so a compare year with no spend on a category draws nothing.
+  // Same months on both years — the ghosts answer "and last year, over this very
+  // period?", so a compare year with no spend on any selected category draws nothing.
   // Deliberately blind to the toggle: every compare element stays mounted as long as
   // the data exists, so it can animate both ways and, above all, so the card's height
   // never depends on the toggle — a legend line appearing there shoves the whole
@@ -77,8 +77,8 @@ const StatisticsCategoryChart = ({
   // Two tweens carry every bit of motion in this chart, in JS rather than CSS: SVG
   // geometry only transitions where the browser exposes `y`/`height` to CSS, and a
   // reduced-motion rule kills it outright — which left the toggle looking dead (PFA-165).
-  // `reveal` opens and closes the year/compare-year pair; `scaleMax` glides the whole
-  // plot when taking last year in changes the ceiling.
+  // `reveal` raises the ghosts out of the baseline and sinks them back; `scaleMax`
+  // glides the whole plot when taking last year in changes the ceiling.
   const reveal = useTweenTo(showCompare ? 1 : 0, COMPARE_ANIM_MS);
   const scaleMax = useTweenTo(yMax, COMPARE_ANIM_MS);
 
@@ -87,17 +87,13 @@ const StatisticsCategoryChart = ({
   const groupW = slotW * 0.62;
   const n = series.length;
   const gap = n > 1 ? 7 : 0;
-  /** Width one category owns in a month's group, whether it shows one year or two. */
-  const catW = n > 0 ? (groupW - gap * (n - 1)) / n : 0;
-  // Turning the comparison on splits that slot in two, side by side — never one bar
-  // behind the other, where every month this year outspent last year would hide it
-  // and the growth would happen out of sight (PFA-165). Both halves are driven by
-  // `reveal`, so the toggle *is* a resize: this year's bar narrows to make room while
-  // last year's rises out of the baseline, and the reverse on the way out.
-  const pairW = Math.max(0, (catW - PAIR_GAP) / 2);
-  const barW = catW + (pairW - catW) * reveal;
-  const compareW = pairW * reveal;
-  const compareGap = PAIR_GAP * reveal;
+  const barW = n > 0 ? (groupW - gap * (n - 1)) / n : 0;
+  // The ghost sits behind its bar, on the same axis — one position per category
+  // whatever the comparison is doing, so three compared categories stay three bars
+  // per month and not six. It overflows on both sides so it reads when last year
+  // was the smaller of the two, capped to keep 2px of air between neighbours.
+  const ghostBleed = n > 1 ? Math.max(0, Math.min(GHOST_BLEED, (gap - 2) / 2)) : GHOST_BLEED;
+  const ghostW = barW + ghostBleed * 2;
   const labelFont = n >= 3 ? 8 : 9.5;
 
   /** Cumulated spend over the plotted months — Jan → current month, or the full year for a past one. */
@@ -135,8 +131,8 @@ const StatisticsCategoryChart = ({
               <LegendItem
                 className="capitalize"
                 swatch={
-                  // Solid chip, dimmed chip: the legend swatch is the pair of bars in
-                  // miniature, so nothing else has to explain which year is which.
+                  // Solid chip + faded chip, in that order: the legend swatch mirrors
+                  // the bar and the ghost behind it, so nothing else has to explain them.
                   <span className="inline-flex items-center gap-0.5">
                     <i
                       className="inline-block size-2.5 rounded-xs"
@@ -145,7 +141,7 @@ const StatisticsCategoryChart = ({
                     {hasCompareData && (
                       <i
                         className="inline-block size-2.5 rounded-xs transition-opacity duration-300 ease-out"
-                        style={{ background: s.color, opacity: showCompare ? COMPARE_OPACITY : 0 }}
+                        style={{ background: s.color, opacity: showCompare ? GHOST_OPACITY : 0 }}
                       />
                     )}
                   </span>
@@ -211,56 +207,63 @@ const StatisticsCategoryChart = ({
               </g>
             ))}
 
-            {/* grouped bars — one slot per category, split into this year and last
-                year as the comparison opens */}
+            {/* grouped bars — every ghost of the group first, so a wide ghost never
+                bleeds over the solid bar of the next category */}
             {range(months).map((m) => {
               const gx = cx(m) - groupW / 2;
               return (
                 <g key={`m-${m}`}>
+                  {hasCompareData &&
+                    series.map((s, i) => {
+                      const cv = s.compareMonthly[m] ?? 0;
+                      if (cv <= 0) return null;
+                      // Height, not opacity: the ghost rises out of the baseline when the
+                      // comparison comes on and sinks back into it when it goes.
+                      const ghostH = (Y0 - yFor(cv)) * reveal;
+                      if (ghostH <= 0.5) return null;
+                      return (
+                        <rect
+                          key={`ghost-${s.name}`}
+                          x={gx + i * (barW + gap) - ghostBleed}
+                          y={Y0 - ghostH}
+                          width={ghostW}
+                          height={ghostH}
+                          rx={3}
+                          fill={s.color}
+                          opacity={GHOST_OPACITY}
+                        />
+                      );
+                    })}
                   {series.map((s, i) => {
                     const v = s.monthly[m] ?? 0;
-                    const cv = hasCompareData ? (s.compareMonthly[m] ?? 0) : 0;
-                    const slotX = gx + i * (catW + gap);
+                    if (v <= 0) return null;
+                    const bx = gx + i * (barW + gap);
                     const by = yFor(v);
-                    const compareH = (Y0 - yFor(cv)) * reveal;
                     return (
                       <g key={s.name}>
-                        {v > 0 && (
-                          <rect
-                            x={slotX}
-                            y={by}
-                            width={barW}
-                            height={Y0 - by}
-                            rx={3}
-                            fill={s.color}
-                            opacity={0.9}
-                          />
-                        )}
-                        {cv > 0 && compareW > 0.5 && compareH > 0.5 && (
-                          <rect
-                            x={slotX + barW + compareGap}
-                            y={Y0 - compareH}
-                            width={compareW}
-                            height={compareH}
-                            rx={3}
-                            fill={s.color}
-                            opacity={COMPARE_OPACITY}
-                          />
-                        )}
-                        {/* Centred on its own bar, so it travels with it as the bar
-                            narrows, and never drifts over last year's. */}
-                        {v > 0 && (
-                          <text
-                            x={slotX + barW / 2}
-                            y={by - 6}
-                            className="num"
-                            fontSize={labelFont}
-                            textAnchor="middle"
-                            fill="var(--ink-2)"
-                          >
-                            {euro0(v)}
-                          </text>
-                        )}
+                        <rect
+                          x={bx}
+                          y={by}
+                          width={barW}
+                          height={Y0 - by}
+                          rx={3}
+                          fill={s.color}
+                          opacity={0.9}
+                        />
+                        {/* Always above its own bar, never above the ghost: a month where
+                            last year dwarfs this one would otherwise hang this year's small
+                            figure at the top of the ghost, as if it were the ghost's own.
+                            Rides the scale tween like the bar, `by` being tweened. */}
+                        <text
+                          x={bx + barW / 2}
+                          y={by - 6}
+                          className="num"
+                          fontSize={labelFont}
+                          textAnchor="middle"
+                          fill="var(--ink-2)"
+                        >
+                          {euro0(v)}
+                        </text>
                       </g>
                     );
                   })}
