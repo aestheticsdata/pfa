@@ -65,7 +65,13 @@ const statistics: typeof frStatistics = {
   },
   categoryChart: {
     title: "Monthly spendings by category",
+    // Compare on: the plotted period, then the year it is held against.
+    subtitleCompare: (period: string, compareYear: number) => `${period} · compared to ${compareYear}`,
     ariaLabel: (year: number) => `Monthly spendings by category ${year}`,
+    ariaLabelCompare: (year: number, compareYear: number) =>
+      `Monthly spendings by category ${year}, compared to ${compareYear}`,
+    // Compare-year total, under the selected year's own in the legend.
+    compareTotal: (compareYear: number, total: string) => `${total} € in ${compareYear}`,
     tooltipShare: "Share",
     tooltipAmount: "Amount",
     tooltipTrend: "Trend",
