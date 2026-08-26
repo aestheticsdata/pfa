@@ -7,4 +7,6 @@ export interface CategorySeries {
   color: string;
   /** 12-slot Jan→Dec monthly spend for this category. */
   monthly: number[];
+  /** Same series for the compare year — drawn as the ghost bar behind each bar. */
+  compareMonthly: number[];
 }

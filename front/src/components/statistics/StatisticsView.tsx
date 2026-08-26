@@ -27,7 +27,7 @@ import useMonthlyIncome from "@components/statistics/services/useMonthlyIncome";
 import useRecurringsDrawn from "@components/statistics/services/useRecurringsDrawn";
 import useStatistics from "@components/statistics/services/useStatistics";
 import useWeekdayCategories from "@components/statistics/services/useWeekdayCategories";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { CategorySeries } from "@components/statistics/interfaces/statisticsCategoryChartTypes";
 import type { TopCategoryRow } from "@components/statistics/interfaces/statisticsTopCategoriesTypes";
@@ -118,6 +118,8 @@ const StatisticsView = () => {
       };
     });
 
+  // The compare year is already part of the /statistics fetch, so the per-category
+  // compare series costs no extra request (PFA-162).
   const categorySeries: CategorySeries[] = selectedCategoryIds
     .map((id) => categories.find((c) => c.ID === id))
     .filter((c): c is (typeof categories)[number] => Boolean(c))
@@ -125,6 +127,7 @@ const StatisticsView = () => {
       name: category.name,
       color: statistics?.colors?.[category.name] ?? category.color,
       monthly: categoryMonthly(data, selectedYear, category.name),
+      compareMonthly: categoryMonthly(data, compareYear, category.name),
     }));
   const monthsCount = elapsedMonths(selectedYear, now);
 
@@ -137,6 +140,21 @@ const StatisticsView = () => {
     setSelectedCategoryIds((prev) =>
       prev.includes(id) ? prev.filter((c) => c !== id) : prev.length < MAX_CATEGORIES ? [...prev, id] : prev,
     );
+
+  // The category chart only exists once a category is picked, two screens below
+  // the (sticky) filter bar it is picked from — so nothing seems to happen. Bring
+  // it into view on the 0 → 1 transition only: the 2nd and 3rd category land in an
+  // already-visible widget, and yanking the page then would be hostile (PFA-162).
+  const categoryCardRef = useRef<HTMLDivElement>(null);
+  const previousCategoryCount = useRef(0);
+  useEffect(() => {
+    const count = selectedCategoryIds.length;
+    const appeared = previousCategoryCount.current === 0 && count === 1;
+    previousCategoryCount.current = count;
+    if (!appeared) return;
+    const reduce = Boolean(window.matchMedia?.("(prefers-reduced-motion: reduce)").matches);
+    categoryCardRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, [selectedCategoryIds]);
 
   return (
     <div className="flex flex-col gap-4">
@@ -201,12 +219,21 @@ const StatisticsView = () => {
       />
 
       {categorySeries.length > 0 && (
-        <StatisticsCategoryChart
-          year={selectedYear}
-          series={categorySeries}
-          monthsCount={monthsCount}
-          now={now}
-        />
+        // `scroll-mt-36` clears the sticky filter bar (top-[76px] + its height), so
+        // the scrolled-to card lands under it rather than behind it.
+        <div
+          ref={categoryCardRef}
+          className="scroll-mt-36"
+        >
+          <StatisticsCategoryChart
+            year={selectedYear}
+            series={categorySeries}
+            monthsCount={monthsCount}
+            compareYear={compareYear}
+            compareEnabled={compareEnabled}
+            now={now}
+          />
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[7fr_5fr]">

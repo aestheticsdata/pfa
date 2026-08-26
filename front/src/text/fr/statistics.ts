@@ -61,7 +61,13 @@ const statistics = {
   },
   categoryChart: {
     title: "Dépenses mensuelles par catégorie",
+    // Comparaison active : la période tracée, puis l'année comparée.
+    subtitleCompare: (period: string, compareYear: number) => `${period} · comparé à ${compareYear}`,
     ariaLabel: (year: number) => `Dépenses mensuelles par catégorie ${year}`,
+    ariaLabelCompare: (year: number, compareYear: number) =>
+      `Dépenses mensuelles par catégorie ${year}, comparées à ${compareYear}`,
+    // Cumul de l'année comparée, sous celui de l'année sélectionnée dans la légende.
+    compareTotal: (compareYear: number, total: string) => `${total} € en ${compareYear}`,
     tooltipShare: "Part",
     tooltipAmount: "Montant",
     tooltipTrend: "Tendance",
