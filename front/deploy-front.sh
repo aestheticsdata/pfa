@@ -144,7 +144,7 @@ deploy() {
     fi
   }
 
-  # Prepend this deploy's commits (+ Linear tickets) to the served changelog.
+  # Prepend this deploy's commits (+ Spira tickets) to the served changelog.
   # Always invoked as `write_deploy_log || log ...`, so errexit is ignored throughout:
   # a changelog hiccup can never fail or roll back an otherwise successful deploy.
   write_deploy_log() {
@@ -173,8 +173,13 @@ deploy() {
 
     # One git-log call, captured into a var (pipefail-safe: no `| grep -q` on a pipe git may SIGPIPE).
     COMMITS=$(git log --no-merges --pretty=format:'  %h  %ad  %s' --date=short "${RANGE[@]}")
+    # Ticket ids: the Spira project keys that ship out of this repo, plus the legacy COS- ones
+    # inherited from Linear. An explicit list rather than a generic KEY-N pattern, which would
+    # also drag in UTF-8 or SHA-256 — a new project deploying from here gets added here too.
+    # Sorted on prefix *and* number: `-u` dedupes on the sort keys alone, so keying on the number
+    # only would have kept one of IKN-51 / PFA-51 and dropped the other.
     TICKETS=$(printf '%s\n' "$COMMITS" \
-      | grep -oiE 'COS-[0-9]+' | tr 'a-z' 'A-Z' | sort -t- -k2,2n -u | paste -sd ',' - | sed 's/,/, /g' || true)
+      | grep -oiE '(COS|PFA|IKN)-[0-9]+' | tr 'a-z' 'A-Z' | sort -u -t- -k1,1 -k2,2n | paste -sd ',' - | sed 's/,/, /g' || true)
 
     ENTRY_TMP=$(mktemp)
     {
