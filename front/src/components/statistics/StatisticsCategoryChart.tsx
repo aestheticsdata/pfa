@@ -55,11 +55,15 @@ const StatisticsCategoryChart = ({
   const isCurrentYear = year === now.getFullYear();
   const cm = now.getMonth();
 
+  const plotted = (monthly: number[]) => range(months).map((m) => monthly[m] ?? 0);
   // Same months on both years — the ghosts answer "and last year, over this very
   // period?", so a compare year with no spend on any selected category draws nothing.
-  const showCompare = compareEnabled && series.some((s) => range(months).some((m) => (s.compareMonthly[m] ?? 0) > 0));
-
-  const plotted = (monthly: number[]) => range(months).map((m) => monthly[m] ?? 0);
+  // Deliberately blind to the toggle: every compare element stays mounted as long as
+  // the data exists, so it can fade both ways and, above all, so the card's height
+  // never depends on the toggle — a legend line appearing there shoves the whole
+  // page down (PFA-163). `showCompare` is the one that follows the switch.
+  const hasCompareData = series.some((s) => plotted(s.compareMonthly).some((value) => value > 0));
+  const showCompare = compareEnabled && hasCompareData;
   const dataMax = Math.max(
     1,
     ...series.flatMap((s) => plotted(s.monthly)),
@@ -119,10 +123,10 @@ const StatisticsCategoryChart = ({
                       className="inline-block size-2.5 rounded-xs"
                       style={{ background: s.color }}
                     />
-                    {showCompare && (
+                    {hasCompareData && (
                       <i
-                        className="inline-block size-2.5 rounded-xs"
-                        style={{ background: s.color, opacity: GHOST_OPACITY }}
+                        className="pfa-anim-compare inline-block size-2.5 rounded-xs"
+                        style={{ background: s.color, opacity: showCompare ? GHOST_OPACITY : 0 }}
                       />
                     )}
                   </span>
@@ -131,8 +135,12 @@ const StatisticsCategoryChart = ({
                 {s.name}
               </LegendItem>
               <span className="num text-ink-2">{euro0(plottedTotal(s.monthly))} €</span>
-              {showCompare && (
-                <span className="num text-ink-4">
+              {hasCompareData && (
+                <span
+                  className="num pfa-anim-compare text-ink-4"
+                  style={{ opacity: showCompare ? 1 : 0 }}
+                  aria-hidden={!showCompare}
+                >
                   {statistics.categoryChart.compareTotal(compareYear, euro0(plottedTotal(s.compareMonthly)))}
                 </span>
               )}
@@ -188,7 +196,7 @@ const StatisticsCategoryChart = ({
               const gx = cx(m) - groupW / 2;
               return (
                 <g key={`m-${m}`}>
-                  {showCompare &&
+                  {hasCompareData &&
                     series.map((s, i) => {
                       const cv = s.compareMonthly[m] ?? 0;
                       if (cv <= 0) return null;
@@ -196,13 +204,14 @@ const StatisticsCategoryChart = ({
                       return (
                         <rect
                           key={`ghost-${s.name}`}
+                          className="pfa-anim-compare"
                           x={gx + i * (barW + gap) - ghostBleed}
                           y={gy}
                           width={ghostW}
                           height={Y0 - gy}
                           rx={3}
                           fill={s.color}
-                          opacity={GHOST_OPACITY}
+                          opacity={showCompare ? GHOST_OPACITY : 0}
                         />
                       );
                     })}
@@ -211,13 +220,10 @@ const StatisticsCategoryChart = ({
                     if (v <= 0) return null;
                     const bx = gx + i * (barW + gap);
                     const by = yFor(v);
-                    const cv = showCompare ? (s.compareMonthly[m] ?? 0) : 0;
-                    // The single label sits above whichever of the two bars is taller,
-                    // rather than landing inside a ghost that overshoots this year.
-                    const labelY = Math.min(by, cv > 0 ? yFor(cv) : by) - 6;
                     return (
                       <g key={s.name}>
                         <rect
+                          className="pfa-anim-compare"
                           x={bx}
                           y={by}
                           width={barW}
@@ -226,13 +232,19 @@ const StatisticsCategoryChart = ({
                           fill={s.color}
                           opacity={0.9}
                         />
+                        {/* Always above its own bar, never above the ghost: a month where
+                            last year dwarfs this one would otherwise hang this year's small
+                            figure at the top of the ghost, as if it were the ghost's own.
+                            Translated rather than positioned — `y` on <text> is not a CSS
+                            geometry property, so it could not follow a scale change. */}
                         <text
                           x={bx + barW / 2}
-                          y={labelY}
+                          y={0}
+                          className="num pfa-anim-compare"
+                          style={{ transform: `translateY(${by - 6}px)` }}
                           fontSize={labelFont}
                           textAnchor="middle"
                           fill="var(--ink-2)"
-                          className="num"
                         >
                           {euro0(v)}
                         </text>

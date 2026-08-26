@@ -67,3 +67,24 @@
   transform: translate(0, 10px);
   transition: all 300ms ease-out;
 }
+
+/* Statistics category chart (PFA-163) — the compare toggle changes the Y scale and
+   the ghost bars' opacity at once, so every bar glides to its new height instead of
+   snapping. `y`/`height` are SVG geometry properties: no Tailwind utility covers
+   them, and they animate wherever the browser exposes them to CSS — elsewhere the
+   new value simply applies at once, which is the old behaviour.
+   Vertical only, deliberately: `x`/`width` follow the container, and easing those
+   would leave the bars trailing behind the card through a window resize.
+   Also carried by the plain HTML legend bits, which only ever fade. */
+.pfa-anim-compare {
+  transition:
+    y 280ms ease-out,
+    height 280ms ease-out,
+    transform 280ms ease-out,
+    opacity 280ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pfa-anim-compare {
+    transition: none;
+  }
+}
