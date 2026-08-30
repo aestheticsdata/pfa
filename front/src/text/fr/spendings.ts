@@ -176,8 +176,6 @@ const spendings = {
     patterns: {
       title: "répartition par motif",
       other: "Autres",
-      showAll: "Tout afficher",
-      showLess: "Réduire",
     },
   },
   // One key per action: injecting a participle into a sentence template does

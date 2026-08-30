@@ -1,8 +1,5 @@
 import {
-  FOLDED_OTHER_GROUP_KEY,
-  foldLabelPatternGroups,
   groupSpendingsByLabelPattern,
-  MAX_LABEL_PATTERN_GROUPS,
   normalizeLabel,
   OTHER_GROUP_KEY,
   tokenizeLabel,
@@ -261,6 +258,23 @@ describe("groupSpendingsByLabelPattern", () => {
     expect(sortIDs(groupSpendingsByLabelPattern(shuffled))).toEqual(sortIDs(groupSpendingsByLabelPattern(items)));
   });
 
+  it("ignores the category's own name — inside its category it says nothing", () => {
+    const items = [
+      makeItem("a", "kiosque - velo", 10),
+      makeItem("b", "kiosque - velo", 12),
+      makeItem("c", "presse - velo", 20),
+      makeItem("d", "presse - velo", 8),
+    ];
+
+    // Labels suffixed with the category name make it the most shared word of
+    // the set: without the exclusion, one giant group named after the category.
+    expect(groupSpendingsByLabelPattern(items).map((group) => group.key)).toEqual(["velo"]);
+    expect(groupSpendingsByLabelPattern(items, "Vélo").map((group) => [group.key, group.count])).toEqual([
+      ["presse", 2],
+      ["kiosque", 2],
+    ]);
+  });
+
   it("keeps a tie between equal totals stable whatever the input order", () => {
     // Both tokens sit in three labels and weigh a mathematically equal 0.60 —
     // summed as floats, the two totals can come out a last-bit apart depending
@@ -280,90 +294,5 @@ describe("groupSpendingsByLabelPattern", () => {
     for (let i = 1; i < items.length; i += 1) {
       expect(shape([...items.slice(i), ...items.slice(0, i)])).toEqual(reference);
     }
-  });
-});
-
-describe("foldLabelPatternGroups", () => {
-  // Seven patterns of two spendings each, on decreasing amounts. Bare-word
-  // labels: a shared filler word would now be the most shared token itself.
-  const patternWords = ["velo", "presse", "cantine", "cinema", "essence", "pharmacie", "librairie"];
-  const sevenPatterns = patternWords.flatMap((word, i) => [
-    makeItem(`${word}-a`, word, 70 - i * 10),
-    makeItem(`${word}-b`, word, 70 - i * 10),
-  ]);
-
-  const soloOther: LabelPatternGroup = {
-    key: OTHER_GROUP_KEY,
-    name: "",
-    total: 3,
-    count: 1,
-    pct: 0,
-    ids: ["solo"],
-    isOther: true,
-  };
-
-  it("is handed the full ranking — the expanded view of the widget", () => {
-    const groups = groupSpendingsByLabelPattern(sevenPatterns);
-
-    expect(groups.map((group) => group.key)).toEqual(patternWords);
-  });
-
-  it("folds the tail past the fifth group into Other, kept last", () => {
-    const folded = foldLabelPatternGroups(groupSpendingsByLabelPattern(sevenPatterns));
-
-    expect(folded.filter((group) => !group.isOther)).toHaveLength(MAX_LABEL_PATTERN_GROUPS);
-    expect(folded[folded.length - 1]).toMatchObject({
-      key: FOLDED_OTHER_GROUP_KEY,
-      isOther: true,
-      count: 4,
-      total: 60,
-    });
-    expect(folded.reduce((acc, group) => acc + group.pct, 0)).toBeCloseTo(100);
-  });
-
-  it("folds one group over the limit as readily as a long tail", () => {
-    // The boundary the widget reads to decide whether to offer "Show all": six
-    // named groups and no remainder still fold, even though the row count does
-    // not move (five named + the catch-all row that took the sixth).
-    const sixPatterns = sevenPatterns.filter((item) => !item.ID.startsWith("librairie"));
-    const groups = groupSpendingsByLabelPattern(sixPatterns);
-    const folded = foldLabelPatternGroups(groups);
-
-    expect(groups.filter((group) => group.isOther)).toHaveLength(0);
-    expect(folded).toHaveLength(groups.length);
-    expect(folded[folded.length - 1]).toMatchObject({ key: FOLDED_OTHER_GROUP_KEY, isOther: true, count: 2 });
-  });
-
-  it("gives the folded catch-all a key of its own — it is not the same bucket", () => {
-    const groups = [...groupSpendingsByLabelPattern(sevenPatterns), soloOther];
-    const folded = foldLabelPatternGroups(groups);
-
-    // Resolving a click on the collapsed row against the full ranking must find
-    // nothing rather than land on the smaller bucket that kept OTHER_GROUP_KEY.
-    expect(folded[folded.length - 1].key).toBe(FOLDED_OTHER_GROUP_KEY);
-    expect(groups.some((group) => group.key === FOLDED_OTHER_GROUP_KEY)).toBe(false);
-    expect(folded.some((group) => group.key === OTHER_GROUP_KEY)).toBe(false);
-  });
-
-  it("folds the tail into the existing Other rather than beside it", () => {
-    const folded = foldLabelPatternGroups([...groupSpendingsByLabelPattern(sevenPatterns), soloOther]);
-
-    expect(folded.filter((group) => group.isOther)).toHaveLength(1);
-    expect(folded[folded.length - 1].count).toBe(5);
-  });
-
-  it("hands back a list shorter than the limit untouched", () => {
-    const groups = groupSpendingsByLabelPattern([
-      makeItem("a", "velo atelier"),
-      makeItem("b", "velo chaine"),
-      makeItem("c", "presse gare"),
-      makeItem("d", "presse kiosque"),
-      makeItem("e", "restaurant"),
-    ]);
-
-    // Same rows, not merely equal ones: with nothing folded away both views of
-    // the widget render — and resolve a click against — one single list.
-    expect(groups.at(-1)?.key).toBe(OTHER_GROUP_KEY);
-    expect(foldLabelPatternGroups(groups)).toBe(groups);
   });
 });

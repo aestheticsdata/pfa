@@ -8,17 +8,8 @@ import { cn } from "@lib/utils";
 import type { LabelPatternGroup } from "@components/spendings/interfaces/labelPatternTypes";
 
 interface LabelPatternBreakdownProps {
-  /**
-   * The rows to render — already folded or not. The modal owns the folding, so
-   * that what a click selects is resolved against the very rows on screen: the
-   * collapsed catch-all row and the full ranking's one do not hold the same
-   * spendings.
-   */
+  /** Full ranking, biggest first, "Other" last — every group gets its row. */
   groups: LabelPatternGroup[];
-  /** Is the full ranking on screen, and is there one left to unfold at all. */
-  expanded: boolean;
-  hasMore: boolean;
-  onToggleExpanded: () => void;
   categoryColor: string;
   selectedKey: string | null;
   onSelect: (key: string | null) => void;
@@ -38,16 +29,12 @@ const OTHER_COLOR = "var(--ink-4)";
  * Clicking a row filters the day list below to that group; the bars are computed
  * from the visible spendings, never from the selection, so picking a group does
  * not send it to 100%.
+ *
+ * No folding: every group has its row, the strip scrolling past its height cap
+ * (PFA-171 — a folded tail read as "not grouped", and "Other" must mean
+ * unclassifiable, not rank six and beyond).
  */
-const LabelPatternBreakdown = ({
-  groups,
-  expanded,
-  hasMore,
-  onToggleExpanded,
-  categoryColor,
-  selectedKey,
-  onSelect,
-}: LabelPatternBreakdownProps) => {
+const LabelPatternBreakdown = ({ groups, categoryColor, selectedKey, onSelect }: LabelPatternBreakdownProps) => {
   const { euro, pct1 } = useFormat();
   const { spendingsListModal } = useTranslations("spendings");
 
@@ -63,26 +50,11 @@ const LabelPatternBreakdown = ({
     <div className="shrink-0 border-b border-line px-5.5 py-3">
       <div className="mb-1.5 flex items-center justify-between gap-3.5">
         <span className="text-2xs font-medium uppercase tracking-widest text-ink-4">{t.title}</span>
-        {hasMore && (
-          <button
-            type="button"
-            onClick={onToggleExpanded}
-            aria-expanded={expanded}
-            className="cursor-pointer text-2xs font-medium uppercase tracking-widest text-ink-3 transition-colors duration-100 hover:text-elec"
-          >
-            {expanded ? t.showLess : t.showAll}
-          </button>
-        )}
       </div>
 
-      {/* Height-bounded with its own scroll once unfolded, and on a phone in any
-          case: the strip sits above the day list and must not eat it. */}
-      <div
-        className={cn(
-          "pfa-scroll-thin flex flex-col max-sm:max-h-40 max-sm:overflow-y-auto",
-          expanded && hasMore && "max-h-44 overflow-y-auto",
-        )}
-      >
+      {/* Height-bounded with its own scroll: the strip sits above the day list
+          and must not eat it. */}
+      <div className="pfa-scroll-thin flex max-h-56 flex-col overflow-y-auto max-sm:max-h-40">
         {groups.map((group) => {
           const isSelected = group.key === selectedKey;
           const color = group.isOther ? OTHER_COLOR : categoryColor;

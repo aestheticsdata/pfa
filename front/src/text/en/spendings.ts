@@ -178,8 +178,6 @@ const spendings: typeof frSpendings = {
     patterns: {
       title: "breakdown by pattern",
       other: "Other",
-      showAll: "Show all",
-      showLess: "Show less",
     },
   },
   toasts: {

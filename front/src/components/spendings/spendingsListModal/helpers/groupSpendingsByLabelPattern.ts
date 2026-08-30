@@ -15,17 +15,6 @@ import type { SpendingItem } from "@components/spendings/interfaces/spendingList
 /** Key of the catch-all bucket. Not a token, so it can never collide with one. */
 export const OTHER_GROUP_KEY = "__other__";
 
-/**
- * Key of the collapsed view's catch-all row. A *different* bucket from
- * `OTHER_GROUP_KEY`: it also holds the folded tail, so it must not answer to the
- * same key — a row's key is the identity a click is resolved against, and the
- * two rows do not stand for the same spendings.
- */
-export const FOLDED_OTHER_GROUP_KEY = "__folded_other__";
-
-/** Named groups kept before the tail is folded into "Other" (see `foldLabelPatternGroups`). */
-export const MAX_LABEL_PATTERN_GROUPS = 5;
-
 /** Below this many named groups the widget says nothing useful and stays hidden. */
 export const MIN_NAMED_PATTERN_GROUPS = 2;
 
@@ -168,14 +157,18 @@ const cents = (amount: number): number => Math.round(amount * 100);
 
 const sumCents = (entries: Entry[]): number => entries.reduce((acc, entry) => acc + cents(entry.amount), 0);
 
-const buildEntries = (items: SpendingItem[]): Entry[] =>
+const buildEntries = (items: SpendingItem[], excluded: ReadonlySet<string>): Entry[] =>
   items.map((item, index) => {
     const tokens = splitWords(item.label, true);
     return {
       index,
       ID: item.ID,
       amount: Number(item.amount) || 0,
-      tokens: [...new Set(tokens.filter((word) => word.length >= MIN_TOKEN_LENGTH && !STOP_WORDS.has(word)))],
+      tokens: [
+        ...new Set(
+          tokens.filter((word) => word.length >= MIN_TOKEN_LENGTH && !STOP_WORDS.has(word) && !excluded.has(word)),
+        ),
+      ],
     };
   });
 
@@ -183,7 +176,7 @@ const buildEntries = (items: SpendingItem[]): Entry[] =>
  * How often each spelling of a token was written, so a group can be named after
  * the form the user actually types ("Vélo", not the stripped "velo").
  */
-const buildSurfaceCounts = (items: SpendingItem[]): Map<string, Map<string, number>> => {
+const buildSurfaceCounts = (items: SpendingItem[], excluded: ReadonlySet<string>): Map<string, Map<string, number>> => {
   const counts = new Map<string, Map<string, number>>();
 
   for (const item of items) {
@@ -192,7 +185,7 @@ const buildSurfaceCounts = (items: SpendingItem[]): Map<string, Map<string, numb
     const aligned = surfaces.length === tokens.length;
 
     tokens.forEach((token, i) => {
-      if (token.length < MIN_TOKEN_LENGTH || STOP_WORDS.has(token)) return;
+      if (token.length < MIN_TOKEN_LENGTH || STOP_WORDS.has(token) || excluded.has(token)) return;
       const surface = aligned ? (surfaces[i] ?? token) : token;
       const perSurface = counts.get(token) ?? new Map<string, number>();
       perSurface.set(surface, (perSurface.get(surface) ?? 0) + 1);
@@ -320,15 +313,25 @@ const mergeCloseClusters = (clusters: Map<string, Entry[]>): void => {
  * Buckets `items` by label pattern, biggest first, with the leftovers gathered
  * in a single trailing "Other" group (`isOther`, no name — the UI supplies its
  * copy). Every named group holds at least two spendings. Percentages are shares
- * of the total of `items`, so they always add up to 100.
+ * of the total of `items`, so they always add up to 100. The full ranking is
+ * what the widget renders — no folding (PFA-171): "Other" means unclassifiable,
+ * not rank six and beyond.
  *
- * The result is the full ranking; `foldLabelPatternGroups` cuts its tail for the
- * collapsed view.
+ * `categoryName` is the category the modal shows: labels are often suffixed
+ * with it, which makes it the most shared word of the whole set — and a group
+ * named after the category, inside that category, says nothing (PFA-171). Its
+ * words are excluded from the token space; exact words only, deliberately not
+ * the fuzzy closeness of the key merge — a "Bio" category must not swallow a
+ * "biocoop" token by prefix.
  */
-export const groupSpendingsByLabelPattern = (items: SpendingItem[]): LabelPatternGroup[] => {
+export const groupSpendingsByLabelPattern = (
+  items: SpendingItem[],
+  categoryName?: string | null,
+): LabelPatternGroup[] => {
   if (items.length === 0) return [];
 
-  const entries = buildEntries(items);
+  const excluded: ReadonlySet<string> = new Set(splitWords(categoryName ?? "", true));
+  const entries = buildEntries(items, excluded);
   const clusters = clusterByKeyToken(entries);
 
   const grouped = new Set([...clusters.values()].flat().map((entry) => entry.index));
@@ -354,7 +357,7 @@ export const groupSpendingsByLabelPattern = (items: SpendingItem[]): LabelPatter
   const share = (total: number): number => (displayedTotal > 0 ? (total / displayedTotal) * 100 : 0);
   const idsOf = (cluster: Entry[]): string[] => [...cluster].sort((a, b) => a.index - b.index).map((e) => e.ID);
 
-  const surfaceCounts = buildSurfaceCounts(items);
+  const surfaceCounts = buildSurfaceCounts(items, excluded);
   const named: LabelPatternGroup[] = [...clusters.entries()].sort(compareClusters).map(([key, cluster]) => {
     const total = sumAmount(cluster);
     return {
@@ -380,39 +383,6 @@ export const groupSpendingsByLabelPattern = (items: SpendingItem[]): LabelPatter
       count: others.length,
       pct: share(otherTotal),
       ids: idsOf(others),
-      isOther: true,
-    },
-  ];
-};
-
-/**
- * Keeps the `maxGroups` biggest named groups and folds the long tail into a
- * catch-all row, which always stays last. This is the collapsed view of the
- * widget; "Show all" renders the untouched output of
- * `groupSpendingsByLabelPattern`. Percentages are shares of the same total
- * either way, so they keep adding up to 100 whichever view is on screen.
- *
- * With nothing to fold the input is handed back as it is, so the two views then
- * render the very same rows.
- */
-export const foldLabelPatternGroups = (
-  groups: LabelPatternGroup[],
-  maxGroups: number = MAX_LABEL_PATTERN_GROUPS,
-): LabelPatternGroup[] => {
-  const named = groups.filter((group) => !group.isOther);
-  if (named.length <= maxGroups) return groups;
-
-  const folded = [...named.slice(maxGroups), ...groups.filter((group) => group.isOther)];
-
-  return [
-    ...named.slice(0, maxGroups),
-    {
-      key: FOLDED_OTHER_GROUP_KEY,
-      name: "",
-      total: folded.reduce((acc, group) => acc + group.total, 0),
-      count: folded.reduce((acc, group) => acc + group.count, 0),
-      pct: folded.reduce((acc, group) => acc + group.pct, 0),
-      ids: folded.flatMap((group) => group.ids),
       isOther: true,
     },
   ];
