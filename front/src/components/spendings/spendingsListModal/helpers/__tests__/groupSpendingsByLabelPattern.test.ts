@@ -54,8 +54,12 @@ describe("normalizeLabel", () => {
 });
 
 describe("tokenizeLabel", () => {
-  it("keeps content words of three characters or more", () => {
+  it("keeps content words of two characters or more", () => {
     expect(tokenizeLabel("atelier velo")).toEqual(["atelier", "velo"]);
+    // Two-letter brand initials are real merchants; only one-letter words and
+    // the listed French two-letter words fall out.
+    expect(tokenizeLabel("pantalon gk")).toEqual(["pantalon", "gk"]);
+    expect(tokenizeLabel("je ne va pas l a")).toEqual(["pas"]);
   });
 
   it("drops stop words and short words", () => {
@@ -159,6 +163,22 @@ describe("groupSpendingsByLabelPattern", () => {
       ["presse", 3],
       ["marche", 2],
     ]);
+    expect(otherGroup(items)).toBeUndefined();
+  });
+
+  it("lets a two-letter brand word carry its own pattern, casing kept", () => {
+    const items = [
+      makeItem("a", "GK", 13),
+      makeItem("b", "pantalon GK", 35),
+      makeItem("c", "pantalons cargo GK noir", 39),
+      makeItem("d", "pantalons cargo GK beige", 70),
+    ];
+
+    // "GK" is in all four labels — the most shared word by far. With a
+    // three-character floor it was not even a token: the bare label fell to
+    // Other and the cargo pair grouped under a word nobody thinks in. The
+    // all-caps spelling the user types is the name, not a lowercased "Gk".
+    expect(groupSpendingsByLabelPattern(items)[0]).toMatchObject({ key: "gk", name: "GK", count: 4 });
     expect(otherGroup(items)).toBeUndefined();
   });
 

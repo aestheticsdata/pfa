@@ -63,7 +63,15 @@ const LabelPatternBreakdown = ({ groups, categoryColor, selectedKey, onSelect }:
               key={group.key}
               type="button"
               aria-pressed={isSelected}
-              onClick={() => onSelect(isSelected ? null : group.key)}
+              onClick={(event) => {
+                // A mouse click leaves the row focused, and the next keypress
+                // (Escape clearing the selection) upgrades that focus to
+                // :focus-visible — a ghost ring on a row that is no longer
+                // selected. Keyboard activation has detail 0 and keeps its
+                // focus ring.
+                if (event.detail > 0) event.currentTarget.blur();
+                onSelect(isSelected ? null : group.key);
+              }}
               className={cn(
                 "grid w-full cursor-pointer grid-cols-[10px_minmax(0,1fr)_minmax(0,1.3fr)_92px_58px] items-center gap-3.5 rounded-md px-2 py-1.5 text-left text-sm transition-colors duration-100 hover:bg-surface-hi max-sm:grid-cols-[10px_minmax(0,1fr)_auto_auto] max-sm:gap-x-2.5 max-sm:py-1",
                 isSelected && "bg-surface-hi ring-1 ring-inset ring-elec/45",
