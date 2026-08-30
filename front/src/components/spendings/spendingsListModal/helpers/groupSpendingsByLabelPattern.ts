@@ -18,8 +18,16 @@ export const OTHER_GROUP_KEY = "__other__";
 /** Below this many named groups the widget says nothing useful and stays hidden. */
 export const MIN_NAMED_PATTERN_GROUPS = 2;
 
-/** Shorter words are noise ("le", "un") and never become keys. */
-const MIN_TOKEN_LENGTH = 3;
+/**
+ * One-letter words are noise; anything longer can be a name — two-letter brand
+ * initials are real merchants (PFA-172). The common French two-letter words are
+ * stop words instead of falling to this floor.
+ */
+const MIN_TOKEN_LENGTH = 2;
+
+/** A prefix shorter than this proves nothing — two letters prefix half the
+ *  dictionary. Guards the key merge and the rescue pass alike. */
+const MIN_PREFIX_LENGTH = 3;
 
 /** A token has to appear in at least two spendings to be worth a group. */
 const MIN_DOC_FREQUENCY = 2;
@@ -29,15 +37,16 @@ const MIN_FUZZY_LENGTH = 5;
 
 const DIACRITICS = /\p{Diacritic}/gu;
 /** Quantities ("x2", "2 x") — dropped before punctuation, which would eat their digits. */
-const QUANTITIES = /\b(?:\d+\s*x|x\s*\d+)\b/gu;
+const QUANTITIES = /\b(?:\d+\s*x|x\s*\d+)\b/giu;
 /** Punctuation and symbols become word breaks; letters AND digits survive. */
 const NON_WORD = /[^\p{L}\p{N}\s]/gu;
 /** A word that is nothing but digits is an amount or a count, not a name. */
 const PURE_NUMBER = /^\p{N}+$/u;
 const SPACES = /\s+/u;
 
-// French stop words. The ones under three characters are already dropped by
-// MIN_TOKEN_LENGTH; they are listed anyway so the set reads as the actual rule.
+// French stop words. With the token floor at two characters these do real
+// work: every common two-letter word has to be listed — only one-letter words
+// fall to the floor.
 const STOP_WORDS = new Set([
   "de",
   "du",
@@ -73,6 +82,20 @@ const STOP_WORDS = new Set([
   "est",
   "plus",
   "via",
+  "je",
+  "tu",
+  "il",
+  "on",
+  "ne",
+  "se",
+  "me",
+  "te",
+  "si",
+  "va",
+  "vu",
+  "ai",
+  "eu",
+  "ca",
 ]);
 
 interface Entry {
@@ -95,8 +118,11 @@ interface Entry {
  * one-letter non-token that can only fall into "Other" (PFA-170).
  */
 const splitWords = (label: string, stripDiacritics: boolean): string[] => {
-  const lowered = label.toLowerCase();
-  const base = stripDiacritics ? lowered.normalize("NFD").replace(DIACRITICS, "") : lowered.normalize("NFC");
+  // The token pass flattens case and accents; the surface pass keeps the label
+  // as written, so a group can display the brand's own casing ("HM", not "Hm").
+  const base = stripDiacritics
+    ? label.toLowerCase().normalize("NFD").replace(DIACRITICS, "")
+    : label.normalize("NFC");
   return base
     .replace(QUANTITIES, " ")
     .replace(NON_WORD, " ")
@@ -138,7 +164,7 @@ const isOneEditApart = (a: string, b: string): boolean => {
 const areCloseKeys = (a: string, b: string): boolean => {
   const shorter = a.length <= b.length ? a : b;
   const longer = a.length <= b.length ? b : a;
-  if (shorter.length >= MIN_TOKEN_LENGTH && longer.startsWith(shorter)) return true;
+  if (shorter.length >= MIN_PREFIX_LENGTH && longer.startsWith(shorter)) return true;
   return shorter.length >= MIN_FUZZY_LENGTH && isOneEditApart(a, b);
 };
 
@@ -199,8 +225,22 @@ const buildSurfaceCounts = (items: SpendingItem[], excluded: ReadonlySet<string>
 const displayName = (key: string, surfaceCounts: Map<string, Map<string, number>>): string => {
   const perSurface = surfaceCounts.get(key);
   if (!perSurface) return capitalize(key);
-  const best = [...perSurface.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr"))[0];
-  return capitalize(best[0]);
+
+  // Spellings are counted case-insensitively (accents kept), so "vélo" and
+  // "Vélo" back the same form — but the exact way the winner is most often
+  // typed survives, and an all-caps brand stays all-caps ("HM", never "Hm").
+  const byFolded = new Map<string, Map<string, number>>();
+  for (const [exact, count] of perSurface) {
+    const folded = exact.toLowerCase();
+    const variants = byFolded.get(folded) ?? new Map<string, number>();
+    variants.set(exact, (variants.get(exact) ?? 0) + count);
+    byFolded.set(folded, variants);
+  }
+
+  const total = (variants: Map<string, number>): number => [...variants.values()].reduce((acc, c) => acc + c, 0);
+  const winner = [...byFolded.entries()].sort((a, b) => total(b[1]) - total(a[1]) || a[0].localeCompare(b[0], "fr"))[0];
+  const exact = [...winner[1].entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "fr"))[0];
+  return capitalize(exact[0]);
 };
 
 /**
