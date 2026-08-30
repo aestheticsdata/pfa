@@ -5,9 +5,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
 import useSpendings from "@components/spendings/services/useSpendings";
 import {
-  foldLabelPatternGroups,
   groupSpendingsByLabelPattern,
-  MAX_LABEL_PATTERN_GROUPS,
   MIN_NAMED_PATTERN_GROUPS,
 } from "@components/spendings/spendingsListModal/helpers/groupSpendingsByLabelPattern";
 import LabelPatternBreakdown from "@components/spendings/spendingsListModal/LabelPatternBreakdown";
@@ -58,7 +56,6 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
   const { from, to } = useDatePickerWrapperStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [patternKey, setPatternKey] = useState<string | null>(null);
-  const [patternsExpanded, setPatternsExpanded] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -76,16 +73,10 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
   // Label patterns are read off what is on screen, so the widget follows the
   // search box. Under two named groups it has nothing to say and stays hidden —
   // and with it, whatever selection it was holding.
-  const allPatternGroups = groupSpendingsByLabelPattern(visibleItems);
+  const allPatternGroups = groupSpendingsByLabelPattern(visibleItems, targetCategory);
   const namedPatternCount = allPatternGroups.filter((group) => !group.isOther).length;
   const patternGroups = namedPatternCount >= MIN_NAMED_PATTERN_GROUPS ? allPatternGroups : [];
-
-  // The fold lives here rather than inside the widget: a row's key is what a
-  // click is resolved against, and the collapsed catch-all row stands for more
-  // spendings than the full ranking's one. Both have to read the same list.
-  const hasFoldedPatterns = namedPatternCount > MAX_LABEL_PATTERN_GROUPS;
-  const patternRows = patternsExpanded ? patternGroups : foldLabelPatternGroups(patternGroups);
-  const selectedPattern = patternRows.find((group) => group.key === patternKey) ?? null;
+  const selectedPattern = patternGroups.find((group) => group.key === patternKey) ?? null;
   const selectedIDs = new Set(selectedPattern?.ids);
 
   // Picking a group narrows the day list only: the widget keeps ranking the whole
@@ -194,10 +185,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
             </div>
 
             <LabelPatternBreakdown
-              groups={patternRows}
-              expanded={patternsExpanded}
-              hasMore={hasFoldedPatterns}
-              onToggleExpanded={() => setPatternsExpanded(!patternsExpanded)}
+              groups={patternGroups}
               categoryColor={categoryColor}
               selectedKey={patternKey}
               onSelect={setPatternKey}
