@@ -8,7 +8,7 @@ import { cn } from "@lib/utils";
 import type { LabelPatternGroup } from "@components/spendings/interfaces/labelPatternTypes";
 
 interface LabelPatternBreakdownProps {
-  /** Full ranking, biggest first, "Other" last — every group gets its row. */
+  /** Full ranking, biggest first, "Other" ranked on its amount among the rest. */
   groups: LabelPatternGroup[];
   categoryColor: string;
   selectedKey: string | null;
@@ -32,7 +32,8 @@ const OTHER_COLOR = "var(--ink-4)";
  *
  * No folding: every group has its row, the strip scrolling past its height cap
  * (PFA-171 — a folded tail read as "not grouped", and "Other" must mean
- * unclassifiable, not rank six and beyond).
+ * unclassifiable, not rank six and beyond). "Other" holds no rank of its own
+ * either: it sits where its amount puts it (PFA-174).
  */
 const LabelPatternBreakdown = ({ groups, categoryColor, selectedKey, onSelect }: LabelPatternBreakdownProps) => {
   const { euro, pct1 } = useFormat();
