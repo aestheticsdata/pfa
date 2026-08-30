@@ -56,7 +56,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
   const { from, to } = useDatePickerWrapperStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [patternKey, setPatternKey] = useState<string | null>(null);
-  const searchRef = useRef<HTMLInputElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   const { spendingsListModal: t } = texts;
@@ -119,11 +119,19 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
         <DialogPrimitive.Overlay className="fixed inset-0 z-[200] bg-[oklch(0.02_0.004_250/0.62)] backdrop-blur-sm animate-in fade-in duration-150 ease-out" />
         <div className="pointer-events-none fixed inset-0 z-[201] grid place-items-center p-8 max-sm:p-3.5">
           <DialogPrimitive.Content
-            className="pfa-card shadow-modal! pointer-events-auto flex max-h-[88vh] w-[min(1000px,94vw)] flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-3.5 zoom-in-95 duration-200 max-sm:max-h-[92vh]"
+            className="pfa-card shadow-modal! pointer-events-auto flex max-h-[88vh] w-[min(1000px,94vw)] flex-col overflow-hidden outline-none animate-in fade-in slide-in-from-bottom-3.5 zoom-in-95 duration-200 max-sm:max-h-[92vh]"
             aria-describedby={undefined}
+            ref={contentRef}
+            // The search box must not take the focus on open: on a phone that
+            // pops the software keyboard over the list nobody has read yet
+            // (PFA-173). The panel itself takes it instead — Radix gives it
+            // tabIndex -1 — so the focus trap, Escape and the focus handed back
+            // to the trigger on close all keep working. It carries outline-none:
+            // opened from the keyboard, that focus would otherwise ring the whole
+            // card.
             onOpenAutoFocus={(e) => {
               e.preventDefault();
-              searchRef.current?.focus({ preventScroll: true });
+              contentRef.current?.focus({ preventScroll: true });
             }}
             // Escape drops the pattern selection first, and only closes the modal
             // once there is none left to drop.
@@ -174,7 +182,6 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                   strokeWidth={2}
                 />
                 <input
-                  ref={searchRef}
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
