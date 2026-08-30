@@ -45,6 +45,12 @@ describe("normalizeLabel", () => {
     expect(normalizeLabel("box 3")).toBe("box");
   });
 
+  it("keeps digits inside a word — an alphanumeric word is a name", () => {
+    expect(normalizeLabel("z30")).toBe("z30");
+    expect(normalizeLabel("z30 marche 12,50 €")).toBe("z30 marche");
+    expect(tokenizeLabel("courses z30")).toEqual(["courses", "z30"]);
+  });
+
   it("returns an empty string for a label made of nothing but noise", () => {
     expect(normalizeLabel("  12,50 € !!  ")).toBe("");
   });
@@ -95,26 +101,22 @@ describe("groupSpendingsByLabelPattern", () => {
     expect(groups[0].name).toBe("Vélo");
   });
 
-  it("files a spending under the most discriminant token of its label", () => {
+  it("files a spending under the most shared token of its label", () => {
     const items = [
-      makeItem("a", "courses velo", 30),
-      makeItem("b", "courses presse", 10),
-      makeItem("c", "atelier velo", 20),
-      makeItem("d", "kiosque presse", 10),
-      makeItem("e", "courses hebdo", 15),
+      makeItem("a", "velo atelier"),
+      makeItem("b", "velo chaine"),
+      makeItem("c", "velo casque"),
+      makeItem("d", "casque audio"),
     ];
 
-    // "courses" is in three labels, "velo" and "presse" in two: the rarer token
-    // says more about the spending, so a and b join velo and presse rather than
-    // each other. "courses" is then left with e alone, which is not a pattern.
-    expect(named(items)).toEqual([
-      ["velo", 2],
-      ["presse", 2],
-    ]);
-    expect(otherGroup(items)?.ids).toEqual(["e"]);
+    // "velo" is in three labels, "casque" in two: c joins the bigger pattern
+    // instead of opening a two-spending "casque" bucket — which leaves d
+    // alone, and a lone spending is not a pattern.
+    expect(named(items)).toEqual([["velo", 3]]);
+    expect(otherGroup(items)?.ids).toEqual(["d"]);
   });
 
-  it("merges a key that is the prefix of another (singular / plural)", () => {
+  it("merges a key that is the prefix of another, the stem keeping the key", () => {
     const items = [
       makeItem("a", "velo pieces", 10),
       makeItem("b", "velo chaine", 10),
@@ -122,8 +124,61 @@ describe("groupSpendingsByLabelPattern", () => {
       makeItem("d", "velos revision", 40),
     ];
 
-    // The heavier spelling keeps the key.
-    expect(named(items)).toEqual([["velos", 4]]);
+    // The stem names the pattern even though the longer spelling weighs more.
+    expect(groupSpendingsByLabelPattern(items)[0]).toMatchObject({ key: "velo", name: "Velo", count: 4, total: 100 });
+  });
+
+  it("rescues a leftover whose token is a written variant of a surviving key", () => {
+    const items = [makeItem("a", "velo pneu"), makeItem("b", "velo lampe"), makeItem("c", "velos revision")];
+
+    // "velos" appears once, so c has no candidate token — but it is a written
+    // variant of the velo group's key, which is where it belongs.
+    expect(named(items)).toEqual([["velo", 3]]);
+    expect(otherGroup(items)).toBeUndefined();
+  });
+
+  it("rescues a leftover one edit away from a surviving key", () => {
+    const items = [makeItem("a", "cantine lundi"), makeItem("b", "cantine mardi"), makeItem("c", "cantone jeudi")];
+
+    // "cantone" appears once, so c has no candidate token — but it is one typo
+    // away from the cantine group's key, which is where it belongs.
+    expect(named(items)).toEqual([["cantine", 3]]);
+    expect(otherGroup(items)).toBeUndefined();
+  });
+
+  it("re-deals a spending a generic word stole from a small pattern", () => {
+    const items = [
+      makeItem("a", "presse gare", 10),
+      makeItem("b", "presse tabac", 10),
+      makeItem("c", "presse courses", 50),
+      makeItem("d", "marche courses", 10),
+      makeItem("e", "marche", 5),
+    ];
+
+    // "courses" outweighs "marche" on d's tie, but ends up holding d alone —
+    // the starved generic key is retired and d falls back to marche, keeping
+    // the small pattern alive instead of scattering both spendings to Other.
+    expect(named(items)).toEqual([
+      ["presse", 3],
+      ["marche", 2],
+    ]);
+    expect(otherGroup(items)).toBeUndefined();
+  });
+
+  it("groups labels that are nothing but an alphanumeric name", () => {
+    const items = [makeItem("a", "z30", 20), makeItem("b", "z30", 30), makeItem("c", "restaurant gare", 5)];
+
+    const groups = groupSpendingsByLabelPattern(items);
+
+    expect(groups[0]).toMatchObject({ key: "z30", name: "Z30", count: 2, total: 50 });
+    expect(otherGroup(items)?.ids).toEqual(["c"]);
+  });
+
+  it("leaves a leftover without any close key in Other", () => {
+    const items = [makeItem("a", "velo pneu"), makeItem("b", "velo lampe"), makeItem("c", "restaurant gare")];
+
+    expect(named(items)).toEqual([["velo", 2]]);
+    expect(otherGroup(items)?.ids).toEqual(["c"]);
   });
 
   it("merges keys one edit apart when they are long enough", () => {
@@ -205,15 +260,36 @@ describe("groupSpendingsByLabelPattern", () => {
 
     expect(sortIDs(groupSpendingsByLabelPattern(shuffled))).toEqual(sortIDs(groupSpendingsByLabelPattern(items)));
   });
+
+  it("keeps a tie between equal totals stable whatever the input order", () => {
+    // Both tokens sit in three labels and weigh a mathematically equal 0.60 —
+    // summed as floats, the two totals can come out a last-bit apart depending
+    // on accumulation order, silently flipping the tie. Cent sums keep it a
+    // real tie, resolved alphabetically, identically for every permutation.
+    const items = [
+      makeItem("a", "velo alpha", 0.1),
+      makeItem("b", "velo bravo", 0.2),
+      makeItem("c", "velo presse", 0.3),
+      makeItem("d", "presse delta", 0.1),
+      makeItem("e", "presse gamma", 0.2),
+    ];
+    const shape = (list: SpendingItem[]) =>
+      groupSpendingsByLabelPattern(list).map((group) => [group.key, [...group.ids].sort()]);
+    const reference = shape(items);
+
+    for (let i = 1; i < items.length; i += 1) {
+      expect(shape([...items.slice(i), ...items.slice(0, i)])).toEqual(reference);
+    }
+  });
 });
 
 describe("foldLabelPatternGroups", () => {
-  // Seven patterns of two spendings each, on decreasing amounts. The two weekday
-  // words are in every label, so they are never discriminant enough to be keys.
+  // Seven patterns of two spendings each, on decreasing amounts. Bare-word
+  // labels: a shared filler word would now be the most shared token itself.
   const patternWords = ["velo", "presse", "cantine", "cinema", "essence", "pharmacie", "librairie"];
   const sevenPatterns = patternWords.flatMap((word, i) => [
-    makeItem(`${word}-a`, `${word} lundi`, 70 - i * 10),
-    makeItem(`${word}-b`, `${word} mardi`, 70 - i * 10),
+    makeItem(`${word}-a`, word, 70 - i * 10),
+    makeItem(`${word}-b`, word, 70 - i * 10),
   ]);
 
   const soloOther: LabelPatternGroup = {

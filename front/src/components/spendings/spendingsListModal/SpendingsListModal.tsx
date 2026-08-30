@@ -203,7 +203,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
               onSelect={setPatternKey}
             />
 
-            <div className="flex min-h-0 flex-auto flex-col gap-3.5 overflow-y-auto px-5.5 pb-5.5 pt-4">
+            <div className="pfa-scroll-thin flex min-h-0 flex-auto flex-col gap-3.5 overflow-y-auto px-5.5 pb-5.5 pt-4">
               {groupedEntries.length === 0 ? (
                 <div className="py-10 text-center text-sm text-ink-4">
                   {normalizedSearchTerm ? t.noMatch : t.noSpendings}

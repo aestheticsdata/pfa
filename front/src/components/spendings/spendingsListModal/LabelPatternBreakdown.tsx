@@ -79,7 +79,7 @@ const LabelPatternBreakdown = ({
           case: the strip sits above the day list and must not eat it. */}
       <div
         className={cn(
-          "flex flex-col max-sm:max-h-40 max-sm:overflow-y-auto",
+          "pfa-scroll-thin flex flex-col max-sm:max-h-40 max-sm:overflow-y-auto",
           expanded && hasMore && "max-h-44 overflow-y-auto",
         )}
       >
