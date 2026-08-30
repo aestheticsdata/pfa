@@ -312,6 +312,17 @@ const clusterByKeyToken = (entries: Entry[]): Map<string, Entry[]> => {
 const compareClusters = (a: [string, Entry[]], b: [string, Entry[]]): number =>
   sumCents(b[1]) - sumCents(a[1]) || b[1].length - a[1].length || a[0].localeCompare(b[0], "fr");
 
+/**
+ * Order of the rows the widget draws. "Other" is ranked on its amount like any
+ * other row (PFA-174): pinned last it read as a broken ranking — a leftovers
+ * bucket sitting under rows worth half of it. It only sinks on a tie, where a
+ * named pattern says more than the catch-all.
+ */
+const compareGroups = (a: [string, Entry[]], b: [string, Entry[]]): number =>
+  sumCents(b[1]) - sumCents(a[1]) ||
+  Number(a[0] === OTHER_GROUP_KEY) - Number(b[0] === OTHER_GROUP_KEY) ||
+  compareClusters(a, b);
+
 const findMergePair = (clusters: Map<string, Entry[]>): [string, string] | null => {
   const keys = [...clusters.entries()].sort(compareClusters).map(([key]) => key);
 
@@ -351,11 +362,11 @@ const mergeCloseClusters = (clusters: Map<string, Entry[]>): void => {
 
 /**
  * Buckets `items` by label pattern, biggest first, with the leftovers gathered
- * in a single trailing "Other" group (`isOther`, no name — the UI supplies its
- * copy). Every named group holds at least two spendings. Percentages are shares
- * of the total of `items`, so they always add up to 100. The full ranking is
- * what the widget renders — no folding (PFA-171): "Other" means unclassifiable,
- * not rank six and beyond.
+ * in a single "Other" group (`isOther`, no name — the UI supplies its copy)
+ * ranked on its amount among the rest (PFA-174). Every named group holds at
+ * least two spendings. Percentages are shares of the total of `items`, so they
+ * always add up to 100. The full ranking is what the widget renders — no
+ * folding (PFA-171): "Other" means unclassifiable, not rank six and beyond.
  *
  * `categoryName` is the category the modal shows: labels are often suffixed
  * with it, which makes it the most shared word of the whole set — and a group
@@ -398,32 +409,20 @@ export const groupSpendingsByLabelPattern = (
   const idsOf = (cluster: Entry[]): string[] => [...cluster].sort((a, b) => a.index - b.index).map((e) => e.ID);
 
   const surfaceCounts = buildSurfaceCounts(items, excluded);
-  const named: LabelPatternGroup[] = [...clusters.entries()].sort(compareClusters).map(([key, cluster]) => {
+  const ranked: [string, Entry[]][] = [...clusters.entries()];
+  if (others.length > 0) ranked.push([OTHER_GROUP_KEY, others]);
+
+  return ranked.sort(compareGroups).map(([key, cluster]): LabelPatternGroup => {
+    const isOther = key === OTHER_GROUP_KEY;
     const total = sumAmount(cluster);
     return {
       key,
-      name: displayName(key, surfaceCounts),
+      name: isOther ? "" : displayName(key, surfaceCounts),
       total,
       count: cluster.length,
       pct: share(total),
       ids: idsOf(cluster),
-      isOther: false,
+      isOther,
     };
   });
-
-  if (others.length === 0) return named;
-
-  const otherTotal = sumAmount(others);
-  return [
-    ...named,
-    {
-      key: OTHER_GROUP_KEY,
-      name: "",
-      total: otherTotal,
-      count: others.length,
-      pct: share(otherTotal),
-      ids: idsOf(others),
-      isOther: true,
-    },
-  ];
 };

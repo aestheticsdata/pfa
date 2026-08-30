@@ -85,11 +85,44 @@ describe("groupSpendingsByLabelPattern", () => {
 
     const groups = groupSpendingsByLabelPattern(items);
 
-    expect(groups.map((group) => group.key)).toEqual(["velo", "presse", OTHER_GROUP_KEY]);
+    // Other weighs 20 and lands between the two named groups — it is ranked on
+    // its amount, not pinned to the bottom.
+    expect(groups.map((group) => group.key)).toEqual(["velo", OTHER_GROUP_KEY, "presse"]);
     expect(groups[0]).toMatchObject({ name: "Velo", count: 3, total: 100 });
     expect(groups[0].ids).toEqual(["a", "b", "c"]);
-    expect(groups[1]).toMatchObject({ name: "Presse", count: 2, total: 10 });
-    expect(groups[2]).toMatchObject({ name: "", count: 1, isOther: true, ids: ["f"] });
+    expect(groups[1]).toMatchObject({ name: "", count: 1, isOther: true, ids: ["f"] });
+    expect(groups[2]).toMatchObject({ name: "Presse", count: 2, total: 10 });
+  });
+
+  it("ranks Other on its amount, above the groups it outweighs", () => {
+    const items = [
+      makeItem("a", "velo pneu", 6),
+      makeItem("b", "velo lampe", 4),
+      makeItem("c", "presse gare", 2),
+      makeItem("d", "presse kiosque", 2),
+      makeItem("e", "restaurant", 30),
+    ];
+
+    expect(groupSpendingsByLabelPattern(items).map((group) => [group.key, group.total])).toEqual([
+      [OTHER_GROUP_KEY, 30],
+      ["velo", 10],
+      ["presse", 4],
+    ]);
+  });
+
+  it("keeps Other under a named group of the same amount", () => {
+    const items = [
+      makeItem("a", "velo pneu", 10),
+      makeItem("b", "velo lampe", 10),
+      makeItem("c", "restaurant gare", 10),
+      makeItem("d", "cinema soir", 10),
+    ];
+
+    // A named pattern says more than the catch-all, so it takes the tie.
+    expect(groupSpendingsByLabelPattern(items).map((group) => [group.key, group.total])).toEqual([
+      ["velo", 20],
+      [OTHER_GROUP_KEY, 20],
+    ]);
   });
 
   it("names a group after the most frequent original spelling, accents kept", () => {
