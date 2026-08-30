@@ -173,6 +173,14 @@ const spendings: typeof frSpendings = {
     noSpendings: "No spendings for this category.",
     noMatch: "No matching spendings.",
     close: "Close",
+    // Breakdown of the category by label pattern (PFA-168). "Other" is the
+    // catch-all bucket: the labels that match no pattern, plus the folded tail.
+    patterns: {
+      title: "breakdown by pattern",
+      other: "Other",
+      showAll: "Show all",
+      showLess: "Show less",
+    },
   },
   toasts: {
     spendingCreated: "Spending created",
