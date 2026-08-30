@@ -33,6 +33,34 @@
   }
 }
 
+/*
+  No elastic overscroll bounce. One rule holding the property, so a scroller
+  added later is covered by adding its selector here and nowhere else.
+
+  `none` and not `contain`: `contain` only stops the gesture chaining to the
+  parent and leaves the local rubber band, which is the part being removed. The
+  horizontal axis is left alone — that one is the browser's back gesture, so
+  horizontal-only scrollers are deliberately absent from this list.
+
+  Matched by scroll-class substring rather than `*`: `overflow: hidden` makes an
+  element a scroll container too, and a non-scrollable one is permanently at its
+  boundary — `overscroll-behavior-y: none` there stops the wheel from reaching
+  the real scroller behind it. On `*` that silently froze the page over every
+  clipped box (PFA-168: the day cards of the category modal swallowed the
+  scroll, leaving only the gaps between two cards live).
+*/
+@layer base {
+  html,
+  body,
+  .pfa-drawer,
+  [class*="overflow-y-auto"],
+  [class*="overflow-y-scroll"],
+  [class*="overflow-auto"],
+  [class*="overflow-scroll"] {
+    overscroll-behavior-y: none;
+  }
+}
+
 /* Webkit autofill yellow background fix */
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
   -webkit-transition-delay: 9999s;

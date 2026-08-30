@@ -171,6 +171,14 @@ const spendings = {
     noSpendings: "Aucune dépense pour cette catégorie.",
     noMatch: "Aucune dépense ne correspond.",
     close: "Fermer",
+    // Breakdown of the category by label pattern (PFA-168). "Autres" is the
+    // catch-all bucket: the labels that match no pattern, plus the folded tail.
+    patterns: {
+      title: "répartition par motif",
+      other: "Autres",
+      showAll: "Tout afficher",
+      showLess: "Réduire",
+    },
   },
   // One key per action: injecting a participle into a sentence template does
   // not survive translation (gender/agreement, word order).

@@ -4,6 +4,13 @@ import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
 import useSpendings from "@components/spendings/services/useSpendings";
+import {
+  foldLabelPatternGroups,
+  groupSpendingsByLabelPattern,
+  MAX_LABEL_PATTERN_GROUPS,
+  MIN_NAMED_PATTERN_GROUPS,
+} from "@components/spendings/spendingsListModal/helpers/groupSpendingsByLabelPattern";
+import LabelPatternBreakdown from "@components/spendings/spendingsListModal/LabelPatternBreakdown";
 import { buildSpendingsPath } from "@helpers/dateRoute";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
@@ -50,6 +57,8 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
   const { spendingsByWeek, spendingsByMonth } = useSpendings();
   const { from, to } = useDatePickerWrapperStore();
   const [searchTerm, setSearchTerm] = useState("");
+  const [patternKey, setPatternKey] = useState<string | null>(null);
+  const [patternsExpanded, setPatternsExpanded] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -60,11 +69,30 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
   const targetCategory = categoryInfos.category ?? null;
   const normalizedSearchTerm = searchTerm.trim().toLowerCase();
 
-  const sourceItems: SpendingItem[] = (
+  const visibleItems: SpendingItem[] = (
     isMonthly ? (spendingsByMonth ?? []) : (spendingsByWeek ?? []).flatMap((g) => g.items)
   ).filter((s) => (s.category ?? null) === targetCategory && s.label.toLowerCase().includes(normalizedSearchTerm));
 
-  const grouped = groupByDate(sourceItems);
+  // Label patterns are read off what is on screen, so the widget follows the
+  // search box. Under two named groups it has nothing to say and stays hidden —
+  // and with it, whatever selection it was holding.
+  const allPatternGroups = groupSpendingsByLabelPattern(visibleItems);
+  const namedPatternCount = allPatternGroups.filter((group) => !group.isOther).length;
+  const patternGroups = namedPatternCount >= MIN_NAMED_PATTERN_GROUPS ? allPatternGroups : [];
+
+  // The fold lives here rather than inside the widget: a row's key is what a
+  // click is resolved against, and the collapsed catch-all row stands for more
+  // spendings than the full ranking's one. Both have to read the same list.
+  const hasFoldedPatterns = namedPatternCount > MAX_LABEL_PATTERN_GROUPS;
+  const patternRows = patternsExpanded ? patternGroups : foldLabelPatternGroups(patternGroups);
+  const selectedPattern = patternRows.find((group) => group.key === patternKey) ?? null;
+  const selectedIDs = new Set(selectedPattern?.ids);
+
+  // Picking a group narrows the day list only: the widget keeps ranking the whole
+  // visible set, otherwise the group just clicked would jump to 100%.
+  const listItems = selectedPattern ? visibleItems.filter((s) => selectedIDs.has(s.ID)) : visibleItems;
+
+  const grouped = groupByDate(listItems);
   const groupedEntries = Object.entries(grouped);
 
   const dayTotal = (items: SpendingItem[]) => items.reduce((acc, s) => acc + Number(s.amount), 0);
@@ -105,6 +133,13 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
             onOpenAutoFocus={(e) => {
               e.preventDefault();
               searchRef.current?.focus({ preventScroll: true });
+            }}
+            // Escape drops the pattern selection first, and only closes the modal
+            // once there is none left to drop.
+            onEscapeKeyDown={(e) => {
+              if (!selectedPattern) return;
+              e.preventDefault();
+              setPatternKey(null);
             }}
           >
             <div className="flex shrink-0 items-center gap-3.5 border-b border-line bg-[linear-gradient(180deg,oklch(1_0_0/0.045),oklch(1_0_0/0.018))] px-5.5 py-4.5 max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-2.5">
@@ -157,6 +192,16 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                 />
               </span>
             </div>
+
+            <LabelPatternBreakdown
+              groups={patternRows}
+              expanded={patternsExpanded}
+              hasMore={hasFoldedPatterns}
+              onToggleExpanded={() => setPatternsExpanded(!patternsExpanded)}
+              categoryColor={categoryColor}
+              selectedKey={patternKey}
+              onSelect={setPatternKey}
+            />
 
             <div className="flex min-h-0 flex-auto flex-col gap-3.5 overflow-y-auto px-5.5 pb-5.5 pt-4">
               {groupedEntries.length === 0 ? (
