@@ -1,5 +1,6 @@
 {
   "name": "pfa-next",
+  "packageManager": "pnpm@12.2.1",
   "private": true,
   "scripts": {
     "dev": "NODE_OPTIONS='--inspect' next dev",
