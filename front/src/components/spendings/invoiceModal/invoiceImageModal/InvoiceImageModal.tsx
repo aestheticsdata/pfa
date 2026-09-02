@@ -22,7 +22,8 @@ const InvoiceImageModal = ({ image, closeImage: closeImageProp }: InvoiceImageMo
       open={open}
       onOpenChange={(isOpen) => !isOpen && closeImage()}
     >
-      <DialogContent className="w-auto max-w-none sm:max-w-none border-0 bg-transparent p-0 shadow-none">
+      {/* Shrink-wraps the image (`w-auto`), so it opts out of the pinned column. */}
+      <DialogContent className="w-auto max-w-none grid-cols-none sm:max-w-none border-0 bg-transparent p-0 shadow-none">
         <DialogTitle className="sr-only">{spendings.invoiceModal.lightboxTitle}</DialogTitle>
         <div className="overflow-hidden rounded-xl border border-elec/30 shadow-lightbox leading-[0]">
           <Image
