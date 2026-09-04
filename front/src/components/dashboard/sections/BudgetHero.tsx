@@ -6,7 +6,9 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import GlowCard from "@components/shared/GlowCard";
 import { LegendItem } from "@components/shared/LegendItem";
 import { MoneyAmount } from "@components/shared/MoneyAmount";
+import { projectedOverBudget } from "@components/spendings/helpers/endOfMonthProjection";
 import useDashboard from "@components/spendings/services/useDashboard";
+import useEndOfMonthProjection from "@components/spendings/services/useEndOfMonthProjection";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { Input } from "@components/ui/input";
 import { Tooltip } from "@components/ui/tooltip";
@@ -17,6 +19,7 @@ import useTranslations from "@i18n/useTranslations";
 import { CategoryTooltipContent, Donut, useCountUp } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
+import isSameMonth from "date-fns/isSameMonth";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -41,6 +44,7 @@ const BudgetHero = () => {
     monthlyTotal,
   } = useDashboard();
   const { recurrings } = useReccurings();
+  const { projection } = useEndOfMonthProjection();
   const [editing, setEditing] = useState(false);
   const [hover, setHover] = useState<BarHover<number> | null>(null);
   const { register, handleSubmit, setFocus } = useForm<SalaryForm>();
@@ -51,6 +55,12 @@ const BudgetHero = () => {
   const variable = Math.max(0, monthlyTotal - fixed);
   const usedPct = initialAmount > 0 ? Math.min(100, (monthlyTotal / initialAmount) * 100) : 0;
   const over = remaining < 0;
+  // The verdict below the amount is about where the month is HEADING, so it
+  // rests on the shared projection rather than on what is spent so far — the
+  // figure the forecast strip and the insights ribbon read too (PFA-175). Null
+  // when there is nothing to project from: the line then says nothing at all.
+  const headingOver = projectedOverBudget(projection, initialAmount);
+  const isThisMonth = isSameMonth(from ?? new Date(), new Date());
 
   // count both figures up from 0 (mount, data load, month change)
   const animatedPct = useCountUp(usedPct);
@@ -179,17 +189,21 @@ const BudgetHero = () => {
               </form>
             )}
 
-            {initialAmount > 0 ? (
-              <>
-                <span className="text-ink-4">•</span>
-                <span className={over ? "text-neg" : "text-accent-strong"}>{over ? t.overBudget : t.withinBudget}</span>
-                <span>{t.atCurrentPace}</span>
-              </>
-            ) : (
+            {initialAmount <= 0 ? (
               <>
                 <span className="text-ink-4">•</span>
                 <span className="text-accent-strong">{t.setBudgetPrompt}</span>
               </>
+            ) : (
+              headingOver !== null && (
+                <>
+                  <span className="text-ink-4">•</span>
+                  <span className={headingOver ? "text-neg" : "text-accent-strong"}>
+                    {headingOver ? t.overBudget : t.withinBudget}
+                  </span>
+                  {isThisMonth && <span>{t.atCurrentPace}</span>}
+                </>
+              )
             )}
           </div>
         </div>

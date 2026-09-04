@@ -68,6 +68,7 @@ const dashboard = {
     realized: "réalisé",
     projection: "projection",
     endOfMonthProjection: "Projection fin de mois",
+    noProjection: "Historique insuffisant",
     above: "au-dessus",
     underBudget: "sous budget",
   },

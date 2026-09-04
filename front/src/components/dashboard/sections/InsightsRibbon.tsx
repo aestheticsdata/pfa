@@ -11,11 +11,13 @@ import { Overline } from "@components/shared/Overline";
 import { MONTHLY } from "@components/spendings/config/constants";
 import { categoryDeltaPct, STABLE_TREND_THRESHOLD } from "@components/spendings/helpers/categoryTrend";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
+import { projectedOverBudget } from "@components/spendings/helpers/endOfMonthProjection";
 import overspendLevel from "@components/spendings/helpers/overspendLevel";
 import { spendingPaceDelta } from "@components/spendings/helpers/spendingPace";
 import useBusiestWeek from "@components/spendings/services/useBusiestWeek";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useDashboard from "@components/spendings/services/useDashboard";
+import useEndOfMonthProjection from "@components/spendings/services/useEndOfMonthProjection";
 import useSpendingPace from "@components/spendings/services/useSpendingPace";
 import { buildSpendingsPath } from "@helpers/dateRoute";
 import { interpolate } from "@i18n/interpolate";
@@ -27,8 +29,10 @@ import endOfMonth from "date-fns/endOfMonth";
 import format from "date-fns/format";
 import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";
+import isBefore from "date-fns/isBefore";
 import isSameMonth from "date-fns/isSameMonth";
 import parseISO from "date-fns/parseISO";
+import startOfMonth from "date-fns/startOfMonth";
 import { ArrowRightLeft, TrendingUp, TriangleAlert, Wallet } from "lucide-react";
 import Link from "next/link";
 
@@ -68,6 +72,7 @@ const InsightsRibbon = () => {
   const trends = trendsData?.trends;
   const { data: busiest } = useBusiestWeek();
   const { data: pace } = useSpendingPace();
+  const { projection } = useEndOfMonthProjection();
   const { insightsRibbon: t } = dashboardText;
 
   const budget = Number(dashboard?.initialAmount ?? 0);
@@ -75,9 +80,15 @@ const InsightsRibbon = () => {
   const monthRef = from ?? now;
   const daysInMonth = getDaysInMonth(monthRef);
   const isThisMonth = isSameMonth(monthRef, now);
-  const dayOfMonth = isThisMonth ? getDate(now) : daysInMonth;
-  const projection = dayOfMonth > 0 ? (monthlyTotal / dayOfMonth) * daysInMonth : monthlyTotal;
-  const underBudget = budget <= 0 || projection <= budget;
+  const isPastMonth = isBefore(startOfMonth(monthRef), startOfMonth(now));
+  // Days elapsed in the VIEWED month: up to today for the current one, the whole
+  // of a past (complete) one, none for a month that has not started — handing a
+  // future month its full length as "elapsed" would fabricate a daily rate.
+  const dayOfMonth = isThisMonth ? getDate(now) : isPastMonth ? daysInMonth : 0;
+  // Shared with the forecast strip and the hero, so the three cards can never
+  // reach opposite conclusions about the same month (PFA-175). Null = nothing to
+  // conclude (no reference period, or no budget set) → the sentence stays off.
+  const overBudget = projectedOverBudget(projection, budget);
   // The budget line is a forecast only while the month is still running; on its
   // last day and for past months there are no days left to project, so it reads
   // as a summary instead ("projection" then equals the month's actual total).
@@ -136,9 +147,10 @@ const InsightsRibbon = () => {
               ),
             })
           : t.paceEmpty}
-        {interpolate(budgetOutcome, {
-          state: <b className="font-semibold text-ink">{underBudget ? t.underBudget : t.overBudget}</b>,
-        })}
+        {overBudget !== null &&
+          interpolate(budgetOutcome, {
+            state: <b className="font-semibold text-ink">{overBudget ? t.overBudget : t.underBudget}</b>,
+          })}
       </Insight>
       <Insight
         tone="bg-neg/10 text-neg"
