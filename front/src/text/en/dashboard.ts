@@ -70,6 +70,7 @@ const dashboard: typeof frDashboard = {
     realized: "actual",
     projection: "projection",
     endOfMonthProjection: "End-of-month projection",
+    noProjection: "Not enough history",
     above: "over",
     underBudget: "under budget",
   },

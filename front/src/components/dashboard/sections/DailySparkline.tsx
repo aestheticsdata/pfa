@@ -8,6 +8,7 @@
 // first month of data (source "none" → no tail, no legend).
 
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { referenceDayAmount } from "@components/spendings/helpers/endOfMonthProjection";
 import useDailyProjection from "@components/spendings/services/useDailyProjection";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { interpolate } from "@i18n/interpolate";
@@ -64,7 +65,8 @@ const DailySparkline = () => {
     // "none" → the user's first month of data → no tail). It starts at today's
     // real point so the dashed curve continues seamlessly from the solid one.
     // A reference month shorter than the current one carries its last day's value
-    // forward for the overhanging days.
+    // forward for the overhanging days — `referenceDayAmount` owns that rule, so
+    // this curve and the forecast strip's summed figure stay in step (PFA-175).
     const source: ProjectionSource = projectionData?.source ?? "none";
     const refDaily = projectionData?.dailyTotals ?? [];
     const canProject = isThisMonth && today < daysInMonth && source !== "none" && refDaily.length > 0;
@@ -73,8 +75,7 @@ const DailySparkline = () => {
           { x: today, y: totals[today] ?? 0 },
           ...Array.from({ length: daysInMonth - today }, (_, i) => {
             const day = today + 1 + i;
-            const refValue = refDaily[day - 1] ?? refDaily[refDaily.length - 1] ?? 0;
-            return { x: day, y: refValue };
+            return { x: day, y: referenceDayAmount(refDaily, day) };
           }),
         ]
       : [];
