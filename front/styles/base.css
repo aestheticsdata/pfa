@@ -34,7 +34,7 @@
 }
 
 /*
-  No elastic overscroll bounce. One rule holding the property, so a scroller
+  No elastic overscroll bounce. One rule holding the property, so a surface
   added later is covered by adding its selector here and nowhere else.
 
   `none` and not `contain`: `contain` only stops the gesture chaining to the
@@ -42,21 +42,32 @@
   horizontal axis is left alone — that one is the browser's back gesture, so
   horizontal-only scrollers are deliberately absent from this list.
 
-  Matched by scroll-class substring rather than `*`: `overflow: hidden` makes an
-  element a scroll container too, and a non-scrollable one is permanently at its
-  boundary — `overscroll-behavior-y: none` there stops the wheel from reaching
-  the real scroller behind it. On `*` that silently froze the page over every
-  clipped box (PFA-168: the day cards of the category modal swallowed the
-  scroll, leaving only the gaps between two cards live).
+  Listed one surface at a time rather than by `*` or by scroll-class substring,
+  because `none` buys the missing bounce at the price of the scroll chaining:
+  an element carrying it stops passing the wheel outwards once it sits at its
+  own boundary. Two ways that has bitten:
+    - on `*`, every `overflow: hidden` box became a scroll container stuck at
+      its boundary and froze the page over itself (PFA-168: the day cards of
+      the category modal swallowed the scroll, leaving only the gaps between
+      two cards live);
+    - on the scroll classes, a list scrolled to its end trapped the wheel and
+      the page underneath would not move (PFA-178: the dashboard category
+      breakdown, the day cards of Dépenses on a phone).
+
+  So the property goes on the surfaces that ROOT a scroll chain and nothing
+  else: the page, and each layer floating over it. Everything nested keeps the
+  default `auto` and chains outwards — and since the chain ends on a surface
+  that does carry `none`, no rubber band shows up at the end of it either.
+
+  Radix dialogs need no entry: RemoveScroll already locks the page behind them,
+  so a scroller inside a modal is free to chain within the modal.
 */
 @layer base {
   html,
   body,
   .pfa-drawer,
-  [class*="overflow-y-auto"],
-  [class*="overflow-y-scroll"],
-  [class*="overflow-auto"],
-  [class*="overflow-scroll"] {
+  [data-radix-popper-content-wrapper] [class*="overflow-y-auto"],
+  [data-radix-popper-content-wrapper] [class*="overflow-y-scroll"] {
     overscroll-behavior-y: none;
   }
 }
