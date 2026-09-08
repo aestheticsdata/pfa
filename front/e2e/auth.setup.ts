@@ -6,7 +6,7 @@ const AUTH_FILE = "e2e/.auth/user.json";
 // Logs in once through the real login form and persists the pfa.sid session cookie.
 // Doubles as the login E2E test.
 setup("login and persist session", async ({ page }) => {
-  const email = process.env.E2E_EMAIL ?? "abc@abc.com";
+  const email = process.env.E2E_EMAIL ?? "local.dev@mock.io";
   const password = process.env.E2E_PASSWORD;
   if (!password) {
     throw new Error("E2E_PASSWORD manquant — copier .env.test.local.example vers .env.test.local et le remplir.");
