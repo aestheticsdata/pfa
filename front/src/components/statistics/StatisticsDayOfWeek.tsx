@@ -382,6 +382,7 @@ const StatisticsDayOfWeek = ({
             data-dow attribute (like the heatmap), so the tooltip follows the
             cursor across the rows without making each row separately interactive. */}
         <div
+          data-testid="weekday-plot"
           className="flex flex-col gap-4 md:gap-2"
           role="img"
           aria-label={dayOfWeek.title}
@@ -408,6 +409,7 @@ const StatisticsDayOfWeek = ({
             return (
               <div
                 key={dayOfWeek.days[dow]}
+                data-testid="weekday-row"
                 data-dow={dow}
                 className={`${ROW_GRID} text-sm`}
               >

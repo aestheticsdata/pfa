@@ -95,6 +95,7 @@ const WeeklyCeiling = () => {
           !editing ? (
             <button
               type="button"
+              data-testid="ceiling-edit"
               disabled={!canEdit}
               onClick={() => canEdit && setEditing(true)}
               className={cn(

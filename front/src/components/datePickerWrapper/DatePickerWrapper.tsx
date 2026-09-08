@@ -69,6 +69,7 @@ const DatePickerWrapper = () => {
         <PopoverTrigger asChild>
           <button
             type="button"
+            data-testid="week-picker"
             className={cn(
               "inline-flex select-none items-center gap-2.5 whitespace-nowrap rounded-lg border px-3.5 py-2 text-sm text-ink-2 shadow-lg transition-colors hover:cursor-pointer",
               isCalendarVisible

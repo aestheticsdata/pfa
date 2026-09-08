@@ -15,6 +15,8 @@ interface StackedBarProps {
   animate?: boolean;
   className?: string;
   ariaLabel?: string;
+  /** `data-testid` on the bar, for the demo harness and E2E; every segment carries `bar-segment`. */
+  testId?: string;
   /** Fires on pointer move over the bar with the segment index under the cursor. */
   onSegmentHover?: (index: number, event: MouseEvent) => void;
   /** Fires when the pointer leaves the bar. */
@@ -26,6 +28,7 @@ const Segment = ({ fraction, color, animate }: { fraction: number; color: string
   const width = useTween(fraction, animate);
   return (
     <span
+      data-testid="bar-segment"
       className="block h-full"
       style={{ width: `${width * 100}%`, background: color }}
     />
@@ -40,6 +43,7 @@ const StackedBar = ({
   animate = false,
   className,
   ariaLabel,
+  testId,
   onSegmentHover,
   onSegmentLeave,
 }: StackedBarProps) => {
@@ -72,6 +76,7 @@ const StackedBar = ({
       style={{ height, borderRadius: radius }}
       role="img"
       aria-label={ariaLabel}
+      data-testid={testId}
       onMouseMove={onSegmentHover ? handleMove : undefined}
       onMouseLeave={onSegmentLeave}
     >

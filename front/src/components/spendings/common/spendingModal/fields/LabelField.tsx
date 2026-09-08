@@ -65,6 +65,7 @@ const LabelField = ({
       <div className="flex flex-col gap-1.5">
         <TextInput
           id="spendingLabel"
+          data-testid="spending-label"
           placeholder={spendings.modal.fields.labelPlaceholder}
           className="dark:bg-surface-base"
           aria-invalid={!!error}

@@ -17,9 +17,13 @@ const getApiBaseUrlFromHeaders = async (): Promise<string> => {
   return `${protocol}://${host}`;
 };
 
+// The laptop's API origin wins whenever it is set, in a production build too (PFA-180): a
+// `next build` + `next start` on the machine — the demo film — has no nginx in front of it to
+// answer `/api` on its own host. Undefined in every real deploy, where `.env.local` never
+// travels, so ks-b keeps deriving the base from the request headers.
 const getApiBaseUrlForServer = async (): Promise<string> => {
   const localOverride = process.env.NEXT_PUBLIC_REMOTE_HOST_FROM_LOCALHOST;
-  if (process.env.NODE_ENV !== "production" && localOverride) {
+  if (localOverride) {
     return trimTrailingSlash(localOverride);
   }
 

@@ -103,6 +103,7 @@ const SharedLoginForm = ({
           </label>
           <input
             id="email"
+            data-testid="login-email"
             type="email"
             placeholder={fields.emailPlaceholder}
             autoComplete="email"
@@ -117,6 +118,7 @@ const SharedLoginForm = ({
       {displayPasswordField && (
         <PasswordField
           id="password"
+          testId="login-password"
           label={fields.passwordLabel}
           autoComplete={displayConfirmPasswordField ? "new-password" : "current-password"}
           invalid={!!errors.password}
@@ -172,6 +174,7 @@ const SharedLoginForm = ({
 
       <Button
         type="submit"
+        data-testid="login-submit"
         variant="primary"
         disabled={isSubmitting || disabled}
         className="h-auto w-full rounded-lg py-3 text-sm tracking-normal"

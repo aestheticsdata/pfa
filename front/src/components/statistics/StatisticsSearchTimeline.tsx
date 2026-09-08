@@ -198,6 +198,7 @@ const StatisticsSearchTimeline = () => {
   return (
     <GlowCard
       as="section"
+      data-testid="search-timeline"
       className="px-6 py-5.5"
     >
       <div className="flex flex-wrap items-baseline justify-between gap-4">
@@ -213,6 +214,7 @@ const StatisticsSearchTimeline = () => {
           <Search className="size-4 shrink-0 text-ink-4" />
           <input
             type="search"
+            data-testid="search-timeline-input"
             value={term}
             onChange={(e) => setParams({ term: e.target.value })}
             placeholder={t.placeholder}
@@ -324,6 +326,7 @@ const StatisticsSearchTimeline = () => {
                     keyboard-reachable "latest matches" rows below. */}
                 {/* biome-ignore lint/a11y/useKeyWithClickEvents: pointing at a bucket has no keyboard equivalent; the same navigation is exposed as real buttons in the matches list */}
                 <div
+                  data-testid="search-timeline-amount"
                   className={cn("relative border-b border-line", bucketIsClickable && "cursor-pointer")}
                   role="img"
                   aria-label={t.legendAmount}

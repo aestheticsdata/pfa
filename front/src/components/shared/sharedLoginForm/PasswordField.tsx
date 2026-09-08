@@ -16,10 +16,12 @@ interface PasswordFieldProps {
   invalid: boolean;
   registration: UseFormRegisterReturn;
   disabled?: boolean;
+  /** `data-testid` on the input — the demo harness and E2E address the field by it. */
+  testId?: string;
 }
 
 /** Auth password input with its own show/hide toggle. */
-const PasswordField = ({ id, label, autoComplete, invalid, registration, disabled }: PasswordFieldProps) => {
+const PasswordField = ({ id, label, autoComplete, invalid, registration, disabled, testId }: PasswordFieldProps) => {
   const login = useTranslations("login");
   const [show, setShow] = useState(false);
 
@@ -34,6 +36,7 @@ const PasswordField = ({ id, label, autoComplete, invalid, registration, disable
       <div className="relative">
         <input
           id={id}
+          data-testid={testId}
           type={show ? "text" : "password"}
           placeholder="••••••••"
           autoComplete={autoComplete}

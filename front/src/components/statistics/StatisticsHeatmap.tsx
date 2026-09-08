@@ -149,6 +149,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
         {/* grid — one hover handler on the container resolves the cell by position
             (like StackedBar), so the tooltip follows the cursor across the grid. */}
         <div
+          data-testid="heatmap"
           className="grid gap-0.5"
           style={{ gridTemplateColumns: gridColumns }}
           role="img"
@@ -188,6 +189,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
                     key={week}
                     className={cn("aspect-square min-h-[9px] rounded-xs", filled && "transition hover:brightness-150")}
                     style={style}
+                    data-testid="heatmap-cell"
                     data-dow={dow}
                     data-week={week}
                   />
@@ -229,6 +231,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
         <div>
           <div className="num mb-2.5 text-2xs uppercase tracking-caps text-ink-4">{t.distributionTitle}</div>
           <div
+            data-testid="heatmap-distribution"
             className="flex h-4 gap-0.5 overflow-hidden rounded-sm"
             role="img"
             aria-label={t.distributionTitle}
@@ -246,6 +249,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
                 key={lvl}
                 className="block h-full rounded-xs"
                 style={{ background: DIST_BG[lvl], flexGrow: counts[lvl], flexBasis: 0 }}
+                data-testid="heatmap-distribution-segment"
                 data-level={lvl}
               />
             ))}

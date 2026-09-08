@@ -80,6 +80,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
         <IconButton
           variant="bordered"
           size={8}
+          data-testid="fixed-expense-add"
           onClick={addSpending}
           aria-label={t.addAria}
           className="hover:border-accent-d"
@@ -155,6 +156,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
           return (
             <div
               key={r.ID}
+              data-testid="fixed-expense-row"
               className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 border-b border-line-soft py-2.5 last:border-b-0"
             >
               <span

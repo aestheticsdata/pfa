@@ -37,6 +37,7 @@ const SpendingSearchTrigger = () => {
     <>
       <button
         type="button"
+        data-testid="search-open"
         onClick={openSearch}
         className="hidden items-center gap-2 rounded-sm border border-line bg-surface-elev px-2.5 py-2 text-sm text-ink-3 transition-colors hover:text-ink md:flex"
       >
@@ -49,6 +50,7 @@ const SpendingSearchTrigger = () => {
 
       <button
         type="button"
+        data-testid="search-open"
         onClick={openSearch}
         className="relative flex w-full items-center rounded-md border border-line bg-surface-elev py-2 pl-8 pr-3 text-left text-sm text-ink-4 transition-colors hover:text-ink md:hidden"
       >

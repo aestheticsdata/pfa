@@ -91,6 +91,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
   const caret = (
     <button
       type="button"
+      data-testid="breakdown-toggle"
       onClick={toggleCollapsed}
       aria-expanded={!collapsed}
       aria-controls={DETAIL_ID}
@@ -142,6 +143,7 @@ const SpendingCategoryBreakdown = ({ rows, rangeLabel }: SpendingCategoryBreakdo
           list right below. */}
       <StackedBar
         animate
+        testId="week-category-bar"
         className="mb-2.5"
         radius="var(--radius-sm)"
         segments={rowsWithTrend.map((r) => ({ label: r.name, value: r.total, color: r.color }))}

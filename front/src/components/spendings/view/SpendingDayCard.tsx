@@ -149,6 +149,7 @@ const SpendingDayCard = ({
           ? "border border-elec bg-surface-elev shadow-[0_0_0_1px_var(--elec),0_16px_44px_oklch(0.72_0.15_230/0.24),inset_0_1px_0_oklch(1_0_0/0.06)]"
           : "pfa-card",
       )}
+      data-testid="day-card"
       data-sp-day={format(date, "yyyy-MM-dd")}
     >
       <div

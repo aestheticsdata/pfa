@@ -40,7 +40,9 @@ const ExceptionalItem = ({ item, onEdit, monthlyAverage }: ExceptionalItemProps)
 
   return (
     <>
-      <div className="group grid grid-cols-[76px_minmax(0,1fr)_auto_auto] items-center gap-x-4.5 gap-y-4.5 border-b border-line-soft px-5 py-4 last:border-b-0 max-md:grid-cols-[64px_1fr_auto] max-md:grid-rows-[auto_auto] max-md:gap-x-3 max-md:gap-y-2.5 max-md:px-4 max-md:py-3.5">
+      <div
+        data-testid="exceptional-item"
+        className="group grid grid-cols-[76px_minmax(0,1fr)_auto_auto] items-center gap-x-4.5 gap-y-4.5 border-b border-line-soft px-5 py-4 last:border-b-0 max-md:grid-cols-[64px_1fr_auto] max-md:grid-rows-[auto_auto] max-md:gap-x-3 max-md:gap-y-2.5 max-md:px-4 max-md:py-3.5">
         <span className="rounded-sm border border-line-soft bg-surface-hi py-1.5 text-center font-mono text-xs capitalize tabular-nums text-ink-3 max-md:col-start-1 max-md:row-start-1 max-md:self-start">
           {dateLabel}
         </span>

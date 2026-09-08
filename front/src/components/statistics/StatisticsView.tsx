@@ -170,7 +170,9 @@ const StatisticsView = () => {
           better — the two look close but aren't pixel-identical (accepted). Shadow
           is the shared --shadow-sticky token. `-mt-7` swallows the header's mb-7 to
           sit tight; `before` seals the seam above, as the KPI cards scroll behind. */}
-      <div className="rounded-xl border border-line bg-surface-elev px-4 py-2.5 shadow-sticky md:sticky md:top-[76px] md:z-30 md:-mt-7 md:before:pointer-events-none md:before:absolute md:before:inset-x-0 md:before:bottom-full md:before:h-16 md:before:bg-surface-base md:before:content-['']">
+      <div
+        data-testid="statistics-filters"
+        className="rounded-xl border border-line bg-surface-elev px-4 py-2.5 shadow-sticky md:sticky md:top-[76px] md:z-30 md:-mt-7 md:before:pointer-events-none md:before:absolute md:before:inset-x-0 md:before:bottom-full md:before:h-16 md:before:bg-surface-base md:before:content-['']">
         <StatisticsFilters
           years={yearOptions(currentYear)}
           selectedYear={selectedYear}
