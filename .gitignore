@@ -52,3 +52,5 @@ yarn-error.log*
 
 # design handoff (mockups / reference, not part of the app)
 design_handoff_pfa/
+# Local credentials cheat sheet (see the same file in zeus/spira/iknos/trekker)
+ACCOUNTS.md

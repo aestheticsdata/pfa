@@ -1,5 +1,5 @@
 /**
- * Mock-data seeder for the local demo account `abc@abc.com`.
+ * Mock-data seeder for the local demo account `local.dev@mock.io`.
  *
  * Generates a coherent "Paris life on ~3500 €/month" dataset: monthly budgets,
  * ~12 recurring charges, ~14 categories and thousands of realistic variable
@@ -65,8 +65,12 @@ function makePrisma(): PrismaClient {
 // --------------------------------------------------------------------------
 // Constants
 // --------------------------------------------------------------------------
-const USER_ID = "6c0183a0-9116-11ed-9ee4-d93e666919a2";
-const USER_EMAIL = "abc@abc.com";
+const USER_EMAIL = "local.dev@mock.io";
+/**
+ * Resolved from USER_EMAIL against the target database at startup, never hard-coded: the same
+ * account carries a different id on every machine.
+ */
+let USER_ID = "";
 const CUR = "EUR";
 
 // --------------------------------------------------------------------------
@@ -537,11 +541,15 @@ function generate(
 // --------------------------------------------------------------------------
 // Guards & wipe (scoped + guarded + FK-safe). Real exceptionals are kept.
 // --------------------------------------------------------------------------
-async function guardUser(prisma: PrismaClient): Promise<void> {
-  const user = await prisma.users.findUnique({ where: { ID: USER_ID } });
-  if (!user || user.email !== USER_EMAIL) {
-    throw new Error(`Refusing to run: user guard failed for ${USER_ID} (email=${user?.email ?? "none"})`);
+async function resolveUser(prisma: PrismaClient): Promise<void> {
+  const user = await prisma.users.findUnique({ where: { email: USER_EMAIL } });
+  if (!user) {
+    throw new Error(
+      `Refusing to run: no account ${USER_EMAIL} in this database. ` +
+        "Create it through the app's signup, then re-run.",
+    );
   }
+  USER_ID = user.ID;
 }
 
 async function wipeAll(prisma: PrismaClient): Promise<void> {
@@ -605,11 +613,11 @@ async function main(): Promise<void> {
 
   const prisma = makePrisma();
   try {
+    await resolveUser(prisma);
     console.log(
       `Seeding ${USER_EMAIL} (${USER_ID})\n` +
         `  mode: ${wipe ? "WIPE + rebuild" : "append (non-destructive)"}, range ${fmt(from)} → ${fmt(to)}`,
     );
-    await guardUser(prisma);
 
     if (wipe) {
       console.log("Wiping this account's seeded rows...");

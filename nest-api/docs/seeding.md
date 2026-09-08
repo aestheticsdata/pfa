@@ -1,6 +1,6 @@
 # Seeding guide — `scripts/seed.ts`
 
-Mock-data seeder for the local demo account **`abc@abc.com`**. It generates a
+Mock-data seeder for the local demo account **`local.dev@mock.io`**. It generates a
 coherent "Paris life on ~3500 €/month" dataset: monthly budgets, ~12 recurring
 charges, 14 categories, thousands of realistic variable spendings, and a few
 one-off exceptionals.
@@ -80,10 +80,24 @@ Every day from `--from` to today gets spendings added. Existing days are **not**
 skipped, so pick `--from` as the first day you actually want to add — a `--from`
 that overlaps existing data stacks extra spendings on those days.
 
+**Don't guess that date.** Ask the database for the last day the account already
+has, and start the day after:
+
+```sql
+SELECT MAX(date) FROM Spendings
+ WHERE userID = (SELECT ID FROM Users WHERE email = 'local.dev@mock.io');
+```
+
+A `--from` earlier than that doubles up the overlapping days; a `--from` later
+leaves a hole. Neither is detected by the script.
+
 ## Notes
 
-- **Account guard.** The script refuses to run unless `abc@abc.com` resolves to
-  the expected user id.
+- **Account guard.** The script looks the account up by email and refuses to run
+  if `local.dev@mock.io` does not exist in the database `DATABASE_URL` points at.
+  It creates neither the user nor anything else outside that user's rows — sign
+  the account up once through the front's `/signup` before the first run. The id
+  is resolved at runtime, so the script is not tied to one machine's database.
 - **Reproducibility.** The PRNG is seeded **per-month**, so a `--wipe` rebuild of
   the same range is deterministic. Append runs add fresh spendings each time, so
   they are not meant to be reproducible.

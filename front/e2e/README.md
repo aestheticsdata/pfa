@@ -3,7 +3,8 @@
 ## Prerequisites
 
 1. MySQL and Redis running (same as the regular dev setup).
-2. Seed account present: `pnpm --dir ../nest-api seed` (creates `abc@abc.com` with demo data).
+2. The dev account `local.dev@mock.io` exists (sign it up once at `/signup`), with demo data:
+   `pnpm --dir ../nest-api seed -- --from <date>`. The seeder fills that account, it does not create it.
 3. `cp .env.test.local.example .env.test.local` and fill in `E2E_PASSWORD` (git-ignored, never committed).
 
 ## Running
