@@ -54,3 +54,7 @@ yarn-error.log*
 design_handoff_pfa/
 # Local credentials cheat sheet (see the same file in zeus/spira/iknos/trekker)
 ACCOUNTS.md
+
+# The demo film harness (see front/e2e/demo/README.md): a take writes a gigabyte of JPEG in flight,
+# then an mp4, chapter files and 4K stills — none of it belongs in git.
+front/e2e/demo/out/

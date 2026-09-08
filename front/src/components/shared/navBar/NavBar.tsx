@@ -197,6 +197,8 @@ const NavBar = () => {
             <Link
               key={route.path}
               href={hrefFor(route)}
+              data-testid="nav-link"
+              data-route={route.labelKey}
               className={cn(
                 "rounded-sm px-3 py-1.5 text-sm font-medium transition-colors",
                 isActiveRoute(route.path) ? cn(ACTIVE_BG, "text-ink") : "text-ink-3 hover:text-ink-2",
@@ -213,6 +215,7 @@ const NavBar = () => {
               <MonthSelector />
               <button
                 type="button"
+                data-testid="current-month"
                 onClick={goToCurrentMonth}
                 disabled={currentMonthDisabled}
                 className={currentMonthButtonClass}
@@ -226,6 +229,7 @@ const NavBar = () => {
                 <DatePickerWrapper />
                 <button
                   type="button"
+                  data-testid="today"
                   onClick={handleGoToToday}
                   className={PERIOD_BTN}
                 >
@@ -247,7 +251,8 @@ const NavBar = () => {
             <MonthSelector />
             <button
               type="button"
-              onClick={goToCurrentMonth}
+              data-testid="current-month"
+                onClick={goToCurrentMonth}
               disabled={currentMonthDisabled}
               className={cn(currentMonthButtonClass, "self-start")}
             >
@@ -260,7 +265,8 @@ const NavBar = () => {
               <DatePickerWrapper />
               <button
                 type="button"
-                onClick={handleGoToToday}
+                data-testid="today"
+                  onClick={handleGoToToday}
                 className={`${PERIOD_BTN} self-start`}
               >
                 {text.today}

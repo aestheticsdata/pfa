@@ -119,6 +119,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
         <DialogPrimitive.Overlay className="fixed inset-0 z-[200] bg-[oklch(0.02_0.004_250/0.62)] backdrop-blur-sm animate-in fade-in duration-150 ease-out" />
         <div className="pointer-events-none fixed inset-0 z-[201] grid place-items-center p-8 max-sm:p-3.5">
           <DialogPrimitive.Content
+            data-testid="category-detail"
             className="pfa-card shadow-modal! pointer-events-auto flex max-h-[88vh] w-[min(1000px,94vw)] flex-col overflow-hidden outline-none animate-in fade-in slide-in-from-bottom-3.5 zoom-in-95 duration-200 max-sm:max-h-[92vh]"
             aria-describedby={undefined}
             ref={contentRef}
@@ -198,7 +199,10 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
               onSelect={setPatternKey}
             />
 
-            <div className="pfa-scroll-thin flex min-h-0 flex-auto flex-col gap-3.5 overflow-y-auto px-5.5 pb-5.5 pt-4">
+            <div
+              data-testid="category-detail-list"
+              className="pfa-scroll-thin flex min-h-0 flex-auto flex-col gap-3.5 overflow-y-auto px-5.5 pb-5.5 pt-4"
+            >
               {groupedEntries.length === 0 ? (
                 <div className="py-10 text-center text-sm text-ink-4">
                   {normalizedSearchTerm ? t.noMatch : t.noSpendings}
@@ -211,6 +215,7 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                     <button
                       key={date}
                       type="button"
+                      data-testid="category-detail-day"
                       className="group w-full shrink-0 cursor-pointer overflow-hidden rounded-lg border border-line bg-surface-elev text-left transition duration-150 hover:-translate-y-px hover:border-elec hover:shadow-[0_0_0_1px_var(--elec),0_14px_34px_oklch(0.72_0.15_230/0.2)]"
                       title={t.seeWeek}
                       onClick={() => goToDayWeek(date)}

@@ -10,6 +10,8 @@ interface DropzoneProps {
   onFile: (file: File | undefined) => void;
   /** Layout/shape chrome: flex direction, radius, padding, text alignment… */
   className?: string;
+  /** `data-testid` on the label, for the demo harness and E2E — the input inside it is hidden. */
+  testId?: string;
   children: ReactNode;
 }
 
@@ -18,11 +20,12 @@ interface DropzoneProps {
  * drag state that tints the dashed border. Layout and content come from the caller
  * via `className`/`children`; type/size validation lives in `onFile`.
  */
-function Dropzone({ accept, onFile, className, children }: DropzoneProps) {
+function Dropzone({ accept, onFile, className, testId, children }: DropzoneProps) {
   const [isDragging, setIsDragging] = useState(false);
 
   return (
     <label
+      data-testid={testId}
       onDragEnter={(e) => {
         e.preventDefault();
         setIsDragging(true);

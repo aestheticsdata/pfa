@@ -36,6 +36,7 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
     <>
       <GlowCard
         hover
+        data-testid="category-tile"
         className="flex flex-col gap-2.5 px-4 pb-3 pt-3.5"
       >
         <div className="flex items-center gap-2.5">
@@ -48,6 +49,7 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
             <IconButton
               variant="bordered"
               size={6}
+              data-testid="category-edit"
               onClick={() => setIsEditOpen(true)}
               aria-label={t.editAction}
               title={t.editAction}

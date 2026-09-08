@@ -8,10 +8,6 @@ const devConnectSources = [
   "http://127.0.0.1:6100",
 ];
 
-if (localApiHost) {
-  devConnectSources.push(localApiHost);
-}
-
 const cspDirectives = {
   "default-src": ["'self'"],
   "base-uri": ["'self'"],
@@ -34,6 +30,10 @@ const cspDirectives = {
     // even consulted.
     "https://iknos.1991computer.com",
     ...(isDev ? devConnectSources : []),
+    // The laptop's API origin (`front/.env.local`, PFA-180) — the one `useRequestHelper` calls
+    // from a page served on localhost, whatever the build. Undefined in every real deploy:
+    // `.env.local` never leaves the machine, so on ks-b this adds nothing.
+    ...(localApiHost ? [localApiHost] : []),
   ],
   "frame-src": ["'none'"],
   "worker-src": ["'self'", "blob:"],

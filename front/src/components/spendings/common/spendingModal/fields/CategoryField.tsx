@@ -82,6 +82,7 @@ const CategoryField = ({
         <PopoverTrigger asChild>
           <button
             type="button"
+            data-testid="spending-category"
             role="combobox"
             aria-expanded={comboboxOpen}
             onKeyDown={(e) => {
@@ -115,6 +116,7 @@ const CategoryField = ({
         >
           <Command className="bg-transparent">
             <CommandInput
+              data-testid="spending-category-search"
               placeholder={t.category.searchPlaceholder}
               value={comboboxQuery}
               onValueChange={setComboboxQuery}
@@ -143,6 +145,8 @@ const CategoryField = ({
                 {categoryOptions.map((category) => (
                   <CommandItem
                     key={category.ID ?? category.name}
+                    data-testid="spending-category-option"
+                    data-category={category.name}
                     value={category.name}
                     onSelect={() => {
                       setSelectedCategory(category);

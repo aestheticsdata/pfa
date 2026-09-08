@@ -133,6 +133,7 @@ const SpendingSearchModal = () => {
       }}
     >
       <DialogContent
+        data-testid="search-modal"
         aria-describedby={undefined}
         className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[700px]"
       >
@@ -146,6 +147,7 @@ const SpendingSearchModal = () => {
           <Search className="size-4 shrink-0 text-ink-4" />
           <input
             type="search"
+            data-testid="search-input"
             autoFocus
             value={q}
             onChange={(e) => onQueryChange(e.target.value)}
@@ -181,6 +183,7 @@ const SpendingSearchModal = () => {
 
         <div
           ref={scrollRef}
+          data-testid="search-results"
           className="h-[min(72vh,590px)] overflow-y-auto"
         >
           {emptyMessage !== null ? (

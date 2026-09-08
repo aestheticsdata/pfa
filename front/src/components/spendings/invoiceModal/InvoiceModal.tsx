@@ -171,7 +171,10 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
         open={open}
         onOpenChange={(isOpen) => !isOpen && handleClickOutside()}
       >
-        <DialogContent className="max-h-[92vh] gap-0 overflow-y-auto border-line bg-surface-elev p-0 sm:max-w-[600px]">
+        <DialogContent
+          data-testid="receipt-modal"
+          className="max-h-[92vh] gap-0 overflow-y-auto border-line bg-surface-elev p-0 sm:max-w-[600px]"
+        >
           <DialogHeader className="flex-row items-center gap-3 space-y-0 pb-4 pl-5.5 pr-14 pt-5 text-left">
             <DialogTitle
               className="min-w-0 flex-1 truncate pr-8 text-xl font-semibold tracking-tight text-ink"
@@ -211,6 +214,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
             ) : invoiceImage ? (
               <button
                 type="button"
+                data-testid="receipt-image"
                 onClick={() => setIsClickOnThumbnail(true)}
                 className="block w-full cursor-zoom-in"
                 aria-label={invoiceModalTexts.enlargeAria}
@@ -276,6 +280,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                 </Button>
                 <Button
                   type="button"
+                  data-testid="receipt-send"
                   variant="primary"
                   size="lg"
                   onClick={sendInvoice}
@@ -287,6 +292,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
             ) : !isLoading ? (
               <Dropzone
                 accept="image/jpeg,image/png,image/webp,image/gif"
+                testId="receipt-pick"
                 onFile={(file) => {
                   if (file) {
                     selectFile(file);

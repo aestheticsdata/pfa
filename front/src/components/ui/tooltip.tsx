@@ -134,6 +134,7 @@ const CursorModeTooltip = ({ point, children, background, color, borderColor, ma
 
   return createPortal(
     <div
+      data-testid="cursor-tooltip"
       ref={ref}
       className={cn(
         SURFACE,

@@ -55,6 +55,7 @@ const MonthPickerPopover = ({ month, currentMonthStart, onSelectMonth }: MonthPi
           "septembre 2025", in mono) so the control never resizes between months;
           whitespace-nowrap keeps it on one line — a wrapped label grows the navbar. */}
       <PopoverTrigger
+        data-testid="month-picker"
         aria-label={text.chooseMonth(label)}
         className="num w-36 cursor-pointer whitespace-nowrap rounded-sm px-1 py-0.5 text-center text-sm capitalize tracking-normal text-ink-2 transition-colors hover:text-ink"
       >
@@ -99,6 +100,8 @@ const MonthPickerPopover = ({ month, currentMonthStart, onSelectMonth }: MonthPi
                 <button
                   key={format(cellDate, "MM")}
                   type="button"
+                  data-testid="month-cell"
+                  data-month={format(cellDate, "yyyy-MM")}
                   onClick={() => selectMonth(cellDate)}
                   aria-current={isSelected ? "date" : undefined}
                   aria-label={text.goToMonth(format(cellDate, "MMMM yyyy", { locale: dateLocale }))}

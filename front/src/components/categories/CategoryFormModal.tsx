@@ -158,7 +158,10 @@ const CategoryFormModal = ({ open, onOpenChange, onSubmit, ...bodyProps }: Categ
     open={open}
     onOpenChange={onOpenChange}
   >
-    <DialogContent className="sm:max-w-[452px]">
+    <DialogContent
+      data-testid="category-form"
+      className="sm:max-w-[452px]"
+    >
       <CategoryFormBody
         {...bodyProps}
         onSubmit={(name, color) => {

@@ -243,6 +243,7 @@ const SpendingView = () => {
       {/* Floating action button — fixed bottom-right (design: .open-modal-btn) */}
       <Button
         type="button"
+        data-testid="new-spending"
         variant="primary"
         onClick={() => setIsQuickAddOpen(true)}
         className="fixed bottom-6 right-6 z-30 shadow-float"

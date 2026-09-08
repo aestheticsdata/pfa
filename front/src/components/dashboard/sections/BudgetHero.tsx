@@ -152,6 +152,7 @@ const BudgetHero = () => {
                   amount: (
                     <button
                       type="button"
+                      data-testid="budget-edit"
                       onClick={() => setEditing(true)}
                       className="group inline-flex items-center gap-1 border-b border-dashed border-ink-4 pb-px leading-tight transition-colors hover:border-accent-strong"
                       aria-label={t.editBudgetAria}
@@ -211,6 +212,7 @@ const BudgetHero = () => {
         <div className="flex flex-col items-center gap-2 sm:items-end">
           <Donut
             key={monthKey}
+            testId="budget-donut"
             segments={segments}
             capacity={initialAmount}
             size={168}

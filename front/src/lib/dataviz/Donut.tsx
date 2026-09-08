@@ -44,6 +44,8 @@ interface DonutProps {
   children?: ReactNode;
   className?: string;
   ariaLabel?: string;
+  /** `data-testid` on the graphic, for the demo harness and E2E. */
+  testId?: string;
 }
 
 const CX = 50;
@@ -91,6 +93,7 @@ const Donut = ({
   children,
   className,
   ariaLabel,
+  testId,
 }: DonutProps) => {
   const segmentsTotal = segments.reduce((sum, seg) => sum + Math.max(0, seg.value), 0);
   // Gauge full-scale denominator (ring): segments + the leftover "available" band,
@@ -351,6 +354,7 @@ const Donut = ({
         height={size}
         role="img"
         aria-label={ariaLabel}
+        data-testid={testId}
         // overflow visible so the hovered arc's zoom isn't clipped by the viewBox edge
         style={emphasizeOnHover ? { overflow: "visible" } : undefined}
         onMouseMove={onSegmentHover || emphasizeOnHover ? handleMove : undefined}

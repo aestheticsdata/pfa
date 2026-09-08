@@ -22,6 +22,7 @@ const AmountField = ({ register, error }: AmountFieldProps) => {
       <div className="flex items-baseline gap-2 rounded-md border border-line bg-surface-base px-3 py-2.5 transition-colors focus-within:border-accent-d">
         <input
           id="spendingAmount"
+          data-testid="spending-amount"
           inputMode="decimal"
           placeholder="0,00"
           className="num min-w-0 flex-1 bg-transparent text-sm font-medium tracking-tight text-ink outline-none placeholder:text-ink-5"

@@ -200,7 +200,10 @@ const SpendingModal = ({
       open={open}
       onOpenChange={(isOpen) => !isOpen && closeModal()}
     >
-      <DialogContent className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[480px]">
+      <DialogContent
+        data-testid="spending-modal"
+        className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-[480px]"
+      >
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-5.5 py-4.5 text-left">
           <DialogTitle className="pr-8 text-base font-semibold tracking-normal text-ink">{title}</DialogTitle>
         </DialogHeader>
@@ -329,6 +332,7 @@ const SpendingModal = ({
             </Button>
             <Button
               type="submit"
+              data-testid="spending-submit"
               variant="primary"
               disabled={isSubmitting}
             >

@@ -43,7 +43,10 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
   };
 
   return (
-    <div className="group relative grid grid-cols-[minmax(0,1fr)_auto_78px] items-center gap-3 border-t border-line-soft py-2.75 first:border-t-0 before:pointer-events-none before:absolute before:inset-x-0 before:inset-y-px before:z-0 before:rounded-lg before:transition-colors before:duration-100 before:content-[''] hover:before:bg-surface-hi max-md:grid-cols-[minmax(0,1fr)_auto] max-md:grid-rows-[auto_auto] max-md:gap-y-1.5">
+    <div
+      data-testid="tx-row"
+      data-has-receipt={hasInvoice}
+      className="group relative grid grid-cols-[minmax(0,1fr)_auto_78px] items-center gap-3 border-t border-line-soft py-2.75 first:border-t-0 before:pointer-events-none before:absolute before:inset-x-0 before:inset-y-px before:z-0 before:rounded-lg before:transition-colors before:duration-100 before:content-[''] hover:before:bg-surface-hi max-md:grid-cols-[minmax(0,1fr)_auto] max-md:grid-rows-[auto_auto] max-md:gap-y-1.5">
       {confirming ? (
         <div
           className="relative z-10 col-span-full flex items-center gap-3 rounded-lg border border-danger-border-soft bg-danger-surface py-2 pl-3.75 pr-2.5 shadow-[0_6px_20px_oklch(0.3_0.16_25/0.28)]"
@@ -112,6 +115,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             <IconButton
               variant="bordered"
               size={7}
+              data-testid="tx-receipt"
               title={hasInvoice ? txRow.viewReceipt : txRow.addReceipt}
               onClick={() => setInvoiceOpen(true)}
               className={
@@ -125,6 +129,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             <IconButton
               variant="bordered"
               size={7}
+              data-testid="tx-edit"
               title={item.actions.edit}
               onClick={() => onEdit(spending)}
             >
@@ -133,6 +138,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             <IconButton
               variant="danger"
               size={7}
+              data-testid="tx-delete"
               title={item.actions.delete}
               onClick={() => setConfirming(true)}
             >

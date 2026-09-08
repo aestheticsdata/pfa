@@ -69,6 +69,7 @@ const CategoryBreakdown = () => {
   return (
     <GlowCard
       as="section"
+      data-testid="category-breakdown"
       className="flex max-h-137.5 min-h-80 flex-col gap-4 px-6 py-5"
     >
       <CardSectionHeader
@@ -79,6 +80,7 @@ const CategoryBreakdown = () => {
       {list.length > 0 ? (
         <>
           <StackedBar
+            testId="category-bar"
             segments={categoriesToSegments(list, common.category.uncategorized)}
             height={8}
             radius={4}
@@ -91,6 +93,8 @@ const CategoryBreakdown = () => {
               <button
                 key={row.name}
                 type="button"
+                data-testid="category-row"
+                data-count={row.count}
                 onClick={() => setSelected(row.category)}
                 className="grid cursor-pointer grid-cols-[10px_minmax(0,1fr)_auto] items-center gap-3 border-b border-line-soft px-1 py-3 text-left text-sm transition-colors last:border-b-0 hover:bg-surface-hi sm:grid-cols-[10px_minmax(0,1fr)_58px_84px_58px]"
               >
