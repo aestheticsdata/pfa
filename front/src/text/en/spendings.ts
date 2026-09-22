@@ -162,6 +162,7 @@ const spendings: typeof frSpendings = {
   },
   spendingsListModal: {
     total: "total",
+    projection: "end-of-month projection",
     filter: "filter",
     searchPlaceholder: "Search…",
     noCategoryLabel: "uncategorized",

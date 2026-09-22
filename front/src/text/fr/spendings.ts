@@ -160,6 +160,7 @@ const spendings = {
   },
   spendingsListModal: {
     total: "total",
+    projection: "projection fin de mois",
     filter: "filtrer",
     searchPlaceholder: "Rechercher…",
     noCategoryLabel: "sans catégorie",
