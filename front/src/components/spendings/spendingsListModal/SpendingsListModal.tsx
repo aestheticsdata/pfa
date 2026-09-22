@@ -13,6 +13,7 @@ import { buildSpendingsPath } from "@helpers/dateRoute";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
+import { cn } from "@lib/utils";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
@@ -36,6 +37,20 @@ interface SpendingsListModalProps {
 }
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
+
+/**
+ * A header figure: the amount in tabular mono with the currency symbol set
+ * smaller and dimmer beside it, so the digits carry the line. `muted` steps the
+ * figure back in colour AND weight — only one amount in the header is at full
+ * intensity, and it is the realized total.
+ */
+const HeaderAmount = ({ amount, muted }: { amount: string; muted?: boolean }) => (
+  <span className={cn("num text-lg leading-none", muted ? "font-medium text-ink-2" : "font-semibold text-ink")}>
+    {amount}
+    {/* Weight is inherited on purpose, so the symbol follows its figure. */}
+    <span className="ml-0.5 text-sm text-ink-4">€</span>
+  </span>
+);
 
 const groupByDate = (spendings: SpendingItem[]): Record<string, SpendingItem[]> => {
   return spendings.reduce((acc: Record<string, SpendingItem[]>, curr) => {
@@ -152,36 +167,45 @@ const SpendingsListModal = ({
               setPatternKey(null);
             }}
           >
-            <div className="flex shrink-0 items-center gap-3.5 border-b border-line bg-[linear-gradient(180deg,oklch(1_0_0/0.045),oklch(1_0_0/0.018))] px-5.5 py-4.5 max-sm:flex-wrap max-sm:gap-x-3 max-sm:gap-y-2.5">
+            {/* Identity on the left, figures on the right (PFA-183, handoff
+                variant A). The rule between the two amounts is the second
+                column's own left border, so it cannot outlive the projection. */}
+            <div className="flex shrink-0 items-center gap-3.5 border-b border-line bg-[linear-gradient(180deg,oklch(1_0_0/0.045),oklch(1_0_0/0.018))] px-5.5 py-4.5 max-sm:flex-wrap max-sm:gap-y-3">
               <span
                 className="size-7.5 shrink-0 rounded-md shadow-[inset_0_1px_0_oklch(1_0_0/0.25)]"
                 style={{ background: categoryColor }}
               />
-              <DialogPrimitive.Title asChild>
-                <span className="text-xl font-semibold capitalize tracking-snug text-ink">
-                  {categoryInfos.category ?? t.noCategoryLabel}
-                </span>
-              </DialogPrimitive.Title>
-              <span className="inline-flex items-baseline gap-2">
-                <span className="text-2xs font-medium uppercase tracking-widest text-ink-4">{t.total}&nbsp;:</span>
-                <span className="font-mono text-base font-semibold tabular-nums text-ink">{euro(total)} €</span>
-              </span>
-              {/* Muted next to the realized total, as on the breakdown row it was
-                  opened from: what is spent reads first, where it is heading second. */}
-              {projected != null && (
-                <span className="inline-flex items-baseline gap-2">
-                  <span className="text-2xs font-medium uppercase tracking-widest text-ink-4">
-                    {t.projection}&nbsp;:
+              <span className="flex min-w-0 flex-col gap-1">
+                <DialogPrimitive.Title asChild>
+                  <span className="truncate text-xl font-semibold capitalize tracking-snug text-ink">
+                    {categoryInfos.category ?? t.noCategoryLabel}
                   </span>
-                  <span className="font-mono text-sm font-semibold tabular-nums text-ink-2">{euro(projected)} €</span>
+                </DialogPrimitive.Title>
+                {periodLabel && (
+                  <span className="truncate text-2xs font-medium uppercase tracking-widest text-ink-4">
+                    {periodLabel}
+                  </span>
+                )}
+              </span>
+
+              <span className="ml-auto flex items-stretch max-sm:order-5 max-sm:ml-0 max-sm:basis-full max-sm:justify-between">
+                <span className="flex flex-col gap-1 px-4.5 text-right max-sm:px-0 max-sm:text-left">
+                  <span className="text-2xs font-medium uppercase tracking-widest text-ink-4">{t.total}</span>
+                  <HeaderAmount amount={euro(total)} />
                 </span>
-              )}
-              <span className="flex-1 max-sm:order-5 max-sm:h-0 max-sm:basis-full" />
-              {periodLabel && (
-                <span className="whitespace-nowrap text-xs font-medium uppercase tracking-widest text-ink-3 max-sm:order-6">
-                  {periodLabel}
-                </span>
-              )}
+                {projected != null && (
+                  <span className="flex flex-col gap-1 border-l border-line px-4.5 text-right max-sm:border-l-0 max-sm:px-0">
+                    <span className="whitespace-nowrap text-2xs font-medium uppercase tracking-widest text-ink-4">
+                      {t.projection}
+                    </span>
+                    <HeaderAmount
+                      amount={euro(projected)}
+                      muted
+                    />
+                  </span>
+                )}
+              </span>
+
               <DialogPrimitive.Close
                 className="grid size-7.5 shrink-0 cursor-pointer place-items-center rounded-md border border-line bg-surface-hi text-ink-3 transition duration-100 hover:border-elec hover:bg-elec/12 hover:text-elec hover:ring-3 hover:ring-elec/16"
                 aria-label={t.close}
