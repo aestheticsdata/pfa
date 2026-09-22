@@ -70,6 +70,10 @@ export interface CategoryTooltipDatum {
   /** Trend data — the page computes it from its own source (weekly vs monthly).
    *  Omit for data with no trend — the "Trend" row is then hidden. */
   trend?: CategoryTrendData;
+  /** End-of-month projection in euros. Omit where there is none to show — a
+   *  closed period, or a category the reference month expects nothing more
+   *  from — and the "Projection" row is then hidden. */
+  projected?: number;
 }
 
 /**

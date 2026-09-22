@@ -12,7 +12,7 @@ interface CategoryTooltipContentProps {
 
 /**
  * Body of a stacked category bar's hover tooltip: mirrors the list row (swatch
- * / name / count / % / amount / trend). Shared by the Spendings and Dashboard
+ * / name / count / % / amount / trend / projection). Shared by the Spendings and Dashboard
  * breakdowns, which render it inside `<Tooltip mode="cursor">` — the bubble
  * (surface, border, fade, positioning) belongs to the tooltip, not here.
  */
@@ -44,6 +44,12 @@ const CategoryTooltipContent = ({ datum }: CategoryTooltipContentProps) => {
           <>
             <span className="text-ink-4">{t.tooltipTrend}</span>
             <CategoryTrend {...datum.trend} />
+          </>
+        )}
+        {datum.projected != null && (
+          <>
+            <span className="text-ink-4">{t.tooltipProjected}</span>
+            <span className="text-right text-ink-2">{euro(datum.projected)} €</span>
           </>
         )}
       </div>

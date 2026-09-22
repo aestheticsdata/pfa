@@ -7,6 +7,7 @@
 // reference follows the GLOBAL projection chain and is absent at the user's very
 // first month of data (source "none" → no tail, no legend).
 
+import ProjectionBasisCaption from "@components/dashboard/sections/ProjectionBasisCaption";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { referenceDayAmount } from "@components/spendings/helpers/endOfMonthProjection";
 import useDailyProjection from "@components/spendings/services/useDailyProjection";
@@ -188,9 +189,7 @@ const DailySparkline = () => {
         ))}
       </div>
 
-      {projectionSource !== "none" && (
-        <p className="mt-1.5 text-right text-3xs text-ink-4">{t.projectionBasis[projectionSource]}</p>
-      )}
+      <ProjectionBasisCaption source={projectionSource} />
     </div>
   );
 };

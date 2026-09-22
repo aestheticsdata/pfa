@@ -71,6 +71,7 @@ const statistics = {
     tooltipShare: "Part",
     tooltipAmount: "Montant",
     tooltipTrend: "Tendance",
+    tooltipProjected: "Projection",
   },
   topCategories: {
     title: "Top catégories",
