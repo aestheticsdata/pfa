@@ -29,6 +29,10 @@ interface SpendingsListModalProps {
   periodType: PeriodType;
   categoryInfos: CategoryProps;
   total: number;
+  /** The category's end-of-month projection (PFA-182). Optional: the weekly
+   *  breakdown this modal is shared with has none, and neither has a category
+   *  the reference month expects nothing more from. */
+  projected?: number;
 }
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
@@ -48,7 +52,13 @@ const groupByDate = (spendings: SpendingItem[]): Record<string, SpendingItem[]> 
  * card links back to the week that contains it. Design ported from
  * design_handoff_pfa/designs/assets/cat-detail.{js,css} onto pfa tokens.
  */
-const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, total }: SpendingsListModalProps) => {
+const SpendingsListModal = ({
+  handleClickOutside,
+  periodType,
+  categoryInfos,
+  total,
+  projected,
+}: SpendingsListModalProps) => {
   const { euro, pct1 } = useFormat();
   const texts = useTranslations("spendings");
   const dateLocale = useDateLocale();
@@ -156,6 +166,16 @@ const SpendingsListModal = ({ handleClickOutside, periodType, categoryInfos, tot
                 <span className="text-2xs font-medium uppercase tracking-widest text-ink-4">{t.total}&nbsp;:</span>
                 <span className="font-mono text-base font-semibold tabular-nums text-ink">{euro(total)} €</span>
               </span>
+              {/* Muted next to the realized total, as on the breakdown row it was
+                  opened from: what is spent reads first, where it is heading second. */}
+              {projected != null && (
+                <span className="inline-flex items-baseline gap-2">
+                  <span className="text-2xs font-medium uppercase tracking-widest text-ink-4">
+                    {t.projection}&nbsp;:
+                  </span>
+                  <span className="font-mono text-sm font-semibold tabular-nums text-ink-2">{euro(projected)} €</span>
+                </span>
+              )}
               <span className="flex-1 max-sm:order-5 max-sm:h-0 max-sm:basis-full" />
               {periodLabel && (
                 <span className="whitespace-nowrap text-xs font-medium uppercase tracking-widest text-ink-3 max-sm:order-6">

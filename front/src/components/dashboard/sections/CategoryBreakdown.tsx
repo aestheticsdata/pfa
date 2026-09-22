@@ -61,13 +61,24 @@ const CategoryBreakdown = () => {
   const total = list.reduce((a, c) => a + c.value, 0) || 1;
   const monthLabel = format(from ?? new Date(), "MMMM yyyy", { locale: dateLocale });
 
+  /**
+   * Where a category lands by the end of the month: its realized total plus what
+   * the reference month still expects. Undefined where nothing more is expected —
+   * a figure repeating the realized amount would say nothing.
+   *
+   * Joined on the raw category, never the displayed name: uncategorized shows a
+   * translated label, which would stop matching in another locale. Defined once
+   * so the row, the tooltip and the drill-down modal cannot drift (PFA-182).
+   */
+  const projectedTotal = (category: CategoryTrendPoint): number | undefined => {
+    const remainder = remainders.get(categoryKey(category.category)) ?? 0;
+    return remainder > 0 ? category.value + remainder : undefined;
+  };
+
   // One derived row per category, shared by the list AND the hover tooltip so
   // both render identical values (no recompute). Order matches the bar segments.
   const rows = list.map((category) => {
     const name = category.category ?? t.uncategorized;
-    // Joined on the raw category, never the displayed name: uncategorized shows
-    // a translated label, which would stop matching in another locale.
-    const remainder = remainders.get(categoryKey(category.category)) ?? 0;
     return {
       category,
       color: category.categoryColor ?? FALLBACK_COLOR,
@@ -76,9 +87,7 @@ const CategoryBreakdown = () => {
       pct: (category.value / total) * 100,
       total: category.value,
       trend: categoryTrend(category.value, category.previousValue, { stable: t.trendStable, fresh: t.trendNew }),
-      // Undefined where the reference month expects nothing more — a figure
-      // repeating the realized amount would say nothing.
-      projected: remainder > 0 ? category.value + remainder : undefined,
+      projected: projectedTotal(category),
     };
   });
 
@@ -160,6 +169,7 @@ const CategoryBreakdown = () => {
           periodType={MONTHLY}
           categoryInfos={selected}
           total={selected.value}
+          projected={projectedTotal(selected)}
         />
       )}
     </GlowCard>
