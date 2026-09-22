@@ -1,4 +1,12 @@
 const dashboard = {
+  // Names the historical period a projection rests on (COS-27). Shared by the
+  // sparkline's dashed tail and the per-category breakdown (PFA-181) — both read
+  // the same reference month, so both name it the same way.
+  projectionBasis: {
+    sameMonthLastYear: "Projection basée sur le même mois l'an dernier",
+    sameMonthTwoYearsAgo: "Projection basée sur le même mois il y a deux ans",
+    previousMonth: "Projection basée sur le mois précédent",
+  },
   monthSelector: {
     prevMonth: "Mois précédent",
     nextMonth: "Mois suivant",
@@ -30,6 +38,8 @@ const dashboard = {
     trendStable: "stable",
     trendNew: "nouv.",
     empty: "Aucune dépense ce mois.",
+    // Projection fin de mois de la ligne, sous son montant réalisé.
+    projected: (amount: string) => `→ ${amount}`,
   },
   dailySparkline: {
     title: "Consommation jour par jour",
@@ -37,12 +47,6 @@ const dashboard = {
     peak: "Pic",
     avgShort: "moy.",
     chartAria: "Consommation quotidienne",
-    // Caption naming the historical basis of the projected (dashed) tail (COS-27).
-    projectionBasis: {
-      sameMonthLastYear: "Projection basée sur le même mois l'an dernier",
-      sameMonthTwoYearsAgo: "Projection basée sur le même mois il y a deux ans",
-      previousMonth: "Projection basée sur le mois précédent",
-    },
   },
   fixedExpenses: {
     title: "Dépenses fixes",

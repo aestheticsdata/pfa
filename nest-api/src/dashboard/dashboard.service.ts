@@ -9,12 +9,29 @@ import type { MonthlyIncomeResponse } from "@dashboard/dto/monthly-income-respon
 // exists yet — the front shows no projection tail, never an average fallback).
 export type ProjectionSource = "sameMonthLastYear" | "sameMonthTwoYearsAgo" | "previousMonth" | "none";
 
+/** One category's slice of the reference month, day by day (PFA-181). */
+export interface CategoryDailyTotals {
+  /** Category name; null = uncategorized. */
+  category: string | null;
+  /** Category colour; null = uncategorized/fallback. */
+  categoryColor: string | null;
+  /** The category's day-by-day totals in the reference month; index i = day (i+1). */
+  dailyTotals: number[];
+}
+
 export interface DailyProjection {
   source: ProjectionSource;
   /** ISO date (YYYY-MM-DD) of the reference month's first day, or null when source is "none". */
   referenceMonth: string | null;
   /** Day-by-day spending totals of the reference month; index i = day (i+1). */
   dailyTotals: number[];
+  /**
+   * The same reference month, sliced per category (PFA-181). The chain above is
+   * resolved ONCE, globally; this only cuts its result up, so every category is
+   * projected from the same month and the slices always add back up to
+   * `dailyTotals`. Empty whenever `dailyTotals` is.
+   */
+  byCategory: CategoryDailyTotals[];
 }
 
 @Injectable()
@@ -37,7 +54,7 @@ export class DashboardService {
   async getDailyProjection(start: string, userID: string): Promise<DailyProjection> {
     const base = new Date(start);
     if (Number.isNaN(base.getTime())) {
-      return { source: "none", referenceMonth: null, dailyTotals: [] };
+      return { source: "none", referenceMonth: null, dailyTotals: [], byCategory: [] };
     }
 
     const year = base.getUTCFullYear();
@@ -56,7 +73,7 @@ export class DashboardService {
 
       const rows = await this.prisma.spendings.findMany({
         where: { userID, date: { gte: monthStart, lt: nextMonthStart } },
-        select: { date: true, amount: true },
+        select: { date: true, amount: true, categoryID: true },
       });
 
       if (rows.length === 0) continue;
@@ -64,21 +81,76 @@ export class DashboardService {
       // Day 0 of the next month == last day of this month → number of days.
       const daysInMonth = new Date(Date.UTC(candidate.year, candidate.month + 1, 0)).getUTCDate();
       const dailyTotals = new Array<number>(daysInMonth).fill(0);
+      // Same pass, bucketed twice: the month as a whole and each category's
+      // share of it, so the two can never tell different stories (PFA-181).
+      const byCategoryID = new Map<string | null, number[]>();
       for (const rowItem of rows) {
         const day = rowItem.date.getUTCDate();
-        if (day >= 1 && day <= daysInMonth) {
-          dailyTotals[day - 1] += Number(rowItem.amount);
+        if (day < 1 || day > daysInMonth) continue;
+        const amount = Number(rowItem.amount);
+        dailyTotals[day - 1] += amount;
+        let categoryDaily = byCategoryID.get(rowItem.categoryID);
+        if (!categoryDaily) {
+          categoryDaily = new Array<number>(daysInMonth).fill(0);
+          byCategoryID.set(rowItem.categoryID, categoryDaily);
         }
+        categoryDaily[day - 1] += amount;
       }
 
       return {
         source: candidate.source,
         referenceMonth: monthStart.toISOString().slice(0, 10),
         dailyTotals,
+        byCategory: await this.namedCategoryTotals(byCategoryID, userID, daysInMonth),
       };
     }
 
-    return { source: "none", referenceMonth: null, dailyTotals: [] };
+    return { source: "none", referenceMonth: null, dailyTotals: [], byCategory: [] };
+  }
+
+  /**
+   * Turns the reference month's per-category-ID buckets into named rows (PFA-181).
+   *
+   * Merged by NAME, not by ID: a user category and a global one can share a
+   * name, and the front already merges those two rows into one
+   * (`aggregateByCategory`). Keying by ID here would hand the breakdown a
+   * projection it cannot line up with any of its rows. A category the user can
+   * no longer read falls back to uncategorized, exactly as the category trends
+   * do, so no spending is ever dropped on the way.
+   */
+  private async namedCategoryTotals(
+    byCategoryID: Map<string | null, number[]>,
+    userID: string,
+    daysInMonth: number,
+  ): Promise<CategoryDailyTotals[]> {
+    const categoryIDs = [...byCategoryID.keys()].filter((id): id is string => id !== null);
+    const categories =
+      categoryIDs.length > 0
+        ? await this.prisma.categories.findMany({
+            where: { ID: { in: categoryIDs }, OR: [{ userID }, { userID: null }] },
+            select: { ID: true, name: true, color: true },
+          })
+        : [];
+    const categoryMap = new Map(categories.map((category) => [category.ID, category]));
+
+    const byName = new Map<string | null, CategoryDailyTotals>();
+    for (const [categoryID, categoryDaily] of byCategoryID) {
+      const category = categoryID ? categoryMap.get(categoryID) : null;
+      const name = category?.name ?? null;
+      const existing = byName.get(name);
+      if (!existing) {
+        byName.set(name, { category: name, categoryColor: category?.color ?? null, dailyTotals: categoryDaily });
+        continue;
+      }
+      for (let day = 0; day < daysInMonth; day += 1) {
+        existing.dailyTotals[day] += categoryDaily[day];
+      }
+      existing.categoryColor ??= category?.color ?? null;
+    }
+
+    // Heaviest first, mirroring the breakdown's own ordering.
+    const monthTotal = (daily: number[]) => daily.reduce((accumulator, value) => accumulator + value, 0);
+    return [...byName.values()].sort((a, b) => monthTotal(b.dailyTotals) - monthTotal(a.dailyTotals));
   }
 
   /**

@@ -75,6 +75,7 @@ const statistics: typeof frStatistics = {
     tooltipShare: "Share",
     tooltipAmount: "Amount",
     tooltipTrend: "Trend",
+    tooltipProjected: "Projection",
   },
   topCategories: {
     title: "Top categories",

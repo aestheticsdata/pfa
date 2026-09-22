@@ -1,6 +1,14 @@
 import type frDashboard from "@text/fr/dashboard";
 
 const dashboard: typeof frDashboard = {
+  // Names the historical period a projection rests on (COS-27). Shared by the
+  // sparkline's dashed tail and the per-category breakdown (PFA-181) — both read
+  // the same reference month, so both name it the same way.
+  projectionBasis: {
+    sameMonthLastYear: "Projection based on the same month last year",
+    sameMonthTwoYearsAgo: "Projection based on the same month two years ago",
+    previousMonth: "Projection based on the previous month",
+  },
   monthSelector: {
     prevMonth: "Previous month",
     nextMonth: "Next month",
@@ -32,6 +40,8 @@ const dashboard: typeof frDashboard = {
     trendStable: "stable",
     trendNew: "new",
     empty: "No spendings this month.",
+    // The row's end-of-month projection, under its realized amount.
+    projected: (amount: string) => `→ ${amount}`,
   },
   dailySparkline: {
     title: "Day-by-day spending",
@@ -39,12 +49,6 @@ const dashboard: typeof frDashboard = {
     peak: "Peak",
     avgShort: "avg.",
     chartAria: "Daily spending",
-    // Caption naming the historical basis of the projected (dashed) tail (COS-27).
-    projectionBasis: {
-      sameMonthLastYear: "Projection based on the same month last year",
-      sameMonthTwoYearsAgo: "Projection based on the same month two years ago",
-      previousMonth: "Projection based on the previous month",
-    },
   },
   fixedExpenses: {
     title: "Fixed expenses",

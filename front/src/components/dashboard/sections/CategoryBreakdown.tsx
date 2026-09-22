@@ -2,13 +2,16 @@
 
 import { CategoryColorDot } from "@components/categories/CategoryColorDot";
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
+import ProjectionBasisCaption from "@components/dashboard/sections/ProjectionBasisCaption";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
 import GlowCard from "@components/shared/GlowCard";
 import { MONTHLY } from "@components/spendings/config/constants";
 import { categoryTrend } from "@components/spendings/helpers/categoryTrend";
+import { categoryKey } from "@components/spendings/helpers/endOfMonthProjection";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
+import useEndOfMonthProjection from "@components/spendings/services/useEndOfMonthProjection";
 import useSpendings from "@components/spendings/services/useSpendings";
 import SpendingsListModal from "@components/spendings/spendingsListModal/SpendingsListModal";
 import { Tooltip } from "@components/ui/tooltip";
@@ -24,7 +27,13 @@ import type { CategoryTrendPoint } from "@src/schemas/stats";
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
-/** Monthly category breakdown — stacked bar + list, click a row for details. */
+/**
+ * Monthly category breakdown — stacked bar + list, click a row for details.
+ *
+ * Each row also carries where its category is heading by the end of the month
+ * (PFA-181), read off the same reference month as the dashboard's global
+ * projection: the two are slices of one figure, never two rival estimates.
+ */
 const CategoryBreakdown = () => {
   const { euro, pct1 } = useFormat();
   const dashboardText = useTranslations("dashboard");
@@ -33,6 +42,7 @@ const CategoryBreakdown = () => {
   const { from } = useDatePickerWrapperStore();
   const { data } = useCategoryTrends(MONTHLY);
   const trends = data?.trends;
+  const { remainders, source } = useEndOfMonthProjection();
   const { spendingsByMonth } = useSpendings();
   const [selected, setSelected] = useState<CategoryTrendPoint | null>(null);
   const [hover, setHover] = useState<BarHover<number> | null>(null);
@@ -55,6 +65,9 @@ const CategoryBreakdown = () => {
   // both render identical values (no recompute). Order matches the bar segments.
   const rows = list.map((category) => {
     const name = category.category ?? t.uncategorized;
+    // Joined on the raw category, never the displayed name: uncategorized shows
+    // a translated label, which would stop matching in another locale.
+    const remainder = remainders.get(categoryKey(category.category)) ?? 0;
     return {
       category,
       color: category.categoryColor ?? FALLBACK_COLOR,
@@ -63,6 +76,9 @@ const CategoryBreakdown = () => {
       pct: (category.value / total) * 100,
       total: category.value,
       trend: categoryTrend(category.value, category.previousValue, { stable: t.trendStable, fresh: t.trendNew }),
+      // Undefined where the reference month expects nothing more — a figure
+      // repeating the realized amount would say nothing.
+      projected: remainder > 0 ? category.value + remainder : undefined,
     };
   });
 
@@ -106,7 +122,14 @@ const CategoryBreakdown = () => {
                   )}
                 </span>
                 <span className="num hidden text-right text-ink-2 sm:block">{pct1(row.pct)} %</span>
-                <span className="num text-right text-ink">{euro(row.total)} €</span>
+                <span className="flex flex-col items-end">
+                  <span className="num text-ink">{euro(row.total)} €</span>
+                  {row.projected != null && (
+                    <span className="num text-2xs leading-tight text-ink-4">
+                      {t.projected(`${euro(row.projected)} €`)}
+                    </span>
+                  )}
+                </span>
                 <CategoryTrend
                   {...row.trend}
                   className="hidden sm:flex"
@@ -114,6 +137,9 @@ const CategoryBreakdown = () => {
               </button>
             ))}
           </div>
+          {/* Named only when a row actually carries a projection, so the card
+              never explains a figure it is not showing. */}
+          <ProjectionBasisCaption source={remainders.size > 0 ? source : "none"} />
         </>
       ) : (
         <EmptyState className="py-10">{t.empty}</EmptyState>

@@ -24,10 +24,25 @@ export const ProjectionSourceSchema = z.enum(["sameMonthLastYear", "sameMonthTwo
 
 export type ProjectionSource = z.infer<typeof ProjectionSourceSchema>;
 
+// One category's slice of the reference month (PFA-181). The chain is resolved
+// once, globally; this only cuts its result up, so every category is projected
+// from the same month and the slices add back up to `dailyTotals`.
+export const CategoryDailyTotalsSchema = z.object({
+  category: z.string().nullable(),
+  categoryColor: z.string().nullable(),
+  dailyTotals: z.array(numberLikeSchema),
+});
+
+export type CategoryDailyTotals = z.infer<typeof CategoryDailyTotalsSchema>;
+
 export const DailyProjectionSchema = z.object({
   source: ProjectionSourceSchema,
   referenceMonth: z.string().nullable(),
   dailyTotals: z.array(numberLikeSchema),
+  // Defaulted so an API that predates PFA-181 degrades to "no per-category
+  // figures" instead of failing the parse and blanking the whole dashboard;
+  // the helper falls back to the whole-month reference for the global number.
+  byCategory: z.array(CategoryDailyTotalsSchema).default([]),
 });
 
 export type DailyProjection = z.infer<typeof DailyProjectionSchema>;
