@@ -455,9 +455,16 @@ EOF
   ######################################
   log "➡️  Syncing Nest API source to release directory (rsync)"
 
+  # `.env` and `.env*.local` stay on this machine (PFA-185). The laptop's `.env` exists only so
+  # `prisma generate` has a DATABASE_URL, and it holds the local root credentials and dev secrets.
+  # Without these two lines it rode along into every release. Nothing on ks-b needs it: pm2 injects
+  # the real env from ecosystem.config.js, Nest's ConfigModule tolerates a missing file, and the
+  # remote build gets DATABASE_URL through the ssh environment below.
   rsync -az \
     --delete \
     --exclude=".git" \
+    --exclude=".env" \
+    --exclude=".env*.local" \
     --exclude="node_modules" \
     --exclude="dist" \
     --exclude=".DS_Store" \
