@@ -26,8 +26,6 @@ interface StatisticsHeatmapProps {
   exceptionals: ExceptionalItem[];
 }
 
-const DOW_LABELS = ["lun", "", "mer", "", "ven", "", "dim"];
-
 const CELL_BG: Record<FilledLevel, string> = {
   [LEVEL.ZERO]: "oklch(0.20 0.006 250)",
   [LEVEL.ONE]: "oklch(0.40 0.05 148 / 0.4)",
@@ -174,7 +172,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
               key={dow}
               className="contents"
             >
-              <span className="num self-center pr-1 text-right text-3xs leading-3 text-ink-4">{DOW_LABELS[dow]}</span>
+              <span className="num self-center pr-1 text-right text-3xs leading-3 text-ink-4">{t.dowLabels[dow]}</span>
               {weekArr.map((lvl, week) => {
                 const filled = lvl !== LEVEL.FUTURE && lvl !== LEVEL.EMPTY;
                 const style =
@@ -211,7 +209,7 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
               />
             ))}
           </span>
-          <span>{euro0(scaleMax)} €/j</span>
+          <span>{t.perDay(euro0(scaleMax))}</span>
           <span className="flex-1" />
           <LegendItem
             swatch={

@@ -143,6 +143,10 @@ const statistics: typeof frStatistics = {
   },
   heatmap: {
     title: "Heatmap — daily",
+    /** The rows' labels, Monday first — every other day, so the column stays legible. */
+    dowLabels: ["Mon", "", "Wed", "", "Fri", "", "Sun"],
+    /** The colour scale's top, a day's spend. */
+    perDay: (amount: string) => `${amount} €/day`,
     meta: (year: number, days: number) => `${year} · ${days} day${days === 1 ? "" : "s"} elapsed`,
     exceptionalPeak: "Exceptional peak",
     distributionTitle: "Day distribution",

@@ -139,6 +139,10 @@ const statistics = {
   },
   heatmap: {
     title: "Carte de chaleur — quotidienne",
+    /** The rows' labels, Monday first — every other day, so the column stays legible. */
+    dowLabels: ["lun", "", "mer", "", "ven", "", "dim"],
+    /** The colour scale's top, a day's spend. */
+    perDay: (amount: string) => `${amount} €/j`,
     meta: (year: number, days: number) => `${year} · ${days} jours réalisés`,
     exceptionalPeak: "Pic exceptionnel",
     distributionTitle: "Répartition des journées",
