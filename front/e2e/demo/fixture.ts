@@ -2,7 +2,7 @@ import { mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { Chapters } from "@e2e/demo/chapters";
 import { Cursor } from "@e2e/demo/cursor";
-import { EventLog } from "@e2e/demo/events";
+import { describe, EventLog } from "@e2e/demo/events";
 import { PACE, resetJitter, sleep } from "@e2e/demo/pacing";
 import { CdpRecorder } from "@e2e/demo/recorder";
 import { test as base } from "@playwright/test";
@@ -252,6 +252,19 @@ export class Demo {
     const start = this.log.now();
     await this.cursor.glideTo(x, y);
     this.log.gesture({ verb: "glide", start, end: this.log.now(), point: { x, y } });
+  }
+
+  /**
+   * Notes where an element is, for the edit — no pointer, no time. What a film frames is not
+   * always something the hand touched: a whole chart around the bars it walked, a modal around
+   * the button it pressed. A mark names that element in `events.json`, by its testid and box, so
+   * the edit can frame it on this take and on every re-take after it.
+   */
+  async mark(target: Locator): Promise<void> {
+    const now = this.log.now();
+    const box = await target.boundingBox();
+    if (!box) throw new Error(`demo: ${target} has no box to mark — is it visible?`);
+    this.log.gesture({ verb: "mark", start: now, end: now, target: await describe(target, box) });
   }
 
   /**

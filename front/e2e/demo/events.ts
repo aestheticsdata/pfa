@@ -44,7 +44,8 @@ export interface Target {
   box: Box;
 }
 
-export type Verb = "moveTo" | "click" | "fill" | "type" | "press" | "scroll" | "glide" | "dwell";
+/** The storyboard's verbs, plus `mark`: where an element is, noted for the edit with no pointer and no time. */
+export type Verb = "moveTo" | "click" | "fill" | "type" | "press" | "scroll" | "glide" | "dwell" | "mark";
 
 export interface Gesture {
   verb: Verb;

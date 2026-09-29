@@ -187,7 +187,9 @@ every pointer step (~50 a second while it travels), every press of the button, e
 every storyboard verb — `click`, `moveTo`, `fill`, `type`, `press`, `scroll`, `glide`, `dwell` —
 with its start and end on the film's clock and the `data-testid`, `data-*` members and box of
 the element it was aimed at. The edit names its beats by those marks, never by a second, so a
-re-take keeps it. A take for a film is filmed without the drawn arrow, which the film redraws:
+re-take keeps it. `demo.mark(locator)` adds one more kind of entry: where an element is, noted
+with no pointer and no time — the storyboard marks what the film frames whole and the hand never
+aims at as a whole (the category detail, the receipt modal, the heatmap, the search timeline). A take for a film is filmed without the drawn arrow, which the film redraws:
 
 ```bash
 DEMO_CURSOR=off DEMO_FPS=30 pnpm video:generate

@@ -326,6 +326,7 @@ test("pfa, end to end", async ({ demo }) => {
   await demo.click(await busiestCategory(page), { aim: "text" });
   const detail = page.getByTestId("category-detail");
   await expect(detail).toBeVisible();
+  await demo.mark(detail);
   await demo.dwell(1400);
   await sweep(detail.getByTestId("category-detail-day"), [0, 1], 1000);
   await demo.scroll(detail.getByTestId("category-detail-list"), 360, 1400);
@@ -416,6 +417,7 @@ test("pfa, end to end", async ({ demo }) => {
   await demo.dwell(1400);
   await demo.click(send);
   await expect(invoice.getByTestId("receipt-image")).toBeVisible({ timeout: 30_000 });
+  await demo.mark(invoice);
   await demo.dwell(2400);
   demo.shot("receipt", async (target) => {
     const dialog = await openReceipt(target);
@@ -501,6 +503,7 @@ test("pfa, end to end", async ({ demo }) => {
   await demo.scroll(scrollAnchor, 520, 1700);
   await demo.dwell(1100);
   await center(heatmap);
+  await demo.mark(heatmap);
 
   // The heatmap: four days of the year, then the distribution bar under it.
   for (const [dow, week] of [
@@ -531,6 +534,7 @@ test("pfa, end to end", async ({ demo }) => {
 
   // The search timeline: a label typed, its bars drawn in, the crosshair walked along them.
   await center(page.getByTestId("search-timeline"));
+  await demo.mark(page.getByTestId("search-timeline"));
   await demo.click(page.getByTestId("search-timeline-input"));
   await demo.type(SEARCH_TERM);
   const amountBand = page.getByTestId("search-timeline-amount");
