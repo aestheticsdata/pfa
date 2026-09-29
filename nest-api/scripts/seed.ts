@@ -1,9 +1,11 @@
 /**
  * Mock-data seeder for the local demo account `local.dev@mock.io`.
  *
- * Generates a coherent "Paris life on ~3500 €/month" dataset: monthly budgets,
- * ~12 recurring charges, ~14 categories and thousands of realistic variable
- * spendings, plus a few one-off exceptionals.
+ * Generates a coherent city life on ~3500 €/month: monthly budgets, ~12
+ * recurring charges, ~14 categories and thousands of realistic variable
+ * spendings, plus a few one-off exceptionals. All of it in English — shops,
+ * categories, charges — because the demo film and the stills made from this
+ * account go on an English portfolio page.
  *
  * Two modes, selected on the CLI (the date range is ALWAYS required — or
  * worked out, by --top-up):
@@ -266,34 +268,34 @@ interface CatDef {
 }
 
 const CATS: CatDef[] = [
-  { id: "a1000000-0000-4000-8000-000000000001", name: "Alimentation", color: "#6DB65B", share: 0.30, min: 4, max: 85, boost: 1.0,
-    labels: ["Franprix", "Monoprix", "Carrefour City", "Naturalia", "Lidl", "Marché Bastille", "Picard", "G20", "Biocoop", "Auchan"] },
+  { id: "a1000000-0000-4000-8000-000000000001", name: "Groceries", color: "#6DB65B", share: 0.30, min: 4, max: 85, boost: 1.0,
+    labels: ["Corner Shop", "Supermarket", "Express Market", "Health Foods", "Lidl", "Farmers Market", "Frozen Foods", "Night Shop", "Organic Co-op", "Aldi"] },
   { id: "a1000000-0000-4000-8000-000000000002", name: "Restaurants", color: "#E8663D", share: 0.14, min: 12, max: 70, boost: 1.9,
-    labels: ["Le Petit Cambodge", "Big Mamma", "Bouillon Pigalle", "Sushi Shop", "PNY Burger", "Chez Janou", "Deliveroo", "Uber Eats", "Le Bistrot", "Pizzeria Popine"] },
-  { id: "a1000000-0000-4000-8000-000000000003", name: "Bar & Café", color: "#C0894B", share: 0.06, min: 3, max: 28, boost: 1.7,
-    labels: ["Starbucks", "Café de Flore", "Le Comptoir", "Bar Le Progrès", "Columbus Café", "La Cave à Vins", "Le Baron Rouge"] },
+    labels: ["Thai Kitchen", "Italian Kitchen", "The Diner", "Sushi Shop", "Burger Joint", "Noodle Bar", "Deliveroo", "Uber Eats", "Steakhouse", "Pizza Place"] },
+  { id: "a1000000-0000-4000-8000-000000000003", name: "Coffee & Drinks", color: "#C0894B", share: 0.06, min: 3, max: 28, boost: 1.7,
+    labels: ["Starbucks", "Coffee House", "The Local Pub", "Corner Bar", "Espresso Bar", "Wine Bar", "Cocktail Lounge"] },
   { id: "a1000000-0000-4000-8000-000000000004", name: "Transport", color: "#4A90D9", share: 0.05, min: 2, max: 45, boost: 1.0,
-    labels: ["RATP recharge", "Uber", "G7 Taxi", "Vélib", "SNCF Transilien", "Trainline", "Bolt"] },
-  { id: "a1000000-0000-4000-8000-000000000005", name: "Loisirs", color: "#9B59B6", share: 0.07, min: 8, max: 120, boost: 1.6,
-    labels: ["UGC Ciné", "MK2", "Fnac Spectacles", "Musée d'Orsay", "Théâtre du Châtelet", "Bowling Mouffetard", "Escape Game", "Steam"] },
+    labels: ["Metro top-up", "Uber", "Taxi", "Bike share", "Commuter train", "Trainline", "Bolt"] },
+  { id: "a1000000-0000-4000-8000-000000000005", name: "Leisure", color: "#9B59B6", share: 0.07, min: 8, max: 120, boost: 1.6,
+    labels: ["Cinema", "Arthouse Cinema", "Concert tickets", "Art museum", "Theatre", "Bowling", "Escape room", "Steam"] },
   { id: "a1000000-0000-4000-8000-000000000006", name: "Shopping", color: "#E84393", share: 0.11, min: 15, max: 260, boost: 1.3,
-    labels: ["Zara", "Uniqlo", "H&M", "Sézane", "Fnac", "Decathlon", "Galeries Lafayette", "Zalando", "Nike Store"] },
-  { id: "a1000000-0000-4000-8000-000000000007", name: "Santé", color: "#2ECC71", share: 0.04, min: 6, max: 90, boost: 0.5,
-    labels: ["Pharmacie", "Médecin généraliste", "Opticien", "Laboratoire", "Kiné", "Dentiste"] },
-  { id: "a1000000-0000-4000-8000-000000000008", name: "Maison", color: "#16A085", share: 0.05, min: 5, max: 190, boost: 1.1,
-    labels: ["IKEA", "Leroy Merlin", "Zara Home", "Darty", "BUT", "Truffaut", "Amazon"] },
-  { id: "a1000000-0000-4000-8000-000000000009", name: "Voyages", color: "#F39C12", share: 0.03, min: 20, max: 380, boost: 1.0,
-    labels: ["SNCF TGV", "Airbnb", "Booking", "Blablacar", "Flixbus", "Trainline"] },
-  { id: "a1000000-0000-4000-8000-000000000010", name: "Beauté", color: "#FD79A8", share: 0.03, min: 8, max: 90, boost: 1.2,
-    labels: ["Coiffeur", "Institut", "Sephora", "Nocibé", "Marionnaud", "Barbier"] },
-  { id: "a1000000-0000-4000-8000-000000000011", name: "Cadeaux", color: "#E74C3C", share: 0.03, min: 10, max: 150, boost: 1.2,
-    labels: ["Amazon", "Fnac", "Nature & Découvertes", "Fleuriste", "Le Bon Marché"] },
+    labels: ["Zara", "Uniqlo", "H&M", "Mango", "Electronics Store", "Decathlon", "Department Store", "Zalando", "Nike Store"] },
+  { id: "a1000000-0000-4000-8000-000000000007", name: "Health", color: "#2ECC71", share: 0.04, min: 6, max: 90, boost: 0.5,
+    labels: ["Pharmacy", "GP visit", "Optician", "Lab tests", "Physio", "Dentist"] },
+  { id: "a1000000-0000-4000-8000-000000000008", name: "Home", color: "#16A085", share: 0.05, min: 5, max: 190, boost: 1.1,
+    labels: ["IKEA", "Hardware Store", "Zara Home", "Appliance Store", "Furniture Store", "Garden Centre", "Amazon"] },
+  { id: "a1000000-0000-4000-8000-000000000009", name: "Travel", color: "#F39C12", share: 0.03, min: 20, max: 380, boost: 1.0,
+    labels: ["High-speed train", "Airbnb", "Booking.com", "BlaBlaCar", "FlixBus", "Trainline"] },
+  { id: "a1000000-0000-4000-8000-000000000010", name: "Beauty", color: "#FD79A8", share: 0.03, min: 8, max: 90, boost: 1.2,
+    labels: ["Hairdresser", "Beauty salon", "Sephora", "Perfumery", "Nail bar", "Barber"] },
+  { id: "a1000000-0000-4000-8000-000000000011", name: "Gifts", color: "#E74C3C", share: 0.03, min: 10, max: 150, boost: 1.2,
+    labels: ["Amazon", "Bookshop", "Gift Shop", "Florist", "Toy Shop"] },
   { id: "a1000000-0000-4000-8000-000000000012", name: "Sport", color: "#1ABC9C", share: 0.02, min: 5, max: 120, boost: 1.1,
-    labels: ["Decathlon", "Nike", "Piscine Pontoise", "Séance escalade", "Yoga studio"] },
-  { id: "a1000000-0000-4000-8000-000000000013", name: "Abonnements", color: "#34495E", share: 0.02, min: 3, max: 60, boost: 1.0,
-    labels: ["App Store", "Google One", "PlayStation Plus", "Kindle", "Le Monde", "Audible"] },
-  { id: "a1000000-0000-4000-8000-000000000014", name: "Banque", color: "#7F8C8D", share: 0.01, min: 2, max: 40, boost: 1.0,
-    labels: ["Frais bancaires", "Retrait DAB", "Commission", "Cotisation carte"] },
+    labels: ["Decathlon", "Nike", "Swimming pool", "Climbing session", "Yoga studio"] },
+  { id: "a1000000-0000-4000-8000-000000000013", name: "Subscriptions", color: "#34495E", share: 0.02, min: 3, max: 60, boost: 1.0,
+    labels: ["App Store", "Google One", "PlayStation Plus", "Kindle", "The Guardian", "Audible"] },
+  { id: "a1000000-0000-4000-8000-000000000014", name: "Bank", color: "#7F8C8D", share: 0.01, min: 2, max: 40, boost: 1.0,
+    labels: ["Bank fees", "ATM withdrawal", "Transfer fee", "Card fee"] },
 ];
 
 // --------------------------------------------------------------------------
@@ -306,12 +308,12 @@ interface RecDef {
   start?: { y: number; m: number };
 }
 const RECURRINGS: RecDef[] = [
-  { label: "Navigo", amount: 86.4 },
-  { label: "EDF électricité", amount: 78 },
-  { label: "Box internet Free", amount: 29.99 },
-  { label: "Forfait mobile Sosh", amount: 19.99 },
-  { label: "Assurance habitation", amount: 14.5 },
-  { label: "Mutuelle santé", amount: 42 },
+  { label: "Metro pass", amount: 86.4 },
+  { label: "Electricity", amount: 78 },
+  { label: "Home internet", amount: 29.99 },
+  { label: "Mobile plan", amount: 19.99 },
+  { label: "Home insurance", amount: 14.5 },
+  { label: "Health insurance", amount: 42 },
   { label: "Netflix", amount: 13.49 },
   { label: "Spotify", amount: 10.99 },
   { label: "Basic-Fit", amount: 29.99, start: { y: 2024, m: 5 } }, // gym from 2024-06
@@ -336,12 +338,26 @@ interface ExcDef {
   description?: string;
 }
 const EXCEPTIONALS: ExcDef[] = [
-  { y: 2023, m: 7, d: 14, label: "Vacances Grèce", amount: 1450, categoryName: "Voyages", categoryColor: "#F39C12", description: "Vol + hôtel Santorin" },
-  { y: 2024, m: 6, d: 20, label: "Vacances Portugal", amount: 1650, categoryName: "Voyages", categoryColor: "#F39C12", description: "Séjour Lisbonne + Porto" },
-  { y: 2024, m: 10, d: 28, label: "Nouveau smartphone", amount: 1090, categoryName: "Shopping", categoryColor: "#E84393" },
-  { y: 2025, m: 4, d: 16, label: "Soins dentaires", amount: 640, categoryName: "Santé", categoryColor: "#2ECC71", description: "Couronne" },
-  { y: 2025, m: 8, d: 12, label: "Canapé + meubles salon", amount: 1290, categoryName: "Maison", categoryColor: "#16A085" },
-  { y: 2026, m: 0, d: 18, label: "Séjour ski Alpes", amount: 1150, categoryName: "Voyages", categoryColor: "#F39C12", description: "Semaine à Chamonix" },
+  { y: 2023, m: 7, d: 14, label: "Holiday in Greece", amount: 1450, categoryName: "Travel", categoryColor: "#F39C12", description: "Flights + hotel, Santorini" },
+  { y: 2024, m: 6, d: 20, label: "Holiday in Portugal", amount: 1650, categoryName: "Travel", categoryColor: "#F39C12", description: "Lisbon + Porto" },
+  { y: 2024, m: 10, d: 28, label: "New smartphone", amount: 1090, categoryName: "Shopping", categoryColor: "#E84393" },
+  { y: 2025, m: 4, d: 16, label: "Dental work", amount: 640, categoryName: "Health", categoryColor: "#2ECC71", description: "A crown" },
+  { y: 2025, m: 8, d: 12, label: "Sofa + living-room furniture", amount: 1290, categoryName: "Home", categoryColor: "#16A085" },
+  { y: 2026, m: 0, d: 18, label: "Ski week in the Alps", amount: 1150, categoryName: "Travel", categoryColor: "#F39C12", description: "A week in Chamonix" },
+];
+
+/**
+ * The labels the exceptionals above carried until 2026-09-29, when the dataset went from French
+ * to English. `--wipe` clears these too, so an account seeded before then is rebuilt in English
+ * rather than left holding both — the wipe keeps every exceptional it does not recognise as its own.
+ */
+const FORMER_EXCEPTIONAL_LABELS = [
+  "Vacances Grèce",
+  "Vacances Portugal",
+  "Nouveau smartphone",
+  "Soins dentaires",
+  "Canapé + meubles salon",
+  "Séjour ski Alpes",
 ];
 
 // --------------------------------------------------------------------------
@@ -356,12 +372,12 @@ function seasonalFactor(m: number): number {
 }
 /** Per-category seasonal share multipliers (before re-normalisation). */
 function seasonalShareMult(name: string, m: number): number {
-  if (m === 11 && name === "Cadeaux") return 3.2;
+  if (m === 11 && name === "Gifts") return 3.2;
   if (m === 11 && name === "Restaurants") return 1.4;
-  if (m === 0 && name === "Shopping") return 1.6; // soldes d'hiver
-  if (m === 6 && name === "Shopping") return 1.5; // soldes d'été
-  if ((m === 6 || m === 7) && name === "Voyages") return 2.2;
-  if ((m === 6 || m === 7) && name === "Loisirs") return 1.4;
+  if (m === 0 && name === "Shopping") return 1.6; // winter sales
+  if (m === 6 && name === "Shopping") return 1.5; // summer sales
+  if ((m === 6 || m === 7) && name === "Travel") return 2.2;
+  if ((m === 6 || m === 7) && name === "Leisure") return 1.4;
   return 1.0;
 }
 
@@ -471,7 +487,7 @@ function generate(
     }
 
     // --- Recurrings (full month): deterministic active set; rows only if missing ---
-    const active: { label: string; amount: number }[] = [{ label: "Loyer appartement", amount: rentForYear(y) }];
+    const active: { label: string; amount: number }[] = [{ label: "Rent", amount: rentForYear(y) }];
     for (const r of RECURRINGS) {
       if (r.start && (y < r.start.y || (y === r.start.y && m < r.start.m))) continue;
       active.push({ label: r.label, amount: r.amount });
@@ -624,10 +640,10 @@ async function wipeAll(prisma: PrismaClient): Promise<void> {
   const r = await prisma.recurrings.deleteMany({ where: { userID: USER_ID } });
   const d = await prisma.dashboards.deleteMany({ where: { userID: USER_ID } });
   const c = await prisma.categories.deleteMany({ where: { userID: USER_ID } });
-  // Only remove the exceptionals THIS script seeds (matched by label), so the
-  // pre-existing real exceptionals are preserved even on a full wipe.
+  // Only remove the exceptionals THIS script seeds (matched by label, today's or a former one),
+  // so the pre-existing real exceptionals are preserved even on a full wipe.
   const e = await prisma.exceptionals.deleteMany({
-    where: { userID: USER_ID, label: { in: EXCEPTIONALS.map((x) => x.label) } },
+    where: { userID: USER_ID, label: { in: [...EXCEPTIONALS.map((x) => x.label), ...FORMER_EXCEPTIONAL_LABELS] } },
   });
   console.log(
     `  wiped: spendings=${s.count} recurrings=${r.count} dashboards=${d.count} categories=${c.count} ` +

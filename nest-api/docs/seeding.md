@@ -1,9 +1,14 @@
 # Seeding guide — `scripts/seed.ts`
 
 Mock-data seeder for the local demo account **`local.dev@mock.io`**. It generates a
-coherent "Paris life on ~3500 €/month" dataset: monthly budgets, ~12 recurring
-charges, 14 categories, thousands of realistic variable spendings, and a few
-one-off exceptionals.
+coherent city life on ~3500 €/month: monthly budgets, ~12 recurring charges,
+14 categories, thousands of realistic variable spendings, and a few one-off
+exceptionals.
+
+Everything it writes is **in English** — shops, categories, charges, exceptionals —
+because the demo film and the stills made from this account go on an English
+portfolio page. Until 2026-09-29 it wrote them in French: an account seeded
+before then is rebuilt in English by a `--wipe` (below).
 
 It is meant to be run **repeatedly** to keep the account topped up to today.
 
@@ -51,8 +56,9 @@ spendings for the 9th through the 16th.
 
 Deletes **all** of the account's seeded rows first
 (spendings / recurrings / dashboards / categories, plus the exceptionals this
-script seeds — matched by label), **then** regenerates the whole range from
-scratch. The two pre-existing *real* exceptionals are preserved.
+script seeds — matched by label, including the French labels it seeded until
+2026-09-29), **then** regenerates the whole range from scratch. The two
+pre-existing *real* exceptionals are preserved.
 
 ⚠️ `--wipe` clears the **entire** account dataset, not just the range. If you
 pass a narrow range with `--wipe`, the account ends up holding only that range.
