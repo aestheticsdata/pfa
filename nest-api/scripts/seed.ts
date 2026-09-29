@@ -5,9 +5,11 @@
  * ~12 recurring charges, ~14 categories and thousands of realistic variable
  * spendings, plus a few one-off exceptionals.
  *
- * Two modes, selected on the CLI (the date range is ALWAYS required):
+ * Two modes, selected on the CLI (the date range is ALWAYS required — or
+ * worked out, by --top-up):
  *
  *   pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wipe]
+ *   pnpm seed -- --top-up [--to <YYYY-MM-DD>]
  *
  *   • default (append)  — nothing is deleted. Budgets/recurrings are created
  *     only for months that don't already have them (so monthly totals stay
@@ -16,6 +18,10 @@
  *     just piles on more spendings — by design, kept simple.
  *   • --wipe            — deletes ALL of this account's seeded rows first, then
  *     regenerates the whole range from scratch.
+ *   • --top-up          — append mode from the day after the account's last
+ *     spending, read from the database: the date the guide used to ask for by
+ *     hand. A no-op when the account is already up to date, so it is safe to
+ *     run before every demo take (front/e2e/demo/demo.setup.ts does).
  *
  *   --to defaults to today when omitted.
  *
@@ -86,17 +92,21 @@ interface Ymd {
 class UsageError extends Error {}
 
 const USAGE = `Usage: pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wipe]
+       pnpm seed -- --top-up [--to <YYYY-MM-DD>]
 
-  --from <YYYY-MM-DD>   Start date (inclusive). Required.
+  --from <YYYY-MM-DD>   Start date (inclusive). Required, unless --top-up.
   --to   <YYYY-MM-DD>   End date (inclusive). Defaults to today.
   --wipe                Delete ALL of ${USER_EMAIL}'s seeded rows first, then
                         regenerate the whole range. Without it the script runs
                         in append mode: nothing is deleted, only data missing
                         from the range is added (safe & idempotent).
+  --top-up              Append from the day after the account's last spending,
+                        read from the database. Nothing to do when it is already
+                        up to date. Not with --from or --wipe.
 
 Examples:
   pnpm seed -- --wipe --from 2023-01-01            # full rebuild up to today
-  pnpm seed -- --from 2026-07-08                   # top up since the last run
+  pnpm seed -- --top-up                            # top up since the last run
   pnpm seed -- --from 2025-01-01 --to 2025-03-31   # backfill a window, non-destructive`;
 
 /** Comparable ordinal for a calendar day (m is 0-based). */
@@ -122,10 +132,25 @@ function parseDate(s: string): Ymd {
   return { y, m, d };
 }
 
-function parseArgs(argv: string[]): { from: Ymd; to: Ymd; wipe: boolean } {
+/** The day after, as a calendar day. */
+function nextDay(t: Ymd): Ymd {
+  const next = new Date(Date.UTC(t.y, t.m, t.d + 1));
+  return { y: next.getUTCFullYear(), m: next.getUTCMonth(), d: next.getUTCDate() };
+}
+
+/** What the command line asks for. `from` is null for --top-up: it is read from the database once connected. */
+interface Options {
+  from: Ymd | null;
+  to: Ymd;
+  wipe: boolean;
+  topUp: boolean;
+}
+
+function parseArgs(argv: string[]): Options {
   let fromStr: string | undefined;
   let toStr: string | undefined;
   let wipe = false;
+  let topUp = false;
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     const eq = a.indexOf("=");
@@ -137,6 +162,9 @@ function parseArgs(argv: string[]): { from: Ymd; to: Ymd; wipe: boolean } {
         break; // pnpm forwards the `--` separator literally; ignore it
       case "--wipe":
         wipe = true;
+        break;
+      case "--top-up":
+        topUp = true;
         break;
       case "--from":
         fromStr = nextVal();
@@ -151,13 +179,18 @@ function parseArgs(argv: string[]): { from: Ymd; to: Ymd; wipe: boolean } {
         throw new UsageError(`Unknown argument: ${a}`);
     }
   }
+  const to = toStr ? parseDate(toStr) : todayYmd();
+  if (topUp) {
+    if (fromStr) throw new UsageError("--top-up works out its own start: drop --from.");
+    if (wipe) throw new UsageError("--top-up appends: it cannot --wipe.");
+    return { from: null, to, wipe, topUp };
+  }
   if (!fromStr) throw new UsageError("Missing required --from.");
   const from = parseDate(fromStr);
-  const to = toStr ? parseDate(toStr) : todayYmd();
   if (ord(from.y, from.m, from.d) > ord(to.y, to.m, to.d)) {
     throw new UsageError(`--from (${fromStr}) is after --to (${toStr ?? "today"}).`);
   }
-  return { from, to, wipe };
+  return { from, to, wipe, topUp };
 }
 
 // --------------------------------------------------------------------------
@@ -552,6 +585,40 @@ async function resolveUser(prisma: PrismaClient): Promise<void> {
   USER_ID = user.ID;
 }
 
+/**
+ * The account's last spending day, as the database stores it — DATE_FORMAT, like the
+ * verification below, so no timezone gets between the column and the calendar day.
+ * Null for an account with no spending yet.
+ */
+async function lastSpendingDay(prisma: PrismaClient): Promise<Ymd | null> {
+  const rows = (await prisma.$queryRawUnsafe(
+    `SELECT DATE_FORMAT(MAX(date),'%Y-%m-%d') last FROM Spendings WHERE userID = '${USER_ID}'`,
+  )) as Array<{ last: string | null }>;
+  const last = rows[0]?.last;
+  return last ? parseDate(last) : null;
+}
+
+/**
+ * Where a --top-up starts: the day after the account's last spending. Null — and said so —
+ * when that day is past `to`: the account is up to date, which is what makes the mode safe to
+ * run before every demo take.
+ */
+async function topUpFrom(prisma: PrismaClient, to: Ymd): Promise<Ymd | null> {
+  const last = await lastSpendingDay(prisma);
+  if (!last) {
+    throw new Error(
+      `Nothing to top up: ${USER_EMAIL} has no spending yet. Seed it in full first ` +
+        "(pnpm seed -- --wipe --from <YYYY-MM-DD>).",
+    );
+  }
+  const from = nextDay(last);
+  if (ord(from.y, from.m, from.d) > ord(to.y, to.m, to.d)) {
+    console.log(`${USER_EMAIL} is up to date: its last spending is on ${fmt(last)}. Nothing to add.`);
+    return null;
+  }
+  return from;
+}
+
 async function wipeAll(prisma: PrismaClient): Promise<void> {
   const s = await prisma.spendings.deleteMany({ where: { userID: USER_ID } });
   const r = await prisma.recurrings.deleteMany({ where: { userID: USER_ID } });
@@ -598,7 +665,7 @@ async function verify(prisma: PrismaClient): Promise<void> {
 // Main
 // --------------------------------------------------------------------------
 async function main(): Promise<void> {
-  let opts: { from: Ymd; to: Ymd; wipe: boolean };
+  let opts: Options;
   try {
     opts = parseArgs(process.argv.slice(2));
   } catch (err) {
@@ -609,11 +676,16 @@ async function main(): Promise<void> {
     }
     throw err;
   }
-  const { from, to, wipe } = opts;
+  const { to, wipe } = opts;
 
   const prisma = makePrisma();
   try {
     await resolveUser(prisma);
+
+    // --top-up leaves `from` to the database; up to date already, there is nothing to do.
+    const from = opts.from ?? (await topUpFrom(prisma, to));
+    if (!from) return;
+
     console.log(
       `Seeding ${USER_EMAIL} (${USER_ID})\n` +
         `  mode: ${wipe ? "WIPE + rebuild" : "append (non-destructive)"}, range ${fmt(from)} → ${fmt(to)}`,

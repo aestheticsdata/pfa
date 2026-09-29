@@ -16,13 +16,16 @@ Output lands in `e2e/demo/out/` (gitignored):
 - `chapters.vtt` — WebVTT, for `<track kind="chapters">` on the portfolio's own `<video>`
 - `chapters.ffmeta` — ffmpeg metadata; already applied to the mp4, kept so a re-encode can reapply it
 - `chapters.json` — the same marks with millisecond precision
+- `events.json` — everything the hand did, on the film's clock: see **For the landing page's films**
 - `shots/01-dashboard.png` and eight more — stills at 3840×2160, for a page that wants pictures too
 - `upload/receipt.png` — the receipt chapter 3 attaches, drawn by the storyboard itself
 
 This is a port of Trekker's harness, which is a port of Zeus's, which is a port of Spira's.
-`pacing.ts`, `recorder.ts`, `chapters.ts` and `cursor.ts` are byte-identical to Trekker's;
-`fixture.ts` is Trekker's plus one method (`Demo.glide`, below); `preflight.ts`, `demo.setup.ts`
-and `playwright.demo.config.ts` are the same files with the PFA-specific parts changed. The full
+`pacing.ts` and `chapters.ts` are byte-identical to Trekker's; `recorder.ts`, `cursor.ts` and
+`fixture.ts` are Trekker's plus the event log (`events.ts`, new here — the other harnesses get it
+when their films are cut), and `fixture.ts` one method more (`Demo.glide`, below); `preflight.ts`,
+`demo.setup.ts` and `playwright.demo.config.ts` are the same files with the PFA-specific parts
+changed. The full
 write-up of how it works and why — the CDP screencast, the drawn pointer, the encode, and every
 trap found building it — is `front/e2e/demo/HOW-TO-FILM-A-DEMO.md` in the Spira repo, and Zeus's
 `e2e/demo/README.md` carries the traps that console found. Only `pfa.demo.ts` knows what PFA is.
@@ -58,7 +61,7 @@ is not. The rest it cannot check.
    video is for a public page, and the take types the password on camera (masked).
 4. **ffmpeg on `PATH`** with libx264, the mp4 muxer and the `concat` demuxer — `brew install ffmpeg`,
    or `DEMO_FFMPEG` pointing at one.
-5. **The seeded account, topped up to today** — see below.
+5. **The seeded account** — topped up to today by the setup itself, see below.
 
 `settle()` in `fixture.ts` adds one more check on the real page: every stylesheet the document
 asked for has loaded and `document.fonts.ready` has resolved before a frame is kept. PFA serves
@@ -73,24 +76,26 @@ categories, a fake budget. Nothing real is on screen — no real account, no rea
 receipt is a picture the storyboard draws on a blank page before the first frame: an invented
 shop, a masked card number, the amount of the row it goes on.
 
-The seeder fills the account **up to today** and the take needs today's card to hold a spending
-(the receipt goes on its first row, and the new spending lands there). So before a take:
+The take needs the account **up to today** — today's card holding a spending (the receipt goes on
+its first row, and the new spending lands there), the month and the statistics current. The seeder
+only fills up to the day it last ran, so `demo.setup.ts` runs it first, before anything else:
 
 ```bash
-cd nest-api && pnpm seed -- --from <the day after the last seeded one>
+cd nest-api && pnpm seed -- --top-up
 ```
 
-The guide says how to read that date. A `--from` too early stacks duplicates on the overlapping
-days; too late leaves a hole the film would show as empty cards.
+`--top-up` starts from the day after the account's last spending, read from the database, and
+adds nothing when it is already current — a take two weeks or six months from now fills its own
+gap. See `nest-api/docs/seeding.md`.
 
 ## The take
 
-Six chapters, **228.4s — three minutes forty-eight**, at the default `DEMO_SPEED=1`.
+Six chapters, **203s — three minutes twenty-three**, at the default `DEMO_SPEED=1`.
 
 | | |
 |---|---|
 | 0:00 Sign in | the login form, the house account typed, the password masked |
-| 0:08 Dashboard | the donut's three arcs hovered — fixed, variable, what is left; the month's budget and the weekly ceiling edited inline; a fixed expense added from the card's `+`; the category bar read, the category with the most spendings opened (`data-count` on the rows) and its days read, the modal left by ⎋; the month picker to last month, every widget's entrance replayed and waited out, `Current month` back; the user menu, and the app switched to English — from here on every label is English, and so are the stills |
+| 0:08 Dashboard | the user menu, and the app switched to English — from here on every label is English, and so are the stills; the month picker to last month, every widget's entrance replayed and waited out, `Current month` back, the whole dashboard counting up again; the donut's arcs hovered — fixed, variable, what is left; the month's budget and the weekly ceiling edited inline; a fixed expense added from the card's `+`; the category bar read, the category with the most spendings opened (`data-count` on the rows) and its days read, the modal left by ⎋ |
 | 1:21 Spendings | `New spending` from the floating button — label, an amount typed as `9.90+2.50`, a category picked from the combobox by its first letters — landing on today's card; the week picker two months back to the 15th, and `Today` home; the first row of today's card hovered for its actions, a receipt chosen through the picker and sent, shown in its modal; the whole-history search on the seeder's most frequent shop, scrolled; the week's breakdown unfolded and its bar read |
 | 2:41 Exceptionals | the page, two cards hovered |
 | 2:49 Categories | the tiles hovered, one opened for edit and left unchanged by ⎋ |
@@ -113,12 +118,14 @@ timeline's term and range are in the URL, so the search itself survives the revi
 ## Running it again
 
 **The take writes six things into the seeded account** — a budget, a weekly ceiling, a fixed
-expense, a spending, a receipt, a language — all on the current month. The language is the one
-that would break the next take, and `demo.setup.ts` puts it back to French through the same
-`PATCH /users/me` the user menu uses. The rest accumulates: every take adds one `Salle de sport`
-to the fixed expenses and one `Boulangerie du canal` to today, and moves the budget and the
-ceiling up by a hundred and thirty euros. Harmless for a few takes; `pnpm seed -- --wipe --from …`
-in `nest-api/` rebuilds the account from scratch when it is not.
+expense, a spending, a receipt, a language — all on the current month. `demo.setup.ts` puts the
+language back to French through the same `PATCH /users/me` the user menu uses, and the month's
+budget and ceiling to 4,600 € and 650 € through the `PUT /dashboard` the inline edits use — above
+what the seeded month spends, so the dashboard opens in the green rather than on a red "over
+budget", and the take edits them up from there. The rest accumulates: every take adds one
+`Gym membership` to the fixed expenses and one `Boulangerie du canal` to today. Harmless for a few
+takes; `pnpm seed -- --wipe --from …` in `nest-api/` rebuilds the account from scratch when it is
+not.
 
 Nothing is ever deleted. This app puts `Delete` next to `Edit` on every row, tile and modal it
 opens, and the receipt modal's one button once a picture is up is `Delete receipt` — so rows are
@@ -135,11 +142,12 @@ things the seeder fixes — a labelled graphic, a card of today, the label just 
 
 ## PFA-specific traps
 
-**The app changes language halfway through the take.** Every element the storyboard touches
+**The app changes language at the top of the dashboard.** Every element the storyboard touches
 carries a `data-testid` — the same contract as the other four harnesses, ~35 marks added by
 PFA-180 — so nothing it clicks or hovers depends on a label. The copy modules (`@text/index`)
-are read only to check what a bubble or a link says: `fr` before the user menu, `en` after it.
-The stills, taken after the take, run in `en`.
+are read only to check what a bubble or a link says, in `en`: the switch comes first, so every
+screen after the sign-in is in the landing page's language. The stills, taken after the take,
+run in `en` too.
 
 **Some marks exist twice.** The week picker, the period buttons (`current-month`, `today`), the
 search trigger and the month picker are rendered as a desktop copy and a mobile one, hidden from
@@ -170,6 +178,28 @@ and `moveTo(main)` would scroll `main` into view first — its centre is below t
 statistics page is scrolled with the pointer parked on the sticky bar, which stays under it
 however far the page has gone.
 
+## For the landing page's films: `events.json`
+
+The landing page cuts a forty-second film from this take with Remotion (`landing-page/films/`):
+it pushes in on each action, speeds through typing and reading pauses, and draws its own big
+pointer. Pixels alone cannot drive that, so every take also writes `events.json` (`events.ts`):
+every pointer step (~50 a second while it travels), every press of the button, every key, and
+every storyboard verb — `click`, `moveTo`, `fill`, `type`, `press`, `scroll`, `glide`, `dwell` —
+with its start and end on the film's clock and the `data-testid`, `data-*` members and box of
+the element it was aimed at. The edit names its beats by those marks, never by a second, so a
+re-take keeps it. A take for a film is filmed without the drawn arrow, which the film redraws:
+
+```bash
+DEMO_CURSOR=off DEMO_FPS=30 pnpm video:generate
+```
+
+A password field is typed for real and logged as bullets, the way the screen shows it. The log
+also records the pixels per CSS pixel the mp4 really carries, read off the frames — which is 1:
+a headless screencast is capped at the viewport's CSS pixels whatever `maxWidth` asks, in the old
+headless shell and the new headless mode alike (measured), and only a headed window sends the 2×
+surface, at the price of the focus of whoever is using the machine. The films keep their zooms
+modest to match.
+
 ## Knobs
 
 The same as Trekker's, all environment variables: `DEMO_SPEED`, `DEMO_HEADED=1`, `DEMO_WIDTH` /
@@ -187,6 +217,7 @@ On an 8-core M1, at 1920×1080 with the default 2× supersampling.
 | The file | **14.3 MB**, h264, 1920×1080, chapters inside it |
 | Stills | 9 × 3840×2160 PNG, 430–830 KB each, 5.5 MB the set |
 | Repeatability | the same storyboard came out at 228.8s, 225.2s and 228.4s on consecutive takes; the chapter marks moved by three seconds at most |
+| A take for the films | 202.9s, 6 chapters, 3024 frames at 14.9fps with `DEMO_CURSOR=off DEMO_FPS=30`; 10.7 MB, and a 71 KB `events.json` — 153 gestures, 2269 pointer steps, 40 presses, 107 keys |
 | The one hang | one take out of seven froze on the receipt modal's `Send` after a hot reload of the thirty-five components that took their `data-testid` — the page had stopped painting, the upload had still gone through. It never recurred, and the same beat replayed headless in three seconds. Let a hot reload finish before starting a take |
 
 ## What this ticket changed outside the harness

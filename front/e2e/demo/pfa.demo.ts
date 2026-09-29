@@ -17,15 +17,16 @@ import type { BrowserContext, Locator, Page } from "@playwright/test";
  * Four things it never breaks.
  *
  * IT SIGNS IN ON CAMERA. The film opens on the login form and types the house dev account into
- * it — there is no saved session, the browser is cold on every take. `demo.setup.ts` only puts
- * the account back in French beforehand, because chapter 2 switches it to English and the API
- * remembers.
+ * it — there is no saved session, the browser is cold on every take. `demo.setup.ts` tops the
+ * account up to today, puts it back in French — chapter 2 switches it to English and the API
+ * remembers — and sets the month's budget above what it spends, before the browser opens.
  *
  * IT ADDRESSES MARKS, NOT WORDS. Every element it touches carries a `data-testid` (PFA-180, the
  * same contract as the other four harnesses), so the storyboard survives a change of label, of
- * class or of language — and the language does change halfway through, when the user menu
- * switches the app to English. The copy modules (`@text`) are read only to check what a bubble
- * or a link says.
+ * class or of language — and the language does change, the moment the dashboard is up, when the
+ * user menu switches the app to English. Everything after that is in English: the landing page
+ * is, and so is the cut it makes from this take. The copy modules (`@text`) are read only to
+ * check what a bubble or a link says.
  *
  * IT WRITES, INTO THE SEEDED ACCOUNT ONLY. A budget, a weekly ceiling, a fixed expense, a
  * spending, a receipt, a language: six writes, all on `local.dev@mock.io`, all on the current
@@ -37,7 +38,6 @@ import type { BrowserContext, Locator, Page } from "@playwright/test";
  * Paris life, the receipt is a picture this file draws itself before the first frame.
  */
 
-const fr = dictionaries.fr;
 const en = dictionaries.en;
 
 const USERNAME = process.env.DEMO_USERNAME ?? "";
@@ -53,8 +53,8 @@ const RECEIPT = join(RECEIPT_DIR, "receipt.png");
  */
 const SEARCH_TERM = "biocoop";
 
-/** What the take adds. Invented, and typed in the language the screen is in at that moment. */
-const NEW_FIXED = { label: "Salle de sport", amount: "29.90" };
+/** What the take adds. Invented, and typed in English — the language the screen is in by then. */
+const NEW_FIXED = { label: "Gym membership", amount: "29.90" };
 /** An expression, on purpose: the amount field evaluates arithmetic on submit (COS-109). */
 const NEW_SPENDING = { label: "Boulangerie du canal", amount: "9.90+2.50" };
 
@@ -240,15 +240,39 @@ test("pfa, end to end", async ({ demo }) => {
   await expect
     .poll(() => donut.locator(":scope > g:first-of-type > circle").count(), { timeout: 15_000 })
     .toBeGreaterThanOrEqual(3);
+  await demo.dwell(1400);
+
+  // The user menu, and the app switched to English — first thing, so every screen after it is
+  // in the landing page's language. Persisted on the account, which is why `demo.setup.ts`
+  // switches it back before the next take. The nav link says so.
+  await demo.click(page.getByTestId("user-menu"));
+  await demo.dwell(700);
+  await demo.click(page.getByTestId("user-menu-language"));
+  await demo.dwell(500);
+  await demo.click(page.locator('[data-testid="user-menu-locale"][data-locale="en"]'));
+  await expect(navLink("spendings")).toHaveText(en.navBar.links.spendings);
+  await demo.dwell(1800);
+
+  // The month picker, to last month — every widget replays its entrance on a month change, and
+  // the take waits for all of it — then the shortcut back to the current month, whose entrance
+  // is the whole dashboard counting up again, in English this time.
+  const now = new Date();
+  await demo.click(visible("month-picker"));
+  await demo.dwell(700);
+  await demo.click(page.locator(`[data-testid="month-cell"][data-month="${format(subMonths(now, 1), "yyyy-MM")}"]`));
+  await expect(page).toHaveURL(/month=/);
+  await demo.dwell(4200);
+  await demo.click(visible("current-month"));
+  await expect(page).not.toHaveURL(/month=/);
   await demo.dwell(3200);
   demo.shot("dashboard");
 
   // The three arcs: fixed, variable, what is left. The ring hit-tests the cursor's angle, so
   // the hand is sent to a point on each dash rather than to an element.
   const arcNames = [
-    fr.dashboard.budgetHero.fixed,
-    fr.dashboard.budgetHero.variables,
-    fr.dashboard.budgetHero.available,
+    en.dashboard.budgetHero.fixed,
+    en.dashboard.budgetHero.variables,
+    en.dashboard.budgetHero.available,
   ];
   for (const [index, point] of (await donutPoints(donut)).entries()) {
     await demo.glide(point.x, point.y);
@@ -313,28 +337,6 @@ test("pfa, end to end", async ({ demo }) => {
     await expect(target.getByTestId("category-detail")).toBeVisible();
   });
   await demo.dwell(600);
-
-  // The month picker, to last month — every widget replays its entrance on a month change, and
-  // the take waits for all of it — then the shortcut back to the current month.
-  const now = new Date();
-  await demo.click(visible("month-picker"));
-  await demo.dwell(700);
-  await demo.click(page.locator(`[data-testid="month-cell"][data-month="${format(subMonths(now, 1), "yyyy-MM")}"]`));
-  await expect(page).toHaveURL(/month=/);
-  await demo.dwell(4200);
-  await demo.click(visible("current-month"));
-  await expect(page).not.toHaveURL(/month=/);
-  await demo.dwell(2600);
-
-  // The user menu, and the app switched to English — persisted on the account, which is why
-  // `demo.setup.ts` switches it back before the next take. The nav link says so.
-  await demo.click(page.getByTestId("user-menu"));
-  await demo.dwell(700);
-  await demo.click(page.getByTestId("user-menu-language"));
-  await demo.dwell(500);
-  await demo.click(page.locator('[data-testid="user-menu-locale"][data-locale="en"]'));
-  await expect(navLink("spendings")).toHaveText(en.navBar.links.spendings);
-  await demo.dwell(1800);
 
   // ── 3 ── Spendings ───────────────────────────────────────────────────────
   await demo.chapter("Spendings");

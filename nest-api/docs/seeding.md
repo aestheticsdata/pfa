@@ -11,15 +11,17 @@ It is meant to be run **repeatedly** to keep the account topped up to today.
 
 ```bash
 pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wipe]
+pnpm seed -- --top-up [--to <YYYY-MM-DD>]
 ```
 
 > The `--` is required so pnpm forwards the flags to the script.
 
 | Option   | Required | Description                                                        |
 | -------- | -------- | ------------------------------------------------------------------ |
-| `--from` | **yes**  | Start date, inclusive (`YYYY-MM-DD`).                              |
+| `--from` | **yes**, unless `--top-up` | Start date, inclusive (`YYYY-MM-DD`). |
 | `--to`   | no       | End date, inclusive. Defaults to **today**.                        |
 | `--wipe` | no       | Destructive rebuild — see below. Omit it for safe append mode.     |
+| `--top-up` | no     | Start the day after the account's last spending — see below.       |
 
 Bad or missing arguments print the usage and exit without touching the database.
 
@@ -73,15 +75,20 @@ pnpm seed -- --from 2025-01-01 --to 2025-03-31
 Run this whenever you want to add data up to today:
 
 ```bash
-pnpm seed -- --from <start-date>
+pnpm seed -- --top-up
 ```
 
-Every day from `--from` to today gets spendings added. Existing days are **not**
-skipped, so pick `--from` as the first day you actually want to add — a `--from`
-that overlaps existing data stacks extra spendings on those days.
+`--top-up` asks the database for the account's last spending day and appends
+from the day after, up to today (or `--to`). Two weeks or six months since the
+last run, the gap is filled; already up to date, it says so and adds nothing —
+so it is safe to run as often as you like. The demo harness runs it before
+every take (`front/e2e/demo/demo.setup.ts`). It cannot be combined with
+`--from` or `--wipe`, and refuses an account with no spending at all: seed that
+one in full first.
 
-**Don't guess that date.** Ask the database for the last day the account already
-has, and start the day after:
+The date it works out is the one you would otherwise pick by hand. Existing days
+are **not** skipped in append mode, so a manual `--from` has to be exactly the
+day after the account's last one:
 
 ```sql
 SELECT MAX(date) FROM Spendings
@@ -89,7 +96,8 @@ SELECT MAX(date) FROM Spendings
 ```
 
 A `--from` earlier than that doubles up the overlapping days; a `--from` later
-leaves a hole. Neither is detected by the script.
+leaves a hole. Neither is detected by the script — which is what `--top-up` is
+for.
 
 ## Notes
 
