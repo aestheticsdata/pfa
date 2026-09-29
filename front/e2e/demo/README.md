@@ -129,9 +129,12 @@ the revisit).
 **The take writes six things into the seeded account** — a budget, a weekly ceiling, a fixed
 expense, a spending, a receipt, a language — all on the current month. `demo.setup.ts` puts the
 language back to French through the same `PATCH /users/me` the user menu uses, and the month's
-budget and ceiling to 4,600 € and 650 € through the `PUT /dashboard` the inline edits use — above
-what the seeded month spends, so the dashboard opens in the green rather than on a red "over
-budget", and the take edits them up from there. The rest accumulates: every take adds one
+budget and ceiling to 4,600 € and 390 € through the `PUT /dashboard` the inline edits use. The
+budget is above what the seeded month spends, so the dashboard opens in the green rather than on
+a red "over budget". The ceiling is above a seeded week and under a seeded weekend day's share of
+it: the statistics page's weekday chart holds each day to a seventh of the ceiling, and shows the
+seeder's week — quiet Monday to Thursday, out on Friday, the big Saturday — green, then orange,
+then red at the tip of Saturday. The take edits both up from there. The rest accumulates: every take adds one
 `Gym membership` to the fixed expenses and one `Corner Bakery` to today. Harmless for a few
 takes; `pnpm seed -- --wipe --from …` in `nest-api/` rebuilds the account from scratch when it is
 not.

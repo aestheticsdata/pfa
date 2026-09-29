@@ -22,8 +22,12 @@ import startOfMonth from "date-fns/startOfMonth";
  * - THE MONTH IN THE GREEN. The seeder's invented city life spends close to 4,000 € a month, and
  *   every take adds to it, so late in a month the seeded budget is overdrawn and the dashboard
  *   opens on a red balance, "over budget" — the wrong first frame for a portfolio film. The
- *   current month's budget and weekly ceiling are set above that. The take then edits both, from
- *   there.
+ *   current month's budget is set above that. The take then edits it, from there.
+ * - A CEILING THE WEEKEND RUNS OVER. The weekly ceiling sits above what a seeded week spends, so
+ *   the dashboard's weeks stay under it — and low enough that the statistics page's weekday
+ *   chart, which holds each day to a seventh of it, shows the seeder's week as a real account
+ *   does: Monday to Thursday green, the weekend orange, red at the tip of Saturday. The take
+ *   raises it by 30 € on camera, to the 420 € that chart is drawn against.
  *
  * Through the API rather than the database: the same calls the user menu and the inline edits
  * make, on the same guards. The house dev account, never anything real — the film is for a public
@@ -36,8 +40,11 @@ import startOfMonth from "date-fns/startOfMonth";
  */
 const API_URL = process.env.DEMO_API_URL ?? "http://localhost:6100";
 
-/** The current month's budget and weekly ceiling, in euros: above what the seeded month spends. */
-const MONTH = { budget: 4600, ceiling: 650 };
+/**
+ * The current month's budget and weekly ceiling, in euros: the budget above what the seeded month
+ * spends; the ceiling above a seeded week, under a seeded weekend day's share of it.
+ */
+const MONTH = { budget: 4600, ceiling: 390 };
 
 /** The API's package, beside the front's in the repository — where `pnpm seed` runs. */
 const NEST_API = join(__dirname, "..", "..", "..", "nest-api");
