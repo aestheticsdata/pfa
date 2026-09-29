@@ -3,7 +3,9 @@ import { join } from "node:path";
 import { expect, test } from "@e2e/demo/fixture";
 import { dictionaries } from "@text/index";
 import format from "date-fns/format";
+import isSameMonth from "date-fns/isSameMonth";
 import subMonths from "date-fns/subMonths";
+import subWeeks from "date-fns/subWeeks";
 
 import type { BrowserContext, Locator, Page } from "@playwright/test";
 
@@ -35,7 +37,8 @@ import type { BrowserContext, Locator, Page } from "@playwright/test";
  * by the keyboard.
  *
  * NOTHING ON SCREEN IS REAL. The account is the house one, the data is the seeder's invented
- * Paris life, the receipt is a picture this file draws itself before the first frame.
+ * city life, the receipt is a picture this file draws itself before the first frame — and all
+ * of it is in English, like the app from the dashboard on: the film goes on an English page.
  */
 
 const en = dictionaries.en;
@@ -48,17 +51,21 @@ const RECEIPT_DIR = join(__dirname, "out", "upload");
 const RECEIPT = join(RECEIPT_DIR, "receipt.png");
 
 /**
- * The label the two searches look for. The seeder's most frequent variable spending, so the
- * whole-history palette fills a screen and the statistics timeline has a bar in most weeks.
+ * What the two searches look for: the seeder's "Organic Co-op", a grocery — the category it
+ * spends most on — so the whole-history palette fills a screen and the statistics timeline has
+ * bars all year. No other label or category carries the word.
  */
-const SEARCH_TERM = "biocoop";
+const SEARCH_TERM = "organic";
 
 /** What the take adds. Invented, and typed in English — the language the screen is in by then. */
 const NEW_FIXED = { label: "Gym membership", amount: "29.90" };
-/** An expression, on purpose: the amount field evaluates arithmetic on submit (COS-109). */
-const NEW_SPENDING = { label: "Boulangerie du canal", amount: "9.90+2.50" };
+/**
+ * An expression, on purpose: the amount field evaluates arithmetic on submit (COS-109). Its row
+ * is the one the receipt goes on, and the receipt says so.
+ */
+const NEW_SPENDING = { label: "Corner Bakery", amount: "9.90+2.50" };
 
-/** The number inside a label such as `3 300 €` or `450 €/sem.` — thousands separators and all. */
+/** The number inside a label such as `3 300 €` or `450 €/week` — thousands separators and all. */
 const digitsOf = (text: string | null) => Number((text ?? "").replace(/\D/g, ""));
 
 /**
@@ -69,23 +76,23 @@ async function drawReceipt(context: BrowserContext, label: string, amount: strin
   mkdirSync(RECEIPT_DIR, { recursive: true });
   const sheet = await context.newPage();
   await sheet.setViewportSize({ width: 380, height: 640 });
-  const today = format(new Date(), "dd/MM/yyyy HH:mm");
+  const today = format(new Date(), "dd MMM yyyy HH:mm").toUpperCase();
   const rows = [
-    ["CARTE BANCAIRE", ""],
+    ["CARD PAYMENT", ""],
     ["", ""],
     [label.toUpperCase(), ""],
-    ["12 RUE DE L'ECLUSE", ""],
-    ["75010 PARIS", ""],
+    ["12 CANAL STREET", ""],
+    ["STORE 042", ""],
     ["", ""],
     [today, ""],
-    ["TICKET CLIENT", ""],
+    ["CUSTOMER COPY", ""],
     ["", ""],
-    ["CB **** **** **** 4242", ""],
+    ["VISA **** **** **** 4242", ""],
     ["AID: A0000000031010", ""],
-    ["MONTANT", `${amount} EUR`],
-    ["DEBIT", ""],
+    ["AMOUNT", `${amount} EUR`],
+    ["SALE", ""],
     ["", ""],
-    ["MERCI DE VOTRE VISITE", ""],
+    ["THANK YOU FOR YOUR VISIT", ""],
   ];
   await sheet.setContent(`
     <body style="margin:0;background:#e9e6df;display:grid;place-items:center;height:640px">
@@ -186,13 +193,18 @@ test("pfa, end to end", async ({ demo }) => {
   };
 
   /**
-   * A row of today's card by whether it carries a receipt: the take attaches one to a row
-   * without, the still re-opens the row with. A second take on the same day finds the previous
-   * take's receipt on the first row and moves on to the next.
+   * The spending the take adds, on today's card, by whether it carries a receipt: the take
+   * attaches one to a row without, the still re-opens the row with. Always that row — a day card
+   * lists its spendings in no fixed order, and the receipt is drawn for this one, its shop and its
+   * amount. A second take on the same day finds the previous take's row with its receipt and
+   * moves on to its own.
    */
   const dayCard = (target: Page) => target.locator(`[data-testid="day-card"][data-sp-day="${todayIso}"]`);
   const receiptRow = (target: Page, hasReceipt: boolean) =>
-    dayCard(target).locator(`[data-testid="tx-row"][data-has-receipt="${hasReceipt}"]`).first();
+    dayCard(target)
+      .locator(`[data-testid="tx-row"][data-has-receipt="${hasReceipt}"]`)
+      .filter({ hasText: NEW_SPENDING.label })
+      .first();
 
   /**
    * The breakdown row with the most spendings — not the biggest amount, which can be a single
@@ -348,6 +360,17 @@ test("pfa, end to end", async ({ demo }) => {
   await demo.dwell(2400);
   demo.shot("spendings");
 
+  // A full week, every day of it spent — this one is empty after today: the week before, while
+  // it is still this month. The balance a week shows is its month's, and only the current month
+  // is kept in the green (`demo.setup.ts`); a past month ends within a few euros of its seeded
+  // budget, or past it, in red. Early in a month there is no such week, and today's stands in.
+  const lastWeek = subWeeks(new Date(), 1);
+  const fullWeek = format(isSameMonth(lastWeek, new Date()) ? lastWeek : new Date(), "yyyy-MM-dd");
+  demo.shot("weekly-view", async (target) => {
+    await target.goto(`/spendings/?date=${fullWeek}`);
+    await expect(target.locator(`[data-testid="day-card"][data-sp-day="${fullWeek}"]`)).toBeVisible();
+  });
+
   // A spending from the floating button: label, an amount typed as a sum, a category picked
   // from the combobox by its first letters. It lands on today's card.
   await demo.click(page.getByTestId("new-spending"));
@@ -401,7 +424,10 @@ test("pfa, end to end", async ({ demo }) => {
   // A receipt on a spending of the week: the row's actions appear on hover, the modal takes a
   // file through the picker the click raises — the one dialogue Playwright answers for the hand.
   const row = receiptRow(page, false);
-  await expect(row, "every row of today's card already carries a receipt — reseed the account").toBeVisible();
+  await expect(
+    row,
+    `today's card has no ${NEW_SPENDING.label} without a receipt — the new spending did not land`,
+  ).toBeVisible();
   await demo.moveTo(row, { aim: "text", dwell: 700 });
   await demo.click(row.getByTestId("tx-receipt"));
   const invoice = page.getByTestId("receipt-modal");

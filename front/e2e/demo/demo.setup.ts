@@ -19,7 +19,7 @@ import startOfMonth from "date-fns/startOfMonth";
  *   dashboard is up, and the API persists that on the account (`PATCH /users/me`), where it wins
  *   over anything the browser remembers — a take started on that account would open in English,
  *   and the switch the film shows would switch nothing.
- * - THE MONTH IN THE GREEN. The seeder's invented Paris life spends close to 4,000 € a month, and
+ * - THE MONTH IN THE GREEN. The seeder's invented city life spends close to 4,000 € a month, and
  *   every take adds to it, so late in a month the seeded budget is overdrawn and the dashboard
  *   opens on a red balance, "over budget" — the wrong first frame for a portfolio film. The
  *   current month's budget and weekly ceiling are set above that. The take then edits both, from

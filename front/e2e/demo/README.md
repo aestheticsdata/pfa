@@ -17,7 +17,7 @@ Output lands in `e2e/demo/out/` (gitignored):
 - `chapters.ffmeta` — ffmpeg metadata; already applied to the mp4, kept so a re-encode can reapply it
 - `chapters.json` — the same marks with millisecond precision
 - `events.json` — everything the hand did, on the film's clock: see **For the landing page's films**
-- `shots/01-dashboard.png` and eight more — stills at 3840×2160, for a page that wants pictures too
+- `shots/01-dashboard.png` and nine more — stills at 3840×2160, for a page that wants pictures too
 - `upload/receipt.png` — the receipt chapter 3 attaches, drawn by the storyboard itself
 
 This is a port of Trekker's harness, which is a port of Zeus's, which is a port of Spira's.
@@ -70,11 +70,17 @@ harnesses are copies of each other.
 
 ## The data, and what it must never contain
 
-The take films the seeder's invented Paris life on `local.dev@mock.io` (`nest-api/docs/seeding.md`):
+The take films the seeder's invented city life on `local.dev@mock.io` (`nest-api/docs/seeding.md`):
 the house dev account every project here uses, filled by `pnpm seed`, with invented shops, fake
 categories, a fake budget. Nothing real is on screen — no real account, no real amount, and the
 receipt is a picture the storyboard draws on a blank page before the first frame: an invented
-shop, a masked card number, the amount of the row it goes on.
+shop, a masked card number, the amount of the row it goes on — the spending the take has just
+added, found by its label.
+
+**All of it is in English**, like the app from the dashboard on: the film and the stills go on an
+English portfolio page. The seeder writes English shops, categories and charges; the storyboard
+types English labels; the receipt is printed in English. An account seeded before 2026-09-29 holds
+the French dataset — rebuild it with `pnpm seed -- --wipe --from 2023-01-01` in `nest-api/`.
 
 The take needs the account **up to today** — today's card holding a spending (the receipt goes on
 its first row, and the new spending lands there), the month and the statistics current. The seeder
@@ -103,17 +109,20 @@ Six chapters, **203s — three minutes twenty-three**, at the default `DEMO_SPEE
 
 ## The stills
 
-`demo.shot("name", prepare?)` marks nine screens. It takes no picture at the time — it writes down
+`demo.shot("name", prepare?)` marks ten screens. It takes no picture at the time — it writes down
 the URL, and the pictures are taken at the very end, once the recorder has stopped and the mp4 is
 closed, by sending the same signed-in page back to each URL. They come out at 3840×2160, lossless
 PNG, animations frozen, caret hidden, the harness's overlays painted out — **and in English**,
 because the take switched the account there.
 
-Four of them show something a URL cannot hold, so they pass a `prepare` step run on the revisited
-page after it has settled and before the shutter: the category detail modal (the first breakdown
-row clicked), the receipt modal (today's first row hovered, its receipt button clicked — by then
-the button says *view*, not *add*), the heatmap and the search timeline scrolled into view (the
-timeline's term and range are in the URL, so the search itself survives the revisit).
+Five of them show something the take's own URL does not hold, so they pass a `prepare` step run
+on the revisited page after it has settled and before the shutter: the weekly view sent to the
+last full week of the current month (the week before this one — seven days spent, under the
+month's balance, which the setup keeps in the green), the category detail modal (the first
+breakdown row clicked), the receipt modal (the new spending's row hovered, its receipt button
+clicked — by then the button says *view*, not *add*), the heatmap and the search timeline
+scrolled into view (the timeline's term and range are in the URL, so the search itself survives
+the revisit).
 
 ## Running it again
 
@@ -123,7 +132,7 @@ language back to French through the same `PATCH /users/me` the user menu uses, a
 budget and ceiling to 4,600 € and 650 € through the `PUT /dashboard` the inline edits use — above
 what the seeded month spends, so the dashboard opens in the green rather than on a red "over
 budget", and the take edits them up from there. The rest accumulates: every take adds one
-`Gym membership` to the fixed expenses and one `Boulangerie du canal` to today. Harmless for a few
+`Gym membership` to the fixed expenses and one `Corner Bakery` to today. Harmless for a few
 takes; `pnpm seed -- --wipe --from …` in `nest-api/` rebuilds the account from scratch when it is
 not.
 
