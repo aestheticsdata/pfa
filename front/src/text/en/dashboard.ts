@@ -111,6 +111,8 @@ const dashboard: typeof frDashboard = {
     avgLabel: "Weekly average",
     pctOfCeiling: (pct: number) => `${pct}% of ceiling`,
     ceilingAmount: (amount: string) => `Ceiling ${amount} €`,
+    /** The ceiling on the card's header, the button that edits it. */
+    perWeek: (amount: string) => `${amount} €/week`,
     withinBudget: "within budget",
     overrun: "overrun",
   },

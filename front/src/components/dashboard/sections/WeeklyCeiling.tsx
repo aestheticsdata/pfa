@@ -104,7 +104,7 @@ const WeeklyCeiling = () => {
               )}
               title={t.editTitle}
             >
-              <span className="num">{euro0(ceiling)} €/sem.</span>
+              <span className="num">{t.perWeek(euro0(ceiling))}</span>
               {canEdit && <EditGlyph className="size-3 text-ink-4 transition-colors group-hover:text-accent-strong" />}
             </button>
           ) : (

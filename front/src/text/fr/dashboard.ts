@@ -113,6 +113,8 @@ const dashboard = {
     avgLabel: "Moyenne hebdo",
     pctOfCeiling: (pct: number) => `${pct}% du plafond`,
     ceilingAmount: (amount: string) => `Plafond ${amount} €`,
+    /** The ceiling on the card's header, the button that edits it. */
+    perWeek: (amount: string) => `${amount} €/sem.`,
     withinBudget: "dans le budget",
     overrun: "dépassement",
   },
