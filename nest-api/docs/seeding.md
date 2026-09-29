@@ -5,6 +5,12 @@ coherent city life on ~3500 €/month: monthly budgets, ~12 recurring charges,
 14 categories, thousands of realistic variable spendings, and a few one-off
 exceptionals.
 
+Spendings follow a week's rhythm (`WEEK_RHYTHM`): Monday to Thursday stay in,
+Friday goes out, Saturday is the big day, Sunday a lighter one — the pattern the
+statistics page's weekday chart reads, green on the quiet days and over the
+weekly ceiling's daily share at the weekend. A day with nothing else still gets
+one small spending: a coffee, a ticket, a few groceries.
+
 Everything it writes is **in English** — shops, categories, charges, exceptionals —
 because the demo film and the stills made from this account go on an English
 portfolio page. Until 2026-09-29 it wrote them in French: an account seeded

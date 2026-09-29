@@ -381,17 +381,30 @@ function seasonalShareMult(name: string, m: number): number {
   return 1.0;
 }
 
-/** Pick a day from `days` with weekend bias controlled by `boost`. */
+/**
+ * The week's rhythm, Sunday first: how much a day of the week draws spending against the others.
+ * Monday to Thursday stay in, Friday goes out, Saturday is the big day — the week's shop, a
+ * dinner, a bar — and Sunday a lighter one. The statistics page's weekday chart shows it: against
+ * the demo's weekly ceiling (front/e2e/demo/demo.setup.ts), the quiet days sit under their
+ * seventh of it and the weekend runs over — orange, and red at the tip of Saturday.
+ */
+const WEEK_RHYTHM = [1.4, 0.55, 0.55, 0.55, 0.6, 1.4, 2.6];
+
+/** What a day with nothing else spends on: a coffee, a ticket, a few groceries. */
+const QUIET_DAY = CATS.filter((c) => ["Groceries", "Coffee & Drinks", "Transport"].includes(c.name));
+
+/**
+ * Pick a day from `days` along the week's rhythm, which a category's `boost` sharpens (above 1:
+ * restaurants, bars) or softens (below 1: health).
+ */
 function pickDay(y: number, m: number, days: number[], boost: number): number {
   const at = (): number => days[Math.floor(rand() * days.length)];
   if (days.length === 1) return days[0];
-  if (boost <= 1) return at();
-  for (let i = 0; i < 12; i += 1) {
+  const weight = (d: number): number => WEEK_RHYTHM[weekdayOf(y, m, d)] ** boost;
+  const top = Math.max(...days.map(weight));
+  for (let i = 0; i < 32; i += 1) {
     const d = at();
-    const wd = weekdayOf(y, m, d);
-    const isWeekend = wd === 0 || wd === 5 || wd === 6;
-    const w = isWeekend ? boost : 1;
-    if (rand() * boost <= w) return d;
+    if (rand() * top <= weight(d)) return d;
   }
   return at();
 }
@@ -558,11 +571,12 @@ function generate(
       }
     });
 
-    // Guarantee every day in the window gets at least one spending (no empty days).
+    // Guarantee every day in the window gets at least one spending (no empty days) — a small
+    // one: a quiet day is a coffee, a ticket, a few groceries, and stays quiet in the week's rhythm.
     for (const day of targetDays) {
       if (filledDays.has(day)) continue;
-      const cat = weightedPick(CATS, adjShares);
-      addSpending(day, cat, money(cat.min + (cat.max - cat.min) * Math.pow(rand(), 1.9)));
+      const cat = pick(QUIET_DAY);
+      addSpending(day, cat, money(cat.min + (cat.max - cat.min) * 0.25 * rand()));
     }
   }
 
