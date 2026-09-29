@@ -25,11 +25,18 @@ interface DashboardMutationVariables {
   initialAmount: string;
 }
 
-const useDashboard = (): UseDashboard => {
+/**
+ * A month's dashboard: the month the date picker is on — or `month`, for a page with no picker.
+ * The statistics page asks for the current month's, whose weekly ceiling its weekday chart is
+ * drawn against: the picker's store is not persisted, so on a page opened directly it is empty,
+ * and a dashboard read from it would never load.
+ */
+const useDashboard = (month?: Date): UseDashboard => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
-  const { from } = useDatePickerWrapperStore();
+  const { from: pickerFrom } = useDatePickerWrapperStore();
+  const from = month ?? pickerFrom;
   const monthBeginning = startOfMonth(from!);
   const queryClient = useQueryClient();
   const { data: monthlyStats } = useMonthlyStats();

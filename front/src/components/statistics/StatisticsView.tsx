@@ -81,7 +81,7 @@ const StatisticsView = () => {
   const { exceptionals: compareExceptionals, isLoading: compareExceptionalsLoading } = useExceptionals({
     year: compareYear,
   });
-  const dashboard = useDashboard();
+  const dashboard = useDashboard(now);
   const { recurrings } = useReccurings();
   const { monthlyIncome } = useMonthlyIncome({ year: selectedYear });
   // "Already debited" is always the real current-year-to-date sum, independent of the
