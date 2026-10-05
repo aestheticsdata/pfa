@@ -34,7 +34,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
   const { deleteSpending } = useSpendings();
 
   const color = spending.categoryColor || FALLBACK_COLOR;
-  const category = spending.category ?? spendings.noCategory;
+  const category = spending.category ?? null;
   const hasInvoice = Boolean(spending.invoicefile);
 
   const onConfirmDelete = () => {
@@ -96,12 +96,14 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
           </span>
 
           <span className="relative z-10 justify-self-end max-md:col-start-1 max-md:row-start-2 max-md:justify-self-start">
-            <span
-              className={cn(TAG_CHIP, "max-md:border-transparent max-md:bg-transparent max-md:p-0")}
-              style={{ color }}
-            >
-              {category}
-            </span>
+            {category && (
+              <span
+                className={cn(TAG_CHIP, "max-md:border-transparent max-md:bg-transparent max-md:p-0")}
+                style={{ color }}
+              >
+                {category}
+              </span>
+            )}
           </span>
 
           <span className="relative z-10 justify-self-end whitespace-nowrap text-right font-mono text-sm font-medium tabular-nums text-ink max-md:col-start-2 max-md:row-start-1 max-md:self-center">
