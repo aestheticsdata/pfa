@@ -25,7 +25,7 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
  * sync that store (the monthly hooks read from/to) and only render once it
  * reflects the URL month, so the hooks never fire against a stale week.
  */
-export default function DashboardPageClient() {
+export default function Dashboard() {
   const { setIsCalendarVisible } = useGlobalStore();
   const { from, to, setFrom, setTo, setRange } = useDatePickerWrapperStore();
   const [monthParam] = useQueryState(MONTH_QUERY_PARAM, parseAsString);

@@ -1,6 +1,7 @@
 "use client";
 
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
+import useGlobalStore from "@components/shared/globalStore";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useReccurings from "@components/spendings/services/useReccurings";
 import { exceptionalMonthly } from "@components/statistics/helpers/exceptionalsData";
@@ -45,7 +46,13 @@ const yearOptions = (currentYear: number): number[] => Array.from({ length: 7 },
  * A single /statistics fetch (all categories, the selected + compare years)
  * feeds the KPIs, forecast and charts; /exceptionals adds the exceptional layer.
  */
-const StatisticsView = () => {
+const Statistics = () => {
+  const { setIsCalendarVisible } = useGlobalStore();
+
+  useEffect(() => {
+    setIsCalendarVisible(false);
+  }, [setIsCalendarVisible]);
+
   const [now] = useState(() => new Date());
   const currentYear = now.getFullYear();
 
@@ -279,4 +286,4 @@ const StatisticsView = () => {
   );
 };
 
-export default StatisticsView;
+export default Statistics;

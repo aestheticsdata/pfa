@@ -21,7 +21,7 @@ export interface DatePickerWrapperStoreProps {
 }
 
 // This store is intentionally NOT persisted. The selected week is carried by the
-// `?date=` URL param (see SpendingPageClient), so it already survives reloads —
+// `?date=` URL param (see Spendings), so it already survives reloads —
 // and the picker is only shown on Spendings. Persisting `selectedDateIso` in
 // localStorage leaked a stale day across sessions, which made the NavBar
 // "Spendings" link reopen a past week instead of today (COS-73). "Today" must be

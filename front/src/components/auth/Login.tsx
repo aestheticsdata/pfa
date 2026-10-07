@@ -14,7 +14,7 @@ import { useState } from "react";
 import type { LoginValues } from "@components/shared/interfaces/sharedLoginFormTypes";
 import type { AxiosError } from "axios";
 
-export default function LoginFormClient() {
+export default function Login() {
   const login = useTranslations("login");
   const { loginService } = useLoginService();
   const { setCredentials } = useCredentials();

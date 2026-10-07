@@ -1,9 +1,9 @@
-import SpendingPageClient from "@components/spendings/view/SpendingPageClient";
+import Spendings from "@components/spendings/Spendings";
 
 // "Today" for the weekly Spendings view is resolved in the browser
-// (SpendingPageClient), never here: the server's timezone can differ from the
+// (Spendings), never here: the server's timezone can differ from the
 // user's and would otherwise bake the wrong day into ?date= (COS-73). The
 // client reads/writes the ?date= param, so this page just renders it.
 export default function SpendingsPage() {
-  return <SpendingPageClient />;
+  return <Spendings />;
 }

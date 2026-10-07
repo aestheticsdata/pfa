@@ -5,18 +5,25 @@ import CategoryFormModal from "@components/categories/CategoryFormModal";
 import CategoryItem from "@components/categories/CategoryItem";
 import useCategoryStats from "@components/categories/services/useCategoryStats";
 import Spinner from "@components/common/Spinner";
+import useGlobalStore from "@components/shared/globalStore";
 import useCategories from "@components/spendings/services/useCategories";
 import { Button } from "@components/ui/button";
 import useTranslations from "@i18n/useTranslations";
 import { Plus, Search } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import type { Category } from "@src/schemas/categories";
 
 const isMock = (id: string) => id.startsWith("mock-");
 
-const CategoriesListcontainer = () => {
+const Categories = () => {
+  const { setIsCalendarVisible } = useGlobalStore();
+
+  useEffect(() => {
+    setIsCalendarVisible(false);
+  }, [setIsCalendarVisible]);
+
   const categoriesText = useTranslations("categories");
   const { categories, updateCategory, deleteCategory } = useCategories();
   const { categoryStats, error: statsError } = useCategoryStats();
@@ -154,4 +161,4 @@ const CategoriesListcontainer = () => {
   );
 };
 
-export default CategoriesListcontainer;
+export default Categories;

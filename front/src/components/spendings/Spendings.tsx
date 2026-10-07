@@ -7,7 +7,7 @@ import { DATE_QUERY_PARAM, getTodayIsoDate, parseAsSpendingsDate } from "@helper
 import { useQueryState } from "nuqs";
 import { useEffect } from "react";
 
-export default function SpendingPageClient() {
+export default function Spendings() {
   const { setIsCalendarVisible } = useGlobalStore();
   // The `?date=` param is the URL source of truth for the selected week; the
   // parser drops any invalid value to null (see parseAsSpendingsDate).

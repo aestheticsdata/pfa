@@ -12,7 +12,7 @@ import { useState, useSyncExternalStore } from "react";
 
 /**
  * Month period selector shown in the app header on the Dashboard. The month is
- * the URL's ?month= param (single source of truth, COS-118); DashboardPageClient
+ * the URL's ?month= param (single source of truth, COS-118); Dashboard
  * syncs the shared store from it. Landing on the current month clears the param,
  * keeping /dashboard clean. The label opens a direct year+month picker (COS-120);
  * the ‹ › arrows step one month at a time.

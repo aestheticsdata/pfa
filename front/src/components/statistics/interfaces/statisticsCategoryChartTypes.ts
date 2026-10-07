@@ -1,5 +1,5 @@
 /**
- * One selected category's monthly series — built by StatisticsView, rendered as
+ * One selected category's monthly series — built by Statistics, rendered as
  * a group of bars by StatisticsCategoryChart.
  */
 export interface CategorySeries {

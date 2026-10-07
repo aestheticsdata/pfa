@@ -1,5 +1,5 @@
 import { getServerSession } from "@auth/server/getServerSession";
-import LoginFormClient from "@components/login/LoginFormClient";
+import Login from "@components/auth/Login";
 import { ROUTES } from "@components/shared/config/constants";
 import { redirect } from "next/navigation";
 
@@ -17,5 +17,5 @@ export default async function LoginPage() {
     redirect(ROUTES.dashboard.path);
   }
 
-  return <LoginFormClient />;
+  return <Login />;
 }
