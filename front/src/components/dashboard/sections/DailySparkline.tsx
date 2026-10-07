@@ -22,7 +22,6 @@ import getDate from "date-fns/getDate";
 import getDaysInMonth from "date-fns/getDaysInMonth";
 import isSameMonth from "date-fns/isSameMonth";
 import parseISO from "date-fns/parseISO";
-import { useMemo } from "react";
 
 import type { LinePoint } from "@lib/dataviz";
 import type { ProjectionSource } from "@src/schemas/dashboard";
@@ -39,63 +38,53 @@ const DailySparkline = () => {
   const monthRef = from ?? new Date();
   const daysInMonth = getDaysInMonth(monthRef);
 
-  const { real, projection, projectionSource, todayX, todayY, avg, peak, peakDay } = useMemo(() => {
-    const isThisMonth = isSameMonth(monthRef, new Date());
-    const today = isThisMonth ? getDate(new Date()) : daysInMonth;
-    const totals = new Array(daysInMonth + 1).fill(0) as number[];
-    for (const s of spendingsByMonth ?? []) {
-      const d = getDate(parseISO(s.date));
-      if (!Number.isNaN(d) && d >= 1 && d <= daysInMonth) {
-        totals[d] += Number(s.amount);
-      }
+  const isThisMonth = isSameMonth(monthRef, new Date());
+  const today = isThisMonth ? getDate(new Date()) : daysInMonth;
+  const totals = new Array(daysInMonth + 1).fill(0) as number[];
+  for (const s of spendingsByMonth ?? []) {
+    const d = getDate(parseISO(s.date));
+    if (!Number.isNaN(d) && d >= 1 && d <= daysInMonth) {
+      totals[d] += Number(s.amount);
     }
-    const realPts: LinePoint[] = [];
-    for (let d = 1; d <= today; d += 1) realPts.push({ x: d, y: totals[d] });
-    const active = realPts.filter((p) => p.y > 0);
-    const average = active.length ? active.reduce((a, p) => a + p.y, 0) / active.length : 0;
-    let peakVal = 0;
-    let peakD = 0;
-    for (const p of realPts) {
-      if (p.y > peakVal) {
-        peakVal = p.y;
-        peakD = p.x;
-      }
+  }
+  const real: LinePoint[] = [];
+  for (let d = 1; d <= today; d += 1) real.push({ x: d, y: totals[d] });
+  const active = real.filter((p) => p.y > 0);
+  const avg = active.length ? active.reduce((a, p) => a + p.y, 0) / active.length : 0;
+  let peak = 0;
+  let peakDay = 0;
+  for (const p of real) {
+    if (p.y > peak) {
+      peak = p.y;
+      peakDay = p.x;
     }
-    // Projected tail: the reference month's day-by-day totals for the days after
-    // today. Only for the in-progress month with a usable reference (source
-    // "none" → the user's first month of data → no tail). It starts at today's
-    // real point so the dashed curve continues seamlessly from the solid one.
-    // A reference month shorter than the current one carries its last day's value
-    // forward for the overhanging days — `referenceDayAmount` owns that rule, so
-    // this curve and the forecast strip's summed figure stay in step (PFA-175).
-    const source: ProjectionSource = projectionData?.source ?? "none";
-    const refDaily = projectionData?.dailyTotals ?? [];
-    const canProject = isThisMonth && today < daysInMonth && source !== "none" && refDaily.length > 0;
-    const projPts: LinePoint[] = canProject
-      ? [
-          { x: today, y: totals[today] ?? 0 },
-          ...Array.from({ length: daysInMonth - today }, (_, i) => {
-            const day = today + 1 + i;
-            return { x: day, y: referenceDayAmount(refDaily, day) };
-          }),
-        ]
-      : [];
-    return {
-      real: realPts,
-      projection: projPts,
-      projectionSource: canProject ? source : ("none" as ProjectionSource),
-      todayX: today,
-      todayY: totals[today] ?? 0,
-      avg: average,
-      peak: peakVal,
-      peakDay: peakD,
-    };
-  }, [spendingsByMonth, monthRef, daysInMonth, projectionData]);
+  }
+  // Projected tail: the reference month's day-by-day totals for the days after
+  // today. Only for the in-progress month with a usable reference (source
+  // "none" → the user's first month of data → no tail). It starts at today's
+  // real point so the dashed curve continues seamlessly from the solid one.
+  // A reference month shorter than the current one carries its last day's value
+  // forward for the overhanging days — `referenceDayAmount` owns that rule, so
+  // this curve and the forecast strip's summed figure stay in step (PFA-175).
+  const source: ProjectionSource = projectionData?.source ?? "none";
+  const refDaily = projectionData?.dailyTotals ?? [];
+  const canProject = isThisMonth && today < daysInMonth && source !== "none" && refDaily.length > 0;
+  const projection: LinePoint[] = canProject
+    ? [
+        { x: today, y: totals[today] ?? 0 },
+        ...Array.from({ length: daysInMonth - today }, (_, i) => {
+          const day = today + 1 + i;
+          return { x: day, y: referenceDayAmount(refDaily, day) };
+        }),
+      ]
+    : [];
+  const projectionSource: ProjectionSource = canProject ? source : "none";
+  const todayY = totals[today] ?? 0;
 
   const ticks = Array.from({ length: 6 }, (_, i) => Math.round(1 + ((daysInMonth - 1) * i) / 5));
   // The today marker / crossing-dot / date-label only make sense while the
   // viewed month is in progress (a "today" falls inside it).
-  const showToday = todayX < daysInMonth;
+  const showToday = today < daysInMonth;
   // The projected tail can exceed the real peak, so the chart's y-domain — and
   // the overlay math below — must key off the greater of the two, else the dot /
   // avg label drift out of alignment with the rendered curve.
@@ -103,7 +92,7 @@ const DailySparkline = () => {
   const yTop = Math.max(peak, projMax);
   // Positions as % of the chart box. LineChart maps its [1, daysInMonth] x-domain
   // and [0, yTop] y-domain into a 600×110 viewBox with 6px padding all round.
-  const dotLeftPct = 1 + ((todayX - 1) / (daysInMonth - 1)) * 98;
+  const dotLeftPct = 1 + ((today - 1) / (daysInMonth - 1)) * 98;
   const dotTopPct = yTop > 0 ? ((104 - (todayY / yTop) * 98) / 110) * 100 : 50;
   const avgTopPct = yTop > 0 ? ((104 - (avg / yTop) * 98) / 110) * 100 : 50;
   const todayLabel = format(new Date(), "d MMM", { locale: dateLocale });
@@ -155,7 +144,7 @@ const DailySparkline = () => {
               width: 1,
             },
           ]}
-          markers={showToday ? [{ x: todayX, color: "var(--ink-3)" }] : []}
+          markers={showToday ? [{ x: today, color: "var(--ink-3)" }] : []}
           gridLines={3}
           ariaLabel={t.chartAria}
         />

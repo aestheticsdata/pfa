@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 const LABEL = overlineClass;
 const INPUT =
@@ -42,7 +42,7 @@ const CategoryFormBody = ({
   const categories = useTranslations("categories");
   const common = useTranslations("common");
   const { form } = categories;
-  const swatches = useMemo(() => paletteHex(), []);
+  const swatches = paletteHex();
   const [name, setName] = useState(initialName);
   const [color, setColor] = useState(() => cssColorToHex(initialColor ?? swatches[7] ?? "#84c4f5"));
   const [error, setError] = useState<string | null>(null);

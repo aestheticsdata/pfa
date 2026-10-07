@@ -21,7 +21,7 @@ import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
 import startOfMonth from "date-fns/startOfMonth";
 import { Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { BreakdownRow } from "@components/spendings/interfaces/spendingCategoryBreakdownTypes";
 import type { FilterCategory } from "@components/spendings/interfaces/spendingCategoryFilterTypes";
@@ -63,47 +63,40 @@ const SpendingView = () => {
   // to the picked week vs the 7 days before it.
   const { data: trendsData } = useCategoryTrends(WEEKLY);
 
-  const groups = useMemo<SpendingDayGroup[]>(() => spendingsByWeek ?? [], [spendingsByWeek]);
+  const groups: SpendingDayGroup[] = spendingsByWeek ?? [];
 
-  const { weekTotal, txCount, biggest, categoryAgg } = useMemo(() => {
-    let total = 0;
-    let count = 0;
-    let largest: { label: string; amount: number; date: Date } | null = null;
-    const map = new Map<string, CategoryAggregate>();
+  let weekTotal = 0;
+  let txCount = 0;
+  let biggest: { label: string; amount: number; date: Date } | null = null;
+  const aggregates = new Map<string, CategoryAggregate>();
 
-    for (const group of groups) {
-      total += group.total;
-      for (const tx of group.items) {
-        const amount = Number(tx.amount);
-        count += 1;
-        if (!largest || amount > largest.amount) {
-          largest = { label: tx.label, amount, date: parseISO(tx.date) };
-        }
-        const key = tx.category ?? UNCATEGORIZED_KEY;
-        const existing = map.get(key);
-        if (existing) {
-          existing.count += 1;
-          existing.total += amount;
-        } else {
-          map.set(key, {
-            key,
-            category: tx.category ?? null,
-            name: tx.category ?? spendings.noCategory,
-            color: tx.categoryColor || FALLBACK_COLOR,
-            count: 1,
-            total: amount,
-          });
-        }
+  for (const group of groups) {
+    weekTotal += group.total;
+    for (const tx of group.items) {
+      const amount = Number(tx.amount);
+      txCount += 1;
+      if (!biggest || amount > biggest.amount) {
+        biggest = { label: tx.label, amount, date: parseISO(tx.date) };
+      }
+      const key = tx.category ?? UNCATEGORIZED_KEY;
+      const existing = aggregates.get(key);
+      if (existing) {
+        existing.count += 1;
+        existing.total += amount;
+      } else {
+        aggregates.set(key, {
+          key,
+          category: tx.category ?? null,
+          name: tx.category ?? spendings.noCategory,
+          color: tx.categoryColor || FALLBACK_COLOR,
+          count: 1,
+          total: amount,
+        });
       }
     }
+  }
 
-    return {
-      weekTotal: total,
-      txCount: count,
-      biggest: largest,
-      categoryAgg: Array.from(map.values()).sort((a, b) => b.total - a.total),
-    };
-  }, [groups, spendings.noCategory]);
+  const categoryAgg = Array.from(aggregates.values()).sort((a, b) => b.total - a.total);
 
   // Auto-scroll the timeline to a requested day card (COS-38). Both the NavBar
   // "Today" button and a fresh spending creation set `scrollToDayIso`; we

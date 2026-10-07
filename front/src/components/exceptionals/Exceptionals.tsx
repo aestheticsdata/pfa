@@ -9,7 +9,7 @@ import ExceptionalsList from "@components/exceptionals/ExceptionalsList";
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import useRegularMonthlyAverage from "@components/exceptionals/services/useRegularMonthlyAverage";
 import useGlobalStore from "@components/shared/globalStore";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
@@ -32,29 +32,24 @@ const Exceptionals = () => {
     setIsCalendarVisible(false);
   }, [setIsCalendarVisible]);
 
-  const availableCategories = useMemo(() => {
-    const seen = new Map<string, string>();
-    for (const item of exceptionals) {
-      if (item.categoryName && !seen.has(item.categoryName)) {
-        seen.set(item.categoryName, item.categoryColor ?? CATEGORY_FALLBACK);
-      }
+  const seenCategories = new Map<string, string>();
+  for (const item of exceptionals) {
+    if (item.categoryName && !seenCategories.has(item.categoryName)) {
+      seenCategories.set(item.categoryName, item.categoryColor ?? CATEGORY_FALLBACK);
     }
-    return Array.from(seen.entries()).map(([name, color]) => ({ name, color }));
-  }, [exceptionals]);
+  }
+  const availableCategories = Array.from(seenCategories.entries()).map(([name, color]) => ({ name, color }));
 
-  const filteredItems = useMemo(() => {
-    if (!activeCategory) return exceptionals;
-    return exceptionals.filter((item) => item.categoryName === activeCategory);
-  }, [exceptionals, activeCategory]);
+  const filteredItems = activeCategory
+    ? exceptionals.filter((item) => item.categoryName === activeCategory)
+    : exceptionals;
 
-  const yearsList = useMemo(() => {
-    const set = new Set<number>(years);
-    set.add(currentYear);
-    if (selectedYear != null) {
-      set.add(selectedYear);
-    }
-    return Array.from(set).sort((a, b) => b - a);
-  }, [years, selectedYear, currentYear]);
+  const yearSet = new Set<number>(years);
+  yearSet.add(currentYear);
+  if (selectedYear != null) {
+    yearSet.add(selectedYear);
+  }
+  const yearsList = Array.from(yearSet).sort((a, b) => b - a);
 
   const handleAdd = () => {
     setEditing(null);

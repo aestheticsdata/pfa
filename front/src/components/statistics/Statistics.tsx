@@ -29,7 +29,7 @@ import useRecurringsDrawn from "@components/statistics/services/useRecurringsDra
 import useStatistics from "@components/statistics/services/useStatistics";
 import useWeekdayCategories from "@components/statistics/services/useWeekdayCategories";
 import { animatedScrollIntoView } from "@lib/scroll";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { CategorySeries } from "@components/statistics/interfaces/statisticsCategoryChartTypes";
 import type { TopCategoryRow } from "@components/statistics/interfaces/statisticsTopCategoriesTypes";
@@ -66,11 +66,9 @@ const Statistics = () => {
   // needs N-1 and N-2 alongside the selected + compare years (COS-47). N-1 is
   // usually already the compare year; N-2 is the extra fetch. Only added when the
   // current year is in view — past years are complete and never projected.
-  const years = useMemo(() => {
-    const requested = [selectedYear, compareYear];
-    if (selectedYear === currentYear) requested.push(selectedYear - 1, selectedYear - 2);
-    return Array.from(new Set(requested));
-  }, [selectedYear, compareYear, currentYear]);
+  const requestedYears = [selectedYear, compareYear];
+  if (selectedYear === currentYear) requestedYears.push(selectedYear - 1, selectedYear - 2);
+  const years = Array.from(new Set(requestedYears));
 
   const { statistics, categories, isLoading: statisticsLoading } = useStatistics({ years });
   const { dailyStats } = useDailyStats({ year: selectedYear });

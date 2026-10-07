@@ -13,7 +13,6 @@ import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
 import { Plus } from "lucide-react";
-import { useMemo } from "react";
 
 import type { SpendingItem, SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { DaySortField } from "@components/spendings/view/helpers/useDaySort";
@@ -97,26 +96,22 @@ const SpendingDayCard = ({
 
   const query = search.trim().toLowerCase();
 
-  const filtered = useMemo(
-    () =>
-      items.filter((s) => {
-        if (selectedCategory) {
-          const key = s.category ?? UNCATEGORIZED_KEY;
-          if (key !== selectedCategory) {
-            return false;
-          }
-        }
-        if (query) {
-          const inLabel = (s.label ?? "").toLowerCase().includes(query);
-          const inCategory = (s.category ?? "").toLowerCase().includes(query);
-          if (!inLabel && !inCategory) {
-            return false;
-          }
-        }
-        return true;
-      }),
-    [items, selectedCategory, query],
-  );
+  const filtered = items.filter((s) => {
+    if (selectedCategory) {
+      const key = s.category ?? UNCATEGORIZED_KEY;
+      if (key !== selectedCategory) {
+        return false;
+      }
+    }
+    if (query) {
+      const inLabel = (s.label ?? "").toLowerCase().includes(query);
+      const inCategory = (s.category ?? "").toLowerCase().includes(query);
+      if (!inLabel && !inCategory) {
+        return false;
+      }
+    }
+    return true;
+  });
 
   const { field, dir, onSort, sorted } = useDaySort(filtered);
 
@@ -124,20 +119,18 @@ const SpendingDayCard = ({
   const displayTotal = isFiltering ? filtered.reduce((acc, s) => acc + Number(s.amount), 0) : total;
   const level = overspendLevel(displayTotal, ceilingPerDay);
 
-  const dayCategories = useMemo<DayCategory[]>(() => {
-    const map = new Map<string, DayCategory>();
-    for (const s of items) {
-      const key = s.category ?? UNCATEGORIZED_KEY;
-      if (!map.has(key)) {
-        map.set(key, {
-          key,
-          name: s.category ?? spendings.noCategory,
-          color: s.categoryColor || FALLBACK_COLOR,
-        });
-      }
+  const dayCategoryMap = new Map<string, DayCategory>();
+  for (const s of items) {
+    const key = s.category ?? UNCATEGORIZED_KEY;
+    if (!dayCategoryMap.has(key)) {
+      dayCategoryMap.set(key, {
+        key,
+        name: s.category ?? spendings.noCategory,
+        color: s.categoryColor || FALLBACK_COLOR,
+      });
     }
-    return Array.from(map.values());
-  }, [items, spendings.noCategory]);
+  }
+  const dayCategories = Array.from(dayCategoryMap.values());
 
   const emptyLabel = items.length === 0 ? spendings.list.empty : dayCard.noResults;
 

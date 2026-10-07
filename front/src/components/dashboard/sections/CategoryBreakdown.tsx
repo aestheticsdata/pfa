@@ -20,7 +20,7 @@ import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { CategoryTooltipContent, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
 import format from "date-fns/format";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import type { BarHover } from "@lib/dataviz";
 import type { CategoryTrendPoint } from "@src/schemas/stats";
@@ -48,14 +48,11 @@ const CategoryBreakdown = () => {
   const [hover, setHover] = useState<BarHover<number> | null>(null);
   const { categoryBreakdown: t } = dashboardText;
 
-  const counts = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const s of spendingsByMonth ?? []) {
-      const key = (s.category ?? t.uncategorized).toLowerCase();
-      map.set(key, (map.get(key) ?? 0) + 1);
-    }
-    return map;
-  }, [spendingsByMonth, t.uncategorized]);
+  const counts = new Map<string, number>();
+  for (const s of spendingsByMonth ?? []) {
+    const key = (s.category ?? t.uncategorized).toLowerCase();
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
 
   const list = trends ?? [];
   const total = list.reduce((a, c) => a + c.value, 0) || 1;

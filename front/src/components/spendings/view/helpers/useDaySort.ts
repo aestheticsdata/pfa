@@ -1,5 +1,5 @@
 import orderBy from "lodash/orderBy";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 
@@ -10,6 +10,23 @@ interface DaySortState {
   field: DaySortField | null;
   dir: SortDir;
 }
+
+const sortSpendings = (spendings: SpendingListItem[], sort: DaySortState) => {
+  if (!sort.field) {
+    return spendings;
+  }
+  if (sort.field === "label") {
+    return orderBy(spendings, (s) => s.label?.toLowerCase() ?? "", [sort.dir]);
+  }
+  if (sort.field === "category") {
+    return orderBy(
+      spendings,
+      [(s) => (("category" in s ? s.category : "") ?? "").toLowerCase(), (s) => Number(s.amount)],
+      [sort.dir, "desc"],
+    );
+  }
+  return orderBy(spendings, (s) => Number(s.amount), [sort.dir]);
+};
 
 /**
  * Per-day-card sort with EXPOSED state (field + direction), so the
@@ -28,24 +45,7 @@ const useDaySort = (spendings: SpendingListItem[]) => {
     });
   };
 
-  const sorted = useMemo(() => {
-    if (!sort.field) {
-      return spendings;
-    }
-    if (sort.field === "label") {
-      return orderBy(spendings, (s) => s.label?.toLowerCase() ?? "", [sort.dir]);
-    }
-    if (sort.field === "category") {
-      return orderBy(
-        spendings,
-        [(s) => (("category" in s ? s.category : "") ?? "").toLowerCase(), (s) => Number(s.amount)],
-        [sort.dir, "desc"],
-      );
-    }
-    return orderBy(spendings, (s) => Number(s.amount), [sort.dir]);
-  }, [spendings, sort]);
-
-  return { field: sort.field, dir: sort.dir, onSort, sorted };
+  return { field: sort.field, dir: sort.dir, onSort, sorted: sortSpendings(spendings, sort) };
 };
 
 export default useDaySort;

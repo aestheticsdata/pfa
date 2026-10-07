@@ -34,6 +34,17 @@
         "useExhaustiveDependencies": "off"
       },
       "style": {
+        "noRestrictedImports": {
+          "level": "error",
+          "options": {
+            "paths": {
+              "react": {
+                "importNames": ["useMemo", "useCallback", "memo"],
+                "message": "The React Compiler memoizes: write plain expressions and plain functions."
+              }
+            }
+          }
+        },
         "useImportType": {
           "level": "warn",
           "options": { "style": "separatedType" }
@@ -47,11 +58,7 @@
         "organizeImports": {
           "level": "on",
           "options": {
-            "groups": [
-              { "type": false },
-              ":BLANK_LINE:",
-              { "type": true }
-            ]
+            "groups": [{ "type": false }, ":BLANK_LINE:", { "type": true }]
           }
         }
       }

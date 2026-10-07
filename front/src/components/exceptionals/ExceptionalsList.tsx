@@ -7,7 +7,6 @@ import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
-import { useMemo } from "react";
 
 import type { ExceptionalItem as ExceptionalItemType } from "@src/schemas/exceptionals";
 
@@ -28,22 +27,20 @@ const ExceptionalsList = ({ items, onEdit, monthlyAverage }: ExceptionalsListPro
   const { euro } = useFormat();
   const exceptionals = useTranslations("exceptionals");
   const dateLocale = useDateLocale();
-  const groups = useMemo<MonthGroup[]>(() => {
-    const map = new Map<string, MonthGroup>();
-    for (const item of items) {
-      const date = parseISO(item.date);
-      const key = format(date, "yyyy-MM");
-      const label = format(date, "MMMM yyyy", { locale: dateLocale });
-      let group = map.get(key);
-      if (!group) {
-        group = { key, label, total: 0, items: [] };
-        map.set(key, group);
-      }
-      group.items.push(item);
-      group.total += Number(item.amount);
+  const groupMap = new Map<string, MonthGroup>();
+  for (const item of items) {
+    const date = parseISO(item.date);
+    const key = format(date, "yyyy-MM");
+    const label = format(date, "MMMM yyyy", { locale: dateLocale });
+    let group = groupMap.get(key);
+    if (!group) {
+      group = { key, label, total: 0, items: [] };
+      groupMap.set(key, group);
     }
-    return Array.from(map.values()).sort((a, b) => (a.key < b.key ? 1 : -1));
-  }, [items, dateLocale]);
+    group.items.push(item);
+    group.total += Number(item.amount);
+  }
+  const groups = Array.from(groupMap.values()).sort((a, b) => (a.key < b.key ? 1 : -1));
 
   const { list: t } = exceptionals;
 

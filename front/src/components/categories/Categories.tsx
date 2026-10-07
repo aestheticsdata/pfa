@@ -10,7 +10,7 @@ import useCategories from "@components/spendings/services/useCategories";
 import { Button } from "@components/ui/button";
 import useTranslations from "@i18n/useTranslations";
 import { Plus, Search } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import type { Category } from "@src/schemas/categories";
@@ -36,7 +36,7 @@ const Categories = () => {
   // categories live here locally until a create endpoint exists.
   const [localCats, setLocalCats] = useState<Category[]>([]);
 
-  const allCats = useMemo<Category[]>(() => [...(categories ?? []), ...localCats], [categories, localCats]);
+  const allCats: Category[] = [...(categories ?? []), ...localCats];
 
   // Real all-time usage per category, keyed by category ID.
   const statsByCategory = new Map((categoryStats?.byCategory ?? []).map((s) => [s.categoryID, s]));
@@ -44,12 +44,10 @@ const Categories = () => {
   // (includes uncategorized spendings), as returned by the backend.
   const grandTotal = categoryStats?.totalSpent ?? 0;
 
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return [...allCats]
-      .sort((a, b) => a.name.localeCompare(b.name, "fr"))
-      .filter((c) => !q || c.name.toLowerCase().includes(q));
-  }, [allCats, query]);
+  const normalizedQuery = query.trim().toLowerCase();
+  const visible = [...allCats]
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"))
+    .filter((c) => !normalizedQuery || c.name.toLowerCase().includes(normalizedQuery));
 
   // useCategoryStats opts out of the global throwOnError (the spending modal
   // must survive a stats failure) — this page still wants the error screen.

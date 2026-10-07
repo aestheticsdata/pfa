@@ -17,7 +17,7 @@ import evaluateAmountExpression from "@lib/amountExpression";
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import format from "date-fns/format";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import type { ExceptionalForm } from "@components/exceptionals/schema";
@@ -89,9 +89,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
     },
   });
 
-  const categoryOptions = useMemo(() => existingCategories, [existingCategories]);
-
-  const exactMatch = categoryOptions.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());
+  const exactMatch = existingCategories.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());
 
   const onSubmit = (values: ExceptionalForm) => {
     if (!user) {
@@ -274,7 +272,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
                           <span className="text-ink-4">{modal.category.noneItem}</span>
                         </CommandItem>
                       )}
-                      {categoryOptions.map((cat) => (
+                      {existingCategories.map((cat) => (
                         <CommandItem
                           key={cat.name}
                           value={cat.name}
