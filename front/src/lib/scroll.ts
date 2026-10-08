@@ -48,3 +48,16 @@ export const animatedScrollIntoView = (
 
   return abort;
 };
+
+/**
+ * Centres `element` in its direct scrolling parent (an `overflow-y: auto` list
+ * inside a card), instantly and without touching the window scroll — the caller
+ * owns that one. Clamped by the browser at both ends of the list.
+ */
+export const centerInScrollParent = (element: HTMLElement) => {
+  const scroller = element.parentElement;
+  if (!scroller) return;
+  const box = scroller.getBoundingClientRect();
+  const rect = element.getBoundingClientRect();
+  scroller.scrollTop += rect.top - box.top - (box.height - rect.height) / 2;
+};

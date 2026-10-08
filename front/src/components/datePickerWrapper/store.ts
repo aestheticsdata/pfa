@@ -13,11 +13,16 @@ export interface DatePickerWrapperStoreProps {
   // by the NavBar "Today" button and by a fresh spending creation; read
   // and consumed (reset to null) by SpendingView once the matching card mounts.
   scrollToDayIso: string | null;
+  // The spending picked from the search modal (PFA-188): its row is brought into
+  // view inside its day card and spotlighted, then the row clears it once the
+  // animation ends.
+  spotlightSpendingId: string | null;
   setWeek: (date: Date) => void;
   setFrom: (from: Date) => void;
   setTo: (from: Date) => void;
   setRange: (from: Date[]) => void;
   setScrollToDayIso: (dateIso: string | null) => void;
+  setSpotlightSpendingId: (spendingId: string | null) => void;
 }
 
 // This store is intentionally NOT persisted. The selected week is carried by the
@@ -33,6 +38,7 @@ const useStore = create<DatePickerWrapperStoreProps>()(
     range: null,
     selectedDateIso: null,
     scrollToDayIso: null,
+    spotlightSpendingId: null,
     /**
      * Single entry point for "select the week containing this day" — the only
      * writer of from/to/range/selectedDateIso (COS-99). It replaces the four
@@ -90,6 +96,12 @@ const useStore = create<DatePickerWrapperStoreProps>()(
       set(
         produce((draft: DatePickerWrapperStoreProps) => {
           draft.scrollToDayIso = dateIso;
+        }),
+      ),
+    setSpotlightSpendingId: (spendingId: string | null) =>
+      set(
+        produce((draft: DatePickerWrapperStoreProps) => {
+          draft.spotlightSpendingId = spendingId;
         }),
       ),
   })),

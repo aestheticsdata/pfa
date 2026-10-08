@@ -1,6 +1,7 @@
 const spendingSearch = {
   trigger: "Rechercher une dépense",
-  shortcutHint: "⌘K",
+  shortcutHintMac: "⌘F",
+  shortcutHintOther: "Ctrl F",
   title: "Rechercher une dépense",
   placeholder: "Rechercher une dépense…",
   hint: "Saisir au moins 2 caractères ou choisir une année",

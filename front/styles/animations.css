@@ -67,3 +67,61 @@
   transform: translate(0, 10px);
   transition: all 300ms ease-out;
 }
+
+/* Search-result spotlight (PFA-188). A fixed box tracks the picked row; a
+   viewport-sized spread shadow darkens everything around it — a veil with a
+   rounded hole, no clip-path maths — and a thin light ring outlines the hole.
+   Once the scroll has landed, the hole takes one quick, intense white flash
+   (its ::after). No fill colour: colours are the categories' vocabulary here.
+   Above the sticky NavBar (z-40), under dialogs (z-50). The veil fades in,
+   holds and fades out on its own; any interaction cuts it short. Opacity only,
+   so no reduced-motion branch: nothing moves, and it is the only "here it is"
+   signal the search jump gives. */
+@keyframes pfa-spotlight-veil {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  6%,
+  72% {
+    opacity: 1;
+  }
+}
+@keyframes pfa-spotlight-veil-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes pfa-spotlight-flash {
+  0% {
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.pfa-spotlight-veil {
+  position: fixed;
+  z-index: 45;
+  pointer-events: none;
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 0 0 1px var(--spotlight-ring),
+    0 0 0 100vmax var(--veil);
+  animation: pfa-spotlight-veil var(--duration-spotlight) ease-in-out both;
+}
+.pfa-spotlight-veil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--spotlight-flash);
+  opacity: 0;
+  animation: pfa-spotlight-flash var(--duration-spotlight-flash) ease-out var(--delay-spotlight-flash) both;
+}
+.pfa-spotlight-veil[data-dismissed="true"] {
+  animation: pfa-spotlight-veil-out var(--duration-spotlight-out) ease-out forwards;
+}
