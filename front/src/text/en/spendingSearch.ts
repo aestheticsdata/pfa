@@ -2,7 +2,8 @@ import type frSpendingSearch from "@text/fr/spendingSearch";
 
 const spendingSearch: typeof frSpendingSearch = {
   trigger: "Search for a spending",
-  shortcutHint: "⌘K",
+  shortcutHintMac: "⌘F",
+  shortcutHintOther: "Ctrl F",
   title: "Search for a spending",
   placeholder: "Search for a spending…",
   hint: "Type at least 2 characters or pick a year",

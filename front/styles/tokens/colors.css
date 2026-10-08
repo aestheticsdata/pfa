@@ -64,6 +64,13 @@
   --accent-strong: oklch(0.84 0.14 148);
   --accent-d:      oklch(0.55 0.10 148);
   --accent-bg:     oklch(0.84 0.14 148 / 0.10);
+  /* Search-result spotlight (PFA-188): darkens the page around the picked
+     spending — the page stays legible behind it, it just stops competing. */
+  --veil:          oklch(0.12 0.01 250 / 0.72);
+  /* …the flash that lands in its hole (intense, gone in a blink), and the thin
+     light ring that keeps outlining the hole while the veil holds. */
+  --spotlight-flash: oklch(1 0 0 / 0.55);
+  --spotlight-ring:  oklch(1 0 0 / 0.35);
   /* Meter/progress bar fill — the accent gradient used by bars & legends */
   --bar-fill:      linear-gradient(90deg, var(--accent-d), var(--accent-strong));
   --neg:           oklch(0.72 0.17 25);

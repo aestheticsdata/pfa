@@ -44,7 +44,7 @@ const SpendingSearchModal = () => {
   const { results, total, isSearching, isFetchingNextPage, hasNextPage, fetchNextPage, hasQuery, error } =
     useSpendingSearch(debounced, year);
   const years = useSpendingYears();
-  const { setScrollToDayIso } = useDatePickerWrapperStore();
+  const { setScrollToDayIso, setSpotlightSpendingId } = useDatePickerWrapperStore();
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -114,12 +114,13 @@ const SpendingSearchModal = () => {
   const emptyMessage = resolveEmptyMessage();
 
   // Picking a result jumps to the Spendings page on the week that contains it (and
-  // asks that page to scroll the day into view). We stash the scroll offset first
+  // asks that page to scroll the day into view and spotlight the row). We stash the scroll offset first
   // and leave the URL search state intact, so Back restores the modal + list.
   const goToSpendingWeek = (spending: SpendingItem) => {
     const dateISO = format(parseISO(spending.date), DATE_FORMAT);
     savedScroll = { q, year, top: scrollRef.current?.scrollTop ?? 0 };
     setScrollToDayIso(dateISO);
+    setSpotlightSpendingId(spending.ID);
     router.push(buildSpendingsPath(dateISO));
   };
 

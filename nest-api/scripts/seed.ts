@@ -268,17 +268,17 @@ interface CatDef {
 }
 
 const CATS: CatDef[] = [
-  { id: "a1000000-0000-4000-8000-000000000001", name: "Groceries", color: "#6DB65B", share: 0.30, min: 4, max: 85, boost: 1.0,
+  { id: "a1000000-0000-4000-8000-000000000001", name: "Groceries", color: "#6DB65B", share: 0.27, min: 4, max: 85, boost: 1.0,
     labels: ["Corner Shop", "Supermarket", "Express Market", "Health Foods", "Lidl", "Farmers Market", "Frozen Foods", "Night Shop", "Organic Co-op", "Aldi"] },
-  { id: "a1000000-0000-4000-8000-000000000002", name: "Restaurants", color: "#E8663D", share: 0.14, min: 12, max: 70, boost: 1.9,
+  { id: "a1000000-0000-4000-8000-000000000002", name: "Restaurants", color: "#E8663D", share: 0.20, min: 12, max: 70, boost: 1.9,
     labels: ["Thai Kitchen", "Italian Kitchen", "The Diner", "Sushi Shop", "Burger Joint", "Noodle Bar", "Deliveroo", "Uber Eats", "Steakhouse", "Pizza Place"] },
-  { id: "a1000000-0000-4000-8000-000000000003", name: "Coffee & Drinks", color: "#C0894B", share: 0.06, min: 3, max: 28, boost: 1.7,
+  { id: "a1000000-0000-4000-8000-000000000003", name: "Coffee & Drinks", color: "#C0894B", share: 0.09, min: 3, max: 28, boost: 1.7,
     labels: ["Starbucks", "Coffee House", "The Local Pub", "Corner Bar", "Espresso Bar", "Wine Bar", "Cocktail Lounge"] },
   { id: "a1000000-0000-4000-8000-000000000004", name: "Transport", color: "#4A90D9", share: 0.05, min: 2, max: 45, boost: 1.0,
     labels: ["Metro top-up", "Uber", "Taxi", "Bike share", "Commuter train", "Trainline", "Bolt"] },
   { id: "a1000000-0000-4000-8000-000000000005", name: "Leisure", color: "#9B59B6", share: 0.07, min: 8, max: 120, boost: 1.6,
     labels: ["Cinema", "Arthouse Cinema", "Concert tickets", "Art museum", "Theatre", "Bowling", "Escape room", "Steam"] },
-  { id: "a1000000-0000-4000-8000-000000000006", name: "Shopping", color: "#E84393", share: 0.11, min: 15, max: 260, boost: 1.3,
+  { id: "a1000000-0000-4000-8000-000000000006", name: "Shopping", color: "#E84393", share: 0.09, min: 15, max: 260, boost: 1.3,
     labels: ["Zara", "Uniqlo", "H&M", "Mango", "Electronics Store", "Decathlon", "Department Store", "Zalando", "Nike Store"] },
   { id: "a1000000-0000-4000-8000-000000000007", name: "Health", color: "#2ECC71", share: 0.04, min: 6, max: 90, boost: 0.5,
     labels: ["Pharmacy", "GP visit", "Optician", "Lab tests", "Physio", "Dentist"] },
@@ -390,8 +390,49 @@ function seasonalShareMult(name: string, m: number): number {
  */
 const WEEK_RHYTHM = [1.4, 0.55, 0.55, 0.55, 0.6, 1.4, 2.6];
 
-/** What a day with nothing else spends on: a coffee, a ticket, a few groceries. */
+/**
+ * What a day with nothing else spends on — groceries or a drink far more often than a ride, so an
+ * empty weekday does not come out as the same cheap Uber week after week.
+ */
 const QUIET_DAY = CATS.filter((c) => ["Groceries", "Coffee & Drinks", "Transport"].includes(c.name));
+const QUIET_DAY_WEIGHTS = [5, 3, 1];
+/** No day of a city life goes by on a single line. */
+const MIN_PER_DAY = 2;
+
+/**
+ * The everyday habits the category fill alone never produces: the week's rhythm pulls most
+ * spending to the weekend, which left Monday to Thursday with a single filler line. Each habit
+ * rolls once per eligible day; what it spends is taken off its category's share before the fill,
+ * so the monthly totals keep their shape.
+ */
+interface HabitDef {
+  category: string;
+  chance: number;
+  min: number;
+  max: number;
+  /** Days of the week it can happen on, Sunday = 0. */
+  days: number[];
+  labels: string[];
+}
+const WORKDAYS = [1, 2, 3, 4, 5];
+const WEEKEND = [0, 6];
+const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6];
+const HABITS: HabitDef[] = [
+  { category: "Coffee & Drinks", chance: 0.85, min: 2.4, max: 5.8, days: WORKDAYS,
+    labels: ["Coffee House", "Espresso Bar", "Starbucks", "Coffee cart", "Bakery cafe"] },
+  { category: "Restaurants", chance: 0.65, min: 7.5, max: 15.5, days: WORKDAYS,
+    labels: ["Pret A Manger", "Sandwich Bar", "Office canteen", "Salad Bar", "Falafel stand", "Banh mi shop", "Poke Bowl"] },
+  { category: "Coffee & Drinks", chance: 0.3, min: 4, max: 14, days: [4, 5],
+    labels: ["After-work drinks", "The Local Pub", "Corner Bar", "Wine Bar"] },
+  { category: "Coffee & Drinks", chance: 0.55, min: 3.5, max: 18, days: WEEKEND,
+    labels: ["Brunch cafe", "Coffee House", "Bakery cafe", "Juice bar"] },
+  { category: "Groceries", chance: 0.55, min: 2.5, max: 19, days: EVERY_DAY,
+    labels: ["Corner Shop", "Express Market", "Night Shop", "Bakery", "Fruit stall", "Butcher", "Cheese shop"] },
+  { category: "Groceries", chance: 0.4, min: 1.2, max: 4.5, days: WORKDAYS,
+    labels: ["Bakery", "Vending machine", "Newsagent", "Snack bar"] },
+  { category: "Transport", chance: 0.22, min: 1.9, max: 16, days: EVERY_DAY,
+    labels: ["Bike share", "Metro ticket", "Bus ticket", "Uber", "Bolt", "Taxi", "E-scooter"] },
+];
 
 /**
  * Pick a day from `days` along the week's rhythm, which a category's `boost` sharpens (above 1:
@@ -541,42 +582,57 @@ function generate(
     const adjShares = CATS.map((c) => c.share * seasonalShareMult(c.name, m));
     const shareSum = adjShares.reduce((s, v) => s + v, 0);
 
-    const filledDays = new Set<number>();
-    const addSpending = (day: number, cat: CatDef, amt: number): void => {
+    const dayCount = new Map<number, number>();
+    const addSpending = (day: number, cat: CatDef, amt: number, labels: string[] = cat.labels): void => {
       spendingRows.push({
         ID: randomUUID(),
         userID: USER_ID,
         date: utc(y, m, day),
         itemType: "spending",
-        label: pick(cat.labels),
+        label: pick(labels),
         amount: amt,
         categoryID: cat.id,
         currency: CUR,
         invoicefile: null,
       });
-      filledDays.add(day);
+      dayCount.set(day, (dayCount.get(day) ?? 0) + 1);
     };
 
+    // Habits first, so the fill below only tops each category up to its share.
+    const habitSpent = new Map<string, number>();
+    for (const day of targetDays) {
+      const weekday = weekdayOf(y, m, day);
+      for (const habit of HABITS) {
+        if (!habit.days.includes(weekday)) continue;
+        if (rand() >= habit.chance) continue;
+        const cat = CATS.find((c) => c.name === habit.category) as CatDef;
+        const amt = money(rnd(habit.min, habit.max));
+        addSpending(day, cat, amt, habit.labels);
+        habitSpent.set(cat.name, (habitSpent.get(cat.name) ?? 0) + amt);
+      }
+    }
+
     CATS.forEach((cat, i) => {
-      const catTarget = variableTarget * (adjShares[i] / shareSum) * rnd(0.8, 1.2);
+      const catTarget = variableTarget * (adjShares[i] / shareSum) * rnd(0.8, 1.2) - (habitSpent.get(cat.name) ?? 0);
       let spent = 0;
       let guard = 0;
       while (spent < catTarget && guard < 80) {
         guard += 1;
         // Skew toward the low end → many small everyday purchases, few large ones.
-        const amt = money(cat.min + (cat.max - cat.min) * Math.pow(rand(), 1.9));
-        if (spent > 0 && spent + amt > catTarget * 1.2) break;
+        const amt = money(cat.min + (cat.max - cat.min) * Math.pow(rand(), 2.6));
+        if (spent + amt > catTarget * 1.2 && (spent > 0 || catTarget <= 0)) break;
         addSpending(pickDay(y, m, targetDays, cat.boost), cat, amt);
         spent += amt;
       }
     });
 
-    // Guarantee every day in the window gets at least one spending (no empty days) — a small
-    // one: a quiet day is a coffee, a ticket, a few groceries, and stays quiet in the week's rhythm.
+    // Guarantee every day in the window gets at least MIN_PER_DAY spendings — small ones: a quiet
+    // day is a coffee, a few groceries, now and then a ticket, and stays quiet in the week's rhythm.
     for (const day of targetDays) {
-      if (filledDays.has(day)) continue;
-      const cat = pick(QUIET_DAY);
-      addSpending(day, cat, money(cat.min + (cat.max - cat.min) * 0.25 * rand()));
+      for (let n = dayCount.get(day) ?? 0; n < MIN_PER_DAY; n += 1) {
+        const cat = weightedPick(QUIET_DAY, QUIET_DAY_WEIGHTS);
+        addSpending(day, cat, money(cat.min + (cat.max - cat.min) * 0.35 * rand()));
+      }
     }
   }
 

@@ -1,15 +1,17 @@
 "use client";
 
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
+import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { IconButton } from "@components/shared/IconButton";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
+import SpotlightVeil from "@components/spendings/view/SpotlightVeil";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
@@ -32,6 +34,8 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
   const [confirming, setConfirming] = useState(false);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const { deleteSpending } = useSpendings();
+  const isSpotlit = useDatePickerWrapperStore((state) => state.spotlightSpendingId === spending.ID);
+  const rowRef = useRef<HTMLDivElement>(null);
 
   const color = spending.categoryColor || FALLBACK_COLOR;
   const category = spending.category ?? null;
@@ -46,7 +50,10 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
     <div
       data-testid="tx-row"
       data-has-receipt={hasInvoice}
-      className="group relative grid grid-cols-[minmax(0,1fr)_auto_78px] items-center gap-3 border-t border-line-soft py-2.75 first:border-t-0 before:pointer-events-none before:absolute before:inset-x-0 before:inset-y-px before:z-0 before:rounded-lg before:transition-colors before:duration-100 before:content-[''] hover:before:bg-surface-hi max-md:grid-cols-[minmax(0,1fr)_auto] max-md:grid-rows-[auto_auto] max-md:gap-y-1.5">
+      data-spending-id={spending.ID}
+      ref={rowRef}
+      className="group relative grid grid-cols-[minmax(0,1fr)_auto_78px] items-center gap-3 border-t border-line-soft py-2.75 first:border-t-0 before:pointer-events-none before:absolute before:inset-x-0 before:inset-y-px before:z-0 before:rounded-lg before:transition-colors before:duration-100 before:content-[''] hover:before:bg-surface-hi max-md:grid-cols-[minmax(0,1fr)_auto] max-md:grid-rows-[auto_auto] max-md:gap-y-1.5"
+    >
       {confirming ? (
         <div
           className="relative z-10 col-span-full flex items-center gap-3 rounded-lg border border-danger-border-soft bg-danger-surface py-2 pl-3.75 pr-2.5 shadow-[0_6px_20px_oklch(0.3_0.16_25/0.28)]"
@@ -147,6 +154,8 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
           </span>
         </>
       )}
+
+      {isSpotlit && <SpotlightVeil target={rowRef} />}
 
       {invoiceOpen && (
         <InvoiceModal

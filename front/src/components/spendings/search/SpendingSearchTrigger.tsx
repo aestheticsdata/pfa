@@ -1,8 +1,10 @@
 "use client";
 
+import { useIsMac } from "@components/shared/hooks/useIsMac";
 import SpendingSearchModal from "@components/spendings/search/SpendingSearchModal";
 import { spendingSearchParsers, spendingSearchUrlOptions } from "@components/spendings/search/searchParams";
 import useTranslations from "@i18n/useTranslations";
+import { isFindChord, isMacPlatform } from "@lib/keyboard";
 import { Search } from "lucide-react";
 import { useQueryStates } from "nuqs";
 import { useEffect } from "react";
@@ -12,17 +14,19 @@ import { useEffect } from "react";
  * Spendings toolbar next to the week filter. Opening writes the modal's open flag
  * to the URL (a pushed history entry) so browser Back can restore it; the modal
  * itself reads that state. Two presentations of the same click target: a compact
- * labelled button with a ⌘K hint on desktop (md+), and a full-width field styled
- * like the week filter on mobile — so it reads as a search field, not a stray
- * icon. ⌘K / Ctrl+K is an optional desktop shortcut.
+ * labelled button with a ⌘F / Ctrl F hint on desktop (md+), and a full-width
+ * field styled like the week filter on mobile — so it reads as a search field,
+ * not a stray icon. On this page the find chord opens the search instead of the
+ * browser's find bar (PFA-188, same as Spira); elsewhere the browser keeps it.
  */
 const SpendingSearchTrigger = () => {
   const spendingSearch = useTranslations("spendingSearch");
   const [, setSearchState] = useQueryStates(spendingSearchParsers, spendingSearchUrlOptions);
+  const isMac = useIsMac();
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+      if (isFindChord(event, isMacPlatform())) {
         event.preventDefault();
         setSearchState({ search: true }, { history: "push" });
       }
@@ -44,7 +48,7 @@ const SpendingSearchTrigger = () => {
         <Search className="size-3.5 text-ink-4" />
         <span>{spendingSearch.trigger}</span>
         <kbd className="ml-1 rounded-sm border border-line px-1 py-0.5 text-[11px] leading-none text-ink-4">
-          {spendingSearch.shortcutHint}
+          {isMac ? spendingSearch.shortcutHintMac : spendingSearch.shortcutHintOther}
         </kbd>
       </button>
 

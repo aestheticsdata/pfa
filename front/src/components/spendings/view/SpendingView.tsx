@@ -16,6 +16,7 @@ import SpendingToolbar from "@components/spendings/view/SpendingToolbar";
 import { Button } from "@components/ui/button";
 import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
+import { centerInScrollParent } from "@lib/scroll";
 import { endOfMonth, isSameDay } from "date-fns";
 import format from "date-fns/format";
 import parseISO from "date-fns/parseISO";
@@ -49,7 +50,8 @@ const SpendingView = () => {
   const common = useTranslations("common");
   const spendings = useTranslations("spendings");
   const dateLocale = useDateLocale();
-  const { from, to, range, scrollToDayIso, setScrollToDayIso } = useDatePickerWrapperStore();
+  const { from, to, range, scrollToDayIso, setScrollToDayIso, spotlightSpendingId, setSpotlightSpendingId } =
+    useDatePickerWrapperStore();
   const [now] = useState(() => new Date());
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -113,12 +115,26 @@ const SpendingView = () => {
       return;
     }
     card.scrollIntoView({ behavior: "smooth", block: "start" });
+    // A search pick also names the row (PFA-188): the day card scrolls its own
+    // list, so a row low in a busy day would stay hidden below the card's fold.
+    const row = spotlightSpendingId
+      ? card.querySelector<HTMLElement>(`[data-spending-id="${spotlightSpendingId}"]`)
+      : null;
+    if (row) {
+      centerInScrollParent(row);
+    }
     setScrollToDayIso(null);
-  }, [scrollToDayIso, range, isLoading, setScrollToDayIso]);
+  }, [scrollToDayIso, spotlightSpendingId, range, isLoading, setScrollToDayIso]);
 
-  // Drop any pending scroll request when leaving the page so it can't fire on a
-  // later visit (COS-38).
-  useEffect(() => () => setScrollToDayIso(null), [setScrollToDayIso]);
+  // Drop any pending scroll / spotlight request when leaving the page so it can't
+  // fire on a later visit (COS-38, PFA-188).
+  useEffect(
+    () => () => {
+      setScrollToDayIso(null);
+      setSpotlightSpendingId(null);
+    },
+    [setScrollToDayIso, setSpotlightSpendingId],
+  );
 
   if (!from || !to || !range) {
     return null;

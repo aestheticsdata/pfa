@@ -1,0 +1,12 @@
+/* Motion — durations and delays that are design decisions, declared once in
+ * `@theme`; the CSS partials read them with `var(--…)`. */
+@theme {
+  /* Search-result spotlight on a Spendings row (PFA-188): the veil's whole run
+     (fade in, hold, fade out), the quick fade when an interaction cuts it
+     short, and the white flash in the hole — short, and delayed until the page
+     scroll has landed on the row. */
+  --duration-spotlight: 2.2s;
+  --duration-spotlight-out: 0.2s;
+  --duration-spotlight-flash: 0.45s;
+  --delay-spotlight-flash: 0.4s;
+}
