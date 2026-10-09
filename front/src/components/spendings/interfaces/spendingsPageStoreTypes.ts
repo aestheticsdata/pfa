@@ -1,4 +1,7 @@
+import type { BATCH_MODAL } from "@components/spendings/config/constants";
 import type { createSpendingsPageStore } from "@components/spendings/stores/spendingsPageStore";
+
+export type BatchModalKind = (typeof BATCH_MODAL)[keyof typeof BATCH_MODAL];
 
 /** UI state of one Spendings page that several day cards share (PFA-189). */
 export interface SpendingsPageState {
@@ -10,11 +13,14 @@ export interface SpendingsPageState {
   hoveredReceipt: string | null;
   /** Row that just appeared from a grouping — flashes once. */
   flashEntryID: string | null;
+  /** Batch dialog opened from a card's selection bar — page-level, so it outlives the selection. */
+  batchModal: BatchModalKind | null;
   toggleDaySelection: (dayIso: string) => void;
   toggleEntry: (entryID: string, dayIso: string) => void;
   exitSelection: () => void;
   setHoveredReceipt: (invoicefile: string | null) => void;
   flashEntry: (entryID: string | null) => void;
+  openBatchModal: (kind: BatchModalKind | null) => void;
 }
 
 export type SpendingsPageStore = ReturnType<typeof createSpendingsPageStore>;
