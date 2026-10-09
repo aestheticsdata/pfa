@@ -73,6 +73,7 @@ const MergeGroupModal = ({ selection, onClose, onGrouped }: MergeGroupModalProps
       submitLabel={t.merge.submit}
       // Same gradient as the bar's Group button (PFA-198).
       submitClassName="[background:var(--selection-group-fill)]"
+      submitOnEnter
       testId="merge-group-modal"
       onSubmit={submit}
       onClose={onClose}
