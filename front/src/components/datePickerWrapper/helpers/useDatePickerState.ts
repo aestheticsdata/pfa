@@ -1,6 +1,6 @@
 "use client";
 
-import { getWeekRange } from "@components/datePickerWrapper/helpers";
+import { adjacentWeekDay, getWeekRange } from "@components/datePickerWrapper/helpers";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_QUERY_PARAM, formatIsoDate, parseAsSpendingsDate, SPENDINGS_PATH } from "@helpers/dateRoute";
 import { usePathname } from "next/navigation";
@@ -56,6 +56,12 @@ const useDatePickerState = () => {
     closeCalendar();
   };
 
+  /** The ‹ › arrows: the previous / next week, pushed like a calendar pick. */
+  const stepWeek = (step: number) => {
+    if (!range?.length) return;
+    handleDayChange(adjacentWeekDay(range, step));
+  };
+
   const handleDayEnter = (date: Date) => {
     setHoverRange(getWeekRange(date));
   };
@@ -70,6 +76,7 @@ const useDatePickerState = () => {
     selectedDays: range ?? [],
     setIsCalendarVisible,
     handleDayChange,
+    stepWeek,
     handleDayEnter,
     handleDayLeave,
   };

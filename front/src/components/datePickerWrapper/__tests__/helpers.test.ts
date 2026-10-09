@@ -1,4 +1,4 @@
-import { getWeekRange, parseDateParam } from "@components/datePickerWrapper/helpers";
+import { adjacentWeekDay, getWeekRange, parseDateParam } from "@components/datePickerWrapper/helpers";
 import format from "date-fns/format";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -40,5 +40,28 @@ describe("getWeekRange from a date-only param", () => {
     const buggy = getWeekRange(new Date("2026-07-12"));
     expect(iso(buggy.from)).toBe("2026-07-05");
     expect(iso(buggy.to)).toBe("2026-07-11");
+  });
+});
+
+describe("adjacentWeekDay", () => {
+  const weekOf = (isoDate: string) => {
+    const { from, to } = getWeekRange(parseDateParam(isoDate));
+    return [from, to];
+  };
+  const step = (isoDate: string, delta: number) => {
+    const { from, to } = getWeekRange(adjacentWeekDay(weekOf(isoDate), delta));
+    return `${iso(from)}/${iso(to)}`;
+  };
+
+  it("steps to the next and previous full week", () => {
+    expect(step("2026-08-12", 1)).toBe("2026-08-16/2026-08-22");
+    expect(step("2026-08-12", -1)).toBe("2026-08-02/2026-08-08");
+  });
+
+  it("crosses month boundaries onto the truncated weeks", () => {
+    // August 2026 ends on Monday 31: 30–31 is its last week, then 1–5 Sept.
+    expect(step("2026-08-30", 1)).toBe("2026-09-01/2026-09-05");
+    expect(step("2026-09-02", -1)).toBe("2026-08-30/2026-08-31");
+    expect(step("2026-08-01", -1)).toBe("2026-07-26/2026-07-31");
   });
 });

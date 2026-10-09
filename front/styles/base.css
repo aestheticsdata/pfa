@@ -72,6 +72,14 @@
   }
 }
 
+/* The page scrollbar keeps its gutter, so a short week (no scrollbar) and a
+   long one never shift the whole layout sideways (PFA-196). */
+@layer base {
+  html {
+    scrollbar-gutter: stable;
+  }
+}
+
 /* Webkit autofill yellow background fix */
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
   -webkit-transition-delay: 9999s;
