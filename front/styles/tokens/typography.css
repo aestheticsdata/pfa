@@ -3,6 +3,9 @@
 }
 
 @theme {
+  /* One date of the week picker, in mono glyphs: the longest label ("27 sept. 2026")
+     so stepping weeks never resizes the handle (PFA-196). */
+  --container-week-date: 13ch;
   --text-2xs: 0.7rem; /* 11px — compact label */
   --text-compact: 0.8125rem; /* 13px — secondary rows, e.g. an unfolded group's lines (PFA-192) */
   --text-3xs: 0.5rem; /* 8px — micro label */

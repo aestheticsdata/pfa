@@ -25,6 +25,8 @@ const common: typeof frCommon = {
     toastDescription: "Available soon.",
   },
   datePicker: {
+    prevWeek: "Previous week",
+    nextWeek: "Next week",
     placeholder: "Select a period",
   },
   category: {

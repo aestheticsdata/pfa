@@ -68,3 +68,12 @@ export const getWeekRange = (date: Date): WeekRange => {
 
   return dateRange;
 };
+
+/**
+ * A day of the week next to `range` (the selected week's days): the day before
+ * its first day for `step` -1, the day after its last day for +1. Feeding it to
+ * getWeekRange lands on the adjacent week as the app models it, month
+ * truncation included (PFA-196).
+ */
+export const adjacentWeekDay = (range: Date[], step: number): Date =>
+  step < 0 ? subDays(range[0], 1) : addDays(range[range.length - 1], 1);

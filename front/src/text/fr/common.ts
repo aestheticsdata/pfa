@@ -23,6 +23,8 @@ const common = {
     toastDescription: "Bientôt disponible.",
   },
   datePicker: {
+    prevWeek: "Semaine précédente",
+    nextWeek: "Semaine suivante",
     placeholder: "Sélectionner une période",
   },
   category: {
