@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import useTranslations from "@i18n/useTranslations";
 import { useState } from "react";
 
-import type { ReactNode } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 
 interface BatchModalProps {
   title: string;
@@ -13,6 +13,8 @@ interface BatchModalProps {
   submitDisabled?: boolean;
   /** Restyles the submit, e.g. to match the bar action that opened the modal (PFA-198). */
   submitClassName?: string;
+  /** Enter anywhere in the modal submits it, like the button (PFA-199). */
+  submitOnEnter?: boolean;
   testId: string;
   /** Returns false to keep the modal open (validation failed). */
   onSubmit: () => boolean;
@@ -26,6 +28,7 @@ const BatchModal = ({
   submitLabel,
   submitDisabled,
   submitClassName,
+  submitOnEnter,
   testId,
   onSubmit,
   onClose,
@@ -37,6 +40,19 @@ const BatchModal = ({
     setOpen(false);
     setTimeout(onClose, 200);
   };
+  const submit = () => {
+    // Once closing, a second Enter (or a key repeat) must not send it again.
+    if (!open || submitDisabled) return;
+    if (onSubmit()) close();
+  };
+  // A focused button keeps its own Enter (Cancel, close, browse); an IME
+  // composition keeps its Enter too.
+  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!submitOnEnter || event.key !== "Enter" || event.nativeEvent.isComposing) return;
+    if (event.target instanceof HTMLButtonElement) return;
+    event.preventDefault();
+    submit();
+  };
 
   return (
     <Dialog
@@ -45,6 +61,7 @@ const BatchModal = ({
     >
       <DialogContent
         data-testid={testId}
+        onKeyDown={onKeyDown}
         className="gap-0 overflow-hidden border-line bg-surface-elev p-0 sm:max-w-135"
       >
         <DialogHeader className="border-b border-line-soft px-5.5 py-4.5 text-left">
@@ -65,9 +82,7 @@ const BatchModal = ({
             data-testid={`${testId}-submit`}
             disabled={submitDisabled}
             className={submitClassName}
-            onClick={() => {
-              if (onSubmit()) close();
-            }}
+            onClick={submit}
           >
             {submitLabel}
           </Button>
