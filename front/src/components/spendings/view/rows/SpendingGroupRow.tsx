@@ -1,14 +1,14 @@
 "use client";
 
-import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import { IconButton } from "@components/shared/IconButton";
 import { GROUP_ROW_ACTION, ROW_CONFIRM_TONE } from "@components/spendings/config/constants";
-import { entryPill } from "@components/spendings/helpers/dayEntries";
+import { categorySplit, entryPill } from "@components/spendings/helpers/dayEntries";
 import EntryReceiptModal from "@components/spendings/invoiceModal/EntryReceiptModal";
 import useSpendingGroups from "@components/spendings/services/useSpendingGroups";
 import useEntryRowState from "@components/spendings/view/hooks/useEntryRowState";
-import GroupCount from "@components/spendings/view/rows/GroupCount";
+import CategorySplitBar from "@components/spendings/view/rows/CategorySplitBar";
 import GroupSubLine from "@components/spendings/view/rows/GroupSubLine";
+import GroupToggle from "@components/spendings/view/rows/GroupToggle";
 import ReceiptMark from "@components/spendings/view/rows/ReceiptMark";
 import RowConfirm from "@components/spendings/view/rows/RowConfirm";
 import { rowStateClass, TX_ROW } from "@components/spendings/view/rows/rowClasses";
@@ -16,7 +16,7 @@ import SelectBox from "@components/spendings/view/rows/SelectBox";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import { ChevronRight, ImageIcon, Pencil, Trash2, Ungroup } from "lucide-react";
+import { ImageIcon, Pencil, Trash2, Ungroup } from "lucide-react";
 import { useState } from "react";
 
 import type { GroupDayEntry, GroupRowAction } from "@components/spendings/interfaces/spendingGroupTypes";
@@ -43,14 +43,16 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
   const { deleteGroup, ungroup } = useSpendingGroups();
   const row = useEntryRowState(entry, dayIso);
 
-  const categories = [
-    ...new Map(entry.lines.map((l) => [l.category ?? "", l.categoryColor || CATEGORY_FALLBACK])).entries(),
-  ];
   const hasInvoice = Boolean(entry.invoicefile);
 
   return (
-    <div data-testid="group-row">
-      {/* biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: a click anywhere on the row folds it (or ticks it); the chevron and the tick are the keyboard path */}
+    // The block carries the row separator: its first child is the group row,
+    // whose own `first:border-t-0` would otherwise always drop it (PFA-192).
+    <div
+      data-testid="group-row"
+      className="border-t border-line-soft first:border-t-0"
+    >
+      {/* biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: a click anywhere on the row folds it (or ticks it); the count button and the tick are the keyboard path */}
       <div
         data-group-id={entry.ID}
         data-selected={row.isSelected}
@@ -63,7 +65,7 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
         }}
         onPointerEnter={row.onPointerEnter}
         onPointerLeave={row.onPointerLeave}
-        className={cn(TX_ROW, "cursor-pointer", rowStateClass(row))}
+        className={cn(TX_ROW, "cursor-pointer border-t-0", rowStateClass(row))}
       >
         {pending ? (
           <RowConfirm
@@ -82,60 +84,35 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
           />
         ) : (
           <>
-            <span className="relative z-10 flex min-w-0 items-center gap-2 text-sm text-ink max-md:col-start-1 max-md:row-start-1">
+            {/* Same grid and pill position as a plain spending (PFA-192): the
+                count after the name is the fold toggle, not a left chevron. */}
+            <span className="relative z-10 flex min-w-0 items-center gap-2.5 text-sm text-ink max-md:col-start-1 max-md:row-start-1 max-md:text-base">
               {row.isSelecting && (
                 <SelectBox
                   checked={row.isSelected}
                   onToggle={row.toggle}
                 />
               )}
-              <button
-                type="button"
-                data-testid="group-toggle"
-                aria-label={open ? t.collapseAria : t.expandAria}
-                aria-expanded={open}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setOpen((v) => !v);
-                }}
-                className="grid size-5 shrink-0 cursor-pointer place-items-center rounded-sm text-ink-4 hover:text-ink"
-              >
-                <ChevronRight
-                  className={cn("size-3 transition-transform duration-150", open && "rotate-90")}
-                  strokeWidth={2.5}
-                />
-              </button>
               <span
-                className="h-7.5 w-0.75 shrink-0 rounded-xs"
+                className="h-5.5 w-0.75 shrink-0 rounded-xs"
                 style={{ background: entryPill(entry) }}
               />
-              <span className="flex min-w-0 flex-col">
-                <span className="flex min-w-0 items-center gap-1.5">
-                  <span
-                    className="truncate font-medium"
-                    title={entry.label}
-                  >
-                    {entry.label}
-                  </span>
-                  <GroupCount count={entry.lines.length} />
-                  {hasInvoice && <ReceiptMark shareCount={row.shareCount} />}
-                </span>
-                {!open && (
-                  <span className="truncate text-xs text-ink-4">
-                    {categories.map(([name]) => name || spendings.noCategory).join(" · ")}
-                  </span>
-                )}
+              <span
+                className="truncate"
+                title={entry.label}
+              >
+                {entry.label}
               </span>
+              <GroupToggle
+                count={entry.lines.length}
+                open={open}
+                onToggle={() => setOpen((v) => !v)}
+              />
+              {hasInvoice && <ReceiptMark shareCount={row.shareCount} />}
             </span>
 
-            <span className="relative z-10 flex gap-0.75 justify-self-end max-md:col-start-1 max-md:row-start-2 max-md:justify-self-start">
-              {categories.map(([name, color]) => (
-                <i
-                  key={name}
-                  className="size-2 rounded-xs"
-                  style={{ background: color }}
-                />
-              ))}
+            <span className="relative z-10 justify-self-end max-md:col-start-1 max-md:row-start-2 max-md:justify-self-start">
+              <CategorySplitBar shares={categorySplit(entry.lines)} />
             </span>
 
             <span className="relative z-10 justify-self-end whitespace-nowrap text-right font-mono text-sm font-medium tabular-nums text-ink max-md:col-start-2 max-md:row-start-1 max-md:self-center">
@@ -196,7 +173,7 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
       </div>
 
       {open && (
-        <div className="mb-1.5 ml-2 border-l border-line pl-3.5">
+        <div className="-mt-0.5 mb-2.5 ml-3.75">
           {entry.lines.map((line) => (
             <GroupSubLine
               key={line.ID}

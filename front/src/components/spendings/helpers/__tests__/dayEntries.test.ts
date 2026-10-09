@@ -1,6 +1,7 @@
 import { DAY_ENTRY_KIND } from "@components/spendings/config/constants";
 import {
   buildDayEntries,
+  categorySplit,
   groupEntriesByReceipt,
   splitSpendingLabel,
   stackedPillGradient,
@@ -114,5 +115,20 @@ describe("stackedPillGradient", () => {
         { color: "blue", amount: 1 },
       ]),
     ).toBe("linear-gradient(180deg, red 0.0% 75.0%, blue 75.0% 100.0%)");
+  });
+});
+
+describe("categorySplit", () => {
+  it("sums each category's lines, in first-seen order", () => {
+    expect(
+      categorySplit([
+        spending({ category: "food", categoryColor: "green", amount: 9 }),
+        spending({ category: "care", categoryColor: "blue", amount: 3 }),
+        spending({ category: "food", categoryColor: "green", amount: 1.5 }),
+      ]),
+    ).toEqual([
+      { category: "food", color: "green", amount: 10.5 },
+      { category: "care", color: "blue", amount: 3 },
+    ]);
   });
 });

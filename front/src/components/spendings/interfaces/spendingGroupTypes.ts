@@ -104,6 +104,11 @@ export interface PillStop {
   amount: number;
 }
 
+/** A category's share of a group: its colour and its lines' total (PFA-192). */
+export interface CategoryShare extends PillStop {
+  category: string;
+}
+
 /** The page-level states a day-card row is drawn with (PFA-189). */
 export interface EntryRowFlags {
   isSelecting: boolean;

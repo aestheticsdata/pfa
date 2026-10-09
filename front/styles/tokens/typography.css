@@ -4,6 +4,7 @@
 
 @theme {
   --text-2xs: 0.7rem; /* 11px — compact label */
+  --text-compact: 0.8125rem; /* 13px — secondary rows, e.g. an unfolded group's lines (PFA-192) */
   --text-3xs: 0.5rem; /* 8px — micro label */
   --text-display: 2.5rem; /* 40px — hero display number */
   --text-display-lg: 3.5rem; /* 56px — hero display, wide screens */

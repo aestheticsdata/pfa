@@ -1,7 +1,12 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import { DAY_ENTRY_KIND } from "@components/spendings/config/constants";
 
-import type { DayEntry, GroupDayEntry, PillStop } from "@components/spendings/interfaces/spendingGroupTypes";
+import type {
+  CategoryShare,
+  DayEntry,
+  GroupDayEntry,
+  PillStop,
+} from "@components/spendings/interfaces/spendingGroupTypes";
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 const toSingleEntry = (spending: SpendingItem): DayEntry => ({
@@ -79,6 +84,21 @@ export const stackedPillGradient = (colors: PillStop[]): string => {
     return `${color} ${start.toFixed(1)}% ${((acc / total) * 100).toFixed(1)}%`;
   });
   return `linear-gradient(180deg, ${stops.join(", ")})`;
+};
+
+/**
+ * A group's split by category (PFA-192): one stop per category, its lines'
+ * amounts summed, in the order the categories first appear.
+ */
+export const categorySplit = (lines: SpendingItem[]): CategoryShare[] => {
+  const byCategory = new Map<string, CategoryShare>();
+  for (const line of lines) {
+    const key = line.category ?? "";
+    const stop = byCategory.get(key) ?? { category: key, color: line.categoryColor || CATEGORY_FALLBACK, amount: 0 };
+    stop.amount += Number(line.amount);
+    byCategory.set(key, stop);
+  }
+  return [...byCategory.values()];
 };
 
 /** The colour of a row's pill: its category, or a group's stacked categories. */
