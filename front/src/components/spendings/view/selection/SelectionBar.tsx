@@ -54,7 +54,7 @@ const SelectionBar = () => {
       {isSelecting && (
         <div
           data-testid="selection-bar"
-          className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 animate-in items-center gap-2.5 rounded-xl border border-line bg-surface-elev py-2 pr-2 pl-4 shadow-[0_18px_50px_oklch(0_0_0/0.55)] fade-in slide-in-from-bottom-4 duration-200 max-md:inset-x-3 max-md:translate-x-0 max-md:flex-wrap"
+          className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 animate-in items-center gap-2.5 rounded-xl border border-selection-bar-border bg-selection-bar-surface py-2 pr-2 pl-4 shadow-selection-bar fade-in slide-in-from-bottom-4 duration-200 max-md:inset-x-3 max-md:translate-x-0 max-md:flex-wrap"
         >
           <span className="text-sm text-ink-2">
             <strong className="font-semibold text-ink">{count}</strong> {t.selection.selected(count)}
