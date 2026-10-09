@@ -218,16 +218,17 @@ const SpendingDayCard = ({
               data-testid="day-select"
               aria-pressed={isSelecting}
               title={isSelecting ? groups.selection.stop : groups.selection.start}
-              aria-label={isSelecting ? groups.selection.stop : groups.selection.start}
               onClick={() => toggleDaySelection(dayIso)}
+              // Styled like the sort buttons beside it, now that it carries a word (PFA-195).
               className={cn(
-                "ml-auto inline-flex cursor-pointer items-center rounded-md border px-2 py-1.5 transition duration-100",
+                "ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.75 py-1.5 text-xs transition duration-100",
                 isSelecting
                   ? "border-accent-d bg-accent-bg text-accent-strong"
-                  : "border-line bg-surface-hi text-ink-4 hover:border-ink-4 hover:text-ink",
+                  : "border-line bg-surface-hi text-ink-2 hover:border-ink-4 hover:text-ink",
               )}
             >
               <SquareCheckBig className="size-3.5" />
+              {groups.selection.button}
             </button>
           )}
         </div>
