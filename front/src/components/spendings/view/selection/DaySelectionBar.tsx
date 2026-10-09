@@ -5,11 +5,13 @@ import useSpendingsPageStore from "@components/spendings/stores/useSpendingsPage
 import useSelectedEntries from "@components/spendings/view/selection/useSelectedEntries";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
+import { cn } from "@lib/utils";
 import { ImageIcon, Layers, X } from "lucide-react";
 
-// Both actions weigh the same, so they share one look (PFA-197).
+// Both actions weigh the same: sibling gradients, Group cyan → blue, Shared
+// receipt green → cyan (PFA-198). Disabled, they fall back to a plain outline.
 const ACTION =
-  "inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.75 whitespace-nowrap rounded-md border border-accent-d bg-accent-bg px-2.5 text-sm font-medium text-accent-strong transition-colors enabled:hover:border-accent-strong disabled:cursor-not-allowed disabled:border-line disabled:bg-transparent disabled:text-ink-4";
+  "inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.75 whitespace-nowrap rounded-md border border-transparent px-2.5 text-sm font-semibold text-on-selection-action transition enabled:hover:brightness-[1.07] disabled:cursor-not-allowed disabled:border-line disabled:bg-none disabled:text-ink-4";
 
 /**
  * Actions on the ticked rows, inside a day card in selection mode (PFA-197):
@@ -48,7 +50,7 @@ const DaySelectionBar = () => {
           title={!canAct ? t.selection.atLeastTwo : !isSameDay ? t.selection.sameDayOnly : undefined}
           disabled={!canAct || !isSameDay}
           onClick={() => openBatchModal(BATCH_MODAL.merge)}
-          className={ACTION}
+          className={cn(ACTION, "bg-(image:--selection-group-fill)")}
         >
           <Layers className="size-3.5" />
           {t.selection.group}
@@ -59,7 +61,7 @@ const DaySelectionBar = () => {
           title={!canAct ? t.selection.atLeastTwo : undefined}
           disabled={!canAct}
           onClick={() => openBatchModal(BATCH_MODAL.share)}
-          className={ACTION}
+          className={cn(ACTION, "bg-(image:--selection-share-fill)")}
         >
           <ImageIcon className="size-3.5" />
           {t.selection.sharedReceipt}

@@ -91,6 +91,10 @@
   --selection-bar-surface:     oklch(0.265 0.005 250);
   --selection-bar-border:      oklch(0.33 0.006 250);
   --selection-bar-exit-border: oklch(0.36 0.006 250); /* its × button */
+  /* Its two actions: sibling gradients, dark text (PFA-198). */
+  --selection-group-fill:  linear-gradient(100deg, oklch(0.82 0.12 205), oklch(0.74 0.14 255));
+  --selection-share-fill:  linear-gradient(100deg, var(--accent-strong), oklch(0.80 0.12 210));
+  --on-selection-action:   oklch(0.18 0.03 170);
 
   --exc:           oklch(0.70 0.13 240); /* achats exceptionnels (bleu calme) */
   --exc-bg:        oklch(0.70 0.13 240 / 0.14);
@@ -194,6 +198,7 @@
   --color-selection-bar-surface: var(--selection-bar-surface);
   --color-selection-bar-border: var(--selection-bar-border);
   --color-selection-bar-exit-border: var(--selection-bar-exit-border);
+  --color-on-selection-action: var(--on-selection-action);
   --color-exc: var(--exc);
   --color-exc-bg: var(--exc-bg);
   --color-elec: var(--elec);

@@ -218,24 +218,26 @@ const SpendingDayCard = ({
               type="button"
               data-testid="day-select"
               aria-pressed={isSelecting}
-              aria-label={groups.selection.start}
               title={isSelecting ? groups.selection.stop : groups.selection.start}
               onClick={() => toggleDaySelection(dayIso)}
-              // Icon only, so it no longer reads like the "Group" action (PFA-197).
+              // Styled like the sort buttons beside it, now that it carries a word (PFA-195).
               className={cn(
-                "ml-auto grid size-8 cursor-pointer place-items-center rounded-md border transition duration-100",
+                "ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.75 py-1.5 text-xs transition duration-100",
                 isSelecting
                   ? "border-accent-d bg-accent-bg text-accent-strong"
-                  : "border-line bg-surface-hi text-ink-4 hover:border-ink-4 hover:text-ink",
+                  : "border-line bg-surface-hi text-ink-2 hover:border-ink-4 hover:text-ink",
               )}
             >
               <SquareCheckBig className="size-3.5" />
+              {groups.selection.button}
             </button>
           )}
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-auto flex-col px-4.5 pt-3.5 pb-4">
+      {/* Wider on the left: the selection checkboxes sit in that margin, so the
+          rows never shift when they appear (PFA-198). */}
+      <div className="flex min-h-0 flex-auto flex-col pt-3.5 pr-4.5 pb-4 pl-7">
         {sorted.length > 0 ? (
           <>
             {dayCategories.length > 0 && (
@@ -257,7 +259,7 @@ const SpendingDayCard = ({
                 ))}
               </div>
             )}
-            <div className="pfa-scroll-thin -ml-2 flex min-h-0 flex-auto flex-col overflow-y-auto pl-2 pr-2">
+            <div className="pfa-scroll-thin -ml-6 flex min-h-0 flex-auto flex-col overflow-y-auto pl-6 pr-2">
               {sorted.map((entry) =>
                 entry.kind === DAY_ENTRY_KIND.group ? (
                   <SpendingGroupRow

@@ -10,6 +10,8 @@ export const TX_ROW =
 // flush, the ring would touch the colour pill and the "€". The day card's list
 // keeps that much room on its left so nothing gets clipped (PFA-190).
 const STATE_SURFACE = "before:-inset-x-2";
+// A ticked row's tint also takes in its checkbox, out in the margin (PFA-198).
+const SELECTED_SURFACE = "before:-left-6";
 
 /**
  * Selection tick, shared-receipt highlight and post-grouping flash (PFA-189),
@@ -19,7 +21,7 @@ export const rowStateClass = (row: EntryRowFlags) =>
   cn(
     (row.isSelected || row.isReceiptHighlighted || row.isFlashing) && STATE_SURFACE,
     row.isSelecting && "cursor-pointer",
-    row.isSelected && "before:bg-accent-bg hover:before:bg-accent-bg",
+    row.isSelected && cn(SELECTED_SURFACE, "before:bg-accent-bg hover:before:bg-accent-bg"),
     row.isReceiptHighlighted && "before:bg-elec/7 before:ring-1 before:ring-elec/35 before:ring-inset",
     row.isFlashing && "before:animate-row-flash",
   );
