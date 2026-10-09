@@ -24,6 +24,12 @@ export const SpendingItemSchema = z.object({
   itemType: itemTypeSchema,
   label: z.string(),
   userID: z.string(),
+  // A line of a group (PFA-189): `label` already reads "<group> — <detail>";
+  // `detail` is the part after the group name, null on a plain spending.
+  groupID: z.string().nullable(),
+  detail: z.string().nullable(),
+  // Joined by GET /spendings only — the search page does not send it.
+  groupLabel: z.string().nullish(),
 });
 
 export const SpendingListSchema = z.array(SpendingItemSchema);
@@ -73,6 +79,10 @@ export const RecurringsDrawnSchema = z.object({ drawn: numberLikeSchema });
 // Response of POST /spendings: the new row's ID, so the receipt upload can
 // chain on it in the same creation flow (PFA-5).
 export const CreateSpendingResponseSchema = z.object({ ID: z.string() });
+
+// Response of POST /spendings/groups: the group and its lines' IDs, so the
+// group's receipt can be uploaded on all of them right after (PFA-189).
+export const CreateSpendingGroupResponseSchema = z.object({ ID: z.string(), spendingIDs: z.array(z.string()) });
 
 export const SpendingMutationPayloadSchema = z.object({
   date: z.string().nullable().optional(),

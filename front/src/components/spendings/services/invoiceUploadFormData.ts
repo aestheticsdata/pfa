@@ -1,3 +1,5 @@
+import type { ShareReceiptInput } from "@components/spendings/interfaces/spendingGroupTypes";
+
 // Multipart body of POST /spendings/upload — shared by the row's InvoiceModal
 // and the receipt-at-creation chain (PFA-5).
 export interface InvoiceUploadTarget {
@@ -35,6 +37,18 @@ export const buildInvoiceUploadFormData = (target: InvoiceUploadTarget, file: Fi
   // The file must stay the last part: multer streams parts in order and derives
   // the stored filename from itemType/date/label, which must already be parsed
   // when the file part arrives.
+  formData.append("invoiceImageUpload", file);
+  return formData;
+};
+
+// Multipart body of POST /spendings/receipts (PFA-189): one file for several
+// spendings. Same ordering rule as above — the naming fields, then the file.
+export const buildSharedReceiptFormData = ({ spendingIDs, file, label, date }: ShareReceiptInput): FormData => {
+  const formData = new FormData();
+  formData.append("spendingIDs", JSON.stringify(spendingIDs));
+  formData.append("itemType", "spending");
+  formData.append("date", date);
+  formData.append("label", label);
   formData.append("invoiceImageUpload", file);
   return formData;
 };

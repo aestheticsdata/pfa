@@ -12,7 +12,7 @@ describe("SpendingsService.searchSpendings", () => {
     const count = jest.fn().mockResolvedValue(countResult);
     // Only spendings.findMany / count are exercised; the other deps are unused.
     const prisma = { spendings: { findMany, count } } as unknown as never;
-    const service = new SpendingsService(prisma, {} as never, {} as never);
+    const service = new SpendingsService(prisma, {} as never);
     return { service, findMany, count };
   };
 
@@ -226,7 +226,7 @@ describe("SpendingsService.getSpendingYears", () => {
   const makeYearsService = (aggregateResult: unknown) => {
     const aggregate = jest.fn().mockResolvedValue(aggregateResult);
     const prisma = { spendings: { aggregate } } as unknown as never;
-    const service = new SpendingsService(prisma, {} as never, {} as never);
+    const service = new SpendingsService(prisma, {} as never);
     return { service, aggregate };
   };
 
@@ -273,7 +273,7 @@ describe("SpendingsService.getLabelSuggestions", () => {
     const groupBy = jest.fn().mockResolvedValue(groupByResult);
     const findMany = jest.fn().mockResolvedValue(categoriesResult);
     const prisma = { spendings: { groupBy }, categories: { findMany } } as unknown as never;
-    const service = new SpendingsService(prisma, {} as never, {} as never);
+    const service = new SpendingsService(prisma, {} as never);
     return { service, groupBy, findMany };
   };
 
@@ -443,7 +443,7 @@ describe("SpendingsService.createSpending", () => {
   it("returns the created spending's ID so the front can chain the receipt upload (PFA-5)", async () => {
     const create = jest.fn().mockResolvedValue(undefined);
     const prisma = { spendings: { create } } as unknown as never;
-    const service = new SpendingsService(prisma, {} as never, {} as never);
+    const service = new SpendingsService(prisma, {} as never);
 
     const result = await service.createSpending(
       { date: "2026-08-21", label: "lunch", amount: 12.5, currency: "EUR" },

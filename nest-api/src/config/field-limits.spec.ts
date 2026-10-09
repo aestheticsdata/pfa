@@ -14,6 +14,11 @@ import { CreateRecurringDto } from "../recurrings/dto/create-recurring.dto";
 import { UpdateRecurringDto } from "../recurrings/dto/update-recurring.dto";
 import { CreateExceptionalDto } from "../exceptionals/dto/create-exceptional.dto";
 import { UpdateExceptionalDto } from "../exceptionals/dto/update-exceptional.dto";
+import { CreateSpendingGroupDto } from "../spendings/dto/create-spending-group.dto";
+import { UpdateSpendingGroupDto } from "../spendings/dto/update-spending-group.dto";
+import { SpendingGroupLineDto } from "../spendings/dto/spending-group-line.dto";
+import { MergeSpendingGroupDto, MergeSpendingGroupLineDto } from "../spendings/dto/merge-spending-group.dto";
+import { GROUP_LABEL_SEPARATOR } from "../spendings/groups/group-label";
 import { AddUserDto } from "../users/dto/add-user.dto";
 import { SignInDto } from "../users/dto/sign-in.dto";
 
@@ -52,6 +57,11 @@ describe("FIELD_LIMITS", () => {
   ])("%s mirrors %s.%s in schema.prisma", (limit, model, column) => {
     expect(columnWidth(model, column)).toBe(FIELD_LIMITS[limit as keyof typeof FIELD_LIMITS]);
   });
+
+  it("a group line's composed label fits Spendings.label (PFA-189)", () => {
+    const composed = FIELD_LIMITS.groupLabel + GROUP_LABEL_SEPARATOR.length + FIELD_LIMITS.groupDetail;
+    expect(composed).toBe(columnWidth("Spendings", "label"));
+  });
 });
 
 describe("DTO length bounds", () => {
@@ -86,6 +96,9 @@ describe("DTO length bounds", () => {
   const user = { name: "someone", email: "someone@example.com", password: "hunter2", baseCurrency: "EUR" };
   const signIn = { email: "someone@example.com", password: "hunter2" };
   const category = { name: "courses", color: "#84c4f5" };
+  const groupLine = { amount: 4.5 };
+  const group = { date: "2026-07-01", label: "Store", currency: "EUR", lines: [groupLine] };
+  const merge = { label: "Store", lines: [{ spendingID: "a" }, { spendingID: "b" }] };
 
   // Object rows, not tuples: with a tuple shorter than the callback's parameter
   // list, jest fills the gap with its `done` callback instead of `undefined`.
@@ -126,6 +139,12 @@ describe("DTO length bounds", () => {
       field: "categoryName",
       max: FIELD_LIMITS.exceptionalCategoryName,
     },
+    { Dto: CreateSpendingGroupDto, base: group, field: "label", max: FIELD_LIMITS.groupLabel },
+    { Dto: CreateSpendingGroupDto, base: group, field: "currency", max: FIELD_LIMITS.currency },
+    { Dto: UpdateSpendingGroupDto, base: group, field: "label", max: FIELD_LIMITS.groupLabel },
+    { Dto: SpendingGroupLineDto, base: groupLine, field: "detail", max: FIELD_LIMITS.groupDetail },
+    { Dto: MergeSpendingGroupDto, base: merge, field: "label", max: FIELD_LIMITS.groupLabel },
+    { Dto: MergeSpendingGroupLineDto, base: { spendingID: "a" }, field: "detail", max: FIELD_LIMITS.groupDetail },
     { Dto: AddUserDto, base: user, field: "name", max: FIELD_LIMITS.userName },
     { Dto: AddUserDto, base: user, field: "email", max: FIELD_LIMITS.email, build: email },
     { Dto: AddUserDto, base: user, field: "baseCurrency", max: FIELD_LIMITS.currency },

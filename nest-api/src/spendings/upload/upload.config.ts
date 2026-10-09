@@ -2,6 +2,7 @@ import type { Request } from "express";
 import { diskStorage } from "multer";
 import { open, mkdir } from "fs/promises";
 import { join } from "path";
+import { randomBytes } from "crypto";
 import { format } from "date-fns";
 
 const DATE_FORMAT = "yyyy-MM-dd";
@@ -77,7 +78,12 @@ export const invoiceUploadOptions = {
           break;
       }
 
-      cb(null, `${fileName}.${safeExtension(file.originalname)}`);
+      // The random suffix keeps two uploads from colliding: the name alone was
+      // only unique per (label, day), and a receipt shared by several rows must
+      // never be overwritten by another row's upload (PFA-189). Files uploaded
+      // before keep their name — rows and the memosyne backup still match.
+      const suffix = randomBytes(3).toString("hex");
+      cb(null, `${fileName}-${suffix}.${safeExtension(file.originalname)}`);
     },
   }),
   fileFilter: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {

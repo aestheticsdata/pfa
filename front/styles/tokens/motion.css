@@ -9,4 +9,25 @@
   --duration-spotlight-out: 0.2s;
   --duration-spotlight-flash: 0.45s;
   --delay-spotlight-flash: 0.4s;
+
+  /* Spending groups (PFA-189): a row that a grouping just produced flashes
+     once, and a group's lines slide in when it unfolds. */
+  --animate-row-flash: row-flash 1.4s ease-out;
+  --animate-sub-line-in: sub-line-in 0.16s ease-out;
+
+  @keyframes row-flash {
+    from {
+      background-color: color-mix(in oklch, var(--accent-strong) 18%, transparent);
+    }
+    to {
+      background-color: transparent;
+    }
+  }
+
+  @keyframes sub-line-in {
+    from {
+      opacity: 0;
+      transform: translateY(-3px);
+    }
+  }
 }

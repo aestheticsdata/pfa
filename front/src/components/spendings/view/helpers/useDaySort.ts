@@ -1,7 +1,7 @@
 import orderBy from "lodash/orderBy";
 import { useState } from "react";
 
-import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { DaySortable } from "@components/spendings/interfaces/spendingGroupTypes";
 
 export type DaySortField = "label" | "category" | "amount";
 type SortDir = "asc" | "desc";
@@ -11,7 +11,7 @@ interface DaySortState {
   dir: SortDir;
 }
 
-const sortSpendings = (spendings: SpendingListItem[], sort: DaySortState) => {
+const sortSpendings = <T extends DaySortable>(spendings: T[], sort: DaySortState) => {
   if (!sort.field) {
     return spendings;
   }
@@ -32,7 +32,7 @@ const sortSpendings = (spendings: SpendingListItem[], sort: DaySortState) => {
  * Per-day-card sort with EXPOSED state (field + direction), so the
  * Spendings day cards can render the active button + arrow glyph.
  */
-const useDaySort = (spendings: SpendingListItem[]) => {
+const useDaySort = <T extends DaySortable>(spendings: T[]) => {
   const [sort, setSort] = useState<DaySortState>({ field: null, dir: "asc" });
 
   const onSort = (field: DaySortField) => {

@@ -707,6 +707,8 @@ async function topUpFrom(prisma: PrismaClient, to: Ymd): Promise<Ymd | null> {
 
 async function wipeAll(prisma: PrismaClient): Promise<void> {
   const s = await prisma.spendings.deleteMany({ where: { userID: USER_ID } });
+  // Groups created by hand on the mock account (PFA-189) are empty by now.
+  await prisma.spendingGroups.deleteMany({ where: { userID: USER_ID } });
   const r = await prisma.recurrings.deleteMany({ where: { userID: USER_ID } });
   const d = await prisma.dashboards.deleteMany({ where: { userID: USER_ID } });
   const c = await prisma.categories.deleteMany({ where: { userID: USER_ID } });
