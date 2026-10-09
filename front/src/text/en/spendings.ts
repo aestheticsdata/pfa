@@ -142,6 +142,7 @@ const spendings: typeof frSpendings = {
   },
   txRow: {
     deleteAria: "Confirm deletion",
+    confirmAria: "Confirm the action",
     receiptAttachedAria: "receipt attached",
     viewReceipt: "View receipt",
     addReceipt: "Add a receipt",
@@ -210,6 +211,7 @@ const spendings: typeof frSpendings = {
     collapseAria: "Collapse the group",
     ungroup: "Ungroup",
     deleteConfirm: (lines: number) => `Delete the group and its ${lines} lines?`,
+    ungroupConfirm: (lines: number) => `Ungroup into ${lines} separate spendings?`,
     sharedReceiptTitle: (count: number) => `Receipt shared with ${count} spendings`,
     selection: {
       start: "Select spendings",

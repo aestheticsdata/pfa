@@ -1,5 +1,10 @@
 import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
-import type { DAY_ENTRY_KIND, SPENDING_MODAL_MODE } from "@components/spendings/config/constants";
+import type {
+  DAY_ENTRY_KIND,
+  GROUP_ROW_ACTION,
+  ROW_CONFIRM_TONE,
+  SPENDING_MODAL_MODE,
+} from "@components/spendings/config/constants";
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 export type DayEntryKind = (typeof DAY_ENTRY_KIND)[keyof typeof DAY_ENTRY_KIND];
@@ -119,3 +124,6 @@ export interface SelectedEntry {
   entry: DayEntry;
   dayIso: string;
 }
+
+export type RowConfirmTone = (typeof ROW_CONFIRM_TONE)[keyof typeof ROW_CONFIRM_TONE];
+export type GroupRowAction = (typeof GROUP_ROW_ACTION)[keyof typeof GROUP_ROW_ACTION];

@@ -30,3 +30,16 @@ export const SPENDING_MODAL_MODE = {
   single: "single",
   group: "group",
 } as const;
+
+// Look of a day-card row's inline confirmation: red for a delete, neutral for
+// a reversible change such as ungrouping (PFA-190).
+export const ROW_CONFIRM_TONE = {
+  danger: "danger",
+  neutral: "neutral",
+} as const;
+
+// The action a group row is asking to confirm inline (PFA-190).
+export const GROUP_ROW_ACTION = {
+  delete: "delete",
+  ungroup: "ungroup",
+} as const;

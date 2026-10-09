@@ -2,6 +2,7 @@
 
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import { IconButton } from "@components/shared/IconButton";
+import { GROUP_ROW_ACTION, ROW_CONFIRM_TONE } from "@components/spendings/config/constants";
 import { entryPill } from "@components/spendings/helpers/dayEntries";
 import EntryReceiptModal from "@components/spendings/invoiceModal/EntryReceiptModal";
 import useSpendingGroups from "@components/spendings/services/useSpendingGroups";
@@ -9,7 +10,7 @@ import useEntryRowState from "@components/spendings/view/hooks/useEntryRowState"
 import GroupCount from "@components/spendings/view/rows/GroupCount";
 import GroupSubLine from "@components/spendings/view/rows/GroupSubLine";
 import ReceiptMark from "@components/spendings/view/rows/ReceiptMark";
-import RowDeleteConfirm from "@components/spendings/view/rows/RowDeleteConfirm";
+import RowConfirm from "@components/spendings/view/rows/RowConfirm";
 import { rowStateClass, TX_ROW } from "@components/spendings/view/rows/rowClasses";
 import SelectBox from "@components/spendings/view/rows/SelectBox";
 import useFormat from "@i18n/useFormat";
@@ -18,7 +19,7 @@ import { cn } from "@lib/utils";
 import { ChevronRight, ImageIcon, Pencil, Trash2, Ungroup } from "lucide-react";
 import { useState } from "react";
 
-import type { GroupDayEntry } from "@components/spendings/interfaces/spendingGroupTypes";
+import type { GroupDayEntry, GroupRowAction } from "@components/spendings/interfaces/spendingGroupTypes";
 
 interface SpendingGroupRowProps {
   entry: GroupDayEntry;
@@ -36,7 +37,8 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
   const spendings = useTranslations("spendings");
   const { groups: t, txRow, item } = spendings;
   const [open, setOpen] = useState(false);
-  const [confirming, setConfirming] = useState(false);
+  // Delete and ungroup both ask inline first (PFA-190); one at a time.
+  const [pending, setPending] = useState<GroupRowAction | null>(null);
   const [invoiceOpen, setInvoiceOpen] = useState(false);
   const { deleteGroup, ungroup } = useSpendingGroups();
   const row = useEntryRowState(entry, dayIso);
@@ -63,13 +65,19 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
         onPointerLeave={row.onPointerLeave}
         className={cn(TX_ROW, "cursor-pointer", rowStateClass(row))}
       >
-        {confirming ? (
-          <RowDeleteConfirm
-            message={t.deleteConfirm(entry.lines.length)}
-            onCancel={() => setConfirming(false)}
+        {pending ? (
+          <RowConfirm
+            message={
+              pending === GROUP_ROW_ACTION.delete
+                ? t.deleteConfirm(entry.lines.length)
+                : t.ungroupConfirm(entry.lines.length)
+            }
+            tone={pending === GROUP_ROW_ACTION.delete ? ROW_CONFIRM_TONE.danger : ROW_CONFIRM_TONE.neutral}
+            onCancel={() => setPending(null)}
             onConfirm={() => {
-              deleteGroup.mutate(entry.ID);
-              setConfirming(false);
+              if (pending === GROUP_ROW_ACTION.delete) deleteGroup.mutate(entry.ID);
+              else ungroup.mutate(entry.ID);
+              setPending(null);
             }}
           />
         ) : (
@@ -168,7 +176,7 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
                   size={7}
                   data-testid="group-ungroup"
                   title={t.ungroup}
-                  onClick={() => ungroup.mutate(entry.ID)}
+                  onClick={() => setPending(GROUP_ROW_ACTION.ungroup)}
                 >
                   <Ungroup />
                 </IconButton>
@@ -177,7 +185,7 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
                   size={7}
                   data-testid="group-delete"
                   title={item.actions.delete}
-                  onClick={() => setConfirming(true)}
+                  onClick={() => setPending(GROUP_ROW_ACTION.delete)}
                 >
                   <Trash2 />
                 </IconButton>

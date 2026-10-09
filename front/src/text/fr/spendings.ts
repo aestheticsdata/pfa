@@ -140,6 +140,7 @@ const spendings = {
   },
   txRow: {
     deleteAria: "Confirmer la suppression",
+    confirmAria: "Confirmer l'action",
     receiptAttachedAria: "reçu joint",
     viewReceipt: "Voir le reçu",
     addReceipt: "Ajouter un reçu",
@@ -209,6 +210,7 @@ const spendings = {
     collapseAria: "Replier le groupe",
     ungroup: "Dégrouper",
     deleteConfirm: (lines: number) => `Supprimer le groupe et ses ${lines} lignes ?`,
+    ungroupConfirm: (lines: number) => `Dégrouper en ${lines} dépenses séparées ?`,
     sharedReceiptTitle: (count: number) => `Reçu partagé avec ${count} dépenses`,
     selection: {
       start: "Sélectionner des dépenses",
