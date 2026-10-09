@@ -5,7 +5,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.6 0.2 200);
+  --primary: oklch(0.60 0.20 200);
   --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.95 0.0058 264.53);
   --secondary-foreground: #030213;
@@ -26,7 +26,7 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.6 0.2 200);
+  --sidebar-primary: oklch(0.60 0.20 200);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
@@ -41,60 +41,60 @@
      ============================================================ */
 
   /* Surfaces (bg → foreground) */
-  --surface-base: oklch(0.14 0.042 234);
-  --surface-elev: oklch(0.205 0.006 250);
-  --surface-hi: oklch(0.215 0.007 250);
-  --surface-hover: oklch(0.22 0.006 250);
-  --line: oklch(0.27 0.008 250);
+  --surface-base:    oklch(0.14 0.042 234);
+  --surface-elev:    oklch(0.205 0.006 250);
+  --surface-hi:      oklch(0.215 0.007 250);
+  --surface-hover:   oklch(0.22 0.006 250);
+  --line:       oklch(0.27 0.008 250);
   /* Must stay ABOVE every surface it draws on (surface-base, surface-elev, surface-hi):
      a hairline is only a line if it is lighter than the fill behind it. At 0.20
      it sat *under* surface-elev (0.205) and every separator on a card vanished.
      0.24 restores the design's spacing: ~.035 above the card, ~.03 below --line. */
-  --line-soft: oklch(0.24 0.006 250);
+  --line-soft:  oklch(0.24 0.006 250);
 
   /* Ink (text) */
-  --ink: oklch(0.975 0.004 250);
-  --ink-2: oklch(0.78 0.005 250);
-  --ink-3: oklch(0.62 0.006 250);
-  --ink-4: oklch(0.47 0.006 250);
-  --ink-5: oklch(0.3 0.006 250);
+  --ink:        oklch(0.975 0.004 250);
+  --ink-2:      oklch(0.78 0.005 250);
+  --ink-3:      oklch(0.62 0.006 250);
+  --ink-4:      oklch(0.47 0.006 250);
+  --ink-5:      oklch(0.30 0.006 250);
 
   /* Accent + semantic (brand green is --accent-strong to avoid the
      collision with shadcn's --accent, which is a hover surface) */
   --accent-strong: oklch(0.84 0.14 148);
-  --accent-d: oklch(0.55 0.1 148);
-  --accent-bg: oklch(0.84 0.14 148 / 0.1);
+  --accent-d:      oklch(0.55 0.10 148);
+  --accent-bg:     oklch(0.84 0.14 148 / 0.10);
   /* Search-result spotlight (PFA-188): darkens the page around the picked
      spending — the page stays legible behind it, it just stops competing. */
-  --veil: oklch(0.12 0.01 250 / 0.72);
+  --veil:          oklch(0.12 0.01 250 / 0.72);
   /* …the flash that lands in its hole (intense, gone in a blink), and the thin
      light ring that keeps outlining the hole while the veil holds. */
   --spotlight-flash: oklch(1 0 0 / 0.55);
-  --spotlight-ring: oklch(1 0 0 / 0.35);
+  --spotlight-ring:  oklch(1 0 0 / 0.35);
   /* Meter/progress bar fill — the accent gradient used by bars & legends */
-  --bar-fill: linear-gradient(90deg, var(--accent-d), var(--accent-strong));
-  --neg: oklch(0.72 0.17 25);
-  --neg-bg: oklch(0.72 0.17 25 / 0.12);
+  --bar-fill:      linear-gradient(90deg, var(--accent-d), var(--accent-strong));
+  --neg:           oklch(0.72 0.17 25);
+  --neg-bg:        oklch(0.72 0.17 25 / 0.12);
   /* Warn (amber) — the middle "over budget but not alarming" step, between the
      accent green and --neg red (Dépenses overspend indicators, COS-34/COS-36) */
-  --warn: oklch(0.8 0.15 70);
-  --warn-bg: oklch(0.8 0.15 70 / 0.12);
+  --warn:          oklch(0.80 0.15 70);
+  --warn-bg:       oklch(0.80 0.15 70 / 0.12);
 
   /* Danger — solid delete button + inline confirm affordance */
-  --danger-solid: oklch(0.55 0.18 25); /* solid delete-button fill */
-  --on-danger: oklch(0.98 0.02 25); /* text on --danger-solid */
-  --danger-surface: color-mix(in oklch, var(--neg) 15%, var(--surface-elev)); /* inline confirm bar bg */
+  --danger-solid:       oklch(0.55 0.18 25); /* solid delete-button fill */
+  --on-danger:          oklch(0.98 0.02 25); /* text on --danger-solid */
+  --danger-surface:     color-mix(in oklch, var(--neg) 15%, var(--surface-elev)); /* inline confirm bar bg */
   --danger-border-soft: color-mix(in oklch, var(--neg) 55%, transparent); /* inline confirm bar border */
 
   /* Multi-selection action bar, inside the Spendings day card (PFA-191→193,
      PFA-197): a neutral grey a little lighter than the card — no tint. */
-  --selection-bar-surface: oklch(0.265 0.005 250);
-  --selection-bar-border: oklch(0.33 0.006 250);
+  --selection-bar-surface:     oklch(0.265 0.005 250);
+  --selection-bar-border:      oklch(0.33 0.006 250);
   --selection-bar-exit-border: oklch(0.36 0.006 250); /* its × button */
 
-  --exc: oklch(0.7 0.13 240); /* achats exceptionnels (bleu calme) */
-  --exc-bg: oklch(0.7 0.13 240 / 0.14);
-  --elec: oklch(0.72 0.15 230); /* "aujourd'hui" */
+  --exc:           oklch(0.70 0.13 240); /* achats exceptionnels (bleu calme) */
+  --exc-bg:        oklch(0.70 0.13 240 / 0.14);
+  --elec:          oklch(0.72 0.15 230); /* "aujourd'hui" */
 
   /* ===== shadcn semantic tokens remapped onto the pfa palette ===== */
   --background: var(--surface-base);
@@ -120,7 +120,7 @@
 
   --chart-1: var(--accent-strong);
   --chart-2: oklch(0.82 0.13 175);
-  --chart-3: oklch(0.8 0.12 210);
+  --chart-3: oklch(0.80 0.12 210);
   --chart-4: var(--exc);
   --chart-5: var(--neg);
 
