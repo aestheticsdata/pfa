@@ -215,6 +215,7 @@ const spendings = {
     selection: {
       start: "Sélectionner des dépenses",
       selectRow: "Sélectionner",
+      button: "Grouper",
       stop: "Terminer la sélection",
       selected: (count: number): string => (count > 1 ? "sélectionnées" : "sélectionnée"),
       atLeastTwo: "Cocher au moins 2 dépenses",
