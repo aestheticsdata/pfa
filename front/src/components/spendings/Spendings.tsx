@@ -2,6 +2,7 @@
 
 import useSyncWeekFromUrl from "@components/datePickerWrapper/helpers/useSyncWeekFromUrl";
 import useGlobalStore from "@components/shared/globalStore";
+import SpendingsPageStoreProvider from "@components/spendings/stores/SpendingsPageStoreProvider";
 import SpendingView from "@components/spendings/view/SpendingView";
 import { DATE_QUERY_PARAM, getTodayIsoDate, parseAsSpendingsDate } from "@helpers/dateRoute";
 import { useQueryState } from "nuqs";
@@ -33,5 +34,9 @@ export default function Spendings() {
     setDate(getTodayIsoDate(), { history: "replace" });
   }, [date, setDate]);
 
-  return <SpendingView />;
+  return (
+    <SpendingsPageStoreProvider>
+      <SpendingView />
+    </SpendingsPageStoreProvider>
+  );
 }

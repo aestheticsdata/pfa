@@ -6,7 +6,10 @@ import Spinner from "@components/common/Spinner";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { Dropzone } from "@components/shared/Dropzone";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
-import { buildInvoiceUploadFormData } from "@components/spendings/services/invoiceUploadFormData";
+import {
+  buildInvoiceUploadFormData,
+  buildSharedReceiptFormData,
+} from "@components/spendings/services/invoiceUploadFormData";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
@@ -19,7 +22,9 @@ import { Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
+import type { ReceiptModalHeader } from "@components/spendings/interfaces/receiptModalTypes";
 import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { ReactNode } from "react";
 
 interface InvoiceModalProps {
   handleClickOutside: () => void;
@@ -29,12 +34,27 @@ interface InvoiceModalProps {
     date?: string;
     dateFrom?: string;
   };
+  /** Replaces the label / category / amount of the header — a group or a shared receipt (PFA-189). */
+  header?: ReceiptModalHeader;
+  /** When the receipt covers several spendings, an upload goes to all of them (PFA-189). */
+  uploadSpendingIDs?: string[];
+  deleteLabel?: string;
+  /** Shown under the header: the group's lines or the spendings sharing the receipt. */
+  children?: ReactNode;
 }
 
 const FILE_SIZE_LIMIT = 32_097_152;
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
-const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: InvoiceModalProps) => {
+const InvoiceModal = ({
+  handleClickOutside: handleClickOutsideProp,
+  spending,
+  header,
+  uploadSpendingIDs,
+  deleteLabel,
+  children,
+}: InvoiceModalProps) => {
+  const isSharedUpload = (uploadSpendingIDs?.length ?? 0) > 1;
   const texts = useTranslations("spendings");
   const { euro } = useFormat();
   const [open, setOpen] = useState(true);
@@ -97,8 +117,14 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
     try {
       setIsProgress(true);
       setIsLoading(true);
-      const uploadedImage = await privateRequest("/spendings/upload", { method: "POST", data: payload }, config);
-      setInvoiceImage(uploadedImage.data);
+      const endpoint = isSharedUpload ? "/spendings/receipts" : "/spendings/upload";
+      const uploadedImage = await privateRequest(endpoint, { method: "POST", data: payload }, config);
+      if (isSharedUpload) {
+        // The shared endpoint answers with the stored name, not the image.
+        await getInvoiceImage();
+      } else {
+        setInvoiceImage(uploadedImage.data);
+      }
       clearPending();
       await queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
@@ -159,7 +185,16 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
 
   const sendInvoice = () => {
     if (!pendingFile || !userID) return;
-    uploadInvoiceImage(buildInvoiceUploadFormData(spending, pendingFile));
+    uploadInvoiceImage(
+      isSharedUpload && uploadSpendingIDs && "date" in spending && spending.date
+        ? buildSharedReceiptFormData({
+            spendingIDs: uploadSpendingIDs,
+            file: pendingFile,
+            label: header?.title ?? spending.label,
+            date: spending.date.slice(0, 10),
+          })
+        : buildInvoiceUploadFormData(spending, pendingFile),
+    );
   };
 
   const category = "category" in spending ? spending.category : null;
@@ -178,25 +213,38 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
           <DialogHeader className="flex-row items-center gap-3 space-y-0 pb-4 pl-5.5 pr-14 pt-5 text-left">
             <DialogTitle
               className="min-w-0 flex-1 truncate pr-8 text-xl font-semibold tracking-tight text-ink"
-              title={spending.label}
+              title={header?.title ?? spending.label}
             >
-              {spending.label}
+              {header?.title ?? spending.label}
             </DialogTitle>
-            {category && (
+            {header ? (
               <span
-                className="shrink-0 rounded-md px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider"
-                style={{
-                  backgroundColor: `${categoryColor}30`,
-                  color: categoryColor,
-                }}
+                className={cn(
+                  "shrink-0 rounded-md px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider",
+                  header.tagClassName,
+                )}
               >
-                {category}
+                {header.tag}
               </span>
+            ) : (
+              category && (
+                <span
+                  className="shrink-0 rounded-md px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider"
+                  style={{
+                    backgroundColor: `${categoryColor}30`,
+                    color: categoryColor,
+                  }}
+                >
+                  {category}
+                </span>
+              )
             )}
             <span className="num shrink-0 whitespace-nowrap text-lg font-semibold tracking-tight text-elec">
-              {euro(spending.amount)} €
+              {euro(header?.amount ?? spending.amount)} €
             </span>
           </DialogHeader>
+
+          {children}
 
           {/* #b3ada4 is the design's neutral tan backdrop behind receipt photos
               (from .facture-stage.is-image) — intentionally a fixed value, not a
@@ -265,7 +313,7 @@ const InvoiceModal = ({ handleClickOutside: handleClickOutsideProp, spending }: 
                 className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-danger-solid px-4.5 py-3.5 text-base font-semibold text-on-danger transition-[filter] hover:brightness-110"
               >
                 <Trash2 className="size-4" />
-                {invoiceModalTexts.delete}
+                {deleteLabel ?? invoiceModalTexts.delete}
               </button>
             ) : pendingPreview && !isLoading ? (
               <div className="flex gap-2.5">

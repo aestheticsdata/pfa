@@ -8,11 +8,13 @@ import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
 import useCategoryTrends from "@components/spendings/services/useCategoryTrends";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendings from "@components/spendings/services/useSpendings";
+import useSpendingsPageStore from "@components/spendings/stores/useSpendingsPageStore";
 import SpendingCategoryBreakdown from "@components/spendings/view/SpendingCategoryBreakdown";
 import SpendingCategoryFilter from "@components/spendings/view/SpendingCategoryFilter";
 import SpendingDayCard from "@components/spendings/view/SpendingDayCard";
 import SpendingSummary from "@components/spendings/view/SpendingSummary";
 import SpendingToolbar from "@components/spendings/view/SpendingToolbar";
+import SelectionBar from "@components/spendings/view/selection/SelectionBar";
 import { Button } from "@components/ui/button";
 import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
@@ -56,6 +58,8 @@ const SpendingView = () => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  // The floating "New spending" button gives way to the selection bar (PFA-189).
+  const isSelecting = useSpendingsPageStore((s) => s.selectingDays.length > 0);
 
   const { spendingsByWeek, isLoading } = useSpendings();
   const { get: dashboardQuery, remaining } = useDashboard();
@@ -250,16 +254,20 @@ const SpendingView = () => {
       )}
 
       {/* Floating action button — fixed bottom-right (design: .open-modal-btn) */}
-      <Button
-        type="button"
-        data-testid="new-spending"
-        variant="primary"
-        onClick={() => setIsQuickAddOpen(true)}
-        className="fixed bottom-6 right-6 z-30 shadow-float"
-      >
-        <Plus className="size-4" />
-        {spendings.view.newSpending}
-      </Button>
+      {!isSelecting && (
+        <Button
+          type="button"
+          data-testid="new-spending"
+          variant="primary"
+          onClick={() => setIsQuickAddOpen(true)}
+          className="fixed bottom-6 right-6 z-30 shadow-float"
+        >
+          <Plus className="size-4" />
+          {spendings.view.newSpending}
+        </Button>
+      )}
+
+      <SelectionBar />
 
       {isQuickAddOpen && (
         <SpendingModal

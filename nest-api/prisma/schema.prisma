@@ -1,8 +1,8 @@
 generator client {
-  provider             = "prisma-client"
-  output               = "../generated/prisma"
-  moduleFormat         = "cjs"
-  importFileExtension  = ""
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  moduleFormat        = "cjs"
+  importFileExtension = ""
 }
 
 datasource db {
@@ -10,10 +10,10 @@ datasource db {
 }
 
 model Categories {
-  ID        String     @id @db.Char(36)
-  userID    String?    @db.Char(36)
-  name      String     @db.VarChar(20)
-  color     String     @db.VarChar(20)
+  ID        String      @id @db.Char(36)
+  userID    String?     @db.Char(36)
+  name      String      @db.VarChar(20)
+  color     String      @db.VarChar(20)
   spendings Spendings[]
 }
 
@@ -39,20 +39,38 @@ model Recurrings {
 }
 
 model Spendings {
-  ID         String      @id @db.Char(36)
-  userID     String      @db.Char(36)
-  date       DateTime    @db.Date
-  itemType   String      @db.VarChar(11)
-  label      String      @db.VarChar(100)
-  amount     Decimal     @db.Decimal(6, 2)
-  categoryID String?     @db.Char(36)
-  currency   String?     @db.VarChar(3)
-  invoicefile String?    @db.VarChar(255)
-  category   Categories? @relation(fields: [categoryID], references: [ID])
+  ID          String          @id @db.Char(36)
+  userID      String          @db.Char(36)
+  date        DateTime        @db.Date
+  itemType    String          @db.VarChar(11)
+  label       String          @db.VarChar(100)
+  amount      Decimal         @db.Decimal(6, 2)
+  categoryID  String?         @db.Char(36)
+  currency    String?         @db.VarChar(3)
+  invoicefile String?         @db.VarChar(255)
+  // A line of a group (one receipt, several categories — PFA-189). `label`
+  // stays the composed "<group> — <detail>" so every reader of the table
+  // (stats, search, export, suggestions) keeps working unchanged.
+  groupID     String?         @db.Char(36)
+  detail      String?         @db.VarChar(100)
+  category    Categories?     @relation(fields: [categoryID], references: [ID])
+  group       SpendingGroups? @relation(fields: [groupID], references: [ID], onDelete: Cascade)
 
   // MySQL auto-creates this index with the FK constraint; declaring it (same
   // name) keeps `migrate diff` clean instead of reporting it as drift forever.
   @@index([categoryID], map: "Spendings_categoryID_fkey")
+  @@index([groupID], map: "Spendings_groupID_fkey")
+}
+
+// Several spendings bought on one receipt (PFA-189). The receipt itself is the
+// `invoicefile` shared by all the group's lines — there is no receipt table: a
+// file shared by N rows is a shared receipt, grouped or not.
+model SpendingGroups {
+  ID        String      @id @db.Char(36)
+  userID    String      @db.Char(36)
+  date      DateTime    @db.Date
+  label     String      @db.VarChar(100)
+  spendings Spendings[]
 }
 
 model Exceptionals {

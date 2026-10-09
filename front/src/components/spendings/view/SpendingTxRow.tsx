@@ -3,9 +3,14 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { IconButton } from "@components/shared/IconButton";
-import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
+import EntryReceiptModal from "@components/spendings/invoiceModal/EntryReceiptModal";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
+import useEntryRowState from "@components/spendings/view/hooks/useEntryRowState";
+import ReceiptMark from "@components/spendings/view/rows/ReceiptMark";
+import RowDeleteConfirm from "@components/spendings/view/rows/RowDeleteConfirm";
+import { rowStateClass, TX_ROW } from "@components/spendings/view/rows/rowClasses";
+import SelectBox from "@components/spendings/view/rows/SelectBox";
 import SpotlightVeil from "@components/spendings/view/SpotlightVeil";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
@@ -13,12 +18,15 @@ import { cn } from "@lib/utils";
 import { ImageIcon, Pencil, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 
+import type { SingleDayEntry } from "@components/spendings/interfaces/spendingGroupTypes";
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 interface SpendingTxRowProps {
-  spending: SpendingItem;
+  entry: SingleDayEntry;
+  /** The day card's day (yyyy-MM-dd) — selection is per card (PFA-189). */
+  dayIso: string;
   onEdit: (spending: SpendingItem) => void;
 }
 
@@ -27,7 +35,8 @@ interface SpendingTxRowProps {
  * (+ receipt indicator) · category tag · amount, with hover actions
  * (receipt / edit / delete) and an inline delete confirmation.
  */
-const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
+const SpendingTxRow = ({ entry, dayIso, onEdit }: SpendingTxRowProps) => {
+  const { spending } = entry;
   const { euro } = useFormat();
   const spendings = useTranslations("spendings");
   const { txRow, item } = spendings;
@@ -36,6 +45,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
   const { deleteSpending } = useSpendings();
   const isSpotlit = useDatePickerWrapperStore((state) => state.spotlightSpendingId === spending.ID);
   const rowRef = useRef<HTMLDivElement>(null);
+  const row = useEntryRowState(entry, dayIso);
 
   const color = spending.categoryColor || FALLBACK_COLOR;
   const category = spending.category ?? null;
@@ -47,40 +57,33 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
   };
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: a click anywhere on the row ticks it in selection mode; the tick itself is the keyboard path
     <div
       data-testid="tx-row"
       data-has-receipt={hasInvoice}
       data-spending-id={spending.ID}
+      data-selected={row.isSelected}
       ref={rowRef}
-      className="group relative grid grid-cols-[minmax(0,1fr)_auto_78px] items-center gap-3 border-t border-line-soft py-2.75 first:border-t-0 before:pointer-events-none before:absolute before:inset-x-0 before:inset-y-px before:z-0 before:rounded-lg before:transition-colors before:duration-100 before:content-[''] hover:before:bg-surface-hi max-md:grid-cols-[minmax(0,1fr)_auto] max-md:grid-rows-[auto_auto] max-md:gap-y-1.5"
+      onClick={row.isSelecting ? row.toggle : undefined}
+      onPointerEnter={row.onPointerEnter}
+      onPointerLeave={row.onPointerLeave}
+      className={cn(TX_ROW, rowStateClass(row))}
     >
       {confirming ? (
-        <div
-          className="relative z-10 col-span-full flex items-center gap-3 rounded-lg border border-danger-border-soft bg-danger-surface py-2 pl-3.75 pr-2.5 shadow-[0_6px_20px_oklch(0.3_0.16_25/0.28)]"
-          role="alertdialog"
-          aria-label={txRow.deleteAria}
-        >
-          <span className="flex-auto text-sm font-medium text-ink">{item.deleteConfirm}</span>
-          <span className="flex shrink-0 gap-2">
-            <button
-              type="button"
-              className="cursor-pointer rounded-md border border-line bg-surface-hi px-3.75 py-1.75 text-sm font-semibold text-ink-2 transition duration-100 hover:border-ink-4 hover:bg-surface-hover hover:text-ink"
-              onClick={() => setConfirming(false)}
-            >
-              {spendings.actions.cancel}
-            </button>
-            <button
-              type="button"
-              className="cursor-pointer rounded-md border border-danger-solid bg-danger-solid px-3.75 py-1.75 text-sm font-semibold text-on-danger transition duration-100 hover:brightness-[1.08]"
-              onClick={onConfirmDelete}
-            >
-              {spendings.actions.confirm}
-            </button>
-          </span>
-        </div>
+        <RowDeleteConfirm
+          message={item.deleteConfirm}
+          onCancel={() => setConfirming(false)}
+          onConfirm={onConfirmDelete}
+        />
       ) : (
         <>
           <span className="relative z-10 flex min-w-0 items-center gap-2.5 text-sm text-ink max-md:col-start-1 max-md:row-start-1 max-md:text-base">
+            {row.isSelecting && (
+              <SelectBox
+                checked={row.isSelected}
+                onToggle={row.toggle}
+              />
+            )}
             <span
               className="h-5.5 w-0.75 shrink-0 rounded-xs"
               style={{ background: color }}
@@ -91,15 +94,7 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             >
               {spending.label}
             </span>
-            {hasInvoice && (
-              <span
-                className="inline-flex shrink-0 text-ink-4"
-                role="img"
-                aria-label={txRow.receiptAttachedAria}
-              >
-                <ImageIcon className="size-3.5" />
-              </span>
-            )}
+            {hasInvoice && <ReceiptMark shareCount={row.shareCount} />}
           </span>
 
           <span className="relative z-10 justify-self-end max-md:col-start-1 max-md:row-start-2 max-md:justify-self-start">
@@ -118,49 +113,51 @@ const SpendingTxRow = ({ spending, onEdit }: SpendingTxRowProps) => {
             <span className="text-xs font-normal text-ink-3"> €</span>
           </span>
 
-          <span className="absolute right-22 top-1/2 z-20 hidden -translate-y-1/2 items-center gap-1.5 bg-[linear-gradient(90deg,transparent,var(--surface-hi)_26px)] pl-7.5 group-hover:flex max-md:static max-md:col-start-2 max-md:row-start-2 max-md:flex max-md:translate-y-0 max-md:justify-self-end max-md:bg-none max-md:p-0">
-            <IconButton
-              variant="bordered"
-              size={7}
-              data-testid="tx-receipt"
-              title={hasInvoice ? txRow.viewReceipt : txRow.addReceipt}
-              onClick={() => setInvoiceOpen(true)}
-              className={
-                hasInvoice
-                  ? "border-accent-strong bg-accent-strong text-[oklch(0.18_0.01_148)] hover:text-[oklch(0.18_0.01_148)] hover:brightness-[1.06]"
-                  : undefined
-              }
-            >
-              <ImageIcon />
-            </IconButton>
-            <IconButton
-              variant="bordered"
-              size={7}
-              data-testid="tx-edit"
-              title={item.actions.edit}
-              onClick={() => onEdit(spending)}
-            >
-              <Pencil />
-            </IconButton>
-            <IconButton
-              variant="danger"
-              size={7}
-              data-testid="tx-delete"
-              title={item.actions.delete}
-              onClick={() => setConfirming(true)}
-            >
-              <Trash2 />
-            </IconButton>
-          </span>
+          {!row.isSelecting && (
+            <span className="absolute right-22 top-1/2 z-20 hidden -translate-y-1/2 items-center gap-1.5 bg-[linear-gradient(90deg,transparent,var(--surface-hi)_26px)] pl-7.5 group-hover:flex max-md:static max-md:col-start-2 max-md:row-start-2 max-md:flex max-md:translate-y-0 max-md:justify-self-end max-md:bg-none max-md:p-0">
+              <IconButton
+                variant="bordered"
+                size={7}
+                data-testid="tx-receipt"
+                title={hasInvoice ? txRow.viewReceipt : txRow.addReceipt}
+                onClick={() => setInvoiceOpen(true)}
+                className={
+                  hasInvoice
+                    ? "border-accent-strong bg-accent-strong text-[oklch(0.18_0.01_148)] hover:text-[oklch(0.18_0.01_148)] hover:brightness-[1.06]"
+                    : undefined
+                }
+              >
+                <ImageIcon />
+              </IconButton>
+              <IconButton
+                variant="bordered"
+                size={7}
+                data-testid="tx-edit"
+                title={item.actions.edit}
+                onClick={() => onEdit(spending)}
+              >
+                <Pencil />
+              </IconButton>
+              <IconButton
+                variant="danger"
+                size={7}
+                data-testid="tx-delete"
+                title={item.actions.delete}
+                onClick={() => setConfirming(true)}
+              >
+                <Trash2 />
+              </IconButton>
+            </span>
+          )}
         </>
       )}
 
       {isSpotlit && <SpotlightVeil target={rowRef} />}
 
       {invoiceOpen && (
-        <InvoiceModal
-          handleClickOutside={() => setInvoiceOpen(false)}
-          spending={spending}
+        <EntryReceiptModal
+          entry={entry}
+          onClose={() => setInvoiceOpen(false)}
         />
       )}
     </div>

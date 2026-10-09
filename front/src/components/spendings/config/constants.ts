@@ -16,3 +16,17 @@ export const WEEKLY = "PERIOD_TYPE_WEEKLY";
 // a bare `string`, so a typo can no longer silently fall through to the weekly
 // branch (COS-107).
 export type PeriodType = typeof MONTHLY | typeof WEEKLY;
+
+// A row of a Spendings day card: a plain spending, or a group of lines bought on
+// one receipt (PFA-189).
+export const DAY_ENTRY_KIND = {
+  spending: "spending",
+  group: "group",
+} as const;
+
+// The spending modal's two shapes: one spending, or a group of lines sharing
+// one receipt (PFA-189).
+export const SPENDING_MODAL_MODE = {
+  single: "single",
+  group: "group",
+} as const;

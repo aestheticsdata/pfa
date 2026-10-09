@@ -209,6 +209,9 @@ const useSpendings = () => {
     spendingsByWeek,
     spendingsByMonth,
     isLoading: isPending,
+    // Shared with the group / shared-receipt mutations (PFA-189): same toast,
+    // same set of refreshed queries.
+    refreshAfterMutation: spendingsActionOnSuccess,
     deleteSpending,
     createSpending,
     updateSpending,

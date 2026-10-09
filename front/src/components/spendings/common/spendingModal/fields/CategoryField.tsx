@@ -1,13 +1,12 @@
 import { comboboxTriggerClass } from "@components/shared/comboboxTriggerClass";
 import { FieldShell } from "@components/shared/FieldShell";
 import { Overline } from "@components/shared/Overline";
+import CategoryCommand from "@components/spendings/common/spendingModal/fields/CategoryCommand";
 import { FALLBACK_COLOR, getRandomHexColor } from "@components/spendings/common/spendingModal/helpers";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 
 import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
 import type { Dispatch, SetStateAction } from "react";
@@ -37,8 +36,6 @@ const CategoryField = ({
 }: CategoryFieldProps) => {
   const spendings = useTranslations("spendings");
   const { modal: t } = spendings;
-
-  const exactMatch = categoryOptions.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());
 
   const onCreateCategory = (name: string) => {
     const newCategory: CategoryOption = {
@@ -114,71 +111,18 @@ const CategoryField = ({
           className="w-[--radix-popover-trigger-width] border-line bg-surface-elev p-0"
           align="start"
         >
-          <Command className="bg-transparent">
-            <CommandInput
-              data-testid="spending-category-search"
-              placeholder={t.category.searchPlaceholder}
-              value={comboboxQuery}
-              onValueChange={setComboboxQuery}
-              // Whatever is typed is committed as a category name — on selection
-              // or simply on close — and this combobox has no error slot, so the
-              // bound is enforced at the keystroke rather than reported after the
-              // fact (COS-180).
-              maxLength={FIELD_LIMITS.categoryName}
-              className="text-ink"
-            />
-            <CommandList>
-              <CommandEmpty>{t.category.commandEmpty}</CommandEmpty>
-              <CommandGroup>
-                {selectedCategory && (
-                  <CommandItem
-                    value="__none"
-                    onSelect={() => {
-                      setSelectedCategory(null);
-                      setComboboxQuery("");
-                      setComboboxOpen(false);
-                    }}
-                  >
-                    <span className="text-ink-4">{t.category.clearOption}</span>
-                  </CommandItem>
-                )}
-                {categoryOptions.map((category) => (
-                  <CommandItem
-                    key={category.ID ?? category.name}
-                    data-testid="spending-category-option"
-                    data-category={category.name}
-                    value={category.name}
-                    onSelect={() => {
-                      setSelectedCategory(category);
-                      setComboboxQuery("");
-                      setComboboxOpen(false);
-                    }}
-                  >
-                    <span
-                      className="mr-1 size-2.5 rounded-xs"
-                      style={{
-                        backgroundColor: category.color ?? FALLBACK_COLOR,
-                      }}
-                    />
-                    <span className="flex-1 capitalize">{category.name}</span>
-                    {selectedCategory?.ID === category.ID && <Check className="size-4 text-accent-strong" />}
-                  </CommandItem>
-                ))}
-                {comboboxQuery.trim() && !exactMatch && (
-                  // The typed value shown as a normal option — selecting
-                  // it (or just closing) uses it; it's persisted when the
-                  // spending is created. No explicit "create" step.
-                  <CommandItem
-                    value={`__new-${comboboxQuery.trim()}`}
-                    onSelect={() => onCreateCategory(comboboxQuery.trim())}
-                  >
-                    <span className="mr-1 size-2.5 rounded-xs bg-ink-4" />
-                    <span className="flex-1 capitalize">{comboboxQuery.trim()}</span>
-                  </CommandItem>
-                )}
-              </CommandGroup>
-            </CommandList>
-          </Command>
+          <CategoryCommand
+            categoryOptions={categoryOptions}
+            selectedCategory={selectedCategory}
+            query={comboboxQuery}
+            onQueryChange={setComboboxQuery}
+            onPick={(category) => {
+              setSelectedCategory(category);
+              setComboboxQuery("");
+              setComboboxOpen(false);
+            }}
+            onCreate={onCreateCategory}
+          />
         </PopoverContent>
       </Popover>
 

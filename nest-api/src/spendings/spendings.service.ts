@@ -1,14 +1,8 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
-import { access, unlink } from "fs/promises";
-import { constants } from "fs";
 import { readFile } from "fs/promises";
-import { resolve } from "path";
-import sharp from "sharp";
-import { AppConfig } from "@config/app.config";
-import { SshBackupService } from "@infrastructure/ssh-backup/ssh-backup.service";
-import { isValidImageFile } from "@spendings/upload/upload.config";
+import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
+import type { SpendingCategoryInput } from "@spendings/dto/spending-category-input.interface";
 import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
 import type { SpendingLabelSuggestion } from "@spendings/dto/spending-label-suggestion.interface";
 import { PrismaService } from "../prisma/prisma.service";
@@ -32,22 +26,10 @@ const LABEL_SUGGESTIONS_LIMIT = 3;
 
 @Injectable()
 export class SpendingsService {
-  private readonly logger = new Logger(SpendingsService.name);
-
   constructor(
     private readonly prisma: PrismaService,
-    private readonly configService: ConfigService,
-    private readonly sshBackup: SshBackupService,
+    private readonly receiptFiles: ReceiptFilesService,
   ) {}
-
-  private safePath(base: string, userID: string, filename: string): string {
-    const userDir = resolve(base, userID);
-    const filePath = resolve(userDir, filename);
-    if (!filePath.startsWith(userDir + "/")) {
-      throw new BadRequestException("Invalid file path");
-    }
-    return filePath;
-  }
 
   private async assertCategoryAccessible(categoryID: string, userID: string): Promise<void> {
     const category = await this.prisma.categories.findFirst({
@@ -68,12 +50,10 @@ export class SpendingsService {
     userID: string,
     itemType: string,
   ): Promise<{ data: string; contentType: string } | null> {
-    const invoicesPath = this.configService.getOrThrow<AppConfig>("app").invoicesPath;
-
     const invoicefile = await this.getInvoiceFileName(spendingID, userID, itemType);
     if (!invoicefile) return null;
 
-    const filePath = this.safePath(invoicesPath, userID, invoicefile);
+    const filePath = this.receiptFiles.safePath(userID, invoicefile);
     const imageFile = await readFile(filePath);
     const base64Image = imageFile.toString("base64");
     const ext = (invoicefile.split(".").pop() ?? "").toLowerCase();
@@ -109,23 +89,17 @@ export class SpendingsService {
     return null;
   }
 
-  async createSpending(
-    dto: {
-      date: string;
-      label: string;
-      amount: number;
-      category?: { ID?: string | null; name?: string; color?: string | null };
-      currency: string;
-    },
-    userID: string,
-  ): Promise<{ ID: string }> {
-    let categoryID: string | null = null;
-
-    const category = dto.category;
+  /**
+   * The category a new spending points at: an accessible existing one by ID, or
+   * one created on the fly from a typed name + colour (reused if the user
+   * already has that name). No category → null. Shared with group lines.
+   */
+  async resolveCategoryID(category: SpendingCategoryInput | undefined, userID: string): Promise<string | null> {
     if (category?.ID) {
       await this.assertCategoryAccessible(category.ID, userID);
-      categoryID = category.ID;
-    } else if (category?.ID === null && category?.color != null && category?.name) {
+      return category.ID;
+    }
+    if (category?.ID === null && category?.color != null && category?.name) {
       const existingCategory = await this.prisma.categories.findFirst({
         where: {
           userID,
@@ -133,20 +107,33 @@ export class SpendingsService {
         },
       });
       if (existingCategory) {
-        categoryID = existingCategory.ID;
-      } else {
-        const newCategoryID = randomUUID();
-        await this.prisma.categories.create({
-          data: {
-            ID: newCategoryID,
-            userID,
-            name: category.name,
-            color: category.color,
-          },
-        });
-        categoryID = newCategoryID;
+        return existingCategory.ID;
       }
+      const newCategoryID = randomUUID();
+      await this.prisma.categories.create({
+        data: {
+          ID: newCategoryID,
+          userID,
+          name: category.name,
+          color: category.color,
+        },
+      });
+      return newCategoryID;
     }
+    return null;
+  }
+
+  async createSpending(
+    dto: {
+      date: string;
+      label: string;
+      amount: number;
+      category?: SpendingCategoryInput;
+      currency: string;
+    },
+    userID: string,
+  ): Promise<{ ID: string }> {
+    const categoryID = await this.resolveCategoryID(dto.category, userID);
 
     const spendingID = randomUUID();
     await this.prisma.spendings.create({
@@ -173,7 +160,7 @@ export class SpendingsService {
     dto: {
       label: string;
       amount: number;
-      category?: { ID?: string | null; name?: string; color?: string | null };
+      category?: SpendingCategoryInput;
     },
   ): Promise<{ success: boolean }> {
     const categoryID = dto.category?.ID ?? null;
@@ -246,11 +233,14 @@ export class SpendingsService {
       orderBy: { date: "asc" },
       include: {
         category: true,
+        group: { select: { label: true } },
       },
     });
 
-    return results.map(({ category, ...spending }) => ({
+    return results.map(({ category, group, ...spending }) => ({
       ...spending,
+      // The front folds rows sharing a groupID into one collapsible row (PFA-189).
+      groupLabel: group?.label ?? null,
       category: category && (category.userID === userID || category.userID === null) ? category.name : null,
       categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
     }));
@@ -419,13 +409,25 @@ export class SpendingsService {
   }
 
   async deleteSpending(spendingID: string, userID: string): Promise<{ success: boolean }> {
-    const deleted = await this.prisma.spendings.deleteMany({
+    const spending = await this.prisma.spendings.findFirst({
       where: { ID: spendingID, userID },
+      select: { invoicefile: true, groupID: true },
     });
 
-    if (deleted.count === 0) {
+    if (!spending) {
       throw new NotFoundException("Spending not found");
     }
+
+    await this.prisma.spendings.deleteMany({
+      where: { ID: spendingID, userID },
+    });
+    if (spending.groupID) {
+      await this.prisma.spendingGroups.deleteMany({
+        where: { ID: spending.groupID, userID, spendings: { none: {} } },
+      });
+    }
+    // Other rows may still share the receipt (PFA-189): only an orphan goes.
+    await this.receiptFiles.release(userID, [spending.invoicefile]);
 
     return { success: true };
   }
@@ -436,14 +438,14 @@ export class SpendingsService {
     itemType: string,
     invoicefile: string,
   ): Promise<{ msg: string }> {
-    const invoicesPath = this.configService.getOrThrow<AppConfig>("app").invoicesPath;
-    const filePath = this.safePath(invoicesPath, userID, invoicefile);
-
-    await unlink(filePath);
+    // Rejects a traversal before anything is touched.
+    this.receiptFiles.safePath(userID, invoicefile);
 
     if (itemType === "spending") {
+      // A shared receipt is one receipt: deleting it from one spending deletes
+      // it from every spending (and group line) holding it (PFA-189).
       await this.prisma.spendings.updateMany({
-        where: { ID: spendingID, userID },
+        where: { userID, invoicefile },
         data: { invoicefile: null },
       });
     } else if (itemType === "exceptional") {
@@ -453,7 +455,7 @@ export class SpendingsService {
       });
     }
 
-    this.backupDelete(userID, invoicefile);
+    await this.receiptFiles.release(userID, [invoicefile]);
 
     return { msg: "INVOICE_IMAGE_DELETED" };
   }
@@ -465,69 +467,38 @@ export class SpendingsService {
     userID: string,
     itemType: string,
   ): Promise<{ data: string; contentType: string }> {
-    sharp.cache(false);
+    const storedFilename = await this.receiptFiles.store(filepath, filename, userID);
 
-    await access(filepath, constants.F_OK);
-
-    if (!(await isValidImageFile(filepath))) {
-      await unlink(filepath);
-      throw new BadRequestException("INVALID_IMAGE_FILE");
-    }
-
-    const imageMetadata = await sharp(filepath).metadata();
-    const biggerSide = (imageMetadata.width ?? 0) > (imageMetadata.height ?? 0) ? "width" : "height";
-    const biggerSideSize = biggerSide === "width" ? 1125 : 1500;
-
-    const parts = filepath.split(".");
-    const fileExtension = parts.pop() ?? "jpg";
-    const resizedPathAndFilename = parts.join(".") + "-r.";
-    const outputPath = resizedPathAndFilename + fileExtension;
-
-    await sharp(filepath)
-      .resize({
-        fit: sharp.fit.contain,
-        [biggerSide]: biggerSideSize,
-      })
-      .toFile(outputPath);
-
-    await unlink(filepath);
-
-    const resizedFilename = filename.slice(0, filename.search(/\./)) + "-r." + fileExtension;
-
+    let previous: string | null = null;
     if (itemType === "spending") {
-      await this.prisma.spendings.updateMany({
+      const row = await this.prisma.spendings.findFirst({
         where: { ID: spendingID, userID },
-        data: { invoicefile: resizedFilename },
+        select: { invoicefile: true },
+      });
+      previous = row?.invoicefile ?? null;
+      // Replacing a shared receipt replaces it for every row holding it (PFA-189).
+      await this.prisma.spendings.updateMany({
+        where: previous ? { userID, invoicefile: previous } : { ID: spendingID, userID },
+        data: { invoicefile: storedFilename },
       });
     } else if (itemType === "exceptional") {
+      const row = await this.prisma.exceptionals.findFirst({
+        where: { ID: spendingID, userID },
+        select: { invoicefile: true },
+      });
+      previous = row?.invoicefile ?? null;
       await this.prisma.exceptionals.updateMany({
         where: { ID: spendingID, userID },
-        data: { invoicefile: resizedFilename },
+        data: { invoicefile: storedFilename },
       });
     }
 
-    this.backupCopy(outputPath, userID, resizedFilename);
+    await this.receiptFiles.release(userID, [previous]);
 
     const result = await this.getInvoiceImage(spendingID, userID, itemType);
     if (!result) {
       throw new Error("Failed to read uploaded image");
     }
     return result;
-  }
-
-  private backupCopy(localPath: string, userID: string, filename: string): void {
-    if (!this.sshBackup.enabled) return;
-    const remotePath = `${this.sshBackup.backupInvoicesPath}${userID}/${filename}`;
-    this.sshBackup.copyFile(localPath, remotePath).catch((err: Error) => {
-      this.logger.error(`SSH backup copy failed for ${remotePath}: ${err.message}`);
-    });
-  }
-
-  private backupDelete(userID: string, filename: string): void {
-    if (!this.sshBackup.enabled) return;
-    const remotePath = `${this.sshBackup.backupInvoicesPath}${userID}/${filename}`;
-    this.sshBackup.deleteFile(remotePath).catch((err: Error) => {
-      this.logger.error(`SSH backup delete failed for ${remotePath}: ${err.message}`);
-    });
   }
 }

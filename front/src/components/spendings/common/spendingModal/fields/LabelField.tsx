@@ -1,6 +1,5 @@
 import { TextInput } from "@components/shared/TextInput";
 import { Label } from "@components/ui/label";
-import useTranslations from "@i18n/useTranslations";
 
 import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";
 import type { LabelSuggestion } from "@src/schemas/spendings";
@@ -16,7 +15,11 @@ interface LabelFieldProps {
    */
   error: string | undefined;
   clearErrors: UseFormClearErrors<SpendingForm>;
-  asRecurring: boolean;
+  /** Recurrings and groups (PFA-189) show no past-label chips. */
+  hideSuggestions: boolean;
+  /** Group mode names the field after the store instead (PFA-189). */
+  label: string;
+  placeholder: string;
   labelSuggestions: LabelSuggestion[];
   applySuggestion: (suggestion: LabelSuggestion) => void;
   setLabelQuery: Dispatch<SetStateAction<string>>;
@@ -31,14 +34,14 @@ const LabelField = ({
   register,
   error,
   clearErrors,
-  asRecurring,
+  hideSuggestions,
+  label,
+  placeholder,
   labelSuggestions,
   applySuggestion,
   setLabelQuery,
 }: LabelFieldProps) => {
-  const spendings = useTranslations("spendings");
-  // Suggestions are spending-specific, hidden for recurrings.
-  const suggestions = asRecurring ? [] : labelSuggestions;
+  const suggestions = hideSuggestions ? [] : labelSuggestions;
 
   return (
     <div className="flex flex-col gap-2">
@@ -51,7 +54,7 @@ const LabelField = ({
           htmlFor="spendingLabel"
           className="text-sm text-ink-2"
         >
-          {spendings.modal.fields.label}
+          {label}
         </Label>
         {error && (
           <p
@@ -66,7 +69,7 @@ const LabelField = ({
         <TextInput
           id="spendingLabel"
           data-testid="spending-label"
-          placeholder={spendings.modal.fields.labelPlaceholder}
+          placeholder={placeholder}
           className="dark:bg-surface-base"
           aria-invalid={!!error}
           aria-describedby={error ? "spendingLabel-error" : undefined}

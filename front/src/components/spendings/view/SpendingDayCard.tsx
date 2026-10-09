@@ -2,18 +2,24 @@
 
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
+import { DAY_ENTRY_KIND } from "@components/spendings/config/constants";
+import { buildDayEntries } from "@components/spendings/helpers/dayEntries";
 import overspendLevel from "@components/spendings/helpers/overspendLevel";
 import useSpendingDayItem from "@components/spendings/helpers/useSpendingDayItem";
+import useSpendingsPageStore from "@components/spendings/stores/useSpendingsPageStore";
 import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
 import useDaySort from "@components/spendings/view/helpers/useDaySort";
+import SpendingGroupRow from "@components/spendings/view/rows/SpendingGroupRow";
 import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
 import format from "date-fns/format";
-import { Plus } from "lucide-react";
+import { Plus, SquareCheckBig } from "lucide-react";
+import { useState } from "react";
 
+import type { GroupDayEntry } from "@components/spendings/interfaces/spendingGroupTypes";
 import type { SpendingItem, SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { DaySortField } from "@components/spendings/view/helpers/useDaySort";
 import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
@@ -90,9 +96,15 @@ const SpendingDayCard = ({
   const { euro } = useFormat();
   const spendings = useTranslations("spendings");
   const dateLocale = useDateLocale();
-  const { sortItem, dayCard } = spendings;
+  const { sortItem, dayCard, groups } = spendings;
   const { isModalVisible, addSpendingEnabled, spending, isEditing, addSpending, closeModal, editSpending } =
     useSpendingDayItem();
+
+  const dayIso = format(date, "yyyy-MM-dd");
+  // Groups (PFA-189): edited in the modal's group mode; selection is per card.
+  const [editingGroup, setEditingGroup] = useState<GroupDayEntry | null>(null);
+  const isSelecting = useSpendingsPageStore((s) => s.selectingDays.includes(dayIso));
+  const toggleDaySelection = useSpendingsPageStore((s) => s.toggleDaySelection);
 
   const query = search.trim().toLowerCase();
 
@@ -113,7 +125,8 @@ const SpendingDayCard = ({
     return true;
   });
 
-  const { field, dir, onSort, sorted } = useDaySort(filtered);
+  // A group shows the lines the filters keep, and sorts as one block.
+  const { field, dir, onSort, sorted } = useDaySort(buildDayEntries(filtered));
 
   const isFiltering = Boolean(selectedCategory) || query.length > 0;
   const displayTotal = isFiltering ? filtered.reduce((acc, s) => acc + Number(s.amount), 0) : total;
@@ -199,6 +212,24 @@ const SpendingDayCard = ({
             dir={dir}
             onSort={onSort}
           />
+          {items.length > 0 && (
+            <button
+              type="button"
+              data-testid="day-select"
+              aria-pressed={isSelecting}
+              title={isSelecting ? groups.selection.stop : groups.selection.start}
+              aria-label={isSelecting ? groups.selection.stop : groups.selection.start}
+              onClick={() => toggleDaySelection(dayIso)}
+              className={cn(
+                "ml-auto inline-flex cursor-pointer items-center rounded-md border px-2 py-1.5 transition duration-100",
+                isSelecting
+                  ? "border-accent-d bg-accent-bg text-accent-strong"
+                  : "border-line bg-surface-hi text-ink-4 hover:border-ink-4 hover:text-ink",
+              )}
+            >
+              <SquareCheckBig className="size-3.5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -225,13 +256,23 @@ const SpendingDayCard = ({
               </div>
             )}
             <div className="pfa-scroll-thin flex min-h-0 flex-auto flex-col overflow-y-auto pr-2">
-              {sorted.map((s) => (
-                <SpendingTxRow
-                  key={s.ID}
-                  spending={s}
-                  onEdit={editSpending as (s: SpendingItem) => void}
-                />
-              ))}
+              {sorted.map((entry) =>
+                entry.kind === DAY_ENTRY_KIND.group ? (
+                  <SpendingGroupRow
+                    key={entry.ID}
+                    entry={entry}
+                    dayIso={dayIso}
+                    onEdit={setEditingGroup}
+                  />
+                ) : (
+                  <SpendingTxRow
+                    key={entry.ID}
+                    entry={entry}
+                    dayIso={dayIso}
+                    onEdit={editSpending as (s: SpendingItem) => void}
+                  />
+                ),
+              )}
             </div>
           </>
         ) : (
@@ -240,9 +281,14 @@ const SpendingDayCard = ({
 
         <button
           type="button"
-          className="mt-2.5 flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-line p-2.75 text-xs text-ink-4 transition duration-100 enabled:hover:border-[oklch(0.82_0.12_175/0.6)] enabled:hover:bg-[linear-gradient(100deg,oklch(0.84_0.14_148/0.08)_0%,oklch(0.82_0.13_175/0.09)_55%,oklch(0.8_0.12_210/0.1)_100%)] enabled:hover:text-[oklch(0.87_0.06_178)] disabled:cursor-not-allowed disabled:opacity-50"
+          className={cn(
+            "mt-2.5 flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-line p-2.75 text-xs text-ink-4 transition duration-100 enabled:hover:border-[oklch(0.82_0.12_175/0.6)] enabled:hover:bg-[linear-gradient(100deg,oklch(0.84_0.14_148/0.08)_0%,oklch(0.82_0.13_175/0.09)_55%,oklch(0.8_0.12_210/0.1)_100%)] enabled:hover:text-[oklch(0.87_0.06_178)] disabled:cursor-not-allowed disabled:opacity-50",
+            // Dimmed and inert while the card selects rows (PFA-189).
+            isSelecting && "pointer-events-none opacity-35",
+          )}
           onClick={addSpending}
           disabled={!addSpendingEnabled}
+          tabIndex={isSelecting ? -1 : undefined}
         >
           <Plus className="size-3" />
           {dayCard.addSpending}
@@ -263,6 +309,17 @@ const SpendingDayCard = ({
           spending={spending as SpendingListItem | null}
           isEditing={isEditing}
           month={month}
+        />
+      )}
+
+      {editingGroup && (
+        <SpendingModal
+          date={date}
+          closeModal={() => setEditingGroup(null)}
+          spending={null}
+          isEditing
+          month={month}
+          group={editingGroup}
         />
       )}
     </div>

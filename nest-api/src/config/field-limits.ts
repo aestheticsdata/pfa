@@ -10,6 +10,13 @@
 export const FIELD_LIMITS = {
   /** `Spendings.label` and `Recurrings.label` — same width. */
   label: 100,
+  /**
+   * A group's store/name and a group line's detail (PFA-189). Each line's
+   * `label` is composed as "<group> — <detail>" and must fit `label`:
+   * 40 + 3 + 57 = 100.
+   */
+  groupLabel: 40,
+  groupDetail: 57,
   /** `Exceptionals.description`. */
   description: 255,
   /** `Categories.name` — the categories the spendings reference. */

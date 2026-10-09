@@ -11,6 +11,12 @@
 export const FIELD_LIMITS = {
   /** `Spendings.label` and `Recurrings.label` — the spending modal's label. */
   label: 100,
+  /**
+   * A group's store/name and a line's detail (PFA-189): the line is stored as
+   * "<group> — <detail>" in `Spendings.label` — 40 + 3 + 57 = 100.
+   */
+  groupLabel: 40,
+  groupDetail: 57,
   /** `Exceptionals.description`. */
   description: 255,
   /** `Categories.name` — the categories the spendings reference. */
