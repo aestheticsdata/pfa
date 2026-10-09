@@ -36,7 +36,7 @@ const useDatePickerState = () => {
   // Escape) — the hook only holds the state it drives (COS-161).
   const closeCalendar = () => setIsCalendarVisible(false);
 
-  /** A deliberate week pick from the calendar (the only caller). */
+  /** A deliberate week pick, from the calendar or the ‹ › arrows. */
   const handleDayChange = (date: Date) => {
     const dateISO = formatIsoDate(date);
     // Supersedes any pending "scroll to a day" request — e.g. a "Today" scroll
@@ -52,6 +52,9 @@ const useDatePickerState = () => {
       setDateInUrl(dateISO, { history: "push" });
     }
     setWeek(date);
+    // Back to the top so the new week reads from its first day card, not from
+    // wherever the previous week was scrolled to (PFA-200).
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
     closeCalendar();
   };
