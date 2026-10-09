@@ -11,6 +11,8 @@ interface BatchModalProps {
   title: string;
   submitLabel: string;
   submitDisabled?: boolean;
+  /** Restyles the submit, e.g. to match the bar action that opened the modal (PFA-198). */
+  submitClassName?: string;
   testId: string;
   /** Returns false to keep the modal open (validation failed). */
   onSubmit: () => boolean;
@@ -19,7 +21,16 @@ interface BatchModalProps {
 }
 
 /** Shell of the "Group N spendings" and "Shared receipt" modals (PFA-189). */
-const BatchModal = ({ title, submitLabel, submitDisabled, testId, onSubmit, onClose, children }: BatchModalProps) => {
+const BatchModal = ({
+  title,
+  submitLabel,
+  submitDisabled,
+  submitClassName,
+  testId,
+  onSubmit,
+  onClose,
+  children,
+}: BatchModalProps) => {
   const spendings = useTranslations("spendings");
   const [open, setOpen] = useState(true);
   const close = () => {
@@ -53,6 +64,7 @@ const BatchModal = ({ title, submitLabel, submitDisabled, testId, onSubmit, onCl
             variant="primary"
             data-testid={`${testId}-submit`}
             disabled={submitDisabled}
+            className={submitClassName}
             onClick={() => {
               if (onSubmit()) close();
             }}

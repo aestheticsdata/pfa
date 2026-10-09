@@ -87,12 +87,11 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
             {/* Same grid and pill position as a plain spending (PFA-192): the
                 count after the name is the fold toggle, not a left chevron. */}
             <span className="relative z-10 flex min-w-0 items-center gap-2.5 text-sm text-ink max-md:col-start-1 max-md:row-start-1 max-md:text-base">
-              {row.isSelecting && (
-                <SelectBox
-                  checked={row.isSelected}
-                  onToggle={row.toggle}
-                />
-              )}
+              <SelectBox
+                isVisible={row.isSelecting}
+                checked={row.isSelected}
+                onToggle={row.toggle}
+              />
               <span
                 className="h-5.5 w-0.75 shrink-0 rounded-xs"
                 style={{ background: entryPill(entry) }}
