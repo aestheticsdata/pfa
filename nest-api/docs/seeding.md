@@ -23,6 +23,7 @@ It is meant to be run **repeatedly** to keep the account topped up to today.
 ```bash
 pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wipe]
 pnpm seed -- --top-up [--to <YYYY-MM-DD>]
+pnpm seed -- --add-groups [--from <YYYY-MM-DD>] [--to <YYYY-MM-DD>]
 ```
 
 > The `--` is required so pnpm forwards the flags to the script.
@@ -33,6 +34,7 @@ pnpm seed -- --top-up [--to <YYYY-MM-DD>]
 | `--to`   | no       | End date, inclusive. Defaults to **today**.                        |
 | `--wipe` | no       | Destructive rebuild — see below. Omit it for safe append mode.     |
 | `--top-up` | no     | Start the day after the account's last spending — see below.       |
+| `--add-groups` | no | Add groups and shared receipts to the spendings already there — see below. |
 
 Bad or missing arguments print the usage and exit without touching the database.
 
@@ -68,6 +70,41 @@ pre-existing *real* exceptionals are preserved.
 
 ⚠️ `--wipe` clears the **entire** account dataset, not just the range. If you
 pass a narrow range with `--wipe`, the account ends up holding only that range.
+
+## Groups and shared receipts
+
+Every seeding run (`--from`, `--top-up`, `--wipe`) then passes over the spendings
+it just generated (`scripts/seed-groups.ts`) and, without adding any money:
+
+- **groups** (PFA-189): on some days, 2–4 of the day's spendings whose
+  categories fit a store run — *City Supermarket*, *Department Store*,
+  *Pharmacy*, *Sports Store*, *Amazon* — become one group, labelled
+  `<store> — <detail>`. Most groups get a receipt;
+- **shared receipts**: on some other days, two plain spendings get one receipt.
+
+Monthly totals are exactly the same as without the pass. The pass is seeded
+with a fixed value, so it is reproducible for the same spendings.
+
+Receipts are real JPEG files, drawn as a paper receipt (store, date, lines,
+total) by `scripts/seed-receipts.ts` into the account's invoices folder
+(`PFA_INVOICES_IMAGES_PATH`, else `nest-api/invoicesUpload/`), named
+`seed-receipt-<hex>-r.jpg`. They are local only: the seeder does not copy them
+to the backup server.
+
+### `--add-groups` (decorate what is already there)
+
+For an account seeded before the pass existed. No spending is added: the pass
+runs on the spendings the account already holds — the whole history, or the
+`--from`/`--to` window. It only touches plain rows (no group, no receipt) on
+days that hold no group or receipt yet, so running it twice does not stack a
+second group on a day. Not combinable with `--wipe` or `--top-up`.
+
+```bash
+pnpm seed -- --add-groups
+```
+
+`--wipe` also deletes the receipt files this seeder drew — only the
+`seed-receipt-*` ones, never a receipt uploaded through the app.
 
 ## Examples
 

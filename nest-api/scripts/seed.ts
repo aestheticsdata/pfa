@@ -12,6 +12,7 @@
  *
  *   pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wipe]
  *   pnpm seed -- --top-up [--to <YYYY-MM-DD>]
+ *   pnpm seed -- --add-groups [--from <YYYY-MM-DD>] [--to <YYYY-MM-DD>]
  *
  *   • default (append)  — nothing is deleted. Budgets/recurrings are created
  *     only for months that don't already have them (so monthly totals stay
@@ -24,6 +25,10 @@
  *     spending, read from the database: the date the guide used to ask for by
  *     hand. A no-op when the account is already up to date, so it is safe to
  *     run before every demo take (front/e2e/demo/demo.setup.ts does).
+ *
+ *   • --add-groups      — no new spending: regroups some of the account's existing
+ *     spendings into groups and gives some others a shared receipt (PFA-194).
+ *     Every seeding run does the same on the spendings it generates.
  *
  *   --to defaults to today when omitted.
  *
@@ -53,6 +58,10 @@ loadEnv();
 
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client";
+import { decorate } from "./seed-groups";
+import { wipeSeedReceipts, writeReceipts } from "./seed-receipts";
+
+import type { Decoration, SeedSpending } from "./seed-groups";
 
 function makePrisma(): PrismaClient {
   const parsed = new URL(process.env.DATABASE_URL as string);
@@ -95,6 +104,7 @@ class UsageError extends Error {}
 
 const USAGE = `Usage: pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wipe]
        pnpm seed -- --top-up [--to <YYYY-MM-DD>]
+       pnpm seed -- --add-groups [--from <YYYY-MM-DD>] [--to <YYYY-MM-DD>]
 
   --from <YYYY-MM-DD>   Start date (inclusive). Required, unless --top-up.
   --to   <YYYY-MM-DD>   End date (inclusive). Defaults to today.
@@ -105,11 +115,16 @@ const USAGE = `Usage: pnpm seed -- --from <YYYY-MM-DD> [--to <YYYY-MM-DD>] [--wi
   --top-up              Append from the day after the account's last spending,
                         read from the database. Nothing to do when it is already
                         up to date. Not with --from or --wipe.
+  --add-groups          Add no spending: regroup some existing spendings into
+                        groups (one receipt, several categories) and give some
+                        others a shared receipt. Whole history unless --from/--to.
+                        Totals do not move. Not with --wipe or --top-up.
 
 Examples:
   pnpm seed -- --wipe --from 2023-01-01            # full rebuild up to today
   pnpm seed -- --top-up                            # top up since the last run
-  pnpm seed -- --from 2025-01-01 --to 2025-03-31   # backfill a window, non-destructive`;
+  pnpm seed -- --from 2025-01-01 --to 2025-03-31   # backfill a window, non-destructive
+  pnpm seed -- --add-groups                        # groups + shared receipts on what exists`;
 
 /** Comparable ordinal for a calendar day (m is 0-based). */
 const ord = (y: number, m: number, d: number): number => y * 10000 + m * 100 + d;
@@ -146,6 +161,8 @@ interface Options {
   to: Ymd;
   wipe: boolean;
   topUp: boolean;
+  /** Decorate the existing spendings only (PFA-194); `from` null = the whole history. */
+  addGroups: boolean;
 }
 
 function parseArgs(argv: string[]): Options {
@@ -153,6 +170,7 @@ function parseArgs(argv: string[]): Options {
   let toStr: string | undefined;
   let wipe = false;
   let topUp = false;
+  let addGroups = false;
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     const eq = a.indexOf("=");
@@ -168,6 +186,9 @@ function parseArgs(argv: string[]): Options {
       case "--top-up":
         topUp = true;
         break;
+      case "--add-groups":
+        addGroups = true;
+        break;
       case "--from":
         fromStr = nextVal();
         break;
@@ -182,17 +203,25 @@ function parseArgs(argv: string[]): Options {
     }
   }
   const to = toStr ? parseDate(toStr) : todayYmd();
+  if (addGroups) {
+    if (wipe || topUp) throw new UsageError("--add-groups only decorates what exists: not with --wipe or --top-up.");
+    const from = fromStr ? parseDate(fromStr) : null;
+    if (from && ord(from.y, from.m, from.d) > ord(to.y, to.m, to.d)) {
+      throw new UsageError(`--from (${fromStr}) is after --to (${toStr ?? "today"}).`);
+    }
+    return { from, to, wipe, topUp, addGroups };
+  }
   if (topUp) {
     if (fromStr) throw new UsageError("--top-up works out its own start: drop --from.");
     if (wipe) throw new UsageError("--top-up appends: it cannot --wipe.");
-    return { from: null, to, wipe, topUp };
+    return { from: null, to, wipe, topUp, addGroups };
   }
   if (!fromStr) throw new UsageError("Missing required --from.");
   const from = parseDate(fromStr);
   if (ord(from.y, from.m, from.d) > ord(to.y, to.m, to.d)) {
     throw new UsageError(`--from (${fromStr}) is after --to (${toStr ?? "today"}).`);
   }
-  return { from, to, wipe, topUp };
+  return { from, to, wipe, topUp, addGroups };
 }
 
 // --------------------------------------------------------------------------
@@ -717,14 +746,66 @@ async function wipeAll(prisma: PrismaClient): Promise<void> {
   const e = await prisma.exceptionals.deleteMany({
     where: { userID: USER_ID, label: { in: [...EXCEPTIONALS.map((x) => x.label), ...FORMER_EXCEPTIONAL_LABELS] } },
   });
+  // Receipt pictures this seeder drew (PFA-194) — matched by their prefix, nothing else.
+  const files = await wipeSeedReceipts(USER_ID);
   console.log(
     `  wiped: spendings=${s.count} recurrings=${r.count} dashboards=${d.count} categories=${c.count} ` +
-      `seededExceptionals=${e.count} (real exceptionals kept)`,
+      `seededExceptionals=${e.count} (real exceptionals kept) seededReceipts=${files}`,
   );
 }
 
 const chunk = <T>(a: T[], n: number): T[][] =>
   Array.from({ length: Math.ceil(a.length / n) }, (_, i) => a.slice(i * n, i * n + n));
+
+// --------------------------------------------------------------------------
+// Groups & shared receipts (PFA-194)
+// --------------------------------------------------------------------------
+const categoryNameByID = new Map(CATS.map((c) => [c.id, c.name]));
+/** Fixed seed: a decoration pass is reproducible for the same set of spendings. */
+const DECORATE_SEED = 0x5eed9;
+
+function decorateSpendings(spendings: SeedSpending[]): Decoration {
+  reseed(DECORATE_SEED);
+  return decorate(spendings, {
+    random: rand,
+    categoryName: (id) => (id ? categoryNameByID.get(id) : undefined),
+  });
+}
+
+/**
+ * --add-groups: decorates the spendings already in the account. Only plain rows (no group,
+ * no receipt) on days that hold no group or receipt yet, so a second run never stacks a
+ * second group on a day.
+ */
+async function addGroupsToExisting(prisma: PrismaClient, from: Ymd | null, to: Ymd): Promise<void> {
+  const rows = await prisma.spendings.findMany({
+    where: {
+      userID: USER_ID,
+      date: { ...(from ? { gte: utc(from.y, from.m, from.d) } : {}), lte: utc(to.y, to.m, to.d) },
+    },
+    select: { ID: true, date: true, label: true, amount: true, categoryID: true, groupID: true, invoicefile: true },
+    orderBy: [{ date: "asc" }, { ID: "asc" }],
+  });
+  const taken = new Set(
+    rows.filter((r) => r.groupID || r.invoicefile).map((r) => (r.date as Date).toISOString().slice(0, 10)),
+  );
+  const candidates: SeedSpending[] = rows
+    .filter((r) => !taken.has((r.date as Date).toISOString().slice(0, 10)))
+    .map((r) => ({ ID: r.ID, date: r.date as Date, label: r.label, amount: Number(r.amount), categoryID: r.categoryID }));
+
+  const { groups, updates, receipts } = decorateSpendings(candidates);
+  console.log(`Decorating: groups=${groups.length} regrouped/receipt rows=${updates.length} receipts=${receipts.length}`);
+
+  if (groups.length) {
+    await prisma.spendingGroups.createMany({ data: groups.map((g) => ({ ...g, userID: USER_ID })) });
+  }
+  for (const c of chunk(updates, 200)) {
+    await prisma.$transaction(
+      c.map(({ ID, ...data }) => prisma.spendings.update({ where: { ID }, data })),
+    );
+  }
+  await writeReceipts(USER_ID, receipts);
+}
 
 // --------------------------------------------------------------------------
 // Verification (range-agnostic all-time summary)
@@ -745,6 +826,8 @@ async function verify(prisma: PrismaClient): Promise<void> {
     recurrings: await prisma.recurrings.count({ where: { userID: USER_ID } }),
     spendings: await prisma.spendings.count({ where: { userID: USER_ID } }),
     exceptionals: await prisma.exceptionals.count({ where: { userID: USER_ID } }),
+    groups: await prisma.spendingGroups.count({ where: { userID: USER_ID } }),
+    spendingsWithReceipt: await prisma.spendings.count({ where: { userID: USER_ID, invoicefile: { not: null } } }),
   };
   console.log("All-time counts:", counts);
 }
@@ -770,6 +853,17 @@ async function main(): Promise<void> {
   try {
     await resolveUser(prisma);
 
+    if (opts.addGroups) {
+      console.log(
+        `Adding groups and shared receipts to ${USER_EMAIL} (${USER_ID}), ` +
+          `range ${opts.from ? fmt(opts.from) : "all history"} → ${fmt(to)}`,
+      );
+      await addGroupsToExisting(prisma, opts.from, to);
+      await verify(prisma);
+      console.log("\nDone.");
+      return;
+    }
+
     // --top-up leaves `from` to the database; up to date already, there is nothing to do.
     const from = opts.from ?? (await topUpFrom(prisma, to));
     if (!from) return;
@@ -791,14 +885,33 @@ async function main(): Promise<void> {
         `recurrings=${recurringRows.length} spendings=${spendingRows.length} exceptionals=${exceptionalRows.length}`,
     );
 
+    // Groups and shared receipts on the fresh spendings (PFA-194): regrouping, no new money.
+    const { groups, updates, receipts } = decorateSpendings(
+      spendingRows.map((r) => ({
+        ID: r.ID as string,
+        date: r.date as Date,
+        label: r.label as string,
+        amount: r.amount as number,
+        categoryID: r.categoryID as string | null,
+      })),
+    );
+    const updateByID = new Map(updates.map((u) => [u.ID, u]));
+    for (const row of spendingRows) Object.assign(row, updateByID.get(row.ID as string) ?? {});
+    console.log(`Decorated: groups=${groups.length} receipts=${receipts.length}`);
+
     console.log("Inserting...");
     if (categoryRows.length) await prisma.categories.createMany({ data: categoryRows as never });
     if (dashboardRows.length) await prisma.dashboards.createMany({ data: dashboardRows as never });
     if (recurringRows.length) await prisma.recurrings.createMany({ data: recurringRows as never });
     if (exceptionalRows.length) await prisma.exceptionals.createMany({ data: exceptionalRows as never });
+    // Groups before their lines: Spendings.groupID references them.
+    if (groups.length) {
+      await prisma.spendingGroups.createMany({ data: groups.map((g) => ({ ...g, userID: USER_ID })) });
+    }
     for (const c of chunk(spendingRows, 500)) {
       await prisma.spendings.createMany({ data: c as never });
     }
+    await writeReceipts(USER_ID, receipts);
 
     await verify(prisma);
     console.log("\nDone.");
