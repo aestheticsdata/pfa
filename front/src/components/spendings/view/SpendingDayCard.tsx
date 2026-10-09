@@ -255,7 +255,7 @@ const SpendingDayCard = ({
                 ))}
               </div>
             )}
-            <div className="pfa-scroll-thin flex min-h-0 flex-auto flex-col overflow-y-auto pr-2">
+            <div className="pfa-scroll-thin -ml-2 flex min-h-0 flex-auto flex-col overflow-y-auto pl-2 pr-2">
               {sorted.map((entry) =>
                 entry.kind === DAY_ENTRY_KIND.group ? (
                   <SpendingGroupRow

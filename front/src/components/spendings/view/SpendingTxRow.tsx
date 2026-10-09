@@ -8,7 +8,7 @@ import useSpendings from "@components/spendings/services/useSpendings";
 import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
 import useEntryRowState from "@components/spendings/view/hooks/useEntryRowState";
 import ReceiptMark from "@components/spendings/view/rows/ReceiptMark";
-import RowDeleteConfirm from "@components/spendings/view/rows/RowDeleteConfirm";
+import RowConfirm from "@components/spendings/view/rows/RowConfirm";
 import { rowStateClass, TX_ROW } from "@components/spendings/view/rows/rowClasses";
 import SelectBox from "@components/spendings/view/rows/SelectBox";
 import SpotlightVeil from "@components/spendings/view/SpotlightVeil";
@@ -70,7 +70,7 @@ const SpendingTxRow = ({ entry, dayIso, onEdit }: SpendingTxRowProps) => {
       className={cn(TX_ROW, rowStateClass(row))}
     >
       {confirming ? (
-        <RowDeleteConfirm
+        <RowConfirm
           message={item.deleteConfirm}
           onCancel={() => setConfirming(false)}
           onConfirm={onConfirmDelete}
