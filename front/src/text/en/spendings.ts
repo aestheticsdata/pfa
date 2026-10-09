@@ -216,7 +216,6 @@ const spendings: typeof frSpendings = {
     selection: {
       start: "Select spendings",
       selectRow: "Select",
-      button: "Group",
       stop: "Finish selecting",
       selected: (_count: number) => "selected",
       atLeastTwo: "Select at least 2",

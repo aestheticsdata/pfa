@@ -43,3 +43,9 @@ export const GROUP_ROW_ACTION = {
   delete: "delete",
   ungroup: "ungroup",
 } as const;
+
+// The batch dialogs opened from a day card's selection bar (PFA-189, PFA-197).
+export const BATCH_MODAL = {
+  merge: "merge",
+  share: "share",
+} as const;

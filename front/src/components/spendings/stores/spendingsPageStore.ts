@@ -7,7 +7,8 @@ const withoutDay = (selected: Record<string, string>, dayIso: string) =>
 
 /**
  * One store per Spendings page (PFA-189): multi-selection across day cards,
- * the shared-receipt hover highlight and the post-grouping flash. Leaving the
+ * the batch dialog it opens, the shared-receipt hover highlight and the
+ * post-grouping flash. Leaving the
  * page drops it with the provider, so no selection outlives the page.
  */
 export const createSpendingsPageStore = () =>
@@ -16,6 +17,7 @@ export const createSpendingsPageStore = () =>
     selected: {},
     hoveredReceipt: null,
     flashEntryID: null,
+    batchModal: null,
     toggleDaySelection: (dayIso) =>
       set((state) =>
         state.selectingDays.includes(dayIso)
@@ -37,4 +39,5 @@ export const createSpendingsPageStore = () =>
     exitSelection: () => set({ selectingDays: [], selected: {} }),
     setHoveredReceipt: (invoicefile) => set({ hoveredReceipt: invoicefile }),
     flashEntry: (entryID) => set({ flashEntryID: entryID }),
+    openBatchModal: (kind) => set({ batchModal: kind }),
   }));

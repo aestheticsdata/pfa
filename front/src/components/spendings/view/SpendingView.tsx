@@ -14,7 +14,7 @@ import SpendingCategoryFilter from "@components/spendings/view/SpendingCategoryF
 import SpendingDayCard from "@components/spendings/view/SpendingDayCard";
 import SpendingSummary from "@components/spendings/view/SpendingSummary";
 import SpendingToolbar from "@components/spendings/view/SpendingToolbar";
-import SelectionBar from "@components/spendings/view/selection/SelectionBar";
+import SelectionModals from "@components/spendings/view/selection/SelectionModals";
 import { Button } from "@components/ui/button";
 import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
@@ -267,7 +267,7 @@ const SpendingView = () => {
         </Button>
       )}
 
-      <SelectionBar />
+      <SelectionModals />
 
       {isQuickAddOpen && (
         <SpendingModal

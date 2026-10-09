@@ -11,6 +11,7 @@ import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
 import useDaySort from "@components/spendings/view/helpers/useDaySort";
 import SpendingGroupRow from "@components/spendings/view/rows/SpendingGroupRow";
 import SpendingTxRow from "@components/spendings/view/SpendingTxRow";
+import DaySelectionBar from "@components/spendings/view/selection/DaySelectionBar";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
@@ -217,18 +218,18 @@ const SpendingDayCard = ({
               type="button"
               data-testid="day-select"
               aria-pressed={isSelecting}
+              aria-label={groups.selection.start}
               title={isSelecting ? groups.selection.stop : groups.selection.start}
               onClick={() => toggleDaySelection(dayIso)}
-              // Styled like the sort buttons beside it, now that it carries a word (PFA-195).
+              // Icon only, so it no longer reads like the "Group" action (PFA-197).
               className={cn(
-                "ml-auto inline-flex cursor-pointer items-center gap-1.5 rounded-md border px-2.75 py-1.5 text-xs transition duration-100",
+                "ml-auto grid size-8 cursor-pointer place-items-center rounded-md border transition duration-100",
                 isSelecting
                   ? "border-accent-d bg-accent-bg text-accent-strong"
-                  : "border-line bg-surface-hi text-ink-2 hover:border-ink-4 hover:text-ink",
+                  : "border-line bg-surface-hi text-ink-4 hover:border-ink-4 hover:text-ink",
               )}
             >
               <SquareCheckBig className="size-3.5" />
-              {groups.selection.button}
             </button>
           )}
         </div>
@@ -280,20 +281,25 @@ const SpendingDayCard = ({
           <div className="grid min-h-0 flex-auto place-items-center text-sm text-ink-4">{emptyLabel}</div>
         )}
 
-        <button
-          type="button"
-          className={cn(
-            "mt-2.5 flex shrink-0 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-line p-2.75 text-xs text-ink-4 transition duration-100 enabled:hover:border-[oklch(0.82_0.12_175/0.6)] enabled:hover:bg-[linear-gradient(100deg,oklch(0.84_0.14_148/0.08)_0%,oklch(0.82_0.13_175/0.09)_55%,oklch(0.8_0.12_210/0.1)_100%)] enabled:hover:text-[oklch(0.87_0.06_178)] disabled:cursor-not-allowed disabled:opacity-50",
-            // Dimmed and inert while the card selects rows (PFA-189).
-            isSelecting && "pointer-events-none opacity-35",
-          )}
-          onClick={addSpending}
-          disabled={!addSpendingEnabled}
-          tabIndex={isSelecting ? -1 : undefined}
-        >
-          <Plus className="size-3" />
-          {dayCard.addSpending}
-        </button>
+        {/* While the card selects, its action bar lies over the "Add" row, which
+            stays (invisible) to hold the card's height (PFA-197). */}
+        <div className="relative mt-2.5 shrink-0">
+          <button
+            type="button"
+            className={cn(
+              "flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-dashed border-line p-2.75 text-xs text-ink-4 transition duration-100 enabled:hover:border-[oklch(0.82_0.12_175/0.6)] enabled:hover:bg-[linear-gradient(100deg,oklch(0.84_0.14_148/0.08)_0%,oklch(0.82_0.13_175/0.09)_55%,oklch(0.8_0.12_210/0.1)_100%)] enabled:hover:text-[oklch(0.87_0.06_178)] disabled:cursor-not-allowed disabled:opacity-50",
+              isSelecting && "invisible",
+            )}
+            onClick={addSpending}
+            disabled={!addSpendingEnabled}
+            tabIndex={isSelecting ? -1 : undefined}
+            aria-hidden={isSelecting || undefined}
+          >
+            <Plus className="size-3" />
+            {dayCard.addSpending}
+          </button>
+          {isSelecting && <DaySelectionBar />}
+        </div>
       </div>
 
       {isToday && dailyBudget != null && (
