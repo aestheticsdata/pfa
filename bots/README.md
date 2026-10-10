@@ -4,7 +4,7 @@ Bots that use PFA like real people, and the back-office that drives them.
 
 ```
 bots/
-  runner/      the bot engine (PFA-124): generic core + PFA adapter, control API on 127.0.0.1:7201
+  runner/      the bot engine (PFA-124): generic core + PFA adapter, control API on 127.0.0.1:7300
   nest-api/    back-office API (PFA-127): auth, apps, runner proxy, incidents, push — 127.0.0.1:7200
   front/       back-office front (PFA-127): Next 16.4 — 127.0.0.1:3014, the only part nginx routes
   deploy/nginx/ the bots.1991computer.com vhost
@@ -44,7 +44,7 @@ cd bots/front && pnpm install && pnpm dev                                    # h
 ## Deploy (ks-b)
 
 One script per part, same shape as pfa's, folio's and Zeus's (release folder, switch with backup,
-pm2 reload, automatic rollback, changelog, report to Zeus as app `bots`). Each refuses to run unless
+pm2 reload, automatic rollback, changelog, report to Zeus under each pm2 name). Each refuses to run unless
 the tree is clean and `HEAD` is `origin/master`.
 
 ```bash
@@ -63,4 +63,4 @@ token pair), the front last.
 On ks-b, `/var/www/bots` holds `nest-api/`, `runner/`, `public_html/` (the front), `state/`,
 `deploy-logs/`, `ecosystem.config.cjs`, `runner.ecosystem.config.cjs` and `apps.json`. First install,
 once: the `bots` database and user, the certificate and the vhost (`deploy/nginx/bots.conf`),
-`SYNTHETIC_ADMIN_TOKEN` in PFA's own env, and the `bots` row in Zeus's registry.
+`SYNTHETIC_ADMIN_TOKEN` in PFA's own env, and the `bots-nest-api`, `bots-front` and `bots-runner` apps in Zeus's registry.

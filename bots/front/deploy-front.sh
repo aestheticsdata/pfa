@@ -39,8 +39,9 @@ CONTRACTS_DIR="$SCRIPT_DIR/../nest-api/src/contracts"
 ######################################
 # Reporting to Zeus (COS-459)
 ######################################
-# The back-office's slug in Zeus's port registry, and which part of it this script deploys.
-ZEUS_APP_NAME="${ZEUS_APP_NAME:-bots}"
+# This part's slug in Zeus's port registry — the stack is three apps named after their pm2 processes
+# (bots-nest-api, bots-front, bots-runner), so the fleet board can tell them apart — and its role.
+ZEUS_APP_NAME="${ZEUS_APP_NAME:-bots-front}"
 ZEUS_ROLE="front"
 
 # **Zeus's** own files on ks-b, as pfa's scripts read them: nothing in the back-office sends Zeus
