@@ -9,6 +9,8 @@ export class RateLimiter {
   private tokens: number;
   private last: number;
   private queue: Promise<void> = Promise.resolve();
+  /** When a request last had to wait for a token: the back-office's "throttled". */
+  private lastWaitAt = Number.NEGATIVE_INFINITY;
 
   constructor(
     private readonly ratePerSecond: number,
@@ -38,11 +40,17 @@ export class RateLimiter {
     return false;
   }
 
+  /** Whether the cap made a request wait within the last `ms`. */
+  throttledWithin(ms: number): boolean {
+    return this.clock() - this.lastWaitAt <= ms;
+  }
+
   private async waitForToken(): Promise<void> {
     for (;;) {
       if (this.tryAcquire()) {
         return;
       }
+      this.lastWaitAt = this.clock();
       const waitMs = Math.ceil(((1 - this.tokens) / this.ratePerSecond) * 1000);
       await new Promise((resolve) => setTimeout(resolve, Math.max(1, waitMs)));
     }

@@ -29,6 +29,10 @@ export interface BotAction<TPersona = unknown> {
   description: string;
   /** Relative odds of being picked among the actions that can run. */
   weight: number;
+  /** Not picked during the quiet hours (e.g. creating data at night). Browsing actions leave it off. */
+  pausedInQuietHours?: boolean;
+  /** Spends the runner-wide upload budget (the back-office tags it "budget"). */
+  usesUploadBudget?: boolean;
   /** Optional precondition; an action that can't run right now is simply not picked. */
   canRun?: (ctx: ActionContext<TPersona>) => boolean;
   run: (ctx: ActionContext<TPersona>) => Promise<void>;
@@ -39,6 +43,8 @@ export interface ActionSnapshot {
   description: string;
   weight: number;
   enabled: boolean;
+  pausedInQuietHours: boolean;
+  usesUploadBudget: boolean;
   runs: number;
   errors: number;
 }

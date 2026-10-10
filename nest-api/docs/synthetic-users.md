@@ -58,3 +58,18 @@ Each refusal logs one `warn` line, `event.kind: alert`,
 `event.action: synthetic-foreign-ip`, with the email or user id, the address,
 the path and the user agent. That line is what the bot back-office (PFA-127)
 turns into a danger banner and a phone notification.
+
+## Disable or purge one bot (PFA-127)
+
+The bot back-office closes a compromised bot through the runner, which calls
+`/api/internal/synthetic/accounts/:email` — `POST …/disable` (sign-in refused with a 403, live
+sessions revoked, data kept: `Users.disabledAt`) or `DELETE …` (the account and everything it owns,
+the same deletion as `synthetic:purge`). Only a synthetic account can be reached (flag and domain).
+
+The route answers 404 unless **all three** hold: the socket is loopback, the request carries no
+proxy header (nginx sets them on every `/api/` request, so a request through nginx never qualifies;
+`pfa.conf` also denies `/api/internal`), and `Authorization: Bearer $SYNTHETIC_ADMIN_TOKEN`
+(32+ characters, constant-time compare). Unset token = route closed.
+
+A stolen bot session now also names the bot: its email rides the session (`syntheticEmail`), so the
+`synthetic-foreign-ip` line carries `user.name` even when no email was posted.

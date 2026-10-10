@@ -1,0 +1,48 @@
+/** Auth screens copy (handoff v5 §3). */
+export const AUTH_TEXT = {
+  brand: "bot-runner",
+  backdrop: { first: "1991", second: "computer" },
+  credit: { before: "a ", brand: "1991computer", after: " tool" },
+  errPrefix: "ERR",
+  fields: {
+    email: "Email",
+    password: "Password",
+    confirm: "Confirm password",
+    passphrase: "Recovery passphrase",
+    newPassword: "New password",
+  },
+  signIn: {
+    title: "Sign in",
+    submit: "Sign in",
+    hint: "Single admin account · registration closed",
+    invalid: "Invalid credentials",
+    tooMany: (minutes: number) => `Too many attempts — retry in ${minutes} min`,
+    expired: "Session expired",
+    reset: "Password reset. Sign in with your new password.",
+  },
+  setup: {
+    title: "Create the admin account",
+    lead: "First run — this page is available only until the account exists.",
+    passwordHint: "At least 12 characters",
+    keepSafe: "Store it safely — it’s the only way to reset the password.",
+    submit: "Create account",
+    invalidEmail: "Enter a valid email",
+    tooShort: "At least 12 characters",
+    mismatch: "Passwords don’t match",
+    fewWords: "At least 4 words",
+  },
+  sealed: {
+    title: "Already set up",
+    lead: "An admin account already exists for this runner. Only one account is allowed.",
+    submit: "Go to sign in",
+  },
+  recover: {
+    title: "Reset password",
+    submit: "Reset password",
+    failed: "Email or recovery passphrase is incorrect",
+    required: "Required",
+    done: "Password reset. Sign in with your new password.",
+    back: "Back to sign in",
+  },
+  unreachable: "The back-office API is not answering",
+} as const;

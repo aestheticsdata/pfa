@@ -1,0 +1,108 @@
+// Bot back-office data model (PFA-127).
+//
+// Small on purpose. The back-office owns four things: who may operate it (one sealed account),
+// what was done through it (the audit log), what went wrong with the bots' accounts (incidents
+// read from the apps' alert lines), and where to send the alarm (push subscriptions). Everything
+// about the bots themselves is read live from each app's runner and never stored here: a stale
+// copy of "is it running?" is worse than no copy.
+
+generator client {
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  moduleFormat        = "esm"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+/// The one operator. Same model as Zeus: UNIQUE on `singleton` is what makes "there is exactly one
+/// admin" a guarantee the database enforces, rather than a count the setup route hopes it won.
+model User {
+  id                     String   @id @db.Char(36)
+  singleton              Boolean  @unique @default(true)
+  email                  String   @unique @db.VarChar(250)
+  /// bcrypt, 60 chars. The two secrets are hashed independently: knowing one never gives the other.
+  passwordHash           String   @db.VarChar(60)
+  recoveryPassphraseHash String   @db.VarChar(60)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+enum AuditStatus {
+  ok
+  failed
+}
+
+/// What the operator did, and what was tried against the account routes. Never pruned.
+model AuditEntry {
+  id        String      @id @db.Char(36)
+  /// The admin's email (or the attempted one), copied in rather than joined.
+  actor     String      @db.VarChar(250)
+  /// Dotted verb: `auth.signin`, `runner.stop`, `bot.toggle`, `account.disable`…
+  action    String      @db.VarChar(64)
+  targetApp String?     @db.VarChar(64)
+  target    String?     @db.VarChar(250)
+  status    AuditStatus
+  detail    String?     @db.Text
+  ip        String?     @db.VarChar(45)
+  userAgent String?     @db.VarChar(255)
+  createdAt DateTime    @default(now())
+
+  @@index([createdAt])
+  @@index([action])
+}
+
+enum IncidentStatus {
+  open
+  acknowledged
+  disabled
+  purged
+}
+
+/// A bot account used from outside the runner's host (`synthetic-foreign-ip`, PFA-122), grouped by
+/// account + address: a hundred refused requests from one address are one incident with
+/// `attempts = 100`, not a hundred alarms.
+model Incident {
+  id          String         @id @db.Char(36)
+  app         String         @db.VarChar(64)
+  /// The bot's email when the line names one (a sign-in or sign-up attempt), else `user:<id>` (a
+  /// stolen session cookie).
+  account     String         @db.VarChar(250)
+  userId      String?        @db.VarChar(64)
+  ip          String         @db.VarChar(45)
+  userAgent   String?        @db.VarChar(255)
+  path        String?        @db.VarChar(255)
+  attempts    Int            @default(1)
+  firstSeenAt DateTime
+  lastSeenAt  DateTime
+  status      IncidentStatus @default(open)
+  /// When the phone was told. Null: no subscription yet, or the push failed.
+  pushedAt    DateTime?
+  resolvedAt  DateTime?
+  createdAt   DateTime       @default(now())
+
+  @@index([app, status])
+  @@index([app, account, ip])
+}
+
+/// A device that asked for incident notifications (Web Push).
+model PushSubscription {
+  id        String   @id @db.Char(36)
+  endpoint  String   @unique @db.VarChar(500)
+  p256dh    String   @db.VarChar(200)
+  auth      String   @db.VarChar(100)
+  userAgent String?  @db.VarChar(255)
+  createdAt DateTime @default(now())
+}
+
+/// How far each alert log has been read, so a restart neither replays old lines (duplicate
+/// incidents, duplicate pushes) nor skips new ones.
+model LogCursor {
+  file      String   @id @db.VarChar(500)
+  /// The file's inode when last read: a different one means it was rotated, so start over.
+  inode     String   @db.VarChar(32)
+  offset    BigInt
+  updatedAt DateTime @updatedAt
+}

@@ -1,4 +1,5 @@
 import type { BOT_KIND, BOT_STATE } from "@core/constants/bot";
+import type { BotActivityBucket, RecentRequest } from "@core/interfaces/metricsTypes";
 
 export type BotKind = (typeof BOT_KIND)[keyof typeof BOT_KIND];
 export type BotState = (typeof BOT_STATE)[keyof typeof BOT_STATE];
@@ -22,6 +23,32 @@ export interface BotSnapshot {
   totalActions: number;
   errors: number;
   uploads: number;
+  /** Actions in the last minute. */
+  actionsPerMin: number;
+  /** Errors over all actions since the runner started, 0–1. */
+  errorRate: number;
+  /** The last 30 s in 2-second slices, oldest first. */
+  spark: BotActivityBucket[];
+  /** When its current session signed in; null when signed out. */
+  sessionStartedAt: string | null;
   lastSeenAt: string | null;
   nextWakeAt: string | null;
+}
+
+/** A bot's drawer: its snapshot, what it did by action, and its last requests. */
+export interface BotDetail extends BotSnapshot {
+  byAction: Record<string, number>;
+  recentRequests: RecentRequest[];
+}
+
+/** The change an operator asks for when toggling bots. */
+export interface BotToggle {
+  ids: string[];
+  enabled: boolean;
+}
+
+/** What a bulk on/off reports. */
+export interface BulkResult {
+  updated: string[];
+  unknown: string[];
 }

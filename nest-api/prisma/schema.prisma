@@ -99,4 +99,7 @@ model Users {
   // the email is on the reserved domain, never otherwise. `synthetic:purge`
   // deletes these accounts and everything they own.
   isSynthetic  Boolean   @default(false)
+  // A bot account switched off from the bot back-office (PFA-127): sign-in refused, sessions
+  // revoked, data kept. Only ever set on a synthetic account, never on a person's.
+  disabledAt   DateTime? @db.DateTime(3)
 }

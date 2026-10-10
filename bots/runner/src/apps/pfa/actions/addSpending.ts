@@ -1,5 +1,6 @@
 import { createSpending } from "@apps/pfa/api/pfaApi";
 import { billPaid, rememberBill, rememberSpending } from "@apps/pfa/persona/botMemory";
+import { PFA_TIME_ZONE } from "@apps/pfa/persona/bots";
 import { clampAmount, plausibleDate } from "@apps/pfa/persona/guardrails";
 
 import type { CatalogItem, PfaPersona } from "@apps/pfa/interfaces/pfaTypes";
@@ -15,9 +16,10 @@ const addSpending: BotAction<PfaPersona> = {
   name: "spending.add",
   description: "Adds a spending from the bot's own catalog (bounded amount, plausible date, pooled category)",
   weight: 50,
+  pausedInQuietHours: true,
   run: async (ctx) => {
     const { persona } = ctx.bot;
-    const date = plausibleDate(ctx.now(), ctx.rng);
+    const date = plausibleDate(ctx.now(), ctx.rng, PFA_TIME_ZONE);
     // Bills come once a month; everything else as often as the bot's habits say.
     const choices = persona.catalog.filter((candidate) => !candidate.monthly || !billPaid(ctx.memory, candidate, date));
     const item = ctx.rng.weighted(choices, (candidate: CatalogItem) => candidate.weight);

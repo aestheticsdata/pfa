@@ -1,0 +1,75 @@
+/* The few things Tailwind can't spell as a utility. Each is used in more than one component. */
+
+/* Tabular figures for every mono number. */
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A scroll strip without a visible bar (nav tabs, the status chip row). */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Text painted with the 1991computer gradient (backdrop wordmark, credit line). */
+@utility text-gradient {
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* A larger invisible hit area around a small control (switches, the zone switch) on touch. */
+@utility hit-area {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -9px -6px;
+  }
+}
+
+/* The top bar's bottom rule, per theme (dashed in the terminal identity). */
+@utility rule-b {
+  border-bottom: var(--top-rule);
+}
+
+/* The Overview activity chart (handoff v5): 100px high on a phone, 120px from the tablet up. Its
+   columns are cut from one gradient that spans this full height. */
+@utility chart-plot {
+  --chart-h: 100px;
+  height: var(--chart-h);
+  @media (width >= 700px) {
+    --chart-h: 120px;
+  }
+}
+
+@utility bg-chart-slice {
+  background-image: linear-gradient(to top, color-mix(in oklch, var(--ok) 15%, transparent), var(--ok));
+  background-position: bottom;
+  background-repeat: no-repeat;
+  background-size: 100% var(--chart-h);
+}
+
+/* The row whose drawer is open: a thin accent line above and below (table), or on the left (list). */
+@utility focus-row {
+  & > td {
+    box-shadow:
+      inset 0 1px 0 var(--ok-d),
+      inset 0 -1px 0 var(--ok-d);
+  }
+}
+
+@utility focus-bar {
+  box-shadow: inset 2px 0 0 var(--ok-d);
+}
+
+/* The phone's fixed bulk bar: the selection tint over the panel, clear of the home indicator. */
+@utility bg-bulk {
+  background: linear-gradient(var(--okbg), var(--okbg)), var(--panel);
+}
+
+@utility pb-bulk {
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
+}

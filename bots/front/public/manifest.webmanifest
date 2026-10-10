@@ -1,0 +1,9 @@
+{
+  "name": "bot-runner",
+  "short_name": "bot-runner",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eceef2",
+  "theme_color": "#2f6fc4",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

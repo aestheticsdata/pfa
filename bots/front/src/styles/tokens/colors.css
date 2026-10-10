@@ -1,0 +1,41 @@
+/* The semantic tokens as Tailwind colours: `bg-panel`, `text-dim`, `border-line-soft`… The only
+   colours components may use; tints are derived with color-mix() in the component. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel2: var(--panel2);
+  --color-hover: var(--hover);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-dim: var(--dim);
+  --color-faint: var(--faint);
+  --color-ok: var(--ok);
+  --color-ok-d: var(--ok-d);
+  --color-okbg: var(--okbg);
+  --color-okbg2: var(--okbg2);
+  --color-on-ok: var(--on-ok);
+  --color-warn: var(--warn);
+  --color-warnbg: var(--warnbg);
+  --color-bad: var(--bad);
+  --color-badbg: var(--badbg);
+  --color-badtx: var(--badtx);
+  --color-on-bad: var(--on-bad);
+  --color-info: var(--info);
+  --color-infobg: var(--infobg);
+  --color-underline: var(--input-underline);
+  --color-scrim: var(--scrim);
+  --color-scrim-strong: var(--scrim-strong);
+  --color-series-1: var(--series-1);
+  --color-series-2: var(--series-2);
+  --color-series-3: var(--series-3);
+  --color-series-4: var(--series-4);
+  --color-series-5: var(--series-5);
+  --color-series-6: var(--series-6);
+  --shadow-float: var(--shadow-float);
+  --shadow-auth: var(--shadow-auth);
+  --shadow-bulk: var(--shadow-bulk);
+  --font-sans: var(--sans);
+  --font-mono: var(--mono);
+}

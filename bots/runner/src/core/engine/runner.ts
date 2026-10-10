@@ -1,17 +1,36 @@
-import { BOT_STATE } from "@core/constants/bot";
+import { BOT_KIND, BOT_STATE } from "@core/constants/bot";
 import { BotBlockedError, SessionExpiredError } from "@core/engine/errors";
 import { actionsPerWake, nextWakeAt, thinkTimeMs } from "@core/engine/schedule";
 import { assertSyntheticEmail } from "@core/guards/syntheticEmail";
 import { AppClient } from "@core/http/appClient";
 import { logger } from "@core/log/logger";
+import { percentile, TimeBuckets } from "@core/metrics/timeBuckets";
 import { Rng } from "@core/random/rng";
+import { isQuietTime, nextQuietChange } from "@core/time/quietHours";
 
 import type { ActionContext, ActionSnapshot, BotAction, BotMemory } from "@core/interfaces/actionTypes";
-import type { BotProfile, BotSnapshot, BotState } from "@core/interfaces/botTypes";
-import type { PersistedRunnerState, RunnerDeps, RunnerStatus, WakeOptions } from "@core/interfaces/runnerTypes";
+import type { BotDetail, BotProfile, BotSnapshot, BotState, BotToggle, BulkResult } from "@core/interfaces/botTypes";
+import type { RequestRecord } from "@core/interfaces/httpTypes";
+import type { ActivityBucket, ActivityPoint, BotActivityBucket, RecentRequest } from "@core/interfaces/metricsTypes";
+import type {
+  PersistedRunnerState,
+  RampSettings,
+  RunnerDeps,
+  RunnerStatus,
+  WakeOptions,
+} from "@core/interfaces/runnerTypes";
+import type { QuietHours, QuietHoursSnapshot } from "@core/interfaces/timeTypes";
 
 const TICK_MS = 5_000;
 const MINUTE_MS = 60_000;
+/** The back-office's charts: the runner's last 80 s in 1-second slices, each bot's last 30 s in 2-second ones. */
+const RUNNER_SLICE_MS = 1_000;
+const RUNNER_SLICES = 80;
+const BOT_SLICE_MS = 2_000;
+const BOT_SLICES = 15;
+const RECENT_REQUESTS = 14;
+const RPS_WINDOW_MS = 10_000;
+const DEFAULT_RAMP: RampSettings = { step: 10, everySec: 30 };
 
 interface BotRuntime<TPersona> {
   profile: BotProfile<TPersona>;
@@ -26,6 +45,10 @@ interface BotRuntime<TPersona> {
   errors: number;
   lastSeenAt: Date | null;
   nextWakeAt: Date | null;
+  sessionStartedAt: Date | null;
+  activity: TimeBuckets<BotActivityBucket>;
+  byAction: Map<string, number>;
+  recentRequests: RecentRequest[];
 }
 
 interface ActionStats {
@@ -45,6 +68,11 @@ export class Runner<TPersona = unknown> {
   private readonly recentActions: number[] = [];
   private readonly recentErrors: number[] = [];
   private readonly recentRequests: number[] = [];
+  private readonly activity = new TimeBuckets<ActivityBucket>({
+    bucketMs: RUNNER_SLICE_MS,
+    size: RUNNER_SLICES,
+    make: () => this.emptyActivity(),
+  });
   private ticker: NodeJS.Timeout | undefined;
 
   constructor(private readonly deps: RunnerDeps<TPersona>) {
@@ -60,6 +88,10 @@ export class Runner<TPersona = unknown> {
       this.actionStats.set(action.name, { runs: 0, errors: 0 });
     }
     this.state = { ...deps.initialState };
+    for (const id of this.state.blockedBots ?? []) {
+      const bot = this.bots.get(id);
+      if (bot) bot.state = BOT_STATE.blocked;
+    }
   }
 
   /** Resumes where the last process left off: running only if it was running. */
@@ -93,25 +125,124 @@ export class Runner<TPersona = unknown> {
   }
 
   async setBotEnabled(botId: string, enabled: boolean): Promise<boolean> {
-    if (!this.bots.has(botId)) {
-      return false;
+    const { updated } = await this.setBotsEnabled({ ids: [botId], enabled });
+    return updated.length === 1;
+  }
+
+  /** One write for the whole selection (the back-office's bulk on/off). Unknown ids are reported. */
+  async setBotsEnabled(toggle: BotToggle): Promise<BulkResult> {
+    const updated = toggle.ids.filter((id) => this.bots.has(id));
+    const unknown = toggle.ids.filter((id) => !this.bots.has(id));
+    let disabled = this.state.disabledBots;
+    for (const id of updated) {
+      disabled = toggleIn(disabled, id, toggle.enabled);
     }
-    this.state.disabledBots = toggle(this.state.disabledBots, botId, enabled);
-    await this.deps.saveState(this.state);
-    return true;
+    this.state.disabledBots = disabled;
+    if (updated.length > 0) {
+      await this.deps.saveState(this.state);
+    }
+    return { updated, unknown };
   }
 
   async setActionEnabled(name: string, enabled: boolean): Promise<boolean> {
     if (!this.actionStats.has(name)) {
       return false;
     }
-    this.state.disabledActions = toggle(this.state.disabledActions, name, enabled);
+    this.state.disabledActions = toggleIn(this.state.disabledActions, name, enabled);
     await this.deps.saveState(this.state);
     return true;
   }
 
-  recordRequest(): void {
+  async enableAllActions(): Promise<void> {
+    this.state.disabledActions = [];
+    await this.deps.saveState(this.state);
+  }
+
+  /** The load-bot target, clamped to the hard cap. Load bots themselves arrive with PFA-128. */
+  async setTarget(target: number): Promise<number> {
+    this.state.target = Math.max(0, Math.min(this.deps.limits.maxBots, Math.floor(target)));
+    await this.deps.saveState(this.state);
+    return this.state.target;
+  }
+
+  async setRamp(ramp: RampSettings): Promise<RampSettings> {
+    this.state.ramp = {
+      step: Math.max(1, Math.min(this.deps.limits.maxBots, Math.floor(ramp.step))),
+      everySec: Math.max(1, Math.floor(ramp.everySec)),
+    };
+    await this.deps.saveState(this.state);
+    return this.state.ramp;
+  }
+
+  quietHours(): QuietHoursSnapshot {
+    const hours = this.state.quietHours ?? this.deps.app.defaultQuietHours;
+    const { timeZone } = this.deps.app;
+    const now = new Date();
+    return {
+      from: hours.from,
+      to: hours.to,
+      tz: timeZone,
+      active: isQuietTime(now, hours, timeZone),
+      nextChangeAt: nextQuietChange(now, hours, timeZone).toISOString(),
+    };
+  }
+
+  /** Validated by the caller (`isValidQuietHours`); takes effect on the next action picked. */
+  async setQuietHours(hours: QuietHours): Promise<QuietHoursSnapshot> {
+    this.state.quietHours = { from: hours.from, to: hours.to };
+    await this.deps.saveState(this.state);
+    return this.quietHours();
+  }
+
+  /** Forgets the bot's session: its next visit signs in afresh. */
+  restartSession(botId: string): boolean {
+    const bot = this.bots.get(botId);
+    if (!bot) {
+      return false;
+    }
+    bot.signedIn = false;
+    bot.sessionStartedAt = null;
+    bot.client.reset();
+    bot.recentRequests = [];
+    return true;
+  }
+
+  /**
+   * "Disable / purge account" from the back-office: the app does it, then the bot is blocked for
+   * good — persisted, so a restart never signs a disabled bot back in, nor re-creates a purged one.
+   * `false` when the bot is unknown; throws when the app has no account admin or refuses.
+   */
+  async closeAccount(botId: string, purge: boolean): Promise<boolean> {
+    const bot = this.bots.get(botId);
+    if (!bot) {
+      return false;
+    }
+    const admin = this.deps.app.accounts;
+    if (!admin) {
+      throw new Error(`${this.deps.app.name} cannot disable or purge accounts`);
+    }
+    assertSyntheticEmail(bot.profile.email, this.deps.app.syntheticDomain);
+    await (purge ? admin.purge(bot.profile) : admin.disable(bot.profile));
+    bot.state = BOT_STATE.blocked;
+    bot.signedIn = false;
+    bot.sessionStartedAt = null;
+    bot.client.reset();
+    bot.nextWakeAt = null;
+    this.state.blockedBots = [...new Set([...(this.state.blockedBots ?? []), botId])];
+    await this.deps.saveState(this.state);
+    logger.warn(purge ? "account purged" : "account disabled", { app: this.deps.app.id, bot: botId });
+    return true;
+  }
+
+  recordRequest(record: RequestRecord): void {
     this.recentRequests.push(Date.now());
+    const slice = this.activity.current();
+    slice.requests += 1;
+    slice.latencies.push(record.ms);
+    if (record.status >= 500 || record.status === 0) slice.codes5xx += 1;
+    else if (record.status >= 400) slice.codes4xx += 1;
+    else slice.codes2xx += 1;
+    if (this.deps.limiter.throttledWithin(RUNNER_SLICE_MS)) slice.throttled = true;
   }
 
   /**
@@ -157,36 +288,74 @@ export class Runner<TPersona = unknown> {
 
   status(): RunnerStatus {
     const now = Date.now();
+    const snapshots = this.snapshotBots();
     const counts: Record<string, number> = {};
-    for (const bot of this.snapshotBots()) {
+    for (const bot of snapshots) {
       counts[bot.state] = (counts[bot.state] ?? 0) + 1;
     }
+    const isLive = (bot: BotSnapshot) => bot.state === BOT_STATE.active || bot.state === BOT_STATE.sleeping;
+    const daily = snapshots.filter((bot) => bot.kind === BOT_KIND.daily);
+    const load = snapshots.filter((bot) => bot.kind === BOT_KIND.load);
     return {
       app: this.deps.app.id,
       running: this.state.running,
       bots: counts,
+      liveDaily: daily.filter(isLive).length,
+      totalDaily: daily.length,
+      liveLoad: load.filter(isLive).length,
+      totalLoad: load.length,
+      target: this.state.target ?? 0,
+      spawned: load.filter(isLive).length,
+      ramp: this.state.ramp ?? DEFAULT_RAMP,
+      // The ramp itself arrives with load bots (PFA-128): until then nothing is ever pending.
+      nextStepInSec: null,
       actionsPerMin: countSince(this.recentActions, now - MINUTE_MS),
       errorsPerMin: countSince(this.recentErrors, now - MINUTE_MS),
       requestsPerMin: countSince(this.recentRequests, now - MINUTE_MS),
+      rps: countSince(this.recentRequests, now - RPS_WINDOW_MS) / (RPS_WINDOW_MS / 1000),
+      throttled: this.deps.limiter.throttledWithin(RPS_WINDOW_MS),
       limits: this.deps.limits,
       uploadBudget: this.deps.uploads.snapshot(),
+      quietHours: this.quietHours(),
     };
   }
 
-  snapshotBots(): BotSnapshot[] {
-    return [...this.bots.values()].map((bot) => ({
-      id: bot.profile.id,
-      email: bot.profile.email,
-      kind: bot.profile.kind,
-      state: this.effectiveState(bot),
-      enabled: !this.state.disabledBots.includes(bot.profile.id),
-      currentAction: bot.currentAction,
-      totalActions: bot.totalActions,
-      errors: bot.errors,
-      uploads: Number(bot.memory.get("uploads") ?? 0),
-      lastSeenAt: bot.lastSeenAt?.toISOString() ?? null,
-      nextWakeAt: bot.nextWakeAt?.toISOString() ?? null,
+  /** The last 80 s in 1-second slices, oldest first: the back-office's live charts. */
+  history(): ActivityPoint[] {
+    const live = this.status();
+    const latest = this.activity.current();
+    latest.live = live.liveDaily + live.liveLoad;
+    latest.target = live.totalDaily + live.target;
+    return this.activity.read().map(({ at, bucket }) => ({
+      at: new Date(at).toISOString(),
+      actions: bucket.actions,
+      errors: bucket.errors,
+      requests: bucket.requests,
+      p50: percentile(bucket.latencies, 0.5),
+      p95: percentile(bucket.latencies, 0.95),
+      codes2xx: bucket.codes2xx,
+      codes4xx: bucket.codes4xx,
+      codes5xx: bucket.codes5xx,
+      live: bucket.live,
+      target: bucket.target,
+      throttled: bucket.throttled,
     }));
+  }
+
+  snapshotBots(): BotSnapshot[] {
+    return [...this.bots.values()].map((bot) => this.snapshotOf(bot));
+  }
+
+  detail(botId: string): BotDetail | null {
+    const bot = this.bots.get(botId);
+    if (!bot) {
+      return null;
+    }
+    return {
+      ...this.snapshotOf(bot),
+      byAction: Object.fromEntries(bot.byAction),
+      recentRequests: bot.recentRequests,
+    };
   }
 
   snapshotActions(): ActionSnapshot[] {
@@ -197,19 +366,50 @@ export class Runner<TPersona = unknown> {
         description: action.description,
         weight: action.weight,
         enabled: !this.state.disabledActions.includes(action.name),
+        pausedInQuietHours: action.pausedInQuietHours === true,
+        usesUploadBudget: action.usesUploadBudget === true,
         runs: stats.runs,
         errors: stats.errors,
       };
     });
   }
 
-  private createRuntime(profile: BotProfile<TPersona>): BotRuntime<TPersona> {
+  private snapshotOf(bot: BotRuntime<TPersona>): BotSnapshot {
+    const spark = bot.activity.read().map(({ bucket }) => ({ ...bucket }));
+    const lastMinute = spark.reduce((sum, slice) => sum + slice.actions, 0) * (MINUTE_MS / (BOT_SLICES * BOT_SLICE_MS));
+    const attempts = bot.totalActions + bot.errors;
     return {
+      id: bot.profile.id,
+      email: bot.profile.email,
+      kind: bot.profile.kind,
+      state: this.effectiveState(bot),
+      enabled: !this.state.disabledBots.includes(bot.profile.id),
+      currentAction: bot.currentAction,
+      totalActions: bot.totalActions,
+      errors: bot.errors,
+      uploads: Number(bot.memory.get("uploads") ?? 0),
+      actionsPerMin: lastMinute,
+      errorRate: attempts === 0 ? 0 : bot.errors / attempts,
+      spark,
+      sessionStartedAt: bot.sessionStartedAt?.toISOString() ?? null,
+      lastSeenAt: bot.lastSeenAt?.toISOString() ?? null,
+      nextWakeAt: bot.nextWakeAt?.toISOString() ?? null,
+    };
+  }
+
+  private createRuntime(profile: BotProfile<TPersona>): BotRuntime<TPersona> {
+    const runtime: BotRuntime<TPersona> = {
       profile,
       client: new AppClient({
         baseUrl: this.deps.app.baseUrl,
         throttle: () => this.deps.limiter.acquire(),
-        onRequest: () => this.recordRequest(),
+        onRequest: (record) => {
+          this.recordRequest(record);
+          runtime.recentRequests = [{ at: new Date().toISOString(), ...record }, ...runtime.recentRequests].slice(
+            0,
+            RECENT_REQUESTS,
+          );
+        },
       }),
       rng: new Rng(`${this.deps.app.id}:${profile.id}`),
       memory: new Map(),
@@ -221,6 +421,38 @@ export class Runner<TPersona = unknown> {
       errors: 0,
       lastSeenAt: null,
       nextWakeAt: null,
+      sessionStartedAt: null,
+      activity: new TimeBuckets<BotActivityBucket>({
+        bucketMs: BOT_SLICE_MS,
+        size: BOT_SLICES,
+        make: () => ({ actions: 0, errors: 0 }),
+      }),
+      byAction: new Map(),
+      recentRequests: [],
+    };
+    return runtime;
+  }
+
+  private emptyActivity(): ActivityBucket {
+    // Sampled when the slice opens, so the population line has a value for every slice.
+    let live = 0;
+    let daily = 0;
+    for (const bot of this.bots?.values() ?? []) {
+      const state = this.effectiveState(bot);
+      if (state === BOT_STATE.active || state === BOT_STATE.sleeping) live += 1;
+      if (bot.profile.kind === BOT_KIND.daily) daily += 1;
+    }
+    return {
+      actions: 0,
+      errors: 0,
+      requests: 0,
+      latencies: [],
+      codes2xx: 0,
+      codes4xx: 0,
+      codes5xx: 0,
+      live,
+      target: daily + (this.state?.target ?? 0),
+      throttled: false,
     };
   }
 
@@ -253,11 +485,11 @@ export class Runner<TPersona = unknown> {
         continue;
       }
       if (!bot.nextWakeAt) {
-        bot.nextWakeAt = nextWakeAt(now, bot.rng);
+        bot.nextWakeAt = nextWakeAt(now, bot.rng, this.deps.app.timeZone);
         continue;
       }
       if (bot.nextWakeAt <= now) {
-        bot.nextWakeAt = nextWakeAt(now, bot.rng);
+        bot.nextWakeAt = nextWakeAt(now, bot.rng, this.deps.app.timeZone);
         void this.runWake(bot.profile.id);
       }
     }
@@ -273,6 +505,7 @@ export class Runner<TPersona = unknown> {
     bot.client.reset();
     await this.deps.app.authenticate({ bot: bot.profile, client: bot.client, password });
     bot.signedIn = true;
+    bot.sessionStartedAt = new Date();
   }
 
   private async runOneAction(bot: BotRuntime<TPersona>): Promise<void> {
@@ -284,8 +517,12 @@ export class Runner<TPersona = unknown> {
       uploads: this.deps.uploads,
       now: () => new Date(),
     };
+    const quiet = this.quietHours().active;
     const candidates = this.deps.actions.filter(
-      (action) => !this.state.disabledActions.includes(action.name) && (action.canRun?.(ctx) ?? true),
+      (action) =>
+        !this.state.disabledActions.includes(action.name) &&
+        !(quiet && action.pausedInQuietHours) &&
+        (action.canRun?.(ctx) ?? true),
     );
     const action = bot.rng.weighted(candidates, (candidate: BotAction<TPersona>) => candidate.weight);
     if (!action) {
@@ -293,19 +530,25 @@ export class Runner<TPersona = unknown> {
     }
     const stats = this.actionStats.get(action.name);
     bot.currentAction = action.name;
+    bot.byAction.set(action.name, (bot.byAction.get(action.name) ?? 0) + 1);
     const started = Date.now();
     try {
       await action.run(ctx);
       bot.totalActions += 1;
+      bot.activity.current().actions += 1;
+      this.activity.current().actions += 1;
       if (stats) stats.runs += 1;
       this.recentActions.push(Date.now());
       logger.info("action", { bot: bot.profile.id, action: action.name, ms: Date.now() - started });
     } catch (error) {
       bot.errors += 1;
+      bot.activity.current().errors += 1;
+      this.activity.current().errors += 1;
       if (stats) stats.errors += 1;
       this.recentErrors.push(Date.now());
       if (error instanceof SessionExpiredError) {
         bot.signedIn = false;
+        bot.sessionStartedAt = null;
       }
       if (error instanceof BotBlockedError) {
         throw error;
@@ -320,7 +563,7 @@ export class Runner<TPersona = unknown> {
   }
 }
 
-function toggle(list: string[], id: string, enabled: boolean): string[] {
+function toggleIn(list: string[], id: string, enabled: boolean): string[] {
   const without = list.filter((item) => item !== id);
   return enabled ? without : [...without, id];
 }

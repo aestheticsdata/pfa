@@ -14,6 +14,8 @@ export async function fakeRunner(options: FakeRunnerOptions = {}): Promise<Runne
     id: "fake",
     name: "Fake",
     baseUrl: "http://127.0.0.1:9",
+    timeZone: "Europe/Paris",
+    defaultQuietHours: options.quietHours ?? { from: "22:00", to: "10:00" },
     syntheticDomain: "synthetic.test",
     bots: (options.emails ?? ["bot@synthetic.test"]).map((email, i) => ({
       id: `bot-${i}`,
@@ -23,6 +25,7 @@ export async function fakeRunner(options: FakeRunnerOptions = {}): Promise<Runne
     })),
     actionsDir: "/nonexistent",
     authenticate: options.authenticate ?? (async () => {}),
+    accounts: options.accounts,
   };
   const saved: PersistedRunnerState[] = options.saved ?? [];
   return new Runner({

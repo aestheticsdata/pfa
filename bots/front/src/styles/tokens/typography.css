@@ -1,0 +1,47 @@
+/* The handoff's type scale (compact density). Tailwind's own steps cover 12/14/16/18/20 px
+   (`text-xs` … `text-xl`); the in-between sizes the design uses are named here, never retyped. */
+@theme {
+  --text-caret: 10px; /* the ▼ of the switcher and menus */
+  --text-micro: 10.5px; /* tags, inline auth messages, chart labels */
+  --text-micro--line-height: 1.45;
+  --text-tiny: 11px; /* uppercase labels, nav counts, axes */
+  --text-tiny--line-height: 1.45;
+  --text-mini: 11.5px; /* incident sub-lines */
+  --text-mini--line-height: 1.45;
+  --text-xs: 12px;
+  --text-xs--line-height: 1.45;
+  --text-note: 12.5px; /* table cells (mono), chips, hints */
+  --text-note--line-height: 1.45;
+  --text-body: 13px; /* most UI text */
+  --text-body--line-height: 1.45;
+  --text-field: 13.5px; /* inputs */
+  --text-field--line-height: 1.45;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.45;
+  --text-title: 15px; /* app card name, limit values */
+  --text-title--line-height: 1.45;
+  --text-base: 16px;
+  --text-base--line-height: 1.45;
+  --text-heading: 17px; /* kill switch, drawer title (compact) */
+  --text-heading--line-height: 1.3;
+  --text-lg: 18px;
+  --text-lg--line-height: 1.3;
+  --text-xl: 20px;
+  --text-xl--line-height: 1.3;
+  --text-stat: 23px; /* status tiles (compact) */
+  --text-stat--line-height: 1.15;
+  /* The 1991computer backdrop wordmark spans the viewport, whatever its width. */
+  --text-backdrop: 15.6vw;
+  --text-backdrop--line-height: 1;
+
+  --tracking-body: -0.005em;
+  --tracking-title: -0.01em;
+  --tracking-figure: -0.02em;
+  --tracking-mark: -0.04em;
+  --tracking-backdrop: -0.07em;
+  --tracking-wordmark: 0.02em;
+  --tracking-tag: 0.05em;
+  --tracking-th: 0.06em;
+  --tracking-label: 0.08em;
+  --tracking-brand: 0.12em;
+}

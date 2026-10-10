@@ -1,3 +1,5 @@
+import { zonedDay } from "@core/time/zonedTime";
+
 import type { Rng } from "@core/random/rng";
 
 /** Hard bounds every bot spending respects, whatever its catalog says. */
@@ -13,17 +15,13 @@ export function clampAmount(amount: number): number {
   return Math.round(bounded * 100) / 100;
 }
 
-/** Today most of the time, sometimes a day or two late (entered after the fact). */
-export function plausibleDate(today: Date, rng: Rng): string {
-  const daysBack = rng.chance(0.8) ? 0 : rng.int(1, SPENDING_BOUNDS.maxDaysBack);
-  const date = new Date(today);
-  date.setDate(date.getDate() - daysBack);
-  return isoDay(date);
-}
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-/** `yyyy-MM-dd` in the server's local time. */
-export function isoDay(date: Date): string {
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${date.getFullYear()}-${month}-${day}`;
+/**
+ * Today most of the time, sometimes a day or two late (entered after the fact) — "today" being the
+ * bot's day in its own time zone, not ks-b's UTC one.
+ */
+export function plausibleDate(today: Date, rng: Rng, timeZone: string): string {
+  const daysBack = rng.chance(0.8) ? 0 : rng.int(1, SPENDING_BOUNDS.maxDaysBack);
+  return zonedDay(new Date(today.getTime() - daysBack * DAY_MS), timeZone);
 }
