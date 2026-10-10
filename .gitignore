@@ -61,3 +61,6 @@ front/e2e/demo/out/
 
 # Claude Design handoffs (design references, never committed)
 design_handoff*/
+
+# Favicon exports dropped here before integration (copied into front/public).
+export-favicons*/

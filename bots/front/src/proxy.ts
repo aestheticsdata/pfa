@@ -67,5 +67,7 @@ const proxy = (request: NextRequest): NextResponse => {
 export default proxy;
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|icon.svg|sw.js|manifest.webmanifest).*)"],
+  // Static files from `public/` (favicons, app icons, manifest, service worker) skip the session
+  // gate: a browser asks for them before anyone signs in.
+  matcher: ["/((?!_next/static|_next/image|.*\\.(?:ico|png|svg|webmanifest)$|sw.js).*)"],
 };

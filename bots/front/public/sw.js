@@ -14,7 +14,7 @@ self.addEventListener("push", (event) => {
       body: message.body,
       tag: message.tag,
       renotify: true,
-      icon: "/icon.svg",
+      icon: "/android-192.png",
       data: { url: message.url },
     }),
   );
