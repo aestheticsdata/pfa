@@ -13,12 +13,14 @@ import type { TopBarProps } from "@components/panel/topBar/interfaces/topBarType
 /**
  * One row on desktop: BOT-RUNNER │ switcher │ tabs … status · host · refreshed · email · Sign out.
  * Tablet: two rows (tabs below), email and Sign out behind the avatar. Phone: switcher, status dot, ☰.
+ * Fixed to the top of the page while it scrolls; layered above the phone's bulk bar (so the ☰ sheet
+ * covers it) and under the drawer and the modal.
  */
 const TopBar = ({ header, email }: TopBarProps) => {
   const items = navItems(header);
   const { app } = header;
   return (
-    <header className="rule-b flex flex-nowrap items-center gap-2 px-gut py-2 tablet:flex-wrap tablet:gap-x-3.5 tablet:gap-y-3 desktop:flex-nowrap">
+    <header className="rule-b sticky top-0 z-7 flex flex-nowrap bg-bg items-center gap-2 px-gut py-2 tablet:flex-wrap tablet:gap-x-3.5 tablet:gap-y-3 desktop:flex-nowrap">
       <span className="hidden items-center gap-2.5 whitespace-nowrap font-mono text-tiny font-semibold uppercase tracking-brand text-dim after:h-5 after:w-px after:bg-line tablet:flex">
         {PANEL_TEXT.wordmark}
       </span>
