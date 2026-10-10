@@ -12,7 +12,7 @@ export const PFA_TIME_ZONE = "Europe/Paris";
 /** Spread around 2 a week: some bots barely ever keep a receipt, others do it often. */
 const RECEIPT_PACES = [0.5, 1, 1.5, 2, 2.5, 3, 3.5];
 
-const { groceries, restaurants, bars, transport, home, health, bills, leisure } = CATEGORIES;
+const { groceries, restaurants, transport, home, health, bills, leisure } = CATEGORIES;
 
 const item = (label: string, category: CatalogItem["category"], habit: ItemHabit): CatalogItem => ({
   label,
@@ -55,11 +55,11 @@ const DAILY_PERSONAS: Record<string, Omit<PfaPersona, "receiptsPerWeek">> = {
       item("Dry cleaning", home, { range: [8, 25], weight: 1 }),
     ],
   },
-  bacchus: {
-    description: "Goes out: bars, restaurants, cinema",
+  mercurius: {
+    description: "Goes out: restaurants, cinema, concerts, museums",
     catalog: [
-      item("Bar", bars, { range: [6, 45], weight: 6 }),
-      item("Restaurant", restaurants, { range: [18, 90], weight: 4 }),
+      item("Restaurant", restaurants, { range: [18, 90], weight: 6 }),
+      item("Museum", leisure, { range: [8, 20], weight: 3 }),
       item("Cinema", leisure, { range: [9, 25], weight: 2 }),
       item("Concert", leisure, { range: [25, 70], weight: 1 }),
       item("Taxi", transport, { range: [12, 35], weight: 3 }),
