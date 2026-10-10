@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException } from "@nestjs/common";
+import { Injectable, UnauthorizedException, ConflictException, ForbiddenException } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { PrismaService } from "../prisma/prisma.service";
 import type { Users } from "../../generated/prisma/client";
@@ -33,6 +33,13 @@ export class UsersService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       throw new UnauthorizedException("Invalid credentials");
+    }
+
+    // A bot switched off from the bot back-office (PFA-127). Checked after the password, so the
+    // answer reveals nothing to someone who does not hold it. The runner reads this 403 as
+    // "blocked" and stops retrying the account.
+    if (user.disabledAt) {
+      throw new ForbiddenException("Account disabled");
     }
 
     return this.buildSignInResponse(user);

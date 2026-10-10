@@ -1,10 +1,22 @@
 import type { AppClient } from "@core/http/appClient";
 import type { BotProfile } from "@core/interfaces/botTypes";
+import type { QuietHours } from "@core/interfaces/timeTypes";
 
 export interface AuthSession<TPersona = unknown> {
   bot: BotProfile<TPersona>;
   client: AppClient;
   password: string;
+}
+
+/**
+ * How the back-office's "Disable / purge account" reaches the app (PFA-127). Optional: an app
+ * without it simply can't be asked, and the control API answers 501.
+ */
+export interface AccountAdmin<TPersona = unknown> {
+  /** Sign-in refused from now on, sessions revoked, data kept. */
+  disable: (bot: BotProfile<TPersona>) => Promise<void>;
+  /** The account and its data, gone. */
+  purge: (bot: BotProfile<TPersona>) => Promise<void>;
 }
 
 /**
@@ -16,6 +28,10 @@ export interface AppDefinition<TPersona = unknown> {
   name: string;
   /** Base URL of the app's API, the public one: bots go through nginx like everyone. */
   baseUrl: string;
+  /** The bots' clock (IANA name): waking hours and quiet hours are read in it, whatever the server's zone. */
+  timeZone: string;
+  /** Quiet hours until the operator changes them from the back-office. */
+  defaultQuietHours: QuietHours;
   /** Every bot email must be on this domain (PFA-122). */
   syntheticDomain: string;
   bots: BotProfile<TPersona>[];
@@ -26,4 +42,5 @@ export interface AppDefinition<TPersona = unknown> {
    * the account can't be used at all, so the runner stops retrying it.
    */
   authenticate: (session: AuthSession<TPersona>) => Promise<void>;
+  accounts?: AccountAdmin<TPersona>;
 }

@@ -155,7 +155,7 @@ const DATES = [
   "12/10/2026 10:44",
 ];
 
-const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+const escapeXml = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;");
 const style = (f) =>
   `font-family="${f.font}" font-size="${f.size}"${f.weight ? ` font-weight="${f.weight}"` : ""}${f.style ? ` font-style="${f.style}"` : ""}`;
 
@@ -165,10 +165,10 @@ function receiptSvg(shop, index) {
   const mid = shop.width / 2;
   const line = shop.body.size + 4;
   let y = pad + shop.header.size;
-  const parts = [`<text x="${mid}" y="${y}" text-anchor="middle" ${style(shop.header)}>${escape(shop.name)}</text>`];
+  const parts = [`<text x="${mid}" y="${y}" text-anchor="middle" ${style(shop.header)}>${escapeXml(shop.name)}</text>`];
   for (const sub of shop.lines) {
     y += line;
-    parts.push(`<text x="${mid}" y="${y}" text-anchor="middle" ${style(shop.body)}>${escape(sub)}</text>`);
+    parts.push(`<text x="${mid}" y="${y}" text-anchor="middle" ${style(shop.body)}>${escapeXml(sub)}</text>`);
   }
   y += line;
   parts.push(`<text x="${mid}" y="${y}" text-anchor="middle" ${style(shop.body)}>${DATES[index]}</text>`);
@@ -176,7 +176,7 @@ function receiptSvg(shop, index) {
   parts.push(`<line x1="${pad}" y1="${y}" x2="${right}" y2="${y}" stroke="#333" stroke-dasharray="3 2"/>`);
   for (const [label, price] of shop.items) {
     y += line;
-    parts.push(`<text x="${pad}" y="${y}" ${style(shop.body)}>${escape(label)}</text>`);
+    parts.push(`<text x="${pad}" y="${y}" ${style(shop.body)}>${escapeXml(label)}</text>`);
     parts.push(`<text x="${right}" y="${y}" text-anchor="end" ${style(shop.body)}>${price.toFixed(2)}</text>`);
   }
   const total = shop.items.reduce((sum, [, price]) => sum + price, 0);

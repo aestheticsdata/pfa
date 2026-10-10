@@ -60,11 +60,17 @@ export class UsersController {
     else this.logger.info(line, `${event.action} succeeded`);
   }
 
-  /** `isSynthetic` rides the session so SyntheticIpGuard can check every later request of a bot. */
+  /**
+   * `isSynthetic` rides the session so SyntheticIpGuard can check every later request of a bot —
+   * and a bot's email with it, so an alert raised from a stolen bot cookie names the bot (PFA-127).
+   */
   private openSession(req: Request, result: SignInResponse): void {
-    const session = req.session as { userId?: string; isSynthetic?: boolean };
+    const session = req.session as { userId?: string; isSynthetic?: boolean; syntheticEmail?: string };
     session.userId = result.user.id;
     session.isSynthetic = isSyntheticEmail(result.user.email);
+    if (session.isSynthetic) {
+      session.syntheticEmail = result.user.email;
+    }
   }
 
   @Get("me")

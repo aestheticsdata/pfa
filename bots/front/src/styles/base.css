@@ -1,0 +1,38 @@
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--line-soft, currentcolor);
+  }
+
+  html,
+  body {
+    margin: 0;
+    /* No rubber band (user rule), set on the roots of the scroll chain: `none` on every element
+       would also stop a scroller from handing off to the page. Sheets and the drawer body set
+       their own, since nothing behind them may move. Horizontal is left to the browser. */
+    overscroll-behavior-y: none;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    line-height: 1.45;
+    letter-spacing: var(--tracking-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* A clickable thing shows a pointer (Tailwind v4 reset it to `default` on buttons). */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  a[href],
+  label[for],
+  summary {
+    cursor: pointer;
+  }
+
+  input:focus,
+  select:focus {
+    outline: none;
+  }
+}

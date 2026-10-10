@@ -1,6 +1,6 @@
 import { PFA_DAILY_BOTS, PFA_SYNTHETIC_DOMAIN } from "@apps/pfa/persona/bots";
 import { CATEGORIES } from "@apps/pfa/persona/categories";
-import { clampAmount, isoDay, plausibleDate, SPENDING_BOUNDS } from "@apps/pfa/persona/guardrails";
+import { clampAmount, plausibleDate, SPENDING_BOUNDS } from "@apps/pfa/persona/guardrails";
 import { isSyntheticEmail } from "@core/guards/syntheticEmail";
 import { Rng } from "@core/random/rng";
 import { describe, expect, it } from "vitest";
@@ -12,12 +12,13 @@ describe("PFA guardrails", () => {
     expect(clampAmount(12.345)).toBe(12.35);
   });
 
-  it("dates a spending today or at most two days back", () => {
+  it("dates a spending today or at most two days back, on the bot's own clock", () => {
     const rng = new Rng(3);
-    const today = new Date(2026, 9, 10, 15);
-    const allowed = [0, 1, 2].map((back) => isoDay(new Date(2026, 9, 10 - back)));
+    // 23:30 UTC on Oct 10 is already Oct 11 in Paris (UTC+2): "today" is the 11th.
+    const today = new Date(Date.UTC(2026, 9, 10, 23, 30));
+    const allowed = ["2026-10-11", "2026-10-10", "2026-10-09"];
     for (let i = 0; i < 500; i++) {
-      expect(allowed).toContain(plausibleDate(today, rng));
+      expect(allowed).toContain(plausibleDate(today, rng, "Europe/Paris"));
     }
   });
 

@@ -12,6 +12,7 @@ const uploadReceiptAction: BotAction<PfaPersona> = {
   name: "receipt.upload",
   description: "Attaches one of the ten fixed receipt pictures to the bot's last spending (upload budget)",
   weight: 60,
+  usesUploadBudget: true,
   canRun: (ctx) => {
     const spending = lastSpending(ctx.memory);
     return (

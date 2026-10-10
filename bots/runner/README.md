@@ -27,13 +27,13 @@ src/
 
 ## Run it
 
-Node 22. `pnpm install`, then copy `.env.example` to `.env` (or export the variables).
+Node 22+. `pnpm install`, then copy `.env.example` to `.env` (or export the variables).
 
 ```bash
 pnpm test        # unit tests: guards, caps, registry, engine, control API
 pnpm typecheck
 pnpm lint
-pnpm start       # the runner + its control API on 127.0.0.1:9471
+pnpm start       # the runner + its control API on 127.0.0.1:7201
 pnpm bot:once -- saturnus 5   # dev: one visit of one bot, now, 5 actions
 ```
 
@@ -44,8 +44,13 @@ Locally, start PFA's API with `SYNTHETIC_ALLOWED_IPS=127.0.0.1,::1`, or every bo
 
 Four permanent "daily" bots, `saturnus`, `ceres`, `janus` and `bacchus` `@synthetic.test`, each with
 its own habits (`apps/pfa/persona/bots.ts`). They visit about 2–3 times a day at random between
-07:00 and 23:00, do 1–5 things per visit, and pause between actions like someone reading. Load bots
-(up to 500) come with PFA-128.
+07:00 and 23:00 **Paris time** (ks-b runs on UTC; the app's zone is read through `Intl`, so the
+change to winter time needs nothing), do 1–5 things per visit, and pause between actions like
+someone reading. Load bots (up to 500) come with PFA-128; the target and the ramp can already be set.
+
+**Quiet hours**: no new spending between 22:00 and 10:00 Paris time by default — actions flagged
+`pausedInQuietHours` are skipped in the window, browsing goes on. The window is changed from the
+back-office (`PUT /quiet-hours`) and persisted.
 
 Accounts are created on the first visit through PFA's public sign-up — PFA flags them
 `isSynthetic` from the domain. Passwords are generated here and stay in the state directory.
@@ -88,13 +93,19 @@ budget is spent, `receipt.upload` is simply skipped.
 
 | Route | |
 |---|---|
-| `GET /status` | running, bots by state, actions/errors/requests per minute, limits, upload budget |
+| `GET /status` | running, live bots, target and ramp, actions/errors/requests per minute, rps, throttled, limits, upload budget, quiet hours |
+| `GET /history` | the last 80 s in 1-second slices: actions, errors, p50/p95, 2xx/4xx/5xx, live/target |
 | `POST /runner` `{"running": true\|false}` | kill switch |
-| `GET /bots` · `PATCH /bots/:id` `{"enabled": bool}` | per-bot toggle |
-| `GET /actions` · `PATCH /actions/:name` `{"enabled": bool}` | per-action toggle |
+| `PUT /target` `{"target": n}` · `PUT /ramp` `{"step", "everySec"}` | load-bot target (capped) and ramp |
+| `GET/PUT /quiet-hours` `{"from": "22:00", "to": "10:00"}` | the quiet window, on the app's clock |
+| `GET /bots` · `GET /bots/:id` · `PATCH /bots/:id` `{"enabled"}` · `POST /bots/bulk` `{"ids", "enabled"}` | bots, a bot's detail, toggles |
+| `POST /bots/:id/restart-session` | forget a bot's session |
+| `POST /accounts/:id/disable` · `DELETE /accounts/:id` | close a bot's account in the app (then the bot is blocked for good) |
+| `GET /actions` · `PATCH /actions/:name` `{"enabled"}` · `POST /actions/enable-all` | per-action toggles |
 | `GET /limits` · `GET /upload-budget` | read-only caps |
 
-The back-office (PFA-127) is a client of this API.
+The back-office (`bots/nest-api`, PFA-127) is a client of this API. Closing an account goes through
+PFA's internal route (`PFA_INTERNAL_API_URL` + `SYNTHETIC_ADMIN_TOKEN`, loopback only).
 
 ## Clean up
 

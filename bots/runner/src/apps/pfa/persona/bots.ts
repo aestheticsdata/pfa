@@ -6,6 +6,8 @@ import type { CatalogItem, ItemHabit, PfaPersona } from "@apps/pfa/interfaces/pf
 import type { BotProfile } from "@core/interfaces/botTypes";
 
 export const PFA_SYNTHETIC_DOMAIN = "synthetic.test";
+/** PFA's users — and so its bots — live on Paris time; ks-b itself runs on UTC. */
+export const PFA_TIME_ZONE = "Europe/Paris";
 
 /** Spread around 2 a week: some bots barely ever keep a receipt, others do it often. */
 const RECEIPT_PACES = [0.5, 1, 1.5, 2, 2.5, 3, 3.5];

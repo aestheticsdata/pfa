@@ -1,0 +1,46 @@
+export const METRICS_TEXT = {
+  population: "Population",
+  live: "live",
+  target: "target",
+  populationAxis: ["−80s", "daily + load", "now"],
+  latency: "Latency",
+  latencyAxis: ["−80s", "now"],
+  codes: "Response codes",
+  codesAxis: ["−80s", "per min", "now"],
+  activity: "Activity per bot",
+  activitySub: (live: number) => `${live} live bots · actions/min`,
+  mix: "Action mix",
+  mixSub: (total: string) => `since runner start · ${total} actions`,
+} as const;
+
+export const ACTIONS_TEXT = {
+  title: "Action registry",
+  enableAll: "Enable all",
+  budget: "budget",
+  quiet: "quiet hours",
+  columns: { action: "Action", weight: "Weight", perMin: "/min", errors: "Errors" },
+  perMin: (n: number) => `${n}/min`,
+  err: (value: string) => `${value}% err`,
+  toggle: (name: string) => `Toggle ${name}`,
+  turned: (name: string, on: boolean) => `${name} turned ${on ? "on" : "off"}`,
+  allOn: "All actions enabled",
+} as const;
+
+export const INCIDENTS_TEXT = {
+  title: "Incident history",
+  sub: "ECS logs · synthetic-foreign-ip",
+  columns: { last: "Last", account: "Account", ip: "IP", attempts: "Attempts", status: "Status" },
+  none: "No incident so far.",
+  attempts: (n: number) => `${n} attempts`,
+  push: {
+    title: "Phone notifications",
+    on: "This device gets a notification for every new incident.",
+    off: "Get a notification on this device for every new incident.",
+    enable: "Enable on this device",
+    disable: "Turn off on this device",
+    unsupported: "This browser can’t receive push notifications.",
+    unavailable: "Push isn’t configured on the server (VAPID keys).",
+    denied: "Notifications are blocked for this site in the browser settings.",
+    devices: (n: number) => `${n} device${n === 1 ? "" : "s"} subscribed`,
+  },
+} as const;

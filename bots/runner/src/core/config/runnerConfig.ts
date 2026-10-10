@@ -24,7 +24,7 @@ export function loadRunnerConfig(env: NodeJS.ProcessEnv): RunnerConfig {
   return {
     // Loopback only: the control API is never reachable from outside the machine.
     controlHost: "127.0.0.1",
-    controlPort: positiveInt(env.RUNNER_CONTROL_PORT, 9471),
+    controlPort: positiveInt(env.RUNNER_CONTROL_PORT, 7201),
     controlToken,
     stateDir: resolve(env.RUNNER_STATE_DIR ?? ".runner-state"),
     limits: {

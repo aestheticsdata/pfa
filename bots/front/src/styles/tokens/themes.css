@@ -1,0 +1,135 @@
+/* ============================================================================
+   Themes — two layers (PFA-127, handoff v5 §1).
+
+   1. bot-runner's own identity, "B light · terminal" (`.theme-runner`): every
+      auth screen, the app picker, and the fallback of an app without a theme.
+      It looks like no app on purpose.
+   2. One block per app (`.theme-pfa`, …): the app's NATIVE tokens (PFA's, copied
+      from its design tokens), then their MAPPING onto the semantic tokens below.
+      The whole panel switches the moment you are inside that app.
+
+   Components only ever read the semantic tokens (see colors.css). Adding an app
+   = one block here, a logo, an entry in the API's apps.json.
+   ============================================================================ */
+
+.theme-runner {
+  color-scheme: light;
+  --acc: #2f6fc4;
+  --acc-bg: rgb(47 111 196 / 0.08);
+  --bg: #eceef2;
+  --panel: #ffffff;
+  --panel2: #f3f5f8;
+  --hover: #eef2f8;
+  --line: rgb(23 27 36 / 0.55);
+  --line-soft: rgb(23 27 36 / 0.16);
+  --text: #171b24;
+  --muted: #3a4150;
+  --dim: #545b6b;
+  --faint: #8b919d;
+  --ok: var(--acc);
+  --ok-d: var(--acc);
+  --okbg: var(--acc-bg);
+  --okbg2: rgb(47 111 196 / 0.16);
+  --on-ok: #ffffff;
+  --warn: #9a6a12;
+  --warnbg: rgb(224 170 60 / 0.16);
+  --bad: #b4473a;
+  --badbg: rgb(180 71 58 / 0.07);
+  --badtx: #9c3b30;
+  --on-bad: #ffffff;
+  --info: var(--acc);
+  --infobg: var(--acc-bg);
+  --sans: var(--font-jetbrains), ui-monospace, monospace;
+  --mono: var(--font-jetbrains), ui-monospace, monospace;
+  --r-card: 0;
+  --r-ctl: 0;
+  --r-tag: 0;
+  /* The "1991computer" gradient: the sign-in button, the backdrop wordmark, the credit line. */
+  --brand-gradient: linear-gradient(110deg, #1fb5d6 0%, #2a8fd8 35%, #2f6fc4 70%, #1f4fa8 100%);
+  --brand-gradient-1991: linear-gradient(110deg, #1fb5d6, #2a8fd8);
+  --brand-gradient-computer: linear-gradient(110deg, #2a8fd8, #2f6fc4 50%, #1f4fa8);
+  --brand-gradient-credit: linear-gradient(110deg, #1fb5d6, #2f6fc4 60%, #1f4fa8);
+  --input-underline: rgb(23 27 36 / 0.35);
+  --shadow-auth: 0 1px 0 var(--line-soft), 0 12px 32px rgb(23 27 36 / 0.08);
+  /* The top bar's bottom rule: dashed in the terminal identity. */
+  --top-rule: 1px dashed var(--line);
+}
+
+.theme-pfa {
+  color-scheme: dark;
+  /* PFA's native tokens */
+  --pfa-bg: oklch(0.14 0.042 234);
+  --pfa-bg-elev: oklch(0.165 0.005 250);
+  --pfa-bg-hi: oklch(0.195 0.006 250);
+  --pfa-bg-hover: oklch(0.22 0.006 250);
+  --pfa-line: oklch(0.235 0.006 250);
+  --pfa-line-soft: oklch(0.2 0.006 250);
+  --pfa-ink: oklch(0.975 0.004 250);
+  --pfa-ink-2: oklch(0.78 0.005 250);
+  --pfa-ink-3: oklch(0.55 0.006 250);
+  --pfa-ink-4: oklch(0.4 0.006 250);
+  --pfa-accent: oklch(0.84 0.14 148);
+  --pfa-accent-d: oklch(0.55 0.1 148);
+  --pfa-accent-bg: oklch(0.84 0.14 148 / 0.1);
+  --pfa-accent-bg2: oklch(0.84 0.14 148 / 0.18);
+  --pfa-neg: oklch(0.72 0.17 25);
+  --pfa-neg-bg: oklch(0.72 0.17 25 / 0.12);
+  --pfa-exc: oklch(0.7 0.13 240);
+  --pfa-exc-bg: oklch(0.7 0.13 240 / 0.14);
+  /* … mapped onto the semantic tokens */
+  --bg: var(--pfa-bg);
+  --panel: var(--pfa-bg-elev);
+  --panel2: var(--pfa-bg-hi);
+  --hover: var(--pfa-bg-hover);
+  --line: var(--pfa-line);
+  --line-soft: var(--pfa-line-soft);
+  --text: var(--pfa-ink);
+  --muted: var(--pfa-ink-2);
+  --dim: var(--pfa-ink-3);
+  --faint: var(--pfa-ink-4);
+  --ok: var(--pfa-accent);
+  --ok-d: var(--pfa-accent-d);
+  --okbg: var(--pfa-accent-bg);
+  --okbg2: var(--pfa-accent-bg2);
+  --on-ok: oklch(0.18 0.01 148);
+  /* PFA has no warning colour: the back-office's own, expressed in PFA's palette. */
+  --warn: oklch(0.82 0.13 80);
+  --warnbg: oklch(0.82 0.13 80 / 0.12);
+  --bad: var(--pfa-neg);
+  --badbg: var(--pfa-neg-bg);
+  --badtx: oklch(0.84 0.06 25);
+  --on-bad: oklch(0.16 0.02 25);
+  --info: var(--pfa-exc);
+  --infobg: var(--pfa-exc-bg);
+  --sans: var(--font-geist), system-ui, sans-serif;
+  --mono: var(--font-geist-mono), ui-monospace, monospace;
+  --r-card: 14px;
+  --r-ctl: 6px;
+  --r-tag: 3px;
+  --top-rule: 1px solid var(--line-soft);
+  /* The 6-colour series of the action mix, in PFA's palette. */
+  --series-1: oklch(0.84 0.14 148);
+  --series-2: oklch(0.7 0.13 240);
+  --series-3: oklch(0.82 0.09 80);
+  --series-4: oklch(0.78 0.09 350);
+  --series-5: oklch(0.8 0.09 310);
+  --series-6: oklch(0.8 0.09 200);
+}
+
+/* An app with no theme of its own: the runner identity, its series included. */
+.theme-runner {
+  --series-1: #2f6fc4;
+  --series-2: #1fb5d6;
+  --series-3: #9a6a12;
+  --series-4: #b4473a;
+  --series-5: #6b5bb8;
+  --series-6: #3a8a5f;
+}
+
+/* Every themed surface, both layers: what's above the page is always on these. */
+:where(.theme-runner, .theme-pfa) {
+  --scrim: oklch(0.08 0.02 240 / 0.55);
+  --scrim-strong: oklch(0.08 0.02 240 / 0.7);
+  --shadow-float: 0 12px 32px oklch(0 0 0 / 0.4);
+  --shadow-bulk: 0 -8px 24px oklch(0 0 0 / 0.3);
+}

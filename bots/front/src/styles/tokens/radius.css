@@ -1,0 +1,8 @@
+/* Per theme: PFA rounds (14 / 6 / 3), the runner identity is square. */
+@theme inline {
+  --radius-card: var(--r-card);
+  --radius-ctl: var(--r-ctl);
+  --radius-tag: var(--r-tag);
+  --radius-menu: 10px;
+  --radius-hair: 1px;
+}

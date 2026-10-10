@@ -7,6 +7,8 @@ import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
 interface SyntheticSession {
   userId?: string;
   isSynthetic?: boolean;
+  /** Set at sign-in for bots (PFA-127), so a stolen-cookie alert names the bot. */
+  syntheticEmail?: string;
 }
 
 /**
@@ -41,7 +43,7 @@ export class SyntheticIpGuard implements CanActivate {
         "event.category": "intrusion_detection",
         "event.action": "synthetic-foreign-ip",
         "event.outcome": "failure",
-        "user.name": email,
+        "user.name": email ?? session?.syntheticEmail,
         "user.id": session?.userId,
         "client.ip": req.ip,
         "url.path": req.originalUrl,

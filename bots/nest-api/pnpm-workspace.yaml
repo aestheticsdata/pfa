@@ -1,0 +1,8 @@
+allowBuilds:
+  "@prisma/client": true
+  "@prisma/engines": true
+  prisma: true
+  "@nestjs/core": true
+  "@swc/core": true
+  "@parcel/watcher": false
+  unrs-resolver: false

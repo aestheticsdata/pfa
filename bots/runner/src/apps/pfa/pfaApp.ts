@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
+import { pfaAccounts } from "@apps/pfa/api/pfaAccounts";
 import { authenticate } from "@apps/pfa/api/pfaApi";
-import { PFA_DAILY_BOTS, PFA_SYNTHETIC_DOMAIN } from "@apps/pfa/persona/bots";
+import { PFA_DAILY_BOTS, PFA_SYNTHETIC_DOMAIN, PFA_TIME_ZONE } from "@apps/pfa/persona/bots";
 
 import type { PfaPersona } from "@apps/pfa/interfaces/pfaTypes";
 import type { AppDefinition } from "@core/interfaces/appTypes";
@@ -15,9 +16,13 @@ export function pfaApp(env: NodeJS.ProcessEnv): AppDefinition<PfaPersona> {
     id: "pfa",
     name: "PFA",
     baseUrl: (env.PFA_API_URL ?? "http://127.0.0.1:6100/api").replace(/\/$/, ""),
+    timeZone: PFA_TIME_ZONE,
+    // No new spending between 22:00 and 10:00 Paris time by default; changed from the back-office.
+    defaultQuietHours: { from: "22:00", to: "10:00" },
     syntheticDomain: PFA_SYNTHETIC_DOMAIN,
     bots: PFA_DAILY_BOTS,
     actionsDir: fileURLToPath(new URL("actions", import.meta.url)),
     authenticate,
+    accounts: pfaAccounts(env),
   };
 }

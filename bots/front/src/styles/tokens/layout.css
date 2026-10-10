@@ -1,0 +1,55 @@
+/* Breakpoints (handoff v5): mobile first. Below 700px is the phone layout (designed at 390,
+   holds at 360), `tablet:` 700–1099, `desktop:` ≥1100, `xl:` ≥1280 (host meta, Total column),
+   `wide:` ≥1600 (Metrics on 3 columns). */
+@theme {
+  --breakpoint-tablet: 700px;
+  --breakpoint-desktop: 1100px;
+  --breakpoint-xl: 1280px;
+  /* Overview: the 3 cards under Status go 3 across from here (2 + 1 below). */
+  --breakpoint-roomy: 1360px;
+  --breakpoint-wide: 1600px;
+
+  /* Fluid side gutter, shared by the top bar, the page, the drawer bar, sheets and the bulk bar. */
+  --spacing-gut: clamp(16px, 2.5vw, 32px);
+  /* Overview: the Controls column stays between 330 and 360px. */
+  --spacing-controls: clamp(330px, 21vw, 360px);
+  --spacing-drawer: 460px;
+  --spacing-auth: 380px;
+  --spacing-modal: 440px;
+  --spacing-picker: 880px;
+  /* The mobile nav sheet's links sit 8px wider than the gutter, so their hover reaches the edge. */
+  --spacing-sheet-nav: calc(clamp(16px, 2.5vw, 32px) - 8px);
+  /* Menus on a phone: as wide as the screen allows, 320px at most. */
+  --spacing-menu-mobile: min(320px, calc(100vw - 2 * clamp(16px, 2.5vw, 32px)));
+  --spacing-toast-max: calc(100vw - 2 * clamp(16px, 2.5vw, 32px));
+  /* Above the iPhone home indicator; higher still while the mobile bulk bar is up. */
+  --spacing-toast-bottom: calc(16px + env(safe-area-inset-bottom));
+  --spacing-toast-raised: calc(120px + env(safe-area-inset-bottom));
+  --spacing-safe-bottom: env(safe-area-inset-bottom);
+  --spacing-sheet-max: 92dvh;
+  --spacing-sheet-bottom: calc(16px + env(safe-area-inset-bottom));
+  /* The backdrop wordmark bleeds off the bottom edge by this much of its own height. */
+  --spacing-bleed: 0.14em;
+
+  --animate-blink: blink 1s steps(1) infinite;
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+}
+
+/* Grid templates the handoff draws with mixed tracks (fr + fixed + auto): named once, used as
+   `grid-cols-(--grid-incident)`. */
+:root {
+  --grid-overview: clamp(330px, 21vw, 360px) minmax(0, 1fr);
+  --grid-incident: minmax(0, 1.6fr) minmax(0, 1fr) 90px minmax(0, 1fr) auto;
+  --grid-daily-row: minmax(0, 1fr) auto 38px;
+  --grid-bot-row: 40px minmax(0, 1fr) auto;
+  --grid-by-action: minmax(0, 1fr) 120px 40px;
+  --grid-by-action-narrow: minmax(0, 1fr) 80px 40px;
+  --grid-request: 64px minmax(0, 1fr) 40px 54px;
+  --grid-mix: 12px minmax(0, 1fr) 56px 44px 12px minmax(0, 1fr) 56px 44px;
+  --grid-mix-narrow: 12px minmax(0, 1fr) 56px 44px;
+  --grid-limit: minmax(0, 1fr) auto;
+}

@@ -1,0 +1,7 @@
+node_modules
+dist
+generated
+.env
+ecosystem.config.cjs
+*.tsbuildinfo
+config/apps.json

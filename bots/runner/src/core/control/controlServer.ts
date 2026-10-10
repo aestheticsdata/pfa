@@ -2,11 +2,12 @@ import { createServer } from "node:http";
 import { HTTP_METHOD } from "@core/constants/http";
 import { isAuthorized } from "@core/control/controlAuth";
 import { logger } from "@core/log/logger";
+import { isValidQuietHours } from "@core/time/quietHours";
 
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
 import type { ControlServerOptions } from "@core/interfaces/controlTypes";
 
-const MAX_BODY_BYTES = 16 * 1024;
+const MAX_BODY_BYTES = 64 * 1024;
 
 class HttpError extends Error {
   constructor(
@@ -17,9 +18,17 @@ class HttpError extends Error {
   }
 }
 
+/** One request, decoded once: what the routes below match on. */
+interface Route {
+  req: IncomingMessage;
+  method: string;
+  /** Path segments, decoded: `/bots/saturnus/restart-session` → `["bots", "saturnus", "restart-session"]`. */
+  parts: string[];
+}
+
 /**
- * The runner's control API (start/stop, toggles, status) — for the back-office (PFA-127) and for
- * curl over SSH. Loopback only and token-gated: it is never routed by the public nginx.
+ * The runner's control API — for the back-office (PFA-127) and for curl over SSH. Loopback only and
+ * token-gated: it is never routed by the public nginx.
  */
 export function createControlServer<TPersona>(options: ControlServerOptions<TPersona>): Server {
   return createServer((req, res) => {
@@ -36,44 +45,130 @@ export function createControlServer<TPersona>(options: ControlServerOptions<TPer
 }
 
 async function handle<TPersona>(req: IncomingMessage, options: ControlServerOptions<TPersona>): Promise<unknown> {
+  // Zeus's liveness probe: no token, nothing logged, nothing about the runner in the answer.
+  if (req.method === HTTP_METHOD.get && req.url === "/health") {
+    return { status: "ok" };
+  }
   if (!isAuthorized(req.headers.authorization, options.token)) {
     logger.warn("control API: unauthorized request", { path: req.url, ip: req.socket.remoteAddress });
     throw new HttpError(401, "Unauthorized");
   }
-  const { runner } = options;
   const url = new URL(req.url ?? "/", "http://localhost");
-  const route = `${req.method} ${url.pathname}`;
-  const [, resource, id] = url.pathname.split("/");
+  const route: Route = {
+    req,
+    method: req.method ?? HTTP_METHOD.get,
+    parts: url.pathname.split("/").filter(Boolean).map(decodeURIComponent),
+  };
+  const answer = (await runnerRoutes(route, options)) ?? (await botRoutes(route, options));
+  if (answer === undefined) {
+    throw new HttpError(404, "Not found");
+  }
+  return answer;
+}
 
-  switch (route) {
-    case `${HTTP_METHOD.get} /status`:
+/** Runner-wide reads and settings. `undefined` = not one of these routes. */
+async function runnerRoutes<TPersona>(route: Route, { runner }: ControlServerOptions<TPersona>): Promise<unknown> {
+  const { req, method, parts } = route;
+  const [resource, sub] = parts;
+  const key = `${method} ${resource ?? ""}${parts.length > 1 ? "/*" : ""}`;
+
+  switch (key) {
+    case `${HTTP_METHOD.get} status`:
       return runner.status();
-    case `${HTTP_METHOD.get} /bots`:
-      return runner.snapshotBots();
-    case `${HTTP_METHOD.get} /actions`:
-      return runner.snapshotActions();
-    case `${HTTP_METHOD.get} /limits`:
+    case `${HTTP_METHOD.get} history`:
+      return runner.history();
+    case `${HTTP_METHOD.get} limits`:
       return runner.status().limits;
-    case `${HTTP_METHOD.get} /upload-budget`:
+    case `${HTTP_METHOD.get} upload-budget`:
       return runner.status().uploadBudget;
-    case `${HTTP_METHOD.post} /runner`: {
+    case `${HTTP_METHOD.get} actions`:
+      return runner.snapshotActions();
+    case `${HTTP_METHOD.get} quiet-hours`:
+      return runner.quietHours();
+    case `${HTTP_METHOD.put} quiet-hours`: {
+      const body = await readBody(req);
+      if (!isValidQuietHours(body)) {
+        throw new HttpError(400, '"from" and "to" must be distinct 24 h "HH:MM" times');
+      }
+      return runner.setQuietHours(body);
+    }
+    case `${HTTP_METHOD.post} runner`: {
       const running = readBoolean(await readBody(req), "running");
       await (running ? runner.start() : runner.stop());
       return runner.status();
     }
+    case `${HTTP_METHOD.put} target`:
+      return { target: await runner.setTarget(readNumber(await readBody(req), "target")) };
+    case `${HTTP_METHOD.put} ramp`: {
+      const body = await readBody(req);
+      return runner.setRamp({ step: readNumber(body, "step"), everySec: readNumber(body, "everySec") });
+    }
+    case `${HTTP_METHOD.post} actions/*`:
+      if (sub === "enable-all") {
+        await runner.enableAllActions();
+        return runner.snapshotActions();
+      }
+      return undefined;
+    case `${HTTP_METHOD.patch} actions/*`: {
+      const enabled = readBoolean(await readBody(req), "enabled");
+      if (!sub || !(await runner.setActionEnabled(sub, enabled))) {
+        throw new HttpError(404, "Unknown action");
+      }
+      return { action: sub, enabled };
+    }
+  }
+  return undefined;
+}
+
+/** Bots and their accounts. `undefined` = not one of these routes. */
+async function botRoutes<TPersona>(route: Route, { runner }: ControlServerOptions<TPersona>): Promise<unknown> {
+  const { req, method, parts } = route;
+  const [resource, id, verb] = parts;
+
+  if (resource === "bots") {
+    if (method === HTTP_METHOD.get && !id) {
+      return runner.snapshotBots();
+    }
+    if (method === HTTP_METHOD.post && id === "bulk") {
+      const body = await readBody(req);
+      return runner.setBotsEnabled({ ids: readIds(body), enabled: readBoolean(body, "enabled") });
+    }
+    if (!id) {
+      return undefined;
+    }
+    if (method === HTTP_METHOD.get && !verb) {
+      return runner.detail(id) ?? notFound("bot");
+    }
+    if (method === HTTP_METHOD.patch && !verb) {
+      const enabled = readBoolean(await readBody(req), "enabled");
+      return (await runner.setBotEnabled(id, enabled)) ? { bot: id, enabled } : notFound("bot");
+    }
+    if (method === HTTP_METHOD.post && verb === "restart-session") {
+      return runner.restartSession(id) ? { bot: id, restarted: true } : notFound("bot");
+    }
   }
 
-  if (req.method === HTTP_METHOD.patch && id && (resource === "bots" || resource === "actions")) {
-    const enabled = readBoolean(await readBody(req), "enabled");
-    const name = decodeURIComponent(id);
-    const found =
-      resource === "bots" ? await runner.setBotEnabled(name, enabled) : await runner.setActionEnabled(name, enabled);
-    if (!found) {
-      throw new HttpError(404, `Unknown ${resource === "bots" ? "bot" : "action"}`);
+  if (resource === "accounts" && id) {
+    const purge = method === HTTP_METHOD.delete && !verb;
+    const disable = method === HTTP_METHOD.post && verb === "disable";
+    if (!purge && !disable) {
+      return undefined;
     }
-    return { [resource === "bots" ? "bot" : "action"]: name, enabled };
+    try {
+      return (await runner.closeAccount(id, purge))
+        ? { bot: id, result: purge ? "purged" : "disabled" }
+        : notFound("bot");
+    } catch (error) {
+      if (error instanceof HttpError) throw error;
+      // The app refused or could not be reached: say so, the operator can retry.
+      throw new HttpError(502, `The app did not ${purge ? "purge" : "disable"} the account: ${String(error)}`);
+    }
   }
-  throw new HttpError(404, "Not found");
+  return undefined;
+}
+
+function notFound(what: string): never {
+  throw new HttpError(404, `Unknown ${what}`);
 }
 
 async function readBody(req: IncomingMessage): Promise<unknown> {
@@ -99,6 +194,22 @@ function readBoolean(body: unknown, field: string): boolean {
     throw new HttpError(400, `"${field}" must be a boolean`);
   }
   return value;
+}
+
+function readNumber(body: unknown, field: string): number {
+  const value = (body as Record<string, unknown> | null)?.[field];
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+    throw new HttpError(400, `"${field}" must be a non-negative number`);
+  }
+  return value;
+}
+
+function readIds(body: unknown): string[] {
+  const value = (body as Record<string, unknown> | null)?.ids;
+  if (!Array.isArray(value) || !value.every((id) => typeof id === "string") || value.length > 1000) {
+    throw new HttpError(400, '"ids" must be an array of bot ids');
+  }
+  return value as string[];
 }
 
 function send(res: ServerResponse, status: number, body: unknown): void {
