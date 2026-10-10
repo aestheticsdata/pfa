@@ -49,13 +49,14 @@ const RecoverForm = () => {
           <AuthField
             label={AUTH_TEXT.fields.passphrase}
             name="recoveryPassphrase"
+            secret
             autoComplete="off"
             error={state.fields.recoveryPassphrase}
           />
           <AuthField
             label={AUTH_TEXT.fields.newPassword}
             name="newPassword"
-            type="password"
+            secret
             autoComplete="new-password"
             error={state.fields.newPassword}
             hint={AUTH_TEXT.setup.passwordHint}

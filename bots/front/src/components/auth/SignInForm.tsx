@@ -48,7 +48,7 @@ const SignInForm = ({ notice, next }: SignInFormProps) => {
       <AuthField
         label={AUTH_TEXT.fields.password}
         name="password"
-        type="password"
+        secret
         autoComplete="current-password"
       />
       <AuthSubmit disabled={locked || pending}>{AUTH_TEXT.signIn.submit}</AuthSubmit>
