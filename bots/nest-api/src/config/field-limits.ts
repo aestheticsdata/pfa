@@ -5,13 +5,12 @@ export const FIELD_LIMITS = {
 
 /**
  * The password and the recovery passphrase, chosen at setup (PFA-127 handoff: password ≥ 12,
- * passphrase ≥ 4 words). `max` is bcrypt's: it hashes the first 72 bytes and ignores the rest, so
+ * passphrase free-form, only non-empty). `max` is bcrypt's: it hashes the first 72 bytes and ignores the rest, so
  * accepting more would check part of a secret while its owner believes all of it counts. Sign-in
  * bounds neither: a rule only ever applies to a secret being chosen, never to one being proved.
  */
 export const SECRET_RULES = {
   passwordMin: 12,
-  passphraseMinWords: 4,
   max: 72,
 } as const;
 

@@ -4,7 +4,7 @@ import { AUTH_ERROR } from "@contracts/authErrors";
 import { ApiError } from "@lib/api/apiError";
 import { api, apiResponse } from "@lib/api/server";
 import { clearSessionCookie, relaySessionCookie } from "@lib/api/sessionCookie";
-import { AUTH_RULES, isEmail, wordCount } from "@lib/auth/authRules";
+import { AUTH_RULES, isEmail } from "@lib/auth/authRules";
 import { AUTH_TEXT } from "@text/auth";
 import { redirect } from "next/navigation";
 
@@ -42,8 +42,7 @@ export async function setup(_previous: SetupState, form: FormData): Promise<Setu
   if (!isEmail(email)) fields.email = AUTH_TEXT.setup.invalidEmail;
   if (password.length < AUTH_RULES.passwordMin) fields.password = AUTH_TEXT.setup.tooShort;
   if (text(form, "confirm") !== password) fields.confirm = AUTH_TEXT.setup.mismatch;
-  if (wordCount(recoveryPassphrase) < AUTH_RULES.passphraseMinWords)
-    fields.recoveryPassphrase = AUTH_TEXT.setup.fewWords;
+  if (!recoveryPassphrase.trim()) fields.recoveryPassphrase = AUTH_TEXT.setup.required;
   if (Object.keys(fields).length > 0) return { fields, message: null, email };
 
   const res = await apiResponse({ path: "/auth/setup", method: "POST", body: { email, password, recoveryPassphrase } });
