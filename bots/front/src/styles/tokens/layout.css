@@ -30,6 +30,8 @@
   --spacing-sheet-bottom: calc(16px + env(safe-area-inset-bottom));
   /* The backdrop wordmark bleeds off the bottom edge by this much of its own height. */
   --spacing-bleed: 0.14em;
+  /* The scrollbar's rail: a 3px thumb with 3px of clearance each side (Zeus's convention). */
+  --spacing-scroll-bar: 9px;
 
   --animate-blink: blink 1s steps(1) infinite;
   @keyframes blink {

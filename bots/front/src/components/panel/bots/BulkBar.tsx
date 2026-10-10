@@ -36,7 +36,7 @@ const BulkBar = ({ app }: BulkBarProps) => {
       <div className="h-37.5 tablet:hidden" />
       <div
         data-testid="bulk-bar"
-        className="fixed inset-x-0 bottom-0 z-7 grid grid-cols-2 gap-2 border-t border-ok-d bg-bulk px-gut pt-2.5 pb-bulk shadow-bulk tablet:static tablet:flex tablet:flex-wrap tablet:items-center tablet:gap-2.5 tablet:border-b tablet:border-line-soft tablet:bg-okbg tablet:px-3.5 tablet:py-2 tablet:shadow-none"
+        className="fixed inset-x-0 bottom-0 z-6 grid grid-cols-2 gap-2 border-t border-ok-d bg-bulk px-gut pt-2.5 pb-bulk shadow-bulk tablet:static tablet:flex tablet:flex-wrap tablet:items-center tablet:gap-2.5 tablet:border-b tablet:border-line-soft tablet:bg-okbg tablet:px-3.5 tablet:py-2 tablet:shadow-none"
       >
         <b className="self-center font-mono text-body">{BOTS_TEXT.selected(count)}</b>
         <Button

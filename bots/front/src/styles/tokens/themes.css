@@ -12,7 +12,11 @@
    = one block here, a logo, an entry in the API's apps.json.
    ============================================================================ */
 
-.theme-runner {
+/* Each block also lands on <html> through `:root:has(…)`: the page's own scrollbar is drawn by the
+   root, above the element that carries the theme, and must read the theme of what it scrolls. Same
+   specificity for every app, so the app's block (later in the file) wins over the runner's. */
+.theme-runner,
+:root:has(.theme-runner) {
   color-scheme: light;
   --acc: #2f6fc4;
   --acc-bg: rgb(47 111 196 / 0.08);
@@ -55,7 +59,8 @@
   --top-rule: 1px dashed var(--line);
 }
 
-.theme-pfa {
+.theme-pfa,
+:root:has(.theme-pfa) {
   color-scheme: dark;
   /* PFA's native tokens */
   --pfa-bg: oklch(0.14 0.042 234);
@@ -117,7 +122,8 @@
 }
 
 /* An app with no theme of its own: the runner identity, its series included. */
-.theme-runner {
+.theme-runner,
+:root:has(.theme-runner) {
   --series-1: #2f6fc4;
   --series-2: #1fb5d6;
   --series-3: #9a6a12;
