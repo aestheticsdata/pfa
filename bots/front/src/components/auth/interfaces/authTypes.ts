@@ -20,6 +20,8 @@ export interface AuthFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   name: string;
   error?: string;
   hint?: string;
+  /** A secret: masked, with an eye button to show or hide what was typed. */
+  secret?: boolean;
 }
 
 export interface MessageBoxProps {

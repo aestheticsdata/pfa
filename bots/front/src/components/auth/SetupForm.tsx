@@ -36,7 +36,7 @@ const SetupForm = () => {
       <AuthField
         label={AUTH_TEXT.fields.password}
         name="password"
-        type="password"
+        secret
         autoComplete="new-password"
         error={fields.password}
         hint={AUTH_TEXT.setup.passwordHint}
@@ -44,13 +44,14 @@ const SetupForm = () => {
       <AuthField
         label={AUTH_TEXT.fields.confirm}
         name="confirm"
-        type="password"
+        secret
         autoComplete="new-password"
         error={fields.confirm}
       />
       <AuthField
         label={AUTH_TEXT.fields.passphrase}
         name="recoveryPassphrase"
+        secret
         autoComplete="off"
         error={fields.recoveryPassphrase}
       />

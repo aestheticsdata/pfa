@@ -11,6 +11,10 @@ export const AUTH_TEXT = {
     passphrase: "Recovery passphrase",
     newPassword: "New password",
   },
+  reveal: {
+    show: (label: string) => `Show ${label.toLowerCase()}`,
+    hide: (label: string) => `Hide ${label.toLowerCase()}`,
+  },
   signIn: {
     title: "Sign in",
     submit: "Sign in",

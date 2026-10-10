@@ -53,3 +53,8 @@ export interface LocalTimeProps {
   /** `TIME_FORMAT.clock` (17:56:20, default) or `TIME_FORMAT.day` (12/10 17:56). */
   format?: string;
 }
+
+export interface EyeIconProps {
+  /** Struck through: the secret is visible, the button hides it. */
+  crossed: boolean;
+}
