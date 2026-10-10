@@ -1,4 +1,7 @@
-import { unlink } from "fs/promises";
+import { mkdtemp, unlink } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
+import sharp from "sharp";
 import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 
 jest.mock("fs/promises", () => ({
@@ -62,5 +65,38 @@ describe("ReceiptFilesService.release", () => {
     await service.release("user-1", ["a-r.jpg"]);
 
     expect(deleteFile).toHaveBeenCalledWith("/backup/user-1/a-r.jpg");
+  });
+});
+
+/**
+ * Stored receipts are downsized to 1500px on their longest side — never enlarged (PFA-124): a small
+ * picture is kept at its own size instead of being blown up to ~25× its weight.
+ */
+describe("ReceiptFilesService.store", () => {
+  const makeService = () => {
+    const config = { getOrThrow: () => ({ invoicesPath: "/invoices" }) };
+    return new ReceiptFilesService({} as never, config as never, { enabled: false } as never);
+  };
+
+  const jpeg = async (dir: string, size: { width: number; height: number }) => {
+    const path = `${dir}/upload-${size.width}.jpg`;
+    await sharp({ create: { ...size, channels: 3, background: "#eeeeee" } })
+      .jpeg()
+      .toFile(path);
+    return path;
+  };
+
+  it("keeps a small picture at its own size", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "receipts-"));
+    const stored = await makeService().store(await jpeg(dir, { width: 128, height: 192 }), "upload-128.jpg", "u1");
+    const meta = await sharp(`${dir}/${stored}`).metadata();
+    expect([meta.width, meta.height]).toEqual([128, 192]);
+  });
+
+  it("still downsizes a big photo", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "receipts-"));
+    const stored = await makeService().store(await jpeg(dir, { width: 2000, height: 3000 }), "upload-2000.jpg", "u1");
+    const meta = await sharp(`${dir}/${stored}`).metadata();
+    expect(meta.height).toBe(1500);
   });
 });
