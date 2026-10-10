@@ -55,7 +55,7 @@ const DAILY_PERSONAS: Record<string, Omit<PfaPersona, "receiptsPerWeek">> = {
       item("Dry cleaning", home, { range: [8, 25], weight: 1 }),
     ],
   },
-  mercurius: {
+  minerva: {
     description: "Goes out: restaurants, cinema, concerts, museums",
     catalog: [
       item("Restaurant", restaurants, { range: [18, 90], weight: 6 }),

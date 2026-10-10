@@ -24,7 +24,7 @@ describe("PFA guardrails", () => {
 
   it("has four daily bots on the synthetic domain, buying only from the category pool", () => {
     const pool = Object.values(CATEGORIES).map((category) => category.name);
-    expect(PFA_DAILY_BOTS.map((bot) => bot.id)).toEqual(["saturnus", "ceres", "janus", "mercurius"]);
+    expect(PFA_DAILY_BOTS.map((bot) => bot.id)).toEqual(["saturnus", "ceres", "janus", "minerva"]);
     for (const bot of PFA_DAILY_BOTS) {
       expect(isSyntheticEmail(bot.email, PFA_SYNTHETIC_DOMAIN)).toBe(true);
       for (const item of bot.persona.catalog) {
