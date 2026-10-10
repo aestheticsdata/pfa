@@ -65,7 +65,7 @@ function mockApps(): AppEntry[] {
       id: "pfa",
       name: "pfa",
       host: "ks-b",
-      address: "127.0.0.1:7201",
+      address: "127.0.0.1:7300",
       theme: "pfa",
       timeZone: "Europe/Paris",
       runner: new SimulatedRunnerClient({ seed: 1991, populated: true }),

@@ -6,7 +6,7 @@
 const config = {
   // 32+ characters — `openssl rand -hex 32`. The back-office API presents it as PFA_RUNNER_TOKEN.
   RUNNER_CONTROL_TOKEN: "",
-  RUNNER_CONTROL_PORT: "7201",
+  RUNNER_CONTROL_PORT: "7300",
 
   // Outside the release folders, so a deploy never touches the bots' passwords or the kill switch.
   RUNNER_STATE_DIR: "/var/www/bots/state",

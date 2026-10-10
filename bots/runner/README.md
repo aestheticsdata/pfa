@@ -33,7 +33,7 @@ Node 22+. `pnpm install`, then copy `.env.example` to `.env` (or export the vari
 pnpm test        # unit tests: guards, caps, registry, engine, control API
 pnpm typecheck
 pnpm lint
-pnpm start       # the runner + its control API on 127.0.0.1:7201
+pnpm start       # the runner + its control API on 127.0.0.1:7300
 pnpm bot:once -- saturnus 5   # dev: one visit of one bot, now, 5 actions
 ```
 

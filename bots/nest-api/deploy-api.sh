@@ -46,11 +46,12 @@ APPS_FILE="config/apps.json"
 ######################################
 # Reporting to Zeus (COS-459)
 ######################################
-# The back-office's slug in Zeus's port registry, and which part of it this script deploys. Zeus refuses a
+# This part's slug in Zeus's port registry — the stack is three apps named after their pm2 processes
+# (bots-nest-api, bots-front, bots-runner), so the fleet board can tell them apart. Zeus refuses a
 # report naming an app the registry has never heard of; an unregistered *role* it records with a
 # warning instead, because that means the registry is behind the box and dropping it would hide
 # exactly that.
-ZEUS_APP_NAME="${ZEUS_APP_NAME:-bots}"
+ZEUS_APP_NAME="${ZEUS_APP_NAME:-bots-nest-api}"
 ZEUS_ROLE="api"
 
 # **Zeus's** own files on ks-b, as pfa's scripts read them: the back-office API sends Zeus no cron

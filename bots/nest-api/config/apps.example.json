@@ -5,7 +5,7 @@
     "host": "ks-b",
     "theme": "pfa",
     "timeZone": "Europe/Paris",
-    "runner": { "url": "http://127.0.0.1:7201", "tokenEnv": "PFA_RUNNER_TOKEN" },
+    "runner": { "url": "http://127.0.0.1:7300", "tokenEnv": "PFA_RUNNER_TOKEN" },
     "alertLogs": "/home/debian/.pm2/logs/pfa-nest-api-out-*.log",
     "allowedIps": "51.75.118.52"
   }

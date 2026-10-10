@@ -8,7 +8,7 @@ export interface AppSummary {
   id: string;
   name: string;
   host: string;
-  /** The runner's control address (`127.0.0.1:7201`). */
+  /** The runner's control address (`127.0.0.1:7300`). */
   address: string;
   /** Theme class suffix (`pfa` → `.theme-pfa`); null = the bot-runner identity. */
   theme: string | null;

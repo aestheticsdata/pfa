@@ -44,13 +44,15 @@ ECOSYSTEM_REMOTE_NAME="runner.ecosystem.config.cjs"
 ######################################
 # Reporting to Zeus (COS-459)
 ######################################
-# The back-office's slug in Zeus's port registry, and which part of it this script deploys. Zeus refuses a
+# The runner's slug in Zeus's port registry, and which part of it this script deploys. Zeus refuses a
 # report naming an app the registry has never heard of; an unregistered *role* it records with a
 # warning instead, because that means the registry is behind the box and dropping it would hide
 # exactly that.
-ZEUS_APP_NAME="${ZEUS_APP_NAME:-bots}"
-# `api`: Zeus knows two roles, `api` and `front`, and refuses any other in a report. The runner is
-# registered as the app's second `api` service, on 7201.
+# The stack is three apps in Zeus named after their pm2 processes (bots-nest-api, bots-front,
+# bots-runner), so the fleet board can tell them apart. Its own block too (7300), since Zeus's
+# convention puts an API on its block's first port.
+ZEUS_APP_NAME="${ZEUS_APP_NAME:-bots-runner}"
+# `api`: Zeus knows two roles, `api` and `front`, and refuses any other in a report.
 ZEUS_ROLE="api"
 
 # **Zeus's** own files on ks-b, as pfa's scripts read them: the back-office API sends Zeus no cron
@@ -68,7 +70,7 @@ ZEUS_ENV_FILE="${ZEUS_ENV_FILE:-/var/www/zeus/nest-api/.env}"
 # `write_deploy_log` because the report to Zeus measures its commit range from the same marker, and
 # two independent resolutions of the same baseline is how they drift apart.
 DEPLOY_LOG_DIR="$API_ROOT/deploy-logs"
-# `runner`, not `$ZEUS_ROLE`: that role is the API's too, and the two must not share a marker.
+# `runner`, not `$ZEUS_ROLE`: both write into /var/www/bots/deploy-logs beside the API's own files.
 DEPLOY_LOG_FILE="$DEPLOY_LOG_DIR/deploys-runner.txt"
 DEPLOY_MARKER="$DEPLOY_LOG_DIR/.last-runner"
 
@@ -675,7 +677,7 @@ EOF
   zeus_report "success" || log "⚠️  Zeus was not told about this deploy (non-fatal)"
 
   log "✅ Runner deployment completed successfully"
-  log "ℹ️  Runner control API on 127.0.0.1:7201 (loopback only). The kill switch is persisted: a"
+  log "ℹ️  Runner control API on 127.0.0.1:7300 (loopback only). The kill switch is persisted: a"
   log "    deploy restarts the runner in the state it was left in — off on the very first start."
   log "ℹ️  Previous version is available in: $NEST_BACKUP_DIR"
   log "ℹ️  You can manually rollback with: ./deploy-runner.sh rollback"
