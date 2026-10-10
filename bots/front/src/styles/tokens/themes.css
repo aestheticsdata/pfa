@@ -55,6 +55,7 @@
   --brand-gradient-credit: linear-gradient(110deg, #1fb5d6, #2f6fc4 60%, #1f4fa8);
   --input-underline: rgb(23 27 36 / 0.35);
   --shadow-auth: 0 1px 0 var(--line-soft), 0 12px 32px rgb(23 27 36 / 0.08);
+  --shadow-header: 0 6px 18px rgb(23 27 36 / 0.1);
   /* The top bar's bottom rule: dashed in the terminal identity. */
   --top-rule: 1px dashed var(--line);
 }
@@ -138,4 +139,6 @@
   --scrim-strong: oklch(0.08 0.02 240 / 0.7);
   --shadow-float: 0 12px 32px oklch(0 0 0 / 0.4);
   --shadow-bulk: 0 -8px 24px oklch(0 0 0 / 0.3);
+  /* Under the fixed top bar: the page scrolls beneath it. Dark themes need it deep to show at all. */
+  --shadow-header: 0 10px 28px oklch(0 0 0 / 0.55);
 }
