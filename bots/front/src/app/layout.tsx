@@ -16,12 +16,20 @@ export const metadata: Metadata = {
   title: "bot-runner · admin",
   robots: { index: false, follow: false },
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/bot-runner.svg", type: "image/svg+xml" },
+    ],
+    apple: "/bot-runner-180.png",
+  },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
+  themeColor: "#171b24",
 };
 
 /** The fonts of both theme layers, loaded once; each theme picks its own through `--sans` / `--mono`. */
