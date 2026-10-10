@@ -9,6 +9,7 @@ import { RedisService } from "@redis/redis.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 import { SignupGuard } from "@users/guards/signup.guard";
+import { isSyntheticEmail } from "@users/synthetic-email.util";
 import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@users/csrf-token.util";
 
 import type { SignInResponse } from "@users/users.service";
@@ -59,6 +60,13 @@ export class UsersController {
     else this.logger.info(line, `${event.action} succeeded`);
   }
 
+  /** `isSynthetic` rides the session so SyntheticIpGuard can check every later request of a bot. */
+  private openSession(req: Request, result: SignInResponse): void {
+    const session = req.session as { userId?: string; isSynthetic?: boolean };
+    session.userId = result.user.id;
+    session.isSynthetic = isSyntheticEmail(result.user.email);
+  }
+
   @Get("me")
   @UseGuards(SessionAuthGuard)
   async me(@Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
@@ -98,7 +106,7 @@ export class UsersController {
     }
 
     await this.redisService.clearSessionsForUser(result.user.id);
-    (req.session as { userId?: string }).userId = result.user.id;
+    this.openSession(req, result);
     this.auth({ action: "user-login", outcome: "success", email: dto.email, userId: result.user.id }, req);
 
     return {
@@ -113,7 +121,7 @@ export class UsersController {
   async addUser(@Body() dto: AddUserDto, @Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
     const result = await this.usersService.addUser(dto);
     await this.redisService.clearSessionsForUser(result.user.id);
-    (req.session as { userId?: string }).userId = result.user.id;
+    this.openSession(req, result);
     // An account being created on a single-user instance is the one event worth never missing.
     this.auth({ action: "user-signup", outcome: "success", email: dto.email, userId: result.user.id }, req);
 
