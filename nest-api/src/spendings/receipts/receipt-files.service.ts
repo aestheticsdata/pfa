@@ -65,8 +65,12 @@ export class ReceiptFilesService {
 
     await sharp(filepath)
       .resize({
-        fit: sharp.fit.contain,
+        // `inside` + `withoutEnlargement`: downsize only. A small picture used to be blown up to
+        // 1500px, storing ~25× its own weight for nothing (the synthetic users' receipts came out at
+        // 61 KB — PFA-124); `contain` would keep it small but pad the canvas to 1500px instead.
+        fit: sharp.fit.inside,
         [biggerSide]: biggerSideSize,
+        withoutEnlargement: true,
       })
       .toFile(outputPath);
 

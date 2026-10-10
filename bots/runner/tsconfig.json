@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    // Only so the API's DTO classes (imported as types, see apps/pfa/api) typecheck as NestJS does.
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "noEmit": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@core/*": ["src/core/*"],
+      "@apps/*": ["src/apps/*"],
+      "@cli/*": ["src/cli/*"],
+      "@pfa-api/*": ["../../nest-api/src/*"],
+      "@config/*": ["../../nest-api/src/config/*"]
+    }
+  },
+  "include": ["src/**/*.ts", "vitest.config.ts"]
+}
