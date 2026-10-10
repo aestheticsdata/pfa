@@ -20,7 +20,7 @@ const TopBar = ({ header, email }: TopBarProps) => {
   const items = navItems(header);
   const { app } = header;
   return (
-    <header className="rule-b sticky top-0 z-7 flex flex-nowrap bg-bg items-center gap-2 px-gut py-2 tablet:flex-wrap tablet:gap-x-3.5 tablet:gap-y-3 desktop:flex-nowrap">
+    <header className="rule-b sticky top-0 z-7 flex flex-nowrap bg-bg shadow-header items-center gap-2 px-gut py-2 tablet:flex-wrap tablet:gap-x-3.5 tablet:gap-y-3 desktop:flex-nowrap">
       <span className="hidden items-center gap-2.5 whitespace-nowrap font-mono text-tiny font-semibold uppercase tracking-brand text-dim after:h-5 after:w-px after:bg-line tablet:flex">
         {PANEL_TEXT.wordmark}
       </span>

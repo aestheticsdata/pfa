@@ -36,6 +36,7 @@
   --shadow-float: var(--shadow-float);
   --shadow-auth: var(--shadow-auth);
   --shadow-bulk: var(--shadow-bulk);
+  --shadow-header: var(--shadow-header);
   --font-sans: var(--sans);
   --font-mono: var(--mono);
 }
