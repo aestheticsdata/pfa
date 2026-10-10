@@ -1,6 +1,14 @@
-import { BOT_KIND, BOT_STATE } from "@core/constants/bot";
+import { BOT_KIND, BOT_STATE, LOAD_PACE } from "@core/constants/bot";
 import { BotBlockedError, SessionExpiredError } from "@core/engine/errors";
-import { actionsPerWake, nextWakeAt, thinkTimeMs } from "@core/engine/schedule";
+import { planRamp } from "@core/engine/ramp";
+import {
+  actionsPerWake,
+  burstThinkTimeMs,
+  burstWakeAt,
+  firstVisitDelayMs,
+  nextWakeAt,
+  thinkTimeMs,
+} from "@core/engine/schedule";
 import { assertSyntheticEmail } from "@core/guards/syntheticEmail";
 import { AppClient } from "@core/http/appClient";
 import { logger } from "@core/log/logger";
@@ -9,7 +17,15 @@ import { Rng } from "@core/random/rng";
 import { isQuietTime, nextQuietChange } from "@core/time/quietHours";
 
 import type { ActionContext, ActionSnapshot, BotAction, BotMemory } from "@core/interfaces/actionTypes";
-import type { BotDetail, BotProfile, BotSnapshot, BotState, BotToggle, BulkResult } from "@core/interfaces/botTypes";
+import type {
+  BotDetail,
+  BotProfile,
+  BotSnapshot,
+  BotState,
+  BotToggle,
+  BulkResult,
+  LoadPace,
+} from "@core/interfaces/botTypes";
 import type { RequestRecord } from "@core/interfaces/httpTypes";
 import type { ActivityBucket, ActivityPoint, BotActivityBucket, RecentRequest } from "@core/interfaces/metricsTypes";
 import type {
@@ -21,7 +37,8 @@ import type {
 } from "@core/interfaces/runnerTypes";
 import type { QuietHours, QuietHoursSnapshot } from "@core/interfaces/timeTypes";
 
-const TICK_MS = 5_000;
+/** One second: the ramp's interval can be as short as that. */
+const TICK_MS = 1_000;
 const MINUTE_MS = 60_000;
 /** The back-office's charts: the runner's last 80 s in 1-second slices, each bot's last 30 s in 2-second ones. */
 const RUNNER_SLICE_MS = 1_000;
@@ -31,6 +48,12 @@ const BOT_SLICES = 15;
 const RECENT_REQUESTS = 14;
 const RPS_WINDOW_MS = 10_000;
 const DEFAULT_RAMP: RampSettings = { step: 10, everySec: 30 };
+/**
+ * Backpressure: at most this many visits at once, every bot together. A bot whose time has come
+ * while the pool is full waits for the next tick, so 500 bots never open 500 visits in one second
+ * — the generator must not fall over before the server it is testing.
+ */
+const MAX_ACTIVE_VISITS = 50;
 
 interface BotRuntime<TPersona> {
   profile: BotProfile<TPersona>;
@@ -68,6 +91,11 @@ export class Runner<TPersona = unknown> {
   private readonly recentActions: number[] = [];
   private readonly recentErrors: number[] = [];
   private readonly recentRequests: number[] = [];
+  /** Load bots the ramp has brought up, and their ramp order (the first `maxBots` of the app's). */
+  private readonly spawned = new Set<string>();
+  private readonly loadOrder: string[] = [];
+  private lastStepAt = 0;
+  private activeVisits = 0;
   private readonly activity = new TimeBuckets<ActivityBucket>({
     bucketMs: RUNNER_SLICE_MS,
     size: RUNNER_SLICES,
@@ -80,9 +108,13 @@ export class Runner<TPersona = unknown> {
     if (app.bots.length > limits.maxBots) {
       throw new Error(`${app.bots.length} bots configured, above the hard cap of ${limits.maxBots}`);
     }
-    for (const profile of app.bots) {
+    for (const profile of [...app.bots, ...(app.loadBots ?? []).slice(0, limits.maxBots)]) {
       assertSyntheticEmail(profile.email, app.syntheticDomain);
+      if (this.bots.has(profile.id)) {
+        throw new Error(`Two bots share the id "${profile.id}"`);
+      }
       this.bots.set(profile.id, this.createRuntime(profile));
+      if (profile.kind === BOT_KIND.load) this.loadOrder.push(profile.id);
     }
     for (const action of deps.actions) {
       this.actionStats.set(action.name, { runs: 0, errors: 0 });
@@ -117,6 +149,9 @@ export class Runner<TPersona = unknown> {
     for (const bot of this.bots.values()) {
       bot.nextWakeAt = null;
     }
+    // Load bots come up again with the ramp when the runner restarts, never all at once.
+    this.spawned.clear();
+    this.lastStepAt = 0;
     logger.info("runner stopped", { app: this.deps.app.id });
   }
 
@@ -158,11 +193,41 @@ export class Runner<TPersona = unknown> {
     await this.deps.saveState(this.state);
   }
 
-  /** The load-bot target, clamped to the hard cap. Load bots themselves arrive with PFA-128. */
+  /**
+   * The load-bot target, clamped to the hard cap. The ramp gets there on its own: up `step` at a
+   * time, down at once (the excess stops after its current action). Daily bots are never counted.
+   */
   async setTarget(target: number): Promise<number> {
     this.state.target = Math.max(0, Math.min(this.deps.limits.maxBots, Math.floor(target)));
     await this.deps.saveState(this.state);
+    this.rampNow();
     return this.state.target;
+  }
+
+  /**
+   * The "Load bots" switch: off stops every load bot at once and keeps the target; on brings the
+   * target back up through the ramp. Daily bots are not touched — that is the kill switch's job.
+   */
+  async setLoadEnabled(enabled: boolean): Promise<boolean> {
+    this.state.loadEnabled = enabled;
+    await this.deps.saveState(this.state);
+    // Back on: the first step comes up now, the rest at the ramp's pace.
+    if (enabled) this.lastStepAt = 0;
+    this.rampNow();
+    logger.info(enabled ? "load bots on" : "load bots off", { app: this.deps.app.id, target: this.state.target ?? 0 });
+    return enabled;
+  }
+
+  /** Changes how the load bots behave; the ones already up take the new pace from their next visit. */
+  async setLoadPace(pace: LoadPace): Promise<LoadPace> {
+    this.state.loadPace = pace;
+    await this.deps.saveState(this.state);
+    const now = Date.now();
+    for (const id of this.spawned) {
+      const bot = this.bots.get(id);
+      if (bot && !bot.busy) bot.nextWakeAt = new Date(now + firstVisitDelayMs(bot.rng, this.isBurst()));
+    }
+    return pace;
   }
 
   async setRamp(ramp: RampSettings): Promise<RampSettings> {
@@ -255,16 +320,18 @@ export class Runner<TPersona = unknown> {
       return;
     }
     bot.busy = true;
+    this.activeVisits += 1;
     bot.state = BOT_STATE.active;
     const count = options.actions ?? actionsPerWake(bot.rng);
     try {
       for (let i = 0; i < count; i++) {
-        // The kill switch holds mid-visit too: the visit ends after the action in progress.
-        if (!this.state.running && !options.force) {
+        // The kill switch — and, for a load bot, the ramp taking it down — holds mid-visit too:
+        // the visit ends after the action in progress.
+        if (!options.force && !this.mayVisit(bot)) {
           break;
         }
         if (i > 0) {
-          await sleep(options.thinkTimeMs ?? thinkTimeMs(bot.rng));
+          await sleep(options.thinkTimeMs ?? this.thinkTime(bot));
         }
         await this.ensureSignedIn(bot);
         await this.runOneAction(bot);
@@ -278,6 +345,7 @@ export class Runner<TPersona = unknown> {
       }
     } finally {
       bot.busy = false;
+      this.activeVisits -= 1;
       bot.currentAction = null;
       bot.lastSeenAt = new Date();
       if (bot.state !== BOT_STATE.blocked) {
@@ -305,10 +373,13 @@ export class Runner<TPersona = unknown> {
       liveLoad: load.filter(isLive).length,
       totalLoad: load.length,
       target: this.state.target ?? 0,
-      spawned: load.filter(isLive).length,
-      ramp: this.state.ramp ?? DEFAULT_RAMP,
-      // The ramp itself arrives with load bots (PFA-128): until then nothing is ever pending.
-      nextStepInSec: null,
+      spawned: this.spawned.size,
+      ramp: this.ramp(),
+      loadEnabled: this.loadEnabled(),
+      loadPace: this.state.loadPace ?? LOAD_PACE.daily,
+      nextStepInSec: this.nextStepInSec(now),
+      activeVisits: this.activeVisits,
+      maxActiveVisits: MAX_ACTIVE_VISITS,
       actionsPerMin: countSince(this.recentActions, now - MINUTE_MS),
       errorsPerMin: countSince(this.recentErrors, now - MINUTE_MS),
       requestsPerMin: countSince(this.recentRequests, now - MINUTE_MS),
@@ -325,7 +396,7 @@ export class Runner<TPersona = unknown> {
     const live = this.status();
     const latest = this.activity.current();
     latest.live = live.liveDaily + live.liveLoad;
-    latest.target = live.totalDaily + live.target;
+    latest.target = live.totalDaily + this.effectiveTarget();
     return this.activity.read().map(({ at, bucket }) => ({
       at: new Date(at).toISOString(),
       actions: bucket.actions,
@@ -451,7 +522,7 @@ export class Runner<TPersona = unknown> {
       codes4xx: 0,
       codes5xx: 0,
       live,
-      target: daily + (this.state?.target ?? 0),
+      target: daily + (this.state ? this.effectiveTarget() : 0),
       throttled: false,
     };
   }
@@ -462,6 +533,9 @@ export class Runner<TPersona = unknown> {
     }
     if (!this.state.running) {
       return BOT_STATE.stopped;
+    }
+    if (bot.profile.kind === BOT_KIND.load && !this.spawned.has(bot.profile.id)) {
+      return BOT_STATE.queued;
     }
     if (this.state.disabledBots.includes(bot.profile.id)) {
       return BOT_STATE.paused;
@@ -477,22 +551,99 @@ export class Runner<TPersona = unknown> {
     this.ticker = setInterval(() => this.tick(), TICK_MS);
   }
 
-  /** Wakes every bot whose time has come; plans the first wake of the others. */
+  /**
+   * Moves the ramp one decision forward, then wakes every bot whose time has come — as many as the
+   * visit pool allows; the others stay due and go at the next tick. Plans the first wake of the rest.
+   */
   private tick(): void {
+    if (!this.state.running) {
+      return;
+    }
+    this.rampNow();
     const now = new Date();
     for (const bot of this.bots.values()) {
-      if (!this.state.running || bot.busy || this.effectiveState(bot) !== BOT_STATE.sleeping) {
+      if (bot.busy || this.effectiveState(bot) !== BOT_STATE.sleeping) {
         continue;
       }
       if (!bot.nextWakeAt) {
-        bot.nextWakeAt = nextWakeAt(now, bot.rng, this.deps.app.timeZone);
+        bot.nextWakeAt = this.nextVisit(bot, now);
         continue;
       }
-      if (bot.nextWakeAt <= now) {
-        bot.nextWakeAt = nextWakeAt(now, bot.rng, this.deps.app.timeZone);
+      if (bot.nextWakeAt <= now && this.activeVisits < MAX_ACTIVE_VISITS) {
+        bot.nextWakeAt = this.nextVisit(bot, now);
         void this.runWake(bot.profile.id);
       }
     }
+  }
+
+  /** One ramp decision, applied: who comes up (first visit soon, spread out) and who stops. */
+  private rampNow(): void {
+    const now = Date.now();
+    const ramp = this.ramp();
+    const stepDue = now - this.lastStepAt >= ramp.everySec * 1000;
+    const plan = planRamp({
+      order: this.loadOrder.filter((id) => this.bots.get(id)?.state !== BOT_STATE.blocked),
+      spawned: this.spawned,
+      target: this.state.target ?? 0,
+      enabled: this.state.running && this.loadEnabled(),
+      stepDue,
+      step: ramp.step,
+    });
+    for (const id of plan.despawn) {
+      this.spawned.delete(id);
+      const bot = this.bots.get(id);
+      if (bot) bot.nextWakeAt = null;
+    }
+    for (const id of plan.spawn) {
+      this.spawned.add(id);
+      const bot = this.bots.get(id);
+      if (bot) bot.nextWakeAt = new Date(now + firstVisitDelayMs(bot.rng, this.isBurst()));
+    }
+    if (plan.spawn.length > 0) {
+      this.lastStepAt = now;
+      logger.info("ramp step", { app: this.deps.app.id, up: this.spawned.size, target: this.state.target ?? 0 });
+    }
+  }
+
+  /** Seconds until the ramp's next step, while load bots are still on their way up; null otherwise. */
+  private nextStepInSec(now: number): number | null {
+    if (!this.state.running || !this.loadEnabled() || this.spawned.size >= (this.state.target ?? 0)) {
+      return null;
+    }
+    const left = this.lastStepAt + this.ramp().everySec * 1000 - now;
+    return Math.max(0, Math.ceil(left / 1000));
+  }
+
+  /** May this bot (go on) visit now: the runner is on and, for a load bot, the ramp has it up. */
+  private mayVisit(bot: BotRuntime<TPersona>): boolean {
+    return this.state.running && (bot.profile.kind !== BOT_KIND.load || this.spawned.has(bot.profile.id));
+  }
+
+  private nextVisit(bot: BotRuntime<TPersona>, now: Date): Date {
+    return bot.profile.kind === BOT_KIND.load && this.isBurst()
+      ? burstWakeAt(now, bot.rng)
+      : nextWakeAt(now, bot.rng, this.deps.app.timeZone);
+  }
+
+  private thinkTime(bot: BotRuntime<TPersona>): number {
+    return bot.profile.kind === BOT_KIND.load && this.isBurst() ? burstThinkTimeMs(bot.rng) : thinkTimeMs(bot.rng);
+  }
+
+  private loadEnabled(): boolean {
+    return this.state.loadEnabled === true;
+  }
+
+  private isBurst(): boolean {
+    return this.state.loadPace === LOAD_PACE.burst;
+  }
+
+  private ramp(): RampSettings {
+    return this.state.ramp ?? DEFAULT_RAMP;
+  }
+
+  /** The load bots the operator wants up right now: the target, or none while the switch is off. */
+  private effectiveTarget(): number {
+    return this.loadEnabled() ? (this.state.target ?? 0) : 0;
   }
 
   private async ensureSignedIn(bot: BotRuntime<TPersona>): Promise<void> {

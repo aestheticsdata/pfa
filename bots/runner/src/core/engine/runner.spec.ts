@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { BOT_STATE } from "@core/constants/bot";
 import { BotBlockedError } from "@core/engine/errors";
 import { fakeRunner } from "@core/testing/fakeRunner";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { BotAction } from "@core/interfaces/actionTypes";
 import type { PersistedRunnerState } from "@core/interfaces/runnerTypes";
@@ -72,5 +72,90 @@ describe("Runner guards", () => {
     await runner.runWake("bot-0", { actions: 2, thinkTimeMs: 0, force: true });
     expect(attempts).toBe(1);
     expect(runner.snapshotBots()[0]?.state).toBe(BOT_STATE.blocked);
+  });
+});
+
+describe("Load bots", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  const loadRunner = async () => {
+    const saved: PersistedRunnerState[] = [];
+    const runner = await fakeRunner({ loadBots: 30, saved, secretsPath: await secretsPath() });
+    await runner.setRamp({ step: 10, everySec: 1 });
+    return { runner, saved };
+  };
+
+  it("ramps up to the target a step at a time, and never counts the daily bot", async () => {
+    vi.useFakeTimers();
+    const { runner } = await loadRunner();
+    await runner.setTarget(25);
+    await runner.setLoadEnabled(true);
+    await runner.start();
+    expect(runner.status().spawned).toBe(10);
+    expect(runner.status().nextStepInSec).toBe(1);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(runner.status().spawned).toBe(20);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(runner.status().spawned).toBe(25);
+    expect(runner.status().nextStepInSec).toBeNull();
+    const states = runner.snapshotBots();
+    expect(states.find((bot) => bot.id === "bot-0")?.state).toBe(BOT_STATE.sleeping);
+    expect(states.filter((bot) => bot.state === BOT_STATE.queued)).toHaveLength(5);
+    await runner.stop();
+  });
+
+  it("stops the excess at once when the target drops", async () => {
+    vi.useFakeTimers();
+    const { runner } = await loadRunner();
+    await runner.setTarget(20);
+    await runner.setLoadEnabled(true);
+    await runner.start();
+    await vi.advanceTimersByTimeAsync(1_000);
+    await runner.setTarget(3);
+    expect(runner.status().spawned).toBe(3);
+    await runner.stop();
+  });
+
+  it("the load switch stops every load bot, keeps the target and the daily bot, and comes back", async () => {
+    vi.useFakeTimers();
+    const { runner, saved } = await loadRunner();
+    await runner.setTarget(10);
+    await runner.setLoadEnabled(true);
+    await runner.start();
+    expect(runner.status().spawned).toBe(10);
+
+    await runner.setLoadEnabled(false);
+    expect(runner.status()).toMatchObject({ spawned: 0, target: 10, loadEnabled: false, running: true });
+    expect(runner.snapshotBots().find((bot) => bot.id === "bot-0")?.state).toBe(BOT_STATE.sleeping);
+    expect(saved.at(-1)?.loadEnabled).toBe(false);
+
+    await runner.setLoadEnabled(true);
+    expect(runner.status().spawned).toBe(10);
+    await runner.stop();
+  });
+
+  it("is off until switched on, and the kill switch takes the load bots down too", async () => {
+    vi.useFakeTimers();
+    const { runner } = await loadRunner();
+    await runner.setTarget(10);
+    await runner.start();
+    expect(runner.status()).toMatchObject({ spawned: 0, loadEnabled: false });
+
+    await runner.setLoadEnabled(true);
+    expect(runner.status().spawned).toBe(10);
+    await runner.stop();
+    expect(runner.status().spawned).toBe(0);
+    expect(runner.snapshotBots().every((bot) => bot.state === BOT_STATE.stopped)).toBe(true);
+  });
+
+  it("keeps only the first maxBots load bots, and persists the pace", async () => {
+    const saved: PersistedRunnerState[] = [];
+    const runner = await fakeRunner({ loadBots: 30, maxBots: 12, saved, secretsPath: await secretsPath() });
+    expect(runner.status().totalLoad).toBe(12);
+    await runner.setLoadPace("burst");
+    expect(runner.status().loadPace).toBe("burst");
+    expect(saved.at(-1)?.loadPace).toBe("burst");
   });
 });

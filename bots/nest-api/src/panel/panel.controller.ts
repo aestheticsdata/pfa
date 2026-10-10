@@ -7,6 +7,7 @@ import {
   bulkSchema,
   closeAccountSchema,
   enabledSchema,
+  loadPaceSchema,
   quietHoursSchema,
   rampSchema,
   runningSchema,
@@ -32,6 +33,7 @@ import type {
   BulkBody,
   CloseAccountBody,
   EnabledBody,
+  LoadPaceBody,
   RunningBody,
   TargetBody,
 } from "#app/panel/interfaces/panelBodyTypes.js";
@@ -113,6 +115,25 @@ export class PanelController {
     @Actor() actor: AuditActor,
   ): Promise<unknown> {
     return this.panel.control({ app, actor, action: { kind: CONTROL_ACTION.rampSet, ramp } });
+  }
+
+  /** The "Load bots" switch: off stops every load bot and keeps the target; daily bots untouched. */
+  @Put(":app/load")
+  setLoad(
+    @Param("app") app: string,
+    @Body({ schema: enabledSchema }) body: EnabledBody,
+    @Actor() actor: AuditActor,
+  ): Promise<unknown> {
+    return this.panel.control({ app, actor, action: { kind: CONTROL_ACTION.loadSet, enabled: body.enabled } });
+  }
+
+  @Put(":app/load-pace")
+  setLoadPace(
+    @Param("app") app: string,
+    @Body({ schema: loadPaceSchema }) body: LoadPaceBody,
+    @Actor() actor: AuditActor,
+  ): Promise<unknown> {
+    return this.panel.control({ app, actor, action: { kind: CONTROL_ACTION.loadPaceSet, pace: body.pace } });
   }
 
   @Put(":app/quiet-hours")

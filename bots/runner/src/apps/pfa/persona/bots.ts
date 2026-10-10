@@ -73,3 +73,28 @@ export const PFA_DAILY_BOTS: BotProfile<PfaPersona>[] = Object.entries(DAILY_PER
   kind: BOT_KIND.daily,
   persona: { ...persona, receiptsPerWeek: new Rng(`receipts:${id}`).pick(RECEIPT_PACES) },
 }));
+
+/** The load bots' accounts (PFA-128): always the same 500, so their data grows over months. */
+export const PFA_LOAD_BOT_COUNT = 500;
+const ARCHETYPES = Object.values(DAILY_PERSONAS);
+
+/** `legionary-001` … `legionary-500`: three digits, so the names sort the way the ramp brings them up. */
+export function loadBotId(index: number): string {
+  return `legionary-${String(index + 1).padStart(3, "0")}`;
+}
+
+/**
+ * The load bots, in ramp order. Each one borrows the habits of one of the daily bots — drawn once
+ * from its own seed, so a legionary keeps the same way of spending from one deploy to the next —
+ * and its own receipt pace.
+ */
+export const PFA_LOAD_BOTS: BotProfile<PfaPersona>[] = Array.from({ length: PFA_LOAD_BOT_COUNT }, (_, index) => {
+  const id = loadBotId(index);
+  const archetype = new Rng(`archetype:${id}`).pick(ARCHETYPES);
+  return {
+    id,
+    email: `${id}@${PFA_SYNTHETIC_DOMAIN}`,
+    kind: BOT_KIND.load,
+    persona: { ...archetype, receiptsPerWeek: new Rng(`receipts:${id}`).pick(RECEIPT_PACES) },
+  };
+});

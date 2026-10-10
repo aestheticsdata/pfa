@@ -34,7 +34,13 @@ export interface AppDefinition<TPersona = unknown> {
   defaultQuietHours: QuietHours;
   /** Every bot email must be on this domain (PFA-122). */
   syntheticDomain: string;
+  /** The permanent "daily" bots: always there, never counted in the load target. */
   bots: BotProfile<TPersona>[];
+  /**
+   * The load bots, in the order the ramp brings them up (PFA-128). The runner keeps the first
+   * `maxBots` of them — the hard cap — and starts as many as the operator's target asks for.
+   */
+  loadBots?: BotProfile<TPersona>[];
   /** Absolute path of the folder whose files are the app's actions. */
   actionsDir: string;
   /**

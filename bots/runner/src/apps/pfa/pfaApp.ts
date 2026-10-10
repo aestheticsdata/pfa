@@ -1,7 +1,7 @@
 import { fileURLToPath } from "node:url";
 import { pfaAccounts } from "@apps/pfa/api/pfaAccounts";
 import { authenticate } from "@apps/pfa/api/pfaApi";
-import { PFA_DAILY_BOTS, PFA_SYNTHETIC_DOMAIN, PFA_TIME_ZONE } from "@apps/pfa/persona/bots";
+import { PFA_DAILY_BOTS, PFA_LOAD_BOTS, PFA_SYNTHETIC_DOMAIN, PFA_TIME_ZONE } from "@apps/pfa/persona/bots";
 
 import type { PfaPersona } from "@apps/pfa/interfaces/pfaTypes";
 import type { AppDefinition } from "@core/interfaces/appTypes";
@@ -21,6 +21,7 @@ export function pfaApp(env: NodeJS.ProcessEnv): AppDefinition<PfaPersona> {
     defaultQuietHours: { from: "22:00", to: "10:00" },
     syntheticDomain: PFA_SYNTHETIC_DOMAIN,
     bots: PFA_DAILY_BOTS,
+    loadBots: PFA_LOAD_BOTS,
     actionsDir: fileURLToPath(new URL("actions", import.meta.url)),
     authenticate,
     accounts: pfaAccounts(env),

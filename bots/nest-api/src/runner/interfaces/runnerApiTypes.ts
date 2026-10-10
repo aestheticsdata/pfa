@@ -43,6 +43,10 @@ export interface RunnerStatus {
   target: number;
   spawned: number;
   ramp: RunnerRamp;
+  loadEnabled: boolean;
+  loadPace: string;
+  activeVisits: number;
+  maxActiveVisits: number;
   nextStepInSec: number | null;
   actionsPerMin: number;
   errorsPerMin: number;

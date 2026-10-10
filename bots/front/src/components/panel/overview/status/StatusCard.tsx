@@ -36,7 +36,7 @@ const StatusCard = ({ status, actions }: StatusCardProps) => {
         <StatTile
           label={
             <>
-              <Dot tone={status.running ? TONE.ok : TONE.neutral} />
+              <Dot tone={status.running && status.loadEnabled ? TONE.ok : TONE.neutral} />
               {text.load}
             </>
           }
@@ -46,7 +46,11 @@ const StatusCard = ({ status, actions }: StatusCardProps) => {
               <small className="text-title font-medium text-dim"> / {status.target}</small>
             </>
           }
-          sub={text.ofTarget(status.target ? Math.round((status.liveLoad / status.target) * 100) : 0)}
+          sub={
+            status.loadEnabled
+              ? text.ofTarget(status.target ? Math.round((status.liveLoad / status.target) * 100) : 0)
+              : text.loadOff
+          }
         />
         <StatTile
           label={text.apm}

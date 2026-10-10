@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
@@ -15,10 +16,14 @@ export async function readJson<T>(file: JsonFile, fallback: T): Promise<T> {
   }
 }
 
-/** Atomic write (temp file + rename), so a crash mid-write never leaves half a ledger behind. */
+/**
+ * Atomic write (temp file + rename), so a crash mid-write never leaves half a ledger behind. Each
+ * write has its own temp name: two bots signing up in the same instant both save the secrets file,
+ * and a shared temp name would let one rename pull the file from under the other.
+ */
 export async function writeJson(file: JsonFile, value: unknown): Promise<void> {
   await mkdir(dirname(file.path), { recursive: true, mode: 0o700 });
-  const tmp = `${file.path}.tmp`;
+  const tmp = `${file.path}.${randomBytes(6).toString("hex")}.tmp`;
   await writeFile(tmp, `${JSON.stringify(value, null, 2)}\n`, { mode: file.mode ?? 0o600 });
   await chmod(tmp, file.mode ?? 0o600);
   await rename(tmp, file.path);

@@ -41,6 +41,14 @@ export async function setTarget(appId: string, target: number): Promise<ActionRe
   return change({ path: `${app(appId)}/target`, method: "PUT", body: { target } });
 }
 
+export async function setLoad(appId: string, enabled: boolean): Promise<ActionResult> {
+  return change({ path: `${app(appId)}/load`, method: "PUT", body: { enabled } });
+}
+
+export async function setLoadPace(appId: string, pace: string): Promise<ActionResult> {
+  return change({ path: `${app(appId)}/load-pace`, method: "PUT", body: { pace } });
+}
+
 export async function setRamp(input: RampInput): Promise<ActionResult> {
   return change({
     path: `${app(input.app)}/ramp`,

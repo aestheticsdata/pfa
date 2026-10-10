@@ -1,6 +1,7 @@
-import { PFA_DAILY_BOTS, PFA_SYNTHETIC_DOMAIN } from "@apps/pfa/persona/bots";
+import { PFA_DAILY_BOTS, PFA_LOAD_BOTS, PFA_SYNTHETIC_DOMAIN } from "@apps/pfa/persona/bots";
 import { CATEGORIES } from "@apps/pfa/persona/categories";
 import { clampAmount, plausibleDate, SPENDING_BOUNDS } from "@apps/pfa/persona/guardrails";
+import { BOT_KIND } from "@core/constants/bot";
 import { isSyntheticEmail } from "@core/guards/syntheticEmail";
 import { Rng } from "@core/random/rng";
 import { describe, expect, it } from "vitest";
@@ -49,5 +50,18 @@ describe("monthly bills", () => {
     rememberBill(memory, electricity, "2026-10-03");
     expect(billPaid(memory, electricity, "2026-10-28")).toBe(true);
     expect(billPaid(memory, electricity, "2026-11-01")).toBe(false);
+  });
+
+  it("has 500 load bots, legionary-001 to legionary-500, on the synthetic domain and the same pool", () => {
+    const pool = Object.values(CATEGORIES).map((category) => category.name);
+    expect(PFA_LOAD_BOTS).toHaveLength(500);
+    expect(PFA_LOAD_BOTS[0]?.id).toBe("legionary-001");
+    expect(PFA_LOAD_BOTS[499]?.id).toBe("legionary-500");
+    expect(new Set(PFA_LOAD_BOTS.map((bot) => bot.email)).size).toBe(500);
+    for (const bot of PFA_LOAD_BOTS) {
+      expect(bot.kind).toBe(BOT_KIND.load);
+      expect(isSyntheticEmail(bot.email, PFA_SYNTHETIC_DOMAIN)).toBe(true);
+      for (const item of bot.persona.catalog) expect(pool).toContain(item.category.name);
+    }
   });
 });

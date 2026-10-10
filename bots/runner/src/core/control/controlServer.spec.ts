@@ -92,6 +92,18 @@ describe("control API", () => {
     expect((await fetch(`${base}/bots/ghost`, { headers: auth })).status).toBe(404);
   });
 
+  it("switches the load bots and sets their pace, validated", async () => {
+    const base = await start({ loadBots: 3 });
+    const put = (path: string, body: unknown) =>
+      fetch(`${base}${path}`, { method: "PUT", headers: auth, body: JSON.stringify(body) });
+    expect(await (await put("/load", { enabled: true })).json()).toEqual({ enabled: true });
+    expect((await put("/load", { enabled: "yes" })).status).toBe(400);
+    expect(await (await put("/load-pace", { pace: "burst" })).json()).toEqual({ pace: "burst" });
+    expect((await put("/load-pace", { pace: "frenzy" })).status).toBe(400);
+    const status = await (await fetch(`${base}/status`, { headers: auth })).json();
+    expect(status).toMatchObject({ loadEnabled: true, loadPace: "burst", totalLoad: 3, maxActiveVisits: 50 });
+  });
+
   it("clamps the load target to the hard cap and validates ramp and quiet hours", async () => {
     const base = await start({ maxBots: 500 });
     const put = (path: string, body: unknown) =>

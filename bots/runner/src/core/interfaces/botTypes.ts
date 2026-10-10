@@ -1,8 +1,9 @@
-import type { BOT_KIND, BOT_STATE } from "@core/constants/bot";
+import type { BOT_KIND, BOT_STATE, LOAD_PACE } from "@core/constants/bot";
 import type { BotActivityBucket, RecentRequest } from "@core/interfaces/metricsTypes";
 
 export type BotKind = (typeof BOT_KIND)[keyof typeof BOT_KIND];
 export type BotState = (typeof BOT_STATE)[keyof typeof BOT_STATE];
+export type LoadPace = (typeof LOAD_PACE)[keyof typeof LOAD_PACE];
 
 /** Who a bot is. `persona` is the app's own data about it (what it buys, how often): the core never reads it. */
 export interface BotProfile<TPersona = unknown> {

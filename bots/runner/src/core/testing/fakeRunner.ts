@@ -23,6 +23,12 @@ export async function fakeRunner(options: FakeRunnerOptions = {}): Promise<Runne
       kind: BOT_KIND.daily,
       persona: {},
     })),
+    loadBots: Array.from({ length: options.loadBots ?? 0 }, (_, i) => ({
+      id: `load-${i}`,
+      email: `load-${i}@synthetic.test`,
+      kind: BOT_KIND.load,
+      persona: {},
+    })),
     actionsDir: "/nonexistent",
     authenticate: options.authenticate ?? (async () => {}),
     accounts: options.accounts,
