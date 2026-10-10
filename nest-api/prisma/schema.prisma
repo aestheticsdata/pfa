@@ -95,4 +95,8 @@ model Users {
   registerDate DateTime? @db.DateTime(0)
   language     String?   @default("en") @db.VarChar(3)
   baseCurrency String    @db.VarChar(3)
+  // A bot account of the synthetic-users runner (PFA-122): set at signup when
+  // the email is on the reserved domain, never otherwise. `synthetic:purge`
+  // deletes these accounts and everything they own.
+  isSynthetic  Boolean   @default(false)
 }

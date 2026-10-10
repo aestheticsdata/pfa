@@ -71,7 +71,10 @@ async function bootstrap() {
   // The hand-rolled `console.log` access line that used to live here is gone (IKN-1). pino-http
   // replaces it with one ECS object per request, carrying the method, path, query, status code,
   // duration, client address, user agent and — when signed in — the user id.
-  await app.listen(appConfig.port);
+  // Loopback only (PFA-122): everything reaches the API through nginx, so nothing outside the
+  // machine should be able to talk to it — and skip nginx to forge the client address that the
+  // synthetic-user allowlist relies on — even if the firewall changes one day.
+  await app.listen(appConfig.port, "127.0.0.1");
 }
 
 void bootstrap();

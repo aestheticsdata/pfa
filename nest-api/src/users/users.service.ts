@@ -5,6 +5,7 @@ import type { Users } from "../../generated/prisma/client";
 import type { AddUserDto } from "./dto/add-user.dto";
 import type { UpdateUserDto } from "./dto/update-user.dto";
 import * as bcrypt from "bcryptjs";
+import { isSyntheticEmail } from "./synthetic-email.util";
 
 export interface SignInResponse {
   user: {
@@ -60,6 +61,7 @@ export class UsersService {
         baseCurrency,
         language,
         registerDate,
+        isSynthetic: isSyntheticEmail(dto.email),
       },
     });
 
