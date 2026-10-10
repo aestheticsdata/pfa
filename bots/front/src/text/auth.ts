@@ -33,7 +33,7 @@ export const AUTH_TEXT = {
     invalidEmail: "Enter a valid email",
     tooShort: "At least 12 characters",
     mismatch: "Passwords don’t match",
-    fewWords: "At least 4 words",
+    required: "Required",
   },
   sealed: {
     title: "Already set up",
