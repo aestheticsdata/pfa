@@ -8,7 +8,6 @@ import type { PfaCategory } from "@apps/pfa/interfaces/pfaTypes";
 export const CATEGORIES = {
   groceries: { name: "Groceries", color: "#6DB65B" },
   restaurants: { name: "Restaurants", color: "#E8663D" },
-  bars: { name: "Bars", color: "#C2457A" },
   transport: { name: "Transport", color: "#3D8FE8" },
   home: { name: "Home", color: "#B08A4F" },
   health: { name: "Health", color: "#4FB0A5" },
