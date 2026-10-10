@@ -42,7 +42,7 @@ Locally, start PFA's API with `SYNTHETIC_ALLOWED_IPS=127.0.0.1,::1`, or every bo
 
 ## The bots
 
-Four permanent "daily" bots, `saturnus`, `ceres`, `janus` and `mercurius` `@synthetic.test`, each with
+Four permanent "daily" bots, `saturnus`, `ceres`, `janus` and `minerva` `@synthetic.test`, each with
 its own habits (`apps/pfa/persona/bots.ts`). They visit about 2–3 times a day at random between
 07:00 and 23:00 **Paris time** (ks-b runs on UTC; the app's zone is read through `Intl`, so the
 change to winter time needs nothing), do 1–5 things per visit, and pause between actions like
