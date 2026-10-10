@@ -24,6 +24,9 @@ export interface RunnerClient {
   setRunning(running: boolean): Promise<void>;
   setTarget(target: number): Promise<number>;
   setRamp(ramp: RunnerRamp): Promise<RunnerRamp>;
+  /** The "Load bots" switch. */
+  setLoad(enabled: boolean): Promise<boolean>;
+  setLoadPace(pace: string): Promise<string>;
   setQuietHours(hours: RunnerQuietHoursInput): Promise<RunnerQuietHours>;
   setBots(toggle: RunnerToggle): Promise<RunnerBulkResult>;
   restartSession(id: string): Promise<boolean>;

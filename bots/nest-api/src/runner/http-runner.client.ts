@@ -65,6 +65,14 @@ export class HttpRunnerClient implements RunnerClient {
     return this.call({ method: "PUT", path: "/ramp", body: ramp });
   }
 
+  async setLoad(enabled: boolean): Promise<boolean> {
+    return (await this.call<{ enabled: boolean }>({ method: "PUT", path: "/load", body: { enabled } })).enabled;
+  }
+
+  async setLoadPace(pace: string): Promise<string> {
+    return (await this.call<{ pace: string }>({ method: "PUT", path: "/load-pace", body: { pace } })).pace;
+  }
+
   setQuietHours(hours: RunnerQuietHoursInput): Promise<RunnerQuietHours> {
     return this.call({ method: "PUT", path: "/quiet-hours", body: hours });
   }

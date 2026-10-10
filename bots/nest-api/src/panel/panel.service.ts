@@ -254,6 +254,10 @@ export class PanelService {
         return { target: await runner.setTarget(action.target) };
       case CONTROL_ACTION.rampSet:
         return runner.setRamp(action.ramp);
+      case CONTROL_ACTION.loadSet:
+        return { enabled: await runner.setLoad(action.enabled) };
+      case CONTROL_ACTION.loadPaceSet:
+        return { pace: await runner.setLoadPace(action.pace) };
       case CONTROL_ACTION.quietHoursSet:
         return runner.setQuietHours(action.hours);
       case CONTROL_ACTION.botsToggle:

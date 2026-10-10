@@ -6,6 +6,8 @@ export type ControlAction =
   | { kind: typeof CONTROL_ACTION.runnerSet; running: boolean }
   | { kind: typeof CONTROL_ACTION.targetSet; target: number }
   | { kind: typeof CONTROL_ACTION.rampSet; ramp: RunnerRamp }
+  | { kind: typeof CONTROL_ACTION.loadSet; enabled: boolean }
+  | { kind: typeof CONTROL_ACTION.loadPaceSet; pace: string }
   | { kind: typeof CONTROL_ACTION.quietHoursSet; hours: RunnerQuietHoursInput }
   | { kind: typeof CONTROL_ACTION.botsToggle; toggle: RunnerToggle }
   | { kind: typeof CONTROL_ACTION.botRestartSession; botId: string }

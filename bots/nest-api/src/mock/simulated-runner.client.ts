@@ -1,3 +1,4 @@
+import { LOAD_PACE } from "#app/contracts/panel.js";
 import { isQuiet, quietSnapshot } from "#app/infrastructure/quiet-hours.js";
 import { SeededRandom } from "#app/mock/seeded-random.js";
 
@@ -35,6 +36,7 @@ const DAILY = ["saturnus", "ceres", "janus", "minerva"];
 const TIME_ZONE = "Europe/Paris";
 const BOOT_TARGET = 120;
 const BOOT_SPAWNED = 84;
+const MAX_ACTIVE_VISITS = 50;
 /** Load bots that fail a lot, so the table has a few "degraded" rows. */
 const FLAKY = new Set([7, 23, 61]);
 /** Turned off by the operator, so the table has a few "paused" rows. */
@@ -89,6 +91,8 @@ export class SimulatedRunnerClient implements RunnerClient {
   private target: number;
   private spawned: number;
   private ramp: RunnerRamp = { step: 10, everySec: 30 };
+  private loadEnabled: boolean;
+  private loadPace: string = LOAD_PACE.daily;
   private nextStepAt: number;
   private quiet: RunnerQuietHoursInput = { from: "22:00", to: "10:00" };
   private usedBytes: number;
@@ -99,6 +103,7 @@ export class SimulatedRunnerClient implements RunnerClient {
   constructor(seed: SimulationSeed) {
     this.random = new SeededRandom(seed.seed);
     this.running = seed.populated;
+    this.loadEnabled = seed.populated;
     this.target = seed.populated ? BOOT_TARGET : 0;
     this.spawned = seed.populated ? BOOT_SPAWNED : 0;
     this.usedBytes = seed.populated ? 212.6 * MB : 0;
@@ -139,8 +144,12 @@ export class SimulatedRunnerClient implements RunnerClient {
       target: this.target,
       spawned: Math.min(this.spawned, this.target),
       ramp: this.ramp,
+      loadEnabled: this.loadEnabled,
+      loadPace: this.loadPace,
+      activeVisits: Math.min(MAX_ACTIVE_VISITS, this.fleet.filter((bot) => this.stateOf(bot) === "active").length),
+      maxActiveVisits: MAX_ACTIVE_VISITS,
       nextStepInSec:
-        this.running && this.spawned < this.target
+        this.running && this.loadEnabled && this.spawned < this.target
           ? Math.max(0, Math.ceil((this.nextStepAt - Date.now()) / 1000))
           : null,
       actionsPerMin,
@@ -224,6 +233,19 @@ export class SimulatedRunnerClient implements RunnerClient {
     return this.ramp;
   }
 
+  async setLoad(enabled: boolean): Promise<boolean> {
+    this.loadEnabled = enabled;
+    // Off: every load bot back to the queue at once. On: the first step comes up now.
+    if (!enabled) this.spawned = 0;
+    else this.nextStepAt = Date.now();
+    return enabled;
+  }
+
+  async setLoadPace(pace: string): Promise<string> {
+    this.loadPace = pace;
+    return pace;
+  }
+
   async setQuietHours(hours: RunnerQuietHoursInput): Promise<RunnerQuietHours> {
     this.quiet = { from: hours.from, to: hours.to };
     return quietSnapshot(this.quiet, TIME_ZONE);
@@ -276,7 +298,7 @@ export class SimulatedRunnerClient implements RunnerClient {
   private stateOf(bot: SimulatedBot): string {
     if (bot.blocked) return "blocked";
     if (!this.running) return "stopped";
-    if (bot.kind === "load" && this.loadIndex(bot) > this.spawned) return "queued";
+    if (bot.kind === "load" && (!this.loadEnabled || this.loadIndex(bot) > this.spawned)) return "queued";
     if (!bot.enabled) return "paused";
     return bot.currentAction ? "active" : "sleeping";
   }
@@ -373,7 +395,7 @@ export class SimulatedRunnerClient implements RunnerClient {
 
   private tick(): void {
     const now = Date.now();
-    if (this.running && this.spawned < this.target && now >= this.nextStepAt) {
+    if (this.running && this.loadEnabled && this.spawned < this.target && now >= this.nextStepAt) {
       this.spawned = Math.min(this.target, this.spawned + this.ramp.step);
       this.nextStepAt = now + this.ramp.everySec * 1000;
     }
@@ -404,7 +426,7 @@ export class SimulatedRunnerClient implements RunnerClient {
       }
       if (live) slice.live += 1;
     }
-    slice.target = this.fleet.filter((bot) => bot.kind === "daily").length + this.target;
+    slice.target = this.fleet.filter((bot) => bot.kind === "daily").length + (this.loadEnabled ? this.target : 0);
     // The RPS cap: past it, requests queue — the "throttled" the status tile warns about.
     const capPerSlice = (LIMITS.maxRps * TICK_MS) / 1000;
     slice.throttled = slice.requests > capPerSlice;

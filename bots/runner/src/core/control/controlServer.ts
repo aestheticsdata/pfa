@@ -1,10 +1,12 @@
 import { createServer } from "node:http";
+import { LOAD_PACE } from "@core/constants/bot";
 import { HTTP_METHOD } from "@core/constants/http";
 import { isAuthorized } from "@core/control/controlAuth";
 import { logger } from "@core/log/logger";
 import { isValidQuietHours } from "@core/time/quietHours";
 
 import type { IncomingMessage, Server, ServerResponse } from "node:http";
+import type { LoadPace } from "@core/interfaces/botTypes";
 import type { ControlServerOptions } from "@core/interfaces/controlTypes";
 
 const MAX_BODY_BYTES = 64 * 1024;
@@ -99,6 +101,10 @@ async function runnerRoutes<TPersona>(route: Route, { runner }: ControlServerOpt
     }
     case `${HTTP_METHOD.put} target`:
       return { target: await runner.setTarget(readNumber(await readBody(req), "target")) };
+    case `${HTTP_METHOD.put} load`:
+      return { enabled: await runner.setLoadEnabled(readBoolean(await readBody(req), "enabled")) };
+    case `${HTTP_METHOD.put} load-pace`:
+      return { pace: await runner.setLoadPace(readPace(await readBody(req))) };
     case `${HTTP_METHOD.put} ramp`: {
       const body = await readBody(req);
       return runner.setRamp({ step: readNumber(body, "step"), everySec: readNumber(body, "everySec") });
@@ -202,6 +208,14 @@ function readNumber(body: unknown, field: string): number {
     throw new HttpError(400, `"${field}" must be a non-negative number`);
   }
   return value;
+}
+
+function readPace(body: unknown): LoadPace {
+  const value = (body as Record<string, unknown> | null)?.pace;
+  if (!Object.values<unknown>(LOAD_PACE).includes(value)) {
+    throw new HttpError(400, `"pace" must be one of ${Object.values(LOAD_PACE).join(", ")}`);
+  }
+  return value as LoadPace;
 }
 
 function readIds(body: unknown): string[] {

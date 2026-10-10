@@ -10,8 +10,19 @@ export const BOT_KIND = {
  */
 export const BOT_STATE = {
   stopped: "stopped",
+  /** A load bot the ramp has not brought up (yet): above the target, or the load switch is off. */
+  queued: "queued",
   sleeping: "sleeping",
   active: "active",
   paused: "paused",
   blocked: "blocked",
+} as const;
+
+/**
+ * How load bots behave (PFA-128). `daily`: like real users — a few visits a day in waking hours,
+ * reading pauses. `burst`: a stress test — a visit every few minutes, day and night, short pauses.
+ */
+export const LOAD_PACE = {
+  daily: "daily",
+  burst: "burst",
 } as const;

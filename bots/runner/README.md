@@ -46,7 +46,44 @@ Four permanent "daily" bots, `saturnus`, `ceres`, `janus` and `minerva` `@synthe
 its own habits (`apps/pfa/persona/bots.ts`). They visit about 2–3 times a day at random between
 07:00 and 23:00 **Paris time** (ks-b runs on UTC; the app's zone is read through `Intl`, so the
 change to winter time needs nothing), do 1–5 things per visit, and pause between actions like
-someone reading. Load bots (up to 500) come with PFA-128; the target and the ramp can already be set.
+someone reading.
+
+## Load bots (PFA-128)
+
+Up to 500 more, `legionary-001` … `legionary-500@synthetic.test`, each borrowing the habits of one
+of the daily bots. **Always the same accounts**: created on their first visit, kept from one run to
+the next, so their data grows over months like real users' (`synthetic:purge` is for exceptional
+clean-ups only). The two populations are independent: nothing below ever touches the daily bots.
+
+- **Target** (0–500, any number): the runner brings load bots up on its own — `step` more every
+  `everySec` seconds (the ramp), first visit within minutes, spread out — and stops the excess at
+  once when the target drops (highest first, so the same bots stay up).
+- **"Load bots" switch**: off stops every load bot at once and keeps the target; on ramps back to
+  it. Off on a fresh install. The kill switch, above it, still stops everything.
+- **Pace**: `daily` (like real users: 2–3 visits a day in waking hours) or `burst` (a stress test:
+  a visit every 1–5 min, day and night, 1–5 s between actions).
+- **Backpressure**: at most 50 visits at once, every bot together; a bot whose time comes while the
+  pool is full goes at the next tick. With the global RPS cap (40 req/s), the generator never falls
+  over before the server it is measuring.
+
+Target, switch, pace and ramp are persisted; which bots are up is not — after a restart the ramp
+starts again from zero.
+
+### Running a load test
+
+1. Check the disk first: PFA's API and the runner log every request, and PM2's logs on ks-b must
+   rotate (`du -sh ~/.pm2/logs`).
+2. Back-office → Overview: set the ramp (e.g. +10 every 30 s), the target (start low: 50, then 120,
+   250, 500), the pace (`burst` to stress, `daily` for realistic growth), then switch load bots on.
+3. Watch the back-office (actions/min, rps and `throttled`, error rate, p50/p95, 2xx/4xx/5xx per
+   second) next to the server: Iknos and Zeus for CPU, RAM, MySQL and the PFA API's own latencies,
+   nginx's access log for its rate limits.
+   ⚠️ Every bot comes from ks-b's address, and PFA's `/api/` allows **5 req/s per address** (burst
+   20, `api_zone` in nginx.conf) and 20 connections: above that nginx answers **503** before PFA
+   sees the request. Those 503s are nginx's protection doing its job, not PFA failing — and as long
+   as the limit applies to ks-b, the bots as a whole cannot push PFA past ~5 req/s.
+4. Stop: the "Load bots" switch (daily bots keep going), or the kill switch for everything.
+
 
 **Quiet hours**: no new spending between 22:00 and 10:00 Paris time by default — actions flagged
 `pausedInQuietHours` are skipped in the window, browsing goes on. The window is changed from the

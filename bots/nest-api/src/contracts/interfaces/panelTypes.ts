@@ -137,6 +137,13 @@ export interface StatusView {
   target: number;
   spawned: number;
   ramp: RampView;
+  /** The "Load bots" switch: off = every load bot stopped, the target kept. */
+  loadEnabled: boolean;
+  /** `LOAD_PACE.daily` or `LOAD_PACE.burst`. */
+  loadPace: string;
+  /** Visits in progress, and the most the runner runs at once. */
+  activeVisits: number;
+  maxActiveVisits: number;
   /** Seconds until the next ramp step; null when at target (or no ramp). */
   nextStepInSec: number | null;
   actionsPerMin: number;

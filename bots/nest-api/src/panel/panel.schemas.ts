@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { BOT_VIEW_STATE, POPULATION } from "#app/contracts/panel.js";
+import { BOT_VIEW_STATE, LOAD_PACE, POPULATION } from "#app/contracts/panel.js";
 
 const clock = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use HH:MM, 24 h (00:00–23:59)");
 const id = z.string().min(1).max(64);
@@ -10,6 +10,7 @@ export const rampSchema = z.object({
   step: z.number().int().min(1).max(500),
   everySec: z.number().int().min(1).max(3600),
 });
+export const loadPaceSchema = z.object({ pace: z.enum([LOAD_PACE.daily, LOAD_PACE.burst]) });
 export const quietHoursSchema = z
   .object({ from: clock, to: clock })
   .refine((hours) => hours.from !== hours.to, { message: "From and To must differ" });

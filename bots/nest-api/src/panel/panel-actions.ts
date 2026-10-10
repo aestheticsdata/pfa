@@ -3,6 +3,8 @@ export const CONTROL_ACTION = {
   runnerSet: "runner.set",
   targetSet: "target.set",
   rampSet: "ramp.set",
+  loadSet: "load.set",
+  loadPaceSet: "load-pace.set",
   quietHoursSet: "quiet-hours.set",
   botsToggle: "bots.toggle",
   botRestartSession: "bot.restart-session",

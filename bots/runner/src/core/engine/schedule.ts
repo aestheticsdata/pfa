@@ -37,3 +37,21 @@ export function actionsPerWake(rng: Rng): number {
 export function thinkTimeMs(rng: Rng): number {
   return rng.int(3, 30) * 1000;
 }
+
+/** Burst pace (PFA-128): a visit every 1 to 5 minutes, day and night — a stress test, not a life. */
+export function burstWakeAt(from: Date, rng: Rng): Date {
+  return new Date(from.getTime() + rng.int(60, 300) * 1000);
+}
+
+/** Burst pace: 1 to 5 seconds between two actions. */
+export function burstThinkTimeMs(rng: Rng): number {
+  return rng.int(1, 5) * 1000;
+}
+
+/**
+ * A load bot's first visit after the ramp brings it up: soon, so a ramp shows on the charts, and
+ * spread out, so a step of fifty does not sign in fifty accounts in the same second.
+ */
+export function firstVisitDelayMs(rng: Rng, burst: boolean): number {
+  return rng.int(5, burst ? 60 : 900) * 1000;
+}

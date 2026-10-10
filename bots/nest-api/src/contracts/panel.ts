@@ -13,6 +13,15 @@ export const BOT_VIEW_STATE = {
   blocked: "blocked",
 } as const;
 
+/**
+ * How the load bots behave (PFA-128): like real users (`daily`), or a visit every few minutes day
+ * and night (`burst`, a stress test).
+ */
+export const LOAD_PACE = {
+  daily: "daily",
+  burst: "burst",
+} as const;
+
 /** The two populations: 4 permanent bots, and up to 500 load bots. */
 export const BOT_KIND = {
   daily: "daily",
