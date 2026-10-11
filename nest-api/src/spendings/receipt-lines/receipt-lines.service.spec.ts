@@ -16,7 +16,15 @@ describe("ReceiptLinesService", () => {
       $transaction: jest.fn().mockResolvedValue([]),
     };
     const receiptFiles = { safePath: jest.fn((userID: string, file: string) => `/invoices/${userID}/${file}`) };
-    const ocr = { read: jest.fn().mockResolvedValue("PAIN 1,20\nTOTAL 1,20") };
+    // Two readings: the whole page, its lines run into the card slip; then the slips apart.
+    const ocr = {
+      read: jest
+        .fn()
+        .mockResolvedValue([
+          ["PAIN 1,20 CARTE BANCAIRE\nTOTAL 1,20 MONTANT"],
+          ["PAIN 1,20\nTOTAL 1,20", "CARTE BANCAIRE\nMONTANT :\n1,20 EUR"],
+        ]),
+    };
     const service = new ReceiptLinesService(prisma as never, receiptFiles as never, ocr as never);
     return { service, prisma, ocr };
   };
@@ -61,7 +69,7 @@ describe("ReceiptLinesService", () => {
     expect(prisma.$transaction).toHaveBeenCalledTimes(1);
   });
 
-  it("proposes the lines read on the spending's own receipt", async () => {
+  it("proposes the reading of the spending's own receipt that holds up", async () => {
     const { service, ocr } = makeService({ invoicefile: "spending-x-r.jpg" });
 
     await expect(service.propose("s-1", "user-1")).resolves.toEqual({

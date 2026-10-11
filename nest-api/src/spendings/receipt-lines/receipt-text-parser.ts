@@ -19,9 +19,13 @@ const PRICE_AT_END = /(-?)\s?(?<![\d.,])(\d{1,4})[.,] ?(\d{2})\s*(?:€|EUR)?(?:
 const TOTAL_LINE = /^(TOTAL|NET A PAYER|A PAYER|MONTANT (TTC|DU))\b/;
 const PARTIAL_TOTAL = /^(SOUS[ -]?TOTAL|TOTAL (HT|TVA|REMISE|ECONOMIE))/;
 
-// Lines that carry a price but are no item: payment, VAT, till chatter.
+// Lines that carry a price but are no item: payment, VAT, till chatter, the card slip.
 const NOISE =
-  /\b(SOUS[ -]?TOTAL|TVA|HT|TTC|CB|CARTE|ESPECES|RENDU|MONNAIE|VISA|MASTERCARD|PAIEMENT|SANS CONTACT|TICKET|CAISSE|SIRET|TEL|MERCI|NB ART(ICLES?)?)\b/;
+  /\b(SOUS[ -]?TOTAL|TVA|HT|TTC|CB|CARTE|ESPECES|RENDU|MONNAIE|VISA|MASTERCARD|PAIEMENT|SANS CONTACT|TICKET|CAISSE|SIRET|TEL|MERCI|NB ART(ICLES?)?|MONTANT|DEBIT|AUTO)\b/;
+
+// The quantity and unit-price columns left between a label and its total:
+// "NAT KARITE 1L  4  5,99" keeps "NAT KARITE 1L" (PFA-216).
+const TRAILING_COLUMNS = /(\s+(\d+([.,]\d+)?|[xX*@]))+$/;
 
 // A line made only of figures, multiply signs and units: a quantity or weight detail.
 const DETAIL_LINE = /^(?:[\d\s.,xX*@=€/-]|KG|G|L|PCE?S?|EUR)*$/i;
@@ -55,6 +59,7 @@ function cleanLabel(raw: string): string | null {
     .replaceAll(/[.·_*]{2,}/g, " ")
     .replaceAll(/\s+/g, " ")
     .replace(/^[\s\-*.:]+|[\s\-*.:€]+$/g, "")
+    .replace(TRAILING_COLUMNS, "")
     .slice(0, FIELD_LIMITS.receiptLineLabel)
     .trim();
   return (label.match(LETTERS)?.length ?? 0) >= MIN_LABEL_LETTERS ? label : null;
@@ -99,4 +104,38 @@ export function parseReceiptText(text: string): ReceiptProposal {
   }
 
   return { lines: state.lines, total: null };
+}
+
+/** Several slips read apart: the items of each, the first total found. */
+export function parseReceiptPages(pages: string[]): ReceiptProposal {
+  const proposals = pages.map(parseReceiptText);
+  return {
+    lines: proposals.flatMap((proposal) => proposal.lines),
+    total: proposals.find((proposal) => proposal.total !== null)?.total ?? null,
+  };
+}
+
+/** Lines adding up to the total read, within a cent. */
+function addsUp(proposal: ReceiptProposal): boolean {
+  if (proposal.total === null || proposal.lines.length === 0) return false;
+  const sum = proposal.lines.reduce((acc, line) => acc + line.amount, 0);
+  return Math.abs(sum - proposal.total) < 0.005;
+}
+
+/**
+ * The reading that holds up best (PFA-216): lines adding up to the receipt's
+ * total first, then a total found at all, then the most lines.
+ */
+export function pickProposal(proposals: ReceiptProposal[]): ReceiptProposal {
+  const score = (proposal: ReceiptProposal) => [
+    addsUp(proposal) ? 1 : 0,
+    proposal.total === null ? 0 : 1,
+    proposal.lines.length,
+  ];
+  const better = (a: ReceiptProposal, b: ReceiptProposal) => {
+    const [sa, sb] = [score(a), score(b)];
+    const diff = sa.findIndex((value, i) => value !== sb[i]);
+    return diff >= 0 && sa[diff] > sb[diff] ? a : b;
+  };
+  return proposals.reduce((best, proposal) => better(proposal, best), { lines: [], total: null });
 }
