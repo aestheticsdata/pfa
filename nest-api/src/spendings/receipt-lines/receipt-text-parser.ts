@@ -12,8 +12,9 @@ import type { ReceiptLine, ReceiptProposal } from "@spendings/receipt-lines/inte
  */
 
 // The price closing a line, optionally followed by a currency mark and the
-// one-character VAT code many tills print after it ("2,30 € A", "2.30 1").
-const PRICE_AT_END = /(-?)\s?(?<![\d.,])(\d{1,4})[.,] ?(\d{2})\s*(?:€|EUR)?(?:\s+[A-D0-9*])?\s*$/i;
+// VAT code many tills print after it: one character or in parentheses
+// ("2,30 € A", "2.30 1", "4.30 (01)" — PFA-217).
+const PRICE_AT_END = /(-?)\s?(?<![\d.,])(\d{1,4})[.,] ?(\d{2})\s*(?:€|EUR|EURO)?(?:\s+(?:[A-D0-9*]|\(\w{1,3}\)))?\s*$/i;
 
 // What starts the totals block. Sub-totals and partial totals are not the total.
 const TOTAL_LINE = /^(TOTAL|NET A PAYER|A PAYER|MONTANT (TTC|DU))\b/;
@@ -58,7 +59,7 @@ function cleanLabel(raw: string): string | null {
   const label = raw
     .replaceAll(/[.·_*]{2,}/g, " ")
     .replaceAll(/\s+/g, " ")
-    .replace(/^[\s\-*.:]+|[\s\-*.:€]+$/g, "")
+    .replace(/^[\s\-*.:|]+|[\s\-*.:€|]+$/g, "")
     .replace(TRAILING_COLUMNS, "")
     .slice(0, FIELD_LIMITS.receiptLineLabel)
     .trim();
