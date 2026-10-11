@@ -12,6 +12,10 @@ const BAD_SHARE = 90;
 const LOW_REMAINING_MB = 40;
 /** Below this, the budget counts as spent (one more receipt wouldn't fit). */
 const EMPTY_MB = 0.2;
+/** Fixed-width, right-aligned: a number changing length leaves the unit after it in place. */
+const MB_SLOT = "inline-block min-w-mb-slot text-right tabular-nums";
+const COUNT_SLOT = "inline-block min-w-count-slot text-right tabular-nums";
+const PERCENT_SLOT = "inline-block min-w-percent-slot text-right tabular-nums";
 
 /** 400 MB per rolling 365 days across all bots: used, remaining, this week, when it runs out. */
 const UploadBudgetCard = ({ status }: StatusOnlyProps) => {
@@ -37,8 +41,11 @@ const UploadBudgetCard = ({ status }: StatusOnlyProps) => {
           <div>
             <Label>{text.used}</Label>
             <div className="mt-0.5 font-mono text-lg font-semibold">
-              {megabytes(budget.usedMB)}
-              <small className="text-xs font-medium text-dim"> MB · {share.toFixed(0)}%</small>
+              <span className={MB_SLOT}>{megabytes(budget.usedMB)}</span>
+              <small className="text-xs font-medium text-dim">
+                {" "}
+                MB · <span className={PERCENT_SLOT}>{share.toFixed(0)}</span>%
+              </small>
             </div>
           </div>
           <div>
@@ -49,17 +56,17 @@ const UploadBudgetCard = ({ status }: StatusOnlyProps) => {
                 budget.remainingMB < LOW_REMAINING_MB && "text-bad",
               )}
             >
-              {megabytes(budget.remainingMB)}
+              <span className={MB_SLOT}>{megabytes(budget.remainingMB)}</span>
               <small className="text-xs font-medium text-dim"> MB</small>
             </div>
           </div>
           <div>
             <Label>{text.week}</Label>
             <div className="mt-0.5 font-mono text-lg font-semibold">
-              {budget.weekUploads}
+              <span className={COUNT_SLOT}>{budget.weekUploads}</span>
               <small className="text-xs font-medium text-dim">
                 {" "}
-                {text.uploads} · {budget.weekMB.toFixed(1)} MB
+                {text.uploads} · <span className={MB_SLOT}>{megabytes(budget.weekMB)}</span> MB
               </small>
             </div>
           </div>
