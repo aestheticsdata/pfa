@@ -109,6 +109,15 @@ describe("panel view", () => {
         bytesThisWeek: 0,
       }).emptyInDays,
     ).toBeNull();
+    expect(
+      uploadBudgetView({
+        budgetBytes: 400 * MB,
+        usedBytes: 25_000,
+        remainingBytes: 400 * MB - 25_000,
+        uploadsThisWeek: 1,
+        bytesThisWeek: 25_000,
+      }),
+    ).toMatchObject({ usedMB: 0.024, weekMB: 0.024 });
   });
 
   it("buckets live bots by pace", () => {

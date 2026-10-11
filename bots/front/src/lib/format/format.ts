@@ -55,9 +55,10 @@ export function countdown(seconds: number): string {
   return s >= 60 ? `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s` : `${s}s`;
 }
 
-/** MB with one decimal below 100, none above (`38.2`, `213`). */
+/** MB with three decimals below 1, one above (`0.024`, `38.2`); `0.9996` rounds up to `1.0`. */
 export function megabytes(value: number): string {
-  return value >= 100 ? value.toFixed(0) : value.toFixed(1);
+  const fine = value.toFixed(3);
+  return Number(fine) < 1 ? fine : value.toFixed(1);
 }
 
 export function count(value: number): string {

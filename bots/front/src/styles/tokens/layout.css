@@ -32,6 +32,11 @@
   --spacing-bleed: 0.14em;
   /* The scrollbar's rail: a 3px thumb with 3px of clearance each side (Zeus's convention). */
   --spacing-scroll-bar: 9px;
+  /* Upload budget: fixed slots for numbers that change length (`0.999` → `1.0`, 7 → 10 uploads),
+     so the units after them never move. Sized for the widest value: `400.0`, `2500`, `100`. */
+  --spacing-mb-slot: 5ch;
+  --spacing-count-slot: 4ch;
+  --spacing-percent-slot: 3ch;
 
   --animate-blink: blink 1s steps(1) infinite;
   @keyframes blink {

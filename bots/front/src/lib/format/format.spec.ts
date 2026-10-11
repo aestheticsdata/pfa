@@ -19,8 +19,13 @@ describe("format", () => {
     expect(duration((5 * 3600 + 3 * 60) * 1000)).toBe("5h 03m");
     expect(countdown(125)).toBe("2m 05s");
     expect(countdown(45)).toBe("45s");
+    expect(megabytes(0.0004)).toBe("0.000");
+    expect(megabytes(0.024)).toBe("0.024");
+    expect(megabytes(0.999)).toBe("0.999");
+    expect(megabytes(0.9996)).toBe("1.0");
+    expect(megabytes(1)).toBe("1.0");
     expect(megabytes(38.24)).toBe("38.2");
-    expect(megabytes(212.6)).toBe("213");
+    expect(megabytes(212.6)).toBe("212.6");
     expect(count(12002)).toBe("12,002");
     expect(longSpan(34)).toBe("34 days");
     expect(longSpan(0.5)).toBe("12 h");

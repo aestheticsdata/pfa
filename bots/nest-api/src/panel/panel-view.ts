@@ -18,6 +18,8 @@ import type {
 } from "#app/runner/interfaces/runnerApiTypes.js";
 
 const MB = 1024 * 1024;
+/** Enough for the front to show a single receipt (`0.024 MB`). */
+const MB_DIGITS = 3;
 const WEEK_DAYS = 7;
 /** A live bot failing more than this share of its last 30 s is shown "degraded". */
 const DEGRADED_ERROR_SHARE = 0.2;
@@ -82,11 +84,11 @@ export function botView({ bot, incident }: BotFacts): BotView {
 export function uploadBudgetView(budget: RunnerUploadBudget): UploadBudgetView {
   const perDay = budget.bytesThisWeek / WEEK_DAYS;
   return {
-    usedMB: round(budget.usedBytes / MB),
+    usedMB: round(budget.usedBytes / MB, MB_DIGITS),
     budgetMB: round(budget.budgetBytes / MB),
-    remainingMB: round(budget.remainingBytes / MB),
+    remainingMB: round(budget.remainingBytes / MB, MB_DIGITS),
     weekUploads: budget.uploadsThisWeek,
-    weekMB: round(budget.bytesThisWeek / MB),
+    weekMB: round(budget.bytesThisWeek / MB, MB_DIGITS),
     emptyInDays: perDay > 0 ? Math.round(budget.remainingBytes / perDay) : null,
   };
 }
