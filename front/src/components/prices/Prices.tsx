@@ -2,6 +2,7 @@
 
 import Spinner from "@components/common/Spinner";
 import BulkReadCard from "@components/prices/BulkReadCard";
+import CatalogDialog from "@components/prices/catalog/CatalogDialog";
 import PriceComparisonCard from "@components/prices/PriceComparisonCard";
 import PriceTypeList from "@components/prices/PriceTypeList";
 import usePriceTypes from "@components/prices/services/usePriceTypes";
@@ -9,9 +10,11 @@ import { EmptyState } from "@components/shared/EmptyState";
 import GlowCard from "@components/shared/GlowCard";
 import useGlobalStore from "@components/shared/globalStore";
 import ReceiptLinesHost from "@components/spendings/receiptLines/ReceiptLinesHost";
+import { Button } from "@components/ui/button";
 import useTranslations from "@i18n/useTranslations";
+import { Store } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // The type on screen lives in the URL, so a comparison can be shared or reloaded.
 const TYPE_QUERY_PARAM = "type";
@@ -22,6 +25,7 @@ const Prices = () => {
   const { setIsCalendarVisible } = useGlobalStore();
   const { data: types, isPending } = usePriceTypes();
   const [typeParam, setTypeParam] = useQueryState(TYPE_QUERY_PARAM, parseAsString);
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
 
   useEffect(() => {
     setIsCalendarVisible(false);
@@ -39,6 +43,17 @@ const Prices = () => {
             {types.length}
           </span>
         )}
+        <Button
+          type="button"
+          data-testid="catalog-open"
+          variant="muted"
+          size="sm"
+          className="ml-auto"
+          onClick={() => setIsCatalogOpen(true)}
+        >
+          <Store />
+          {t.catalog.open}
+        </Button>
       </div>
       <p className="text-xs text-ink-4">{t.subtitle}</p>
 
@@ -65,6 +80,10 @@ const Prices = () => {
 
       {/* The review queue of the bulk read opens the receipt-lines modal here (PFA-223). */}
       <ReceiptLinesHost />
+      <CatalogDialog
+        open={isCatalogOpen}
+        onOpenChange={setIsCatalogOpen}
+      />
     </div>
   );
 };

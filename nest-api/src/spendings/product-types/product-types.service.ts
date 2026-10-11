@@ -1,7 +1,9 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { markDuplicates, sameProductType } from "@spendings/catalog/catalog-duplicates";
 import { textKey } from "@spendings/text-key";
+import type { CatalogEntry } from "@spendings/catalog/interfaces/catalogTypes";
 import type { ProductTypeRef } from "@spendings/product-types/interfaces/productTypesTypes";
 import { PrismaService } from "../../prisma/prisma.service";
 
@@ -34,5 +36,58 @@ export class ProductTypesService {
       ids.set(nameKey, saved.ID);
     }
     return ids;
+  }
+
+  /** The types with their purchase counts and likely duplicates (PFA-224). */
+  async usage(userID: string): Promise<CatalogEntry[]> {
+    const types = await this.prisma.productTypes.findMany({
+      where: { userID },
+      select: { ID: true, name: true, _count: { select: { receiptLines: true } } },
+      orderBy: { name: "asc" },
+    });
+    const entries = types.map(({ _count, ...type }) => ({ ...type, uses: _count.receiptLines, duplicateOf: null }));
+    return markDuplicates(entries, sameProductType);
+  }
+
+  /** A new name; refused when another type already bears it — merge it instead. */
+  async rename(typeID: string, rawName: string, userID: string): Promise<ProductTypeRef> {
+    await this.owned(typeID, userID);
+    const name = rawName.trim().slice(0, FIELD_LIMITS.productTypeName);
+    const nameKey = textKey(name);
+    if (!nameKey) throw new BadRequestException("Product type name is empty");
+    const twin = await this.prisma.productTypes.findFirst({
+      where: { userID, nameKey, ID: { not: typeID } },
+      select: { ID: true },
+    });
+    if (twin) throw new ConflictException({ message: "Product type already exists", conflictID: twin.ID });
+    return this.prisma.productTypes.update({
+      where: { ID: typeID },
+      data: { name, nameKey },
+      select: { ID: true, name: true },
+    });
+  }
+
+  /** The source's receipt lines move to the target, then the source goes, all at once. */
+  async merge(sourceID: string, targetID: string, userID: string): Promise<void> {
+    if (sourceID === targetID) throw new BadRequestException("A product type cannot merge into itself");
+    await Promise.all([this.owned(sourceID, userID), this.owned(targetID, userID)]);
+    await this.prisma.$transaction([
+      this.prisma.receiptLines.updateMany({ where: { productTypeID: sourceID }, data: { productTypeID: targetID } }),
+      this.prisma.productTypes.delete({ where: { ID: sourceID } }),
+    ]);
+  }
+
+  /** Only a type no receipt line has. */
+  async remove(typeID: string, userID: string): Promise<void> {
+    await this.owned(typeID, userID);
+    if (await this.prisma.receiptLines.count({ where: { productTypeID: typeID } })) {
+      throw new ConflictException("Product type is in use");
+    }
+    await this.prisma.productTypes.delete({ where: { ID: typeID } });
+  }
+
+  private async owned(typeID: string, userID: string): Promise<void> {
+    const type = await this.prisma.productTypes.findFirst({ where: { ID: typeID, userID }, select: { ID: true } });
+    if (!type) throw new NotFoundException("Product type not found");
   }
 }
