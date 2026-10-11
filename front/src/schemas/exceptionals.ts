@@ -15,7 +15,8 @@ export const ExceptionalItemSchema = z.object({
   invoicefile: z.string().nullable(),
 });
 
-export const ExceptionalListSchema = z.array(ExceptionalItemSchema);
+// Compiled (PFA-176): list payloads are the heavy parses.
+export const ExceptionalListSchema = z.compile(z.array(ExceptionalItemSchema));
 export type ExceptionalItem = z.infer<typeof ExceptionalItemSchema>;
 
 export const ExceptionalMutationPayloadSchema = z.object({

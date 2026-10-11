@@ -32,17 +32,21 @@ export const SpendingItemSchema = z.object({
   groupLabel: z.string().nullish(),
 });
 
-export const SpendingListSchema = z.array(SpendingItemSchema);
+// The list and series payloads are the heavy parses, so they go through
+// `z.compile()` (PFA-176): same output, same errors, flat generated code.
+export const SpendingListSchema = z.compile(z.array(SpendingItemSchema));
 export type SpendingItem = z.infer<typeof SpendingItemSchema>;
 
 // Whole-history search page (COS-114): one keyset page of matches, the cursor to
 // fetch the next page (null at the end), and the unbounded total — sent only on
 // the first page, so the UI can say "N results" without recounting every page.
-export const SpendingSearchPageSchema = z.object({
-  items: SpendingListSchema,
-  nextCursor: z.string().nullable(),
-  total: z.number().optional(),
-});
+export const SpendingSearchPageSchema = z.compile(
+  z.object({
+    items: SpendingListSchema,
+    nextCursor: z.string().nullable(),
+    total: z.number().optional(),
+  }),
+);
 
 // Years the user has spendings in (newest first) — the search modal's year filter.
 export const SpendingYearsSchema = z.array(z.number());
@@ -69,7 +73,7 @@ export const RecurringItemSchema = z.object({
   userID: z.string(),
 });
 
-export const RecurringListSchema = z.array(RecurringItemSchema);
+export const RecurringListSchema = z.compile(z.array(RecurringItemSchema));
 export type RecurringItem = z.infer<typeof RecurringItemSchema>;
 
 // Real year-to-date "Already debited" (COS-49) — GET /recurrings/drawn. The server

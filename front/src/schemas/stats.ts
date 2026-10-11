@@ -23,10 +23,15 @@ const statisticsMonthEntrySchema = z.record(z.string(), z.union([z.string(), z.n
 // are the user's own category names and the years they have data for, both only
 // known at runtime. Typing them further is impossible without changing the
 // backend contract, which is out of scope here.
-export const StatisticsResponseSchema = z.object({
-  colors: z.record(z.string(), z.string()),
-  data: z.record(z.string(), z.array(statisticsMonthEntrySchema)),
-});
+//
+// This one and the other series payloads below go through `z.compile()`
+// (PFA-176): they are the heavy parses, and the output and errors stay the same.
+export const StatisticsResponseSchema = z.compile(
+  z.object({
+    colors: z.record(z.string(), z.string()),
+    data: z.record(z.string(), z.array(statisticsMonthEntrySchema)),
+  }),
+);
 
 export type StatisticsResponse = z.infer<typeof StatisticsResponseSchema>;
 
@@ -52,13 +57,15 @@ export const CategoryTrendPointSchema = z.object({
 
 export type CategoryTrendPoint = z.infer<typeof CategoryTrendPointSchema>;
 
-export const CategoryTrendsResponseSchema = z.object({
-  trends: z.array(CategoryTrendPointSchema),
-  // Total spent across every category in the comparison window (incl. ones
-  // absent from the current window). Drives the Spendings "Average / day vs last
-  // week" delta (COS-35); unused by the dashboard monthly breakdown.
-  previousTotal: numberLikeSchema,
-});
+export const CategoryTrendsResponseSchema = z.compile(
+  z.object({
+    trends: z.array(CategoryTrendPointSchema),
+    // Total spent across every category in the comparison window (incl. ones
+    // absent from the current window). Drives the Spendings "Average / day vs last
+    // week" delta (COS-35); unused by the dashboard monthly breakdown.
+    previousTotal: numberLikeSchema,
+  }),
+);
 
 // Per-day spending totals for a year (COS-45) — GET /daily-stats. Sparse: one
 // entry per day that has at least one spending. Feeds the daily heatmap and the
@@ -71,9 +78,11 @@ export const DailyStatSchema = z.object({
 
 export type DailyStat = z.infer<typeof DailyStatSchema>;
 
-export const DailyStatsResponseSchema = z.object({
-  days: z.array(DailyStatSchema),
-});
+export const DailyStatsResponseSchema = z.compile(
+  z.object({
+    days: z.array(DailyStatSchema),
+  }),
+);
 
 export type DailyStatsResponse = z.infer<typeof DailyStatsResponseSchema>;
 
@@ -154,14 +163,16 @@ export const SearchTimelineBucketSchema = z.object({
 
 export type SearchTimelineBucket = z.infer<typeof SearchTimelineBucketSchema>;
 
-export const SearchTimelineResponseSchema = z.object({
-  buckets: z.array(SearchTimelineBucketSchema),
-  summary: z.object({
-    total: numberLikeSchema,
-    count: numberLikeSchema,
-    firstDate: z.string().nullable(),
-    lastDate: z.string().nullable(),
+export const SearchTimelineResponseSchema = z.compile(
+  z.object({
+    buckets: z.array(SearchTimelineBucketSchema),
+    summary: z.object({
+      total: numberLikeSchema,
+      count: numberLikeSchema,
+      firstDate: z.string().nullable(),
+      lastDate: z.string().nullable(),
+    }),
   }),
-});
+);
 
 export type SearchTimelineResponse = z.infer<typeof SearchTimelineResponseSchema>;

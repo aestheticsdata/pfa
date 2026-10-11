@@ -35,15 +35,18 @@ export const CategoryDailyTotalsSchema = z.object({
 
 export type CategoryDailyTotals = z.infer<typeof CategoryDailyTotalsSchema>;
 
-export const DailyProjectionSchema = z.object({
-  source: ProjectionSourceSchema,
-  referenceMonth: z.string().nullable(),
-  dailyTotals: z.array(numberLikeSchema),
-  // Defaulted so an API that predates PFA-181 degrades to "no per-category
-  // figures" instead of failing the parse and blanking the whole dashboard;
-  // the helper falls back to the whole-month reference for the global number.
-  byCategory: z.array(CategoryDailyTotalsSchema).default([]),
-});
+// Compiled (PFA-176): a month of daily totals per category is a heavy parse.
+export const DailyProjectionSchema = z.compile(
+  z.object({
+    source: ProjectionSourceSchema,
+    referenceMonth: z.string().nullable(),
+    dailyTotals: z.array(numberLikeSchema),
+    // Defaulted so an API that predates PFA-181 degrades to "no per-category
+    // figures" instead of failing the parse and blanking the whole dashboard;
+    // the helper falls back to the whole-month reference for the global number.
+    byCategory: z.array(CategoryDailyTotalsSchema).default([]),
+  }),
+);
 
 export type DailyProjection = z.infer<typeof DailyProjectionSchema>;
 
