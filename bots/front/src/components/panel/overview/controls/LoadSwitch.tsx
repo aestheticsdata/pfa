@@ -10,7 +10,7 @@ import type { ControlProps } from "@components/panel/overview/interfaces/overvie
 
 /**
  * "Load bots ON/OFF" (PFA-128): stops every load bot at once and keeps the target, so switching
- * back on ramps to it again. The daily bots are not touched — that is the kill switch's job.
+ * back on ramps to it again. The daily bots are not touched — they have their own switch.
  */
 const LoadSwitch = ({ app, status }: ControlProps) => {
   const { pending, apply } = useApply();

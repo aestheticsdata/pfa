@@ -10,12 +10,12 @@ like a browser. Nothing here touches the database directly.
 ```
 src/
   core/        generic engine — knows nothing about PFA (a test enforces it)
-    engine/      the Runner: scheduling, visits, kill switch, counters
+    engine/      the Runner: scheduling, visits, switches, counters
     registry/    auto-discovery of actions
     http/        per-bot HTTP session: cookie jar, CSRF header, RPS cap
     limits/      hard caps: RPS token bucket, rolling upload budget
     control/     control API (127.0.0.1 + bearer token)
-    storage/     state files (0600): bots' passwords, kill switch, upload ledger
+    storage/     state files (0600): bots' passwords, switches, upload ledger
   apps/pfa/    PFA's adapter — the only PFA-specific code
     pfaApp.ts    URL, synthetic domain, bots, sign-in
     persona/     the four daily bots, their catalogs, guardrails
@@ -59,7 +59,10 @@ clean-ups only). The two populations are independent: nothing below ever touches
   `everySec` seconds (the ramp), first visit within minutes, spread out — and stops the excess at
   once when the target drops (highest first, so the same bots stay up).
 - **"Load bots" switch**: off stops every load bot at once and keeps the target; on ramps back to
-  it. Off on a fresh install. The kill switch, above it, still stops everything.
+  it. Off on a fresh install. The daily bots have their own switch ("Daily bots"); either one runs
+  without the other.
+- **A bot's own switch**: off sets that bot aside. A load bot turned off takes no place in the
+  target — the ramp brings up the next one instead.
 - **Pace**: `daily` (like real users: 2–3 visits a day in waking hours) or `burst` (a stress test:
   a visit every 1–5 min, day and night, 1–5 s between actions).
 - **Backpressure**: at most 50 visits at once, every bot together; a bot whose time comes while the
@@ -82,7 +85,7 @@ starts again from zero.
    20, `api_zone` in nginx.conf) and 20 connections: above that nginx answers **503** before PFA
    sees the request. Those 503s are nginx's protection doing its job, not PFA failing — and as long
    as the limit applies to ks-b, the bots as a whole cannot push PFA past ~5 req/s.
-4. Stop: the "Load bots" switch (daily bots keep going), or the kill switch for everything.
+4. Stop: the "Load bots" switch (daily bots keep going); the "Daily bots" switch for the others.
 
 
 **Quiet hours**: no new spending between 22:00 and 10:00 Paris time by default — actions flagged
@@ -106,7 +109,7 @@ fixed set and only after reserving budget).
 | Guard | Where |
 |---|---|
 | Every bot email must be `@synthetic.test`, checked before any HTTP call | `core/guards/syntheticEmail.ts`, `Runner` |
-| Off by default; the kill switch is persisted and holds mid-visit | `Runner.start/stop`, `<app>-state.json` |
+| Off by default; the "Daily bots" and "Load bots" switches are persisted and hold mid-visit | `Runner.setDailyEnabled/setLoadEnabled`, `<app>-state.json` |
 | Control API: 127.0.0.1 only, bearer token compared in constant time | `core/control/` |
 | Hard caps from the environment only — lowered, never raised (500 bots, 40 req/s, 400 MB) | `core/config/runnerConfig.ts` |
 | Global RPS cap across every bot | `core/limits/rateLimiter.ts` |
@@ -132,7 +135,7 @@ budget is spent, `receipt.upload` is simply skipped.
 |---|---|
 | `GET /status` | running, live bots, target and ramp, actions/errors/requests per minute, rps, throttled, limits, upload budget, quiet hours |
 | `GET /history` | the last 80 s in 1-second slices: actions, errors, p50/p95, 2xx/4xx/5xx, live/target |
-| `POST /runner` `{"running": true\|false}` | kill switch |
+| `PUT /daily` `{"enabled"}` · `PUT /load` `{"enabled"}` · `PUT /load-pace` `{"pace"}` | the two switches, the load pace |
 | `PUT /target` `{"target": n}` · `PUT /ramp` `{"step", "everySec"}` | load-bot target (capped) and ramp |
 | `GET/PUT /quiet-hours` `{"from": "22:00", "to": "10:00"}` | the quiet window, on the app's clock |
 | `GET /bots` · `GET /bots/:id` · `PATCH /bots/:id` `{"enabled"}` · `POST /bots/bulk` `{"ids", "enabled"}` | bots, a bot's detail, toggles |

@@ -29,8 +29,8 @@ describe("control API", () => {
       expect((await fetch(`${base}${path}`)).status).toBe(401);
       expect((await fetch(`${base}${path}`, { headers: { authorization: "Bearer nope" } })).status).toBe(401);
     }
-    const kill = await fetch(`${base}/runner`, { method: "POST", body: JSON.stringify({ running: true }) });
-    expect(kill.status).toBe(401);
+    const daily = await fetch(`${base}/daily`, { method: "PUT", body: JSON.stringify({ enabled: true }) });
+    expect(daily.status).toBe(401);
   });
 
   it("answers Zeus's health probe without the token", async () => {
@@ -40,31 +40,32 @@ describe("control API", () => {
     expect(await health.json()).toEqual({ status: "ok" });
   });
 
-  it("serves the status and flips the kill switch with the token", async () => {
+  it("serves the status and flips the daily switch with the token", async () => {
     const base = await start();
     const status = await (await fetch(`${base}/status`, { headers: auth })).json();
-    expect(status.running).toBe(false);
+    expect(status).toMatchObject({ running: false, dailyEnabled: false });
 
-    const started = await fetch(`${base}/runner`, {
-      method: "POST",
+    const started = await fetch(`${base}/daily`, {
+      method: "PUT",
       headers: auth,
-      body: JSON.stringify({ running: true }),
+      body: JSON.stringify({ enabled: true }),
     });
-    expect((await started.json()).running).toBe(true);
-    const stopped = await fetch(`${base}/runner`, {
-      method: "POST",
+    expect(await started.json()).toEqual({ enabled: true });
+    expect(await (await fetch(`${base}/status`, { headers: auth })).json()).toMatchObject({ running: true });
+    const stopped = await fetch(`${base}/daily`, {
+      method: "PUT",
       headers: auth,
-      body: JSON.stringify({ running: false }),
+      body: JSON.stringify({ enabled: false }),
     });
-    expect((await stopped.json()).running).toBe(false);
+    expect(await stopped.json()).toEqual({ enabled: false });
   });
 
   it("validates bodies and unknown targets", async () => {
     const base = await start();
-    const bad = await fetch(`${base}/runner`, {
-      method: "POST",
+    const bad = await fetch(`${base}/daily`, {
+      method: "PUT",
       headers: auth,
-      body: JSON.stringify({ running: "yes" }),
+      body: JSON.stringify({ enabled: "yes" }),
     });
     expect(bad.status).toBe(400);
     const unknown = await fetch(`${base}/bots/ghost`, {

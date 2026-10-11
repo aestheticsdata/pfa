@@ -34,7 +34,7 @@ cd bots/front && pnpm install && pnpm dev                                    # h
 - **Auth** — Zeus's model: one sealed account, bcrypt, recovery passphrase, rate limits, CSRF, audit.
 - **Apps** — picked after sign-in (skipped with one app). Each app has its theme (`.theme-pfa`
   mapped onto the semantic tokens, `front/src/styles/tokens/themes.css`), logo, runner.
-- **Controls** — kill switch, load target and ramp (load bots: PFA-128), quiet hours, bot and action
+- **Controls** — "Daily bots" and "Load bots" switches, load target and ramp (load bots: PFA-128), quiet hours, bot and action
   toggles, bulk on/off, restart a session, disable / purge an account.
 - **Incidents** — `synthetic-foreign-ip` lines read from the app's PM2 logs (`alertLogs` in
   apps.json), grouped by account + IP, danger banner on every page, Web Push to subscribed devices.

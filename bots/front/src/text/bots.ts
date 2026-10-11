@@ -46,7 +46,7 @@ export const BOTS_TEXT = {
 export const DRAWER_TEXT = {
   close: "Close",
   permanent:
-    "Permanent bot — always on, not affected by target or ramp. Only the kill switch or its own toggle stops it.",
+    'Permanent bot — always on, not affected by target or ramp. Only the "Daily bots" switch or its own toggle stops it.',
   apm: "Actions/min",
   errorRate: "Error rate",
   total: "Total actions",

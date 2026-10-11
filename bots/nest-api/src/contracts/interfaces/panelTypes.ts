@@ -130,7 +130,10 @@ export interface RampView {
 }
 
 export interface StatusView {
+  /** Either switch is on: the daily bots, the load bots, or both. */
   running: boolean;
+  /** The "Daily bots" switch: off = every daily bot stopped. */
+  dailyEnabled: boolean;
   liveDaily: number;
   totalDaily: number;
   liveLoad: number;

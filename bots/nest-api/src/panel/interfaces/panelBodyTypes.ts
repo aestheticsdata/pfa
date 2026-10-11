@@ -4,12 +4,10 @@ import type {
   closeAccountSchema,
   enabledSchema,
   loadPaceSchema,
-  runningSchema,
   targetSchema,
 } from "#app/panel/panel.schemas.js";
 import type { unsubscribeSchema } from "#app/push/push.schemas.js";
 
-export type RunningBody = z.infer<typeof runningSchema>;
 export type TargetBody = z.infer<typeof targetSchema>;
 export type EnabledBody = z.infer<typeof enabledSchema>;
 export type LoadPaceBody = z.infer<typeof loadPaceSchema>;

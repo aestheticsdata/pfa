@@ -8,7 +8,7 @@ const config = {
   RUNNER_CONTROL_TOKEN: "",
   RUNNER_CONTROL_PORT: "7300",
 
-  // Outside the release folders, so a deploy never touches the bots' passwords or the kill switch.
+  // Outside the release folders, so a deploy never touches the bots' passwords or the switches.
   RUNNER_STATE_DIR: "/var/www/bots/state",
 
   // The public URL: the bots cross nginx and the IP lock like real users (PFA-122).

@@ -21,7 +21,8 @@ export interface RunnerClient {
   bots(): Promise<RunnerBot[]>;
   bot(id: string): Promise<RunnerBotDetail | null>;
   actions(): Promise<RunnerAction[]>;
-  setRunning(running: boolean): Promise<void>;
+  /** The "Daily bots" switch. */
+  setDaily(enabled: boolean): Promise<boolean>;
   setTarget(target: number): Promise<number>;
   setRamp(ramp: RunnerRamp): Promise<RunnerRamp>;
   /** The "Load bots" switch. */

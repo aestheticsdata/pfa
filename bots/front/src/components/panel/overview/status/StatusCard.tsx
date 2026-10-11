@@ -36,7 +36,7 @@ const StatusCard = ({ status, actions }: StatusCardProps) => {
         <StatTile
           label={
             <>
-              <Dot tone={status.running && status.loadEnabled ? TONE.ok : TONE.neutral} />
+              <Dot tone={status.loadEnabled ? TONE.ok : TONE.neutral} />
               {text.load}
             </>
           }

@@ -80,9 +80,9 @@ interface ActionStats {
 }
 
 /**
- * Runs one app's bots. Off by default: nothing happens until `start()` — and the kill switch is
- * persisted, so a restart never wakes bots that were stopped. Every bot email is checked against
- * the app's synthetic domain, and the bot count against the hard cap, before anything else.
+ * Runs one app's bots. Off by default: nothing happens until the "Daily bots" or the "Load bots"
+ * switch is on — both persisted, so a restart never wakes bots that were stopped. Every bot email is
+ * checked against the app's synthetic domain, and the bot count against the hard cap, before anything else.
  */
 export class Runner<TPersona = unknown> {
   private readonly bots = new Map<string, BotRuntime<TPersona>>();
@@ -126,37 +126,29 @@ export class Runner<TPersona = unknown> {
     }
   }
 
-  /** Resumes where the last process left off: running only if it was running. */
+  /** Resumes where the last process left off: running only if one of the two switches was on. */
   resume(): void {
-    if (this.state.running) {
-      this.startTicker();
-    }
+    this.syncTicker();
   }
 
-  async start(): Promise<void> {
-    this.state.running = true;
-    await this.deps.saveState(this.state);
-    this.startTicker();
-    logger.info("runner started", { app: this.deps.app.id });
-  }
-
-  /** The kill switch: no new visit starts, and visits in progress stop after their current action. */
-  async stop(): Promise<void> {
-    this.state.running = false;
-    await this.deps.saveState(this.state);
-    clearInterval(this.ticker);
-    this.ticker = undefined;
-    for (const bot of this.bots.values()) {
-      bot.nextWakeAt = null;
-    }
-    // Load bots come up again with the ramp when the runner restarts, never all at once.
-    this.spawned.clear();
-    this.lastStepAt = 0;
-    logger.info("runner stopped", { app: this.deps.app.id });
-  }
-
+  /** Something runs: the daily bots, the load bots, or both. */
   isRunning(): boolean {
-    return this.state.running;
+    return this.dailyEnabled() || this.loadEnabled();
+  }
+
+  /**
+   * The "Daily bots" switch: off, no daily bot starts a visit and those in progress stop after
+   * their current action. The load bots are not touched — they have their own switch.
+   */
+  async setDailyEnabled(enabled: boolean): Promise<boolean> {
+    this.state.dailyEnabled = enabled;
+    await this.deps.saveState(this.state);
+    for (const bot of this.bots.values()) {
+      if (bot.profile.kind === BOT_KIND.daily) bot.nextWakeAt = null;
+    }
+    this.syncTicker();
+    logger.info(enabled ? "daily bots on" : "daily bots off", { app: this.deps.app.id });
+    return enabled;
   }
 
   async setBotEnabled(botId: string, enabled: boolean): Promise<boolean> {
@@ -175,6 +167,8 @@ export class Runner<TPersona = unknown> {
     this.state.disabledBots = disabled;
     if (updated.length > 0) {
       await this.deps.saveState(this.state);
+      // A load bot turned off gives its place in the target to the next one.
+      this.rampNow();
     }
     return { updated, unknown };
   }
@@ -206,7 +200,7 @@ export class Runner<TPersona = unknown> {
 
   /**
    * The "Load bots" switch: off stops every load bot at once and keeps the target; on brings the
-   * target back up through the ramp. Daily bots are not touched — that is the kill switch's job.
+   * target back up through the ramp. Daily bots are not touched — they have their own switch.
    */
   async setLoadEnabled(enabled: boolean): Promise<boolean> {
     this.state.loadEnabled = enabled;
@@ -214,6 +208,7 @@ export class Runner<TPersona = unknown> {
     // Back on: the first step comes up now, the rest at the ramp's pace.
     if (enabled) this.lastStepAt = 0;
     this.rampNow();
+    this.syncTicker();
     logger.info(enabled ? "load bots on" : "load bots off", { app: this.deps.app.id, target: this.state.target ?? 0 });
     return enabled;
   }
@@ -325,7 +320,7 @@ export class Runner<TPersona = unknown> {
     const count = options.actions ?? actionsPerWake(bot.rng);
     try {
       for (let i = 0; i < count; i++) {
-        // The kill switch — and, for a load bot, the ramp taking it down — holds mid-visit too:
+        // The bot's switches — and, for a load bot, the ramp taking it down — hold mid-visit too:
         // the visit ends after the action in progress.
         if (!options.force && !this.mayVisit(bot)) {
           break;
@@ -366,7 +361,8 @@ export class Runner<TPersona = unknown> {
     const load = snapshots.filter((bot) => bot.kind === BOT_KIND.load);
     return {
       app: this.deps.app.id,
-      running: this.state.running,
+      running: this.isRunning(),
+      dailyEnabled: this.dailyEnabled(),
       bots: counts,
       liveDaily: daily.filter(isLive).length,
       totalDaily: daily.length,
@@ -531,19 +527,26 @@ export class Runner<TPersona = unknown> {
     if (bot.state === BOT_STATE.blocked || bot.state === BOT_STATE.active) {
       return bot.state;
     }
-    if (!this.state.running) {
+    if (!this.kindEnabled(bot)) {
       return BOT_STATE.stopped;
-    }
-    if (bot.profile.kind === BOT_KIND.load && !this.spawned.has(bot.profile.id)) {
-      return BOT_STATE.queued;
     }
     if (this.state.disabledBots.includes(bot.profile.id)) {
       return BOT_STATE.paused;
     }
+    if (bot.profile.kind === BOT_KIND.load && !this.spawned.has(bot.profile.id)) {
+      return BOT_STATE.queued;
+    }
     return bot.state;
   }
 
-  private startTicker(): void {
+  /** Ticks while either switch is on; with both off, the load bots come up again through the ramp. */
+  private syncTicker(): void {
+    if (!this.isRunning()) {
+      clearInterval(this.ticker);
+      this.ticker = undefined;
+      this.lastStepAt = 0;
+      return;
+    }
     if (this.ticker) {
       return;
     }
@@ -556,7 +559,7 @@ export class Runner<TPersona = unknown> {
    * visit pool allows; the others stay due and go at the next tick. Plans the first wake of the rest.
    */
   private tick(): void {
-    if (!this.state.running) {
+    if (!this.isRunning()) {
       return;
     }
     this.rampNow();
@@ -582,10 +585,13 @@ export class Runner<TPersona = unknown> {
     const ramp = this.ramp();
     const stepDue = now - this.lastStepAt >= ramp.everySec * 1000;
     const plan = planRamp({
-      order: this.loadOrder.filter((id) => this.bots.get(id)?.state !== BOT_STATE.blocked),
+      // A load bot turned off by hand takes no place in the target: the next one comes up instead.
+      order: this.loadOrder.filter(
+        (id) => this.bots.get(id)?.state !== BOT_STATE.blocked && !this.state.disabledBots.includes(id),
+      ),
       spawned: this.spawned,
       target: this.state.target ?? 0,
-      enabled: this.state.running && this.loadEnabled(),
+      enabled: this.loadEnabled(),
       stepDue,
       step: ramp.step,
     });
@@ -607,16 +613,20 @@ export class Runner<TPersona = unknown> {
 
   /** Seconds until the ramp's next step, while load bots are still on their way up; null otherwise. */
   private nextStepInSec(now: number): number | null {
-    if (!this.state.running || !this.loadEnabled() || this.spawned.size >= (this.state.target ?? 0)) {
+    if (!this.loadEnabled() || this.spawned.size >= (this.state.target ?? 0)) {
       return null;
     }
     const left = this.lastStepAt + this.ramp().everySec * 1000 - now;
     return Math.max(0, Math.ceil(left / 1000));
   }
 
-  /** May this bot (go on) visit now: the runner is on and, for a load bot, the ramp has it up. */
+  /** May this bot (go on) visit now: its switches are on and, for a load bot, the ramp has it up. */
   private mayVisit(bot: BotRuntime<TPersona>): boolean {
-    return this.state.running && (bot.profile.kind !== BOT_KIND.load || this.spawned.has(bot.profile.id));
+    return (
+      this.kindEnabled(bot) &&
+      !this.state.disabledBots.includes(bot.profile.id) &&
+      (bot.profile.kind !== BOT_KIND.load || this.spawned.has(bot.profile.id))
+    );
   }
 
   private nextVisit(bot: BotRuntime<TPersona>, now: Date): Date {
@@ -629,8 +639,17 @@ export class Runner<TPersona = unknown> {
     return bot.profile.kind === BOT_KIND.load && this.isBurst() ? burstThinkTimeMs(bot.rng) : thinkTimeMs(bot.rng);
   }
 
+  private dailyEnabled(): boolean {
+    return this.state.dailyEnabled === true;
+  }
+
   private loadEnabled(): boolean {
     return this.state.loadEnabled === true;
+  }
+
+  /** The switch of the bot's kind: "Daily bots" or "Load bots". */
+  private kindEnabled(bot: BotRuntime<TPersona>): boolean {
+    return bot.profile.kind === BOT_KIND.load ? this.loadEnabled() : this.dailyEnabled();
   }
 
   private isBurst(): boolean {

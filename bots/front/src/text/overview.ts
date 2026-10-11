@@ -1,20 +1,20 @@
 export const OVERVIEW_TEXT = {
   empty: (app: string) =>
     `No bots configured for ${app} yet. Register an action registry and bot accounts on the runner, then set a target.`,
-  killSwitch: {
-    on: "All bots ON",
-    off: "All bots OFF",
-    sub: "Kill switch — stops daily and load bots at once",
-    label: "All bots on/off",
-    stopped: "Kill switch engaged — all bots stopped",
-    started: "All bots restarted",
+  dailySwitch: {
+    on: "Daily bots ON",
+    off: "Daily bots OFF",
+    sub: "The permanent bots only — the load bots have their own switch",
+    label: "Daily bots on/off",
+    stopped: "Daily bots stopped — load bots untouched",
+    started: "Daily bots back on",
   },
   loadSwitch: {
     on: "Load bots ON",
     off: "Load bots OFF",
-    sub: "Stops load bots only — the daily bots keep running, the target is kept",
+    sub: "The load bots only — the daily bots have their own switch, the target is kept",
     label: "Load bots on/off",
-    stopped: "Load bots stopped — daily bots still running",
+    stopped: "Load bots stopped — daily bots untouched",
     started: (target: number) => `Load bots back on — ramping to ${target}`,
   },
   pace: {

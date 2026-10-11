@@ -53,8 +53,8 @@ export class HttpRunnerClient implements RunnerClient {
     return this.call({ method: "GET", path: "/actions" });
   }
 
-  async setRunning(running: boolean): Promise<void> {
-    await this.call({ method: "POST", path: "/runner", body: { running } });
+  async setDaily(enabled: boolean): Promise<boolean> {
+    return (await this.call<{ enabled: boolean }>({ method: "PUT", path: "/daily", body: { enabled } })).enabled;
   }
 
   async setTarget(target: number): Promise<number> {

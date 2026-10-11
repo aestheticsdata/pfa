@@ -10,7 +10,7 @@ export const BOT_KIND = {
  */
 export const BOT_STATE = {
   stopped: "stopped",
-  /** A load bot the ramp has not brought up (yet): above the target, or the load switch is off. */
+  /** A load bot the ramp has not brought up (yet): above the target. */
   queued: "queued",
   sleeping: "sleeping",
   active: "active",

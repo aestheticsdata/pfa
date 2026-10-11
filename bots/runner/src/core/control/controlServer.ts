@@ -94,11 +94,8 @@ async function runnerRoutes<TPersona>(route: Route, { runner }: ControlServerOpt
       }
       return runner.setQuietHours(body);
     }
-    case `${HTTP_METHOD.post} runner`: {
-      const running = readBoolean(await readBody(req), "running");
-      await (running ? runner.start() : runner.stop());
-      return runner.status();
-    }
+    case `${HTTP_METHOD.put} daily`:
+      return { enabled: await runner.setDailyEnabled(readBoolean(await readBody(req), "enabled")) };
     case `${HTTP_METHOD.put} target`:
       return { target: await runner.setTarget(readNumber(await readBody(req), "target")) };
     case `${HTTP_METHOD.put} load`:

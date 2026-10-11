@@ -10,7 +10,6 @@ import {
   loadPaceSchema,
   quietHoursSchema,
   rampSchema,
-  runningSchema,
   targetSchema,
 } from "#app/panel/panel.schemas.js";
 import { PanelService } from "#app/panel/panel.service.js";
@@ -34,7 +33,6 @@ import type {
   CloseAccountBody,
   EnabledBody,
   LoadPaceBody,
-  RunningBody,
   TargetBody,
 } from "#app/panel/interfaces/panelBodyTypes.js";
 import type { BotsQuery } from "#app/panel/interfaces/panelViewTypes.js";
@@ -89,14 +87,14 @@ export class PanelController {
     return this.panel.incidentsView(app);
   }
 
-  @Post(":app/runner")
-  @HttpCode(HttpStatus.OK)
-  setRunning(
+  /** The "Daily bots" switch: the permanent bots; load bots untouched. */
+  @Put(":app/daily")
+  setDaily(
     @Param("app") app: string,
-    @Body({ schema: runningSchema }) body: RunningBody,
+    @Body({ schema: enabledSchema }) body: EnabledBody,
     @Actor() actor: AuditActor,
   ): Promise<unknown> {
-    return this.panel.control({ app, actor, action: { kind: CONTROL_ACTION.runnerSet, running: body.running } });
+    return this.panel.control({ app, actor, action: { kind: CONTROL_ACTION.dailySet, enabled: body.enabled } });
   }
 
   @Put(":app/target")

@@ -1,4 +1,4 @@
-import KillSwitch from "@components/panel/overview/controls/KillSwitch";
+import DailySwitch from "@components/panel/overview/controls/DailySwitch";
 import LoadPace from "@components/panel/overview/controls/LoadPace";
 import LoadSwitch from "@components/panel/overview/controls/LoadSwitch";
 import LoadTarget from "@components/panel/overview/controls/LoadTarget";
@@ -9,7 +9,7 @@ import Card from "@components/ui/Card";
 import type { ControlProps } from "@components/panel/overview/interfaces/overviewTypes";
 
 /**
- * Kill switch, load switch, load target, ramp-up, load pace, quiet hours. One column on a phone and
+ * Daily switch, load switch, load target, ramp-up, load pace, quiet hours. One column on a phone and
  * on desktop; on a tablet the card goes full width in two columns (switches + target | ramp, pace +
  * quiet hours).
  */
@@ -19,7 +19,7 @@ const ControlsCard = ({ app, status }: ControlProps) => (
     testId="controls-card"
   >
     <div className="contents tablet:block tablet:min-w-0 desktop:contents">
-      <KillSwitch
+      <DailySwitch
         app={app}
         status={status}
       />

@@ -87,7 +87,7 @@ export class SimulatedRunnerClient implements RunnerClient {
   private readonly slices: SimulationSlice[] = [];
   private readonly disabledActions = new Set<string>();
   private readonly runs = new Map<string, { runs: number; errors: number }>();
-  private running: boolean;
+  private dailyEnabled: boolean;
   private target: number;
   private spawned: number;
   private ramp: RunnerRamp = { step: 10, everySec: 30 };
@@ -102,7 +102,7 @@ export class SimulatedRunnerClient implements RunnerClient {
 
   constructor(seed: SimulationSeed) {
     this.random = new SeededRandom(seed.seed);
-    this.running = seed.populated;
+    this.dailyEnabled = seed.populated;
     this.loadEnabled = seed.populated;
     this.target = seed.populated ? BOOT_TARGET : 0;
     this.spawned = seed.populated ? BOOT_SPAWNED : 0;
@@ -135,7 +135,8 @@ export class SimulatedRunnerClient implements RunnerClient {
     const requestsPerMin = last.reduce((sum, slice) => sum + slice.requests, 0);
     return {
       app: "simulated",
-      running: this.running,
+      running: this.dailyEnabled || this.loadEnabled,
+      dailyEnabled: this.dailyEnabled,
       bots: counts,
       liveDaily: daily.filter((bot) => this.isLive(bot)).length,
       totalDaily: daily.length,
@@ -149,7 +150,7 @@ export class SimulatedRunnerClient implements RunnerClient {
       activeVisits: Math.min(MAX_ACTIVE_VISITS, this.fleet.filter((bot) => this.stateOf(bot) === "active").length),
       maxActiveVisits: MAX_ACTIVE_VISITS,
       nextStepInSec:
-        this.running && this.loadEnabled && this.spawned < this.target
+        this.loadEnabled && this.spawned < this.target
           ? Math.max(0, Math.ceil((this.nextStepAt - Date.now()) / 1000))
           : null,
       actionsPerMin,
@@ -212,8 +213,9 @@ export class SimulatedRunnerClient implements RunnerClient {
     }));
   }
 
-  async setRunning(running: boolean): Promise<void> {
-    this.running = running;
+  async setDaily(enabled: boolean): Promise<boolean> {
+    this.dailyEnabled = enabled;
+    return enabled;
   }
 
   async setTarget(target: number): Promise<number> {
@@ -297,10 +299,19 @@ export class SimulatedRunnerClient implements RunnerClient {
   /** A bot's runner state: the same words the real runner uses, plus "queued" for load bots not up yet. */
   private stateOf(bot: SimulatedBot): string {
     if (bot.blocked) return "blocked";
-    if (!this.running) return "stopped";
-    if (bot.kind === "load" && (!this.loadEnabled || this.loadIndex(bot) > this.spawned)) return "queued";
+    if (!(bot.kind === "load" ? this.loadEnabled : this.dailyEnabled)) return "stopped";
     if (!bot.enabled) return "paused";
+    if (bot.kind === "load" && this.loadRank(bot) > this.spawned) return "queued";
     return bot.currentAction ? "active" : "sleeping";
+  }
+
+  /** A load bot's place in the ramp: bots turned off or blocked take none (as in the real runner). */
+  private loadRank(bot: SimulatedBot): number {
+    const before = this.fleet.filter(
+      (other) =>
+        other.kind === "load" && other.enabled && !other.blocked && this.loadIndex(other) < this.loadIndex(bot),
+    );
+    return before.length + 1;
   }
 
   private isLive(bot: SimulatedBot): boolean {
@@ -395,7 +406,7 @@ export class SimulatedRunnerClient implements RunnerClient {
 
   private tick(): void {
     const now = Date.now();
-    if (this.running && this.loadEnabled && this.spawned < this.target && now >= this.nextStepAt) {
+    if (this.loadEnabled && this.spawned < this.target && now >= this.nextStepAt) {
       this.spawned = Math.min(this.target, this.spawned + this.ramp.step);
       this.nextStepAt = now + this.ramp.everySec * 1000;
     }

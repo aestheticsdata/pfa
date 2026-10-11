@@ -33,8 +33,8 @@ async function change(call: ApiCall): Promise<ActionResult> {
   }
 }
 
-export async function setRunning(appId: string, running: boolean): Promise<ActionResult> {
-  return change({ path: `${app(appId)}/runner`, method: "POST", body: { running } });
+export async function setDaily(appId: string, enabled: boolean): Promise<ActionResult> {
+  return change({ path: `${app(appId)}/daily`, method: "PUT", body: { enabled } });
 }
 
 export async function setTarget(appId: string, target: number): Promise<ActionResult> {
