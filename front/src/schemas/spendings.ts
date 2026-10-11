@@ -31,6 +31,8 @@ export const SpendingItemSchema = apiObject({
   detail: z.string().nullable(),
   // Joined by GET /spendings only — the search page does not send it.
   groupLabel: z.string().nullish(),
+  // How many receipt lines were saved for the row (PFA-214); 0 when none.
+  lineCount: z.number(),
 });
 
 // The list and series payloads are the heavy parses, so they go through

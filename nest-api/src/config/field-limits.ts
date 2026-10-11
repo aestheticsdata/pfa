@@ -17,6 +17,8 @@ export const FIELD_LIMITS = {
    */
   groupLabel: 40,
   groupDetail: 57,
+  /** `ReceiptLines.label` — one line read on a receipt (PFA-214). */
+  receiptLineLabel: 100,
   /** `Exceptionals.description`. */
   description: 255,
   /** `Categories.name` — the categories the spendings reference. */

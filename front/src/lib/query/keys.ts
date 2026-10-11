@@ -27,4 +27,7 @@ export const QUERY_KEYS = {
   SEARCH_TIMELINE: "searchTimeline",
   SPENDINGS_YEARS: "spendingsYears",
   LABEL_SUGGESTIONS: "labelSuggestions",
+  RECEIPT_LINES: "receiptLines",
+  RECEIPT_OCR: "receiptOcr",
+  RECEIPT_IMAGE: "receiptImage",
 } as const;

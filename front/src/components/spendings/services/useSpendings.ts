@@ -1,6 +1,8 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { RECEIPT_LINES_MODE } from "@components/spendings/config/constants";
 import { buildInvoiceUploadFormData } from "@components/spendings/services/invoiceUploadFormData";
+import useReceiptLinesStore from "@components/spendings/stores/receiptLinesStore";
 import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
@@ -150,6 +152,13 @@ const useSpendings = () => {
               },
               receiptFile,
             ),
+          });
+          // The receipt is read once it is stored, and its lines proposed (PFA-214).
+          useReceiptLinesStore.getState().open({
+            spendingID: ID,
+            label: spendingEdited.label,
+            amount: Number(spendingEdited.amount),
+            mode: RECEIPT_LINES_MODE.review,
           });
         } catch (e) {
           console.log("error attaching receipt at creation : ", e);

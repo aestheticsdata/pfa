@@ -13,7 +13,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000051",
@@ -28,7 +29,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000030",
@@ -43,7 +45,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000024",
@@ -58,7 +61,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000052",
@@ -73,7 +77,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000053",
@@ -88,7 +93,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000054",
@@ -103,7 +109,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000055",
@@ -118,7 +125,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000056",
@@ -133,7 +141,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000057",
@@ -148,7 +157,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000058",
@@ -163,7 +173,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000059",
@@ -178,7 +189,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000060",
@@ -193,7 +205,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000061",
@@ -208,7 +221,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000062",
@@ -223,7 +237,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000063",
@@ -238,7 +253,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000064",
@@ -253,7 +269,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000065",
@@ -268,7 +285,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000066",
@@ -283,7 +301,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000067",
@@ -298,7 +317,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000068",
@@ -313,7 +333,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000069",
@@ -328,7 +349,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000070",
@@ -343,7 +365,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000071",
@@ -358,7 +381,8 @@
       "groupID": null,
       "detail": null,
       "category": "Train pass",
-      "categoryColor": "#6DB65B"
+      "categoryColor": "#6DB65B",
+      "lineCount": 0
     },
     {
       "ID": "00000000-0000-4000-8000-000000000072",
@@ -373,7 +397,8 @@
       "groupID": null,
       "detail": null,
       "category": "Pharmacy",
-      "categoryColor": "#C0894B"
+      "categoryColor": "#C0894B",
+      "lineCount": 0
     }
   ],
   "nextCursor": "00000000-0000-4000-8000-000000000073",

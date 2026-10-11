@@ -23,6 +23,7 @@ describe("SpendingsService.searchSpendings", () => {
     amount: 1,
     date: new Date("2026-01-01"),
     category: null,
+    _count: { receiptLines: 0 },
   });
 
   it("returns empty without hitting the DB when the trimmed query is shorter than 2 chars", async () => {
@@ -50,7 +51,7 @@ describe("SpendingsService.searchSpendings", () => {
     expect(findMany).toHaveBeenCalledWith({
       where,
       orderBy: [{ date: "desc" }, { ID: "desc" }],
-      include: { category: true },
+      include: { category: true, _count: { select: { receiptLines: true } } },
       // Over-fetch one row to detect a further page without a spurious empty call.
       take: 51,
     });
@@ -172,6 +173,7 @@ describe("SpendingsService.searchSpendings", () => {
       amount: 42.8,
       date: new Date("2026-05-03"),
       category: { userID: "user-1", name: "Courses", color: "#0F6E56" },
+      _count: { receiptLines: 0 },
     };
     const { service } = makeService([row], 1);
 
@@ -185,6 +187,9 @@ describe("SpendingsService.searchSpendings", () => {
     });
     // The nested relation object is flattened away, not leaked.
     expect(result.items[0]).not.toHaveProperty("category.name");
+    // The receipt line count is flattened too (PFA-214).
+    expect(result.items[0]).toMatchObject({ lineCount: 0 });
+    expect(result.items[0]).not.toHaveProperty("_count");
   });
 
   it("nulls a category that belongs to another user (defensive, mirrors getSpendings)", async () => {
@@ -195,6 +200,7 @@ describe("SpendingsService.searchSpendings", () => {
       amount: 1,
       date: new Date("2026-01-01"),
       category: { userID: "other-user", name: "Secret", color: "#000000" },
+      _count: { receiptLines: 0 },
     };
     const { service } = makeService([row], 1);
 
@@ -212,6 +218,7 @@ describe("SpendingsService.searchSpendings", () => {
       amount: 500,
       date: new Date("2026-01-01"),
       category: { userID: null, name: "Logement", color: "#185FA5" },
+      _count: { receiptLines: 0 },
     };
     const { service } = makeService([row], 1);
 

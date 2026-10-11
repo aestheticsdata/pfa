@@ -3,10 +3,13 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { IconButton } from "@components/shared/IconButton";
+import { RECEIPT_LINES_MODE } from "@components/spendings/config/constants";
 import EntryReceiptModal from "@components/spendings/invoiceModal/EntryReceiptModal";
 import useSpendings from "@components/spendings/services/useSpendings";
+import useReceiptLinesStore from "@components/spendings/stores/receiptLinesStore";
 import { TAG_CHIP } from "@components/spendings/view/helpers/tagChipClass";
 import useEntryRowState from "@components/spendings/view/hooks/useEntryRowState";
+import ReceiptLinesMark from "@components/spendings/view/rows/ReceiptLinesMark";
 import ReceiptMark from "@components/spendings/view/rows/ReceiptMark";
 import RowConfirm from "@components/spendings/view/rows/RowConfirm";
 import { rowStateClass, TX_ROW } from "@components/spendings/view/rows/rowClasses";
@@ -20,6 +23,7 @@ import { useRef, useState } from "react";
 
 import type { SingleDayEntry } from "@components/spendings/interfaces/spendingGroupTypes";
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { MouseEvent } from "react";
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
@@ -33,7 +37,8 @@ interface SpendingTxRowProps {
 /**
  * A single transaction row in a Spendings day-card: colour pill + label
  * (+ receipt indicator) · category tag · amount, with hover actions
- * (receipt / edit / delete) and an inline delete confirmation.
+ * (receipt / edit / delete) and an inline delete confirmation. A row whose
+ * receipt was read into lines opens them on click (PFA-214).
  */
 const SpendingTxRow = ({ entry, dayIso, onEdit }: SpendingTxRowProps) => {
   const { spending } = entry;
@@ -50,6 +55,28 @@ const SpendingTxRow = ({ entry, dayIso, onEdit }: SpendingTxRowProps) => {
   const color = spending.categoryColor || FALLBACK_COLOR;
   const category = spending.category ?? null;
   const hasInvoice = Boolean(spending.invoicefile);
+  const hasLines = spending.lineCount > 0;
+  const openReceiptLines = useReceiptLinesStore((state) => state.open);
+
+  const openLines = () =>
+    openReceiptLines({
+      spendingID: spending.ID,
+      label: spending.label,
+      amount: spending.amount,
+      mode: RECEIPT_LINES_MODE.detail,
+    });
+
+  // Clicks bubble here from the buttons and, through React portals, from the
+  // receipt modal: only a click on the row itself opens the lines.
+  const onRowClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (row.isSelecting) {
+      row.toggle();
+      return;
+    }
+    const target = event.target as HTMLElement;
+    if (!event.currentTarget.contains(target) || target.closest("button")) return;
+    openLines();
+  };
 
   const onConfirmDelete = () => {
     deleteSpending.mutate({ spending });
@@ -57,17 +84,17 @@ const SpendingTxRow = ({ entry, dayIso, onEdit }: SpendingTxRowProps) => {
   };
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: a click anywhere on the row ticks it in selection mode; the tick itself is the keyboard path
+    // biome-ignore lint/a11y/noStaticElementInteractions lint/a11y/useKeyWithClickEvents: a click anywhere on the row ticks it in selection mode, or opens its receipt lines; the tick and the lines mark are the keyboard paths
     <div
       data-testid="tx-row"
       data-has-receipt={hasInvoice}
       data-spending-id={spending.ID}
       data-selected={row.isSelected}
       ref={rowRef}
-      onClick={row.isSelecting ? row.toggle : undefined}
+      onClick={row.isSelecting || (hasLines && !confirming) ? onRowClick : undefined}
       onPointerEnter={row.onPointerEnter}
       onPointerLeave={row.onPointerLeave}
-      className={cn(TX_ROW, rowStateClass(row))}
+      className={cn(TX_ROW, rowStateClass(row), hasLines && !confirming && "cursor-pointer")}
     >
       {confirming ? (
         <RowConfirm
@@ -94,6 +121,12 @@ const SpendingTxRow = ({ entry, dayIso, onEdit }: SpendingTxRowProps) => {
               {spending.label}
             </span>
             {hasInvoice && <ReceiptMark shareCount={row.shareCount} />}
+            {hasLines && !row.isSelecting && (
+              <ReceiptLinesMark
+                lineCount={spending.lineCount}
+                onOpen={openLines}
+              />
+            )}
           </span>
 
           <span className="relative z-10 justify-self-end max-md:col-start-1 max-md:row-start-2 max-md:justify-self-start">
