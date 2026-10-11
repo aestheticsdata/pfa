@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { FIELD_LIMITS } from "@config/field-limits";
-import { closestStore, storeKey } from "@spendings/stores/store-name";
-import type { StoreRef } from "@spendings/stores/interfaces/storesTypes";
+import { recogniseStore } from "@spendings/stores/store-name";
+import { textKey } from "@spendings/text-key";
+import type { StoreIdentity, StoreRef } from "@spendings/stores/interfaces/storesTypes";
 import { PrismaService } from "../../prisma/prisma.service";
 
-/** The user's stores (PFA-218): one row per shop, whatever the receipts' spelling. */
+/** The user's stores (PFA-218): one row per shop — name and address (PFA-219). */
 @Injectable()
 export class StoresService {
   constructor(private readonly prisma: PrismaService) {}
@@ -13,28 +14,31 @@ export class StoresService {
   list(userID: string): Promise<StoreRef[]> {
     return this.prisma.stores.findMany({
       where: { userID },
-      select: { ID: true, name: true },
-      orderBy: { name: "asc" },
+      select: { ID: true, name: true, address: true },
+      orderBy: [{ name: "asc" }, { address: "asc" }],
     });
   }
 
-  /** A name read on a receipt, as the user's store it resembles when there is one. */
-  async recognise(name: string | null, userID: string): Promise<string | null> {
-    if (!name) return null;
-    return closestStore(name, await this.list(userID))?.name ?? name;
+  /** A store read on a receipt, as the user's known shop when it is one. */
+  async recognise(read: StoreIdentity | null, userID: string): Promise<StoreIdentity | null> {
+    if (!read) return null;
+    const known = recogniseStore(read, await this.list(userID));
+    return known ? { name: known.name, address: known.address } : read;
   }
 
-  /** The store's ID for a name the user confirmed, created on first use. */
-  async resolve(name: string, userID: string): Promise<string | null> {
-    const trimmed = name.trim().slice(0, FIELD_LIMITS.storeName);
-    const nameKey = storeKey(trimmed);
+  /** The store's ID for a name and address the user confirmed, created on first use. */
+  async resolve(store: StoreIdentity, userID: string): Promise<string | null> {
+    const name = store.name.trim().slice(0, FIELD_LIMITS.storeName);
+    const address = store.address?.trim().slice(0, FIELD_LIMITS.storeAddress) || null;
+    const nameKey = textKey(name);
     if (!nameKey) return null;
-    const store = await this.prisma.stores.upsert({
-      where: { userID_nameKey: { userID, nameKey } },
-      create: { ID: randomUUID(), userID, name: trimmed, nameKey },
+    const addressKey = textKey(address ?? "");
+    const saved = await this.prisma.stores.upsert({
+      where: { userID_nameKey_addressKey: { userID, nameKey, addressKey } },
+      create: { ID: randomUUID(), userID, name, nameKey, address, addressKey },
       update: {},
       select: { ID: true },
     });
-    return store.ID;
+    return saved.ID;
   }
 }

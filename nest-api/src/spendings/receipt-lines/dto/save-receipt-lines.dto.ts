@@ -1,5 +1,5 @@
-import { ArrayMaxSize, IsArray, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
-import { FIELD_LIMITS } from "@config/field-limits";
+import { ArrayMaxSize, IsArray, IsOptional, ValidateNested } from "class-validator";
+import { StoreDto } from "@spendings/stores/dto/store.dto";
 import { Type } from "class-transformer";
 import { ReceiptLineDto } from "@spendings/receipt-lines/dto/receipt-line.dto";
 
@@ -14,9 +14,9 @@ export class SaveReceiptLinesDto {
   @Type(() => ReceiptLineDto)
   lines: ReceiptLineDto[];
 
-  /** The store's name (PFA-218): null clears it, absent leaves it as it is. */
+  /** The store (PFA-218, PFA-219): null clears it, absent leaves it as it is. */
   @IsOptional()
-  @IsString()
-  @MaxLength(FIELD_LIMITS.storeName)
-  store?: string | null;
+  @ValidateNested()
+  @Type(() => StoreDto)
+  store?: StoreDto | null;
 }

@@ -83,27 +83,54 @@ model Spendings {
 // One line of a spending's receipt (PFA-214): proposed by the local OCR,
 // corrected and accepted by the user. Gone with its spending.
 model ReceiptLines {
-  ID         String    @id @db.Char(36)
-  spendingID String    @db.Char(36)
-  position   Int
-  label      String    @db.VarChar(100)
-  amount     Decimal   @db.Decimal(6, 2)
-  spending   Spendings @relation(fields: [spendingID], references: [ID], onDelete: Cascade)
+  ID            String        @id @db.Char(36)
+  spendingID    String        @db.Char(36)
+  position      Int
+  label         String        @db.VarChar(100)
+  amount        Decimal       @db.Decimal(6, 2)
+  // What a unit price needs (PFA-219): how many were bought, and the size of
+  // one (1 L, 250 g; null when sold by the piece). A weighed item is one item
+  // of its weight.
+  quantity      Decimal       @default(1) @db.Decimal(8, 3)
+  size          Decimal?      @db.Decimal(8, 3)
+  sizeUnit      String?       @db.VarChar(2)
+  // The generic product it is, across brands and stores (PFA-219).
+  productTypeID String?       @db.Char(36)
+  spending      Spendings     @relation(fields: [spendingID], references: [ID], onDelete: Cascade)
+  productType   ProductTypes? @relation(fields: [productTypeID], references: [ID], onDelete: SetNull)
 
   @@index([spendingID])
+  @@index([productTypeID], map: "ReceiptLines_productTypeID_fkey")
 }
 
-// A shop the user buys from (PFA-218), one per spelling: `nameKey` is the name
-// upper-cased, accents and punctuation dropped, so "Épicerie du Parc" and
-// "EPICERIE DU PARC" are one store.
-model Stores {
-  ID        String      @id @db.Char(36)
-  userID    String      @db.Char(36)
-  name      String      @db.VarChar(60)
-  nameKey   String      @db.VarChar(60)
-  spendings Spendings[]
+// A generic product the user compares between stores (PFA-219): "Liquid soap",
+// all brands together. `nameKey` is the name upper-cased, accents and
+// punctuation dropped, like a store's.
+model ProductTypes {
+  ID           String         @id @db.Char(36)
+  userID       String         @db.Char(36)
+  name         String         @db.VarChar(40)
+  nameKey      String         @db.VarChar(40)
+  receiptLines ReceiptLines[]
 
   @@unique([userID, nameKey])
+}
+
+// A shop the user buys from (PFA-218), one per spelling and address: `nameKey`
+// is the name upper-cased, accents and punctuation dropped, so "Épicerie du
+// Parc" and "EPICERIE DU PARC" at one address are one store.
+model Stores {
+  ID         String      @id @db.Char(36)
+  userID     String      @db.Char(36)
+  name       String      @db.VarChar(60)
+  nameKey    String      @db.VarChar(60)
+  // Two shops of one chain are two stores, priced apart (PFA-219): the address
+  // tells them apart. `addressKey` is it normalised, "" when unknown.
+  address    String?     @db.VarChar(120)
+  addressKey String      @default("") @db.VarChar(120)
+  spendings  Spendings[]
+
+  @@unique([userID, nameKey, addressKey])
 }
 
 // Several spendings bought on one receipt (PFA-189). The receipt itself is the

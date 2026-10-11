@@ -1,29 +1,29 @@
-import { closestStore, storeKey } from "@spendings/stores/store-name";
+import { recogniseStore } from "@spendings/stores/store-name";
 
-/** PFA-218 — one store per spelling, OCR near misses included. Invented names. */
-describe("store-name", () => {
-  it("keys a name without case, accents or punctuation", () => {
-    expect(storeKey("  Épicerie du Parc. ")).toBe("EPICERIE DU PARC");
-    expect(storeKey("Le Fournil — Saint-Jean")).toBe("LE FOURNIL SAINT JEAN");
+/** PFA-219 — a store is a name and an address. Invented stores. */
+describe("recogniseStore", () => {
+  const stores = [
+    { ID: "s1", name: "Marché Express", address: "4 rue des Lilas, 00001 VILLE" },
+    { ID: "s2", name: "Marché Express", address: "18 avenue du Port, 00002 BOURG" },
+    { ID: "s3", name: "Le Fournil", address: null },
+  ];
+
+  it("picks the shop of that name at that address, typos included", () => {
+    expect(recogniseStore({ name: "MARCHE EXPRESS", address: "18 AVENUE DU P0RT, 00002 BOURG" }, stores)).toBe(
+      stores[1],
+    );
   });
 
-  describe("closestStore", () => {
-    const stores = [
-      { ID: "s1", name: "Épicerie du Parc" },
-      { ID: "s2", name: "Le Fournil" },
-    ];
+  it("proposes no known store for a known name at a new address", () => {
+    expect(recogniseStore({ name: "MARCHE EXPRESS", address: "2 place Neuve, 00003 CITE" }, stores)).toBeNull();
+  });
 
-    it("finds the same store under another spelling", () => {
-      expect(closestStore("EPICERIE DU PARC", stores)).toEqual(stores[0]);
-    });
+  it("without an address, decides only when one store bears the name", () => {
+    expect(recogniseStore({ name: "LE FOURNIL", address: null }, stores)).toBe(stores[2]);
+    expect(recogniseStore({ name: "MARCHE EXPRESS", address: null }, stores)).toBeNull();
+  });
 
-    it("forgives an OCR typo or two", () => {
-      expect(closestStore("EPICERIE DU PAPC", stores)).toEqual(stores[0]);
-    });
-
-    it("leaves a different store alone", () => {
-      expect(closestStore("LE FOURNIL DU PORT", stores)).toBeNull();
-      expect(closestStore("", stores)).toBeNull();
-    });
+  it("leaves an unknown name alone", () => {
+    expect(recogniseStore({ name: "PRIMEUR DU COIN", address: null }, stores)).toBeNull();
   });
 });

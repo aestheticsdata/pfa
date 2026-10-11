@@ -25,6 +25,7 @@ const ReceiptLinesBody = ({ target, receiptLines, onDismiss }: ReceiptLinesBodyP
   const editor = (initial: SavedReceipt, receiptTotal: number | null) => (
     <ReceiptLinesEditor
       initial={initial}
+      fromProposal={isReview}
       spendingAmount={target.amount}
       receiptTotal={receiptTotal}
       isSaving={save.isPending}

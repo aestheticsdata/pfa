@@ -1,5 +1,12 @@
 import { FIELD_LIMITS } from "@config/field-limits";
-import type { ReceiptLine, ReceiptProposal } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
+import {
+  readQuantityDetail,
+  readSize,
+  splitColumns,
+  splitLeadingCount,
+} from "@spendings/receipt-lines/receipt-quantities";
+import type { ItemSize, ReceiptLine, ReceiptProposal } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
+import type { StoreIdentity } from "@spendings/stores/interfaces/storesTypes";
 
 /**
  * Raw OCR text of a receipt → its line items (PFA-214).
@@ -24,10 +31,6 @@ const PARTIAL_TOTAL = /^(SOUS[ -]?TOTAL|TOTAL (HT|TVA|REMISE|ECONOMIE))/;
 const NOISE =
   /\b(SOUS[ -]?TOTAL|TVA|HT|TTC|CB|CARTE|ESPECES|RENDU|MONNAIE|VISA|MASTERCARD|PAIEMENT|SANS CONTACT|TICKET|CAISSE|SIRET|TEL|MERCI|NB ART(ICLES?)?|MONTANT|DEBIT|AUTO)\b/;
 
-// The quantity and unit-price columns left between a label and its total:
-// "NAT KARITE 1L  4  5,99" keeps "NAT KARITE 1L" (PFA-216).
-const TRAILING_COLUMNS = /(\s+(\d+([.,]\d+)?|[xX*@]))+$/;
-
 // A line made only of figures, multiply signs and units: a quantity or weight detail.
 const DETAIL_LINE = /^(?:[\d\s.,xX*@=€/-]|KG|G|L|PCE?S?|EUR)*$/i;
 
@@ -46,6 +49,11 @@ const NOT_A_STORE_NAME = [
   /^(BIENVENUE|WELCOME|BONJOUR)\b/,
   /\b(SIRET|SIREN|NAF|RCS|APE|FAX|DUPLICATA|VENTE|FACTURE)\b/,
 ];
+// The store's address in its header (PFA-219): a street line, then postcode and city.
+const STREET =
+  /^\d{1,4}\s*(BIS|TER)?[\s,]+(RUE|AVENUE|AV|BD|BOULEVARD|PLACE|PL|CHEMIN|ALLEE|QUAI|ROUTE|IMPASSE|COURS|CHAUSSEE|ZA|ZI|CENTRE)\b/;
+const CITY = /\b(\d{5})\s+(\p{L}[\p{L}' -]*\p{L})/u;
+
 // A name is mostly letters, with a word of three letters at least.
 const MIN_STORE_LETTERS = 4;
 const MIN_STORE_LETTER_SHARE = 0.6;
@@ -57,6 +65,9 @@ interface ParseState {
   pendingLabel: string | null;
   /** The store's name, read on the first header line that can be one. */
   store: string | null;
+  /** Its address lines, read in the header after the name (PFA-219). */
+  street: string | null;
+  city: string | null;
 }
 
 /** Upper-cased, accents stripped, spaces collapsed: what the keyword tests read. */
@@ -77,11 +88,60 @@ function cleanLabel(raw: string): string | null {
   const label = raw
     .replaceAll(/[.·_*]{2,}/g, " ")
     .replaceAll(/\s+/g, " ")
-    .replace(/^[\s\-*.:|]+|[\s\-*.:€|]+$/g, "")
-    .replace(TRAILING_COLUMNS, "")
+    .replace(/^[\s\-*.:|]+|[\s\-*.:€|xX@]+$/g, "")
     .slice(0, FIELD_LIMITS.receiptLineLabel)
     .trim();
   return (label.match(LETTERS)?.length ?? 0) >= MIN_LABEL_LETTERS ? label : null;
+}
+
+/**
+ * A priced item line read off its text (PFA-219): a count before the label or
+ * in the columns before the total, and the size printed in the label.
+ */
+function itemLine(rest: string, amount: number): ReceiptLine | null {
+  const columns = splitColumns(rest.trimEnd(), amount);
+  const label = cleanLabel(columns.label);
+  if (!label) return null;
+  const leading = splitLeadingCount(label);
+  const size = readSize(leading.label);
+  return {
+    label: leading.label,
+    amount,
+    quantity: columns.quantity > 1 ? columns.quantity : leading.quantity,
+    size: size?.size ?? null,
+    sizeUnit: size?.unit ?? null,
+    productType: null,
+  };
+}
+
+/** A label priced by the quantity or weight line under it. */
+function detailedLine(label: string, amount: number, weight: ItemSize | null): ReceiptLine {
+  const leading = splitLeadingCount(label);
+  const size = weight ?? readSize(leading.label);
+  return {
+    label: leading.label,
+    amount,
+    quantity: leading.quantity,
+    size: size?.size ?? null,
+    sizeUnit: size?.unit ?? null,
+    productType: null,
+  };
+}
+
+/** The street, or the postcode and city, this header line gives — the slip beside it left out. */
+function readAddressPart(state: ParseState, raw: string): void {
+  const part = raw
+    .split("|")[0]
+    .replace(/^[^\p{L}\d]+|[^\p{L}\d]+$/gu, "")
+    .replaceAll(/\s+/g, " ")
+    .trim();
+  const normalized = normalize(part);
+  const city = CITY.exec(part);
+  if (state.street === null && STREET.test(normalized)) {
+    // "8 AVENUE DU PARC 00000 VILLE": street and city on one line.
+    state.street = city ? part.slice(0, city.index).trim() : part;
+  }
+  if (state.city === null && city) state.city = `${city[1]} ${city[2].trim()}`;
 }
 
 /**
@@ -109,14 +169,21 @@ function readLine(state: ParseState, raw: string): void {
   const line = raw.trim();
   if (!line) return;
   const price = readPrice(line);
-  // The name heads the receipt: only looked for before the first item.
-  if (state.store === null && state.lines.length === 0 && !price) {
-    state.store = storeNameCandidate(line);
+  // Name, then address, head the receipt: only looked for before the first item.
+  if (state.lines.length === 0 && !price) {
+    if (state.store === null) state.store = storeNameCandidate(line);
+    else readAddressPart(state, line);
   }
 
   if (DETAIL_LINE.test(line)) {
+    const detail = readQuantityDetail(line);
+    const last = state.lines.at(-1);
     if (price && state.pendingLabel) {
-      state.lines.push({ label: state.pendingLabel, amount: price.amount });
+      const priced = detailedLine(state.pendingLabel, price.amount, detail?.weight ?? null);
+      state.lines.push(detail && !detail.weight ? { ...priced, quantity: detail.quantity } : priced);
+    } else if (detail && !detail.weight && last && Math.abs(detail.quantity * detail.unitPrice - last.amount) < 0.011) {
+      // "2 x 1,20" under an item already priced 2,40: its count.
+      last.quantity = detail.quantity;
     }
     state.pendingLabel = null;
     return;
@@ -126,28 +193,39 @@ function readLine(state: ParseState, raw: string): void {
     return;
   }
 
-  const label = cleanLabel(price ? price.rest : line);
-  if (!label) return;
   if (price) {
-    state.lines.push({ label, amount: price.amount });
-    state.pendingLabel = null;
-  } else {
-    state.pendingLabel = label;
+    const item = itemLine(price.rest, price.amount);
+    if (item) {
+      state.lines.push(item);
+      state.pendingLabel = null;
+    }
+    return;
   }
+  const label = cleanLabel(line);
+  if (label) state.pendingLabel = label;
 }
 
 export function parseReceiptText(text: string): ReceiptProposal {
-  const state: ParseState = { lines: [], pendingLabel: null, store: null };
+  const state: ParseState = { lines: [], pendingLabel: null, store: null, street: null, city: null };
+  let total: number | null = null;
 
   for (const raw of text.split(/\r?\n/)) {
     const normalized = normalize(raw);
     if (TOTAL_LINE.test(normalized) && !PARTIAL_TOTAL.test(normalized)) {
-      return { lines: state.lines, total: readPrice(raw.trim())?.amount ?? null, store: state.store };
+      total = readPrice(raw.trim())?.amount ?? null;
+      break;
     }
     readLine(state, raw);
   }
 
-  return { lines: state.lines, total: null, store: state.store };
+  return { lines: state.lines, total, store: storeOf(state) };
+}
+
+/** The store read in the header: its name, and its address when found (PFA-219). */
+function storeOf(state: ParseState): StoreIdentity | null {
+  if (!state.store) return null;
+  const address = [state.street, state.city].filter(Boolean).join(", ").slice(0, FIELD_LIMITS.storeAddress);
+  return { name: state.store, address: address || null };
 }
 
 /**

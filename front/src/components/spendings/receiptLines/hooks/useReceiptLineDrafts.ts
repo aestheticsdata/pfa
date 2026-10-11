@@ -4,15 +4,20 @@ import { useState } from "react";
 import type { ReceiptLineDraft } from "@components/spendings/interfaces/receiptLinesTypes";
 import type { ReceiptLine } from "@src/schemas/receiptLines";
 
-/** The editable lines of the receipt-lines modal, seeded once from the proposal or the saved set. */
-const useReceiptLineDrafts = (initial: ReceiptLine[]) => {
+/**
+ * The editable lines of the receipt-lines modal, seeded once from the proposal
+ * or the saved set. `fromProposal`: types already set came from earlier receipts.
+ */
+const useReceiptLineDrafts = (initial: ReceiptLine[], fromProposal: boolean) => {
   const [drafts, setDrafts] = useState<ReceiptLineDraft[]>(() =>
-    initial.length > 0 ? draftsFromLines(initial) : [emptyLineDraft()],
+    initial.length > 0 ? draftsFromLines(initial, fromProposal) : [emptyLineDraft()],
   );
   const [invalidKeys, setInvalidKeys] = useState<string[]>([]);
 
   const update = (key: string, patch: Partial<ReceiptLineDraft>) => {
-    setDrafts((current) => current.map((d) => (d.key === key ? { ...d, ...patch } : d)));
+    // A type picked by hand is no longer the one taken from earlier receipts.
+    const unlinked = "productType" in patch ? { ...patch, linked: false } : patch;
+    setDrafts((current) => current.map((d) => (d.key === key ? { ...d, ...unlinked } : d)));
     setInvalidKeys((keys) => keys.filter((k) => k !== key));
   };
 

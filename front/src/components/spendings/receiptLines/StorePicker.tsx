@@ -1,110 +1,67 @@
+import NameCombobox from "@components/spendings/receiptLines/NameCombobox";
 import useStores from "@components/spendings/services/useStores";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
-import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import useTranslations from "@i18n/useTranslations";
-import { cn } from "@lib/utils";
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
-import { Check, Store } from "lucide-react";
-import { useState } from "react";
+import { MapPin, Store } from "lucide-react";
+
+import type { StoreIdentity } from "@src/schemas/receiptLines";
 
 interface StorePickerProps {
-  value: string | null;
-  onChange: (store: string | null) => void;
+  value: StoreIdentity | null;
+  onChange: (store: StoreIdentity | null) => void;
 }
 
+const sameText = (a: string | null, b: string | null) =>
+  (a ?? "").trim().toLowerCase() === (b ?? "").trim().toLowerCase();
+
 /**
- * The store of a receipt (PFA-218): prefilled from the OCR, one of the user's
- * stores or a new name typed in. Closing with a typed name keeps it, like the
- * category combobox.
+ * The store of a receipt (PFA-218): a name AND an address, since two shops of
+ * one chain are priced apart (PFA-219). Prefilled from the OCR — the user's
+ * known shop when it is one; any other known shop can be picked, a new one typed.
  */
 const StorePicker = ({ value, onChange }: StorePickerProps) => {
   const { receiptLines: t } = useTranslations("spendings");
   const { data: stores = [] } = useStores();
-  const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState("");
-  const typed = query.trim();
-  const exactMatch = stores.find((store) => store.name.toLowerCase() === typed.toLowerCase());
-
-  const pick = (store: string | null) => {
-    onChange(store);
-    setQuery("");
-    setOpen(false);
-  };
+  const options = stores.map((store) => ({ ID: store.ID, name: store.name, hint: store.address }));
+  const selected = value
+    ? stores.find((store) => sameText(store.name, value.name) && sameText(store.address, value.address))
+    : undefined;
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen && typed) {
-          pick(exactMatch?.name ?? typed);
-          return;
-        }
-        setOpen(isOpen);
-      }}
-      modal
-    >
-      <PopoverTrigger asChild>
-        <button
-          type="button"
-          data-testid="receipt-store"
-          role="combobox"
-          aria-expanded={open}
-          aria-label={t.store}
-          className={cn(
-            "flex h-9.5 w-full min-w-0 cursor-pointer items-center gap-2.5 rounded-md border bg-surface-base px-3 text-left text-sm text-ink transition-colors hover:border-ink-4",
-            open ? "border-accent-d" : "border-line",
-          )}
-        >
-          <Store className="size-4 shrink-0 text-ink-4" />
-          <span className={cn("min-w-0 flex-1 truncate", !value && "text-ink-4")}>{value ?? t.storePlaceholder}</span>
-        </button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-(--radix-popover-trigger-width) border-line bg-surface-elev p-0"
-        align="start"
-      >
-        <Command className="bg-transparent">
-          <CommandInput
-            placeholder={t.storeSearch}
-            value={query}
-            onValueChange={setQuery}
-            maxLength={FIELD_LIMITS.storeName}
-            className="text-ink"
+    <div className="flex flex-col gap-2">
+      <NameCombobox
+        options={options}
+        selectedID={selected?.ID ?? null}
+        value={value?.name ?? null}
+        icon={<Store />}
+        text={{
+          label: t.store,
+          placeholder: t.storePlaceholder,
+          search: t.storeSearch,
+          empty: t.storeEmpty,
+          clear: t.storeClear,
+        }}
+        maxLength={FIELD_LIMITS.storeName}
+        testId="receipt-store"
+        onPick={(option) => onChange(option ? { name: option.name, address: option.hint } : null)}
+        // A new name keeps the address read on the receipt.
+        onType={(name) => onChange({ name, address: value?.address ?? null })}
+      />
+      {value && (
+        <label className="flex h-9.5 min-w-0 items-center gap-2.5 rounded-md border border-line bg-surface-base px-3 transition-colors focus-within:border-accent-d">
+          <MapPin className="size-4 shrink-0 text-ink-4" />
+          <input
+            data-testid="receipt-store-address"
+            aria-label={t.storeAddress}
+            value={value.address ?? ""}
+            maxLength={FIELD_LIMITS.storeAddress}
+            placeholder={t.storeAddressPlaceholder}
+            onChange={(e) => onChange({ ...value, address: e.target.value || null })}
+            className="min-w-0 flex-1 bg-transparent text-sm text-ink outline-none placeholder:text-ink-5"
           />
-          <CommandList>
-            <CommandEmpty>{t.storeEmpty}</CommandEmpty>
-            <CommandGroup>
-              {value && (
-                <CommandItem
-                  value="__none"
-                  onSelect={() => pick(null)}
-                >
-                  <span className="text-ink-4">{t.storeClear}</span>
-                </CommandItem>
-              )}
-              {stores.map((store) => (
-                <CommandItem
-                  key={store.ID}
-                  value={store.name}
-                  onSelect={() => pick(store.name)}
-                >
-                  <span className="flex-1">{store.name}</span>
-                  {store.name === value && <Check className="size-4 text-accent-strong" />}
-                </CommandItem>
-              ))}
-              {typed && !exactMatch && (
-                <CommandItem
-                  value={`__new-${typed}`}
-                  onSelect={() => pick(typed)}
-                >
-                  <span className="flex-1">{typed}</span>
-                </CommandItem>
-              )}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+        </label>
+      )}
+    </div>
   );
 };
 
