@@ -179,7 +179,9 @@ body:has([data-nav-overlay][data-state="open"]) .pfa-nav-scrim {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* Thin scrollbar for spending lists — stable gutter, no content shift */
+/* Thin scrollbars — standard properties only. Since Chrome 121, Chromium ignores
+   ::-webkit-scrollbar on any element that also sets scrollbar-width or
+   scrollbar-color, so a ::-webkit-* block here would be dead code: don't add one. */
 .recurrings-list-container,
 .charts-categories-list {
   scrollbar-gutter: stable;
@@ -187,43 +189,10 @@ body:has([data-nav-overlay][data-state="open"]) .pfa-nav-scrim {
   scrollbar-color: rgba(75, 85, 99, 0.55) transparent;
 }
 
-.recurrings-list-container::-webkit-scrollbar,
-.charts-categories-list::-webkit-scrollbar {
-  width: 5px;
-}
-
-.recurrings-list-container::-webkit-scrollbar-track,
-.charts-categories-list::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.recurrings-list-container::-webkit-scrollbar-thumb,
-.charts-categories-list::-webkit-scrollbar-thumb {
-  background-color: rgba(75, 85, 99, 0.55);
-  border-radius: 3px;
-}
-
-.recurrings-list-container::-webkit-scrollbar-thumb:hover,
-.charts-categories-list::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(107, 114, 128, 0.8);
-}
-
-/* Thin scrollbar for the Dépenses day-card transaction lists (::-webkit-scrollbar
-   has no Tailwind utility, so it stays here as obligatoire). Layout (flex/overflow/
-   padding) lives on the element in Tailwind. */
+/* Dépenses day-card transaction lists. Layout (flex/overflow/padding) lives on the
+   element in Tailwind. */
 .pfa-scroll-thin {
   scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: var(--line) transparent;
-}
-.pfa-scroll-thin::-webkit-scrollbar {
-  width: 7px;
-  background: transparent;
-}
-.pfa-scroll-thin::-webkit-scrollbar-thumb {
-  background: var(--line);
-  border-radius: 4px;
-}
-.pfa-scroll-thin::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-5);
 }
