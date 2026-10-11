@@ -31,6 +31,17 @@ const prices = {
     others: (count: number) =>
       `${count} autre${count > 1 ? "s" : ""} magasin${count > 1 ? "s" : ""} non tracé${count > 1 ? "s" : ""}`,
   },
+  bulk: {
+    title: "Anciens tickets",
+    candidates: (count: number) =>
+      count > 1 ? `${count} tickets enregistrés pas encore lus` : "1 ticket enregistré pas encore lu",
+    start: "Les lire",
+    reading: (done: number, total: number) => `Lecture des tickets… ${done} / ${total}`,
+    readingHint: "Un ticket à la fois, en arrière-plan : la page peut être quittée.",
+    review: (count: number) => `Vérifier (${count})`,
+    reviewHint: "Rien n'est enregistré sans vérification : chaque ticket lu attend d'être validé ou passé.",
+    failed: (count: number) => (count > 1 ? `${count} tickets illisibles` : "1 ticket illisible"),
+  },
   loadFailed: "Comparatif indisponible",
 };
 

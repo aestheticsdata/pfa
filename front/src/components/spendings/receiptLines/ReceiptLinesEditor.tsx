@@ -19,6 +19,8 @@ interface ReceiptLinesEditorProps {
   isSaving: boolean;
   onSave: (receipt: SavedReceipt) => void;
   onCancel: () => void;
+  /** In the bulk-read queue: pass on this receipt (PFA-223). */
+  onSkip?: () => void;
 }
 
 /** The store and lines to check and correct before they are saved (PFA-214, PFA-218). */
@@ -30,6 +32,7 @@ const ReceiptLinesEditor = ({
   isSaving,
   onSave,
   onCancel,
+  onSkip,
 }: ReceiptLinesEditorProps) => {
   const texts = useTranslations("spendings");
   const t = texts.receiptLines;
@@ -89,6 +92,18 @@ const ReceiptLinesEditor = ({
         >
           {texts.actions.cancel}
         </Button>
+        {onSkip && (
+          <Button
+            type="button"
+            data-testid="receipt-lines-skip"
+            variant="muted"
+            size="lg"
+            onClick={onSkip}
+            className="flex-1 text-base"
+          >
+            {t.skip}
+          </Button>
+        )}
         <Button
           type="button"
           data-testid="receipt-lines-save"

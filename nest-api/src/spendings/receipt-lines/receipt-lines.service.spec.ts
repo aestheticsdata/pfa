@@ -23,6 +23,7 @@ describe("ReceiptLinesService", () => {
         deleteMany,
         createMany,
       },
+      receiptProposals: { deleteMany: jest.fn((args: unknown) => ({ op: "deleteProposal", args })) },
       $transaction: jest.fn().mockResolvedValue([]),
     };
     const receiptFiles = { safePath: jest.fn((userID: string, file: string) => `/invoices/${userID}/${file}`) };

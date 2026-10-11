@@ -68,3 +68,22 @@ export type Store = z.infer<typeof StoreSchema>;
 export const ProductTypeSchema = apiObject({ ID: z.string(), name: z.string() });
 export const ProductTypeListSchema = z.array(ProductTypeSchema);
 export type ProductType = z.infer<typeof ProductTypeSchema>;
+
+// GET/POST /receipt-proposals: the bulk read's progress (PFA-223).
+export const BulkReadStatusSchema = apiObject({
+  candidates: z.number(),
+  queued: z.number(),
+  ready: z.number(),
+  failed: z.number(),
+});
+export type BulkReadStatus = z.infer<typeof BulkReadStatusSchema>;
+
+// GET /receipt-proposals/next: the next read receipt to review, or null.
+export const PendingProposalSchema = apiObject({
+  spendingID: z.string(),
+  label: z.string(),
+  amount: numberLikeSchema,
+  date: z.string(),
+  proposal: ReceiptProposalSchema,
+}).nullable();
+export type PendingProposal = NonNullable<z.infer<typeof PendingProposalSchema>>;

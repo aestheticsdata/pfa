@@ -1,5 +1,5 @@
 import type { RECEIPT_LINES_MODE } from "@components/spendings/config/constants";
-import type { SizeUnit } from "@src/schemas/receiptLines";
+import type { ReceiptProposal, SizeUnit } from "@src/schemas/receiptLines";
 
 export type ReceiptLinesMode = (typeof RECEIPT_LINES_MODE)[keyof typeof RECEIPT_LINES_MODE];
 
@@ -9,6 +9,18 @@ export interface ReceiptLinesTarget {
   label: string;
   amount: number;
   mode: ReceiptLinesMode;
+  /** Set when reviewing a receipt read in bulk (PFA-223). */
+  queue?: ReviewQueueStep;
+}
+
+/** One receipt of the bulk-read review queue: read already, saved or skipped next. */
+export interface ReviewQueueStep {
+  proposal: ReceiptProposal;
+  /** Receipts left to review, this one included. */
+  remaining: number;
+  /** After a save: the next receipt, or the end of the queue. */
+  onDone: () => void;
+  onSkip: () => void;
 }
 
 /** A receipt line as the editor holds it: numbers are the text being typed. */

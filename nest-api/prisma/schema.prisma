@@ -50,27 +50,29 @@ model Recurrings {
 }
 
 model Spendings {
-  ID           String          @id @db.Char(36)
-  userID       String          @db.Char(36)
-  date         DateTime        @db.Date
-  itemType     String          @db.VarChar(11)
-  label        String          @db.VarChar(100)
-  amount       Decimal         @db.Decimal(6, 2)
-  categoryID   String?         @db.Char(36)
-  currency     String?         @db.VarChar(3)
-  invoicefile  String?         @db.VarChar(255)
+  ID              String            @id @db.Char(36)
+  userID          String            @db.Char(36)
+  date            DateTime          @db.Date
+  itemType        String            @db.VarChar(11)
+  label           String            @db.VarChar(100)
+  amount          Decimal           @db.Decimal(6, 2)
+  categoryID      String?           @db.Char(36)
+  currency        String?           @db.VarChar(3)
+  invoicefile     String?           @db.VarChar(255)
   // A line of a group (one receipt, several categories — PFA-189). `label`
   // stays the composed "<group> — <detail>" so every reader of the table
   // (stats, search, export, suggestions) keeps working unchanged.
-  groupID      String?         @db.Char(36)
-  detail       String?         @db.VarChar(100)
-  category     Categories?     @relation(fields: [categoryID], references: [ID])
-  group        SpendingGroups? @relation(fields: [groupID], references: [ID], onDelete: Cascade)
+  groupID         String?           @db.Char(36)
+  detail          String?           @db.VarChar(100)
+  category        Categories?       @relation(fields: [categoryID], references: [ID])
+  group           SpendingGroups?   @relation(fields: [groupID], references: [ID], onDelete: Cascade)
   // The receipt's line items, read by OCR then checked by the user (PFA-214).
-  receiptLines ReceiptLines[]
+  receiptLines    ReceiptLines[]
+  // A receipt read in bulk, waiting for the user's review (PFA-223).
+  receiptProposal ReceiptProposals?
   // Where it was bought, read on the receipt then checked by the user (PFA-218).
-  storeID      String?         @db.Char(36)
-  store        Stores?         @relation(fields: [storeID], references: [ID], onDelete: SetNull)
+  storeID         String?           @db.Char(36)
+  store           Stores?           @relation(fields: [storeID], references: [ID], onDelete: SetNull)
 
   // MySQL auto-creates this index with the FK constraint; declaring it (same
   // name) keeps `migrate diff` clean instead of reporting it as drift forever.
@@ -114,6 +116,21 @@ model ProductTypes {
   receiptLines ReceiptLines[]
 
   @@unique([userID, nameKey])
+}
+
+// What the OCR read on a saved receipt during a bulk read (PFA-223), kept until
+// the user saves or skips it. Never applied to the spending on its own.
+model ReceiptProposals {
+  ID         String    @id @db.Char(36)
+  spendingID String    @unique @db.Char(36)
+  userID     String    @db.Char(36)
+  // queued → ready | failed; skipped once the user passed on it.
+  status     String    @db.VarChar(7)
+  proposal   Json?
+  createdAt  DateTime  @default(now())
+  spending   Spendings @relation(fields: [spendingID], references: [ID], onDelete: Cascade)
+
+  @@index([userID, status])
 }
 
 // A shop the user buys from (PFA-218), one per spelling and address: `nameKey`

@@ -29,8 +29,13 @@ const ReceiptLinesModal = ({ target }: ReceiptLinesModalProps) => {
   const close = useReceiptLinesStore((state) => state.close);
   const [open, setOpen] = useState(true);
   const isReview = target.mode === RECEIPT_LINES_MODE.review;
-  const receiptLines = useReceiptLines(target.spendingID, { withSaved: !isReview, withProposal: isReview });
-  const lineCount = isReview ? receiptLines.proposal.data?.lines.length : receiptLines.saved.data?.lines.length;
+  // A receipt read in bulk comes with its proposal: no new OCR run (PFA-223).
+  const receiptLines = useReceiptLines(target.spendingID, {
+    withSaved: !isReview,
+    withProposal: isReview && !target.queue,
+  });
+  const proposal = target.queue?.proposal ?? receiptLines.proposal.data;
+  const lineCount = isReview ? proposal?.lines.length : receiptLines.saved.data?.lines.length;
 
   const dismiss = () => {
     setOpen(false);
@@ -54,6 +59,7 @@ const ReceiptLinesModal = ({ target }: ReceiptLinesModalProps) => {
             <DialogDescription className="truncate text-sm text-ink-3">
               {target.label}
               {lineCount != null && ` · ${t.linesCount(lineCount)}`}
+              {target.queue && ` · ${t.queueRemaining(target.queue.remaining)}`}
             </DialogDescription>
           </div>
           <span className="num shrink-0 whitespace-nowrap text-lg font-semibold tracking-tight text-elec">

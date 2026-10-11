@@ -1,12 +1,14 @@
 "use client";
 
 import Spinner from "@components/common/Spinner";
+import BulkReadCard from "@components/prices/BulkReadCard";
 import PriceComparisonCard from "@components/prices/PriceComparisonCard";
 import PriceTypeList from "@components/prices/PriceTypeList";
 import usePriceTypes from "@components/prices/services/usePriceTypes";
 import { EmptyState } from "@components/shared/EmptyState";
 import GlowCard from "@components/shared/GlowCard";
 import useGlobalStore from "@components/shared/globalStore";
+import ReceiptLinesHost from "@components/spendings/receiptLines/ReceiptLinesHost";
 import useTranslations from "@i18n/useTranslations";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect } from "react";
@@ -40,6 +42,8 @@ const Prices = () => {
       </div>
       <p className="text-xs text-ink-4">{t.subtitle}</p>
 
+      <BulkReadCard />
+
       {isPending ? (
         <div className="flex justify-center py-10">
           <Spinner />
@@ -58,6 +62,9 @@ const Prices = () => {
           <PriceComparisonCard typeID={selectedID} />
         </div>
       )}
+
+      {/* The review queue of the bulk read opens the receipt-lines modal here (PFA-223). */}
+      <ReceiptLinesHost />
     </div>
   );
 };

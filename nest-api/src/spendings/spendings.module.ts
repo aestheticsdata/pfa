@@ -13,6 +13,8 @@ import { ProductTypesController } from "@spendings/product-types/product-types.c
 import { ProductTypesService } from "@spendings/product-types/product-types.service";
 import { PricesController } from "@spendings/prices/prices.controller";
 import { PricesService } from "@spendings/prices/prices.service";
+import { ReceiptProposalsController } from "@spendings/receipt-proposals/receipt-proposals.controller";
+import { ReceiptProposalsService } from "@spendings/receipt-proposals/receipt-proposals.service";
 import { StoresController } from "@spendings/stores/stores.controller";
 import { StoresService } from "@spendings/stores/stores.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
@@ -28,6 +30,7 @@ import { MonitoringModule } from "@monitoring/monitoring.module";
     StoresController,
     ProductTypesController,
     PricesController,
+    ReceiptProposalsController,
   ],
   providers: [
     SpendingsService,
@@ -39,6 +42,7 @@ import { MonitoringModule } from "@monitoring/monitoring.module";
     StoresService,
     ProductTypesService,
     PricesService,
+    ReceiptProposalsService,
     SessionAuthGuard,
   ],
 })

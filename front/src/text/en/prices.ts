@@ -30,6 +30,17 @@ const prices: typeof frPrices = {
     hint: "Hover a point for the purchase",
     others: (count: number) => `${count} more store${count > 1 ? "s" : ""} not drawn`,
   },
+  bulk: {
+    title: "Past receipts",
+    candidates: (count: number) =>
+      count > 1 ? `${count} saved receipts not read yet` : "1 saved receipt not read yet",
+    start: "Read them",
+    reading: (done: number, total: number) => `Reading receipts… ${done} / ${total}`,
+    readingHint: "One receipt at a time, in the background: the page can be left.",
+    review: (count: number) => `Review (${count})`,
+    reviewHint: "Nothing is saved unreviewed: each read receipt waits to be saved or skipped.",
+    failed: (count: number) => (count > 1 ? `${count} unreadable receipts` : "1 unreadable receipt"),
+  },
   loadFailed: "Comparison unavailable",
 };
 
