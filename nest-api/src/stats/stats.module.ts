@@ -1,5 +1,7 @@
 import { Module } from "@nestjs/common";
-import { StatsService } from "@stats/stats.service";
+import { CategoryStatsService } from "@stats/services/category-stats.service";
+import { SpendingsStatsService } from "@stats/services/spendings-stats.service";
+import { YearlyStatsService } from "@stats/services/yearly-stats.service";
 import {
   WeeklyStatsController,
   MonthlyStatsController,
@@ -33,6 +35,6 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
     WeekdayCategoriesController,
     SearchTimelineController,
   ],
-  providers: [StatsService, SessionAuthGuard],
+  providers: [SpendingsStatsService, YearlyStatsService, CategoryStatsService, SessionAuthGuard],
 })
 export class StatsModule {}
