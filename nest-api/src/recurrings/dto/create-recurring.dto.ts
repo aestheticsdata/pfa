@@ -1,6 +1,7 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { CreateSpendingCategoryDto } from "@spendings/dto/create-spending-category.dto";
 
 export class CreateRecurringDto {
   @IsString()
@@ -24,4 +25,9 @@ export class CreateRecurringDto {
   @IsString()
   @MaxLength(FIELD_LIMITS.currency)
   currency?: string;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => CreateSpendingCategoryDto)
+  category?: CreateSpendingCategoryDto;
 }

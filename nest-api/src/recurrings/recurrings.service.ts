@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
+import { resolveCategoryID } from "@categories/category-resolver";
+import type { SpendingCategoryInput } from "@spendings/dto/spending-category-input.interface";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -7,13 +9,21 @@ export class RecurringsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getRecurrings(start: string, userID: string) {
-    return this.prisma.recurrings.findMany({
+    const results = await this.prisma.recurrings.findMany({
       where: {
         userID,
         dateFrom: new Date(start),
       },
       orderBy: { amount: "desc" },
+      include: { category: true },
     });
+
+    // Flattened to name/colour exactly like getSpendings (PFA-38).
+    return results.map(({ category, ...recurring }) => ({
+      ...recurring,
+      category: category && (category.userID === userID || category.userID === null) ? category.name : null,
+      categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
+    }));
   }
 
   /**
@@ -42,9 +52,17 @@ export class RecurringsService {
   }
 
   async createRecurring(
-    dto: { start: string; end: string; label: string; amount: number; currency?: string },
+    dto: {
+      start: string;
+      end: string;
+      label: string;
+      amount: number;
+      currency?: string;
+      category?: SpendingCategoryInput;
+    },
     userID: string,
   ): Promise<{ message: string }> {
+    const categoryID = await resolveCategoryID(this.prisma, dto.category, userID);
     const id = randomUUID();
     await this.prisma.recurrings.create({
       data: {
@@ -55,6 +73,7 @@ export class RecurringsService {
         label: dto.label,
         amount: dto.amount,
         currency: dto.currency ?? null,
+        categoryID,
         itemType: "recurring",
       },
     });
@@ -64,11 +83,12 @@ export class RecurringsService {
   async updateRecurring(
     id: string,
     userID: string,
-    dto: { label: string; amount: number },
+    dto: { label: string; amount: number; category?: SpendingCategoryInput },
   ): Promise<{ success: boolean }> {
+    const categoryID = await resolveCategoryID(this.prisma, dto.category, userID);
     const updated = await this.prisma.recurrings.updateMany({
       where: { ID: id, userID },
-      data: { label: dto.label, amount: dto.amount },
+      data: { label: dto.label, amount: dto.amount, categoryID },
     });
 
     if (updated.count === 0) {
@@ -92,6 +112,7 @@ export class RecurringsService {
         amount: true,
         itemType: true,
         currency: true,
+        categoryID: true,
       },
     });
 
@@ -108,6 +129,7 @@ export class RecurringsService {
         label: r.label,
         amount: r.amount,
         currency: r.currency,
+        categoryID: r.categoryID,
         itemType: r.itemType,
       })),
     });

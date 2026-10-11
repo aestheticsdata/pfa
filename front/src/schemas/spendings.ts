@@ -66,6 +66,10 @@ export type LabelSuggestion = z.infer<typeof LabelSuggestionSchema>;
 export const RecurringItemSchema = apiObject({
   ID: z.string(),
   amount: numberLikeSchema,
+  // Flattened from the joined category, like a spending (PFA-38).
+  category: z.string().nullable(),
+  categoryColor: z.string().nullable(),
+  categoryID: z.string().nullable(),
   currency: z.string().nullable(),
   dateFrom: z.string(),
   dateTo: z.string(),
@@ -107,5 +111,6 @@ export type SpendingMutationPayload = z.infer<typeof SpendingMutationPayloadSche
 export const RecurringMutationPayloadSchema = z.object({
   label: z.string().min(1),
   amount: numberLikeSchema,
+  category: SpendingCategoryInputSchema.nullable().optional(),
   id: z.string().optional(),
 });

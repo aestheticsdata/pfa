@@ -47,6 +47,7 @@ export class RecurringsController {
         label: dto.label,
         amount: dto.amount,
         currency: dto.currency,
+        category: dto.category,
       },
       userID,
     );

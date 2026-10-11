@@ -41,6 +41,10 @@ export class CategoriesService {
         where: { categoryID: id },
         data: { categoryID: null },
       }),
+      this.prisma.recurrings.updateMany({
+        where: { categoryID: id },
+        data: { categoryID: null },
+      }),
       this.prisma.categories.delete({
         where: { ID: id },
       }),

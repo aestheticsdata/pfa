@@ -96,15 +96,14 @@ const SpendingModal = ({
 
   const isSpendingItem = (v: SpendingListItem | null): v is SpendingItem => !!v && "date" in v;
 
-  const initialCategory: CategoryOption | null =
-    isSpendingItem(spending) && spending.category
-      ? {
-          ID: spending.categoryID ?? null,
-          userID: user?.id ?? null,
-          name: spending.category ?? "",
-          color: spending.categoryColor ?? null,
-        }
-      : null;
+  const initialCategory: CategoryOption | null = spending?.category
+    ? {
+        ID: spending.categoryID ?? null,
+        userID: user?.id ?? null,
+        name: spending.category ?? "",
+        color: spending.categoryColor ?? null,
+      }
+    : null;
 
   const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(initialCategory);
   const [comboboxOpen, setComboboxOpen] = useState(false);
@@ -290,11 +289,7 @@ const SpendingModal = ({
             />
           )}
 
-          {/* Category is hidden for recurrings: the backend/DB have no notion of
-              a category on a recurring (no column, postRecurringController drops
-              it, RecurringItemSchema omits it). Enabling it needs DB + back work
-              — tracked separately, not in this modal-layout fix. */}
-          {!asRecurring && !isGroup && (
+          {!isGroup && (
             <CategoryField
               categoryOptions={categoryOptions}
               frequentCategories={frequentCategories}

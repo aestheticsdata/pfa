@@ -104,6 +104,7 @@
       "^@users/(.*)$": "<rootDir>/users/$1",
       "^@spendings/(.*)$": "<rootDir>/spendings/$1",
       "^@stats/(.*)$": "<rootDir>/stats/$1",
+      "^@categories/(.*)$": "<rootDir>/categories/$1",
       "^@monitoring/(.*)$": "<rootDir>/monitoring/$1"
     },
     "collectCoverageFrom": [
