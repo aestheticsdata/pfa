@@ -9,9 +9,14 @@ import { OVERVIEW_TEXT } from "@text/overview";
 import { useState } from "react";
 
 import type { DayChartProps } from "@components/panel/overview/interfaces/overviewTypes";
+import type { ActivityPoint } from "@contracts/interfaces/panelTypes";
 
 /** The day chart's slices: 15 minutes each (the runner's `GET /history/day`). */
 export const SLICE_MINUTES = 15;
+
+/** Actions of the slice that no action name accounts for. */
+const unattributed = (slice: ActivityPoint) =>
+  Math.max(0, slice.actions - Object.values(slice.byAction).reduce((sum, runs) => sum + runs, 0));
 
 /**
  * The last 24 h in daily pace (PFA-206): one bar every 15 min, stacked by action in the Metrics
@@ -55,6 +60,8 @@ const DayChart = ({ history, actionNames }: DayChartProps) => {
               value: slice.byAction[name] ?? 0,
               color: actionColor(actionNames, name),
             })),
+            // Slices saved before PFA-206 have no breakdown: their actions show as one grey block.
+            { label: "other", value: unattributed(slice), color: "var(--faint)" },
             { label: "errors", value: slice.errors, color: "var(--bad)" },
           ],
         }))}

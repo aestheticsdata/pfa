@@ -88,7 +88,7 @@ export const OVERVIEW_TEXT = {
     latency: "p50 / p95",
     codes: "2xx · 4xx · 5xx",
     byAction: "By action",
-    none: "Only errors in this slice.",
+    none: "No breakdown by action for this slice.",
   },
   daily: {
     title: "Daily bots",
