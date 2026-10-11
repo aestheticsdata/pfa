@@ -1,7 +1,10 @@
 import { MetricsService } from "./metrics.service";
 import { readReleaseMarker } from "./release-marker";
+import { USER_KIND } from "@monitoring/user-kind";
 
 import type { PrismaService } from "../prisma/prisma.service";
+import type { RedisService } from "@redis/redis.service";
+import type { SessionCounts } from "@redis/interfaces/redisTypes";
 import type { DbPoolStats } from "../prisma/db-pool-stats";
 
 jest.mock("./release-marker");
@@ -15,13 +18,16 @@ const mockedReadReleaseMarker = readReleaseMarker as jest.MockedFunction<typeof 
 describe("MetricsService", () => {
   let stats: DbPoolStats | null;
   const prisma = { getPoolStats: () => stats } as unknown as PrismaService;
+  let sessions: () => Promise<SessionCounts>;
+  const redis = { countActiveSessions: () => sessions() } as unknown as RedisService;
 
   beforeEach(() => {
     stats = null;
+    sessions = () => Promise.resolve({ real: 0, synthetic: 0 });
     mockedReadReleaseMarker.mockReturnValue(null);
   });
 
-  const build = () => new MetricsService(prisma);
+  const build = () => new MetricsService(prisma, redis);
 
   it("serves the default node metrics", async () => {
     const text = await build().metricsText();
@@ -87,6 +93,42 @@ describe("MetricsService", () => {
     const text = await build().metricsText();
 
     expect(text).not.toContain("app_build_info");
+  });
+
+  it("serves both spendings_created_total series at zero before anything is created", async () => {
+    const text = await build().metricsText();
+
+    expect(text).toContain('spendings_created_total{user_kind="real"} 0');
+    expect(text).toContain('spendings_created_total{user_kind="synthetic"} 0');
+  });
+
+  it("counts created spendings by user kind", async () => {
+    const service = build();
+    service.countSpendingsCreated(USER_KIND.real);
+    service.countSpendingsCreated(USER_KIND.synthetic, 3);
+
+    const text = await service.metricsText();
+
+    expect(text).toContain('spendings_created_total{user_kind="real"} 1');
+    expect(text).toContain('spendings_created_total{user_kind="synthetic"} 3');
+  });
+
+  it("reports active sessions from Redis by user kind", async () => {
+    sessions = () => Promise.resolve({ real: 2, synthetic: 5 });
+
+    const text = await build().metricsText();
+
+    expect(text).toContain('active_sessions{user_kind="real"} 2');
+    expect(text).toContain('active_sessions{user_kind="synthetic"} 5');
+  });
+
+  it("drops active_sessions, not the scrape, when Redis fails", async () => {
+    sessions = () => Promise.reject(new Error("connection lost"));
+
+    const text = await build().metricsText();
+
+    expect(text).not.toContain("active_sessions{");
+    expect(text).toContain("process_resident_memory_bytes");
   });
 
   it("names the Prometheus text content type", () => {

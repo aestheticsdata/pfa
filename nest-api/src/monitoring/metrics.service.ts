@@ -1,7 +1,11 @@
 import { Injectable } from "@nestjs/common";
 import { collectDefaultMetrics, Counter, Gauge, Histogram, Registry } from "prom-client";
+import { RedisService } from "@redis/redis.service";
+import { USER_KIND } from "@monitoring/user-kind";
 import { PrismaService } from "../prisma/prisma.service";
 import { readReleaseMarker } from "./release-marker";
+
+import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
 
 /**
  * The Prometheus registry behind `GET /api/metrics` (IKN-2).
@@ -17,6 +21,9 @@ import { readReleaseMarker } from "./release-marker";
  *   a route returns 500. Absent until the pool exists, never invented.
  * - `app_build_info` carries the deployed release; without a marker the series is absent and the
  *   UI shows `—` (Iknos UI spec §8.7).
+ * - `spendings_created_total` and `active_sessions` are the business side (PFA-212), labelled by
+ *   `user_kind` only, so the bots' traffic can be read apart from people's without the text ever
+ *   naming anyone.
  *
  * A dedicated registry rather than prom-client's global one: nothing else in the process can
  * leak series in, and tests can build as many instances as they like.
@@ -26,8 +33,12 @@ export class MetricsService {
   private readonly registry = new Registry();
   private readonly httpRequestsTotal: Counter<"method" | "route" | "status_code">;
   private readonly httpRequestDuration: Histogram<"method" | "route">;
+  private readonly spendingsCreatedTotal: Counter<"user_kind">;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {
     collectDefaultMetrics({ register: this.registry });
 
     this.httpRequestsTotal = new Counter({
@@ -62,6 +73,38 @@ export class MetricsService {
       },
     });
 
+    this.spendingsCreatedTotal = new Counter({
+      name: "spendings_created_total",
+      help: "Spendings created since the process started, by user kind.",
+      labelNames: ["user_kind"],
+      registers: [this.registry],
+    });
+    // Both series exist from the first scrape: a counter that only appears on its first increment
+    // makes `rate()` blind to that first one.
+    for (const kind of Object.values(USER_KIND)) {
+      this.spendingsCreatedTotal.inc({ user_kind: kind }, 0);
+    }
+
+    const sessionSource = this.redis;
+    new Gauge({
+      name: "active_sessions",
+      help: "Signed-in sessions held in Redis, by user kind.",
+      labelNames: ["user_kind"],
+      registers: [this.registry],
+      async collect() {
+        // Redis down must not take the whole scrape with it: the series goes absent for this
+        // scrape, and /api/health is the one that reports the outage.
+        this.reset();
+        try {
+          const counts = await sessionSource.countActiveSessions();
+          this.set({ user_kind: USER_KIND.real }, counts.real);
+          this.set({ user_kind: USER_KIND.synthetic }, counts.synthetic);
+        } catch {
+          // Absent, never a stale or invented value.
+        }
+      },
+    });
+
     const marker = readReleaseMarker();
     if (marker) {
       new Gauge({
@@ -76,6 +119,10 @@ export class MetricsService {
   observeHttpRequest(method: string, route: string, statusCode: number, seconds: number): void {
     this.httpRequestsTotal.inc({ method, route, status_code: statusCode });
     this.httpRequestDuration.observe({ method, route }, seconds);
+  }
+
+  countSpendingsCreated(kind: UserKind, count = 1): void {
+    this.spendingsCreatedTotal.inc({ user_kind: kind }, count);
   }
 
   metricsText(): Promise<string> {

@@ -1,6 +1,8 @@
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { createClient, type RedisClientType } from "redis";
 
+import type { SessionCounts } from "@redis/interfaces/redisTypes";
+
 const SESSION_PREFIX = "pfa:";
 
 @Injectable()
@@ -50,5 +52,52 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         // Skip malformed entries
       }
     }
+  }
+
+  /**
+   * Signed-in sessions, people and bots apart (PFA-212). SCAN rather than KEYS: this runs on every
+   * metrics scrape, and KEYS blocks the server for as long as it walks the keyspace.
+   *
+   * A session without a `userId` is not counted: nobody is behind it.
+   */
+  async countActiveSessions(): Promise<SessionCounts> {
+    const counts: SessionCounts = { real: 0, synthetic: 0 };
+
+    for await (const keys of this.client.scanIterator({ MATCH: `${SESSION_PREFIX}*`, COUNT: 200 })) {
+      if (keys.length === 0) {
+        continue;
+      }
+      for (const value of await this.client.mGet(keys)) {
+        const session = parseSession(value);
+        if (!session?.userId) {
+          continue;
+        }
+        if (session.isSynthetic) {
+          counts.synthetic += 1;
+        } else {
+          counts.real += 1;
+        }
+      }
+    }
+
+    return counts;
+  }
+}
+
+/** The two fields of a stored session the counts read; `isSynthetic` is set at sign-in. */
+interface StoredSession {
+  userId?: string;
+  isSynthetic?: boolean;
+}
+
+/** A session expired between SCAN and MGET comes back null; a malformed one is skipped. */
+function parseSession(value: string | null): StoredSession | null {
+  if (!value) {
+    return null;
+  }
+  try {
+    return JSON.parse(value) as StoredSession;
+  } catch {
+    return null;
   }
 }

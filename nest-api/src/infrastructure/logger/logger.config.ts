@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import ecsFormat from "@elastic/ecs-pino-format";
+import { readReleaseMarker } from "@monitoring/release-marker";
 
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Params } from "nestjs-pino";
@@ -32,21 +31,6 @@ const SERVICE_NAME = "pfa-api";
 const UNLOGGED_PATHS = new Set(["/api/health", "/api/metrics"]);
 
 /**
- * Read from the working directory, which is where PM2 starts the process and where pnpm runs it.
- *
- * Not an import: `package.json` sits outside `rootDir`, so importing it would either fail the
- * build or change the shape of `dist/`. A missing version is not worth a crash at boot.
- */
-function serviceVersion(): string | undefined {
-  try {
-    const raw = readFileSync(join(process.cwd(), "package.json"), "utf8");
-    return (JSON.parse(raw) as { version?: string }).version;
-  } catch {
-    return undefined;
-  }
-}
-
-/**
  * ECS puts durations in **nanoseconds**; pino-http reports `responseTime` in milliseconds.
  *
  * Converted here rather than left as-is, because `event.duration` is the field every ECS consumer
@@ -67,6 +51,30 @@ function withEventDuration(options: LoggerOptions): LoggerOptions {
           delete out.responseTime;
         }
         return out;
+      },
+    },
+  };
+}
+
+/**
+ * The commit beside the version on every line (PFA-212). The API's `version` is a fixed `0.0.1`,
+ * so it alone cannot tell two deploys apart; the commit from the same marker can.
+ *
+ * `labels.*` is where ECS puts custom keyword fields — there is no ECS field for a commit. Added in
+ * the bindings formatter, like the ECS formatter's own static fields, so it costs nothing per line.
+ */
+function withReleaseCommit(options: LoggerOptions, commit: string | undefined): LoggerOptions {
+  const format = options.formatters?.bindings;
+  if (!commit) {
+    return options;
+  }
+
+  return {
+    ...options,
+    formatters: {
+      ...options.formatters,
+      bindings(bindings: Record<string, unknown>): Record<string, unknown> {
+        return { ...(format ? format(bindings) : bindings), "labels.commit": commit };
       },
     },
   };
@@ -105,6 +113,7 @@ export function buildLoggerParams(): Params {
   const environment = process.env.NODE_ENV ?? "development";
   const isProduction = environment === "production";
   const isTest = environment === "test";
+  const release = readReleaseMarker();
 
   return {
     pinoHttp: {
@@ -112,15 +121,21 @@ export function buildLoggerParams(): Params {
       // stop reading the output, which is where real failures then hide.
       level: isTest ? "silent" : (process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug")),
 
-      ...withEventDuration(
-        ecsFormat({
-          serviceName: SERVICE_NAME,
-          serviceVersion: serviceVersion(),
-          serviceEnvironment: environment,
-          // Off by default, and the whole point of this ticket: without it `req` and `res` are
-          // logged as raw objects and no consumer finds a method, a path or a status code.
-          convertReqRes: true,
-        }),
+      ...withReleaseCommit(
+        withEventDuration(
+          ecsFormat({
+            serviceName: SERVICE_NAME,
+            // The release on every line, exception logs included (PFA-212) — the same value as
+            // `app_build_info` and the health `version`, from the same marker. No marker (dev), no
+            // field: never a value rebuilt from `package.json`.
+            serviceVersion: release?.version,
+            serviceEnvironment: environment,
+            // Off by default, and the whole point of this ticket: without it `req` and `res` are
+            // logged as raw objects and no consumer finds a method, a path or a status code.
+            convertReqRes: true,
+          }),
+        ),
+        release?.commit,
       ),
 
       /**

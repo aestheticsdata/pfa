@@ -7,9 +7,10 @@ import { SpendingReceiptsController } from "@spendings/receipts/spending-receipt
 import { SpendingReceiptsService } from "@spendings/receipts/spending-receipts.service";
 import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { MonitoringModule } from "@monitoring/monitoring.module";
 
 @Module({
-  imports: [],
+  imports: [MonitoringModule],
   controllers: [SpendingsController, SpendingGroupsController, SpendingReceiptsController],
   providers: [SpendingsService, SpendingGroupsService, SpendingReceiptsService, ReceiptFilesService, SessionAuthGuard],
 })

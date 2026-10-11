@@ -6,15 +6,25 @@ import { MergeSpendingGroupDto } from "@spendings/dto/merge-spending-group.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { CsrfGuard } from "@users/guards/csrf.guard";
+import { MetricsService } from "@monitoring/metrics.service";
+import { GetUserKind } from "@monitoring/user-kind.decorator";
+
+import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
 
 @Controller("spendings/groups")
 @UseGuards(SessionAuthGuard, CsrfGuard)
 export class SpendingGroupsController {
-  constructor(private readonly groups: SpendingGroupsService) {}
+  constructor(
+    private readonly groups: SpendingGroupsService,
+    private readonly metrics: MetricsService,
+  ) {}
 
+  /** Each line of a group is a spending, and counts as one (PFA-212). */
   @Post()
-  async create(@Body() dto: CreateSpendingGroupDto, @GetUserId() userID: string) {
-    return this.groups.create(dto, userID);
+  async create(@Body() dto: CreateSpendingGroupDto, @GetUserId() userID: string, @GetUserKind() userKind: UserKind) {
+    const created = await this.groups.create(dto, userID);
+    this.metrics.countSpendingsCreated(userKind, created.spendingIDs.length);
+    return created;
   }
 
   @Post("merge")
@@ -22,9 +32,17 @@ export class SpendingGroupsController {
     return this.groups.merge(dto, userID);
   }
 
+  /** A line without an ID is added while editing: a new spending. */
   @Put(":id")
-  async update(@Param("id") id: string, @Body() dto: UpdateSpendingGroupDto, @GetUserId() userID: string) {
-    return this.groups.update(id, dto, userID);
+  async update(
+    @Param("id") id: string,
+    @Body() dto: UpdateSpendingGroupDto,
+    @GetUserId() userID: string,
+    @GetUserKind() userKind: UserKind,
+  ) {
+    const updated = await this.groups.update(id, dto, userID);
+    this.metrics.countSpendingsCreated(userKind, dto.lines.filter((line) => !line.ID).length);
+    return updated;
   }
 
   @Post(":id/ungroup")

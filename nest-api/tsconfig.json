@@ -23,7 +23,8 @@
       "@recurrings/*": ["./src/recurrings/*"],
       "@stats/*": ["./src/stats/*"],
       "@categories/*": ["./src/categories/*"],
-      "@exceptionals/*": ["./src/exceptionals/*"]
+      "@exceptionals/*": ["./src/exceptionals/*"],
+      "@monitoring/*": ["./src/monitoring/*"]
     },
     "incremental": true,
     "skipLibCheck": true,
