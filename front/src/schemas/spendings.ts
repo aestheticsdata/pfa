@@ -33,6 +33,8 @@ export const SpendingItemSchema = apiObject({
   groupLabel: z.string().nullish(),
   // How many receipt lines were saved for the row (PFA-214); 0 when none.
   lineCount: z.number(),
+  // Where it was bought, when its receipt named the store (PFA-218).
+  storeName: z.string().nullable(),
 });
 
 // The list and series payloads are the heavy parses, so they go through

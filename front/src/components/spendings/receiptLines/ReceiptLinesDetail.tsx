@@ -3,23 +3,34 @@ import ReceiptLinesSummary from "@components/spendings/receiptLines/ReceiptLines
 import { sumLines } from "@components/spendings/receiptLines/receiptLineDrafts";
 import { Button } from "@components/ui/button";
 import useTranslations from "@i18n/useTranslations";
-import { Pencil, ScanText } from "lucide-react";
+import { Pencil, ScanText, Store } from "lucide-react";
 
 import type { ReceiptLine } from "@src/schemas/receiptLines";
 
 interface ReceiptLinesDetailProps {
   lines: ReceiptLine[];
+  store: string | null;
   spendingAmount: number;
   onReread: () => void;
   onEdit: () => void;
 }
 
-/** The saved lines, with their sum against the spending, to edit or read again (PFA-214). */
-const ReceiptLinesDetail = ({ lines, spendingAmount, onReread, onEdit }: ReceiptLinesDetailProps) => {
+/** The saved store and lines, with their sum against the spending, to edit or read again (PFA-214, PFA-218). */
+const ReceiptLinesDetail = ({ lines, store, spendingAmount, onReread, onEdit }: ReceiptLinesDetailProps) => {
   const { receiptLines: t } = useTranslations("spendings");
 
   return (
     <div className="flex flex-col gap-3">
+      {store && (
+        <p
+          data-testid="receipt-lines-store"
+          className="flex items-center gap-2 text-sm text-ink-2"
+        >
+          <Store className="size-4 shrink-0 text-ink-4" />
+          <span className="text-ink-4">{t.store}</span>
+          <span className="truncate font-medium text-ink">{store}</span>
+        </p>
+      )}
       <ReceiptLinesList lines={lines} />
       {lines.length > 0 && (
         <ReceiptLinesSummary

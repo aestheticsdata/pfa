@@ -30,7 +30,7 @@ const ReceiptLinesModal = ({ target }: ReceiptLinesModalProps) => {
   const [open, setOpen] = useState(true);
   const isReview = target.mode === RECEIPT_LINES_MODE.review;
   const receiptLines = useReceiptLines(target.spendingID, { withSaved: !isReview, withProposal: isReview });
-  const lineCount = isReview ? receiptLines.proposal.data?.lines.length : receiptLines.saved.data?.length;
+  const lineCount = isReview ? receiptLines.proposal.data?.lines.length : receiptLines.saved.data?.lines.length;
 
   const dismiss = () => {
     setOpen(false);

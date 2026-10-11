@@ -4,11 +4,22 @@ export interface ReceiptLine {
   amount: number;
 }
 
+/**
+ * A spending's receipt as saved (PFA-218): its lines and its store's name.
+ * On a save, an absent store leaves the spending's store as it is.
+ */
+export interface SavedReceipt {
+  lines: ReceiptLine[];
+  store?: string | null;
+}
+
 /** What the OCR read on a receipt, for the user to check before saving. */
 export interface ReceiptProposal {
   lines: ReceiptLine[];
   /** The receipt's own total when one was found, to compare with the lines' sum. */
   total: number | null;
+  /** The store's name read on the receipt, or a known store it resembles (PFA-218). */
+  store: string | null;
 }
 
 /** A slip's horizontal extent in the receipt photo, in pixels: [start, end). */

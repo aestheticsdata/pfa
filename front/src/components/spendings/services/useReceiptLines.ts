@@ -10,7 +10,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import type { ReceiptLine } from "@src/schemas/receiptLines";
+import type { SavedReceipt } from "@src/schemas/receiptLines";
 
 interface ReceiptLinesQueries {
   /** Load the lines already saved for the spending. */
@@ -20,8 +20,8 @@ interface ReceiptLinesQueries {
 }
 
 /**
- * A spending's receipt lines (PFA-214): the saved set, the OCR proposal, and
- * saving the set the user accepted.
+ * A spending's receipt lines and store (PFA-214, PFA-218): the saved set, the
+ * OCR proposal, and saving what the user accepted.
  */
 const useReceiptLines = (spendingID: string, queries: ReceiptLinesQueries) => {
   const { receiptLines: t } = useTranslations("spendings");
@@ -33,7 +33,7 @@ const useReceiptLines = (spendingID: string, queries: ReceiptLinesQueries) => {
     queryKey: [QUERY_KEYS.RECEIPT_LINES, spendingID],
     queryFn: async () => {
       const response = await privateRequest(endpoint);
-      return parseResponse(ReceiptLinesResponseSchema, response.data, endpoint).lines;
+      return parseResponse(ReceiptLinesResponseSchema, response.data, endpoint);
     },
     enabled: queries.withSaved,
   });
@@ -54,15 +54,17 @@ const useReceiptLines = (spendingID: string, queries: ReceiptLinesQueries) => {
   });
 
   const save = useMutation({
-    mutationFn: async (lines: ReceiptLine[]) => {
-      const payload = SaveReceiptLinesPayloadSchema.parse({ lines });
+    mutationFn: async (receipt: SavedReceipt) => {
+      const payload = SaveReceiptLinesPayloadSchema.parse(receipt);
       const response = await privateRequest(endpoint, { method: "PUT", data: payload });
-      return parseResponse(ReceiptLinesResponseSchema, response.data, endpoint).lines;
+      return parseResponse(ReceiptLinesResponseSchema, response.data, endpoint);
     },
-    onSuccess: async (lines) => {
+    onSuccess: async (receipt) => {
       toast.success(t.saved);
-      queryClient.setQueryData([QUERY_KEYS.RECEIPT_LINES, spendingID], lines);
-      // The rows' line mark comes with the spendings.
+      queryClient.setQueryData([QUERY_KEYS.RECEIPT_LINES, spendingID], receipt);
+      // A store typed for the first time joins the list (PFA-218).
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STORES] });
+      // The rows' line mark and store come with the spendings.
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH] });
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SPENDINGS_SEARCH] });
     },

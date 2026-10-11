@@ -68,11 +68,15 @@ model Spendings {
   group        SpendingGroups? @relation(fields: [groupID], references: [ID], onDelete: Cascade)
   // The receipt's line items, read by OCR then checked by the user (PFA-214).
   receiptLines ReceiptLines[]
+  // Where it was bought, read on the receipt then checked by the user (PFA-218).
+  storeID      String?         @db.Char(36)
+  store        Stores?         @relation(fields: [storeID], references: [ID], onDelete: SetNull)
 
   // MySQL auto-creates this index with the FK constraint; declaring it (same
   // name) keeps `migrate diff` clean instead of reporting it as drift forever.
   @@index([categoryID], map: "Spendings_categoryID_fkey")
   @@index([groupID], map: "Spendings_groupID_fkey")
+  @@index([storeID], map: "Spendings_storeID_fkey")
   @@index([userID, date])
 }
 
@@ -87,6 +91,19 @@ model ReceiptLines {
   spending   Spendings @relation(fields: [spendingID], references: [ID], onDelete: Cascade)
 
   @@index([spendingID])
+}
+
+// A shop the user buys from (PFA-218), one per spelling: `nameKey` is the name
+// upper-cased, accents and punctuation dropped, so "Épicerie du Parc" and
+// "EPICERIE DU PARC" are one store.
+model Stores {
+  ID        String      @id @db.Char(36)
+  userID    String      @db.Char(36)
+  name      String      @db.VarChar(60)
+  nameKey   String      @db.VarChar(60)
+  spendings Spendings[]
+
+  @@unique([userID, nameKey])
 }
 
 // Several spendings bought on one receipt (PFA-189). The receipt itself is the

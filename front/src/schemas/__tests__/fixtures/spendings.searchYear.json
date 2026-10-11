@@ -14,7 +14,8 @@
       "detail": null,
       "category": "Gym",
       "categoryColor": "#16A085",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000101",
@@ -30,7 +31,8 @@
       "detail": null,
       "category": "Stationery",
       "categoryColor": "#F39C12",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000102",
@@ -46,7 +48,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000103",
@@ -62,7 +65,8 @@
       "detail": "Hardware 3",
       "category": "Florist",
       "categoryColor": "#2ECC71",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000105",
@@ -78,7 +82,8 @@
       "detail": null,
       "category": "Toys",
       "categoryColor": "#7F8C8D",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000106",
@@ -94,7 +99,8 @@
       "detail": null,
       "category": "Garden",
       "categoryColor": "#1ABC9C",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000107",
@@ -110,7 +116,8 @@
       "detail": "Stationery 3",
       "category": "Laundry",
       "categoryColor": "#FD79A8",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000050",
@@ -126,7 +133,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000051",
@@ -142,7 +150,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000108",
@@ -158,7 +167,8 @@
       "detail": null,
       "category": "Bookshop",
       "categoryColor": "#E8663D",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000109",
@@ -174,7 +184,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000110",
@@ -190,7 +201,8 @@
       "detail": null,
       "category": "Cinema",
       "categoryColor": "#4A90D9",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000111",
@@ -206,7 +218,8 @@
       "detail": null,
       "category": "Museum",
       "categoryColor": "#E74C3C",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000112",
@@ -222,7 +235,8 @@
       "detail": null,
       "category": "Hardware",
       "categoryColor": "#9B59B6",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000113",
@@ -238,7 +252,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000114",
@@ -254,7 +269,8 @@
       "detail": null,
       "category": "Repair",
       "categoryColor": "#34495E",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000115",
@@ -270,7 +286,8 @@
       "detail": null,
       "category": "Market",
       "categoryColor": "#E84393",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000116",
@@ -286,7 +303,8 @@
       "detail": "Phone plan 3",
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000118",
@@ -302,7 +320,8 @@
       "detail": "Bicycle 2",
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000119",
@@ -318,7 +337,8 @@
       "detail": null,
       "category": "Bookshop",
       "categoryColor": "#E8663D",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000120",
@@ -334,7 +354,8 @@
       "detail": null,
       "category": "Stationery",
       "categoryColor": "#F39C12",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000121",
@@ -350,7 +371,8 @@
       "detail": null,
       "category": "Cinema",
       "categoryColor": "#4A90D9",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000122",
@@ -366,7 +388,8 @@
       "detail": null,
       "category": "Market",
       "categoryColor": "#E84393",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000123",
@@ -382,7 +405,8 @@
       "detail": null,
       "category": "Bookshop",
       "categoryColor": "#E8663D",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000124",
@@ -398,7 +422,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     }
   ],
   "nextCursor": "00000000-0000-4000-8000-000000000029",

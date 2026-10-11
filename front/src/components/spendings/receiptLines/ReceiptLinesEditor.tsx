@@ -2,22 +2,24 @@ import useReceiptLineDrafts from "@components/spendings/receiptLines/hooks/useRe
 import ReceiptLineRow from "@components/spendings/receiptLines/ReceiptLineRow";
 import ReceiptLinesSummary from "@components/spendings/receiptLines/ReceiptLinesSummary";
 import { lineAmount, sumLines } from "@components/spendings/receiptLines/receiptLineDrafts";
+import StorePicker from "@components/spendings/receiptLines/StorePicker";
 import { Button } from "@components/ui/button";
 import useTranslations from "@i18n/useTranslations";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 
-import type { ReceiptLine } from "@src/schemas/receiptLines";
+import type { SavedReceipt } from "@src/schemas/receiptLines";
 
 interface ReceiptLinesEditorProps {
-  initial: ReceiptLine[];
+  initial: SavedReceipt;
   spendingAmount: number;
   receiptTotal?: number | null;
   isSaving: boolean;
-  onSave: (lines: ReceiptLine[]) => void;
+  onSave: (receipt: SavedReceipt) => void;
   onCancel: () => void;
 }
 
-/** The lines to check and correct before they are saved (PFA-214). */
+/** The store and lines to check and correct before they are saved (PFA-214, PFA-218). */
 const ReceiptLinesEditor = ({
   initial,
   spendingAmount,
@@ -28,16 +30,22 @@ const ReceiptLinesEditor = ({
 }: ReceiptLinesEditorProps) => {
   const texts = useTranslations("spendings");
   const t = texts.receiptLines;
-  const { drafts, invalidKeys, update, add, remove, validate } = useReceiptLineDrafts(initial);
+  const { drafts, invalidKeys, update, add, remove, validate } = useReceiptLineDrafts(initial.lines);
+  const [store, setStore] = useState(initial.store);
   const sum = sumLines(drafts.map((d) => lineAmount(d) ?? 0));
 
   const save = () => {
     const lines = validate();
-    if (lines) onSave(lines);
+    if (lines) onSave({ lines, store });
   };
 
   return (
     <div className="flex flex-col gap-3">
+      <StorePicker
+        value={store}
+        onChange={setStore}
+      />
+
       <div className="flex flex-col gap-2">
         {drafts.map((draft) => (
           <ReceiptLineRow

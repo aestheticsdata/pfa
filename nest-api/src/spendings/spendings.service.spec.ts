@@ -51,7 +51,7 @@ describe("SpendingsService.searchSpendings", () => {
     expect(findMany).toHaveBeenCalledWith({
       where,
       orderBy: [{ date: "desc" }, { ID: "desc" }],
-      include: { category: true, _count: { select: { receiptLines: true } } },
+      include: { category: true, store: { select: { name: true } }, _count: { select: { receiptLines: true } } },
       // Over-fetch one row to detect a further page without a spurious empty call.
       take: 51,
     });

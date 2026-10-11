@@ -10,13 +10,19 @@ export const ReceiptLineSchema = apiObject({
 });
 export type ReceiptLine = z.infer<typeof ReceiptLineSchema>;
 
-// GET and PUT /spendings/:id/lines.
-export const ReceiptLinesResponseSchema = apiObject({ lines: z.array(ReceiptLineSchema) });
+// GET and PUT /spendings/:id/lines: the lines and the store (PFA-218).
+export const ReceiptLinesResponseSchema = apiObject({
+  lines: z.array(ReceiptLineSchema),
+  store: z.string().nullable(),
+});
+export type SavedReceipt = z.infer<typeof ReceiptLinesResponseSchema>;
 
 // POST /spendings/:id/lines/ocr: what the OCR read, and the receipt's own total when found.
 export const ReceiptProposalSchema = apiObject({
   lines: z.array(ReceiptLineSchema),
   total: numberLikeSchema.nullable(),
+  // The store's name read on the receipt, or the user's store it resembles.
+  store: z.string().nullable(),
 });
 export type ReceiptProposal = z.infer<typeof ReceiptProposalSchema>;
 
@@ -27,5 +33,11 @@ export const SaveReceiptLinesPayloadSchema = z.object({
       amount: z.number(),
     }),
   ),
+  store: z.string().trim().max(FIELD_LIMITS.storeName).nullable(),
 });
 export type SaveReceiptLinesPayload = z.infer<typeof SaveReceiptLinesPayloadSchema>;
+
+// GET /stores: the user's stores, for the store field (PFA-218).
+export const StoreSchema = apiObject({ ID: z.string(), name: z.string() });
+export const StoreListSchema = z.array(StoreSchema);
+export type Store = z.infer<typeof StoreSchema>;

@@ -14,7 +14,8 @@
     "groupLabel": null,
     "category": "Pharmacy",
     "categoryColor": "#C0894B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000025",
@@ -31,7 +32,8 @@
     "groupLabel": null,
     "category": "Train pass",
     "categoryColor": "#6DB65B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000026",
@@ -48,7 +50,8 @@
     "groupLabel": null,
     "category": "Bookshop",
     "categoryColor": "#E8663D",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000027",
@@ -65,7 +68,8 @@
     "groupLabel": null,
     "category": "Pharmacy",
     "categoryColor": "#C0894B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000028",
@@ -82,7 +86,8 @@
     "groupLabel": null,
     "category": "Florist",
     "categoryColor": "#2ECC71",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000029",
@@ -99,7 +104,8 @@
     "groupLabel": null,
     "category": "Bookshop",
     "categoryColor": "#E8663D",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000030",
@@ -116,7 +122,8 @@
     "groupLabel": null,
     "category": "Train pass",
     "categoryColor": "#6DB65B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000031",
@@ -133,7 +140,8 @@
     "groupLabel": null,
     "category": "Pharmacy",
     "categoryColor": "#C0894B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000032",
@@ -150,7 +158,8 @@
     "groupLabel": null,
     "category": "Train pass",
     "categoryColor": "#6DB65B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000033",
@@ -167,7 +176,8 @@
     "groupLabel": "Garden 2",
     "category": "Gym",
     "categoryColor": "#16A085",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000035",
@@ -184,7 +194,8 @@
     "groupLabel": "Garden 2",
     "category": "Train pass",
     "categoryColor": "#6DB65B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000036",
@@ -201,7 +212,8 @@
     "groupLabel": null,
     "category": "Bookshop",
     "categoryColor": "#E8663D",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000037",
@@ -218,7 +230,8 @@
     "groupLabel": null,
     "category": "Garden",
     "categoryColor": "#1ABC9C",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000038",
@@ -235,7 +248,8 @@
     "groupLabel": "Garden 2",
     "category": "Pharmacy",
     "categoryColor": "#C0894B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000039",
@@ -252,7 +266,8 @@
     "groupLabel": null,
     "category": "Pharmacy",
     "categoryColor": "#C0894B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000040",
@@ -269,7 +284,8 @@
     "groupLabel": null,
     "category": "Hardware",
     "categoryColor": "#9B59B6",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000041",
@@ -286,7 +302,8 @@
     "groupLabel": null,
     "category": "Cinema",
     "categoryColor": "#4A90D9",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000042",
@@ -303,7 +320,8 @@
     "groupLabel": null,
     "category": "Cinema",
     "categoryColor": "#4A90D9",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000043",
@@ -320,7 +338,8 @@
     "groupLabel": null,
     "category": "Toys",
     "categoryColor": "#7F8C8D",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000044",
@@ -337,7 +356,8 @@
     "groupLabel": null,
     "category": "Train pass",
     "categoryColor": "#6DB65B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000045",
@@ -354,7 +374,8 @@
     "groupLabel": null,
     "category": "Laundry",
     "categoryColor": "#FD79A8",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000046",
@@ -371,7 +392,8 @@
     "groupLabel": null,
     "category": "Repair",
     "categoryColor": "#34495E",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000047",
@@ -388,7 +410,8 @@
     "groupLabel": null,
     "category": "Bookshop",
     "categoryColor": "#E8663D",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000048",
@@ -405,7 +428,8 @@
     "groupLabel": null,
     "category": "Train pass",
     "categoryColor": "#6DB65B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   },
   {
     "ID": "00000000-0000-4000-8000-000000000049",
@@ -422,6 +446,7 @@
     "groupLabel": null,
     "category": "Train pass",
     "categoryColor": "#6DB65B",
-    "lineCount": 0
+    "lineCount": 0,
+    "storeName": null
   }
 ]

@@ -45,6 +45,7 @@ describe("FIELD_LIMITS", () => {
     ["label", "Spendings", "label"],
     ["label", "Recurrings", "label"],
     ["receiptLineLabel", "ReceiptLines", "label"],
+    ["storeName", "Stores", "name"],
     ["description", "Exceptionals", "description"],
     ["categoryName", "Categories", "name"],
     ["exceptionalCategoryName", "Exceptionals", "categoryName"],

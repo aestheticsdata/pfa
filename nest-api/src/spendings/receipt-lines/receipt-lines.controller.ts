@@ -17,7 +17,7 @@ export class ReceiptLinesController {
 
   @Put()
   async save(@Param("id") id: string, @Body() dto: SaveReceiptLinesDto, @GetUserId() userID: string) {
-    return this.receiptLines.save(id, userID, dto.lines);
+    return this.receiptLines.save(id, userID, { lines: dto.lines, store: dto.store });
   }
 
   /** Runs the OCR on the spending's receipt and answers with the proposed lines. */
