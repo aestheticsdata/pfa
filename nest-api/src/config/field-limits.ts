@@ -21,6 +21,10 @@ export const FIELD_LIMITS = {
   receiptLineLabel: 100,
   /** `Stores.name` — a shop as read on its receipts (PFA-218). */
   storeName: 60,
+  /** `Stores.address` — street and city as read on its receipts (PFA-219). */
+  storeAddress: 120,
+  /** `ProductTypes.name` — a generic product such as "Liquid soap" (PFA-219). */
+  productTypeName: 40,
   /** `Exceptionals.description`. */
   description: 255,
   /** `Categories.name` — the categories the spendings reference. */

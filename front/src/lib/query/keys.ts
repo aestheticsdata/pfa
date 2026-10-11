@@ -31,4 +31,5 @@ export const QUERY_KEYS = {
   RECEIPT_OCR: "receiptOcr",
   RECEIPT_IMAGE: "receiptImage",
   STORES: "stores",
+  PRODUCT_TYPES: "productTypes",
 } as const;

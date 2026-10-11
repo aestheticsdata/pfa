@@ -24,39 +24,44 @@ describe("parseReceiptText", () => {
       "TVA 5,5%                  0,39",
     ].join("\n");
 
-    expect(parseReceiptText(text)).toEqual({
+    expect(parseReceiptText(text)).toMatchObject({
       lines: [
         { label: "BAGUETTE TRADITION", amount: 1.2 },
         { label: "CAFE MOULU 250G", amount: 3.85 },
         { label: "CONFITURE ABRICOT", amount: 2.49 },
       ],
       total: 7.54,
-      store: "EPICERIE DES TILLEULS",
+      store: { name: "EPICERIE DES TILLEULS", address: "8 AVENUE DU PARC, 00000 VILLE" },
     });
   });
 
   it("prices a label from the quantity line under it", () => {
     const text = ["JUS D'ORANGE", "  3 x 1,10           3,30", "TOTAL 3,30"].join("\n");
 
-    expect(parseReceiptText(text).lines).toEqual([{ label: "JUS D'ORANGE", amount: 3.3 }]);
+    expect(parseReceiptText(text).lines).toMatchObject([{ label: "JUS D'ORANGE", amount: 3.3, quantity: 3 }]);
   });
 
   it("ignores a quantity line under an already priced item", () => {
     const text = ["EAU GAZEUSE 6X1L        2,40", "   2 x 1,20", "TOTAL 2,40"].join("\n");
 
-    expect(parseReceiptText(text).lines).toEqual([{ label: "EAU GAZEUSE 6X1L", amount: 2.4 }]);
+    expect(parseReceiptText(text).lines).toMatchObject([
+      // The count line under it is its quantity; the pack is its size (PFA-219).
+      { label: "EAU GAZEUSE 6X1L", amount: 2.4, quantity: 2, size: 6, sizeUnit: "l" },
+    ]);
   });
 
   it("prices a label from a weight line", () => {
     const text = ["TOMATES GRAPPE", "0,512 kg x 3,99 €/kg    2,04", "TOTAL 2,04"].join("\n");
 
-    expect(parseReceiptText(text).lines).toEqual([{ label: "TOMATES GRAPPE", amount: 2.04 }]);
+    expect(parseReceiptText(text).lines).toMatchObject([
+      { label: "TOMATES GRAPPE", amount: 2.04, quantity: 1, size: 0.512, sizeUnit: "kg" },
+    ]);
   });
 
   it("keeps a discount as a negative line", () => {
     const text = ["SAVON LIQUIDE    4,50", "REMISE FIDELITE  -0,90", "TOTAL 3,60"].join("\n");
 
-    expect(parseReceiptText(text).lines).toEqual([
+    expect(parseReceiptText(text).lines).toMatchObject([
       { label: "SAVON LIQUIDE", amount: 4.5 },
       { label: "REMISE FIDELITE", amount: -0.9 },
     ]);
@@ -65,7 +70,7 @@ describe("parseReceiptText", () => {
   it("drops the currency mark, the VAT code and dot leaders", () => {
     const text = ["RIZ BASMATI ........ 2,15 € A", "LENTILLES VERTES 1.89 1", "TOTAL 4,04"].join("\n");
 
-    expect(parseReceiptText(text).lines).toEqual([
+    expect(parseReceiptText(text).lines).toMatchObject([
       { label: "RIZ BASMATI", amount: 2.15 },
       { label: "LENTILLES VERTES", amount: 1.89 },
     ]);
@@ -105,7 +110,10 @@ describe("parseReceiptText", () => {
       "Total TTC en EUR             12,60",
     ].join("\n");
 
-    expect(parseReceiptText(text)).toMatchObject({ lines: [{ label: "FLACON 500ML", amount: 12.6 }], total: 12.6 });
+    expect(parseReceiptText(text)).toMatchObject({
+      lines: [{ label: "FLACON 500ML", amount: 12.6, quantity: 3, size: 500, sizeUnit: "ml" }],
+      total: 12.6,
+    });
   });
 
   it("reads a VAT code in parentheses after the price, and a stray bar before it (PFA-217)", () => {
@@ -118,8 +126,9 @@ describe("parseReceiptText", () => {
 
     expect(parseReceiptText(text)).toMatchObject({
       lines: [
-        { label: "1 FIGUES SECHEES TURQUIE", amount: 3.2 },
-        { label: "1 FIGUES SECHEES TURQUIE", amount: 3.2 },
+        // The count in front leaves the label (PFA-219).
+        { label: "FIGUES SECHEES TURQUIE", amount: 3.2, quantity: 1 },
+        { label: "FIGUES SECHEES TURQUIE", amount: 3.2, quantity: 1 },
       ],
       total: 6.4,
     });
@@ -157,11 +166,17 @@ describe("store name (PFA-218)", () => {
       "TOTAL       2,40",
     ].join("\n");
 
-    expect(parseReceiptText(text).store).toBe("Le Comptoir des Saisons");
+    expect(parseReceiptText(text).store).toEqual({
+      name: "Le Comptoir des Saisons",
+      address: "4 rue des Lilas, 00000 VILLE",
+    });
   });
 
   it("leaves out the slip run into the same line", () => {
-    expect(parseReceiptText("EPICERIE DU PARC | CARTE BANCAIRE\nPAIN 1,00").store).toBe("EPICERIE DU PARC");
+    expect(parseReceiptText("EPICERIE DU PARC | CARTE BANCAIRE\nPAIN 1,00").store).toEqual({
+      name: "EPICERIE DU PARC",
+      address: null,
+    });
   });
 
   it("is not looked for once the items start", () => {
@@ -178,13 +193,13 @@ describe("store name (PFA-218)", () => {
   it("comes from a receipt slip, never from the card slip beside it", () => {
     const card = "CARTE BANCAIRE\nPRIMEUR DU MARCHE\nMONTANT :\n2,40 EUR";
     const receipt = "Primeur du Marché\nPOIRES 2,40\nTOTAL 2,40";
-    expect(parseReceiptPages([card, receipt]).store).toBe("Primeur du Marché");
+    expect(parseReceiptPages([card, receipt]).store?.name).toBe("Primeur du Marché");
   });
 });
 
 describe("parseReceiptPages", () => {
   it("takes the items of every slip and the first total found", () => {
-    expect(parseReceiptPages(["THE VERT 3,10\nTOTAL 3,10", "CARTE BANCAIRE\nMONTANT :\n3,10 EUR"])).toEqual({
+    expect(parseReceiptPages(["THE VERT 3,10\nTOTAL 3,10", "CARTE BANCAIRE\nMONTANT :\n3,10 EUR"])).toMatchObject({
       store: null,
       lines: [{ label: "THE VERT", amount: 3.1 }],
       total: 3.1,
@@ -193,7 +208,15 @@ describe("parseReceiptPages", () => {
 });
 
 describe("pickProposal", () => {
-  const lines = (...amounts: number[]) => amounts.map((amount, i) => ({ label: `ITEM ${i}`, amount }));
+  const lines = (...amounts: number[]) =>
+    amounts.map((amount, i) => ({
+      label: `ITEM ${i}`,
+      amount,
+      quantity: 1,
+      size: null,
+      sizeUnit: null,
+      productType: null,
+    }));
 
   it("prefers lines adding up to the total over more lines", () => {
     const addsUp = { lines: lines(1.2, 3.85), total: 5.05, store: null };

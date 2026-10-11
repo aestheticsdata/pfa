@@ -3,13 +3,13 @@ import ReceiptLinesSummary from "@components/spendings/receiptLines/ReceiptLines
 import { sumLines } from "@components/spendings/receiptLines/receiptLineDrafts";
 import { Button } from "@components/ui/button";
 import useTranslations from "@i18n/useTranslations";
-import { Pencil, ScanText, Store } from "lucide-react";
+import { MapPin, Pencil, ScanText, Store } from "lucide-react";
 
-import type { ReceiptLine } from "@src/schemas/receiptLines";
+import type { ReceiptLine, StoreIdentity } from "@src/schemas/receiptLines";
 
 interface ReceiptLinesDetailProps {
   lines: ReceiptLine[];
-  store: string | null;
+  store: StoreIdentity | null;
   spendingAmount: number;
   onReread: () => void;
   onEdit: () => void;
@@ -22,14 +22,21 @@ const ReceiptLinesDetail = ({ lines, store, spendingAmount, onReread, onEdit }: 
   return (
     <div className="flex flex-col gap-3">
       {store && (
-        <p
+        <div
           data-testid="receipt-lines-store"
-          className="flex items-center gap-2 text-sm text-ink-2"
+          className="flex flex-col gap-1 text-sm"
         >
-          <Store className="size-4 shrink-0 text-ink-4" />
-          <span className="text-ink-4">{t.store}</span>
-          <span className="truncate font-medium text-ink">{store}</span>
-        </p>
+          <p className="flex items-center gap-2">
+            <Store className="size-4 shrink-0 text-ink-4" />
+            <span className="truncate font-medium text-ink">{store.name}</span>
+          </p>
+          {store.address && (
+            <p className="flex items-center gap-2 text-ink-3">
+              <MapPin className="size-4 shrink-0 text-ink-4" />
+              <span className="truncate">{store.address}</span>
+            </p>
+          )}
+        </div>
       )}
       <ReceiptLinesList lines={lines} />
       {lines.length > 0 && (

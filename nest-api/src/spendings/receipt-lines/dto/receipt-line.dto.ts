@@ -1,11 +1,16 @@
-import { IsNotEmpty, IsNumber, IsString, Max, MaxLength, Min } from "class-validator";
+import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 import { Type } from "class-transformer";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
+import type { SizeUnit } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 
 // `ReceiptLines.amount` is a Decimal(6, 2); a discount line is negative.
 const MAX_LINE_AMOUNT = 9999.99;
+// `quantity` and `size` are Decimal(8, 3).
+const MAX_MEASURE = 99999.999;
+const MIN_MEASURE = 0.001;
 
-/** One receipt line as the user accepted it (PFA-214). */
+/** One receipt line as the user accepted it (PFA-214), with what a unit price needs (PFA-219). */
 export class ReceiptLineDto {
   @IsString()
   @IsNotEmpty()
@@ -17,4 +22,28 @@ export class ReceiptLineDto {
   @Max(MAX_LINE_AMOUNT)
   @Type(() => Number)
   amount: number;
+
+  @IsNumber({ maxDecimalPlaces: 3 })
+  @Min(MIN_MEASURE)
+  @Max(MAX_MEASURE)
+  @Type(() => Number)
+  quantity: number;
+
+  /** One item's size; null when sold by the piece. */
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 3 })
+  @Min(MIN_MEASURE)
+  @Max(MAX_MEASURE)
+  @Type(() => Number)
+  size: number | null;
+
+  @IsOptional()
+  @IsIn(Object.values(SIZE_UNIT))
+  sizeUnit: SizeUnit | null;
+
+  /** The generic product's name: an existing one or a new one. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(FIELD_LIMITS.productTypeName)
+  productType: string | null;
 }

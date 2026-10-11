@@ -12,6 +12,8 @@ import type { SavedReceipt } from "@src/schemas/receiptLines";
 
 interface ReceiptLinesEditorProps {
   initial: SavedReceipt;
+  /** The lines come from the OCR: types already set were taken from earlier receipts. */
+  fromProposal: boolean;
   spendingAmount: number;
   receiptTotal?: number | null;
   isSaving: boolean;
@@ -22,6 +24,7 @@ interface ReceiptLinesEditorProps {
 /** The store and lines to check and correct before they are saved (PFA-214, PFA-218). */
 const ReceiptLinesEditor = ({
   initial,
+  fromProposal,
   spendingAmount,
   receiptTotal,
   isSaving,
@@ -30,7 +33,7 @@ const ReceiptLinesEditor = ({
 }: ReceiptLinesEditorProps) => {
   const texts = useTranslations("spendings");
   const t = texts.receiptLines;
-  const { drafts, invalidKeys, update, add, remove, validate } = useReceiptLineDrafts(initial.lines);
+  const { drafts, invalidKeys, update, add, remove, validate } = useReceiptLineDrafts(initial.lines, fromProposal);
   const [store, setStore] = useState(initial.store);
   const sum = sumLines(drafts.map((d) => lineAmount(d) ?? 0));
 
@@ -46,7 +49,7 @@ const ReceiptLinesEditor = ({
         onChange={setStore}
       />
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2.5">
         {drafts.map((draft) => (
           <ReceiptLineRow
             key={draft.key}
