@@ -1,6 +1,6 @@
 /** Every change the panel can make to a runner; also the audit log's `action` for it. */
 export const CONTROL_ACTION = {
-  runnerSet: "runner.set",
+  dailySet: "daily.set",
   targetSet: "target.set",
   rampSet: "ramp.set",
   loadSet: "load.set",

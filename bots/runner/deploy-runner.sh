@@ -18,7 +18,7 @@ API_ROOT="/var/www/bots"
 NEST_DIR="$API_ROOT/runner"
 NEST_BACKUP_DIR="$API_ROOT/runner.bak"
 NEST_RELEASES_DIR="$API_ROOT/runner-releases"
-# The runner's state — bots' passwords (0600), kill switch, upload ledger, quiet hours — lives
+# The runner's state — bots' passwords (0600), switches, upload ledger, quiet hours — lives
 # outside the release folders, so a deploy or a rollback never touches it (RUNNER_STATE_DIR).
 STATE_DIR="$API_ROOT/state"
 # How many releases stay under $NEST_RELEASES_DIR after a successful switch. The directory
@@ -677,7 +677,7 @@ EOF
   zeus_report "success" || log "⚠️  Zeus was not told about this deploy (non-fatal)"
 
   log "✅ Runner deployment completed successfully"
-  log "ℹ️  Runner control API on 127.0.0.1:7300 (loopback only). The kill switch is persisted: a"
+  log "ℹ️  Runner control API on 127.0.0.1:7300 (loopback only). The bot switches are persisted: a"
   log "    deploy restarts the runner in the state it was left in — off on the very first start."
   log "ℹ️  Previous version is available in: $NEST_BACKUP_DIR"
   log "ℹ️  You can manually rollback with: ./deploy-runner.sh rollback"

@@ -6,6 +6,7 @@ import { BotBlockedError } from "@core/engine/errors";
 import { fakeRunner } from "@core/testing/fakeRunner";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import type { Runner } from "@core/engine/runner";
 import type { BotAction } from "@core/interfaces/actionTypes";
 import type { PersistedRunnerState } from "@core/interfaces/runnerTypes";
 
@@ -33,17 +34,18 @@ describe("Runner guards", () => {
     );
   });
 
-  it("is stopped by default, and persists the kill switch", async () => {
+  it("is stopped by default, and persists the daily switch", async () => {
     const saved: PersistedRunnerState[] = [];
     const runner = await fakeRunner({ saved, secretsPath: await secretsPath() });
     expect(runner.isRunning()).toBe(false);
     expect(runner.snapshotBots()[0]?.state).toBe(BOT_STATE.stopped);
-    await runner.start();
-    await runner.stop();
-    expect(saved.map((state) => state.running)).toEqual([true, false]);
+    await runner.setDailyEnabled(true);
+    expect(runner.isRunning()).toBe(true);
+    await runner.setDailyEnabled(false);
+    expect(saved.map((state) => state.dailyEnabled)).toEqual([true, false]);
   });
 
-  it("never picks a disabled action, and stops a visit when the kill switch is off", async () => {
+  it("never picks a disabled action, and stops a visit when the daily switch is off", async () => {
     const ran: string[] = [];
     const runner = await fakeRunner({
       actions: [tracked("a", ran), tracked("b", ran)],
@@ -75,6 +77,13 @@ describe("Runner guards", () => {
   });
 });
 
+const dailyState = (runner: Runner) => runner.snapshotBots().find((bot) => bot.id === "bot-0")?.state;
+
+const stopAll = async (runner: Runner) => {
+  await runner.setDailyEnabled(false);
+  await runner.setLoadEnabled(false);
+};
+
 describe("Load bots", () => {
   afterEach(() => {
     vi.useRealTimers();
@@ -92,7 +101,7 @@ describe("Load bots", () => {
     const { runner } = await loadRunner();
     await runner.setTarget(25);
     await runner.setLoadEnabled(true);
-    await runner.start();
+    await runner.setDailyEnabled(true);
     expect(runner.status().spawned).toBe(10);
     expect(runner.status().nextStepInSec).toBe(1);
     await vi.advanceTimersByTimeAsync(1_000);
@@ -103,7 +112,7 @@ describe("Load bots", () => {
     const states = runner.snapshotBots();
     expect(states.find((bot) => bot.id === "bot-0")?.state).toBe(BOT_STATE.sleeping);
     expect(states.filter((bot) => bot.state === BOT_STATE.queued)).toHaveLength(5);
-    await runner.stop();
+    await stopAll(runner);
   });
 
   it("stops the excess at once when the target drops", async () => {
@@ -111,11 +120,11 @@ describe("Load bots", () => {
     const { runner } = await loadRunner();
     await runner.setTarget(20);
     await runner.setLoadEnabled(true);
-    await runner.start();
+    await runner.setDailyEnabled(true);
     await vi.advanceTimersByTimeAsync(1_000);
     await runner.setTarget(3);
     expect(runner.status().spawned).toBe(3);
-    await runner.stop();
+    await stopAll(runner);
   });
 
   it("the load switch stops every load bot, keeps the target and the daily bot, and comes back", async () => {
@@ -123,7 +132,7 @@ describe("Load bots", () => {
     const { runner, saved } = await loadRunner();
     await runner.setTarget(10);
     await runner.setLoadEnabled(true);
-    await runner.start();
+    await runner.setDailyEnabled(true);
     expect(runner.status().spawned).toBe(10);
 
     await runner.setLoadEnabled(false);
@@ -133,21 +142,44 @@ describe("Load bots", () => {
 
     await runner.setLoadEnabled(true);
     expect(runner.status().spawned).toBe(10);
-    await runner.stop();
+    await stopAll(runner);
   });
 
-  it("is off until switched on, and the kill switch takes the load bots down too", async () => {
+  it("runs each kind on its own switch: load bots without the daily ones, and the other way round", async () => {
     vi.useFakeTimers();
     const { runner } = await loadRunner();
     await runner.setTarget(10);
-    await runner.start();
-    expect(runner.status()).toMatchObject({ spawned: 0, loadEnabled: false });
-
     await runner.setLoadEnabled(true);
-    expect(runner.status().spawned).toBe(10);
-    await runner.stop();
-    expect(runner.status().spawned).toBe(0);
+    expect(runner.status()).toMatchObject({ spawned: 10, running: true, dailyEnabled: false });
+    expect(dailyState(runner)).toBe(BOT_STATE.stopped);
+
+    await runner.setDailyEnabled(true);
+    await runner.setLoadEnabled(false);
+    expect(runner.status()).toMatchObject({ spawned: 0, running: true });
+    expect(dailyState(runner)).toBe(BOT_STATE.sleeping);
+    expect(runner.snapshotBots().filter((bot) => bot.state === BOT_STATE.stopped)).toHaveLength(30);
+
+    await runner.setDailyEnabled(false);
+    expect(runner.isRunning()).toBe(false);
     expect(runner.snapshotBots().every((bot) => bot.state === BOT_STATE.stopped)).toBe(true);
+  });
+
+  it("gives the place of a load bot turned off by hand to the next one", async () => {
+    vi.useFakeTimers();
+    const { runner } = await loadRunner();
+    await runner.setBotsEnabled({ ids: ["load-0", "load-1", "load-2"], enabled: false });
+    await runner.setTarget(10);
+    await runner.setLoadEnabled(true);
+    const up = runner.snapshotBots().filter((bot) => bot.state === BOT_STATE.sleeping);
+    expect(up.map((bot) => bot.id)).not.toContain("load-0");
+    expect(up).toHaveLength(10);
+    expect(runner.snapshotBots().find((bot) => bot.id === "load-0")?.state).toBe(BOT_STATE.paused);
+
+    await runner.setBotsEnabled({ ids: ["load-3"], enabled: false });
+    expect(runner.status().spawned).toBe(9);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(runner.status().spawned).toBe(10);
+    await stopAll(runner);
   });
 
   it("keeps only the first maxBots load bots, and persists the pace", async () => {

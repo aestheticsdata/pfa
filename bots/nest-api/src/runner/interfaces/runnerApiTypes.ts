@@ -34,7 +34,9 @@ export interface RunnerRamp {
 
 export interface RunnerStatus {
   app: string;
+  /** Either switch is on: the daily bots, the load bots, or both. */
   running: boolean;
+  dailyEnabled: boolean;
   bots: Record<string, number>;
   liveDaily: number;
   totalDaily: number;

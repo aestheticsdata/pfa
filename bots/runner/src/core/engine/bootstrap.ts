@@ -12,7 +12,12 @@ import type { UploadEntry } from "@core/interfaces/limitTypes";
 import type { PersistedRunnerState } from "@core/interfaces/runnerTypes";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const DEFAULT_STATE: PersistedRunnerState = { running: false, disabledBots: [], disabledActions: [] };
+const DEFAULT_STATE: PersistedRunnerState = { disabledBots: [], disabledActions: [] };
+
+/** A state file written before PFA-202, when one kill switch stopped every bot. */
+interface LegacyRunnerState {
+  running?: boolean;
+}
 
 /** Wires an app's runner: its actions, its persisted state, and the runner-wide caps. */
 export async function createRunner<TPersona>(
@@ -33,7 +38,13 @@ export async function createRunner<TPersona>(
       onChange: (entries) => void writeJson(uploadsFile, entries),
     }),
     secrets: await BotSecrets.load(join(config.stateDir, "bot-secrets.json")),
-    initialState: { ...DEFAULT_STATE, ...(await readJson<Partial<PersistedRunnerState>>(stateFile, {})) },
+    initialState: migrateState(await readJson<Partial<PersistedRunnerState> & LegacyRunnerState>(stateFile, {})),
     saveState: (state) => writeJson(stateFile, state),
   });
+}
+
+/** The old kill switch becomes the "Daily bots" switch: the load bots always had their own. */
+function migrateState(saved: Partial<PersistedRunnerState> & LegacyRunnerState): PersistedRunnerState {
+  const { running, ...state } = saved;
+  return { ...DEFAULT_STATE, ...state, dailyEnabled: state.dailyEnabled ?? running === true };
 }

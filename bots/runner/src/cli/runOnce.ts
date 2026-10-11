@@ -3,7 +3,7 @@ import { loadRunnerConfig } from "@core/config/runnerConfig";
 import { createRunner } from "@core/engine/bootstrap";
 
 /**
- * Dev tool: one visit of one bot, now, whatever the kill switch says — every other guard (synthetic
+ * Dev tool: one visit of one bot, now, whatever the switches say — every other guard (synthetic
  * domain, caps, upload budget, fixed receipts) still applies.
  *
  *   pnpm bot:once -- saturnus 5

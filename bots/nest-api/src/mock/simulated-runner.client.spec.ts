@@ -23,4 +23,16 @@ describe("SimulatedRunnerClient", () => {
     expect(await runner.closeAccount("ceres")).toBe(true);
     expect((await runner.bot("ceres"))?.state).toBe("blocked");
   });
+
+  it("runs each kind on its own switch, and a load bot turned off gives its place to the next", async () => {
+    const runner = new SimulatedRunnerClient({ seed: 1, populated: true });
+    expect(await runner.setDaily(false)).toBe(false);
+    expect(await runner.status()).toMatchObject({ running: true, dailyEnabled: false, liveDaily: 0 });
+    const liveLoad = (await runner.status()).liveLoad;
+    await runner.setBots({ ids: ["legionary-001"], enabled: false });
+    expect((await runner.bot("legionary-001"))?.state).toBe("paused");
+    expect((await runner.status()).liveLoad).toBe(liveLoad);
+    await runner.setLoad(false);
+    expect(await runner.status()).toMatchObject({ running: false, liveLoad: 0 });
+  });
 });

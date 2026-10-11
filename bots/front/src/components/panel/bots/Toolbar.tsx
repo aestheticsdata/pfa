@@ -32,7 +32,9 @@ const Toolbar = ({ app, data, filters }: ToolbarProps) => {
 
   const states = [
     "all",
-    ...(data.running ? [] : [BOT_VIEW_STATE.stopped]),
+    ...((data.counts.state[BOT_VIEW_STATE.stopped] ?? 0) > 0 || filters.state === BOT_VIEW_STATE.stopped
+      ? [BOT_VIEW_STATE.stopped]
+      : []),
     BOT_VIEW_STATE.running,
     BOT_VIEW_STATE.degraded,
     BOT_VIEW_STATE.paused,

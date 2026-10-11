@@ -41,7 +41,7 @@ export async function fakeRunner(options: FakeRunnerOptions = {}): Promise<Runne
     limiter: new RateLimiter(1000),
     uploads: new UploadBudget({ budgetBytes: 1024, windowMs: 1000, entries: [] }),
     secrets: await BotSecrets.load(options.secretsPath ?? "/tmp/bot-runner-test-secrets.json"),
-    initialState: options.initialState ?? { running: false, disabledBots: [], disabledActions: [] },
+    initialState: options.initialState ?? { disabledBots: [], disabledActions: [] },
     saveState: async (state) => {
       saved.push(structuredClone(state));
     },

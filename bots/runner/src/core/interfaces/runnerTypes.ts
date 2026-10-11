@@ -13,9 +13,10 @@ export interface RampSettings {
   everySec: number;
 }
 
-/** What survives a restart: the kill switch and the operator's settings. */
+/** What survives a restart: the two switches and the operator's settings. */
 export interface PersistedRunnerState {
-  running: boolean;
+  /** The "Daily bots" switch; absent = off. */
+  dailyEnabled?: boolean;
   disabledBots: string[];
   disabledActions: string[];
   /** Accounts disabled or purged from the back-office: never signed in again (nor re-created). */
@@ -58,7 +59,9 @@ export interface RampPlan {
 
 export interface RunnerStatus {
   app: string;
+  /** Either switch is on: the daily bots, the load bots, or both. */
   running: boolean;
+  dailyEnabled: boolean;
   /** Bots per state. */
   bots: Record<string, number>;
   liveDaily: number;
@@ -95,11 +98,11 @@ export interface RunnerView {
 
 /** What the ramp decides from: the load bots in ramp order, who is up, and what was asked for. */
 export interface RampInput {
-  /** Load bots that may run (not blocked), in the order the ramp brings them up. */
+  /** Load bots that may run (neither blocked nor turned off), in the order the ramp brings them up. */
   order: string[];
   spawned: ReadonlySet<string>;
   target: number;
-  /** The "Load bots" switch and the kill switch, both on. */
+  /** The "Load bots" switch. */
   enabled: boolean;
   /** The ramp's interval has elapsed: one more step may come up now. */
   stepDue: boolean;

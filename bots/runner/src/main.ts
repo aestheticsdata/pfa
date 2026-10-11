@@ -6,8 +6,8 @@ import { createRunner } from "@core/engine/bootstrap";
 import { logger } from "@core/log/logger";
 
 /**
- * The bot runner process: one app (PFA) for now. Boots with every bot stopped unless the kill
- * switch was on before the restart, and serves its control API on 127.0.0.1 only.
+ * The bot runner process: one app (PFA) for now. Boots with every bot stopped unless its switch
+ * ("Daily bots", "Load bots") was on before the restart, and serves its control API on 127.0.0.1 only.
  */
 async function main(): Promise<void> {
   const config = loadRunnerConfig(process.env);

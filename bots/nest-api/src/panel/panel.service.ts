@@ -248,8 +248,8 @@ export class PanelService {
   private async apply(app: AppEntry, action: ControlAction): Promise<unknown> {
     const { runner } = app;
     switch (action.kind) {
-      case CONTROL_ACTION.runnerSet:
-        return runner.setRunning(action.running);
+      case CONTROL_ACTION.dailySet:
+        return { enabled: await runner.setDaily(action.enabled) };
       case CONTROL_ACTION.targetSet:
         return { target: await runner.setTarget(action.target) };
       case CONTROL_ACTION.rampSet:

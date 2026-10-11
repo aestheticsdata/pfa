@@ -91,6 +91,7 @@ export function statusView(status: RunnerStatus): StatusView {
   const attempts = status.actionsPerMin + status.errorsPerMin;
   return {
     running: status.running,
+    dailyEnabled: status.dailyEnabled,
     liveDaily: status.liveDaily,
     totalDaily: status.totalDaily,
     liveLoad: status.liveLoad,

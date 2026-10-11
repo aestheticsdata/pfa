@@ -21,12 +21,12 @@ const everyLabel = (seconds: number) => (seconds >= 60 ? `${seconds / 60} min` :
  */
 const RampUp = ({ app, status }: ControlProps) => {
   const { apply } = useApply();
-  const { ramp, target, spawned, nextStepInSec, running } = status;
+  const { ramp, target, spawned, nextStepInSec, loadEnabled } = status;
   const [stepDraft, setStepDraft] = useState<string | null>(null);
   const text = OVERVIEW_TEXT.ramp;
   const behind = Math.max(0, target - spawned);
   const eta =
-    running && behind > 0 && nextStepInSec !== null
+    loadEnabled && behind > 0 && nextStepInSec !== null
       ? (Math.ceil(behind / ramp.step) - 1) * ramp.everySec + nextStepInSec
       : null;
   const save = (step: number, everySec: number) => apply(() => setRamp({ app, step, everySec }), text.applied);
@@ -41,7 +41,7 @@ const RampUp = ({ app, status }: ControlProps) => {
     <Section>
       <SectionLabel label={text.title}>
         <b className="font-mono text-note font-medium text-text">
-          {eta !== null ? text.eta(countdown(eta)) : running ? text.atTarget : "—"}
+          {eta !== null ? text.eta(countdown(eta)) : loadEnabled ? text.atTarget : "—"}
         </b>
       </SectionLabel>
       <div className="grid grid-cols-2 gap-2.5">
@@ -81,7 +81,7 @@ const RampUp = ({ app, status }: ControlProps) => {
         />
       </div>
       <p className="m-0 mt-2 font-mono text-xs text-dim">
-        {running && behind > 0
+        {loadEnabled && behind > 0
           ? `${text.progress(spawned, target, Math.min(ramp.step, behind))}${nextStepInSec !== null ? ` in ${nextStepInSec}s` : ""}`
           : text.done(Math.min(spawned, target), target)}
       </p>
