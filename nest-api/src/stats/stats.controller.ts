@@ -1,5 +1,7 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { StatsService } from "@stats/stats.service";
+import { CategoryStatsService } from "@stats/services/category-stats.service";
+import { SpendingsStatsService } from "@stats/services/spendings-stats.service";
+import { YearlyStatsService } from "@stats/services/yearly-stats.service";
 import { WeeklyStatsQueryDto } from "@stats/dto/weekly-stats-query.dto";
 import { MonthlyStatsQueryDto } from "@stats/dto/monthly-stats-query.dto";
 import { StatisticsQueryDto } from "@stats/dto/statistics-query.dto";
@@ -18,29 +20,29 @@ import { GetUserId } from "@spendings/decorators/get-user.decorator";
 @Controller("weeklystats")
 @UseGuards(SessionAuthGuard)
 export class WeeklyStatsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
 
   @Get()
   async getWeeklyStats(@Query() query: WeeklyStatsQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getWeeklyStats(query.start, userID);
+    return this.spendingsStatsService.getWeeklyStats(query.start, userID);
   }
 }
 
 @Controller("monthlystats")
 @UseGuards(SessionAuthGuard)
 export class MonthlyStatsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
 
   @Get()
   async getMonthlyStats(@Query() query: MonthlyStatsQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getMonthlyStats(query.from, userID);
+    return this.spendingsStatsService.getMonthlyStats(query.from, userID);
   }
 }
 
 @Controller("statistics")
 @UseGuards(SessionAuthGuard)
 export class StatisticsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
 
   @Get()
   async getStatistics(@Query() query: StatisticsQueryDto, @GetUserId() userID: string) {
@@ -52,105 +54,105 @@ export class StatisticsController {
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-    return this.statsService.getStatistics(categoryIDs, years, userID);
+    return this.yearlyStatsService.getStatistics(categoryIDs, years, userID);
   }
 }
 
 @Controller("regular-monthly-average")
 @UseGuards(SessionAuthGuard)
 export class RegularMonthlyAverageController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly categoryStatsService: CategoryStatsService) {}
 
   @Get()
   async getRegularMonthlyAverage(@Query() query: RegularMonthlyAverageQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getRegularMonthlyAverage(query.year, userID);
+    return this.categoryStatsService.getRegularMonthlyAverage(query.year, userID);
   }
 }
 
 @Controller("category-stats")
 @UseGuards(SessionAuthGuard)
 export class CategoryStatsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly categoryStatsService: CategoryStatsService) {}
 
   @Get()
   async getCategoryStats(@Query() query: CategoryStatsQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getCategoryStats(userID, query.from, query.to);
+    return this.categoryStatsService.getCategoryStats(userID, query.from, query.to);
   }
 }
 
 @Controller("category-trends")
 @UseGuards(SessionAuthGuard)
 export class CategoryTrendsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
 
   @Get()
   async getCategoryTrends(@Query() query: CategoryTrendsQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getCategoryTrends(userID, query.from, query.to, query.prevFrom, query.prevTo);
+    return this.spendingsStatsService.getCategoryTrends(userID, query);
   }
 }
 
 @Controller("busiest-week")
 @UseGuards(SessionAuthGuard)
 export class BusiestWeekController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
 
   @Get()
   async getBusiestWeek(@Query() query: BusiestWeekQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getBusiestWeek(query.start, userID);
+    return this.spendingsStatsService.getBusiestWeek(query.start, userID);
   }
 }
 
 @Controller("spending-pace")
 @UseGuards(SessionAuthGuard)
 export class SpendingPaceController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
 
   @Get()
   async getSpendingPace(@Query() query: SpendingPaceQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getSpendingPace(query.start, userID);
+    return this.spendingsStatsService.getSpendingPace(query.start, userID);
   }
 }
 
 @Controller("daily-stats")
 @UseGuards(SessionAuthGuard)
 export class DailyStatsController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
 
   @Get()
   async getDailyStats(@Query() query: DailyStatsQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getDailyStats(query.year, userID);
+    return this.yearlyStatsService.getDailyStats(query.year, userID);
   }
 }
 
 @Controller("biggest-regular-expense")
 @UseGuards(SessionAuthGuard)
 export class BiggestRegularExpenseController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
 
   @Get()
   async getBiggestRegularExpense(@Query() query: BiggestRegularExpenseQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getBiggestRegularExpense(query.year, userID);
+    return this.yearlyStatsService.getBiggestRegularExpense(query.year, userID);
   }
 }
 
 @Controller("weekday-categories")
 @UseGuards(SessionAuthGuard)
 export class WeekdayCategoriesController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
 
   @Get()
   async getWeekdayCategories(@Query() query: WeekdayCategoriesQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getWeekdayCategories(query.year, userID);
+    return this.yearlyStatsService.getWeekdayCategories(query.year, userID);
   }
 }
 
 @Controller("search-timeline")
 @UseGuards(SessionAuthGuard)
 export class SearchTimelineController {
-  constructor(private readonly statsService: StatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
 
   @Get()
   async getSearchTimeline(@Query() query: SearchTimelineQueryDto, @GetUserId() userID: string) {
-    return this.statsService.getSearchTimeline(query.q, query.from, query.to, query.bucket, userID);
+    return this.yearlyStatsService.getSearchTimeline(query, userID);
   }
 }

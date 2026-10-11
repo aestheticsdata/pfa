@@ -101,7 +101,8 @@
       "^@infrastructure/(.*)$": "<rootDir>/infrastructure/$1",
       "^@redis/redis\\.(.*)$": "<rootDir>/redis/redis.$1",
       "^@users/(.*)$": "<rootDir>/users/$1",
-      "^@spendings/(.*)$": "<rootDir>/spendings/$1"
+      "^@spendings/(.*)$": "<rootDir>/spendings/$1",
+      "^@stats/(.*)$": "<rootDir>/stats/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
