@@ -14,6 +14,8 @@
 # next.js
 /.next/
 /out/
+# Written and kept current by `next dev` (docs pointer for the installed version)
+/AGENTS.md
 
 # production
 /build

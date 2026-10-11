@@ -47,6 +47,11 @@ const contentSecurityPolicy = Object.entries(cspDirectives)
 const nextConfig = {
   reactStrictMode: false,
   reactCompiler: true,
+  experimental: {
+    // Rust port of the React Compiler, dev only (PFA-158): faster `next dev`, but still
+    // experimental in 16.4, so production builds keep the Babel plugin.
+    turbopackRustReactCompiler: isDev,
+  },
   trailingSlash: true,
   typescript: {
     // !! WARN !!
