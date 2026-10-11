@@ -146,6 +146,11 @@ const spendings = {
     addReceipt: "Ajouter un reçu",
   },
   receiptLines: {
+    store: "Magasin",
+    storePlaceholder: "Choisir ou saisir un magasin",
+    storeSearch: "Rechercher un magasin…",
+    storeEmpty: "Aucun magasin",
+    storeClear: "Sans magasin",
     reviewTitle: "Lignes du ticket",
     detailTitle: "Détail du ticket",
     reading: "Lecture du ticket…",

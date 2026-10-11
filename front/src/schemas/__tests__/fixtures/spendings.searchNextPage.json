@@ -14,7 +14,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000075",
@@ -30,7 +31,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000076",
@@ -46,7 +48,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000077",
@@ -62,7 +65,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000078",
@@ -78,7 +82,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000079",
@@ -94,7 +99,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000080",
@@ -110,7 +116,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000081",
@@ -126,7 +133,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000082",
@@ -142,7 +150,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000083",
@@ -158,7 +167,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000084",
@@ -174,7 +184,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000085",
@@ -190,7 +201,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000086",
@@ -206,7 +218,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000087",
@@ -222,7 +235,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000088",
@@ -238,7 +252,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000089",
@@ -254,7 +269,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000090",
@@ -270,7 +286,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000091",
@@ -286,7 +303,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000092",
@@ -302,7 +320,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000093",
@@ -318,7 +337,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000094",
@@ -334,7 +354,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000095",
@@ -350,7 +371,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000096",
@@ -366,7 +388,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000097",
@@ -382,7 +405,8 @@
       "detail": null,
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     },
     {
       "ID": "00000000-0000-4000-8000-000000000098",
@@ -398,7 +422,8 @@
       "detail": null,
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "lineCount": 0
+      "lineCount": 0,
+      "storeName": null
     }
   ],
   "nextCursor": "00000000-0000-4000-8000-000000000099"

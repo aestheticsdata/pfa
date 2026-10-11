@@ -9,12 +9,20 @@ import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 import { ReceiptLinesController } from "@spendings/receipt-lines/receipt-lines.controller";
 import { ReceiptLinesService } from "@spendings/receipt-lines/receipt-lines.service";
 import { ReceiptOcrService } from "@spendings/receipt-lines/receipt-ocr.service";
+import { StoresController } from "@spendings/stores/stores.controller";
+import { StoresService } from "@spendings/stores/stores.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { MonitoringModule } from "@monitoring/monitoring.module";
 
 @Module({
   imports: [MonitoringModule],
-  controllers: [SpendingsController, SpendingGroupsController, SpendingReceiptsController, ReceiptLinesController],
+  controllers: [
+    SpendingsController,
+    SpendingGroupsController,
+    SpendingReceiptsController,
+    ReceiptLinesController,
+    StoresController,
+  ],
   providers: [
     SpendingsService,
     SpendingGroupsService,
@@ -22,6 +30,7 @@ import { MonitoringModule } from "@monitoring/monitoring.module";
     ReceiptFilesService,
     ReceiptLinesService,
     ReceiptOcrService,
+    StoresService,
     SessionAuthGuard,
   ],
 })

@@ -148,6 +148,11 @@ const spendings: typeof frSpendings = {
     addReceipt: "Add a receipt",
   },
   receiptLines: {
+    store: "Store",
+    storePlaceholder: "Pick or type a store",
+    storeSearch: "Search a store…",
+    storeEmpty: "No store",
+    storeClear: "No store",
     reviewTitle: "Receipt lines",
     detailTitle: "Receipt detail",
     reading: "Reading the receipt…",

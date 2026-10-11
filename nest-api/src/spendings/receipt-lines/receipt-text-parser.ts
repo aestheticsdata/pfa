@@ -35,10 +35,28 @@ const LETTERS = /\p{L}/gu;
 const MIN_LABEL_LETTERS = 2;
 const MAX_AMOUNT = 9999.99;
 
+// Header lines that are not the store's name (PFA-218): address, postcode,
+// contact, dates and numbers, the person on duty, a greeting.
+const NOT_A_STORE_NAME = [
+  /\b(RUE|AVENUE|AV|BD|BOULEVARD|PLACE|CHEMIN|ALLEE|QUAI|ROUTE|IMPASSE|COURS|CEDEX|BP)\b/,
+  /\b\d{5}\b/,
+  /HTTP|WWW|\.(FR|COM|NET)\b|@/,
+  /\d{2}[/.-]\d{2}/,
+  /^(MR|MME|MLLE|M\.)\s/,
+  /^(BIENVENUE|WELCOME|BONJOUR)\b/,
+  /\b(SIRET|SIREN|NAF|RCS|APE|FAX|DUPLICATA|VENTE|FACTURE)\b/,
+];
+// A name is mostly letters, with a word of three letters at least.
+const MIN_STORE_LETTERS = 4;
+const MIN_STORE_LETTER_SHARE = 0.6;
+const STORE_WORD = /\p{L}{3,}/u;
+
 interface ParseState {
   lines: ReceiptLine[];
   /** A label read on its own line, waiting for the detail line that prices it. */
   pendingLabel: string | null;
+  /** The store's name, read on the first header line that can be one. */
+  store: string | null;
 }
 
 /** Upper-cased, accents stripped, spaces collapsed: what the keyword tests read. */
@@ -66,10 +84,35 @@ function cleanLabel(raw: string): string | null {
   return (label.match(LETTERS)?.length ?? 0) >= MIN_LABEL_LETTERS ? label : null;
 }
 
+/**
+ * The store's name if this header line can be one, else null. Text after a
+ * bar is another slip run into the line and is left out.
+ */
+export function storeNameCandidate(raw: string): string | null {
+  const name = raw
+    .split("|")[0]
+    .replace(/^[^\p{L}\d]+|[^\p{L}\d]+$/gu, "")
+    .replaceAll(/\s+/g, " ")
+    .slice(0, FIELD_LIMITS.storeName)
+    .trim();
+  const normalized = normalize(name);
+  if (NOISE.test(normalized) || NOT_A_STORE_NAME.some((pattern) => pattern.test(normalized))) return null;
+  const letters = name.match(LETTERS)?.length ?? 0;
+  const visible = name.replaceAll(/\s/g, "").length;
+  if (letters < MIN_STORE_LETTERS || letters / visible < MIN_STORE_LETTER_SHARE || !STORE_WORD.test(name)) {
+    return null;
+  }
+  return name;
+}
+
 function readLine(state: ParseState, raw: string): void {
   const line = raw.trim();
   if (!line) return;
   const price = readPrice(line);
+  // The name heads the receipt: only looked for before the first item.
+  if (state.store === null && state.lines.length === 0 && !price) {
+    state.store = storeNameCandidate(line);
+  }
 
   if (DETAIL_LINE.test(line)) {
     if (price && state.pendingLabel) {
@@ -94,25 +137,31 @@ function readLine(state: ParseState, raw: string): void {
 }
 
 export function parseReceiptText(text: string): ReceiptProposal {
-  const state: ParseState = { lines: [], pendingLabel: null };
+  const state: ParseState = { lines: [], pendingLabel: null, store: null };
 
   for (const raw of text.split(/\r?\n/)) {
     const normalized = normalize(raw);
     if (TOTAL_LINE.test(normalized) && !PARTIAL_TOTAL.test(normalized)) {
-      return { lines: state.lines, total: readPrice(raw.trim())?.amount ?? null };
+      return { lines: state.lines, total: readPrice(raw.trim())?.amount ?? null, store: state.store };
     }
     readLine(state, raw);
   }
 
-  return { lines: state.lines, total: null };
+  return { lines: state.lines, total: null, store: state.store };
 }
 
-/** Several slips read apart: the items of each, the first total found. */
+/**
+ * Several slips read apart: the items of each, the first total found, and the
+ * store of the first slip that is a receipt — one with items or a total. A
+ * card slip has neither, and names the store only in passing (PFA-218).
+ */
 export function parseReceiptPages(pages: string[]): ReceiptProposal {
   const proposals = pages.map(parseReceiptText);
+  const receipts = proposals.filter((proposal) => proposal.lines.length > 0 || proposal.total !== null);
   return {
     lines: proposals.flatMap((proposal) => proposal.lines),
     total: proposals.find((proposal) => proposal.total !== null)?.total ?? null,
+    store: receipts.find((proposal) => proposal.store !== null)?.store ?? null,
   };
 }
 
@@ -138,5 +187,5 @@ export function pickProposal(proposals: ReceiptProposal[]): ReceiptProposal {
     const diff = sa.findIndex((value, i) => value !== sb[i]);
     return diff >= 0 && sa[diff] > sb[diff] ? a : b;
   };
-  return proposals.reduce((best, proposal) => better(proposal, best), { lines: [], total: null });
+  return proposals.reduce((best, proposal) => better(proposal, best), { lines: [], total: null, store: null });
 }
