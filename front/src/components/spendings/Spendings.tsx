@@ -2,6 +2,7 @@
 
 import useSyncWeekFromUrl from "@components/datePickerWrapper/helpers/useSyncWeekFromUrl";
 import useGlobalStore from "@components/shared/globalStore";
+import ReceiptLinesHost from "@components/spendings/receiptLines/ReceiptLinesHost";
 import SpendingsPageStoreProvider from "@components/spendings/stores/SpendingsPageStoreProvider";
 import SpendingView from "@components/spendings/view/SpendingView";
 import { DATE_QUERY_PARAM, getTodayIsoDate, parseAsSpendingsDate } from "@helpers/dateRoute";
@@ -37,6 +38,7 @@ export default function Spendings() {
   return (
     <SpendingsPageStoreProvider>
       <SpendingView />
+      <ReceiptLinesHost />
     </SpendingsPageStoreProvider>
   );
 }

@@ -192,13 +192,16 @@ export class SpendingsService {
       include: {
         category: true,
         group: { select: { label: true } },
+        _count: { select: { receiptLines: true } },
       },
     });
 
-    return results.map(({ category, group, ...spending }) => ({
+    return results.map(({ category, group, _count, ...spending }) => ({
       ...spending,
       // The front folds rows sharing a groupID into one collapsible row (PFA-189).
       groupLabel: group?.label ?? null,
+      // Rows with their receipt read into lines get a mark and open the detail (PFA-214).
+      lineCount: _count.receiptLines,
       category: category && (category.userID === userID || category.userID === null) ? category.name : null,
       categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
     }));
@@ -245,7 +248,7 @@ export class SpendingsService {
     const rows = await this.prisma.spendings.findMany({
       where,
       orderBy: [{ date: "desc" }, { ID: "desc" }],
-      include: { category: true },
+      include: { category: true, _count: { select: { receiptLines: true } } },
       take: SEARCH_PAGE_SIZE + 1,
       ...(cursor ? { cursor: { ID: cursor }, skip: 1 } : {}),
     });
@@ -253,8 +256,9 @@ export class SpendingsService {
     const hasMore = rows.length > SEARCH_PAGE_SIZE;
     const pageRows = hasMore ? rows.slice(0, SEARCH_PAGE_SIZE) : rows;
 
-    const items = pageRows.map(({ category, ...spending }) => ({
+    const items = pageRows.map(({ category, _count, ...spending }) => ({
       ...spending,
+      lineCount: _count.receiptLines,
       category: category && (category.userID === userID || category.userID === null) ? category.name : null,
       categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
     }));

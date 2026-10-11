@@ -50,28 +50,43 @@ model Recurrings {
 }
 
 model Spendings {
-  ID          String          @id @db.Char(36)
-  userID      String          @db.Char(36)
-  date        DateTime        @db.Date
-  itemType    String          @db.VarChar(11)
-  label       String          @db.VarChar(100)
-  amount      Decimal         @db.Decimal(6, 2)
-  categoryID  String?         @db.Char(36)
-  currency    String?         @db.VarChar(3)
-  invoicefile String?         @db.VarChar(255)
+  ID           String          @id @db.Char(36)
+  userID       String          @db.Char(36)
+  date         DateTime        @db.Date
+  itemType     String          @db.VarChar(11)
+  label        String          @db.VarChar(100)
+  amount       Decimal         @db.Decimal(6, 2)
+  categoryID   String?         @db.Char(36)
+  currency     String?         @db.VarChar(3)
+  invoicefile  String?         @db.VarChar(255)
   // A line of a group (one receipt, several categories — PFA-189). `label`
   // stays the composed "<group> — <detail>" so every reader of the table
   // (stats, search, export, suggestions) keeps working unchanged.
-  groupID     String?         @db.Char(36)
-  detail      String?         @db.VarChar(100)
-  category    Categories?     @relation(fields: [categoryID], references: [ID])
-  group       SpendingGroups? @relation(fields: [groupID], references: [ID], onDelete: Cascade)
+  groupID      String?         @db.Char(36)
+  detail       String?         @db.VarChar(100)
+  category     Categories?     @relation(fields: [categoryID], references: [ID])
+  group        SpendingGroups? @relation(fields: [groupID], references: [ID], onDelete: Cascade)
+  // The receipt's line items, read by OCR then checked by the user (PFA-214).
+  receiptLines ReceiptLines[]
 
   // MySQL auto-creates this index with the FK constraint; declaring it (same
   // name) keeps `migrate diff` clean instead of reporting it as drift forever.
   @@index([categoryID], map: "Spendings_categoryID_fkey")
   @@index([groupID], map: "Spendings_groupID_fkey")
   @@index([userID, date])
+}
+
+// One line of a spending's receipt (PFA-214): proposed by the local OCR,
+// corrected and accepted by the user. Gone with its spending.
+model ReceiptLines {
+  ID         String    @id @db.Char(36)
+  spendingID String    @db.Char(36)
+  position   Int
+  label      String    @db.VarChar(100)
+  amount     Decimal   @db.Decimal(6, 2)
+  spending   Spendings @relation(fields: [spendingID], references: [ID], onDelete: Cascade)
+
+  @@index([spendingID])
 }
 
 // Several spendings bought on one receipt (PFA-189). The receipt itself is the

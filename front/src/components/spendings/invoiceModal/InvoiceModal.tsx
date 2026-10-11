@@ -5,11 +5,13 @@ import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors
 import Spinner from "@components/common/Spinner";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import { Dropzone } from "@components/shared/Dropzone";
+import { RECEIPT_LINES_MODE } from "@components/spendings/config/constants";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
 import {
   buildInvoiceUploadFormData,
   buildSharedReceiptFormData,
 } from "@components/spendings/services/invoiceUploadFormData";
+import useReceiptLinesStore from "@components/spendings/stores/receiptLinesStore";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
 import useRequestHelper from "@helpers/useRequestHelper";
@@ -17,8 +19,9 @@ import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { cn } from "@lib/utils";
+import { itemTypeSchema } from "@src/schemas/primitives";
 import { useQueryClient } from "@tanstack/react-query";
-import { Trash2, Upload } from "lucide-react";
+import { ScanText, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -77,6 +80,20 @@ const InvoiceModal = ({
   const [showConfirmDeleteImage, setShowConfirmDeleteImage] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [pendingPreview, setPendingPreview] = useState<string | null>(null);
+  const openReceiptLines = useReceiptLinesStore((state) => state.open);
+  // A spending's own receipt can be read into lines (PFA-214); a shared one,
+  // a group's or an exceptional's cannot.
+  const canReadLines = spending.itemType === itemTypeSchema.enum.spending && !isSharedUpload;
+
+  const readLines = () => {
+    openReceiptLines({
+      spendingID: spending.ID,
+      label: spending.label,
+      amount: spending.amount,
+      mode: RECEIPT_LINES_MODE.review,
+    });
+    handleClickOutside();
+  };
 
   const clearPending = () => {
     setPendingFile(null);
@@ -130,6 +147,8 @@ const InvoiceModal = ({
         queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
       });
       setIsLoading(false);
+      // A fresh receipt goes straight to the OCR review (PFA-214).
+      if (canReadLines) readLines();
     } catch (e) {
       const message = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
       if (message === "INVALID_IMAGE_FILE") {
@@ -307,14 +326,29 @@ const InvoiceModal = ({
                 </div>
               </div>
             ) : invoiceImage && !isLoading ? (
-              <button
-                type="button"
-                onClick={() => setShowConfirmDeleteImage(true)}
-                className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-danger-solid px-4.5 py-3.5 text-base font-semibold text-on-danger transition-[filter] hover:brightness-110"
-              >
-                <Trash2 className="size-4" />
-                {deleteLabel ?? invoiceModalTexts.delete}
-              </button>
+              <>
+                {canReadLines && (
+                  <Button
+                    type="button"
+                    data-testid="receipt-read-lines"
+                    variant="muted"
+                    size="lg"
+                    onClick={readLines}
+                    className="text-base"
+                  >
+                    <ScanText />
+                    {texts.receiptLines.readReceipt}
+                  </Button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmDeleteImage(true)}
+                  className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-danger-solid px-4.5 py-3.5 text-base font-semibold text-on-danger transition-[filter] hover:brightness-110"
+                >
+                  <Trash2 className="size-4" />
+                  {deleteLabel ?? invoiceModalTexts.delete}
+                </button>
+              </>
             ) : pendingPreview && !isLoading ? (
               <div className="flex gap-2.5">
                 <Button

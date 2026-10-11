@@ -44,6 +44,7 @@ describe("FIELD_LIMITS", () => {
   it.each([
     ["label", "Spendings", "label"],
     ["label", "Recurrings", "label"],
+    ["receiptLineLabel", "ReceiptLines", "label"],
     ["description", "Exceptionals", "description"],
     ["categoryName", "Categories", "name"],
     ["exceptionalCategoryName", "Exceptionals", "categoryName"],

@@ -5,6 +5,7 @@ allowBuilds:
   prisma: true
   sharp: true
   ssh2: true
+  tesseract.js: false
   unrs-resolver: true
 onlyBuiltDependencies:
   - '@nestjs/core'

@@ -49,3 +49,11 @@ export const BATCH_MODAL = {
   merge: "merge",
   share: "share",
 } as const;
+
+// The receipt-lines modal (PFA-214): checking what the OCR just read, reading
+// the saved lines, or editing them.
+export const RECEIPT_LINES_MODE = {
+  review: "review",
+  detail: "detail",
+  edit: "edit",
+} as const;
