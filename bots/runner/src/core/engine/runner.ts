@@ -72,6 +72,8 @@ const DEFAULT_RAMP: RampSettings = { step: 10, everySec: 30 };
  * — the generator must not fall over before the server it is testing.
  */
 const MAX_ACTIVE_VISITS = 50;
+/** Signs in again this long before the app would drop an idle session, not on the edge of it. */
+const SESSION_IDLE_MARGIN_MS = MINUTE_MS;
 
 interface BotRuntime<TPersona> {
   profile: BotProfile<TPersona>;
@@ -87,6 +89,8 @@ interface BotRuntime<TPersona> {
   lastSeenAt: Date | null;
   nextWakeAt: Date | null;
   sessionStartedAt: Date | null;
+  /** The bot's last action, signed in: the app's idle timer runs from there. */
+  sessionActiveAt: Date | null;
   activity: TimeBuckets<BotActivityBucket>;
   day: TimeBuckets<BotActivityBucket>;
   byAction: Map<string, number>;
@@ -568,6 +572,7 @@ export class Runner<TPersona = unknown> {
       lastSeenAt: null,
       nextWakeAt: null,
       sessionStartedAt: null,
+      sessionActiveAt: null,
       activity: new TimeBuckets<BotActivityBucket>({
         bucketMs: BOT_SLICE_MS,
         size: BOT_SLICES,
@@ -775,7 +780,7 @@ export class Runner<TPersona = unknown> {
   }
 
   private async ensureSignedIn(bot: BotRuntime<TPersona>): Promise<void> {
-    if (bot.signedIn) {
+    if (bot.signedIn && !this.sessionIdledOut(bot)) {
       return;
     }
     // Checked again here, right before the password leaves the runner.
@@ -785,6 +790,33 @@ export class Runner<TPersona = unknown> {
     await this.deps.app.authenticate({ bot: bot.profile, client: bot.client, password });
     bot.signedIn = true;
     bot.sessionStartedAt = new Date();
+    bot.sessionActiveAt = bot.sessionStartedAt;
+  }
+
+  /** The app has dropped the session by now: the bot slept past its idle lifetime. */
+  private sessionIdledOut(bot: BotRuntime<TPersona>): boolean {
+    const idleMs = Date.now() - (bot.sessionActiveAt?.getTime() ?? 0);
+    return idleMs > this.deps.app.sessionIdleMs - SESSION_IDLE_MARGIN_MS;
+  }
+
+  /**
+   * Runs the action, and once more after signing in again if the session turns out to be gone —
+   * dropped by the app sooner than its idle lifetime says (a restart, a sign-out elsewhere). Only a
+   * second failure is the action's.
+   */
+  private async runSignedIn(bot: BotRuntime<TPersona>, action: BotAction<TPersona>, ctx: ActionContext<TPersona>) {
+    try {
+      await action.run(ctx);
+    } catch (error) {
+      if (!(error instanceof SessionExpiredError)) {
+        throw error;
+      }
+      logger.info("session expired, signing in again", { bot: bot.profile.id, action: action.name });
+      bot.signedIn = false;
+      await this.ensureSignedIn(bot);
+      await action.run(ctx);
+    }
+    bot.sessionActiveAt = new Date();
   }
 
   /** Writes the last 24 h to disk when something changed, at most once a minute. */
@@ -842,7 +874,7 @@ export class Runner<TPersona = unknown> {
     bot.byAction.set(action.name, (bot.byAction.get(action.name) ?? 0) + 1);
     const started = Date.now();
     try {
-      await action.run(ctx);
+      await this.runSignedIn(bot, action, ctx);
       bot.totalActions += 1;
       bot.activity.current().actions += 1;
       bot.day.current().actions += 1;

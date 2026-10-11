@@ -11,6 +11,8 @@ export interface FakeRunnerOptions {
   maxBots?: number;
   actions?: BotAction<unknown>[];
   authenticate?: (session: AuthSession<unknown>) => Promise<void>;
+  /** Default 10 min, PFA's. */
+  sessionIdleMs?: number;
   initialState?: PersistedRunnerState;
   saved?: PersistedRunnerState[];
   secretsPath?: string;

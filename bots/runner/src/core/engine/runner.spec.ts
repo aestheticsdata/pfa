@@ -2,7 +2,7 @@ import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { BOT_STATE } from "@core/constants/bot";
-import { BotBlockedError } from "@core/engine/errors";
+import { BotBlockedError, SessionExpiredError } from "@core/engine/errors";
 import { fakeRunner } from "@core/testing/fakeRunner";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -132,6 +132,68 @@ describe("Runner guards", () => {
     await runner.runWake("bot-0", { actions: 2, thinkTimeMs: 0, force: true });
     expect(attempts).toBe(1);
     expect(runner.snapshotBots()[0]?.state).toBe(BOT_STATE.blocked);
+  });
+
+  it("signs in again after sleeping past the app's session lifetime, without an error", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    let signIns = 0;
+    const runner = await fakeRunner({
+      actions: [tracked("a", [])],
+      authenticate: async () => {
+        signIns += 1;
+      },
+      sessionIdleMs: 10 * 60_000,
+      secretsPath: await secretsPath(),
+    });
+    await runner.runWake("bot-0", { actions: 1, thinkTimeMs: 0, force: true });
+    vi.advanceTimersByTime(5 * 60_000);
+    await runner.runWake("bot-0", { actions: 1, thinkTimeMs: 0, force: true });
+    expect(signIns).toBe(1);
+    vi.advanceTimersByTime(30 * 60_000);
+    await runner.runWake("bot-0", { actions: 1, thinkTimeMs: 0, force: true });
+    expect(signIns).toBe(2);
+    expect(runner.snapshotBots()[0]?.errors).toBe(0);
+    vi.useRealTimers();
+  });
+
+  it("retries an action once after signing in again when the session is gone", async () => {
+    let signIns = 0;
+    let calls = 0;
+    const runner = await fakeRunner({
+      actions: [
+        {
+          ...tracked("a", []),
+          run: async () => {
+            calls += 1;
+            if (calls === 2) throw new SessionExpiredError("a: session expired");
+          },
+        },
+      ],
+      authenticate: async () => {
+        signIns += 1;
+      },
+      secretsPath: await secretsPath(),
+    });
+    await runner.runWake("bot-0", { actions: 2, thinkTimeMs: 0, force: true });
+    expect(calls).toBe(3);
+    expect(signIns).toBe(2);
+    expect(runner.snapshotBots()[0]?.errors).toBe(0);
+  });
+
+  it("counts an error when the session is refused again right after signing in", async () => {
+    const runner = await fakeRunner({
+      actions: [
+        {
+          ...tracked("a", []),
+          run: async () => {
+            throw new SessionExpiredError("a: session expired");
+          },
+        },
+      ],
+      secretsPath: await secretsPath(),
+    });
+    await runner.runWake("bot-0", { actions: 1, thinkTimeMs: 0, force: true });
+    expect(runner.snapshotBots()[0]?.errors).toBe(1);
   });
 });
 

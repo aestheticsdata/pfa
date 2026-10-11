@@ -17,6 +17,7 @@ export async function fakeRunner(options: FakeRunnerOptions = {}): Promise<Runne
     timeZone: "Europe/Paris",
     defaultQuietHours: options.quietHours ?? { from: "22:00", to: "10:00" },
     syntheticDomain: "synthetic.test",
+    sessionIdleMs: options.sessionIdleMs ?? 10 * 60 * 1000,
     bots: (options.emails ?? ["bot@synthetic.test"]).map((email, i) => ({
       id: `bot-${i}`,
       email,
