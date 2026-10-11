@@ -63,7 +63,7 @@ const Figure = ({ children }: { children: ReactNode }) => <span className="font-
  */
 const StatisticsSearchTimeline = () => {
   const statistics = useTranslations("statistics");
-  const { euro0 } = useFormat();
+  const { euro, euro0 } = useFormat();
   const dateLocale = useDateLocale();
   const router = useRouter();
   const { setScrollToDayIso } = useDatePickerWrapperStore();
@@ -115,7 +115,7 @@ const StatisticsSearchTimeline = () => {
   const peakLabel =
     hasMatches && peak.total > 0
       ? (bucket === "day" ? t.peakDay : t.peakWeek)(
-          euro0(peak.total),
+          euro(peak.total),
           format(parseISO(peak.date), "d MMM yy", { locale: dateLocale }),
         )
       : null;
@@ -139,7 +139,7 @@ const StatisticsSearchTimeline = () => {
         },
         {
           id: "basket",
-          node: interpolate(t.averageBasket, { amount: <Figure>{euro0(summary.total / summary.count)} €</Figure> }),
+          node: interpolate(t.averageBasket, { amount: <Figure>{euro(summary.total / summary.count)} €</Figure> }),
         },
         ...(summary.lastDate
           ? [
@@ -452,7 +452,7 @@ const StatisticsSearchTimeline = () => {
             </div>
             <div className="mt-0.5">
               {hoveredPoint.count > 0
-                ? `${euro0(hoveredPoint.total)} € · ${t.tooltip.spendings(hoveredPoint.count)}`
+                ? `${euro(hoveredPoint.total)} € · ${t.tooltip.spendings(hoveredPoint.count)}`
                 : t.tooltip.noSpend}
             </div>
             <div className="text-ink-3">{t.tooltip.rolling(hoveredRolling, windowDays)}</div>
