@@ -2,6 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { CategoryStatsResponseSchema } from "@src/schemas/categoryStats";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { useQuery } from "@tanstack/react-query";
 
 /** Inclusive calendar-date window (yyyy-MM-dd) to scope the aggregate. */
@@ -26,7 +27,7 @@ const useCategoryStats = (range?: CategoryStatsRange) => {
     try {
       const query = range ? `?from=${range.from}&to=${range.to}` : "";
       const response = await privateRequest(`/category-stats${query}`);
-      return CategoryStatsResponseSchema.parse(response.data);
+      return parseResponse(CategoryStatsResponseSchema, response.data, "/category-stats");
     } catch (e) {
       console.log("get category stats error : ", e);
       throw e; // Re-throw so React Query handles the error properly

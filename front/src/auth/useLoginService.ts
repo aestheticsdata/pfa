@@ -2,6 +2,7 @@
 
 import useRequestHelper from "@helpers/useRequestHelper";
 import { AuthResponseSchema } from "@src/schemas/auth";
+import { parseResponse } from "@src/schemas/parseResponse";
 
 import type { AuthResponse } from "@auth/interfaces/authTypes";
 
@@ -18,7 +19,7 @@ const useLoginService = () => {
         password,
       },
     });
-    return AuthResponseSchema.parse(result.data);
+    return parseResponse(AuthResponseSchema, result.data, "/users");
   };
 
   return {

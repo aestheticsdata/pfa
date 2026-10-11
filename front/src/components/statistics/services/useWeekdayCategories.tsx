@@ -1,5 +1,6 @@
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { WeekdayCategoriesResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
 
@@ -19,7 +20,7 @@ const useWeekdayCategories = ({ year }: UseWeekdayCategoriesOptions) => {
 
   const getWeekdayCategories = async (): Promise<WeekdayCategoriesResponse> => {
     const response = await privateRequest(`/weekday-categories?year=${year}`);
-    return WeekdayCategoriesResponseSchema.parse(response.data);
+    return parseResponse(WeekdayCategoriesResponseSchema, response.data, "/weekday-categories");
   };
 
   const { data, isPending } = useQuery({

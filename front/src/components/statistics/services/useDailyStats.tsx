@@ -1,5 +1,6 @@
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { DailyStatsResponseSchema } from "@src/schemas/stats";
 import { keepPreviousData as keepPreviousDataFn, useQuery } from "@tanstack/react-query";
 
@@ -24,7 +25,7 @@ const useDailyStats = ({ year, enabled = true, keepPreviousData = false }: UseDa
 
   const getDailyStats = async (): Promise<DailyStatsResponse> => {
     const response = await privateRequest(`/daily-stats?year=${year}`);
-    return DailyStatsResponseSchema.parse(response.data);
+    return parseResponse(DailyStatsResponseSchema, response.data, "/daily-stats");
   };
 
   const { data, isPending } = useQuery({

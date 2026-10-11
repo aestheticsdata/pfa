@@ -3,6 +3,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DailyProjectionSchema } from "@src/schemas/dashboard";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { useQuery } from "@tanstack/react-query";
 import { formatISO, isSameMonth, startOfMonth } from "date-fns";
 
@@ -28,7 +29,7 @@ const useDailyProjection = (): UseQueryResult<DailyProjection> => {
 
   const getDailyProjection = async () => {
     const response = await privateRequest(`/dashboard/projection?userID=${userID}&start=${start}`);
-    return DailyProjectionSchema.parse(response.data);
+    return parseResponse(DailyProjectionSchema, response.data, "/dashboard/projection");
   };
 
   return useQuery({

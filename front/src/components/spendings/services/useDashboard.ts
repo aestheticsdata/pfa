@@ -4,6 +4,7 @@ import useMonthlyStats from "@components/spendings/services/useMonthlyStats";
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DashboardResponseSchema } from "@src/schemas/dashboard";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 
@@ -41,7 +42,7 @@ const useDashboard = (month?: Date): UseDashboard => {
 
   const getDashboard = async () => {
     const response = await privateRequest(`/dashboard?userID=${userID}&start=${startOfMonth(from!)}`);
-    return DashboardResponseSchema.parse(response.data);
+    return parseResponse(DashboardResponseSchema, response.data, "/dashboard");
   };
 
   const setInitialSalary = async (amount: string) => {

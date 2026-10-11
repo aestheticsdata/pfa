@@ -5,6 +5,7 @@ import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
+import { parseResponse } from "@src/schemas/parseResponse";
 import {
   CreateSpendingResponseSchema,
   SpendingListSchema,
@@ -58,7 +59,7 @@ const useSpendings = () => {
     }
 
     const response = await privateRequest(`/spendings?userID=${userID}&from=${monthStart}&to=${monthEnd}`);
-    return SpendingListSchema.parse(response.data);
+    return parseResponse(SpendingListSchema, response.data, "/spendings");
   };
 
   const { data, isPending } = useQuery({
@@ -136,7 +137,7 @@ const useSpendings = () => {
         // mutation — the row exists, so let onSuccess refresh the list and only
         // surface a dedicated toast; the row's receipt icon is the retry path.
         try {
-          const { ID } = CreateSpendingResponseSchema.parse(response.data);
+          const { ID } = parseResponse(CreateSpendingResponseSchema, response.data, "/spendings");
           await privateRequest("/spendings/upload", {
             method: "POST",
             data: buildInvoiceUploadFormData(

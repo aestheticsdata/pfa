@@ -2,6 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import { SEARCH_MIN_LENGTH } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { SpendingSearchPageSchema } from "@src/schemas/spendings";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
@@ -25,7 +26,7 @@ const useSpendingSearch = (query: string, year: number | null) => {
     const response = await privateRequest(
       `/spendings/search?q=${encodeURIComponent(trimmed)}${yearParam}${cursorParam}`,
     );
-    return SpendingSearchPageSchema.parse(response.data);
+    return parseResponse(SpendingSearchPageSchema, response.data, "/spendings/search");
   };
 
   const { data, isPending, isFetchingNextPage, hasNextPage, fetchNextPage, error } = useInfiniteQuery({

@@ -3,6 +3,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { MonthlyStatsSchema } from "@src/schemas/dashboard";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { useQuery } from "@tanstack/react-query";
 import { startOfMonth } from "date-fns";
 
@@ -25,7 +26,7 @@ const useMonthlyStats = () => {
 
     try {
       const monthlyStats = await privateRequest(`/monthlystats?userID=${userID}&from=${startOfMonth(from)}`);
-      return MonthlyStatsSchema.parse(monthlyStats.data);
+      return parseResponse(MonthlyStatsSchema, monthlyStats.data, "/monthlystats");
     } catch (e) {
       console.log("get monthly stats error : ", e);
       throw e;

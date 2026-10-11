@@ -3,6 +3,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { CategoryTrendsResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
@@ -78,7 +79,7 @@ const useCategoryTrends = (periodType: PeriodType) => {
       prevTo: format(previous.to, DATE_FORMAT),
     });
     const response = await privateRequest(`/category-trends?${query}`);
-    const parsed = CategoryTrendsResponseSchema.parse(response.data);
+    const parsed = parseResponse(CategoryTrendsResponseSchema, response.data, "/category-trends");
     return { trends: aggregateByCategory(parsed.trends), previousTotal: parsed.previousTotal };
   };
 

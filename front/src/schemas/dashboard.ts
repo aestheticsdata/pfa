@@ -1,7 +1,8 @@
+import { apiObject } from "@src/schemas/apiObject";
 import { numberLikeSchema, numberLikeWithZeroFallbackSchema } from "@src/schemas/primitives";
 import { z } from "zod";
 
-export const DashboardSchema = z.object({
+export const DashboardSchema = apiObject({
   ID: z.string(),
   dateFrom: z.string(),
   dateTo: z.string(),
@@ -27,7 +28,7 @@ export type ProjectionSource = z.infer<typeof ProjectionSourceSchema>;
 // One category's slice of the reference month (PFA-181). The chain is resolved
 // once, globally; this only cuts its result up, so every category is projected
 // from the same month and the slices add back up to `dailyTotals`.
-export const CategoryDailyTotalsSchema = z.object({
+export const CategoryDailyTotalsSchema = apiObject({
   category: z.string().nullable(),
   categoryColor: z.string().nullable(),
   dailyTotals: z.array(numberLikeSchema),
@@ -37,7 +38,7 @@ export type CategoryDailyTotals = z.infer<typeof CategoryDailyTotalsSchema>;
 
 // Compiled (PFA-176): a month of daily totals per category is a heavy parse.
 export const DailyProjectionSchema = z.compile(
-  z.object({
+  apiObject({
     source: ProjectionSourceSchema,
     referenceMonth: z.string().nullable(),
     dailyTotals: z.array(numberLikeSchema),
@@ -53,7 +54,7 @@ export type DailyProjection = z.infer<typeof DailyProjectionSchema>;
 // Per-month income (dashboard initialAmount) for a year (COS-50) — GET
 // /dashboard/monthly-income. 12-slot Jan→Dec; null where the user has no
 // dashboard row for that month. Backs the monthly chart's stepped budget line.
-export const MonthlyIncomeResponseSchema = z.object({
+export const MonthlyIncomeResponseSchema = apiObject({
   income: z.array(z.number().finite().nullable()),
 });
 
@@ -63,7 +64,7 @@ export type MonthlyIncomeResponse = z.infer<typeof MonthlyIncomeResponseSchema>;
 // on one side, the month's fixed expenses on the other; the dashboard adds them
 // up for "spent this month" and for the remaining-budget delta. Both arrive as
 // bare numbers since COS-179 (they were `{ amount }` wrappers carrying nothing).
-export const MonthlyStatsSchema = z.object({
+export const MonthlyStatsSchema = apiObject({
   spendingsSum: numberLikeSchema,
   recurringsSum: numberLikeSchema,
 });

@@ -1,7 +1,8 @@
+import { apiObject } from "@src/schemas/apiObject";
 import { itemTypeSchema, numberLikeSchema } from "@src/schemas/primitives";
 import { z } from "zod";
 
-export const ExceptionalItemSchema = z.object({
+export const ExceptionalItemSchema = apiObject({
   ID: z.string(),
   userID: z.string(),
   date: z.string(),
@@ -33,3 +34,11 @@ export const ExceptionalMutationPayloadSchema = z.object({
 export type ExceptionalMutationPayload = z.infer<typeof ExceptionalMutationPayloadSchema>;
 
 export const ExceptionalYearsSchema = z.array(z.number().int());
+
+// Average monthly regular spending of a year — GET /regular-monthly-average.
+// Backs the Exceptionals page.
+export const RegularMonthlyAverageSchema = apiObject({
+  monthlyAverage: z.number(),
+});
+
+export type RegularMonthlyAverage = z.infer<typeof RegularMonthlyAverageSchema>;

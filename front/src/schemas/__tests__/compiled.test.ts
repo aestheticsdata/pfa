@@ -67,7 +67,6 @@ const VALID: [z.ZodType, unknown][] = [
         userID: "u1",
         groupID: null,
         detail: null,
-        extra: "stripped",
       },
     ],
   ],

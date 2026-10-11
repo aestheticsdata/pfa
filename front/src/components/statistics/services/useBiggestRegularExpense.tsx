@@ -1,5 +1,6 @@
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { BiggestRegularExpenseResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
 
@@ -19,7 +20,7 @@ const useBiggestRegularExpense = ({ year }: UseBiggestRegularExpenseOptions) => 
 
   const getBiggestRegularExpense = async (): Promise<BiggestRegularExpenseResponse> => {
     const response = await privateRequest(`/biggest-regular-expense?year=${year}`);
-    return BiggestRegularExpenseResponseSchema.parse(response.data);
+    return parseResponse(BiggestRegularExpenseResponseSchema, response.data, "/biggest-regular-expense");
   };
 
   const { data, isPending } = useQuery({
