@@ -28,8 +28,9 @@ const OverviewView = ({ app, appName, configured, view }: OverviewProps) => {
         <div className="flex min-w-0 flex-col gap-3.5">
           <StatusCard
             status={view.status}
-            actions={(daily ? view.dayHistory : view.history).map((point) => point.actions)}
+            history={daily ? view.dayHistory : view.history}
             day={daily}
+            actionNames={view.actionNames}
           />
           <div className="grid grid-cols-1 items-start gap-3.5 tablet:grid-cols-2 roomy:grid-cols-3">
             <DailyBotsCard

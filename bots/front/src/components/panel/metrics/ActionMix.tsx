@@ -1,17 +1,17 @@
 import ChartCard from "@components/panel/metrics/ChartCard";
 import StackedBar from "@lib/dataviz/StackedBar";
 import { count } from "@lib/format/format";
+import { actionColor } from "@lib/panel/actionColors";
 import { METRICS_TEXT } from "@text/metrics";
 
 import type { ActionMixProps } from "@components/panel/metrics/interfaces/metricsTypes";
 
-const SERIES = ["--series-1", "--series-2", "--series-3", "--series-4", "--series-5", "--series-6"];
-
 /** What the bots did, by action, since the runner started: one stacked bar and its legend. */
 const ActionMix = ({ view }: ActionMixProps) => {
   const enabled = new Map(view.actionMix.map((action) => [action.name, action.enabled]));
+  const names = view.mixRuns.map((entry) => entry.name);
   const mix = view.mixRuns
-    .map((entry, index) => ({ ...entry, color: `var(${SERIES[index % SERIES.length]})` }))
+    .map((entry) => ({ ...entry, color: actionColor(names, entry.name) }))
     .filter((entry) => entry.count > 0)
     .sort((a, b) => b.count - a.count);
   const total = mix.reduce((sum, entry) => sum + entry.count, 0) || 1;

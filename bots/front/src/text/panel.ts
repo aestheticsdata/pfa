@@ -6,6 +6,7 @@ export const PANEL_TEXT = {
   account: "Account",
   menu: "Menu",
   closeMenu: "Close menu",
+  close: "Close",
   runnerLive: "runner live",
   runnerStopped: "runner stopped",
   refreshed: "refreshed",

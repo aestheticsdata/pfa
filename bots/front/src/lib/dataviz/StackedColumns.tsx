@@ -11,6 +11,8 @@ interface StackedColumnsProps {
   ariaLabel?: string;
   /** A column's lowest part keeps rounded top corners (the handoff's bars); stacked parts above are square. */
   rounded?: boolean;
+  /** Makes every non-empty column a button (an empty one stays inert); called with its index. */
+  onSelect?: (index: number) => void;
 }
 
 /**
@@ -18,29 +20,43 @@ interface StackedColumnsProps {
  * 2xx / 4xx / 5xx per slice. Flex boxes rather than SVG so a column's gap and minimum width stay
  * crisp at any width; parts are listed bottom first.
  */
-const StackedColumns = ({ columns, max, className, ariaLabel, rounded = true }: StackedColumnsProps) => {
-  const domainMax = max ?? Math.max(1, ...columns.map((column) => column.parts.reduce((s, p) => s + p.value, 0)));
+const StackedColumns = ({ columns, max, className, ariaLabel, rounded = true, onSelect }: StackedColumnsProps) => {
+  const totals = columns.map((column) => column.parts.reduce((sum, part) => sum + Math.max(0, part.value), 0));
+  const domainMax = max ?? Math.max(1, ...totals);
   return (
-    <div
-      className={cx("flex items-end border-b border-line", className)}
-      role="img"
+    // A figure either way: plain bars, or bars that are buttons (`onSelect`).
+    <figure
+      className={cx("m-0 flex items-end border-b border-line", className)}
       aria-label={ariaLabel}
     >
-      {columns.map((column) => (
-        <div
-          key={column.key}
-          className="flex h-full min-w-0 flex-1 flex-col-reverse"
-        >
-          {column.parts.map((part, index) => (
-            <span
-              key={`${column.key}-${part.label ?? index}`}
-              className={cx("block", rounded && index === column.parts.length - 1 && "rounded-t-xs")}
-              style={{ height: `${(Math.max(0, part.value) / domainMax) * 100}%`, background: part.color }}
-            />
-          ))}
-        </div>
-      ))}
-    </div>
+      {columns.map((column, index) => {
+        const parts = column.parts.map((part, partIndex) => (
+          <span
+            key={`${column.key}-${part.label ?? partIndex}`}
+            className={cx("block", rounded && partIndex === column.parts.length - 1 && "rounded-t-xs")}
+            style={{ height: `${(Math.max(0, part.value) / domainMax) * 100}%`, background: part.color }}
+          />
+        ));
+        return onSelect && (totals[index] ?? 0) > 0 ? (
+          <button
+            key={column.key}
+            type="button"
+            aria-label={column.label}
+            onClick={() => onSelect(index)}
+            className="flex h-full min-w-0 flex-1 cursor-pointer flex-col-reverse rounded-t-xs hover:bg-hover focus-visible:bg-hover focus-visible:outline-none [&>span]:transition-opacity hover:[&>span]:opacity-80"
+          >
+            {parts}
+          </button>
+        ) : (
+          <div
+            key={column.key}
+            className="flex h-full min-w-0 flex-1 flex-col-reverse"
+          >
+            {parts}
+          </div>
+        );
+      })}
+    </figure>
   );
 };
 

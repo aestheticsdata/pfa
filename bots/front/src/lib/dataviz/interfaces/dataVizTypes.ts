@@ -48,5 +48,7 @@ export interface SeriesDot {
 /** One column of a stacked column chart: its parts, bottom first. */
 export interface StackedColumn {
   key: string;
+  /** Read out when the column is a button (`StackedColumns`' `onSelect`). */
+  label?: string;
   parts: Segment[];
 }

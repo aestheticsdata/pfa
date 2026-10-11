@@ -88,19 +88,27 @@ describe("Runner guards", () => {
 
   it("keeps the last 24 h across a restart, and saves it", async () => {
     const hour = Math.floor(Date.now() / 3_600_000) * 3_600_000;
+    const quarter = Math.floor(Date.now() / 900_000) * 900_000;
     const savedActivity: DayActivity[] = [];
     const runner = await fakeRunner({
       actions: [tracked("a", [])],
       secretsPath: await secretsPath(),
       initialActivity: {
-        runner: [{ at: hour, bucket: { actions: 3, errors: 0 } }],
+        runner: [{ at: quarter, bucket: { actions: 3, errors: 0 } }],
         bots: { "bot-0": [{ at: hour, bucket: { actions: 3, errors: 0 } }] },
       },
       savedActivity,
     });
     await runner.runWake("bot-0", { actions: 2, thinkTimeMs: 0, force: true });
-    expect(runner.dayHistory()).toHaveLength(24);
-    expect(runner.dayHistory().at(-1)).toMatchObject({ actions: 5, errors: 0, requests: 0, p50: 0, codes2xx: 0 });
+    expect(runner.dayHistory()).toHaveLength(96);
+    expect(runner.dayHistory().at(-1)).toMatchObject({
+      actions: 5,
+      errors: 0,
+      byAction: { a: 2 },
+      requests: 0,
+      p50: 0,
+      codes2xx: 0,
+    });
     expect(runner.snapshotBots()[0]?.daySpark.at(-1)).toEqual({ actions: 5, errors: 0 });
 
     await runner.setDailyEnabled(true);

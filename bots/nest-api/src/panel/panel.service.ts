@@ -77,17 +77,19 @@ export class PanelService {
 
   async overview(appId: string): Promise<OverviewView> {
     const app = this.apps.get(appId);
-    const [status, history, dayHistory, bots, flagged] = await Promise.all([
+    const [status, history, dayHistory, bots, actions, flagged] = await Promise.all([
       app.runner.status(),
       app.runner.history(),
       app.runner.dayHistory(),
       app.runner.bots(),
+      app.runner.actions(),
       this.flaggedAccounts(app.id),
     ]);
     return {
       status: statusView(status),
       history: activityPoints(history),
       dayHistory,
+      actionNames: actions.map((action) => action.name),
       dailyBots: bots
         .filter((bot) => bot.kind === BOT_KIND.daily)
         .map((bot) => botView({ bot, incident: flagged.has(bot.email) })),

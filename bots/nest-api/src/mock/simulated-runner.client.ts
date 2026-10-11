@@ -34,6 +34,10 @@ const TICKS_PER_BOT_SLICE = 2;
 /** The day charts (PFA-204): 24 slices of 1 h. */
 const HOUR_MS = 3_600_000;
 const DAY_SLICES = 24;
+/** The overview's day chart: 15-minute slices (PFA-206). */
+const QUARTERS = 4;
+const QUARTER_MS = HOUR_MS / QUARTERS;
+const QUARTER_SHARES = [0.4, 0.1, 0.3, 0.2];
 const MB = 1024 * 1024;
 const LIMITS = { maxBots: 500, maxRps: 40, uploadBudgetBytes: 400 * MB, uploadWindowDays: 365 };
 const DAILY = ["saturnus", "ceres", "janus", "minerva"];
@@ -184,6 +188,7 @@ export class SimulatedRunnerClient implements RunnerClient {
         at: new Date(slice.at).toISOString(),
         actions: slice.actions,
         errors: slice.errors,
+        byAction: {},
         requests: slice.requests,
         p50: pick(0.5),
         p95: pick(0.95),
@@ -197,21 +202,26 @@ export class SimulatedRunnerClient implements RunnerClient {
     });
   }
 
+  /** The last 24 h in 15-minute slices: each simulated hour spread over its quarters, by action weight. */
   async dayHistory(): Promise<RunnerActivityPoint[]> {
     const live = this.fleet.filter((bot) => this.isLive(bot)).length;
     const target = this.fleet.filter((bot) => bot.kind === "daily").length + (this.loadEnabled ? this.target : 0);
-    return Array.from({ length: DAY_SLICES }, (_, i) => {
-      const actions = this.fleet.reduce((sum, bot) => sum + (bot.day[i]?.actions ?? 0), 0);
-      const errors = this.fleet.reduce((sum, bot) => sum + (bot.day[i]?.errors ?? 0), 0);
-      // The hour's latencies and codes, made up from its counts (same seed, same film).
+    return Array.from({ length: DAY_SLICES * QUARTERS }, (_, q) => {
+      const hour = Math.floor(q / QUARTERS);
+      // The quarter's share of its hour, rotated so the hours don't all look alike (same seed, same film).
+      const share = QUARTER_SHARES[(q + hour) % QUARTERS] ?? 0;
+      const quarter = (count: number) => Math.round(count * share);
+      const actions = quarter(this.fleet.reduce((sum, bot) => sum + (bot.day[hour]?.actions ?? 0), 0));
+      const errors = quarter(this.fleet.reduce((sum, bot) => sum + (bot.day[hour]?.errors ?? 0), 0));
       const busy = actions + errors > 0;
       return {
-        at: new Date((this.hour - DAY_SLICES + 1 + i) * HOUR_MS).toISOString(),
+        at: new Date(((this.hour - DAY_SLICES + 1) * QUARTERS + q) * QUARTER_MS).toISOString(),
         actions,
         errors,
+        byAction: byWeight(actions),
         requests: actions + errors,
-        p50: busy ? Math.round(60 + ((i * 37) % 40)) : 0,
-        p95: busy ? Math.round(180 + ((i * 53) % 160)) : 0,
+        p50: busy ? Math.round(60 + ((q * 37) % 40)) : 0,
+        p95: busy ? Math.round(180 + ((q * 53) % 160)) : 0,
         codes2xx: actions,
         codes4xx: Math.round(errors * 0.4),
         codes5xx: errors - Math.round(errors * 0.4),
@@ -546,4 +556,19 @@ export class SimulatedRunnerClient implements RunnerClient {
     }
     this.runs.set(action.name, stats);
   }
+}
+
+/** `count` actions split over the registry by weight, the rounding left to the heaviest. */
+function byWeight(count: number): Record<string, number> {
+  const total = ACTIONS.reduce((sum, action) => sum + action.weight, 0);
+  const split: Record<string, number> = {};
+  let left = count;
+  for (const action of ACTIONS.slice(1)) {
+    const share = Math.floor((count * action.weight) / total);
+    if (share > 0) split[action.name] = share;
+    left -= share;
+  }
+  const first = ACTIONS[0];
+  if (first && left > 0) split[first.name] = left;
+  return split;
 }

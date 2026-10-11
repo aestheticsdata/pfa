@@ -24,10 +24,12 @@ describe("SimulatedRunnerClient", () => {
     expect((await runner.bot("ceres"))?.state).toBe("blocked");
   });
 
-  it("charts the last 24 h, one point an hour, for the fleet and for each bot", async () => {
+  it("charts the last 24 h every 15 min by action for the fleet, and each bot's by the hour", async () => {
     const runner = new SimulatedRunnerClient({ seed: 1991, populated: true });
     const day = await runner.dayHistory();
-    expect(day).toHaveLength(24);
+    expect(day).toHaveLength(96);
+    const busy = day.find((point) => point.actions > 0);
+    expect(Object.values(busy?.byAction ?? {}).reduce((sum, n) => sum + n, 0)).toBe(busy?.actions);
     expect(day.reduce((sum, point) => sum + point.actions, 0)).toBeGreaterThan(0);
     expect((await runner.bot("ceres"))?.daySpark).toHaveLength(24);
   });

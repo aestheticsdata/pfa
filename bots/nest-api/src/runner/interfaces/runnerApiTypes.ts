@@ -64,6 +64,8 @@ export interface RunnerActivityPoint {
   at: string;
   actions: number;
   errors: number;
+  /** Actions that succeeded, by action name. */
+  byAction: Record<string, number>;
   requests: number;
   p50: number;
   p95: number;

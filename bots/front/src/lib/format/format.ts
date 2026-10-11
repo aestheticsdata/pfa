@@ -10,6 +10,14 @@ export function clockTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
 
+/** `13:15 – 13:30`: a slice of `minutes` starting at `iso`, in the browser's zone. */
+export function slotRange(iso: string, minutes: number): string {
+  const start = new Date(iso);
+  const end = new Date(start.getTime() + minutes * MINUTE);
+  const hm = (date: Date) => date.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+  return `${hm(start)} – ${hm(end)}`;
+}
+
 /** `12/10 17:56`: the date and minute of an older event. */
 export function dayTime(iso: string): string {
   return new Date(iso).toLocaleString("en-GB", {

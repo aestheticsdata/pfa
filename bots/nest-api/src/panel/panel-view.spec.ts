@@ -59,6 +59,7 @@ describe("panel view", () => {
         at: "2026-10-10T12:00:00.000Z",
         actions: 2,
         errors: 1,
+        byAction: { "spending.add": 2 },
         requests: 3,
         p50: 90,
         p95: 300,
