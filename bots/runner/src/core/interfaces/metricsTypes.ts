@@ -48,6 +48,29 @@ export interface BotActivityBucket {
   errors: number;
 }
 
+/** One slice of a rolling window as read, or saved to disk: when it starts (epoch ms) and what it holds. */
+export interface StoredSlice<T> {
+  at: number;
+  bucket: T;
+}
+
+/**
+ * The day-scale activity (PFA-204): the runner's and each bot's last 24 h in 1-hour slices. Saved
+ * to disk, so a restart or a deploy does not blank the back-office's day charts.
+ */
+export interface DayActivity {
+  runner: StoredSlice<BotActivityBucket>[];
+  bots: Record<string, StoredSlice<BotActivityBucket>[]>;
+}
+
+/** One hour of the last 24, for the back-office's day chart. */
+export interface DayPoint {
+  /** Start of the hour (ISO 8601). */
+  at: string;
+  actions: number;
+  errors: number;
+}
+
 /** One request a bot sent, for its drawer. */
 export interface RecentRequest {
   at: string;

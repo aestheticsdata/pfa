@@ -6,6 +6,7 @@ import type {
   RunnerBot,
   RunnerBotDetail,
   RunnerBulkResult,
+  RunnerDayPoint,
   RunnerQuietHours,
   RunnerQuietHoursInput,
   RunnerRamp,
@@ -39,6 +40,10 @@ export class HttpRunnerClient implements RunnerClient {
 
   history(): Promise<RunnerActivityPoint[]> {
     return this.call({ method: "GET", path: "/history" });
+  }
+
+  dayHistory(): Promise<RunnerDayPoint[]> {
+    return this.call({ method: "GET", path: "/history/day" });
   }
 
   bots(): Promise<RunnerBot[]> {

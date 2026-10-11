@@ -11,8 +11,8 @@ import type { StatusCardProps } from "@components/panel/overview/interfaces/over
 const WARN_RATE = 1.5;
 const BAD_RATE = 3;
 
-/** Daily bots · Load bots · Actions/min · Error rate, then actions/min over the last 80 s (1 bar a second). */
-const StatusCard = ({ status, actions }: StatusCardProps) => {
+/** Daily bots · Load bots · Actions/min · Error rate, then the actions over the last 80 s (1 bar a second) or, in daily pace, the last 24 h (1 bar an hour). */
+const StatusCard = ({ status, actions, day }: StatusCardProps) => {
   const text = OVERVIEW_TEXT.status;
   const rateClass = status.errorRate > BAD_RATE ? "text-bad" : status.errorRate > WARN_RATE ? "text-warn" : undefined;
   return (
@@ -79,15 +79,15 @@ const StatusCard = ({ status, actions }: StatusCardProps) => {
       </div>
       <div className="px-3.5 py-3">
         <div className="mb-2.5 flex flex-wrap justify-between gap-2 text-xs text-dim">
-          <span>{text.chart}</span>
+          <span>{day ? text.chartDay : text.chart}</span>
         </div>
         <GradientColumns
           values={actions}
           className="gap-px tablet:gap-0.5"
-          ariaLabel={text.chart}
+          ariaLabel={day ? text.chartDay : text.chart}
         />
         <div className="mt-1.5 flex justify-between font-mono text-tiny text-dim">
-          {text.axis.map((tick) => (
+          {(day ? text.axisDay : text.axis).map((tick) => (
             <span key={tick}>{tick}</span>
           ))}
         </div>

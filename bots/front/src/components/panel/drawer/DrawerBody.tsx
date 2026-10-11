@@ -70,6 +70,21 @@ const DrawerBody = ({ bot }: DrawerPartProps) => {
         />
       </div>
       <div className={section}>
+        <Label className="mb-2.5 block">{DRAWER_TEXT.activityDay}</Label>
+        <StackedColumns
+          className="h-17.5 gap-0.75"
+          ariaLabel={DRAWER_TEXT.activityDay}
+          columns={bot.daySpark.map((slice, index) => ({
+            key: String(index),
+            parts: [
+              { label: "errors", value: slice.errors, color: "var(--bad)" },
+              { label: "actions", value: slice.actions, color: "color-mix(in oklch, var(--ok) 50%, transparent)" },
+            ],
+          }))}
+          max={Math.max(0.1, ...bot.daySpark.map((slice) => slice.actions + slice.errors))}
+        />
+      </div>
+      <div className={section}>
         <Label className="mb-2.5 block">{DRAWER_TEXT.byAction}</Label>
         {bot.byAction.length === 0 ? (
           <p className="m-0 text-xs text-dim">{DRAWER_TEXT.noActions}</p>

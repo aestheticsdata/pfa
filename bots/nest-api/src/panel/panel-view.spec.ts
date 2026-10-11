@@ -17,6 +17,7 @@ const bot = (fields: Partial<RunnerBot>): RunnerBot => ({
   actionsPerMin: 0,
   errorRate: 0,
   spark: Array.from({ length: 15 }, () => ({ actions: 0, errors: 0 })),
+  daySpark: Array.from({ length: 24 }, () => ({ actions: 0, errors: 0 })),
   sessionStartedAt: null,
   lastSeenAt: null,
   nextWakeAt: null,

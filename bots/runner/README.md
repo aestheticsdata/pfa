@@ -63,7 +63,7 @@ clean-ups only). The two populations are independent: nothing below ever touches
   without the other.
 - **A bot's own switch**: daily bots only. Load bots have none — the "Load bots" switch and the
   target alone decide which run; their "on" in the back-office just reads "the ramp has it up".
-- **Pace**: `daily` (like real users: 2–3 visits a day in waking hours) or `burst` (a stress test:
+- **Pace**: `daily` (like real users: 2–3 visits a day in waking hours, at most one spending a visit — 1–2 a day — at hours that change every day) or `burst` (a stress test:
   a visit every 1–5 min, day and night, 1–5 s between actions).
 - **Backpressure**: at most 50 visits at once, every bot together; a bot whose time comes while the
   pool is full goes at the next tick. With the global RPS cap (40 req/s), the generator never falls
@@ -135,6 +135,7 @@ budget is spent, `receipt.upload` is simply skipped.
 |---|---|
 | `GET /status` | running, live bots, target and ramp, actions/errors/requests per minute, rps, throttled, limits, upload budget, quiet hours |
 | `GET /history` | the last 80 s in 1-second slices: actions, errors, p50/p95, 2xx/4xx/5xx, live/target |
+| `GET /history/day` | the last 24 h in 1-hour slices: actions, errors (saved in `<app>-activity.json`, kept across restarts) |
 | `PUT /daily` `{"enabled"}` · `PUT /load` `{"enabled"}` · `PUT /load-pace` `{"pace"}` | the two switches, the load pace |
 | `PUT /target` `{"target": n}` · `PUT /ramp` `{"step", "everySec"}` | load-bot target (capped) and ramp |
 | `GET/PUT /quiet-hours` `{"from": "22:00", "to": "10:00"}` | the quiet window, on the app's clock |

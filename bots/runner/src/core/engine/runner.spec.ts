@@ -8,6 +8,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { Runner } from "@core/engine/runner";
 import type { BotAction } from "@core/interfaces/actionTypes";
+import type { DayActivity } from "@core/interfaces/metricsTypes";
 import type { PersistedRunnerState } from "@core/interfaces/runnerTypes";
 
 const tracked = (name: string, ran: string[]): BotAction<unknown> => ({
@@ -58,6 +59,53 @@ describe("Runner guards", () => {
     ran.length = 0;
     await runner.runWake("bot-0", { actions: 3, thinkTimeMs: 0 });
     expect(ran).toEqual([]);
+  });
+
+  it("runs an action at most `maxPerVisit` times in a visit", async () => {
+    const ran: string[] = [];
+    const runner = await fakeRunner({
+      actions: [{ ...tracked("spend", ran), weight: 100, maxPerVisit: 1 }, tracked("browse", ran)],
+      secretsPath: await secretsPath(),
+    });
+    await runner.runWake("bot-0", { actions: 6, thinkTimeMs: 0, force: true });
+    expect(ran.filter((name) => name === "spend")).toHaveLength(1);
+    expect(ran).toHaveLength(6);
+  });
+
+  it("does not replay the same visit times after a restart", async () => {
+    vi.useFakeTimers();
+    const wake = async (seed: string) => {
+      const runner = await fakeRunner({ seed, secretsPath: await secretsPath() });
+      await runner.setDailyEnabled(true);
+      const at = runner.snapshotBots()[0]?.nextWakeAt;
+      await runner.setDailyEnabled(false);
+      return at;
+    };
+    expect(await wake("boot-1")).toBe(await wake("boot-1"));
+    expect(await wake("boot-1")).not.toBe(await wake("boot-2"));
+    vi.useRealTimers();
+  });
+
+  it("keeps the last 24 h across a restart, and saves it", async () => {
+    const hour = Math.floor(Date.now() / 3_600_000) * 3_600_000;
+    const savedActivity: DayActivity[] = [];
+    const runner = await fakeRunner({
+      actions: [tracked("a", [])],
+      secretsPath: await secretsPath(),
+      initialActivity: {
+        runner: [{ at: hour, bucket: { actions: 3, errors: 0 } }],
+        bots: { "bot-0": [{ at: hour, bucket: { actions: 3, errors: 0 } }] },
+      },
+      savedActivity,
+    });
+    await runner.runWake("bot-0", { actions: 2, thinkTimeMs: 0, force: true });
+    expect(runner.dayHistory()).toHaveLength(24);
+    expect(runner.dayHistory().at(-1)).toMatchObject({ actions: 5, errors: 0 });
+    expect(runner.snapshotBots()[0]?.daySpark.at(-1)).toEqual({ actions: 5, errors: 0 });
+
+    await runner.setDailyEnabled(true);
+    await runner.setDailyEnabled(false);
+    expect(savedActivity.at(-1)?.bots["bot-0"]?.at(-1)?.bucket).toEqual({ actions: 5, errors: 0 });
   });
 
   it("blocks a bot whose account is refused, and stops retrying it", async () => {

@@ -1,4 +1,4 @@
-import type { TimeBucketsOptions } from "@core/interfaces/metricsTypes";
+import type { StoredSlice, TimeBucketsOptions } from "@core/interfaces/metricsTypes";
 
 /**
  * A rolling window of fixed time slices: writes go to the slice "now" falls in, and slices older
@@ -22,13 +22,25 @@ export class TimeBuckets<T> {
   }
 
   /** Every slice of the window, oldest first, with the time each one starts. */
-  read(): { at: number; bucket: T }[] {
+  read(): StoredSlice<T>[] {
     this.roll();
     const { size, bucketMs } = this.options;
     return Array.from({ length: size }, (_, i) => {
       const slot = this.newest - size + 1 + i;
       return { at: slot * bucketMs, bucket: this.buckets[((slot % size) + size) % size] as T };
     });
+  }
+
+  /** Puts back slices read from disk; those that have left the window since are dropped. */
+  restore(slices: StoredSlice<T>[]): void {
+    this.roll();
+    const { size } = this.options;
+    for (const { at, bucket } of slices) {
+      const slot = this.slot(at);
+      if (slot > this.newest - size && slot <= this.newest) {
+        this.buckets[slot % size] = bucket;
+      }
+    }
   }
 
   private roll(): void {

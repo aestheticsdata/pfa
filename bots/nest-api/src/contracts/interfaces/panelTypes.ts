@@ -59,6 +59,8 @@ export interface BotView {
   sessionStartedAt: string | null;
   /** The last 30 s, 15 slices of 2 s, oldest first. */
   spark: SparkPoint[];
+  /** The last 24 h, 24 slices of 1 h, oldest first (PFA-204). */
+  daySpark: SparkPoint[];
   /** An open incident names this bot. */
   incident: boolean;
 }
@@ -160,9 +162,18 @@ export interface StatusView {
   uploadBudget: UploadBudgetView;
 }
 
+/** One hour of the runner's last 24. */
+export interface DayPoint {
+  at: string;
+  actions: number;
+  errors: number;
+}
+
 export interface OverviewView {
   status: StatusView;
   history: ActivityPoint[];
+  /** The last 24 h, 1 point an hour: the chart of the daily pace (PFA-204). */
+  dayHistory: DayPoint[];
   dailyBots: BotView[];
 }
 
@@ -183,6 +194,8 @@ export interface BotsPage {
   /** Every id matching the filters: "select all" selects across pages. */
   matchingIds: string[];
   running: boolean;
+  /** `LOAD_PACE`: daily → the rows chart the last 24 h, burst → the last 30 s. */
+  loadPace: string;
 }
 
 export interface ActionView {

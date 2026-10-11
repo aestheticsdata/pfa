@@ -33,6 +33,11 @@ export interface BotAction<TPersona = unknown> {
   pausedInQuietHours?: boolean;
   /** Spends the runner-wide upload budget (the back-office tags it "budget"). */
   usesUploadBudget?: boolean;
+  /**
+   * At most this many times in one visit, like a person who notes one spending and then browses.
+   * Burst-paced visits (a stress test) ignore it.
+   */
+  maxPerVisit?: number;
   /** Optional precondition; an action that can't run right now is simply not picked. */
   canRun?: (ctx: ActionContext<TPersona>) => boolean;
   run: (ctx: ActionContext<TPersona>) => Promise<void>;

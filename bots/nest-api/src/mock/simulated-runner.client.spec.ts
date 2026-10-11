@@ -24,6 +24,14 @@ describe("SimulatedRunnerClient", () => {
     expect((await runner.bot("ceres"))?.state).toBe("blocked");
   });
 
+  it("charts the last 24 h, one point an hour, for the fleet and for each bot", async () => {
+    const runner = new SimulatedRunnerClient({ seed: 1991, populated: true });
+    const day = await runner.dayHistory();
+    expect(day).toHaveLength(24);
+    expect(day.reduce((sum, point) => sum + point.actions, 0)).toBeGreaterThan(0);
+    expect((await runner.bot("ceres"))?.daySpark).toHaveLength(24);
+  });
+
   it("runs each kind on its own switch, and ignores a load bot's own toggle", async () => {
     const runner = new SimulatedRunnerClient({ seed: 1, populated: true });
     expect(await runner.setDaily(false)).toBe(false);

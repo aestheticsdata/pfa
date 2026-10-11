@@ -3,13 +3,13 @@ import SelectAll from "@components/panel/bots/SelectAll";
 import { cx } from "@lib/classNames/cx";
 import { BOTS_TEXT } from "@text/bots";
 
-import type { BotsTableProps } from "@components/panel/bots/interfaces/botsTypes";
+import type { BotsGridProps } from "@components/panel/bots/interfaces/botsTypes";
 
 const HEAD =
   "whitespace-nowrap border-b border-line-soft px-2.5 py-2 text-left text-tiny font-medium uppercase tracking-th text-dim first:pl-3.5 last:pr-3.5";
 
 /** The Bots table, from 700px: Activity from 1100, Total from 1280. */
-const BotsTable = ({ app, rows, focused, ids }: BotsTableProps) => {
+const BotsTable = ({ app, rows, focused, ids, day }: BotsGridProps) => {
   const c = BOTS_TEXT.columns;
   return (
     <div className="hidden overflow-x-auto tablet:block">
@@ -23,7 +23,7 @@ const BotsTable = ({ app, rows, focused, ids }: BotsTableProps) => {
             <th className={HEAD}>{c.type}</th>
             <th className={HEAD}>{c.status}</th>
             <th className={HEAD}>{c.action}</th>
-            <th className={cx(HEAD, "hidden desktop:table-cell")}>{c.activity}</th>
+            <th className={cx(HEAD, "hidden desktop:table-cell")}>{day ? c.activityDay : c.activity}</th>
             <th className={cx(HEAD, "text-right")}>{c.apm}</th>
             <th className={cx(HEAD, "text-right")}>{c.errors}</th>
             <th className={cx(HEAD, "hidden text-right xl:table-cell")}>{c.total}</th>
@@ -38,6 +38,7 @@ const BotsTable = ({ app, rows, focused, ids }: BotsTableProps) => {
               app={app}
               bot={bot}
               focused={bot.id === focused}
+              day={day}
             />
           ))}
         </tbody>

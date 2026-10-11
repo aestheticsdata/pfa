@@ -79,6 +79,11 @@ async function runnerRoutes<TPersona>(route: Route, { runner }: ControlServerOpt
       return runner.status();
     case `${HTTP_METHOD.get} history`:
       return runner.history();
+    case `${HTTP_METHOD.get} history/*`:
+      if (sub === "day") {
+        return runner.dayHistory();
+      }
+      return undefined;
     case `${HTTP_METHOD.get} limits`:
       return runner.status().limits;
     case `${HTTP_METHOD.get} upload-budget`:
