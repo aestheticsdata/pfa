@@ -6,3 +6,21 @@ export interface PurchaseMeasure {
   size: number | null;
   sizeUnit: SizeUnit | null;
 }
+
+/** One purchase as the price history chart draws it (PFA-222). */
+export interface HistoryPoint extends PurchaseMeasure {
+  storeID: string;
+  storeName: string;
+  color: string;
+  /** Days since the epoch: the chart's x. */
+  day: number;
+  date: string;
+  unitPrice: number;
+  amount: number;
+}
+
+/** A position on the chart, in pixels. */
+export interface PixelPoint {
+  x: number;
+  y: number;
+}

@@ -62,9 +62,10 @@ describe("compareStores", () => {
       ["Alpha", 2, 2.5, 2, true],
       ["Beta", 2.5, 2.5, 1, false],
     ]);
+    // Each point carries the purchase as paid, for the chart's tooltip (PFA-222).
     expect(comparison[0].stores[0].history).toEqual([
-      { date: "2031-01-01", unitPrice: 3 },
-      { date: "2031-02-01", unitPrice: 2 },
+      { date: "2031-01-01", unitPrice: 3, amount: 3, quantity: 1, size: 1, sizeUnit: "l" },
+      { date: "2031-02-01", unitPrice: 2, amount: 2, quantity: 1, size: 1, sizeUnit: "l" },
     ]);
   });
 

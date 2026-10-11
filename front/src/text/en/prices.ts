@@ -24,6 +24,12 @@ const prices: typeof frPrices = {
   purchases: (count: number) => `${count} purchase${count > 1 ? "s" : ""}`,
   lastPaid: "Last purchase",
   sizeUnits: { g: "g", kg: "kg", ml: "ml", cl: "cl", l: "L" },
+  history: {
+    title: "Price over time",
+    aria: (basis: string) => `Price over time ${basis}, by store`,
+    hint: "Hover a point for the purchase",
+    others: (count: number) => `${count} more store${count > 1 ? "s" : ""} not drawn`,
+  },
   loadFailed: "Comparison unavailable",
 };
 

@@ -37,8 +37,18 @@ export interface StorePrice {
   lastDate: string;
   purchases: number;
   cheapest: boolean;
-  /** Unit price over time, oldest first. */
-  history: { date: string; unitPrice: number }[];
+  /** Unit price over time, oldest first (PFA-222). */
+  history: PricePoint[];
+}
+
+/** One purchase on a store's price history: its unit price, and the line as paid. */
+export interface PricePoint {
+  date: string;
+  unitPrice: number;
+  amount: number;
+  quantity: number;
+  size: number | null;
+  sizeUnit: SizeUnit | null;
 }
 
 /** The stores ranked on one basis, cheapest first — kilos and pieces never mixed. */
