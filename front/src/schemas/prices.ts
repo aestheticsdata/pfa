@@ -57,3 +57,25 @@ export const PriceComparisonSchema = apiObject({
   name: z.string(),
   comparisons: z.array(BasisComparisonSchema),
 });
+
+// GET /stores/usage and /product-types/usage: managing them (PFA-224), with
+// how much each is used and the entry it likely duplicates.
+export const StoreEntrySchema = apiObject({
+  ID: z.string(),
+  name: z.string(),
+  address: z.string().nullable(),
+  uses: z.number(),
+  duplicateOf: z.string().nullable(),
+});
+export const StoreEntryListSchema = z.array(StoreEntrySchema);
+
+export const ProductTypeEntrySchema = apiObject({
+  ID: z.string(),
+  name: z.string(),
+  uses: z.number(),
+  duplicateOf: z.string().nullable(),
+});
+export const ProductTypeEntryListSchema = z.array(ProductTypeEntrySchema);
+
+// The 409 of a rename onto an existing store or type: the one to merge into instead.
+export const CatalogConflictSchema = z.object({ conflictID: z.string() });
