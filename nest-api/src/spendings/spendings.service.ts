@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
 import { readFile } from "fs/promises";
+import { assertCategoryAccessible, resolveCategoryID } from "@categories/category-resolver";
 import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 import type { SpendingCategoryInput } from "@spendings/dto/spending-category-input.interface";
 import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
@@ -30,20 +31,6 @@ export class SpendingsService {
     private readonly prisma: PrismaService,
     private readonly receiptFiles: ReceiptFilesService,
   ) {}
-
-  private async assertCategoryAccessible(categoryID: string, userID: string): Promise<void> {
-    const category = await this.prisma.categories.findFirst({
-      where: {
-        ID: categoryID,
-        OR: [{ userID }, { userID: null }],
-      },
-      select: { ID: true },
-    });
-
-    if (!category) {
-      throw new BadRequestException("Invalid category ID");
-    }
-  }
 
   async getInvoiceImage(
     spendingID: string,
@@ -89,38 +76,9 @@ export class SpendingsService {
     return null;
   }
 
-  /**
-   * The category a new spending points at: an accessible existing one by ID, or
-   * one created on the fly from a typed name + colour (reused if the user
-   * already has that name). No category → null. Shared with group lines.
-   */
+  /** Shared with group lines (PFA-189); the logic lives with the categories (PFA-38). */
   async resolveCategoryID(category: SpendingCategoryInput | undefined, userID: string): Promise<string | null> {
-    if (category?.ID) {
-      await this.assertCategoryAccessible(category.ID, userID);
-      return category.ID;
-    }
-    if (category?.ID === null && category?.color != null && category?.name) {
-      const existingCategory = await this.prisma.categories.findFirst({
-        where: {
-          userID,
-          name: category.name,
-        },
-      });
-      if (existingCategory) {
-        return existingCategory.ID;
-      }
-      const newCategoryID = randomUUID();
-      await this.prisma.categories.create({
-        data: {
-          ID: newCategoryID,
-          userID,
-          name: category.name,
-          color: category.color,
-        },
-      });
-      return newCategoryID;
-    }
-    return null;
+    return resolveCategoryID(this.prisma, category, userID);
   }
 
   async createSpending(
@@ -200,7 +158,7 @@ export class SpendingsService {
     };
 
     if (categoryID !== null && spending.categoryID !== categoryID) {
-      await this.assertCategoryAccessible(categoryID, userID);
+      await assertCategoryAccessible(this.prisma, categoryID, userID);
       await this.prisma.spendings.updateMany({
         where: { ID: spendingID, userID },
         data: { label: dto.label, amount: dto.amount, categoryID },

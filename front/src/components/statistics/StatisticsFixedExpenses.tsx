@@ -1,7 +1,7 @@
 "use client";
 
-// All figures are real (from /recurrings). Recurrings carry no category, so —
-// exactly as the mockup notes — they are totalled by name. "Already debited" is the
+// All figures are real (from /recurrings). Exactly as the mockup notes, recurrings
+// are totalled by name. "Already debited" is the
 // real year-to-date sum of the per-month recurring rows (Jan → current month),
 // computed server-side (GET /recurrings/drawn) and passed in as `drawn`.
 

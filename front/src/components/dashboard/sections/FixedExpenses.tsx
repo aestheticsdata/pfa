@@ -1,5 +1,6 @@
 "use client";
 
+import { CategoryColorDot } from "@components/categories/CategoryColorDot";
 import { CardTitle } from "@components/shared/CardSectionHeader";
 import { EmptyState } from "@components/shared/EmptyState";
 import GlowCard from "@components/shared/GlowCard";
@@ -156,11 +157,21 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
               data-testid="fixed-expense-row"
               className="group grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 border-b border-line-soft py-2.5 last:border-b-0"
             >
-              <span
-                className="truncate text-sm text-ink"
-                title={r.label}
-              >
-                {r.label}
+              <span className="flex min-w-0 items-center gap-2">
+                {r.category && (
+                  <span
+                    title={r.category}
+                    className="flex"
+                  >
+                    <CategoryColorDot color={r.categoryColor} />
+                  </span>
+                )}
+                <span
+                  className="truncate text-sm text-ink"
+                  title={r.label}
+                >
+                  {r.label}
+                </span>
               </span>
               <span className="flex items-center gap-2">
                 <span className="flex gap-1 opacity-100 transition-opacity [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:group-hover:opacity-100">
