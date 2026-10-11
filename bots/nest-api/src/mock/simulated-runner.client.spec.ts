@@ -35,14 +35,24 @@ describe("SimulatedRunnerClient", () => {
     expect((await runner.bot("ceres"))?.daySpark).toHaveLength(24);
   });
 
-  it("runs each kind on its own switch, and ignores a load bot's own toggle", async () => {
+  it("runs each kind on its own switch, and a load bot turned off gives its place to the next", async () => {
     const runner = new SimulatedRunnerClient({ seed: 1, populated: true });
     expect(await runner.setDaily(false)).toBe(false);
     expect(await runner.status()).toMatchObject({ running: true, dailyEnabled: false, liveDaily: 0 });
+    const liveLoad = (await runner.status()).liveLoad;
     await runner.setBots({ ids: ["legionary-001"], enabled: false });
-    expect(await runner.bot("legionary-001")).toMatchObject({ enabled: true });
-    expect((await runner.bot("legionary-001"))?.state).not.toBe("paused");
+    expect(await runner.bot("legionary-001")).toMatchObject({ enabled: false, state: "paused" });
+    expect((await runner.status()).liveLoad).toBe(liveLoad);
     await runner.setLoad(false);
     expect(await runner.status()).toMatchObject({ running: false, liveLoad: 0 });
+  });
+
+  it("a kind's switch, off then on, turns all its bots off then back on", async () => {
+    const runner = new SimulatedRunnerClient({ seed: 1, populated: true });
+    await runner.setBots({ ids: ["legionary-001", "legionary-002"], enabled: false });
+    await runner.setLoad(false);
+    expect((await runner.bots()).filter((bot) => bot.kind === "load").every((bot) => !bot.enabled)).toBe(true);
+    await runner.setLoad(true);
+    expect((await runner.bots()).filter((bot) => bot.kind === "load").every((bot) => bot.enabled)).toBe(true);
   });
 });

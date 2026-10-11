@@ -264,6 +264,7 @@ export class SimulatedRunnerClient implements RunnerClient {
 
   async setDaily(enabled: boolean): Promise<boolean> {
     this.dailyEnabled = enabled;
+    this.resetBotsOf("daily");
     return enabled;
   }
 
@@ -286,6 +287,7 @@ export class SimulatedRunnerClient implements RunnerClient {
 
   async setLoad(enabled: boolean): Promise<boolean> {
     this.loadEnabled = enabled;
+    this.resetBotsOf("load");
     // Off: every load bot back to the queue at once. On: the first step comes up now.
     if (!enabled) this.spawned = 0;
     else this.nextStepAt = Date.now();
@@ -311,8 +313,8 @@ export class SimulatedRunnerClient implements RunnerClient {
         unknown.push(id);
         continue;
       }
-      // Load bots have no switch of their own: the "Load bots" switch and the target decide.
-      if (bot.kind === "load") continue;
+      // Turned on while its kind is off: the kind comes on with only this bot (as in the real runner).
+      if (toggle.enabled && !this.kindOn(bot)) this.turnKindOnAlone(bot.kind);
       bot.enabled = toggle.enabled;
       updated.push(id);
     }
@@ -350,18 +352,38 @@ export class SimulatedRunnerClient implements RunnerClient {
   /** A bot's runner state: the same words the real runner uses, plus "queued" for load bots not up yet. */
   private stateOf(bot: SimulatedBot): string {
     if (bot.blocked) return "blocked";
-    if (!(bot.kind === "load" ? this.loadEnabled : this.dailyEnabled)) return "stopped";
+    if (!this.kindOn(bot)) return "stopped";
     if (!bot.enabled) return "paused";
     if (bot.kind === "load" && this.loadRank(bot) > this.spawned) return "queued";
     return bot.currentAction ? "active" : "sleeping";
   }
 
-  /** A load bot's place in the ramp: blocked ones take none (as in the real runner). */
+  /** A load bot's place in the ramp: bots turned off or blocked take none (as in the real runner). */
   private loadRank(bot: SimulatedBot): number {
     const before = this.fleet.filter(
-      (other) => other.kind === "load" && !other.blocked && this.loadIndex(other) < this.loadIndex(bot),
+      (other) =>
+        other.kind === "load" && other.enabled && !other.blocked && this.loadIndex(other) < this.loadIndex(bot),
     );
     return before.length + 1;
+  }
+
+  private kindOn(bot: SimulatedBot): boolean {
+    return bot.kind === "load" ? this.loadEnabled : this.dailyEnabled;
+  }
+
+  /** A kind's switch, flipped either way, sets every bot of that kind to follow it. */
+  private resetBotsOf(kind: SimulatedBot["kind"]): void {
+    for (const bot of this.fleet) if (bot.kind === kind) bot.enabled = true;
+  }
+
+  private turnKindOnAlone(kind: SimulatedBot["kind"]): void {
+    for (const bot of this.fleet) if (bot.kind === kind) bot.enabled = false;
+    if (kind === "load") {
+      this.loadEnabled = true;
+      this.nextStepAt = Date.now();
+    } else {
+      this.dailyEnabled = true;
+    }
   }
 
   private isLive(bot: SimulatedBot): boolean {
@@ -380,8 +402,8 @@ export class SimulatedRunnerClient implements RunnerClient {
       email: bot.email,
       kind: bot.kind,
       state: this.stateOf(bot),
-      // A load bot's "on" is read-only: the ramp has it up.
-      enabled: bot.kind === "load" ? this.loadEnabled && this.loadRank(bot) <= this.spawned : bot.enabled,
+      // A kind switched off shows all its bots off.
+      enabled: this.kindOn(bot) && bot.enabled,
       currentAction: this.isLive(bot) ? bot.currentAction : null,
       totalActions: bot.totalActions,
       errors: bot.errors,

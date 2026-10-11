@@ -61,8 +61,9 @@ clean-ups only). The two populations are independent: nothing below ever touches
 - **"Load bots" switch**: off stops every load bot at once and keeps the target; on ramps back to
   it. Off on a fresh install. The daily bots have their own switch ("Daily bots"); either one runs
   without the other.
-- **A bot's own switch**: daily bots only. Load bots have none — the "Load bots" switch and the
-  target alone decide which run; their "on" in the back-office just reads "the ramp has it up".
+- **A bot's own switch**: off sets that bot aside. A load bot turned off takes no place in the
+  target — the ramp brings up the next one. Flipping "Daily bots" or "Load bots" either way sets
+  every bot of that kind to follow it; a bot turned on while its kind is off turns the kind on, alone.
 - **Pace**: `daily` (like real users: 2–3 visits a day in waking hours, at most one spending a visit — 1–2 a day — at hours that change every day) or `burst` (a stress test:
   a visit every 1–5 min, day and night, 1–5 s between actions).
 - **Backpressure**: at most 50 visits at once, every bot together; a bot whose time comes while the

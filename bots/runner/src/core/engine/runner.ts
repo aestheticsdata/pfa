@@ -19,6 +19,7 @@ import { isQuietTime, nextQuietChange } from "@core/time/quietHours";
 import type { ActionContext, ActionSnapshot, BotAction, BotMemory } from "@core/interfaces/actionTypes";
 import type {
   BotDetail,
+  BotKind,
   BotProfile,
   BotSnapshot,
   BotState,
@@ -152,11 +153,7 @@ export class Runner<TPersona = unknown> {
     for (const action of deps.actions) {
       this.actionStats.set(action.name, { runs: 0, errors: 0 });
     }
-    // Load bots have no switch of their own (PFA-203): only the "Load bots" switch and the target.
-    this.state = {
-      ...deps.initialState,
-      disabledBots: deps.initialState.disabledBots.filter((id) => this.bots.get(id)?.profile.kind !== BOT_KIND.load),
-    };
+    this.state = { ...deps.initialState };
     // A file written before PFA-205 holds actions and errors only: the rest starts at zero. Its
     // 1-hour slices land in the first quarter of their hour.
     this.day.restore(
@@ -186,10 +183,12 @@ export class Runner<TPersona = unknown> {
 
   /**
    * The "Daily bots" switch: off, no daily bot starts a visit and those in progress stop after
-   * their current action. The load bots are not touched — they have their own switch.
+   * their current action. Either way every daily bot's own switch follows it (PFA-211). The load
+   * bots are not touched — they have their own switch.
    */
   async setDailyEnabled(enabled: boolean): Promise<boolean> {
     this.state.dailyEnabled = enabled;
+    this.resetBotsOf(BOT_KIND.daily);
     await this.deps.saveState(this.state);
     for (const bot of this.bots.values()) {
       if (bot.profile.kind === BOT_KIND.daily) bot.nextWakeAt = null;
@@ -205,12 +204,20 @@ export class Runner<TPersona = unknown> {
   }
 
   /**
-   * One write for the whole selection (the back-office's bulk on/off). Daily bots only: a load bot
-   * runs when the "Load bots" switch and the target say so, nothing else. Unknown ids are reported.
+   * One write for the whole selection (the back-office's bulk on/off). A bot turned on while its
+   * kind's switch is off turns that switch on, alone: the rest of its kind stays off. A load bot
+   * turned off takes no place in the target — the ramp brings up the next one. Unknown ids are reported.
    */
   async setBotsEnabled(toggle: BotToggle): Promise<BulkResult> {
-    const updated = toggle.ids.filter((id) => this.bots.get(id)?.profile.kind === BOT_KIND.daily);
+    const updated = toggle.ids.filter((id) => this.bots.has(id));
     const unknown = toggle.ids.filter((id) => !this.bots.has(id));
+    if (toggle.enabled) {
+      for (const kind of Object.values(BOT_KIND)) {
+        if (!this.isKindEnabled(kind) && updated.some((id) => this.bots.get(id)?.profile.kind === kind)) {
+          this.turnKindOnAlone(kind);
+        }
+      }
+    }
     let disabled = this.state.disabledBots;
     for (const id of updated) {
       disabled = toggleIn(disabled, id, toggle.enabled);
@@ -218,6 +225,8 @@ export class Runner<TPersona = unknown> {
     this.state.disabledBots = disabled;
     if (updated.length > 0) {
       await this.deps.saveState(this.state);
+      this.rampNow();
+      this.syncTicker();
     }
     return { updated, unknown };
   }
@@ -249,10 +258,11 @@ export class Runner<TPersona = unknown> {
 
   /**
    * The "Load bots" switch: off stops every load bot at once and keeps the target; on brings the
-   * target back up through the ramp. Daily bots are not touched — they have their own switch.
+   * target back up through the ramp. Either way every load bot's own switch follows it (PFA-211). Daily bots are not touched — they have their own switch.
    */
   async setLoadEnabled(enabled: boolean): Promise<boolean> {
     this.state.loadEnabled = enabled;
+    this.resetBotsOf(BOT_KIND.load);
     await this.deps.saveState(this.state);
     // Back on: the first step comes up now, the rest at the ramp's pace.
     if (enabled) this.lastStepAt = 0;
@@ -517,11 +527,8 @@ export class Runner<TPersona = unknown> {
       email: bot.profile.email,
       kind: bot.profile.kind,
       state: this.effectiveState(bot),
-      // A load bot's "on" is read-only: the ramp has it up.
-      enabled:
-        bot.profile.kind === BOT_KIND.load
-          ? this.spawned.has(bot.profile.id)
-          : !this.state.disabledBots.includes(bot.profile.id),
+      // A kind switched off shows all its bots off.
+      enabled: this.kindEnabled(bot) && !this.state.disabledBots.includes(bot.profile.id),
       currentAction: bot.currentAction,
       totalActions: bot.totalActions,
       errors: bot.errors,
@@ -666,7 +673,10 @@ export class Runner<TPersona = unknown> {
     const ramp = this.ramp();
     const stepDue = now - this.lastStepAt >= ramp.everySec * 1000;
     const plan = planRamp({
-      order: this.loadOrder.filter((id) => this.bots.get(id)?.state !== BOT_STATE.blocked),
+      // A load bot turned off by hand takes no place in the target: the next one comes up instead.
+      order: this.loadOrder.filter(
+        (id) => this.bots.get(id)?.state !== BOT_STATE.blocked && !this.state.disabledBots.includes(id),
+      ),
       spawned: this.spawned,
       target: this.state.target ?? 0,
       enabled: this.loadEnabled(),
@@ -727,7 +737,28 @@ export class Runner<TPersona = unknown> {
 
   /** The switch of the bot's kind: "Daily bots" or "Load bots". */
   private kindEnabled(bot: BotRuntime<TPersona>): boolean {
-    return bot.profile.kind === BOT_KIND.load ? this.loadEnabled() : this.dailyEnabled();
+    return this.isKindEnabled(bot.profile.kind);
+  }
+
+  private isKindEnabled(kind: BotKind): boolean {
+    return kind === BOT_KIND.load ? this.loadEnabled() : this.dailyEnabled();
+  }
+
+  /** A kind's switch, flipped either way, sets every bot of that kind to follow it. */
+  private resetBotsOf(kind: BotKind): void {
+    this.state.disabledBots = this.state.disabledBots.filter((id) => this.bots.get(id)?.profile.kind !== kind);
+  }
+
+  /** Turns a kind's switch on with every bot of that kind off, for the caller to turn some back on. */
+  private turnKindOnAlone(kind: BotKind): void {
+    const others = [...this.bots.values()].filter((bot) => bot.profile.kind === kind).map((bot) => bot.profile.id);
+    this.state.disabledBots = [...new Set([...this.state.disabledBots, ...others])];
+    if (kind === BOT_KIND.load) {
+      this.state.loadEnabled = true;
+      this.lastStepAt = 0;
+    } else {
+      this.state.dailyEnabled = true;
+    }
   }
 
   private isBurst(): boolean {
