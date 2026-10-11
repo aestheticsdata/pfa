@@ -485,6 +485,7 @@ EOF
   log "➡️  Installing dependencies and building Next.js on remote server"
   ssh "$REMOTE_USER_HOST" \
     STAGING_DIR="$STAGING_DIR" \
+    APP_RELEASE="$GIT_HASH" \
     CURRENT_DIR="$CURRENT_DIR" \
     PM2_ECOSYSTEM_FILE="$PM2_ECOSYSTEM_FILE" \
     'bash -s' << 'EOF'
@@ -511,7 +512,9 @@ for env_file in .env.production.local .env.production .env; do
 done
 
 pnpm install --frozen-lockfile
-pnpm build
+# The commit, inlined into the bundle so every error and vital reported to Iknos names the deploy
+# it came from (PFA-212). The staging folder has no .git, hence passed in rather than read here.
+NEXT_PUBLIC_APP_RELEASE="$APP_RELEASE" pnpm build
 
 if [ ! -f "$PM2_ECOSYSTEM_FILE" ]; then
   echo "❌ ERROR: Missing $PM2_ECOSYSTEM_FILE in release" >&2

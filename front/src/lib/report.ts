@@ -3,7 +3,7 @@
  *
  * This file is meant to be **copied into the other fronts of the fleet**, not imported from them.
  * It has no dependencies, reads three public environment variables, and does nothing at all when
- * they are unset.
+ * they are unset. A fourth, the release, is optional: stamped by the deploy, absent in dev.
  *
  * What it sends is ECS, the same shape every app already prints to stdout. That is the whole
  * point: a posted browser error and a tailed server line go through one parser and land in the
@@ -28,6 +28,13 @@ const ENDPOINT = process.env.NEXT_PUBLIC_IKNOS_INGEST_URL;
 const TOKEN = process.env.NEXT_PUBLIC_IKNOS_INGEST_TOKEN;
 const SERVICE = process.env.NEXT_PUBLIC_IKNOS_SERVICE;
 
+/**
+ * The commit this bundle was built from, inlined at build time by the deploy script (PFA-212), so
+ * an error in Iknos says which deploy threw it. `service.version` is the ECS field the API's own
+ * lines carry. Unset in dev, and then the field is left out rather than filled with a guess.
+ */
+const RELEASE = process.env.NEXT_PUBLIC_APP_RELEASE;
+
 /** Matches `MAX_EVENTS_PER_REQUEST` in the API. Sending more would be rejected wholesale. */
 const MAX_BATCH = 100;
 
@@ -42,6 +49,21 @@ const MAX_EVENTS_PER_PAGE = 50;
 const DEDUPE_WINDOW_MS = 10_000;
 
 type EcsEvent = Record<string, unknown>;
+
+/** The fields of a Web Vitals metric this file reads — structural, so it needs no import from Next. */
+interface WebVital {
+  name: string;
+  value: number;
+  rating?: string;
+  id: string;
+  navigationType?: string;
+}
+
+/**
+ * The three Core Web Vitals. Next also reports FCP, TTFB and its own hydration timings; they are
+ * diagnostics, not the numbers anyone is asked to keep green, and each one is another POST.
+ */
+const REPORTED_VITALS = new Set(["LCP", "INP", "CLS"]);
 
 let queue: EcsEvent[] = [];
 let sent = 0;
@@ -108,6 +130,26 @@ function flush(): void {
   send(batch);
 }
 
+/** Stamps the context every event shares and queues it for the next flush. */
+function enqueue(event: EcsEvent): void {
+  queue.push({
+    "@timestamp": new Date().toISOString(),
+    "log.level": "error",
+    "url.path": window.location.pathname,
+    ...(RELEASE ? { "service.version": RELEASE } : {}),
+    // Everything the API does not promote to a column lands in `attrs`, so context is free to
+    // add and costs nothing to leave out.
+    ...(cameFrom === null ? {} : { navigated_from: cameFrom }),
+    ...event,
+  });
+
+  if (queue.length >= MAX_BATCH) {
+    flush();
+    return;
+  }
+  if (timer === null) timer = setTimeout(flush, FLUSH_INTERVAL_MS);
+}
+
 /**
  * Queues one ECS event.
  *
@@ -122,23 +164,37 @@ export function report(event: EcsEvent): void {
     if (key !== "" && isRepeat(key)) return;
 
     sent += 1;
-    queue.push({
-      "@timestamp": new Date().toISOString(),
-      "log.level": "error",
-      "url.path": window.location.pathname,
-      // Everything the API does not promote to a column lands in `attrs`, so context is free to
-      // add and costs nothing to leave out.
-      ...(cameFrom === null ? {} : { navigated_from: cameFrom }),
-      ...event,
-    });
-
-    if (queue.length >= MAX_BATCH) {
-      flush();
-      return;
-    }
-    if (timer === null) timer = setTimeout(flush, FLUSH_INTERVAL_MS);
+    enqueue(event);
   } catch {
     // Whatever went wrong here, the page carries on.
+  }
+}
+
+/**
+ * Queues one Core Web Vital (PFA-212), handed over by Next's `useReportWebVitals`.
+ *
+ * Outside the error budget and the dedupe on purpose: there are at most three per page view, the
+ * same name legitimately repeats on every navigation, and a page that is throwing must not also
+ * lose the measurement of how slow it was. Info level — a slow page is a number, not an incident;
+ * `rating` is what says whether it is a bad one.
+ */
+export function reportWebVital(metric: WebVital): void {
+  try {
+    if (!enabled() || !REPORTED_VITALS.has(metric.name)) return;
+
+    enqueue({
+      "log.level": "info",
+      message: `web vital ${metric.name}`,
+      web_vital: {
+        name: metric.name,
+        value: metric.value,
+        rating: metric.rating ?? null,
+        id: metric.id,
+        navigation_type: metric.navigationType ?? null,
+      },
+    });
+  } catch {
+    // Measuring the page must never break it either.
   }
 }
 

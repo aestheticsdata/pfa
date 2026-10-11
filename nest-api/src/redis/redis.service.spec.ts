@@ -15,3 +15,38 @@ describe("RedisService", () => {
     }).not.toThrow();
   });
 });
+
+/** The `active_sessions` gauge (PFA-212) is only as right as this count. */
+describe("RedisService.countActiveSessions", () => {
+  const withStore = (batches: string[][], values: Record<string, string | null>): RedisService => {
+    const service = new RedisService();
+    const client = service.getClient();
+    Object.assign(client, {
+      scanIterator: () =>
+        (async function* () {
+          yield* await Promise.resolve(batches);
+        })(),
+      mGet: (keys: string[]) => Promise.resolve(keys.map((key) => values[key] ?? null)),
+    });
+    return service;
+  };
+
+  it("counts signed-in sessions, people and bots apart", async () => {
+    const service = withStore([["pfa:a", "pfa:b"], [], ["pfa:c"]], {
+      "pfa:a": JSON.stringify({ userId: "u1" }),
+      "pfa:b": JSON.stringify({ userId: "u2", isSynthetic: true }),
+      "pfa:c": JSON.stringify({ userId: "u3", isSynthetic: false }),
+    });
+
+    await expect(service.countActiveSessions()).resolves.toEqual({ real: 2, synthetic: 1 });
+  });
+
+  it("skips sessions with nobody behind them, expired keys and malformed values", async () => {
+    const service = withStore([["pfa:a", "pfa:b", "pfa:c"]], {
+      "pfa:a": JSON.stringify({ cookie: {} }),
+      "pfa:c": "{not json",
+    });
+
+    await expect(service.countActiveSessions()).resolves.toEqual({ real: 0, synthetic: 0 });
+  });
+});

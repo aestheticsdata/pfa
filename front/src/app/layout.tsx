@@ -1,5 +1,6 @@
 import "@styles/globals.css";
 import Providers from "@app/providers";
+import { WebVitals } from "@components/shared/WebVitals";
 import { Geist, Geist_Mono, Keania_One } from "next/font/google";
 
 const geistSans = Geist({
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <body className="bg-surface-base text-foreground antialiased">
+        <WebVitals />
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -1,6 +1,11 @@
 import { buildLoggerParams } from "./logger.config";
+import { readReleaseMarker } from "@monitoring/release-marker";
 
 import type { IncomingMessage, ServerResponse } from "node:http";
+
+jest.mock("@monitoring/release-marker");
+
+const mockedReadReleaseMarker = readReleaseMarker as jest.MockedFunction<typeof readReleaseMarker>;
 
 /**
  * The one rule in this file that can fail silently, and did.
@@ -49,5 +54,37 @@ describe("buildLoggerParams — customLogLevel", () => {
   it("no longer silences anything on the way in", () => {
     const pinoHttp = buildLoggerParams().pinoHttp as { autoLogging?: { ignore?: unknown } };
     expect(pinoHttp.autoLogging?.ignore).toBeUndefined();
+  });
+});
+
+/**
+ * The release on every line (PFA-212), so an exception in Iknos says which deploy threw it — the
+ * same value `app_build_info` and the health `version` carry, never one rebuilt from elsewhere.
+ */
+describe("buildLoggerParams — service.version and labels.commit", () => {
+  const ecsBindings = (): Record<string, unknown> => {
+    const pinoHttp = buildLoggerParams().pinoHttp as {
+      formatters: { bindings: (b: object) => Record<string, unknown> };
+    };
+    return pinoHttp.formatters.bindings({});
+  };
+
+  it("carries the release marker's version", () => {
+    mockedReadReleaseMarker.mockReturnValue({ version: "2.19.0", commit: "a41c9e2" });
+
+    expect(ecsBindings()["service.version"]).toBe("2.19.0");
+  });
+
+  it("carries the release marker's commit, since the version alone does not change between deploys", () => {
+    mockedReadReleaseMarker.mockReturnValue({ version: "0.0.1", commit: "a41c9e2" });
+
+    expect(ecsBindings()).toMatchObject({ "labels.commit": "a41c9e2", "service.name": "pfa-api" });
+  });
+
+  it("has neither without a marker", () => {
+    mockedReadReleaseMarker.mockReturnValue(null);
+
+    expect(ecsBindings()).not.toHaveProperty(["service.version"]);
+    expect(ecsBindings()).not.toHaveProperty(["labels.commit"]);
   });
 });

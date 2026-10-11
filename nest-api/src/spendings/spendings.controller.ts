@@ -26,11 +26,18 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { invoiceUploadOptions } from "@spendings/upload/upload.config";
 import { CsrfGuard } from "@users/guards/csrf.guard";
+import { MetricsService } from "@monitoring/metrics.service";
+import { GetUserKind } from "@monitoring/user-kind.decorator";
+
+import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
 
 @Controller("spendings")
 @UseGuards(SessionAuthGuard, CsrfGuard)
 export class SpendingsController {
-  constructor(private readonly spendingsService: SpendingsService) {}
+  constructor(
+    private readonly spendingsService: SpendingsService,
+    private readonly metrics: MetricsService,
+  ) {}
 
   @Get()
   async getSpendings(@Query() query: SpendingsQueryDto, @GetUserId() userID: string) {
@@ -38,8 +45,10 @@ export class SpendingsController {
   }
 
   @Post()
-  async createSpending(@Body() dto: CreateSpendingDto, @GetUserId() userID: string) {
-    return this.spendingsService.createSpending(dto, userID);
+  async createSpending(@Body() dto: CreateSpendingDto, @GetUserId() userID: string, @GetUserKind() userKind: UserKind) {
+    const created = await this.spendingsService.createSpending(dto, userID);
+    this.metrics.countSpendingsCreated(userKind);
+    return created;
   }
 
   @Get("search")

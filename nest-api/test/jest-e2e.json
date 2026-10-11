@@ -8,12 +8,14 @@
     "^@config/(.*)$": "<rootDir>/src/config/$1",
     "^@infrastructure/(.*)$": "<rootDir>/src/infrastructure/$1",
     "^@redis/redis\\.(.*)$": "<rootDir>/src/redis/redis.$1",
+    "^@redis/interfaces/(.*)$": "<rootDir>/src/redis/interfaces/$1",
     "^@users/(.*)$": "<rootDir>/src/users/$1",
     "^@spendings/(.*)$": "<rootDir>/src/spendings/$1",
     "^@recurrings/(.*)$": "<rootDir>/src/recurrings/$1",
     "^@dashboard/(.*)$": "<rootDir>/src/dashboard/$1",
     "^@stats/(.*)$": "<rootDir>/src/stats/$1",
     "^@categories/(.*)$": "<rootDir>/src/categories/$1",
-    "^@exceptionals/(.*)$": "<rootDir>/src/exceptionals/$1"
+    "^@exceptionals/(.*)$": "<rootDir>/src/exceptionals/$1",
+    "^@monitoring/(.*)$": "<rootDir>/src/monitoring/$1"
   }
 }

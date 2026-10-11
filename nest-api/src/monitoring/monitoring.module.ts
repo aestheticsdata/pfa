@@ -18,5 +18,7 @@ import { MetricsService } from "./metrics.service";
 @Module({
   controllers: [HealthController, MetricsController],
   providers: [MetricsService, HealthService, HttpMetricsMiddleware],
+  // The business counters are incremented where the business happens (PFA-212).
+  exports: [MetricsService],
 })
 export class MonitoringModule {}

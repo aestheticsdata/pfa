@@ -100,9 +100,11 @@
       "^@config/(.*)$": "<rootDir>/config/$1",
       "^@infrastructure/(.*)$": "<rootDir>/infrastructure/$1",
       "^@redis/redis\\.(.*)$": "<rootDir>/redis/redis.$1",
+      "^@redis/interfaces/(.*)$": "<rootDir>/redis/interfaces/$1",
       "^@users/(.*)$": "<rootDir>/users/$1",
       "^@spendings/(.*)$": "<rootDir>/spendings/$1",
-      "^@stats/(.*)$": "<rootDir>/stats/$1"
+      "^@stats/(.*)$": "<rootDir>/stats/$1",
+      "^@monitoring/(.*)$": "<rootDir>/monitoring/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

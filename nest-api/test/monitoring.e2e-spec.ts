@@ -1,5 +1,6 @@
 import request from "supertest";
 import { PrismaService } from "../src/prisma/prisma.service";
+import { createAuthenticatedSession } from "./auth-session.helper";
 import { createE2eApp } from "./e2e-app";
 
 import type { INestApplication } from "@nestjs/common";
@@ -77,5 +78,22 @@ describe("monitoring (e2e)", () => {
 
     expect(res.text).toContain('db_pool_connections{state="active"} 10');
     expect(res.text).toMatch(/db_pool_connections\{state="waiting"\} [1-9]/);
+  });
+
+  it("counts a created spending and the signed-in session as real, never naming the user", async () => {
+    const server = app.getHttpServer();
+    const { agent, userId } = await createAuthenticatedSession(server);
+
+    const created = await agent
+      .post("/api/spendings")
+      .send({ date: new Date().toISOString().slice(0, 10), label: "e2e-metrics", amount: 1, currency: "EUR" })
+      .expect(201);
+    const res = await request(server).get("/api/metrics").expect(200);
+    await agent.delete(`/api/spendings/${(created.body as { ID: string }).ID}`).expect(200);
+
+    expect(res.text).toMatch(/spendings_created_total\{user_kind="real"\} [1-9]/);
+    expect(res.text).toContain('spendings_created_total{user_kind="synthetic"}');
+    expect(res.text).toMatch(/active_sessions\{user_kind="real"\} [1-9]/);
+    expect(res.text).not.toContain(userId);
   });
 });
