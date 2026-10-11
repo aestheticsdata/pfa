@@ -34,6 +34,15 @@ export interface BotRowProps {
   focused: boolean;
 }
 
+/** The table charts the last 24 h in daily pace, the last 30 s in burst (PFA-204). */
+export interface BotsGridProps extends BotsTableProps {
+  day: boolean;
+}
+
+export interface BotTableRowProps extends BotRowProps {
+  day: boolean;
+}
+
 export interface ToolbarProps {
   app: string;
   data: BotsPage;
@@ -56,6 +65,8 @@ export interface SelectAllProps {
 
 export interface SparklineProps {
   bot: BotView;
+  /** The last 24 h (1 bar an hour) rather than the last 30 s. */
+  day: boolean;
 }
 
 export interface StatusLabelProps {

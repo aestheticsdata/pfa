@@ -71,6 +71,7 @@ export function botView({ bot, incident }: BotFacts): BotView {
     lastSeenAt: bot.lastSeenAt,
     sessionStartedAt: bot.sessionStartedAt,
     spark: bot.spark,
+    daySpark: bot.daySpark,
     incident,
   };
 }

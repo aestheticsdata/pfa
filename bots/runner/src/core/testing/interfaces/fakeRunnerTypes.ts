@@ -1,5 +1,6 @@
 import type { BotAction } from "@core/interfaces/actionTypes";
 import type { AccountAdmin, AuthSession } from "@core/interfaces/appTypes";
+import type { DayActivity } from "@core/interfaces/metricsTypes";
 import type { PersistedRunnerState } from "@core/interfaces/runnerTypes";
 import type { QuietHours } from "@core/interfaces/timeTypes";
 
@@ -15,4 +16,8 @@ export interface FakeRunnerOptions {
   secretsPath?: string;
   quietHours?: QuietHours;
   accounts?: AccountAdmin<unknown>;
+  /** Default `test`: every run replays the same draws. */
+  seed?: string;
+  initialActivity?: DayActivity;
+  savedActivity?: DayActivity[];
 }

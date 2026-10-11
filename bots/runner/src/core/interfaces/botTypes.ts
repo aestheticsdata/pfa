@@ -30,6 +30,8 @@ export interface BotSnapshot {
   errorRate: number;
   /** The last 30 s in 2-second slices, oldest first. */
   spark: BotActivityBucket[];
+  /** The last 24 h in 1-hour slices, oldest first (PFA-204). */
+  daySpark: BotActivityBucket[];
   /** When its current session signed in; null when signed out. */
   sessionStartedAt: string | null;
   lastSeenAt: string | null;

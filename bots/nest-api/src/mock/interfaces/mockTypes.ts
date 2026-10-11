@@ -17,6 +17,8 @@ export interface SimulatedBot {
   uploads: number;
   actionsPerMin: number;
   spark: RunnerBotSpark[];
+  /** The last 24 h in 1-hour slices, oldest first; the newest is the hour in progress. */
+  day: RunnerBotSpark[];
   byAction: Record<string, number>;
   recentRequests: RunnerRecentRequest[];
   sessionStartedAt: number | null;

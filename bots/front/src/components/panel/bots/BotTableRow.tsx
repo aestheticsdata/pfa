@@ -17,12 +17,12 @@ import { BOTS_TEXT } from "@text/bots";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import type { BotRowProps } from "@components/panel/bots/interfaces/botsTypes";
+import type { BotTableRowProps } from "@components/panel/bots/interfaces/botsTypes";
 
 const CELL = "border-b border-line-soft px-2.5 py-1.5 align-middle first:pl-3.5 last:pr-3.5";
 
 /** One row of the Bots table (≥ 700px). Clicking it opens the bot's drawer. */
-const BotTableRow = ({ app, bot, focused }: BotRowProps) => {
+const BotTableRow = ({ app, bot, focused, day }: BotTableRowProps) => {
   const router = useRouter();
   const now = useNow(5000);
   const selected = useSelectionStore((state) => state.selected.includes(bot.id));
@@ -78,7 +78,10 @@ const BotTableRow = ({ app, bot, focused }: BotRowProps) => {
       </td>
       <td className={CELL}>{live && bot.currentAction ? bot.currentAction : "—"}</td>
       <td className={cx(CELL, "hidden desktop:table-cell")}>
-        <Sparkline bot={bot} />
+        <Sparkline
+          bot={bot}
+          day={day}
+        />
       </td>
       <td className={cx(CELL, "text-right")}>{live ? bot.actionsPerMin.toFixed(1) : "—"}</td>
       <td className={cx(CELL, "text-right", errorClass(bot.errorRate))}>

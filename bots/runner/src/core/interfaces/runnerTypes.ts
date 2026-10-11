@@ -2,6 +2,7 @@ import type { BotAction } from "@core/interfaces/actionTypes";
 import type { AppDefinition } from "@core/interfaces/appTypes";
 import type { BotSnapshot, LoadPace } from "@core/interfaces/botTypes";
 import type { RunnerLimits, UploadBudgetSnapshot } from "@core/interfaces/limitTypes";
+import type { DayActivity } from "@core/interfaces/metricsTypes";
 import type { QuietHours, QuietHoursSnapshot } from "@core/interfaces/timeTypes";
 import type { RateLimiter } from "@core/limits/rateLimiter";
 import type { UploadBudget } from "@core/limits/uploadBudget";
@@ -41,6 +42,14 @@ export interface RunnerDeps<TPersona = unknown> {
   secrets: BotSecrets;
   initialState: PersistedRunnerState;
   saveState: (state: PersistedRunnerState) => Promise<void>;
+  /** The last 24 h as saved before the restart, and where to save it; absent = kept in memory only. */
+  initialActivity?: DayActivity;
+  saveActivity?: (activity: DayActivity) => Promise<void>;
+  /**
+   * Mixed into every bot's random draws. Absent = the boot time, so a restart never replays the
+   * same visit times; tests pass a fixed one to replay exactly.
+   */
+  seed?: string;
 }
 
 /** Options of a single visit; the CLI shortens the pauses, the scheduler doesn't. */

@@ -7,16 +7,18 @@ import type { CatalogItem, PfaPersona } from "@apps/pfa/interfaces/pfaTypes";
 import type { BotAction } from "@core/interfaces/actionTypes";
 
 /**
- * About how many spendings a daily bot enters in a week (≈ 2.5 visits a day × 3 actions × this
- * action's share of the weights). Used to turn "N receipts a week" into a per-spending chance.
+ * About how many spendings a daily bot enters in a week: ≈ 2.5 visits a day, three quarters of them
+ * outside the quiet hours, at most one spending each (and most visits have one) → 1–2 a day, like a
+ * real user. Used to turn "N receipts a week" into a per-spending chance.
  */
-const SPENDINGS_PER_WEEK = 30;
+const SPENDINGS_PER_WEEK = 11;
 
 const addSpending: BotAction<PfaPersona> = {
   name: "spending.add",
   description: "Adds a spending from the bot's own catalog (bounded amount, plausible date, pooled category)",
   weight: 50,
   pausedInQuietHours: true,
+  maxPerVisit: 1,
   run: async (ctx) => {
     const { persona } = ctx.bot;
     const date = plausibleDate(ctx.now(), ctx.rng, PFA_TIME_ZONE);

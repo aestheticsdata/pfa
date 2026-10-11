@@ -15,7 +15,9 @@ import type {
   RunnerActivityPoint,
   RunnerBot,
   RunnerBotDetail,
+  RunnerBotSpark,
   RunnerBulkResult,
+  RunnerDayPoint,
   RunnerQuietHours,
   RunnerQuietHoursInput,
   RunnerRamp,
@@ -30,6 +32,9 @@ const SLICES = 80;
 /** Each bot's sparkline is 15 slices of 2 s: a new one every other tick. */
 const BOT_SLICES = 15;
 const TICKS_PER_BOT_SLICE = 2;
+/** The day charts (PFA-204): 24 slices of 1 h. */
+const HOUR_MS = 3_600_000;
+const DAY_SLICES = 24;
 const MB = 1024 * 1024;
 const LIMITS = { maxBots: 500, maxRps: 40, uploadBudgetBytes: 400 * MB, uploadWindowDays: 365 };
 const DAILY = ["saturnus", "ceres", "janus", "minerva"];
@@ -99,6 +104,8 @@ export class SimulatedRunnerClient implements RunnerClient {
   private weekUploads: number;
   private weekBytes: number;
   private ticks = 0;
+  /** `floor(now / 1 h)` of the newest day slice. */
+  private hour = Math.floor(Date.now() / HOUR_MS);
 
   constructor(seed: SimulationSeed) {
     this.random = new SeededRandom(seed.seed);
@@ -189,6 +196,14 @@ export class SimulatedRunnerClient implements RunnerClient {
         throttled: slice.throttled,
       };
     });
+  }
+
+  async dayHistory(): Promise<RunnerDayPoint[]> {
+    return Array.from({ length: DAY_SLICES }, (_, i) => ({
+      at: new Date((this.hour - DAY_SLICES + 1 + i) * HOUR_MS).toISOString(),
+      actions: this.fleet.reduce((sum, bot) => sum + (bot.day[i]?.actions ?? 0), 0),
+      errors: this.fleet.reduce((sum, bot) => sum + (bot.day[i]?.errors ?? 0), 0),
+    }));
   }
 
   async bots(): Promise<RunnerBot[]> {
@@ -340,6 +355,7 @@ export class SimulatedRunnerClient implements RunnerClient {
       actionsPerMin: this.isLive(bot) ? bot.actionsPerMin : 0,
       errorRate: attempts === 0 ? 0 : bot.errors / attempts,
       spark: bot.spark,
+      daySpark: bot.day,
       sessionStartedAt: bot.sessionStartedAt ? new Date(bot.sessionStartedAt).toISOString() : null,
       lastSeenAt: bot.lastSeenAt ? new Date(bot.lastSeenAt).toISOString() : null,
       nextWakeAt: null,
@@ -362,6 +378,7 @@ export class SimulatedRunnerClient implements RunnerClient {
       uploads: 0,
       actionsPerMin: 0,
       spark: Array.from({ length: BOT_SLICES }, () => ({ actions: 0, errors: 0 })),
+      day: Array.from({ length: DAY_SLICES }, () => ({ actions: 0, errors: 0 })),
       byAction: {},
       recentRequests: [],
       sessionStartedAt: null,
@@ -380,6 +397,13 @@ export class SimulatedRunnerClient implements RunnerClient {
       bot.uploads = Math.round(bot.totalActions * 0.03);
       bot.sessionStartedAt = now - (daily ? (9 + i * 4) * 86_400_000 : minutes * 60_000);
       bot.lastSeenAt = now - this.random.int(1, 40) * 1000;
+      // A daily bot's past day: a couple of short visits; a load bot's: busy since it came up.
+      bot.day = bot.day.map((slice, hour) => {
+        const busy = daily ? this.random.chance(0.12) : hour >= DAY_SLICES - Math.ceil(minutes / 60);
+        if (!busy || hour === DAY_SLICES - 1) return slice;
+        const actions = daily ? this.random.int(1, 5) : Math.round(bot.pace * this.random.between(20, 60));
+        return { actions, errors: bot.flaky ? Math.round(actions * 0.18) : 0 };
+      });
       for (const action of ACTIONS) {
         bot.byAction[action.name] = Math.round((bot.totalActions * action.weight) / 93);
       }
@@ -423,9 +447,13 @@ export class SimulatedRunnerClient implements RunnerClient {
     const slice = this.emptySlice(now);
     this.ticks += 1;
     const newSpark = this.ticks % TICKS_PER_BOT_SLICE === 0;
+    const hour = Math.floor(now / HOUR_MS);
+    const newHours = Math.min(DAY_SLICES, hour - this.hour);
+    this.hour = hour;
     for (const bot of this.fleet) {
       const live = this.isLive(bot);
       if (newSpark) bot.spark = [...bot.spark.slice(1), { actions: 0, errors: 0 }];
+      for (let i = 0; i < newHours; i++) bot.day = [...bot.day.slice(1), { actions: 0, errors: 0 }];
       const spark = bot.spark[bot.spark.length - 1] ?? { actions: 0, errors: 0 };
       if (live && totalWeight > 0) {
         bot.actionsPerMin = bot.pace * this.random.between(0.7, 1.3);
@@ -445,6 +473,13 @@ export class SimulatedRunnerClient implements RunnerClient {
     slice.throttled = slice.requests > capPerSlice;
     this.slices.push(slice);
     this.slices.splice(0, this.slices.length - SLICES);
+  }
+
+  /** The bot's slice of the hour in progress. */
+  private dayNow(bot: SimulatedBot): RunnerBotSpark {
+    const slice = bot.day[DAY_SLICES - 1] ?? { actions: 0, errors: 0 };
+    bot.day[DAY_SLICES - 1] = slice;
+    return slice;
   }
 
   private runAction(run: ActionRun): void {
@@ -475,12 +510,14 @@ export class SimulatedRunnerClient implements RunnerClient {
       bot.errors += 1;
       stats.errors += 1;
       spark.errors += 1;
+      this.dayNow(bot).errors += 1;
       slice.errors += 1;
       if (status >= 500) slice.codes5xx += 1;
       else slice.codes4xx += 1;
     } else {
       bot.totalActions += 1;
       spark.actions += 1;
+      this.dayNow(bot).actions += 1;
       slice.actions += 1;
       slice.codes2xx += 1;
       if (action.upload) {

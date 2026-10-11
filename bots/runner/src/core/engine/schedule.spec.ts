@@ -29,4 +29,23 @@ describe("nextWakeAt", () => {
     expect(visits / 365).toBeGreaterThan(1.8);
     expect(visits / 365).toBeLessThan(3.2);
   });
+
+  it("leaves 1–2 visits a day outside the quiet hours, at an hour that changes from day to day", () => {
+    const rng = new Rng(11);
+    const start = new Date(Date.UTC(2026, 0, 1, 6, 0, 0));
+    const firstHourOfDay = new Map<string, number>();
+    let at = start;
+    let outsideQuiet = 0;
+    while (at.getTime() < start.getTime() + 365 * 24 * 3600 * 1000) {
+      at = nextWakeAt(at, rng, "Europe/Paris");
+      const hour = zonedHour(at, "Europe/Paris");
+      // Spendings are only entered from 10:00 to 22:00 (default quiet hours), at most one a visit.
+      if (hour >= 10 && hour < 22) outsideQuiet += 1;
+      const day = at.toISOString().slice(0, 10);
+      if (!firstHourOfDay.has(day)) firstHourOfDay.set(day, hour);
+    }
+    expect(outsideQuiet / 365).toBeGreaterThan(1);
+    expect(outsideQuiet / 365).toBeLessThan(2.5);
+    expect(new Set(firstHourOfDay.values()).size).toBeGreaterThanOrEqual(8);
+  });
 });

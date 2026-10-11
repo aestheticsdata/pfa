@@ -42,6 +42,11 @@ export async function fakeRunner(options: FakeRunnerOptions = {}): Promise<Runne
     uploads: new UploadBudget({ budgetBytes: 1024, windowMs: 1000, entries: [] }),
     secrets: await BotSecrets.load(options.secretsPath ?? "/tmp/bot-runner-test-secrets.json"),
     initialState: options.initialState ?? { disabledBots: [], disabledActions: [] },
+    seed: options.seed ?? "test",
+    initialActivity: options.initialActivity,
+    saveActivity: async (activity) => {
+      options.savedActivity?.push(structuredClone(activity));
+    },
     saveState: async (state) => {
       saved.push(structuredClone(state));
     },

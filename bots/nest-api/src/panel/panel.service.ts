@@ -76,15 +76,17 @@ export class PanelService {
 
   async overview(appId: string): Promise<OverviewView> {
     const app = this.apps.get(appId);
-    const [status, history, bots, flagged] = await Promise.all([
+    const [status, history, dayHistory, bots, flagged] = await Promise.all([
       app.runner.status(),
       app.runner.history(),
+      app.runner.dayHistory(),
       app.runner.bots(),
       this.flaggedAccounts(app.id),
     ]);
     return {
       status: statusView(status),
       history: activityPoints(history),
+      dayHistory,
       dailyBots: bots
         .filter((bot) => bot.kind === BOT_KIND.daily)
         .map((bot) => botView({ bot, incident: flagged.has(bot.email) })),
@@ -122,6 +124,7 @@ export class PanelService {
       counts: { population, state },
       matchingIds: matching.map((view) => view.id),
       running: status.running,
+      loadPace: status.loadPace,
     };
   }
 

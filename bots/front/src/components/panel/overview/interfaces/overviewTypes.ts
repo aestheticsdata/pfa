@@ -34,6 +34,8 @@ export interface DailyBotsCardProps {
 export interface StatusCardProps {
   status: StatusView;
   actions: number[];
+  /** `actions` are the last 24 h, one an hour (daily pace), not the last 80 s (PFA-204). */
+  day: boolean;
 }
 
 export interface StatusOnlyProps {

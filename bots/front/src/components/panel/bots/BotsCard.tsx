@@ -5,6 +5,7 @@ import Pager from "@components/panel/bots/Pager";
 import Toolbar from "@components/panel/bots/Toolbar";
 import Card from "@components/ui/Card";
 import CardHeader from "@components/ui/CardHeader";
+import { LOAD_PACE } from "@contracts/panel";
 import { BOTS_TEXT } from "@text/bots";
 
 import type { BotsCardProps } from "@components/panel/bots/interfaces/botsTypes";
@@ -30,6 +31,7 @@ const BotsCard = ({ app, data, filters, focused = null }: BotsCardProps) => (
       rows={data.rows}
       focused={focused}
       ids={data.matchingIds}
+      day={data.loadPace === LOAD_PACE.daily}
     />
     <BotsList
       app={app}

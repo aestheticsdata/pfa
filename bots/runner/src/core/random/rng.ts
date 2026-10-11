@@ -1,6 +1,7 @@
 /**
- * Seeded PRNG (mulberry32): a bot seeded with its id makes the same "personal" choices on every
- * restart (its upload pace, its habits), and tests replay exactly.
+ * Seeded PRNG (mulberry32): seeded with a bot's id alone, it makes the same "personal" choices on
+ * every restart (its upload pace, its habits); the runner adds its boot time to the seed of the
+ * visits, so a restart never replays the same visit times. Tests replay exactly.
  */
 export class Rng {
   private state: number;

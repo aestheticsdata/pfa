@@ -9,6 +9,7 @@ import { readJson, writeJson } from "@core/storage/jsonStore";
 import type { AppDefinition } from "@core/interfaces/appTypes";
 import type { RunnerConfig } from "@core/interfaces/configTypes";
 import type { UploadEntry } from "@core/interfaces/limitTypes";
+import type { DayActivity } from "@core/interfaces/metricsTypes";
 import type { PersistedRunnerState } from "@core/interfaces/runnerTypes";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -26,6 +27,7 @@ export async function createRunner<TPersona>(
 ): Promise<Runner<TPersona>> {
   const stateFile = { path: join(config.stateDir, `${app.id}-state.json`) };
   const uploadsFile = { path: join(config.stateDir, "uploads.json") };
+  const activityFile = { path: join(config.stateDir, `${app.id}-activity.json`) };
   return new Runner<TPersona>({
     app,
     actions: await loadActions<TPersona>(app.actionsDir),
@@ -40,6 +42,8 @@ export async function createRunner<TPersona>(
     secrets: await BotSecrets.load(join(config.stateDir, "bot-secrets.json")),
     initialState: migrateState(await readJson<Partial<PersistedRunnerState> & LegacyRunnerState>(stateFile, {})),
     saveState: (state) => writeJson(stateFile, state),
+    initialActivity: await readJson<DayActivity | undefined>(activityFile, undefined),
+    saveActivity: (activity) => writeJson(activityFile, activity),
   });
 }
 

@@ -75,6 +75,8 @@ export const OVERVIEW_TEXT = {
     errorsSub: (perMin: number) => `${perMin} err/min · threshold 3%`,
     chart: "Actions / min — last 80 seconds",
     axis: ["−80s", "−40s", "now"],
+    chartDay: "Actions / hour — last 24 hours",
+    axisDay: ["−24h", "−12h", "now"],
   },
   daily: {
     title: "Daily bots",

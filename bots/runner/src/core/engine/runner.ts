@@ -27,7 +27,14 @@ import type {
   LoadPace,
 } from "@core/interfaces/botTypes";
 import type { RequestRecord } from "@core/interfaces/httpTypes";
-import type { ActivityBucket, ActivityPoint, BotActivityBucket, RecentRequest } from "@core/interfaces/metricsTypes";
+import type {
+  ActivityBucket,
+  ActivityPoint,
+  BotActivityBucket,
+  DayActivity,
+  DayPoint,
+  RecentRequest,
+} from "@core/interfaces/metricsTypes";
 import type {
   PersistedRunnerState,
   RampSettings,
@@ -45,6 +52,10 @@ const RUNNER_SLICE_MS = 1_000;
 const RUNNER_SLICES = 80;
 const BOT_SLICE_MS = 2_000;
 const BOT_SLICES = 15;
+/** The day charts (PFA-204): the last 24 h in 1-hour slices, saved at most once a minute. */
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_SLICES = 24;
+const ACTIVITY_SAVE_MS = MINUTE_MS;
 const RECENT_REQUESTS = 14;
 const RPS_WINDOW_MS = 10_000;
 const DEFAULT_RAMP: RampSettings = { step: 10, everySec: 30 };
@@ -70,6 +81,7 @@ interface BotRuntime<TPersona> {
   nextWakeAt: Date | null;
   sessionStartedAt: Date | null;
   activity: TimeBuckets<BotActivityBucket>;
+  day: TimeBuckets<BotActivityBucket>;
   byAction: Map<string, number>;
   recentRequests: RecentRequest[];
 }
@@ -77,6 +89,12 @@ interface BotRuntime<TPersona> {
 interface ActionStats {
   runs: number;
   errors: number;
+}
+
+/** An action about to be picked, and what the visit already did. */
+interface VisitCheck<TPersona> {
+  action: BotAction<TPersona>;
+  visit: Map<string, number>;
 }
 
 /**
@@ -101,10 +119,19 @@ export class Runner<TPersona = unknown> {
     size: RUNNER_SLICES,
     make: () => this.emptyActivity(),
   });
+  private readonly day = new TimeBuckets<BotActivityBucket>({
+    bucketMs: HOUR_MS,
+    size: DAY_SLICES,
+    make: () => ({ actions: 0, errors: 0 }),
+  });
+  private dayDirty = false;
+  private daySavedAt = 0;
+  private readonly seed: string;
   private ticker: NodeJS.Timeout | undefined;
 
   constructor(private readonly deps: RunnerDeps<TPersona>) {
     const { app, limits } = deps;
+    this.seed = deps.seed ?? String(Date.now());
     if (app.bots.length > limits.maxBots) {
       throw new Error(`${app.bots.length} bots configured, above the hard cap of ${limits.maxBots}`);
     }
@@ -124,6 +151,10 @@ export class Runner<TPersona = unknown> {
       ...deps.initialState,
       disabledBots: deps.initialState.disabledBots.filter((id) => this.bots.get(id)?.profile.kind !== BOT_KIND.load),
     };
+    this.day.restore(deps.initialActivity?.runner ?? []);
+    for (const [id, slices] of Object.entries(deps.initialActivity?.bots ?? {})) {
+      this.bots.get(id)?.day.restore(slices);
+    }
     for (const id of this.state.blockedBots ?? []) {
       const bot = this.bots.get(id);
       if (bot) bot.state = BOT_STATE.blocked;
@@ -323,6 +354,8 @@ export class Runner<TPersona = unknown> {
     this.activeVisits += 1;
     bot.state = BOT_STATE.active;
     const count = options.actions ?? actionsPerWake(bot.rng);
+    // How many times each action ran in this visit, for `maxPerVisit`.
+    const visit = new Map<string, number>();
     try {
       for (let i = 0; i < count; i++) {
         // The bot's switches — and, for a load bot, the ramp taking it down — hold mid-visit too:
@@ -334,7 +367,7 @@ export class Runner<TPersona = unknown> {
           await sleep(options.thinkTimeMs ?? this.thinkTime(bot));
         }
         await this.ensureSignedIn(bot);
-        await this.runOneAction(bot);
+        await this.runOneAction(bot, visit);
       }
     } catch (error) {
       if (error instanceof BotBlockedError) {
@@ -390,6 +423,11 @@ export class Runner<TPersona = unknown> {
       uploadBudget: this.deps.uploads.snapshot(),
       quietHours: this.quietHours(),
     };
+  }
+
+  /** The last 24 h in 1-hour slices, oldest first: the back-office's day chart (PFA-204). */
+  dayHistory(): DayPoint[] {
+    return this.day.read().map(({ at, bucket }) => ({ at: new Date(at).toISOString(), ...bucket }));
   }
 
   /** The last 80 s in 1-second slices, oldest first: the back-office's live charts. */
@@ -467,6 +505,7 @@ export class Runner<TPersona = unknown> {
       actionsPerMin: lastMinute,
       errorRate: attempts === 0 ? 0 : bot.errors / attempts,
       spark,
+      daySpark: bot.day.read().map(({ bucket }) => ({ ...bucket })),
       sessionStartedAt: bot.sessionStartedAt?.toISOString() ?? null,
       lastSeenAt: bot.lastSeenAt?.toISOString() ?? null,
       nextWakeAt: bot.nextWakeAt?.toISOString() ?? null,
@@ -487,7 +526,7 @@ export class Runner<TPersona = unknown> {
           );
         },
       }),
-      rng: new Rng(`${this.deps.app.id}:${profile.id}`),
+      rng: new Rng(`${this.deps.app.id}:${profile.id}:${this.seed}`),
       memory: new Map(),
       state: BOT_STATE.sleeping,
       signedIn: false,
@@ -501,6 +540,11 @@ export class Runner<TPersona = unknown> {
       activity: new TimeBuckets<BotActivityBucket>({
         bucketMs: BOT_SLICE_MS,
         size: BOT_SLICES,
+        make: () => ({ actions: 0, errors: 0 }),
+      }),
+      day: new TimeBuckets<BotActivityBucket>({
+        bucketMs: HOUR_MS,
+        size: DAY_SLICES,
         make: () => ({ actions: 0, errors: 0 }),
       }),
       byAction: new Map(),
@@ -572,6 +616,7 @@ export class Runner<TPersona = unknown> {
       return;
     }
     this.rampNow();
+    this.saveDayIfDue();
     const now = new Date();
     for (const bot of this.bots.values()) {
       if (bot.busy || this.effectiveState(bot) !== BOT_STATE.sleeping) {
@@ -684,7 +729,34 @@ export class Runner<TPersona = unknown> {
     bot.sessionStartedAt = new Date();
   }
 
-  private async runOneAction(bot: BotRuntime<TPersona>): Promise<void> {
+  /** Writes the last 24 h to disk when something changed, at most once a minute. */
+  private saveDayIfDue(): void {
+    const now = Date.now();
+    if (!this.dayDirty || !this.deps.saveActivity || now - this.daySavedAt < ACTIVITY_SAVE_MS) {
+      return;
+    }
+    this.dayDirty = false;
+    this.daySavedAt = now;
+    const bots: DayActivity["bots"] = {};
+    for (const bot of this.bots.values()) {
+      const slices = bot.day.read().filter(({ bucket }) => bucket.actions + bucket.errors > 0);
+      if (slices.length > 0) bots[bot.profile.id] = slices;
+    }
+    this.deps.saveActivity({ runner: this.day.read(), bots }).catch((error: unknown) => {
+      logger.warn("activity not saved", { app: this.deps.app.id, error: String(error) });
+    });
+  }
+
+  /** The action already ran as many times as it may in this visit (never in a burst-paced one). */
+  private visitCapReached(bot: BotRuntime<TPersona>, check: VisitCheck<TPersona>): boolean {
+    const { action, visit } = check;
+    if (action.maxPerVisit === undefined || (bot.profile.kind === BOT_KIND.load && this.isBurst())) {
+      return false;
+    }
+    return (visit.get(action.name) ?? 0) >= action.maxPerVisit;
+  }
+
+  private async runOneAction(bot: BotRuntime<TPersona>, visit: Map<string, number>): Promise<void> {
     const ctx: ActionContext<TPersona> = {
       bot: bot.profile,
       client: bot.client,
@@ -698,6 +770,7 @@ export class Runner<TPersona = unknown> {
       (action) =>
         !this.state.disabledActions.includes(action.name) &&
         !(quiet && action.pausedInQuietHours) &&
+        !this.visitCapReached(bot, { action, visit }) &&
         (action.canRun?.(ctx) ?? true),
     );
     const action = bot.rng.weighted(candidates, (candidate: BotAction<TPersona>) => candidate.weight);
@@ -705,6 +778,8 @@ export class Runner<TPersona = unknown> {
       return;
     }
     const stats = this.actionStats.get(action.name);
+    visit.set(action.name, (visit.get(action.name) ?? 0) + 1);
+    this.dayDirty = true;
     bot.currentAction = action.name;
     bot.byAction.set(action.name, (bot.byAction.get(action.name) ?? 0) + 1);
     const started = Date.now();
@@ -712,14 +787,18 @@ export class Runner<TPersona = unknown> {
       await action.run(ctx);
       bot.totalActions += 1;
       bot.activity.current().actions += 1;
+      bot.day.current().actions += 1;
       this.activity.current().actions += 1;
+      this.day.current().actions += 1;
       if (stats) stats.runs += 1;
       this.recentActions.push(Date.now());
       logger.info("action", { bot: bot.profile.id, action: action.name, ms: Date.now() - started });
     } catch (error) {
       bot.errors += 1;
       bot.activity.current().errors += 1;
+      bot.day.current().errors += 1;
       this.activity.current().errors += 1;
+      this.day.current().errors += 1;
       if (stats) stats.errors += 1;
       this.recentErrors.push(Date.now());
       if (error instanceof SessionExpiredError) {

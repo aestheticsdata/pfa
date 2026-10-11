@@ -75,6 +75,13 @@ export interface RunnerActivityPoint {
   throttled: boolean;
 }
 
+/** One hour of the runner's last 24 (`GET /history/day`). */
+export interface RunnerDayPoint {
+  at: string;
+  actions: number;
+  errors: number;
+}
+
 export interface RunnerBotSpark {
   actions: number;
   errors: number;
@@ -94,6 +101,8 @@ export interface RunnerBot {
   actionsPerMin: number;
   errorRate: number;
   spark: RunnerBotSpark[];
+  /** The last 24 h in 1-hour slices, oldest first (PFA-204). */
+  daySpark: RunnerBotSpark[];
   sessionStartedAt: string | null;
   lastSeenAt: string | null;
   nextWakeAt: string | null;
