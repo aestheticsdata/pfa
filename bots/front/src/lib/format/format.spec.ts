@@ -29,6 +29,10 @@ describe("format", () => {
     expect(count(12002)).toBe("12,002");
     expect(longSpan(34)).toBe("34 days");
     expect(longSpan(0.5)).toBe("12 h");
+    expect(longSpan(365)).toBe("365 days");
+    expect(longSpan(400)).toBe("1y 01m");
+    expect(longSpan(10233)).toBe("28y 00m");
+    expect(longSpan(800)).toBe("2y 02m");
   });
 
   it("writes a slice as its start and end minute", () => {

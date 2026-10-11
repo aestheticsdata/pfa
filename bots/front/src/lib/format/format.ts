@@ -70,8 +70,13 @@ export function count(value: number): string {
   return value.toLocaleString("en-US");
 }
 
-/** "empty in ~X" at the current pace. */
+const DAYS_PER_YEAR = 365;
+const DAYS_PER_MONTH = 365.25 / 12;
+
+/** "empty in ~X" at the current pace: hours, then days, then years and months past a year (`2y 03m`). */
 export function longSpan(days: number): string {
   if (days < 1) return `${Math.max(1, Math.round(days * 24))} h`;
-  return `${Math.round(days)} days`;
+  if (days <= DAYS_PER_YEAR) return `${Math.round(days)} days`;
+  const months = Math.round(days / DAYS_PER_MONTH);
+  return `${Math.floor(months / 12)}y ${String(months % 12).padStart(2, "0")}m`;
 }

@@ -72,7 +72,7 @@ const UploadBudgetCard = ({ status }: StatusOnlyProps) => {
           </div>
           <div>
             <Label>{text.pace}</Label>
-            <div className="mt-0.5 font-mono text-title font-semibold">
+            <div className="mt-0.5 truncate font-mono text-title font-semibold whitespace-nowrap">
               {empty ? text.exhausted : budget.emptyInDays !== null ? text.emptyIn(longSpan(budget.emptyInDays)) : "—"}
             </div>
           </div>
