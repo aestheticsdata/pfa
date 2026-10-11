@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { randomUUID } from "crypto";
 import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 import { ReceiptOcrService } from "@spendings/receipt-lines/receipt-ocr.service";
-import { parseReceiptText } from "@spendings/receipt-lines/receipt-text-parser";
+import { parseReceiptPages, pickProposal } from "@spendings/receipt-lines/receipt-text-parser";
 import type { ReceiptLine, ReceiptProposal } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 import { PrismaService } from "../../prisma/prisma.service";
 
@@ -57,7 +57,7 @@ export class ReceiptLinesService {
     if (!invoicefile) {
       throw new BadRequestException("NO_RECEIPT");
     }
-    const text = await this.ocr.read(this.receiptFiles.safePath(userID, invoicefile));
-    return parseReceiptText(text);
+    const readings = await this.ocr.read(this.receiptFiles.safePath(userID, invoicefile));
+    return pickProposal(readings.map(parseReceiptPages));
   }
 }

@@ -1,4 +1,4 @@
-import { parseReceiptText } from "@spendings/receipt-lines/receipt-text-parser";
+import { parseReceiptPages, parseReceiptText, pickProposal } from "@spendings/receipt-lines/receipt-text-parser";
 
 /**
  * PFA-214 — the shapes below are invented receipts, written after the layouts
@@ -91,6 +91,23 @@ describe("parseReceiptText", () => {
     });
   });
 
+  it("drops the quantity and unit-price columns from a label (PFA-216)", () => {
+    const text = [
+      "Produit            Qté  A régler  Total",
+      "LOTION DOUCE",
+      "FLACON 500ML        3    4,20    12,60",
+      "Total TTC en EUR             12,60",
+    ].join("\n");
+
+    expect(parseReceiptText(text)).toEqual({ lines: [{ label: "FLACON 500ML", amount: 12.6 }], total: 12.6 });
+  });
+
+  it("reads nothing on a card-payment slip", () => {
+    const text = ["CARTE BANCAIRE", "CB EXEMPLE", "No AUTO : 123456", "MONTANT :", "12,60 EUR", "DEBIT"].join("\n");
+
+    expect(parseReceiptText(text)).toEqual({ lines: [], total: null });
+  });
+
   it("finds nothing in a text with no priced line", () => {
     expect(parseReceiptText("MERCI DE VOTRE VISITE\nA BIENTOT")).toEqual({ lines: [], total: null });
   });
@@ -99,5 +116,37 @@ describe("parseReceiptText", () => {
     const text = ["CANAPE 3 PLACES  12999,00", "%% ~ 3,20", "PAIN 1,00"].join("\n");
 
     expect(parseReceiptText(text)).toEqual({ lines: [{ label: "PAIN", amount: 1 }], total: null });
+  });
+});
+
+describe("parseReceiptPages", () => {
+  it("takes the items of every slip and the first total found", () => {
+    expect(parseReceiptPages(["THE VERT 3,10\nTOTAL 3,10", "CARTE BANCAIRE\nMONTANT :\n3,10 EUR"])).toEqual({
+      lines: [{ label: "THE VERT", amount: 3.1 }],
+      total: 3.1,
+    });
+  });
+});
+
+describe("pickProposal", () => {
+  const lines = (...amounts: number[]) => amounts.map((amount, i) => ({ label: `ITEM ${i}`, amount }));
+
+  it("prefers lines adding up to the total over more lines", () => {
+    const addsUp = { lines: lines(1.2, 3.85), total: 5.05 };
+    const more = { lines: lines(1.2, 3.85, 9), total: 5.05 };
+    expect(pickProposal([more, addsUp])).toBe(addsUp);
+  });
+
+  it("then a found total, then the most lines", () => {
+    const withTotal = { lines: lines(2), total: 9 };
+    const noTotal = { lines: lines(2, 3), total: null };
+    expect(pickProposal([noTotal, withTotal])).toBe(withTotal);
+    expect(pickProposal([{ lines: lines(1), total: null }, noTotal])).toBe(noTotal);
+  });
+
+  it("keeps the first reading on a tie, and has an empty proposal for none", () => {
+    const first = { lines: lines(1), total: null };
+    expect(pickProposal([first, { lines: lines(2), total: null }])).toBe(first);
+    expect(pickProposal([])).toEqual({ lines: [], total: null });
   });
 });
