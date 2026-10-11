@@ -102,6 +102,23 @@ describe("parseReceiptText", () => {
     expect(parseReceiptText(text)).toEqual({ lines: [{ label: "FLACON 500ML", amount: 12.6 }], total: 12.6 });
   });
 
+  it("reads a VAT code in parentheses after the price, and a stray bar before it (PFA-217)", () => {
+    const text = [
+      "1 FIGUES SECHEES TURQUIE *   3.20 (01)",
+      "1 FIGUES SECHEES TURQUIE * | 3,20 (01)",
+      "Montant total éligible : 6.40 Euro",
+      "TOTAL (Euro)                 6.40",
+    ].join("\n");
+
+    expect(parseReceiptText(text)).toEqual({
+      lines: [
+        { label: "1 FIGUES SECHEES TURQUIE", amount: 3.2 },
+        { label: "1 FIGUES SECHEES TURQUIE", amount: 3.2 },
+      ],
+      total: 6.4,
+    });
+  });
+
   it("reads nothing on a card-payment slip", () => {
     const text = ["CARTE BANCAIRE", "CB EXEMPLE", "No AUTO : 123456", "MONTANT :", "12,60 EUR", "DEBIT"].join("\n");
 
