@@ -1,5 +1,12 @@
 import { BOT_VIEW_STATE } from "#app/contracts/panel.js";
-import { actionViews, activityHistogram, activityPoints, uploadBudgetView, viewState } from "#app/panel/panel-view.js";
+import {
+  actionViews,
+  activityHistogram,
+  activityPoints,
+  dayActivityHistogram,
+  uploadBudgetView,
+  viewState,
+} from "#app/panel/panel-view.js";
 
 import type { BotView } from "#app/contracts/interfaces/panelTypes.js";
 import type { RunnerAction, RunnerBot } from "#app/runner/interfaces/runnerApiTypes.js";
@@ -107,5 +114,11 @@ describe("panel view", () => {
     const paces = [0.5, 1.5, 1.9, 6.5];
     const histogram = activityHistogram(paces.map((actionsPerMin) => ({ actionsPerMin }) as BotView));
     expect(histogram.map((bucket) => bucket.count)).toEqual([1, 2, 0, 0, 0, 0, 1]);
+  });
+
+  it("buckets live bots by their actions over the last 24 h", () => {
+    const days = [0, 2, 4, 4, 60];
+    const histogram = dayActivityHistogram(days.map((actions) => ({ daySpark: [{ actions, errors: 0 }] }) as BotView));
+    expect(histogram.map((bucket) => bucket.count)).toEqual([1, 1, 2, 0, 0, 0, 1]);
   });
 });

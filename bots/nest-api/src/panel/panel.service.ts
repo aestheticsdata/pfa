@@ -9,6 +9,7 @@ import {
   activityHistogram,
   activityPoints,
   botView,
+  dayActivityHistogram,
   isLiveState,
   statusView,
 } from "#app/panel/panel-view.js";
@@ -145,16 +146,20 @@ export class PanelService {
 
   async metrics(appId: string): Promise<MetricsView> {
     const app = this.apps.get(appId);
-    const [status, history, bots, actions] = await Promise.all([
+    const [status, history, dayHistory, bots, actions] = await Promise.all([
       app.runner.status(),
       app.runner.history(),
+      app.runner.dayHistory(),
       app.runner.bots(),
       app.runner.actions(),
     ]);
     const live = bots.map((bot) => botView({ bot, incident: false })).filter((view) => isLiveState(view.state));
     return {
       history: activityPoints(history),
+      dayHistory,
+      loadPace: status.loadPace,
       activity: activityHistogram(live),
+      dayActivity: dayActivityHistogram(live),
       liveBots: live.length,
       actionMix: actionViews({
         actions,

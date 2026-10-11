@@ -9,7 +9,7 @@ export interface TimeBucketsOptions<T> {
   clock?: Clock;
 }
 
-/** One 1-second slice of the runner's activity, as the back-office charts it (last 80 s). */
+/** One slice of the runner's activity: 1 s (the last 80 s) or 1 h (the last 24 h, PFA-205). */
 export interface ActivityBucket {
   actions: number;
   errors: number;
@@ -59,16 +59,12 @@ export interface StoredSlice<T> {
  * to disk, so a restart or a deploy does not blank the back-office's day charts.
  */
 export interface DayActivity {
-  runner: StoredSlice<BotActivityBucket>[];
+  /**
+   * The runner's hours, as the live 1-second slices (latencies sampled, PFA-205). Partial: a file
+   * written before PFA-205 holds actions and errors only.
+   */
+  runner: StoredSlice<Partial<ActivityBucket>>[];
   bots: Record<string, StoredSlice<BotActivityBucket>[]>;
-}
-
-/** One hour of the last 24, for the back-office's day chart. */
-export interface DayPoint {
-  /** Start of the hour (ISO 8601). */
-  at: string;
-  actions: number;
-  errors: number;
 }
 
 /** One request a bot sent, for its drawer. */

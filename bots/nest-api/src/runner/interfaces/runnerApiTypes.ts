@@ -75,13 +75,6 @@ export interface RunnerActivityPoint {
   throttled: boolean;
 }
 
-/** One hour of the runner's last 24 (`GET /history/day`). */
-export interface RunnerDayPoint {
-  at: string;
-  actions: number;
-  errors: number;
-}
-
 export interface RunnerBotSpark {
   actions: number;
   errors: number;

@@ -32,7 +32,6 @@ import type {
   ActivityPoint,
   BotActivityBucket,
   DayActivity,
-  DayPoint,
   RecentRequest,
 } from "@core/interfaces/metricsTypes";
 import type {
@@ -52,10 +51,12 @@ const RUNNER_SLICE_MS = 1_000;
 const RUNNER_SLICES = 80;
 const BOT_SLICE_MS = 2_000;
 const BOT_SLICES = 15;
-/** The day charts (PFA-204): the last 24 h in 1-hour slices, saved at most once a minute. */
+/** The day charts (PFA-204/205): the last 24 h in 1-hour slices, saved at most once a minute. */
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_SLICES = 24;
 const ACTIVITY_SAVE_MS = MINUTE_MS;
+/** Response times kept per hour for its p50/p95: past that, a sample replaces a random one. */
+const DAY_LATENCY_SAMPLES = 2_000;
 const RECENT_REQUESTS = 14;
 const RPS_WINDOW_MS = 10_000;
 const DEFAULT_RAMP: RampSettings = { step: 10, everySec: 30 };
@@ -119,10 +120,10 @@ export class Runner<TPersona = unknown> {
     size: RUNNER_SLICES,
     make: () => this.emptyActivity(),
   });
-  private readonly day = new TimeBuckets<BotActivityBucket>({
+  private readonly day = new TimeBuckets<ActivityBucket>({
     bucketMs: HOUR_MS,
     size: DAY_SLICES,
-    make: () => ({ actions: 0, errors: 0 }),
+    make: () => this.emptyActivity(),
   });
   private dayDirty = false;
   private daySavedAt = 0;
@@ -151,7 +152,13 @@ export class Runner<TPersona = unknown> {
       ...deps.initialState,
       disabledBots: deps.initialState.disabledBots.filter((id) => this.bots.get(id)?.profile.kind !== BOT_KIND.load),
     };
-    this.day.restore(deps.initialActivity?.runner ?? []);
+    // A file written before PFA-205 holds actions and errors only: the rest starts at zero.
+    this.day.restore(
+      (deps.initialActivity?.runner ?? []).map(({ at, bucket }) => ({
+        at,
+        bucket: { ...this.emptyActivity(), ...bucket },
+      })),
+    );
     for (const [id, slices] of Object.entries(deps.initialActivity?.bots ?? {})) {
       this.bots.get(id)?.day.restore(slices);
     }
@@ -332,13 +339,17 @@ export class Runner<TPersona = unknown> {
 
   recordRequest(record: RequestRecord): void {
     this.recentRequests.push(Date.now());
-    const slice = this.activity.current();
-    slice.requests += 1;
-    slice.latencies.push(record.ms);
-    if (record.status >= 500 || record.status === 0) slice.codes5xx += 1;
-    else if (record.status >= 400) slice.codes4xx += 1;
-    else slice.codes2xx += 1;
-    if (this.deps.limiter.throttledWithin(RUNNER_SLICE_MS)) slice.throttled = true;
+    const throttled = this.deps.limiter.throttledWithin(RUNNER_SLICE_MS);
+    for (const slice of [this.activity.current(), this.day.current()]) {
+      slice.requests += 1;
+      if (slice.latencies.length < DAY_LATENCY_SAMPLES) slice.latencies.push(record.ms);
+      else slice.latencies[Math.floor(Math.random() * DAY_LATENCY_SAMPLES)] = record.ms;
+      if (record.status >= 500 || record.status === 0) slice.codes5xx += 1;
+      else if (record.status >= 400) slice.codes4xx += 1;
+      else slice.codes2xx += 1;
+      if (throttled) slice.throttled = true;
+    }
+    this.dayDirty = true;
   }
 
   /**
@@ -425,18 +436,22 @@ export class Runner<TPersona = unknown> {
     };
   }
 
-  /** The last 24 h in 1-hour slices, oldest first: the back-office's day chart (PFA-204). */
-  dayHistory(): DayPoint[] {
-    return this.day.read().map(({ at, bucket }) => ({ at: new Date(at).toISOString(), ...bucket }));
+  /** The last 24 h in 1-hour slices, oldest first: the back-office's day charts (PFA-204/205). */
+  dayHistory(): ActivityPoint[] {
+    return this.points(this.day);
   }
 
   /** The last 80 s in 1-second slices, oldest first: the back-office's live charts. */
   history(): ActivityPoint[] {
+    return this.points(this.activity);
+  }
+
+  private points(window: TimeBuckets<ActivityBucket>): ActivityPoint[] {
     const live = this.status();
-    const latest = this.activity.current();
+    const latest = window.current();
     latest.live = live.liveDaily + live.liveLoad;
     latest.target = live.totalDaily + this.effectiveTarget();
-    return this.activity.read().map(({ at, bucket }) => ({
+    return window.read().map(({ at, bucket }) => ({
       at: new Date(at).toISOString(),
       actions: bucket.actions,
       errors: bucket.errors,
