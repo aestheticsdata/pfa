@@ -105,6 +105,8 @@ describe("Runner guards", () => {
       actions: 5,
       errors: 0,
       byAction: { a: 2 },
+      errorsByAction: {},
+      byBot: { "bot-0": 2 },
       requests: 0,
       p50: 0,
       codes2xx: 0,

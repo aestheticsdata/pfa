@@ -1,0 +1,51 @@
+/* Motion (PFA-209): the dialog's open / close, as in the other apps (shadcn's fade + zoom, a bottom
+   sheet that slides up on a phone). Radix waits for the closing animation before unmounting. */
+@theme {
+  --animate-overlay-in: overlay-in 200ms ease-out both;
+  --animate-overlay-out: overlay-out 150ms ease-in both;
+  --animate-dialog-in: dialog-in 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-dialog-out: dialog-out 150ms ease-in both;
+  --animate-sheet-in: sheet-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-sheet-out: sheet-out 200ms ease-in both;
+
+  @keyframes overlay-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes overlay-out {
+    to {
+      opacity: 0;
+    }
+  }
+  /* `scale`, not `transform`: the centred box keeps its own `translate`. */
+  @keyframes dialog-in {
+    from {
+      opacity: 0;
+      scale: 0.95;
+    }
+  }
+  @keyframes dialog-out {
+    to {
+      opacity: 0;
+      scale: 0.95;
+    }
+  }
+  @keyframes sheet-in {
+    from {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes sheet-out {
+    to {
+      transform: translateY(100%);
+    }
+  }
+}
+
+/* Reduced motion: the dialog just appears; 1ms (not none) so Radix still sees its animation end. */
+@media (prefers-reduced-motion: reduce) {
+  [data-motion="dialog"] {
+    animation-duration: 1ms !important;
+  }
+}

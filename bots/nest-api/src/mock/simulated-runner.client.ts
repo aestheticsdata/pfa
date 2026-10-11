@@ -189,6 +189,8 @@ export class SimulatedRunnerClient implements RunnerClient {
         actions: slice.actions,
         errors: slice.errors,
         byAction: {},
+        errorsByAction: {},
+        byBot: {},
         requests: slice.requests,
         p50: pick(0.5),
         p95: pick(0.95),
@@ -219,6 +221,12 @@ export class SimulatedRunnerClient implements RunnerClient {
         actions,
         errors,
         byAction: byWeight(actions),
+        errorsByAction: errors > 0 ? { [ACTIONS[0]?.name ?? "spending.add"]: errors } : {},
+        byBot: Object.fromEntries(
+          this.fleet
+            .map((bot) => [bot.id, quarter((bot.day[hour]?.actions ?? 0) + (bot.day[hour]?.errors ?? 0))] as const)
+            .filter(([, runs]) => runs > 0),
+        ),
         requests: actions + errors,
         p50: busy ? Math.round(60 + ((q * 37) % 40)) : 0,
         p95: busy ? Math.round(180 + ((q * 53) % 160)) : 0,

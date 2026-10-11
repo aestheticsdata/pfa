@@ -1,4 +1,4 @@
-import { ago, count, countdown, duration, longSpan, megabytes, slotRange } from "@lib/format/format";
+import { ago, count, countdown, duration, longSpan, megabytes, slotRange, weekDay } from "@lib/format/format";
 import { describe, expect, it } from "vitest";
 
 describe("format", () => {
@@ -37,5 +37,9 @@ describe("format", () => {
     const [start = "", end = ""] = range.split(" – ");
     const minutes = (hm: string) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3));
     expect((minutes(end) - minutes(start) + 1440) % 1440).toBe(15);
+  });
+
+  it("names the day of a slice", () => {
+    expect(weekDay("2026-10-11T12:00:00Z")).toMatch(/^Sun 11 Oct$/);
   });
 });

@@ -30,6 +30,7 @@ describe("SimulatedRunnerClient", () => {
     expect(day).toHaveLength(96);
     const busy = day.find((point) => point.actions > 0);
     expect(Object.values(busy?.byAction ?? {}).reduce((sum, n) => sum + n, 0)).toBe(busy?.actions);
+    expect(Object.keys(busy?.byBot ?? {}).length).toBeGreaterThan(0);
     expect(day.reduce((sum, point) => sum + point.actions, 0)).toBeGreaterThan(0);
     expect((await runner.bot("ceres"))?.daySpark).toHaveLength(24);
   });

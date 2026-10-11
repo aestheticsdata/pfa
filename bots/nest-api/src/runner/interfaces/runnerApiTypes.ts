@@ -66,6 +66,10 @@ export interface RunnerActivityPoint {
   errors: number;
   /** Actions that succeeded, by action name. */
   byAction: Record<string, number>;
+  /** Actions that failed, by action name. */
+  errorsByAction: Record<string, number>;
+  /** Actions run (ok or not), by bot id. */
+  byBot: Record<string, number>;
   requests: number;
   p50: number;
   p95: number;
