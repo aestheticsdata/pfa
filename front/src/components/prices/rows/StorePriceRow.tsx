@@ -12,10 +12,12 @@ interface StorePriceRowProps {
   store: StorePrice;
   rank: number;
   basis: PriceBasis;
+  /** The store's hue on the price history, null when it is not drawn (PFA-222). */
+  color: string | null;
 }
 
 /** One store on a product type's ranking: its unit price, last purchase and average (PFA-220). */
-const StorePriceRow = ({ store, rank, basis }: StorePriceRowProps) => {
+const StorePriceRow = ({ store, rank, basis, color }: StorePriceRowProps) => {
   const t = useTranslations("prices");
   const { euro } = useFormat();
   const locale = useDateLocale();
@@ -36,6 +38,12 @@ const StorePriceRow = ({ store, rank, basis }: StorePriceRowProps) => {
 
       <div className="flex min-w-0 flex-col gap-1">
         <span className="flex min-w-0 items-center gap-2">
+          {color && (
+            <span
+              className="inline-block size-2.5 shrink-0 rounded-full"
+              style={{ background: color }}
+            />
+          )}
           <span className="truncate text-sm font-semibold text-ink">{store.name}</span>
           {store.cheapest && (
             <span className="shrink-0 rounded-sm bg-accent-strong px-1.5 py-0.5 text-2xs font-semibold uppercase tracking-wider text-on-selection-action">

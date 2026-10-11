@@ -46,7 +46,14 @@ function storePrice(purchases: Purchase[], prices: number[]): StorePrice {
     lastDate: last.date,
     purchases: purchases.length,
     cheapest: false,
-    history: purchases.map((purchase, i) => ({ date: purchase.date, unitPrice: prices[i] })),
+    history: purchases.map((purchase, i) => ({
+      date: purchase.date,
+      unitPrice: prices[i],
+      amount: purchase.amount,
+      quantity: purchase.quantity,
+      size: purchase.size,
+      sizeUnit: purchase.sizeUnit,
+    })),
   };
 }
 

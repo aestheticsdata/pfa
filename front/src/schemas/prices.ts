@@ -31,7 +31,17 @@ export const StorePriceSchema = apiObject({
   lastDate: z.string(),
   purchases: z.number(),
   cheapest: z.boolean(),
-  history: z.array(apiObject({ date: z.string(), unitPrice: numberLikeSchema })),
+  // Each purchase: its unit price, and the line as paid (PFA-222).
+  history: z.array(
+    apiObject({
+      date: z.string(),
+      unitPrice: numberLikeSchema,
+      amount: numberLikeSchema,
+      quantity: numberLikeSchema,
+      size: numberLikeSchema.nullable(),
+      sizeUnit: sizeUnitSchema.nullable(),
+    }),
+  ),
 });
 export type StorePrice = z.infer<typeof StorePriceSchema>;
 

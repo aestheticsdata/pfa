@@ -24,6 +24,13 @@ const prices = {
   purchases: (count: number) => `${count} achat${count > 1 ? "s" : ""}`,
   lastPaid: "Dernier achat",
   sizeUnits: { g: "g", kg: "kg", ml: "ml", cl: "cl", l: "L" },
+  history: {
+    title: "Évolution du prix",
+    aria: (basis: string) => `Évolution du prix ${basis}, par magasin`,
+    hint: "Survoler un point pour le détail de l'achat",
+    others: (count: number) =>
+      `${count} autre${count > 1 ? "s" : ""} magasin${count > 1 ? "s" : ""} non tracé${count > 1 ? "s" : ""}`,
+  },
   loadFailed: "Comparatif indisponible",
 };
 

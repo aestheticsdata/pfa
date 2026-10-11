@@ -1,4 +1,6 @@
 import Spinner from "@components/common/Spinner";
+import { hasHistory, storeColors } from "@components/prices/helpers/priceHistory";
+import PriceHistoryChart from "@components/prices/history/PriceHistoryChart";
 import StorePriceRow from "@components/prices/rows/StorePriceRow";
 import usePriceComparison from "@components/prices/services/usePriceComparison";
 import { CardSectionHeader } from "@components/shared/CardSectionHeader";
@@ -15,6 +17,7 @@ interface PriceComparisonCardProps {
 const PriceComparisonCard = ({ typeID }: PriceComparisonCardProps) => {
   const t = useTranslations("prices");
   const { data, isPending, isError } = usePriceComparison(typeID);
+  const colors = storeColors(data?.comparisons ?? []);
 
   return (
     <GlowCard
@@ -45,10 +48,17 @@ const PriceComparisonCard = ({ typeID }: PriceComparisonCardProps) => {
                     store={store}
                     rank={index + 1}
                     basis={comparison.basis}
+                    color={colors.get(store.storeID) ?? null}
                   />
                 ))}
               </ol>
               {comparison.stores.length === 1 && <p className="text-xs text-ink-4">{t.singleStore}</p>}
+              {hasHistory(comparison) && (
+                <PriceHistoryChart
+                  comparison={comparison}
+                  colors={colors}
+                />
+              )}
             </div>
           ))}
         </>
