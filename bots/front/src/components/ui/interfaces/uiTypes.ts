@@ -54,6 +54,20 @@ export interface LocalTimeProps {
   format?: string;
 }
 
+export interface ModalProps {
+  open: boolean;
+  onClose: () => void;
+  title: ReactNode;
+  /** The mono line under the title (a time range, an id…); also the dialog's description. */
+  sub?: ReactNode;
+  /** Buttons, right-aligned under the body. */
+  footer?: ReactNode;
+  testId?: string;
+  /** Extra classes for the box, e.g. a wider `tablet:max-w-…`. */
+  className?: string;
+  children: ReactNode;
+}
+
 export interface EyeIconProps {
   /** Struck through: the secret is visible, the button hides it. */
   crossed: boolean;

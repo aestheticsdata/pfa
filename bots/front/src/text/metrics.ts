@@ -9,7 +9,7 @@ export const METRICS_TEXT = {
   latencyAxisDay: ["−24h", "now"],
   codes: "Response codes",
   codesAxis: ["−80s", "per min", "now"],
-  codesAxisDay: ["−24h", "per hour", "now"],
+  codesAxisDay: ["−24h", "per 15 min", "now"],
   activity: "Activity per bot",
   activitySub: (live: number) => `${live} live bots · actions/min`,
   activitySubDay: (live: number) => `${live} live bots · actions over 24 h`,

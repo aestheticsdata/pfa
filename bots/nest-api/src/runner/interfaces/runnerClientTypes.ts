@@ -18,7 +18,7 @@ import type {
 export interface RunnerClient {
   status(): Promise<RunnerStatus>;
   history(): Promise<RunnerActivityPoint[]>;
-  /** The last 24 h in 1-hour slices, counts per hour. */
+  /** The last 24 h in 15-minute slices, counts per slice. */
   dayHistory(): Promise<RunnerActivityPoint[]>;
   bots(): Promise<RunnerBot[]>;
   bot(id: string): Promise<RunnerBotDetail | null>;

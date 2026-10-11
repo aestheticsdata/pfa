@@ -1,4 +1,4 @@
-import { ago, count, countdown, duration, longSpan, megabytes } from "@lib/format/format";
+import { ago, count, countdown, duration, longSpan, megabytes, slotRange } from "@lib/format/format";
 import { describe, expect, it } from "vitest";
 
 describe("format", () => {
@@ -24,5 +24,13 @@ describe("format", () => {
     expect(count(12002)).toBe("12,002");
     expect(longSpan(34)).toBe("34 days");
     expect(longSpan(0.5)).toBe("12 h");
+  });
+
+  it("writes a slice as its start and end minute", () => {
+    const range = slotRange("2026-10-10T12:15:00Z", 15);
+    expect(range).toMatch(/^\d\d:\d\d – \d\d:\d\d$/);
+    const [start = "", end = ""] = range.split(" – ");
+    const minutes = (hm: string) => Number(hm.slice(0, 2)) * 60 + Number(hm.slice(3));
+    expect((minutes(end) - minutes(start) + 1440) % 1440).toBe(15);
   });
 });

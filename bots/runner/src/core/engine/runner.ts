@@ -51,9 +51,14 @@ const RUNNER_SLICE_MS = 1_000;
 const RUNNER_SLICES = 80;
 const BOT_SLICE_MS = 2_000;
 const BOT_SLICES = 15;
-/** The day charts (PFA-204/205): the last 24 h in 1-hour slices, saved at most once a minute. */
+/**
+ * The day charts, saved at most once a minute: the runner's last 24 h in 15-minute slices (PFA-206),
+ * each bot's in 1-hour ones (its sparkline, PFA-204).
+ */
 const HOUR_MS = 60 * MINUTE_MS;
 const DAY_SLICES = 24;
+const QUARTER_MS = 15 * MINUTE_MS;
+const DAY_QUARTERS = 96;
 const ACTIVITY_SAVE_MS = MINUTE_MS;
 /** Response times kept per hour for its p50/p95: past that, a sample replaces a random one. */
 const DAY_LATENCY_SAMPLES = 2_000;
@@ -121,8 +126,8 @@ export class Runner<TPersona = unknown> {
     make: () => this.emptyActivity(),
   });
   private readonly day = new TimeBuckets<ActivityBucket>({
-    bucketMs: HOUR_MS,
-    size: DAY_SLICES,
+    bucketMs: QUARTER_MS,
+    size: DAY_QUARTERS,
     make: () => this.emptyActivity(),
   });
   private dayDirty = false;
@@ -152,7 +157,8 @@ export class Runner<TPersona = unknown> {
       ...deps.initialState,
       disabledBots: deps.initialState.disabledBots.filter((id) => this.bots.get(id)?.profile.kind !== BOT_KIND.load),
     };
-    // A file written before PFA-205 holds actions and errors only: the rest starts at zero.
+    // A file written before PFA-205 holds actions and errors only: the rest starts at zero. Its
+    // 1-hour slices land in the first quarter of their hour.
     this.day.restore(
       (deps.initialActivity?.runner ?? []).map(({ at, bucket }) => ({
         at,
@@ -436,7 +442,7 @@ export class Runner<TPersona = unknown> {
     };
   }
 
-  /** The last 24 h in 1-hour slices, oldest first: the back-office's day charts (PFA-204/205). */
+  /** The last 24 h in 15-minute slices, oldest first: the back-office's day charts (PFA-204/205/206). */
   dayHistory(): ActivityPoint[] {
     return this.points(this.day);
   }
@@ -455,6 +461,7 @@ export class Runner<TPersona = unknown> {
       at: new Date(at).toISOString(),
       actions: bucket.actions,
       errors: bucket.errors,
+      byAction: { ...bucket.byAction },
       requests: bucket.requests,
       p50: percentile(bucket.latencies, 0.5),
       p95: percentile(bucket.latencies, 0.95),
@@ -580,6 +587,7 @@ export class Runner<TPersona = unknown> {
     return {
       actions: 0,
       errors: 0,
+      byAction: {},
       requests: 0,
       latencies: [],
       codes2xx: 0,
@@ -803,8 +811,10 @@ export class Runner<TPersona = unknown> {
       bot.totalActions += 1;
       bot.activity.current().actions += 1;
       bot.day.current().actions += 1;
-      this.activity.current().actions += 1;
-      this.day.current().actions += 1;
+      for (const slice of [this.activity.current(), this.day.current()]) {
+        slice.actions += 1;
+        slice.byAction[action.name] = (slice.byAction[action.name] ?? 0) + 1;
+      }
       if (stats) stats.runs += 1;
       this.recentActions.push(Date.now());
       logger.info("action", { bot: bot.profile.id, action: action.name, ms: Date.now() - started });

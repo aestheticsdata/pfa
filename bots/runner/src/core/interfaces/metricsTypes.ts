@@ -9,10 +9,12 @@ export interface TimeBucketsOptions<T> {
   clock?: Clock;
 }
 
-/** One slice of the runner's activity: 1 s (the last 80 s) or 1 h (the last 24 h, PFA-205). */
+/** One slice of the runner's activity: 1 s (the last 80 s) or 15 min (the last 24 h, PFA-206). */
 export interface ActivityBucket {
   actions: number;
   errors: number;
+  /** Actions that succeeded, by action name (PFA-206: the day chart stacks them). */
+  byAction: Record<string, number>;
   requests: number;
   /** Response times of the requests in the slice, in ms (reduced to p50/p95 on read). */
   latencies: number[];
@@ -31,6 +33,7 @@ export interface ActivityPoint {
   at: string;
   actions: number;
   errors: number;
+  byAction: Record<string, number>;
   requests: number;
   p50: number;
   p95: number;
@@ -60,8 +63,8 @@ export interface StoredSlice<T> {
  */
 export interface DayActivity {
   /**
-   * The runner's hours, as the live 1-second slices (latencies sampled, PFA-205). Partial: a file
-   * written before PFA-205 holds actions and errors only.
+   * The runner's quarters of an hour, as the live 1-second slices (latencies sampled). Partial: a
+   * file written before PFA-205/206 holds 1-hour slices with fewer fields.
    */
   runner: StoredSlice<Partial<ActivityBucket>>[];
   bots: Record<string, StoredSlice<BotActivityBucket>[]>;

@@ -1,4 +1,10 @@
-import type { BotView, OverviewView, QuietHoursView, StatusView } from "@contracts/interfaces/panelTypes";
+import type {
+  ActivityPoint,
+  BotView,
+  OverviewView,
+  QuietHoursView,
+  StatusView,
+} from "@contracts/interfaces/panelTypes";
 import type { ReactNode } from "react";
 
 export interface OverviewProps {
@@ -33,9 +39,22 @@ export interface DailyBotsCardProps {
 
 export interface StatusCardProps {
   status: StatusView;
-  actions: number[];
-  /** `actions` are the last 24 h, one an hour (daily pace), not the last 80 s (PFA-204). */
+  /** The last 80 s (burst) or, with `day`, the last 24 h in 15-minute slices (daily pace, PFA-206). */
+  history: ActivityPoint[];
   day: boolean;
+  /** The registry's actions, in order: the day chart's colours. */
+  actionNames: string[];
+}
+
+export interface DayChartProps {
+  history: ActivityPoint[];
+  actionNames: string[];
+}
+
+export interface SliceDetailModalProps {
+  point: ActivityPoint;
+  actionNames: string[];
+  onClose: () => void;
 }
 
 export interface StatusOnlyProps {

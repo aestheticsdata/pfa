@@ -135,7 +135,7 @@ budget is spent, `receipt.upload` is simply skipped.
 |---|---|
 | `GET /status` | running, live bots, target and ramp, actions/errors/requests per minute, rps, throttled, limits, upload budget, quiet hours |
 | `GET /history` | the last 80 s in 1-second slices: actions, errors, p50/p95, 2xx/4xx/5xx, live/target |
-| `GET /history/day` | the last 24 h in 1-hour slices, same fields (saved in `<app>-activity.json`, kept across restarts) |
+| `GET /history/day` | the last 24 h in 15-minute slices, same fields + actions by name (saved in `<app>-activity.json`, kept across restarts) |
 | `PUT /daily` `{"enabled"}` · `PUT /load` `{"enabled"}` · `PUT /load-pace` `{"pace"}` | the two switches, the load pace |
 | `PUT /target` `{"target": n}` · `PUT /ramp` `{"step", "everySec"}` | load-bot target (capped) and ramp |
 | `GET/PUT /quiet-hours` `{"from": "22:00", "to": "10:00"}` | the quiet window, on the app's clock |

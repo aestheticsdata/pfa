@@ -1,3 +1,4 @@
+import DayChart from "@components/panel/overview/status/DayChart";
 import StatTile from "@components/panel/overview/status/StatTile";
 import Card from "@components/ui/Card";
 import Dot from "@components/ui/Dot";
@@ -11,8 +12,11 @@ import type { StatusCardProps } from "@components/panel/overview/interfaces/over
 const WARN_RATE = 1.5;
 const BAD_RATE = 3;
 
-/** Daily bots · Load bots · Actions/min · Error rate, then the actions over the last 80 s (1 bar a second) or, in daily pace, the last 24 h (1 bar an hour). */
-const StatusCard = ({ status, actions, day }: StatusCardProps) => {
+/**
+ * Daily bots · Load bots · Actions/min · Error rate, then the actions over the last 80 s (1 bar a
+ * second) or, in daily pace, the last 24 h (1 bar every 15 min, by action, clickable — PFA-206).
+ */
+const StatusCard = ({ status, history, day, actionNames }: StatusCardProps) => {
   const text = OVERVIEW_TEXT.status;
   const rateClass = status.errorRate > BAD_RATE ? "text-bad" : status.errorRate > WARN_RATE ? "text-warn" : undefined;
   return (
@@ -78,19 +82,28 @@ const StatusCard = ({ status, actions, day }: StatusCardProps) => {
         />
       </div>
       <div className="px-3.5 py-3">
-        <div className="mb-2.5 flex flex-wrap justify-between gap-2 text-xs text-dim">
-          <span>{day ? text.chartDay : text.chart}</span>
-        </div>
-        <GradientColumns
-          values={actions}
-          className="gap-px tablet:gap-0.5"
-          ariaLabel={day ? text.chartDay : text.chart}
-        />
-        <div className="mt-1.5 flex justify-between font-mono text-tiny text-dim">
-          {(day ? text.axisDay : text.axis).map((tick) => (
-            <span key={tick}>{tick}</span>
-          ))}
-        </div>
+        {day ? (
+          <DayChart
+            history={history}
+            actionNames={actionNames}
+          />
+        ) : (
+          <>
+            <div className="mb-2.5 flex flex-wrap justify-between gap-2 text-xs text-dim">
+              <span>{text.chart}</span>
+            </div>
+            <GradientColumns
+              values={history.map((point) => point.actions)}
+              className="gap-px tablet:gap-0.5"
+              ariaLabel={text.chart}
+            />
+            <div className="mt-1.5 flex justify-between font-mono text-tiny text-dim">
+              {text.axis.map((tick) => (
+                <span key={tick}>{tick}</span>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </Card>
   );

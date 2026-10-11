@@ -89,6 +89,8 @@ export interface ActivityPoint {
   at: string;
   actions: number;
   errors: number;
+  /** Actions that succeeded, by action name (the day chart stacks them, PFA-206). */
+  byAction: Record<string, number>;
   requests: number;
   p50: number;
   p95: number;
@@ -165,8 +167,10 @@ export interface StatusView {
 export interface OverviewView {
   status: StatusView;
   history: ActivityPoint[];
-  /** The last 24 h, 1 point an hour, counts per hour: the chart of the daily pace (PFA-204). */
+  /** The last 24 h, 1 point every 15 min, counts per slice: the chart of the daily pace (PFA-204/206). */
   dayHistory: ActivityPoint[];
+  /** The registry's actions, in order: their colours match the Metrics action mix. */
+  actionNames: string[];
   dailyBots: BotView[];
 }
 
@@ -218,7 +222,7 @@ export interface HistogramBucket {
 
 export interface MetricsView {
   history: ActivityPoint[];
-  /** The last 24 h, 1 point an hour, counts per hour: the charts of the daily pace (PFA-205). */
+  /** The last 24 h, 1 point every 15 min, counts per slice: the charts of the daily pace (PFA-205/206). */
   dayHistory: ActivityPoint[];
   /** `LOAD_PACE`: daily → the day charts, burst → the last 80 s. */
   loadPace: string;
