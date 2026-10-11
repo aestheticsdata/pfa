@@ -34,6 +34,11 @@ export interface AppDefinition<TPersona = unknown> {
   defaultQuietHours: QuietHours;
   /** Every bot email must be on this domain (PFA-122). */
   syntheticDomain: string;
+  /**
+   * How long the app keeps a session without a request. A bot idle for longer signs in again
+   * before its next action, as a person coming back would (PFA-213).
+   */
+  sessionIdleMs: number;
   /** The permanent "daily" bots: always there, never counted in the load target. */
   bots: BotProfile<TPersona>[];
   /**

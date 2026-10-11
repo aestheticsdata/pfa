@@ -20,6 +20,8 @@ export function pfaApp(env: NodeJS.ProcessEnv): AppDefinition<PfaPersona> {
     // No new spending between 22:00 and 10:00 Paris time by default; changed from the back-office.
     defaultQuietHours: { from: "22:00", to: "10:00" },
     syntheticDomain: PFA_SYNTHETIC_DOMAIN,
+    // PFA's rolling session TTL (`SESSION_TTL_SECONDS` in nest-api's main.ts).
+    sessionIdleMs: 10 * 60 * 1000,
     bots: PFA_DAILY_BOTS,
     loadBots: PFA_LOAD_BOTS,
     actionsDir: fileURLToPath(new URL("actions", import.meta.url)),
