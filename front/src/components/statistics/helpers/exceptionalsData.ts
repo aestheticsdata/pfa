@@ -1,5 +1,4 @@
-import getMonth from "date-fns/getMonth";
-import parseISO from "date-fns/parseISO";
+import { getMonth, parseISO } from "date-fns";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 

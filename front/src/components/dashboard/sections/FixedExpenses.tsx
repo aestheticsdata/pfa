@@ -15,10 +15,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import format from "date-fns/format";
-import getDate from "date-fns/getDate";
-import isSameMonth from "date-fns/isSameMonth";
-import parseISO from "date-fns/parseISO";
+import { format, getDate, isSameMonth, parseISO } from "date-fns";
 import { ImageIcon, Pencil, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 

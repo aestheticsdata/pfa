@@ -8,7 +8,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
 import localesDates from "@src/i18n/locales-dates";
-import format from "date-fns/format";
+import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import DayPicker from "react-day-picker";
 // NOTE: react-day-picker/lib/style.css is intentionally NOT imported — the pfa

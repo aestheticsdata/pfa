@@ -1,6 +1,4 @@
-import getDay from "date-fns/getDay";
-import getDayOfYear from "date-fns/getDayOfYear";
-import parseISO from "date-fns/parseISO";
+import { getDay, getDayOfYear, parseISO } from "date-fns";
 
 import type { DailyStat } from "@src/schemas/stats";
 

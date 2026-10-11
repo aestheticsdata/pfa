@@ -3,9 +3,7 @@ import { DATE_FORMAT } from "@components/spendings/config/constants";
 import { Input } from "@components/ui/input";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import addDays from "date-fns/addDays";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
+import { addDays, format, parseISO } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";

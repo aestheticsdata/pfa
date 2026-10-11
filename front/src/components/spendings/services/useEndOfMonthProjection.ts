@@ -3,10 +3,7 @@ import { categoryKey, endOfMonthProjection } from "@components/spendings/helpers
 import useDailyProjection from "@components/spendings/services/useDailyProjection";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendings from "@components/spendings/services/useSpendings";
-import getDate from "date-fns/getDate";
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import isSameMonth from "date-fns/isSameMonth";
-import parseISO from "date-fns/parseISO";
+import { getDate, getDaysInMonth, isSameMonth, parseISO } from "date-fns";
 
 import type { ProjectionSource } from "@src/schemas/dashboard";
 

@@ -17,11 +17,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { LineChart } from "@lib/dataviz";
-import format from "date-fns/format";
-import getDate from "date-fns/getDate";
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import isSameMonth from "date-fns/isSameMonth";
-import parseISO from "date-fns/parseISO";
+import { format, getDate, getDaysInMonth, isSameMonth, parseISO } from "date-fns";
 
 import type { LinePoint } from "@lib/dataviz";
 import type { ProjectionSource } from "@src/schemas/dashboard";

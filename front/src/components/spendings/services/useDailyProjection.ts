@@ -4,9 +4,7 @@ import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DailyProjectionSchema } from "@src/schemas/dashboard";
 import { useQuery } from "@tanstack/react-query";
-import formatISO from "date-fns/formatISO";
-import isSameMonth from "date-fns/isSameMonth";
-import startOfMonth from "date-fns/startOfMonth";
+import { formatISO, isSameMonth, startOfMonth } from "date-fns";
 
 import type { DailyProjection } from "@src/schemas/dashboard";
 import type { UseQueryResult } from "@tanstack/react-query";

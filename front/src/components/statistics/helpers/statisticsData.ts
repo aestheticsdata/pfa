@@ -1,8 +1,8 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
-import format from "date-fns/format";
+import { format } from "date-fns";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
-import type { Locale } from "date-fns";
+import type { Locale } from "date-fns/locale";
 
 /**
  * WIRE FORMAT — not UI copy. `/statistics` emits its `month` key as a French

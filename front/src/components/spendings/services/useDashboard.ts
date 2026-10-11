@@ -5,9 +5,7 @@ import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DashboardResponseSchema } from "@src/schemas/dashboard";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import endOfMonth from "date-fns/endOfMonth";
-import formatISO from "date-fns/formatISO";
-import startOfMonth from "date-fns/startOfMonth";
+import { endOfMonth, formatISO, startOfMonth } from "date-fns";
 
 import type { DashboardResponse } from "@src/schemas/dashboard";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";

@@ -1,8 +1,6 @@
 import { getRandomHexColor } from "@components/spendings/common/spendingModal/helpers";
 import evaluateAmountExpression from "@lib/amountExpression";
-import endOfMonth from "date-fns/endOfMonth";
-import format from "date-fns/format";
-import startOfMonth from "date-fns/startOfMonth";
+import { endOfMonth, format, startOfMonth } from "date-fns";
 
 import type { AuthUser } from "@auth/interfaces/authTypes";
 import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";

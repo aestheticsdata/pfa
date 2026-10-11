@@ -6,7 +6,7 @@ import { StatTile } from "@components/shared/StatTile";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import format from "date-fns/format";
+import { format } from "date-fns";
 import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";

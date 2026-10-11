@@ -22,8 +22,7 @@ import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { useCursorHover } from "@lib/dataviz";
 import { cn } from "@lib/utils";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
+import { format, parseISO } from "date-fns";
 import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";

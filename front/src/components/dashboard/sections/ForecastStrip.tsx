@@ -16,11 +16,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { AnimatedNumber, ProgressTrack } from "@lib/dataviz";
-import endOfMonth from "date-fns/endOfMonth";
-import format from "date-fns/format";
-import isBefore from "date-fns/isBefore";
-import isSameMonth from "date-fns/isSameMonth";
-import startOfMonth from "date-fns/startOfMonth";
+import { endOfMonth, format, isBefore, isSameMonth, startOfMonth } from "date-fns";
 
 const ForecastStrip = () => {
   const { euro0 } = useFormat();

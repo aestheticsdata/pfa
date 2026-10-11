@@ -18,8 +18,7 @@ import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { CategoryTooltipContent, Donut, useCountUp } from "@lib/dataviz";
 import { cn } from "@lib/utils";
-import format from "date-fns/format";
-import isSameMonth from "date-fns/isSameMonth";
+import { format, isSameMonth } from "date-fns";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 

@@ -10,8 +10,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { AnimatedNumber, ProgressTrack, useCursorHover } from "@lib/dataviz";
-import format from "date-fns/format";
-import getDayOfYear from "date-fns/getDayOfYear";
+import { format, getDayOfYear } from "date-fns";
 import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";

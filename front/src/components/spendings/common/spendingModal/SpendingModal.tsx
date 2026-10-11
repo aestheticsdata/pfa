@@ -29,11 +29,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { zodResolver } from "@hookform/resolvers/zod";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import endOfMonth from "date-fns/endOfMonth";
-import format from "date-fns/format";
-import startOfMonth from "date-fns/startOfMonth";
-import startOfYear from "date-fns/startOfYear";
-import subMonths from "date-fns/subMonths";
+import { endOfMonth, format, startOfMonth, startOfYear, subMonths } from "date-fns";
 import { Copy } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

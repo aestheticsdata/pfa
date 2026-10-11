@@ -1,6 +1,6 @@
 import { parseDateParam } from "@components/datePickerWrapper/helpers";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import format from "date-fns/format";
+import { format } from "date-fns";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 // Same timezone pinning as helpers.test.ts: a week computed from a `?date=` param

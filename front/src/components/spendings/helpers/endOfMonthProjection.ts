@@ -1,8 +1,4 @@
-import getDate from "date-fns/getDate";
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import isBefore from "date-fns/isBefore";
-import isSameMonth from "date-fns/isSameMonth";
-import startOfMonth from "date-fns/startOfMonth";
+import { getDate, getDaysInMonth, isBefore, isSameMonth, startOfMonth } from "date-fns";
 
 import type { CategoryDailyTotals, DailyProjection } from "@src/schemas/dashboard";
 

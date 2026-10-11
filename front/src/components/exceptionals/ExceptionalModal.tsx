@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import useTranslations from "@i18n/useTranslations";
 import evaluateAmountExpression from "@lib/amountExpression";
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
-import format from "date-fns/format";
+import { format } from "date-fns";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

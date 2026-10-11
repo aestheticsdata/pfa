@@ -1,5 +1,5 @@
 import { monthlyPresence, monthlyTotals } from "@components/statistics/helpers/statisticsData";
-import getDaysInMonth from "date-fns/getDaysInMonth";
+import { getDaysInMonth } from "date-fns";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
 

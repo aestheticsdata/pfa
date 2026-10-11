@@ -1,14 +1,16 @@
-import addDays from "date-fns/addDays";
-import endOfWeek from "date-fns/endOfWeek";
-import getDate from "date-fns/getDate";
-import getDay from "date-fns/getDay";
-import isSameMonth from "date-fns/isSameMonth";
-import lastDayOfMonth from "date-fns/lastDayOfMonth";
-import parseISO from "date-fns/parseISO";
-import setHours from "date-fns/setHours";
-import startOfMonth from "date-fns/startOfMonth";
-import startOfWeek from "date-fns/startOfWeek";
-import subDays from "date-fns/subDays";
+import {
+  addDays,
+  endOfWeek,
+  getDate,
+  getDay,
+  isSameMonth,
+  lastDayOfMonth,
+  parseISO,
+  setHours,
+  startOfMonth,
+  startOfWeek,
+  subDays,
+} from "date-fns";
 
 import type { WeekRange } from "@components/datePickerWrapper/interfaces/datePickerTypes";
 

@@ -1,5 +1,4 @@
-import formatISO from "date-fns/formatISO";
-import startOfMonth from "date-fns/startOfMonth";
+import { formatISO, startOfMonth } from "date-fns";
 import { createParser } from "nuqs";
 
 export const DATE_QUERY_PARAM = "date";

@@ -3,8 +3,7 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
+import { format, parseISO } from "date-fns";
 
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 

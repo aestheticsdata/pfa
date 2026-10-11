@@ -5,8 +5,7 @@ import GlowCard from "@components/shared/GlowCard";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
+import { format, parseISO } from "date-fns";
 
 import type { ExceptionalItem as ExceptionalItemType } from "@src/schemas/exceptionals";
 

@@ -10,7 +10,7 @@ import {
   SpendingMutationPayloadSchema,
 } from "@src/schemas/spendings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import startOfMonth from "date-fns/startOfMonth";
+import { startOfMonth } from "date-fns";
 
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
 import type { AxiosError } from "axios";
