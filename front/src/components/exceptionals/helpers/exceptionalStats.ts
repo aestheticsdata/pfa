@@ -1,5 +1,5 @@
 import { elapsedMonths } from "@components/statistics/helpers/statisticsData";
-import parseISO from "date-fns/parseISO";
+import { parseISO } from "date-fns";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 

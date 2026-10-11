@@ -1,4 +1,4 @@
-import format from "date-fns/format";
+import { format } from "date-fns";
 
 import type { AuthUser } from "@auth/interfaces/authTypes";
 import type { SpendingForm } from "@components/spendings/common/spendingModal/schema";

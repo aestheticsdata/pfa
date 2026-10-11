@@ -5,11 +5,7 @@ import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { CategoryTrendsResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
-import endOfMonth from "date-fns/endOfMonth";
-import format from "date-fns/format";
-import startOfMonth from "date-fns/startOfMonth";
-import subDays from "date-fns/subDays";
-import subMonths from "date-fns/subMonths";
+import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
 
 import type { PeriodType } from "@components/spendings/config/constants";
 import type { CategoryTrendPoint } from "@src/schemas/stats";

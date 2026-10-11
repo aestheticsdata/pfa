@@ -19,10 +19,7 @@ import { Button } from "@components/ui/button";
 import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
 import { centerInScrollParent } from "@lib/scroll";
-import { endOfMonth, isSameDay } from "date-fns";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
-import startOfMonth from "date-fns/startOfMonth";
+import { endOfMonth, format, isSameDay, parseISO, startOfMonth } from "date-fns";
 import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 

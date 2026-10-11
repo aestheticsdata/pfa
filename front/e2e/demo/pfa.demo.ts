@@ -2,10 +2,7 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "@e2e/demo/fixture";
 import { dictionaries } from "@text/index";
-import format from "date-fns/format";
-import isSameMonth from "date-fns/isSameMonth";
-import subMonths from "date-fns/subMonths";
-import subWeeks from "date-fns/subWeeks";
+import { format, isSameMonth, subMonths, subWeeks } from "date-fns";
 
 import type { BrowserContext, Locator, Page } from "@playwright/test";
 

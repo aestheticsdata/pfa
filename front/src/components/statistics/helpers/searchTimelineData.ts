@@ -3,16 +3,10 @@
 // and the rolling-window frequency series.
 
 import { DATE_FORMAT } from "@components/spendings/config/constants";
-import addDays from "date-fns/addDays";
-import format from "date-fns/format";
-import isAfter from "date-fns/isAfter";
-import parseISO from "date-fns/parseISO";
-import startOfWeek from "date-fns/startOfWeek";
-import subMonths from "date-fns/subMonths";
-import subYears from "date-fns/subYears";
+import { addDays, format, isAfter, parseISO, startOfWeek, subMonths, subYears } from "date-fns";
 
 import type { SearchTimelineBucket } from "@src/schemas/stats";
-import type { Locale } from "date-fns";
+import type { Locale } from "date-fns/locale";
 
 export const SEARCH_TIMELINE_RANGE_VALUES = ["month", "year", "threeYears"] as const;
 export type SearchTimelineRange = (typeof SEARCH_TIMELINE_RANGE_VALUES)[number];

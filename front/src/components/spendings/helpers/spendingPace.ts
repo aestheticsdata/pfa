@@ -1,5 +1,4 @@
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import parseISO from "date-fns/parseISO";
+import { getDaysInMonth, parseISO } from "date-fns";
 
 import type { MonthlyTotal } from "@src/schemas/stats";
 

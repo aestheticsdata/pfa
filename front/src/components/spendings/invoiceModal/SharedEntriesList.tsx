@@ -7,8 +7,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
+import { format, parseISO } from "date-fns";
 import { X } from "lucide-react";
 
 import type { DayEntry } from "@components/spendings/interfaces/spendingGroupTypes";

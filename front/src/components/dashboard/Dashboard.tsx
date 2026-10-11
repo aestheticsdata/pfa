@@ -4,10 +4,7 @@ import DashboardView from "@components/dashboard/DashboardView";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useGlobalStore from "@components/shared/globalStore";
 import { isValidMonthParam, MONTH_QUERY_PARAM, parseMonthParam } from "@helpers/dateRoute";
-import { endOfMonth } from "date-fns";
-import addDays from "date-fns/addDays";
-import eachDayOfInterval from "date-fns/eachDayOfInterval";
-import startOfMonth from "date-fns/startOfMonth";
+import { addDays, eachDayOfInterval, endOfMonth, startOfMonth } from "date-fns";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useLayoutEffect, useState } from "react";
 

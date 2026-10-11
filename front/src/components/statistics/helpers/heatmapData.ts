@@ -1,10 +1,8 @@
-import format from "date-fns/format";
-import getDay from "date-fns/getDay";
-import getDayOfYear from "date-fns/getDayOfYear";
+import { format, getDay, getDayOfYear } from "date-fns";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { DailyStat } from "@src/schemas/stats";
-import type { Locale } from "date-fns";
+import type { Locale } from "date-fns/locale";
 
 /**
  * The single source of truth for heat-map intensity levels: the `empty`/`future`

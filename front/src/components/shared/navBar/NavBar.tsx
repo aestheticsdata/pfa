@@ -25,8 +25,7 @@ import {
 } from "@helpers/dateRoute";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import parseISO from "date-fns/parseISO";
-import startOfMonth from "date-fns/startOfMonth";
+import { parseISO, startOfMonth } from "date-fns";
 import { BarChart3, LayoutDashboard, Menu, Receipt, Sparkles, Tag, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";

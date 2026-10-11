@@ -1,7 +1,4 @@
-import getDate from "date-fns/getDate";
-import getDay from "date-fns/getDay";
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import startOfMonth from "date-fns/startOfMonth";
+import { getDate, getDay, getDaysInMonth, startOfMonth } from "date-fns";
 
 import type { WeekSlice } from "@components/spendings/interfaces/weeklyStatsTypes";
 

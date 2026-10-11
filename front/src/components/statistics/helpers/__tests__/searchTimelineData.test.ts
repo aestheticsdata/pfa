@@ -5,7 +5,7 @@ import {
   searchTimelineWindow,
   timelineTicks,
 } from "@components/statistics/helpers/searchTimelineData";
-import fr from "date-fns/locale/fr";
+import { fr } from "date-fns/locale";
 
 import type { SearchTimelineBucket } from "@src/schemas/stats";
 

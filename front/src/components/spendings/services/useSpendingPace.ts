@@ -5,8 +5,7 @@ import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { SpendingPaceResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
-import format from "date-fns/format";
-import startOfMonth from "date-fns/startOfMonth";
+import { format, startOfMonth } from "date-fns";
 
 import type { SpendingPaceResponse } from "@src/schemas/stats";
 

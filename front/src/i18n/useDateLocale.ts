@@ -1,11 +1,10 @@
 "use client";
 
 import { useLocale } from "@i18n/LocaleContext";
-import enUS from "date-fns/locale/en-US";
-import fr from "date-fns/locale/fr";
+import { enUS, fr } from "date-fns/locale";
 
 import type { LangKeys } from "@i18n/interfaces/localesTypes";
-import type { Locale } from "date-fns";
+import type { Locale } from "date-fns/locale";
 
 /** date-fns locale per app locale — for non-hook code taking a locale param. */
 export const DATE_FNS_LOCALES: Record<LangKeys, Locale> = {

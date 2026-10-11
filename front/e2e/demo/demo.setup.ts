@@ -1,8 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import { expect, test as setup } from "@playwright/test";
-import format from "date-fns/format";
-import startOfMonth from "date-fns/startOfMonth";
+import { format, startOfMonth } from "date-fns";
 
 /**
  * Putting the account back the way the take expects to find it.

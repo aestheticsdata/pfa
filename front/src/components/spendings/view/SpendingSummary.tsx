@@ -10,7 +10,7 @@ import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { AnimatedNumber } from "@lib/dataviz";
 import { cn } from "@lib/utils";
-import format from "date-fns/format";
+import { format } from "date-fns";
 
 import type { ReactNode } from "react";
 

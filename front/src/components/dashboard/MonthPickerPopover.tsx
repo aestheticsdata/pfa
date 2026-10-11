@@ -5,7 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover"
 import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import format from "date-fns/format";
+import { format } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 

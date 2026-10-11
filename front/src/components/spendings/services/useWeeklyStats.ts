@@ -5,8 +5,7 @@ import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { WeeklyStatsSchema } from "@src/schemas/dashboard";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { endOfMonth } from "date-fns";
-import startOfMonth from "date-fns/startOfMonth";
+import { endOfMonth, startOfMonth } from "date-fns";
 
 const useWeeklyStats = () => {
   const { privateRequest } = useRequestHelper();

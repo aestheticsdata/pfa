@@ -8,8 +8,7 @@ import { interpolate } from "@i18n/interpolate";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
-import format from "date-fns/format";
-import parseISO from "date-fns/parseISO";
+import { format, parseISO } from "date-fns";
 import { Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 

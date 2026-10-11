@@ -11,11 +11,7 @@ import {
   SpendingMutationPayloadSchema,
 } from "@src/schemas/spendings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import endOfMonth from "date-fns/endOfMonth";
-import format from "date-fns/format";
-import getDate from "date-fns/getDate";
-import parseISO from "date-fns/parseISO";
-import startOfMonth from "date-fns/startOfMonth";
+import { endOfMonth, format, getDate, parseISO, startOfMonth } from "date-fns";
 import { toast } from "sonner";
 
 import type { SpendingDayGroup, SpendingItem } from "@components/spendings/interfaces/spendingListTypes";

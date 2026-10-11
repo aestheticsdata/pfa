@@ -1,5 +1,4 @@
-import getDate from "date-fns/getDate";
-import getDaysInMonth from "date-fns/getDaysInMonth";
+import { getDate, getDaysInMonth } from "date-fns";
 
 /**
  * "Maximum daily budget" / "left to spend" — the remaining monthly budget

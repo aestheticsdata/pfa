@@ -25,14 +25,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import endOfMonth from "date-fns/endOfMonth";
-import format from "date-fns/format";
-import getDate from "date-fns/getDate";
-import getDaysInMonth from "date-fns/getDaysInMonth";
-import isBefore from "date-fns/isBefore";
-import isSameMonth from "date-fns/isSameMonth";
-import parseISO from "date-fns/parseISO";
-import startOfMonth from "date-fns/startOfMonth";
+import { endOfMonth, format, getDate, getDaysInMonth, isBefore, isSameMonth, parseISO, startOfMonth } from "date-fns";
 import { ArrowRightLeft, TrendingUp, TriangleAlert, Wallet } from "lucide-react";
 import Link from "next/link";
 

@@ -2,7 +2,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { buildDayEntries } from "@components/spendings/helpers/dayEntries";
 import useSpendings from "@components/spendings/services/useSpendings";
 import useSpendingsPageStore from "@components/spendings/stores/useSpendingsPageStore";
-import format from "date-fns/format";
+import { format } from "date-fns";
 
 import type { SelectedEntry } from "@components/spendings/interfaces/spendingGroupTypes";
 

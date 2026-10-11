@@ -5,8 +5,7 @@ import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { BusiestWeekResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
-import format from "date-fns/format";
-import startOfMonth from "date-fns/startOfMonth";
+import { format, startOfMonth } from "date-fns";
 
 import type { BusiestWeekResponse } from "@src/schemas/stats";
 

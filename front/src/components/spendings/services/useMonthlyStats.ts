@@ -4,7 +4,7 @@ import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { MonthlyStatsSchema } from "@src/schemas/dashboard";
 import { useQuery } from "@tanstack/react-query";
-import startOfMonth from "date-fns/startOfMonth";
+import { startOfMonth } from "date-fns";
 
 /**
  * The displayed month's spendings and fixed-expenses totals. Named after what it
