@@ -15,6 +15,8 @@ model Categories {
   name      String      @db.VarChar(20)
   color     String      @db.VarChar(20)
   spendings Spendings[]
+
+  @@index([userID])
 }
 
 model Dashboards {
@@ -24,6 +26,8 @@ model Dashboards {
   initialAmount  Decimal  @db.Decimal(6, 2)
   userID         String   @db.Char(36)
   initialCeiling Decimal? @db.Decimal(6, 2)
+
+  @@index([userID, dateFrom])
 }
 
 model Recurrings {
@@ -36,6 +40,8 @@ model Recurrings {
   amount      Decimal  @db.Decimal(6, 2)
   currency    String?  @db.VarChar(3)
   invoicefile String?  @db.VarChar(255)
+
+  @@index([userID, dateFrom])
 }
 
 model Spendings {
@@ -60,6 +66,7 @@ model Spendings {
   // name) keeps `migrate diff` clean instead of reporting it as drift forever.
   @@index([categoryID], map: "Spendings_categoryID_fkey")
   @@index([groupID], map: "Spendings_groupID_fkey")
+  @@index([userID, date])
 }
 
 // Several spendings bought on one receipt (PFA-189). The receipt itself is the
@@ -71,6 +78,8 @@ model SpendingGroups {
   date      DateTime    @db.Date
   label     String      @db.VarChar(100)
   spendings Spendings[]
+
+  @@index([userID])
 }
 
 model Exceptionals {
@@ -85,6 +94,8 @@ model Exceptionals {
   categoryName  String?  @db.VarChar(50)
   categoryColor String?  @db.VarChar(20)
   invoicefile   String?  @db.VarChar(255)
+
+  @@index([userID, date])
 }
 
 model Users {
