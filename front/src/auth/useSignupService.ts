@@ -5,6 +5,7 @@ import { pickSupportedLocale } from "@i18n/pickSupportedLocale";
 import useTranslations from "@i18n/useTranslations";
 import { AuthResponseSchema } from "@src/schemas/auth";
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { toast } from "sonner";
 
 import type { AuthResponse } from "@auth/interfaces/authTypes";
@@ -32,7 +33,7 @@ const useSignupService = () => {
           language: pickSupportedLocale(navigator.languages ?? []),
         },
       });
-      return AuthResponseSchema.parse(res.data);
+      return parseResponse(AuthResponseSchema, res.data, "/users/add");
     } catch (e) {
       const status = (e as AxiosError)?.response?.status;
       toast.error(status === 409 ? t.emailAlreadyExists : t.error);

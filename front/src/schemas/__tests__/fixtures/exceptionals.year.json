@@ -1,0 +1,41 @@
+[
+  {
+    "ID": "00000000-0000-4000-8000-000000000016",
+    "userID": "00000000-0000-4000-8000-000000000001",
+    "date": "2026-03-06T00:00:00.000Z",
+    "itemType": "exceptional",
+    "label": "Music",
+    "description": null,
+    "amount": "51.01",
+    "currency": "EUR",
+    "categoryName": "Tea house",
+    "categoryColor": "#1cfe54",
+    "invoicefile": null
+  },
+  {
+    "ID": "00000000-0000-4000-8000-000000000017",
+    "userID": "00000000-0000-4000-8000-000000000001",
+    "date": "2026-02-06T00:00:00.000Z",
+    "itemType": "exceptional",
+    "label": "Bicycle",
+    "description": null,
+    "amount": "178.99",
+    "currency": "EUR",
+    "categoryName": "Stationery",
+    "categoryColor": "#F39C12",
+    "invoicefile": null
+  },
+  {
+    "ID": "00000000-0000-4000-8000-000000000018",
+    "userID": "00000000-0000-4000-8000-000000000001",
+    "date": "2026-01-18T00:00:00.000Z",
+    "itemType": "exceptional",
+    "label": "Phone plan",
+    "description": "Insurance",
+    "amount": "118.00",
+    "currency": "EUR",
+    "categoryName": "Stationery",
+    "categoryColor": "#F39C12",
+    "invoicefile": null
+  }
+]

@@ -1,6 +1,7 @@
+import { apiObject } from "@src/schemas/apiObject";
 import { z } from "zod";
 
-export const CategorySchema = z.object({
+export const CategorySchema = apiObject({
   ID: z.string(),
   userID: z.string().nullable(),
   name: z.string(),

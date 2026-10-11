@@ -1,0 +1,89 @@
+{
+  "trends": [
+    {
+      "category": "Train pass",
+      "categoryColor": "#6DB65B",
+      "value": 40.64,
+      "previousValue": null
+    },
+    {
+      "category": "Bookshop",
+      "categoryColor": "#E8663D",
+      "value": 60.06,
+      "previousValue": null
+    },
+    {
+      "category": "Market",
+      "categoryColor": "#E84393",
+      "value": 37.73,
+      "previousValue": null
+    },
+    {
+      "category": "Pharmacy",
+      "categoryColor": "#C0894B",
+      "value": 256.06,
+      "previousValue": null
+    },
+    {
+      "category": "Stationery",
+      "categoryColor": "#F39C12",
+      "value": 286.36,
+      "previousValue": null
+    },
+    {
+      "category": "Cinema",
+      "categoryColor": "#4A90D9",
+      "value": 55.46,
+      "previousValue": null
+    },
+    {
+      "category": "Hardware",
+      "categoryColor": "#9B59B6",
+      "value": 212.45,
+      "previousValue": null
+    },
+    {
+      "category": "Repair",
+      "categoryColor": "#34495E",
+      "value": 295.29,
+      "previousValue": null
+    },
+    {
+      "category": "Laundry",
+      "categoryColor": "#FD79A8",
+      "value": 97.5,
+      "previousValue": null
+    },
+    {
+      "category": "Garden",
+      "categoryColor": "#1ABC9C",
+      "value": 34.82,
+      "previousValue": null
+    },
+    {
+      "category": "Museum",
+      "categoryColor": "#E74C3C",
+      "value": 211.87,
+      "previousValue": null
+    },
+    {
+      "category": "Gym",
+      "categoryColor": "#16A085",
+      "value": 288.85,
+      "previousValue": null
+    },
+    {
+      "category": "Toys",
+      "categoryColor": "#7F8C8D",
+      "value": 148.16,
+      "previousValue": null
+    },
+    {
+      "category": "Florist",
+      "categoryColor": "#2ECC71",
+      "value": 161,
+      "previousValue": null
+    }
+  ],
+  "previousTotal": 155
+}

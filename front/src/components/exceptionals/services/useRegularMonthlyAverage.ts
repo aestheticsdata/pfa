@@ -1,14 +1,11 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
+import { RegularMonthlyAverageSchema } from "@src/schemas/exceptionals";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { useQuery } from "@tanstack/react-query";
-import { z } from "zod";
 
-const RegularMonthlyAverageSchema = z.object({
-  monthlyAverage: z.number(),
-});
-
-export type RegularMonthlyAverage = z.infer<typeof RegularMonthlyAverageSchema>;
+import type { RegularMonthlyAverage } from "@src/schemas/exceptionals";
 
 const useRegularMonthlyAverage = (year: number) => {
   const { privateRequest } = useRequestHelper();
@@ -17,7 +14,7 @@ const useRegularMonthlyAverage = (year: number) => {
 
   const fetcher = async (): Promise<RegularMonthlyAverage> => {
     const response = await privateRequest(`/regular-monthly-average?year=${year}`);
-    return RegularMonthlyAverageSchema.parse(response.data);
+    return parseResponse(RegularMonthlyAverageSchema, response.data, "/regular-monthly-average");
   };
 
   return useQuery({

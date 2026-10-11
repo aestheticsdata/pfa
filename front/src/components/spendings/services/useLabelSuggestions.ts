@@ -1,6 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { LabelSuggestionListSchema } from "@src/schemas/spendings";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
@@ -23,7 +24,7 @@ const useLabelSuggestions = (query: string, enabled = true): LabelSuggestion[] =
 
   const fetchSuggestions = async () => {
     const response = await privateRequest(`/spendings/label-suggestions?q=${encodeURIComponent(trimmed)}`);
-    return LabelSuggestionListSchema.parse(response.data);
+    return parseResponse(LabelSuggestionListSchema, response.data, "/spendings/label-suggestions");
   };
 
   const { data } = useQuery({

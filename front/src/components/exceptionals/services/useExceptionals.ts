@@ -8,6 +8,7 @@ import {
   ExceptionalMutationPayloadSchema,
   ExceptionalYearsSchema,
 } from "@src/schemas/exceptionals";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { ExceptionalMutationPayload } from "@src/schemas/exceptionals";
@@ -41,7 +42,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   const getExceptionals = async () => {
     const yearParam = year ? `?year=${year}` : "";
     const response = await privateRequest(`/exceptionals${yearParam}`);
-    return ExceptionalListSchema.parse(response.data);
+    return parseResponse(ExceptionalListSchema, response.data, "/exceptionals");
   };
 
   const list = useQuery({
@@ -53,7 +54,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
 
   const getYears = async () => {
     const response = await privateRequest(`/exceptionals/years`);
-    return ExceptionalYearsSchema.parse(response.data);
+    return parseResponse(ExceptionalYearsSchema, response.data, "/exceptionals/years");
   };
 
   const years = useQuery({

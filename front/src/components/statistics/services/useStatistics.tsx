@@ -1,6 +1,7 @@
 import useCategories from "@components/spendings/services/useCategories";
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { StatisticsResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
 
@@ -27,7 +28,7 @@ const useStatistics = ({ years }: UseStatisticsOptions) => {
 
   const getStatistics = async (): Promise<StatisticsResponse> => {
     const response = await privateRequest(`/statistics?years=${yearsParam}&categories=${categoryIds.join(",")}`);
-    return StatisticsResponseSchema.parse(response.data);
+    return parseResponse(StatisticsResponseSchema, response.data, "/statistics");
   };
 
   const { data, isLoading } = useQuery({

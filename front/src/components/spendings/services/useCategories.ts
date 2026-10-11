@@ -2,6 +2,7 @@ import { useAuth } from "@auth/context/AuthContext";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { CategoryListSchema, UpdateCategoryPayloadSchema } from "@src/schemas/categories";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { UpdateCategoryPayload } from "@src/schemas/categories";
@@ -33,7 +34,7 @@ const useCategories = () => {
   const getCategoriesService = async () => {
     try {
       const response = await privateRequest(`/categories?userID=${userID}`);
-      return CategoryListSchema.parse(response.data);
+      return parseResponse(CategoryListSchema, response.data, "/categories");
     } catch (e) {
       console.log("get categories error : ", e);
       throw e; // Re-throw so React Query handles the error properly

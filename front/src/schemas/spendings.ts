@@ -1,3 +1,4 @@
+import { apiObject } from "@src/schemas/apiObject";
 import { itemTypeSchema, numberLikeSchema } from "@src/schemas/primitives";
 import { z } from "zod";
 
@@ -12,7 +13,7 @@ export const SpendingCategoryInputSchema = z.object({
 // real column returned by an unprojected Prisma `findMany`, so nullable fields
 // arrive as `null`, never absent — hence `.nullable()` without `.optional()`
 // (COS-107).
-export const SpendingItemSchema = z.object({
+export const SpendingItemSchema = apiObject({
   ID: z.string(),
   amount: numberLikeSchema,
   category: z.string().nullable(),
@@ -41,7 +42,7 @@ export type SpendingItem = z.infer<typeof SpendingItemSchema>;
 // fetch the next page (null at the end), and the unbounded total — sent only on
 // the first page, so the UI can say "N results" without recounting every page.
 export const SpendingSearchPageSchema = z.compile(
-  z.object({
+  apiObject({
     items: SpendingListSchema,
     nextCursor: z.string().nullable(),
     total: z.number().optional(),
@@ -55,14 +56,14 @@ export const SpendingYearsSchema = z.array(z.number());
 // spending labels, filtered by prefix and ranked by frequency, each with its
 // most-used category so selecting one can pre-fill it. `category` is null when
 // the label was only ever used uncategorized.
-export const LabelSuggestionSchema = z.object({
+export const LabelSuggestionSchema = apiObject({
   label: z.string(),
   category: z.string().nullable(),
 });
 export const LabelSuggestionListSchema = z.array(LabelSuggestionSchema);
 export type LabelSuggestion = z.infer<typeof LabelSuggestionSchema>;
 
-export const RecurringItemSchema = z.object({
+export const RecurringItemSchema = apiObject({
   ID: z.string(),
   amount: numberLikeSchema,
   currency: z.string().nullable(),
@@ -78,15 +79,18 @@ export type RecurringItem = z.infer<typeof RecurringItemSchema>;
 
 // Real year-to-date "Already debited" (COS-49) — GET /recurrings/drawn. The server
 // sums the actual per-month recurring rows from January through the current month.
-export const RecurringsDrawnSchema = z.object({ drawn: numberLikeSchema });
+export const RecurringsDrawnSchema = apiObject({ drawn: numberLikeSchema });
 
 // Response of POST /spendings: the new row's ID, so the receipt upload can
 // chain on it in the same creation flow (PFA-5).
-export const CreateSpendingResponseSchema = z.object({ ID: z.string() });
+export const CreateSpendingResponseSchema = apiObject({ ID: z.string() });
 
 // Response of POST /spendings/groups: the group and its lines' IDs, so the
 // group's receipt can be uploaded on all of them right after (PFA-189).
-export const CreateSpendingGroupResponseSchema = z.object({ ID: z.string(), spendingIDs: z.array(z.string()) });
+export const CreateSpendingGroupResponseSchema = apiObject({ ID: z.string(), spendingIDs: z.array(z.string()) });
+
+// Response of POST /spendings/groups/merge: the merged row and the receipt it kept.
+export const MergeResponseSchema = apiObject({ ID: z.string(), invoicefile: z.string().nullable() });
 
 export const SpendingMutationPayloadSchema = z.object({
   date: z.string().nullable().optional(),

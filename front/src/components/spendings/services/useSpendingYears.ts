@@ -1,6 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { SpendingYearsSchema } from "@src/schemas/spendings";
 import { useQuery } from "@tanstack/react-query";
 
@@ -16,7 +17,7 @@ const useSpendingYears = () => {
 
   const fetchYears = async () => {
     const response = await privateRequest("/spendings/years");
-    return SpendingYearsSchema.parse(response.data);
+    return parseResponse(SpendingYearsSchema, response.data, "/spendings/years");
   };
 
   const { data } = useQuery({

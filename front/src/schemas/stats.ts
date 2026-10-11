@@ -1,3 +1,4 @@
+import { apiObject } from "@src/schemas/apiObject";
 import { numberLikeSchema } from "@src/schemas/primitives";
 import { z } from "zod";
 
@@ -27,7 +28,7 @@ const statisticsMonthEntrySchema = z.record(z.string(), z.union([z.string(), z.n
 // This one and the other series payloads below go through `z.compile()`
 // (PFA-176): they are the heavy parses, and the output and errors stay the same.
 export const StatisticsResponseSchema = z.compile(
-  z.object({
+  apiObject({
     colors: z.record(z.string(), z.string()),
     data: z.record(z.string(), z.array(statisticsMonthEntrySchema)),
   }),
@@ -35,7 +36,7 @@ export const StatisticsResponseSchema = z.compile(
 
 export type StatisticsResponse = z.infer<typeof StatisticsResponseSchema>;
 
-export const ChartsCategorySchema = z.object({
+export const ChartsCategorySchema = apiObject({
   category: z.string().nullable(),
   categoryColor: z.string().nullable(),
   value: numberLikeSchema,
@@ -48,7 +49,7 @@ export type ChartsCategory = z.infer<typeof ChartsCategorySchema>;
 // category" trend column + "Rising category" insight (COS-41); the delta %
 // and its up/down/stable/new styling are derived on the front.
 // `previousValue` is null when the category is new to the comparison window.
-export const CategoryTrendPointSchema = z.object({
+export const CategoryTrendPointSchema = apiObject({
   category: z.string().nullable(),
   categoryColor: z.string().nullable(),
   value: numberLikeSchema,
@@ -58,7 +59,7 @@ export const CategoryTrendPointSchema = z.object({
 export type CategoryTrendPoint = z.infer<typeof CategoryTrendPointSchema>;
 
 export const CategoryTrendsResponseSchema = z.compile(
-  z.object({
+  apiObject({
     trends: z.array(CategoryTrendPointSchema),
     // Total spent across every category in the comparison window (incl. ones
     // absent from the current window). Drives the Spendings "Average / day vs last
@@ -70,7 +71,7 @@ export const CategoryTrendsResponseSchema = z.compile(
 // Per-day spending totals for a year (COS-45) — GET /daily-stats. Sparse: one
 // entry per day that has at least one spending. Feeds the daily heatmap and the
 // day-of-week averages (COS-48).
-export const DailyStatSchema = z.object({
+export const DailyStatSchema = apiObject({
   date: z.string(),
   total: numberLikeSchema,
   count: numberLikeSchema,
@@ -79,7 +80,7 @@ export const DailyStatSchema = z.object({
 export type DailyStat = z.infer<typeof DailyStatSchema>;
 
 export const DailyStatsResponseSchema = z.compile(
-  z.object({
+  apiObject({
     days: z.array(DailyStatSchema),
   }),
 );
@@ -90,14 +91,14 @@ export type DailyStatsResponse = z.infer<typeof DailyStatsResponseSchema>;
 // /weekday-categories. `weekdays` is length 7, index 0 = Monday … 6 = Sunday;
 // each entry's name/color is null when that weekday has no categorized spending.
 // Backs the day-of-week widget's hover tooltip.
-export const WeekdayCategorySchema = z.object({
+export const WeekdayCategorySchema = apiObject({
   name: z.string().nullable(),
   color: z.string().nullable(),
 });
 
 export type WeekdayCategory = z.infer<typeof WeekdayCategorySchema>;
 
-export const WeekdayCategoriesResponseSchema = z.object({
+export const WeekdayCategoriesResponseSchema = apiObject({
   weekdays: z.array(WeekdayCategorySchema),
 });
 
@@ -106,7 +107,7 @@ export type WeekdayCategoriesResponse = z.infer<typeof WeekdayCategoriesResponse
 // Biggest single one-off (non-exceptional) expense of a year (COS-46) — GET
 // /biggest-regular-expense. `expense` is null when the user has no spending that
 // year. Backs the "regular" row of the "Biggest expense" KPI card.
-export const BiggestRegularExpenseSchema = z.object({
+export const BiggestRegularExpenseSchema = apiObject({
   label: z.string(),
   amount: numberLikeSchema,
   date: z.string(),
@@ -116,7 +117,7 @@ export const BiggestRegularExpenseSchema = z.object({
 
 export type BiggestRegularExpense = z.infer<typeof BiggestRegularExpenseSchema>;
 
-export const BiggestRegularExpenseResponseSchema = z.object({
+export const BiggestRegularExpenseResponseSchema = apiObject({
   expense: BiggestRegularExpenseSchema.nullable(),
 });
 
@@ -126,7 +127,7 @@ export type BiggestRegularExpenseResponse = z.infer<typeof BiggestRegularExpense
 // /busiest-week. "Week" = the month's calendar-aligned Sun→Sat slices, truncated
 // at the month edges (not a rolling window). `from`/`to` are null when the month
 // has no spending. Backs the dashboard's 4th ribbon insight.
-export const BusiestWeekResponseSchema = z.object({
+export const BusiestWeekResponseSchema = apiObject({
   count: numberLikeSchema,
   from: z.string().nullable(),
   to: z.string().nullable(),
@@ -138,14 +139,14 @@ export type BusiestWeekResponse = z.infer<typeof BusiestWeekResponseSchema>;
 // /spending-pace. Newest→oldest (M-1, M-2, M-3); `month` is the month's first day
 // (YYYY-MM-DD). Feeds the dashboard's "On pace" insight, which turns these
 // into daily rates and compares them to the current month's pace.
-export const MonthlyTotalSchema = z.object({
+export const MonthlyTotalSchema = apiObject({
   month: z.string(),
   total: numberLikeSchema,
 });
 
 export type MonthlyTotal = z.infer<typeof MonthlyTotalSchema>;
 
-export const SpendingPaceResponseSchema = z.object({
+export const SpendingPaceResponseSchema = apiObject({
   months: z.array(MonthlyTotalSchema),
 });
 
@@ -155,7 +156,7 @@ export type SpendingPaceResponse = z.infer<typeof SpendingPaceResponseSchema>;
 // /search-timeline. Sparse: only buckets with at least one match come back (the
 // widget fills the gaps), each keyed by its start day (the day itself, or the
 // Sunday of the Sun→Sat week). Backs the Statistics search-timeline widget.
-export const SearchTimelineBucketSchema = z.object({
+export const SearchTimelineBucketSchema = apiObject({
   date: z.string(),
   total: numberLikeSchema,
   count: numberLikeSchema,
@@ -164,9 +165,9 @@ export const SearchTimelineBucketSchema = z.object({
 export type SearchTimelineBucket = z.infer<typeof SearchTimelineBucketSchema>;
 
 export const SearchTimelineResponseSchema = z.compile(
-  z.object({
+  apiObject({
     buckets: z.array(SearchTimelineBucketSchema),
-    summary: z.object({
+    summary: apiObject({
       total: numberLikeSchema,
       count: numberLikeSchema,
       firstDate: z.string().nullable(),

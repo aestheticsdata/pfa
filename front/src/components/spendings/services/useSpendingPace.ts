@@ -3,6 +3,7 @@ import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT } from "@components/spendings/config/constants";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { SpendingPaceResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
 import { format, startOfMonth } from "date-fns";
@@ -27,7 +28,7 @@ const useSpendingPace = () => {
     if (!monthBeginning || !userID) return { months: [] };
     const query = new URLSearchParams({ start: format(monthBeginning, DATE_FORMAT) });
     const response = await privateRequest(`/spending-pace?${query}`);
-    return SpendingPaceResponseSchema.parse(response.data);
+    return parseResponse(SpendingPaceResponseSchema, response.data, "/spending-pace");
   };
 
   return useQuery({

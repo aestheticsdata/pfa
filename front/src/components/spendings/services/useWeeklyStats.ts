@@ -4,6 +4,7 @@ import useDashboard from "@components/spendings/services/useDashboard";
 import useRequestHelper from "@helpers/useRequestHelper";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { WeeklyStatsSchema } from "@src/schemas/dashboard";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth, startOfMonth } from "date-fns";
 
@@ -20,7 +21,7 @@ const useWeeklyStats = () => {
 
   const getWeeklyStats = async () => {
     const response = await privateRequest(`/weeklystats?userID=${userID}&start=${startOfMonth(from!)}`);
-    return WeeklyStatsSchema.parse(response.data);
+    return parseResponse(WeeklyStatsSchema, response.data, "/weeklystats");
   };
 
   const setInitialCeiling = async (ceiling: string) => {

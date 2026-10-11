@@ -4,6 +4,7 @@ import { displayPopup } from "@helpers/swalHelper";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
+import { parseResponse } from "@src/schemas/parseResponse";
 import {
   RecurringListSchema,
   RecurringMutationPayloadSchema,
@@ -53,7 +54,7 @@ const useReccurings = () => {
 
   const getRecurrings = async () => {
     const response = await privateRequest(`/recurrings?userID=${userID}&start=${startOfMonth(from!)}`);
-    return RecurringListSchema.parse(response.data);
+    return parseResponse(RecurringListSchema, response.data, "/recurrings");
   };
 
   const { data, isPending } = useQuery({

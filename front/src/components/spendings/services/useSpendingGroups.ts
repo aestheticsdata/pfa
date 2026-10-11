@@ -3,10 +3,10 @@ import { buildSharedReceiptFormData } from "@components/spendings/services/invoi
 import useSpendings from "@components/spendings/services/useSpendings";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
-import { CreateSpendingGroupResponseSchema } from "@src/schemas/spendings";
+import { parseResponse } from "@src/schemas/parseResponse";
+import { CreateSpendingGroupResponseSchema, MergeResponseSchema } from "@src/schemas/spendings";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { z } from "zod";
 
 import type {
   CreateSpendingGroupInput,
@@ -16,8 +16,6 @@ import type {
   UpdateSpendingGroupInput,
 } from "@components/spendings/interfaces/spendingGroupTypes";
 import type { AxiosError } from "axios";
-
-const MergeResponseSchema = z.object({ ID: z.string(), invoicefile: z.string().nullable() });
 
 // A line's category goes as the single-spending flow sends it: an existing one
 // by ID, a typed one by name + colour, none at all when left empty.
@@ -60,7 +58,7 @@ const useSpendingGroups = () => {
         data: { date, label, currency, lines: lines.map(toLineBody) },
       });
       if (receiptFile) {
-        const { spendingIDs } = CreateSpendingGroupResponseSchema.parse(response.data);
+        const { spendingIDs } = parseResponse(CreateSpendingGroupResponseSchema, response.data, "/spendings/groups");
         await attachAfterCreation({ spendingIDs, file: receiptFile, label, date });
       }
       return response;
@@ -90,7 +88,7 @@ const useSpendingGroups = () => {
         method: "POST",
         data: { label, lines: lines.map(({ spendingID, detail }) => ({ spendingID, detail: detail.trim() })) },
       });
-      const { ID, invoicefile } = MergeResponseSchema.parse(response.data);
+      const { ID, invoicefile } = parseResponse(MergeResponseSchema, response.data, "/spendings/groups/merge");
       if (receiptFile && !invoicefile) {
         await attachAfterCreation({ spendingIDs: lines.map((l) => l.spendingID), file: receiptFile, label, date });
       }

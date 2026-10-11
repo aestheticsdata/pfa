@@ -2,6 +2,7 @@ import { SEARCH_MIN_LENGTH } from "@components/spendings/config/constants";
 import { SEARCH_TIMELINE_RANGES, searchTimelineWindow } from "@components/statistics/helpers/searchTimelineData";
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
+import { parseResponse } from "@src/schemas/parseResponse";
 import { SearchTimelineResponseSchema } from "@src/schemas/stats";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
@@ -31,7 +32,7 @@ const useStatisticsSearchTimeline = (query: string, range: SearchTimelineRange) 
     const response = await privateRequest(
       `/search-timeline?q=${encodeURIComponent(trimmed)}&from=${from}&to=${to}&bucket=${bucket}`,
     );
-    return SearchTimelineResponseSchema.parse(response.data);
+    return parseResponse(SearchTimelineResponseSchema, response.data, "/search-timeline");
   };
 
   const { data, isPending, error } = useQuery({
