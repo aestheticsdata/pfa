@@ -98,7 +98,7 @@ export interface RunnerView {
 
 /** What the ramp decides from: the load bots in ramp order, who is up, and what was asked for. */
 export interface RampInput {
-  /** Load bots that may run (neither blocked nor turned off), in the order the ramp brings them up. */
+  /** Load bots that may run (not blocked), in the order the ramp brings them up. */
   order: string[];
   spawned: ReadonlySet<string>;
   target: number;

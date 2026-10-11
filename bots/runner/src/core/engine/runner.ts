@@ -119,7 +119,11 @@ export class Runner<TPersona = unknown> {
     for (const action of deps.actions) {
       this.actionStats.set(action.name, { runs: 0, errors: 0 });
     }
-    this.state = { ...deps.initialState };
+    // Load bots have no switch of their own (PFA-203): only the "Load bots" switch and the target.
+    this.state = {
+      ...deps.initialState,
+      disabledBots: deps.initialState.disabledBots.filter((id) => this.bots.get(id)?.profile.kind !== BOT_KIND.load),
+    };
     for (const id of this.state.blockedBots ?? []) {
       const bot = this.bots.get(id);
       if (bot) bot.state = BOT_STATE.blocked;
@@ -156,9 +160,12 @@ export class Runner<TPersona = unknown> {
     return updated.length === 1;
   }
 
-  /** One write for the whole selection (the back-office's bulk on/off). Unknown ids are reported. */
+  /**
+   * One write for the whole selection (the back-office's bulk on/off). Daily bots only: a load bot
+   * runs when the "Load bots" switch and the target say so, nothing else. Unknown ids are reported.
+   */
   async setBotsEnabled(toggle: BotToggle): Promise<BulkResult> {
-    const updated = toggle.ids.filter((id) => this.bots.has(id));
+    const updated = toggle.ids.filter((id) => this.bots.get(id)?.profile.kind === BOT_KIND.daily);
     const unknown = toggle.ids.filter((id) => !this.bots.has(id));
     let disabled = this.state.disabledBots;
     for (const id of updated) {
@@ -167,8 +174,6 @@ export class Runner<TPersona = unknown> {
     this.state.disabledBots = disabled;
     if (updated.length > 0) {
       await this.deps.saveState(this.state);
-      // A load bot turned off gives its place in the target to the next one.
-      this.rampNow();
     }
     return { updated, unknown };
   }
@@ -450,7 +455,11 @@ export class Runner<TPersona = unknown> {
       email: bot.profile.email,
       kind: bot.profile.kind,
       state: this.effectiveState(bot),
-      enabled: !this.state.disabledBots.includes(bot.profile.id),
+      // A load bot's "on" is read-only: the ramp has it up.
+      enabled:
+        bot.profile.kind === BOT_KIND.load
+          ? this.spawned.has(bot.profile.id)
+          : !this.state.disabledBots.includes(bot.profile.id),
       currentAction: bot.currentAction,
       totalActions: bot.totalActions,
       errors: bot.errors,
@@ -585,10 +594,7 @@ export class Runner<TPersona = unknown> {
     const ramp = this.ramp();
     const stepDue = now - this.lastStepAt >= ramp.everySec * 1000;
     const plan = planRamp({
-      // A load bot turned off by hand takes no place in the target: the next one comes up instead.
-      order: this.loadOrder.filter(
-        (id) => this.bots.get(id)?.state !== BOT_STATE.blocked && !this.state.disabledBots.includes(id),
-      ),
+      order: this.loadOrder.filter((id) => this.bots.get(id)?.state !== BOT_STATE.blocked),
       spawned: this.spawned,
       target: this.state.target ?? 0,
       enabled: this.loadEnabled(),

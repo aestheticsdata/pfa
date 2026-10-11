@@ -164,21 +164,25 @@ describe("Load bots", () => {
     expect(runner.snapshotBots().every((bot) => bot.state === BOT_STATE.stopped)).toBe(true);
   });
 
-  it("gives the place of a load bot turned off by hand to the next one", async () => {
+  it("runs the target whatever a load bot's old toggle said, and shows the bots up as on", async () => {
     vi.useFakeTimers();
-    const { runner } = await loadRunner();
-    await runner.setBotsEnabled({ ids: ["load-0", "load-1", "load-2"], enabled: false });
+    const saved: PersistedRunnerState[] = [];
+    const runner = await fakeRunner({
+      loadBots: 30,
+      saved,
+      secretsPath: await secretsPath(),
+      initialState: { disabledBots: ["load-0", "load-1", "bot-0"], disabledActions: [] },
+    });
+    expect(await runner.setBotsEnabled({ ids: ["load-2", "bot-0"], enabled: false })).toEqual({
+      updated: ["bot-0"],
+      unknown: [],
+    });
+    expect(saved.at(-1)?.disabledBots).toEqual(["bot-0"]);
     await runner.setTarget(10);
     await runner.setLoadEnabled(true);
-    const up = runner.snapshotBots().filter((bot) => bot.state === BOT_STATE.sleeping);
-    expect(up.map((bot) => bot.id)).not.toContain("load-0");
-    expect(up).toHaveLength(10);
-    expect(runner.snapshotBots().find((bot) => bot.id === "load-0")?.state).toBe(BOT_STATE.paused);
-
-    await runner.setBotsEnabled({ ids: ["load-3"], enabled: false });
-    expect(runner.status().spawned).toBe(9);
-    await vi.advanceTimersByTimeAsync(1_000);
-    expect(runner.status().spawned).toBe(10);
+    const load = runner.snapshotBots().filter((bot) => bot.kind === "load");
+    expect(load.filter((bot) => bot.state === BOT_STATE.sleeping).map((bot) => bot.id)).toContain("load-0");
+    expect(load.filter((bot) => bot.enabled)).toHaveLength(10);
     await stopAll(runner);
   });
 

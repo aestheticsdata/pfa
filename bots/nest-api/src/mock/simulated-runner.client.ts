@@ -262,6 +262,8 @@ export class SimulatedRunnerClient implements RunnerClient {
         unknown.push(id);
         continue;
       }
+      // Load bots have no switch of their own: the "Load bots" switch and the target decide.
+      if (bot.kind === "load") continue;
       bot.enabled = toggle.enabled;
       updated.push(id);
     }
@@ -305,11 +307,10 @@ export class SimulatedRunnerClient implements RunnerClient {
     return bot.currentAction ? "active" : "sleeping";
   }
 
-  /** A load bot's place in the ramp: bots turned off or blocked take none (as in the real runner). */
+  /** A load bot's place in the ramp: blocked ones take none (as in the real runner). */
   private loadRank(bot: SimulatedBot): number {
     const before = this.fleet.filter(
-      (other) =>
-        other.kind === "load" && other.enabled && !other.blocked && this.loadIndex(other) < this.loadIndex(bot),
+      (other) => other.kind === "load" && !other.blocked && this.loadIndex(other) < this.loadIndex(bot),
     );
     return before.length + 1;
   }
@@ -330,7 +331,8 @@ export class SimulatedRunnerClient implements RunnerClient {
       email: bot.email,
       kind: bot.kind,
       state: this.stateOf(bot),
-      enabled: bot.enabled,
+      // A load bot's "on" is read-only: the ramp has it up.
+      enabled: bot.kind === "load" ? this.loadEnabled && this.loadRank(bot) <= this.spawned : bot.enabled,
       currentAction: this.isLive(bot) ? bot.currentAction : null,
       totalActions: bot.totalActions,
       errors: bot.errors,
