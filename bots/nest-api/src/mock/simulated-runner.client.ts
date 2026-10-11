@@ -17,7 +17,6 @@ import type {
   RunnerBotDetail,
   RunnerBotSpark,
   RunnerBulkResult,
-  RunnerDayPoint,
   RunnerQuietHours,
   RunnerQuietHoursInput,
   RunnerRamp,
@@ -198,12 +197,29 @@ export class SimulatedRunnerClient implements RunnerClient {
     });
   }
 
-  async dayHistory(): Promise<RunnerDayPoint[]> {
-    return Array.from({ length: DAY_SLICES }, (_, i) => ({
-      at: new Date((this.hour - DAY_SLICES + 1 + i) * HOUR_MS).toISOString(),
-      actions: this.fleet.reduce((sum, bot) => sum + (bot.day[i]?.actions ?? 0), 0),
-      errors: this.fleet.reduce((sum, bot) => sum + (bot.day[i]?.errors ?? 0), 0),
-    }));
+  async dayHistory(): Promise<RunnerActivityPoint[]> {
+    const live = this.fleet.filter((bot) => this.isLive(bot)).length;
+    const target = this.fleet.filter((bot) => bot.kind === "daily").length + (this.loadEnabled ? this.target : 0);
+    return Array.from({ length: DAY_SLICES }, (_, i) => {
+      const actions = this.fleet.reduce((sum, bot) => sum + (bot.day[i]?.actions ?? 0), 0);
+      const errors = this.fleet.reduce((sum, bot) => sum + (bot.day[i]?.errors ?? 0), 0);
+      // The hour's latencies and codes, made up from its counts (same seed, same film).
+      const busy = actions + errors > 0;
+      return {
+        at: new Date((this.hour - DAY_SLICES + 1 + i) * HOUR_MS).toISOString(),
+        actions,
+        errors,
+        requests: actions + errors,
+        p50: busy ? Math.round(60 + ((i * 37) % 40)) : 0,
+        p95: busy ? Math.round(180 + ((i * 53) % 160)) : 0,
+        codes2xx: actions,
+        codes4xx: Math.round(errors * 0.4),
+        codes5xx: errors - Math.round(errors * 0.4),
+        live,
+        target,
+        throttled: false,
+      };
+    });
   }
 
   async bots(): Promise<RunnerBot[]> {

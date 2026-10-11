@@ -100,7 +100,7 @@ describe("Runner guards", () => {
     });
     await runner.runWake("bot-0", { actions: 2, thinkTimeMs: 0, force: true });
     expect(runner.dayHistory()).toHaveLength(24);
-    expect(runner.dayHistory().at(-1)).toMatchObject({ actions: 5, errors: 0 });
+    expect(runner.dayHistory().at(-1)).toMatchObject({ actions: 5, errors: 0, requests: 0, p50: 0, codes2xx: 0 });
     expect(runner.snapshotBots()[0]?.daySpark.at(-1)).toEqual({ actions: 5, errors: 0 });
 
     await runner.setDailyEnabled(true);

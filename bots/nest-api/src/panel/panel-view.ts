@@ -24,6 +24,9 @@ const DEGRADED_ERROR_SHARE = 0.2;
 /** The Metrics histogram's buckets, actions/min per live bot (handoff). */
 const ACTIVITY_EDGES = [1, 2, 3, 4, 5, 6, Number.POSITIVE_INFINITY];
 const ACTIVITY_LABELS = ["<1", "1–2", "2–3", "3–4", "4–5", "5–6", "6+"];
+/** Actions a bot ran over the last 24 h (PFA-205): a daily-pace bot runs a handful. */
+const DAY_ACTIVITY_EDGES = [1, 3, 6, 11, 21, 51, Number.POSITIVE_INFINITY];
+const DAY_ACTIVITY_LABELS = ["0", "1–2", "3–5", "6–10", "11–20", "21–50", "51+"];
 
 const round = (value: number, digits = 1): number => Math.round(value * 10 ** digits) / 10 ** digits;
 
@@ -163,4 +166,15 @@ export function activityHistogram(bots: BotView[]): HistogramBucket[] {
     counts[index] = (counts[index] ?? 0) + 1;
   }
   return ACTIVITY_LABELS.map((label, i) => ({ label, count: counts[i] ?? 0 }));
+}
+
+/** Live bots by how many actions they ran over the last 24 h. */
+export function dayActivityHistogram(bots: BotView[]): HistogramBucket[] {
+  const counts = DAY_ACTIVITY_EDGES.map(() => 0);
+  for (const bot of bots) {
+    const total = bot.daySpark.reduce((sum, slice) => sum + slice.actions, 0);
+    const index = DAY_ACTIVITY_EDGES.findIndex((edge) => total < edge);
+    counts[index] = (counts[index] ?? 0) + 1;
+  }
+  return DAY_ACTIVITY_LABELS.map((label, i) => ({ label, count: counts[i] ?? 0 }));
 }

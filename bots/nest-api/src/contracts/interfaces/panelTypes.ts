@@ -162,18 +162,11 @@ export interface StatusView {
   uploadBudget: UploadBudgetView;
 }
 
-/** One hour of the runner's last 24. */
-export interface DayPoint {
-  at: string;
-  actions: number;
-  errors: number;
-}
-
 export interface OverviewView {
   status: StatusView;
   history: ActivityPoint[];
-  /** The last 24 h, 1 point an hour: the chart of the daily pace (PFA-204). */
-  dayHistory: DayPoint[];
+  /** The last 24 h, 1 point an hour, counts per hour: the chart of the daily pace (PFA-204). */
+  dayHistory: ActivityPoint[];
   dailyBots: BotView[];
 }
 
@@ -225,7 +218,13 @@ export interface HistogramBucket {
 
 export interface MetricsView {
   history: ActivityPoint[];
+  /** The last 24 h, 1 point an hour, counts per hour: the charts of the daily pace (PFA-205). */
+  dayHistory: ActivityPoint[];
+  /** `LOAD_PACE`: daily → the day charts, burst → the last 80 s. */
+  loadPace: string;
   activity: HistogramBucket[];
+  /** Live bots by actions over the last 24 h. */
+  dayActivity: HistogramBucket[];
   liveBots: number;
   actionMix: ActionView[];
   mixRuns: ActionCount[];
