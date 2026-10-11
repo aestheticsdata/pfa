@@ -146,6 +146,8 @@ const spendings = {
     addReceipt: "Ajouter un reçu",
   },
   receiptLines: {
+    skip: "Passer",
+    queueRemaining: (count: number) => (count > 1 ? `${count} tickets à vérifier` : "dernier ticket à vérifier"),
     store: "Magasin",
     storePlaceholder: "Choisir ou saisir un magasin",
     storeSearch: "Rechercher un magasin…",

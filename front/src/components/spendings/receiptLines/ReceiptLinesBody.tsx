@@ -15,13 +15,17 @@ interface ReceiptLinesBodyProps {
   onDismiss: () => void;
 }
 
-/** What the modal shows for its mode: the OCR proposal, the saved lines, or their editor (PFA-214). */
+/**
+ * What the modal shows for its mode: the OCR proposal — fresh, or read in bulk
+ * earlier (PFA-223) — the saved lines, or their editor (PFA-214).
+ */
 const ReceiptLinesBody = ({ target, receiptLines, onDismiss }: ReceiptLinesBodyProps) => {
   const { receiptLines: t } = useTranslations("spendings");
   const setMode = useReceiptLinesStore((state) => state.setMode);
   const { saved, proposal, save } = receiptLines;
   const isReview = target.mode === RECEIPT_LINES_MODE.review;
 
+  const queue = target.queue;
   const editor = (initial: SavedReceipt, receiptTotal: number | null) => (
     <ReceiptLinesEditor
       initial={initial}
@@ -29,10 +33,23 @@ const ReceiptLinesBody = ({ target, receiptLines, onDismiss }: ReceiptLinesBodyP
       spendingAmount={target.amount}
       receiptTotal={receiptTotal}
       isSaving={save.isPending}
-      onSave={(receipt) => save.mutate(receipt, { onSuccess: () => setMode(RECEIPT_LINES_MODE.detail) })}
+      // In the bulk-read queue, a save moves on to the next receipt (PFA-223).
+      onSave={(receipt) =>
+        save.mutate(receipt, { onSuccess: queue ? queue.onDone : () => setMode(RECEIPT_LINES_MODE.detail) })
+      }
       onCancel={isReview ? onDismiss : () => setMode(RECEIPT_LINES_MODE.detail)}
+      onSkip={queue?.onSkip}
     />
   );
+
+  if (queue) {
+    return (
+      <div className="flex flex-col gap-3">
+        {queue.proposal.lines.length === 0 && <p className="text-sm text-ink-3">{t.nothingFound}</p>}
+        {editor({ lines: queue.proposal.lines, store: queue.proposal.store }, queue.proposal.total)}
+      </div>
+    );
+  }
 
   if (isReview) {
     if (proposal.isPending) return <ReceiptLinesStatus message={t.reading} />;

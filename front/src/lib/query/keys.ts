@@ -33,4 +33,6 @@ export const QUERY_KEYS = {
   STORES: "stores",
   PRODUCT_TYPES: "productTypes",
   PRICES: "prices",
+  RECEIPT_PROPOSALS: "receiptProposals",
+  RECEIPT_PROPOSAL_NEXT: "receiptProposalNext",
 } as const;

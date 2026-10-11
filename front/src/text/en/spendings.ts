@@ -148,6 +148,8 @@ const spendings: typeof frSpendings = {
     addReceipt: "Add a receipt",
   },
   receiptLines: {
+    skip: "Skip",
+    queueRemaining: (count: number) => (count > 1 ? `${count} receipts to review` : "last receipt to review"),
     store: "Store",
     storePlaceholder: "Pick or type a store",
     storeSearch: "Search a store…",

@@ -67,6 +67,8 @@ const useReceiptLines = (spendingID: string, queries: ReceiptLinesQueries) => {
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRODUCT_TYPES] });
       // New lines change the price comparison (PFA-220).
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRICES] });
+      // A saved receipt leaves the bulk-read queue (PFA-223).
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.RECEIPT_PROPOSALS] });
       // The rows' line mark and store come with the spendings.
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH] });
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SPENDINGS_SEARCH] });

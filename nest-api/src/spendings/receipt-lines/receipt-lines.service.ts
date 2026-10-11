@@ -92,6 +92,8 @@ export class ReceiptLinesService {
             }),
           ];
     await this.prisma.$transaction([
+      // Saved lines settle a bulk-read proposal (PFA-223).
+      this.prisma.receiptProposals.deleteMany({ where: { spendingID } }),
       this.prisma.receiptLines.deleteMany({ where: { spendingID } }),
       this.prisma.receiptLines.createMany({
         data: receipt.lines.map((line, position) => ({
