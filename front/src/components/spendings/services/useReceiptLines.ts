@@ -65,6 +65,8 @@ const useReceiptLines = (spendingID: string, queries: ReceiptLinesQueries) => {
       // A store or a type typed for the first time joins its list (PFA-218, PFA-219).
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STORES] });
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRODUCT_TYPES] });
+      // New lines change the price comparison (PFA-220).
+      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRICES] });
       // The rows' line mark and store come with the spendings.
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH] });
       await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SPENDINGS_SEARCH] });

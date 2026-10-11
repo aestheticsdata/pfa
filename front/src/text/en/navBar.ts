@@ -9,6 +9,7 @@ const navBar: typeof frNavBar = {
     exceptionals: "Exceptionals",
     categories: "Categories",
     statistics: "Statistics",
+    prices: "Prices",
     about: "About",
   },
   aria: {
