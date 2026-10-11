@@ -25,7 +25,11 @@ const AppLayout = async ({ children, drawer, modal, params }: LayoutProps<"/[app
   if (!auth.signedIn || !auth.email) redirect(SIGN_IN_EXPIRED);
 
   return (
-    <div className={`${themeClass(header.app.theme)} min-h-dvh bg-bg font-sans text-text`}>
+    // `data-theme-root`: where portals (dialogs) mount, so they wear the app's theme, not <body>'s.
+    <div
+      data-theme-root
+      className={`${themeClass(header.app.theme)} min-h-dvh bg-bg font-sans text-text`}
+    >
       <TopBar
         header={header}
         email={auth.email}

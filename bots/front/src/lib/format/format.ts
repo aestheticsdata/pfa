@@ -18,6 +18,11 @@ export function slotRange(iso: string, minutes: number): string {
   return `${hm(start)} – ${hm(end)}`;
 }
 
+/** `Sun 11 Oct`: the day of `iso`, in the browser's zone. */
+export function weekDay(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+}
+
 /** `12/10 17:56`: the date and minute of an older event. */
 export function dayTime(iso: string): string {
   return new Date(iso).toLocaleString("en-GB", {

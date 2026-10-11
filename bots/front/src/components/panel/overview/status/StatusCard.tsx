@@ -16,7 +16,7 @@ const BAD_RATE = 3;
  * Daily bots · Load bots · Actions/min · Error rate, then the actions over the last 80 s (1 bar a
  * second) or, in daily pace, the last 24 h (1 bar every 15 min, by action, clickable — PFA-206).
  */
-const StatusCard = ({ status, history, day, actionNames }: StatusCardProps) => {
+const StatusCard = ({ app, status, history, day, actionNames, dailyIds }: StatusCardProps) => {
   const text = OVERVIEW_TEXT.status;
   const rateClass = status.errorRate > BAD_RATE ? "text-bad" : status.errorRate > WARN_RATE ? "text-warn" : undefined;
   return (
@@ -84,8 +84,10 @@ const StatusCard = ({ status, history, day, actionNames }: StatusCardProps) => {
       <div className="px-3.5 py-3">
         {day ? (
           <DayChart
+            app={app}
             history={history}
             actionNames={actionNames}
+            dailyIds={dailyIds}
           />
         ) : (
           <>

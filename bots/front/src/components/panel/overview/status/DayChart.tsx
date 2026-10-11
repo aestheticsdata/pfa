@@ -1,7 +1,7 @@
 "use client";
 
 import LegendItem from "@components/panel/metrics/LegendItem";
-import SliceDetailModal from "@components/panel/overview/status/SliceDetailModal";
+import SliceDetailModal from "@components/panel/overview/slice/SliceDetailModal";
 import StackedColumns from "@lib/dataviz/StackedColumns";
 import { slotRange } from "@lib/format/format";
 import { actionColor } from "@lib/panel/actionColors";
@@ -22,11 +22,17 @@ const unattributed = (slice: ActivityPoint) =>
  * The last 24 h in daily pace (PFA-206): one bar every 15 min, stacked by action in the Metrics
  * mix's colours, errors on top in red. A bar with activity opens its detail; an empty one doesn't.
  */
-const DayChart = ({ history, actionNames }: DayChartProps) => {
+const DayChart = ({ app, history, actionNames, dailyIds }: DayChartProps) => {
   const text = OVERVIEW_TEXT.status;
-  const [selected, setSelected] = useState<number | null>(null);
+  // The slice by its start, not its index: the window slides every 15 min while the modal is open.
+  const [selected, setSelected] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
   const seen = actionNames.filter((name) => history.some((point) => (point.byAction[name] ?? 0) > 0));
-  const point = selected === null ? undefined : history[selected];
+  const point = history.find((slice) => slice.at === selected);
+  const select = (index: number) => {
+    setSelected(history[index]?.at ?? null);
+    setOpen(true);
+  };
   return (
     <>
       <div className="mb-2.5 flex flex-wrap justify-between gap-2 text-xs text-dim">
@@ -50,7 +56,7 @@ const DayChart = ({ history, actionNames }: DayChartProps) => {
       <StackedColumns
         className="chart-plot gap-px"
         ariaLabel={text.chartDay}
-        onSelect={setSelected}
+        onSelect={select}
         columns={history.map((slice) => ({
           key: slice.at,
           label: text.sliceLabel(slotRange(slice.at, SLICE_MINUTES), slice.actions),
@@ -71,13 +77,15 @@ const DayChart = ({ history, actionNames }: DayChartProps) => {
           <span key={tick}>{tick}</span>
         ))}
       </div>
-      {point && (
-        <SliceDetailModal
-          point={point}
-          actionNames={actionNames}
-          onClose={() => setSelected(null)}
-        />
-      )}
+      {/* Always mounted, so closing plays its animation before the content goes. */}
+      <SliceDetailModal
+        app={app}
+        point={point}
+        actionNames={actionNames}
+        dailyIds={dailyIds}
+        open={open && point !== undefined}
+        onClose={() => setOpen(false)}
+      />
     </>
   );
 };

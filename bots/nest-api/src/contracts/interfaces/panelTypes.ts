@@ -91,6 +91,10 @@ export interface ActivityPoint {
   errors: number;
   /** Actions that succeeded, by action name (the day chart stacks them, PFA-206). */
   byAction: Record<string, number>;
+  /** Actions that failed, by action name (a slice's detail, PFA-209). */
+  errorsByAction: Record<string, number>;
+  /** Actions run (ok or not), by bot id: who was active in the slice (PFA-209). */
+  byBot: Record<string, number>;
   requests: number;
   p50: number;
   p95: number;

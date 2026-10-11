@@ -60,6 +60,8 @@ describe("panel view", () => {
         actions: 2,
         errors: 1,
         byAction: { "spending.add": 2 },
+        errorsByAction: { "spending.add": 1 },
+        byBot: { ceres: 3 },
         requests: 3,
         p50: 90,
         p95: 300,

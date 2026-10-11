@@ -462,6 +462,8 @@ export class Runner<TPersona = unknown> {
       actions: bucket.actions,
       errors: bucket.errors,
       byAction: { ...bucket.byAction },
+      errorsByAction: { ...bucket.errorsByAction },
+      byBot: { ...bucket.byBot },
       requests: bucket.requests,
       p50: percentile(bucket.latencies, 0.5),
       p95: percentile(bucket.latencies, 0.95),
@@ -588,6 +590,8 @@ export class Runner<TPersona = unknown> {
       actions: 0,
       errors: 0,
       byAction: {},
+      errorsByAction: {},
+      byBot: {},
       requests: 0,
       latencies: [],
       codes2xx: 0,
@@ -814,6 +818,7 @@ export class Runner<TPersona = unknown> {
       for (const slice of [this.activity.current(), this.day.current()]) {
         slice.actions += 1;
         slice.byAction[action.name] = (slice.byAction[action.name] ?? 0) + 1;
+        slice.byBot[bot.profile.id] = (slice.byBot[bot.profile.id] ?? 0) + 1;
       }
       if (stats) stats.runs += 1;
       this.recentActions.push(Date.now());
@@ -822,8 +827,11 @@ export class Runner<TPersona = unknown> {
       bot.errors += 1;
       bot.activity.current().errors += 1;
       bot.day.current().errors += 1;
-      this.activity.current().errors += 1;
-      this.day.current().errors += 1;
+      for (const slice of [this.activity.current(), this.day.current()]) {
+        slice.errors += 1;
+        slice.errorsByAction[action.name] = (slice.errorsByAction[action.name] ?? 0) + 1;
+        slice.byBot[bot.profile.id] = (slice.byBot[bot.profile.id] ?? 0) + 1;
+      }
       if (stats) stats.errors += 1;
       this.recentErrors.push(Date.now());
       if (error instanceof SessionExpiredError) {

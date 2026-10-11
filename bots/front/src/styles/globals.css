@@ -5,6 +5,7 @@
 @import "./tokens/radius.css";
 @import "./tokens/typography.css";
 @import "./tokens/layout.css";
+@import "./tokens/motion.css";
 
 @import "./base.css";
 @import "./utilities.css";

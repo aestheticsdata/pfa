@@ -15,6 +15,10 @@ export interface ActivityBucket {
   errors: number;
   /** Actions that succeeded, by action name (PFA-206: the day chart stacks them). */
   byAction: Record<string, number>;
+  /** Actions that failed, by action name (PFA-209: a slice's detail). */
+  errorsByAction: Record<string, number>;
+  /** Actions run (ok or not), by bot id (PFA-209: who was active in the slice). */
+  byBot: Record<string, number>;
   requests: number;
   /** Response times of the requests in the slice, in ms (reduced to p50/p95 on read). */
   latencies: number[];
@@ -34,6 +38,8 @@ export interface ActivityPoint {
   actions: number;
   errors: number;
   byAction: Record<string, number>;
+  errorsByAction: Record<string, number>;
+  byBot: Record<string, number>;
   requests: number;
   p50: number;
   p95: number;

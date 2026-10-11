@@ -16,6 +16,8 @@
   --spacing-drawer: 460px;
   --spacing-auth: 380px;
   --spacing-modal: 440px;
+  /* A modal with charts and lists in it (a day-chart slice's detail). */
+  --spacing-modal-wide: 600px;
   --spacing-picker: 880px;
   /* The mobile nav sheet's links sit 8px wider than the gutter, so their hover reaches the edge. */
   --spacing-sheet-nav: calc(clamp(16px, 2.5vw, 32px) - 8px);
