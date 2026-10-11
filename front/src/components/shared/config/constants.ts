@@ -9,6 +9,7 @@ export const ROUTES = {
   exceptionals: { path: "/exceptionals", labelKey: "exceptionals" as NavLabelKey },
   categories: { path: "/categories", labelKey: "categories" as NavLabelKey },
   statistics: { path: "/statistics", labelKey: "statistics" as NavLabelKey },
+  prices: { path: "/prices", labelKey: "prices" as NavLabelKey },
   login: { path: "/login", label: "Login" },
   signup: { path: "/signup", label: "Signup" },
   changePassword: { path: "/changepassword", label: "Change password" },

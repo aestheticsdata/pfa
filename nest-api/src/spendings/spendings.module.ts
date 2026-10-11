@@ -11,6 +11,8 @@ import { ReceiptLinesService } from "@spendings/receipt-lines/receipt-lines.serv
 import { ReceiptOcrService } from "@spendings/receipt-lines/receipt-ocr.service";
 import { ProductTypesController } from "@spendings/product-types/product-types.controller";
 import { ProductTypesService } from "@spendings/product-types/product-types.service";
+import { PricesController } from "@spendings/prices/prices.controller";
+import { PricesService } from "@spendings/prices/prices.service";
 import { StoresController } from "@spendings/stores/stores.controller";
 import { StoresService } from "@spendings/stores/stores.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
@@ -25,6 +27,7 @@ import { MonitoringModule } from "@monitoring/monitoring.module";
     ReceiptLinesController,
     StoresController,
     ProductTypesController,
+    PricesController,
   ],
   providers: [
     SpendingsService,
@@ -35,6 +38,7 @@ import { MonitoringModule } from "@monitoring/monitoring.module";
     ReceiptOcrService,
     StoresService,
     ProductTypesService,
+    PricesService,
     SessionAuthGuard,
   ],
 })

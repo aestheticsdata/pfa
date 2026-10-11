@@ -7,6 +7,7 @@ const navBar = {
     exceptionals: "Exceptionnels",
     categories: "Catégories",
     statistics: "Statistiques",
+    prices: "Prix",
     about: "À propos",
   },
   aria: {

@@ -26,7 +26,7 @@ import {
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
 import { parseISO, startOfMonth } from "date-fns";
-import { BarChart3, LayoutDashboard, Menu, Receipt, Sparkles, Tag, X } from "lucide-react";
+import { BarChart3, LayoutDashboard, Menu, Receipt, Scale, Sparkles, Tag, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
@@ -43,6 +43,7 @@ const NAV_ROUTES: NavRoute[] = [
   ROUTES.exceptionals,
   ROUTES.categories,
   ROUTES.statistics,
+  ROUTES.prices,
 ];
 
 const ROUTE_ICONS: Record<string, LucideIcon> = {
@@ -51,6 +52,7 @@ const ROUTE_ICONS: Record<string, LucideIcon> = {
   [ROUTES.exceptionals.path]: Sparkles,
   [ROUTES.categories.path]: Tag,
   [ROUTES.statistics.path]: BarChart3,
+  [ROUTES.prices.path]: Scale,
 };
 
 const ACTIVE_BG = "bg-[oklch(0.26_0.010_248)]";
@@ -251,7 +253,7 @@ const NavBar = () => {
             <button
               type="button"
               data-testid="current-month"
-                onClick={goToCurrentMonth}
+              onClick={goToCurrentMonth}
               disabled={currentMonthDisabled}
               className={cn(currentMonthButtonClass, "self-start")}
             >
@@ -265,7 +267,7 @@ const NavBar = () => {
               <button
                 type="button"
                 data-testid="today"
-                  onClick={handleGoToToday}
+                onClick={handleGoToToday}
                 className={`${PERIOD_BTN} self-start`}
               >
                 {text.today}

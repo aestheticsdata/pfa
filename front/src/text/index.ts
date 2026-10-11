@@ -10,6 +10,7 @@ import enDashboard from "@text/en/dashboard";
 import enExceptionals from "@text/en/exceptionals";
 import enLogin from "@text/en/login";
 import enNavBar from "@text/en/navBar";
+import enPrices from "@text/en/prices";
 import enSpendingSearch from "@text/en/spendingSearch";
 import enSpendings from "@text/en/spendings";
 import enStatistics from "@text/en/statistics";
@@ -20,6 +21,7 @@ import frDashboard from "@text/fr/dashboard";
 import frExceptionals from "@text/fr/exceptionals";
 import frLogin from "@text/fr/login";
 import frNavBar from "@text/fr/navBar";
+import frPrices from "@text/fr/prices";
 import frSpendingSearch from "@text/fr/spendingSearch";
 import frSpendings from "@text/fr/spendings";
 import frStatistics from "@text/fr/statistics";
@@ -34,6 +36,7 @@ const fr = {
   exceptionals: frExceptionals,
   login: frLogin,
   navBar: frNavBar,
+  prices: frPrices,
   spendingSearch: frSpendingSearch,
   spendings: frSpendings,
   statistics: frStatistics,
@@ -52,6 +55,7 @@ export const dictionaries: Record<LangKeys, Dictionary> = {
     exceptionals: enExceptionals,
     login: enLogin,
     navBar: enNavBar,
+    prices: enPrices,
     spendingSearch: enSpendingSearch,
     spendings: enSpendings,
     statistics: enStatistics,
