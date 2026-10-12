@@ -110,7 +110,7 @@ const SpendingGroupRow = ({ entry, dayIso, onEdit }: SpendingGroupRowProps) => {
               {hasInvoice && <ReceiptMark shareCount={row.shareCount} />}
             </span>
 
-            <span className="relative z-10 justify-self-end max-md:col-start-1 max-md:row-start-2 max-md:justify-self-start">
+            <span className="relative z-10 justify-self-end md:group-hover:invisible max-md:col-start-1 max-md:row-start-2 max-md:justify-self-start">
               <CategorySplitBar shares={categorySplit(entry.lines)} />
             </span>
 
