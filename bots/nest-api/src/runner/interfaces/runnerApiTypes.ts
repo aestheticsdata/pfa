@@ -17,6 +17,8 @@ export interface RunnerUploadBudget {
   remainingBytes: number;
   uploadsThisWeek: number;
   bytesThisWeek: number;
+  /** Days the week's figures cover, 1 to 7: shorter while the ledger is under a week old. */
+  weekSpanDays: number;
 }
 
 export interface RunnerQuietHours {

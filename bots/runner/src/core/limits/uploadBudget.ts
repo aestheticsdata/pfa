@@ -1,6 +1,7 @@
 import type { Clock, UploadBudgetOptions, UploadBudgetSnapshot, UploadEntry } from "@core/interfaces/limitTypes";
 
-const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const WEEK_MS = 7 * DAY_MS;
 
 /**
  * Hard cap on what the bots upload, across every bot, over a rolling window (400 MB / 365 days for
@@ -45,14 +46,26 @@ export class UploadBudget {
   snapshot(): UploadBudgetSnapshot {
     const usedBytes = this.usedBytes();
     const weekStart = this.clock() - WEEK_MS;
-    const week = this.live().filter((entry) => entry.at > weekStart);
+    const live = this.live();
+    const week = live.filter((entry) => entry.at > weekStart);
     return {
       budgetBytes: this.options.budgetBytes,
       usedBytes,
       remainingBytes: Math.max(0, this.options.budgetBytes - usedBytes),
       uploadsThisWeek: week.length,
       bytesThisWeek: week.reduce((sum, entry) => sum + entry.bytes, 0),
+      weekSpanDays: this.weekSpanDays(live[0]),
     };
+  }
+
+  /**
+   * The days the week's figures actually cover (PFA-227): a ledger younger than a week would
+   * otherwise spread its few days of uploads over seven. At least a day, so a first upload
+   * minutes old doesn't read as a whole day's pace.
+   */
+  private weekSpanDays(oldest: UploadEntry | undefined): number {
+    const span = oldest ? this.clock() - oldest.at : WEEK_MS;
+    return Math.min(WEEK_MS, Math.max(DAY_MS, span)) / DAY_MS;
   }
 
   private live(): UploadEntry[] {

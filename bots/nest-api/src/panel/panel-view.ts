@@ -20,7 +20,6 @@ import type {
 const MB = 1024 * 1024;
 /** Enough for the front to show a single receipt (`0.024 MB`). */
 const MB_DIGITS = 3;
-const WEEK_DAYS = 7;
 /** A live bot failing more than this share of its last 30 s is shown "degraded". */
 const DEGRADED_ERROR_SHARE = 0.2;
 /** The Metrics histogram's buckets, actions/min per live bot (handoff). */
@@ -82,7 +81,7 @@ export function botView({ bot, incident }: BotFacts): BotView {
 }
 
 export function uploadBudgetView(budget: RunnerUploadBudget): UploadBudgetView {
-  const perDay = budget.bytesThisWeek / WEEK_DAYS;
+  const perDay = budget.bytesThisWeek / budget.weekSpanDays;
   return {
     usedMB: round(budget.usedBytes / MB, MB_DIGITS),
     budgetMB: round(budget.budgetBytes / MB),
