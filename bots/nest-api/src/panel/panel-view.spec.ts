@@ -99,6 +99,7 @@ describe("panel view", () => {
       remainingBytes: 70 * MB,
       uploadsThisWeek: 300,
       bytesThisWeek: 7 * MB,
+      weekSpanDays: 7,
     });
     expect(view).toMatchObject({ usedMB: 330, remainingMB: 70, weekMB: 7, emptyInDays: 70 });
     expect(
@@ -109,6 +110,7 @@ describe("panel view", () => {
         remainingBytes: 1,
         uploadsThisWeek: 0,
         bytesThisWeek: 0,
+        weekSpanDays: 7,
       }).emptyInDays,
     ).toBeNull();
     expect(
@@ -118,8 +120,24 @@ describe("panel view", () => {
         remainingBytes: 400 * MB - 25_000,
         uploadsThisWeek: 1,
         bytesThisWeek: 25_000,
+        weekSpanDays: 1,
       }),
     ).toMatchObject({ usedMB: 0.024, weekMB: 0.024 });
+  });
+
+  it("reads the pace over the days the ledger covers, not a fixed week (PFA-227)", () => {
+    const MB = 1024 * 1024;
+    const day = (n: number) =>
+      uploadBudgetView({
+        budgetBytes: 400 * MB,
+        usedBytes: n * MB,
+        remainingBytes: (400 - n) * MB,
+        uploadsThisWeek: n * 100,
+        bytesThisWeek: n * MB,
+        weekSpanDays: n,
+      }).emptyInDays;
+    // 1 MB a day from day one: the projection holds steady instead of shrinking day after day.
+    expect([day(2), day(3)]).toEqual([398, 397]);
   });
 
   it("buckets live bots by pace", () => {

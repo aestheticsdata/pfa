@@ -117,6 +117,8 @@ export class SimulatedRunnerClient implements RunnerClient {
   private usedBytes: number;
   private weekUploads: number;
   private weekBytes: number;
+  /** A populated seed stands for a full week of history; a blank one starts today (PFA-227). */
+  private readonly weekSpanDays: number;
   private ticks = 0;
   /** `floor(now / 1 h)` of the newest day slice. */
   private hour = Math.floor(Date.now() / HOUR_MS);
@@ -130,6 +132,7 @@ export class SimulatedRunnerClient implements RunnerClient {
     this.usedBytes = seed.populated ? 212.6 * MB : 0;
     this.weekUploads = seed.populated ? 318 : 0;
     this.weekBytes = seed.populated ? 38.2 * MB : 0;
+    this.weekSpanDays = seed.populated ? 7 : 1;
     this.nextStepAt = Date.now() + this.ramp.everySec * 1000;
     for (const action of ACTIONS) this.runs.set(action.name, { runs: 0, errors: 0 });
     if (seed.populated) {
@@ -186,6 +189,7 @@ export class SimulatedRunnerClient implements RunnerClient {
         remainingBytes: LIMITS.uploadBudgetBytes - this.usedBytes,
         uploadsThisWeek: this.weekUploads,
         bytesThisWeek: this.weekBytes,
+        weekSpanDays: this.weekSpanDays,
       },
       quietHours: quietSnapshot(this.quiet, TIME_ZONE),
     };

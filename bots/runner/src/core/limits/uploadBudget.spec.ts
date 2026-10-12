@@ -35,6 +35,19 @@ describe("UploadBudget", () => {
     expect(budget.reserve(5)).toBe(true);
   });
 
+  it("spreads the week over the days the ledger covers, a day at least and a week at most (PFA-227)", () => {
+    let now = 0;
+    const budget = new UploadBudget({ budgetBytes: 400 * MB, windowMs: 365 * DAY_MS, entries: [] }, () => now);
+    expect(budget.snapshot().weekSpanDays).toBe(7);
+    budget.reserve(1024);
+    now = DAY_MS / 24;
+    expect(budget.snapshot().weekSpanDays).toBe(1);
+    now = 3 * DAY_MS;
+    expect(budget.snapshot().weekSpanDays).toBe(3);
+    now = 30 * DAY_MS;
+    expect(budget.snapshot().weekSpanDays).toBe(7);
+  });
+
   it("refuses empty or negative sizes", () => {
     const budget = new UploadBudget({ budgetBytes: 10, windowMs: 100, entries: [] });
     expect(budget.reserve(0)).toBe(false);
