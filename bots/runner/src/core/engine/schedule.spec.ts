@@ -48,4 +48,23 @@ describe("nextWakeAt", () => {
     expect(outsideQuiet / 365).toBeLessThan(2.5);
     expect(new Set(firstHourOfDay.values()).size).toBeGreaterThanOrEqual(8);
   });
+
+  it("wakes a crowd of bots at random through the day: no pile-up at 07:00 (PFA-228)", () => {
+    const rng = new Rng(3);
+    const start = new Date(Date.UTC(2026, 9, 12, 10, 0, 0));
+    const end = start.getTime() + 7 * 24 * 3600 * 1000;
+    const quarters = new Map<number, number>();
+    for (let bot = 0; bot < 500; bot++) {
+      let at = nextWakeAt(start, rng, "Europe/Paris");
+      while (at.getTime() < end) {
+        const quarter = Math.floor(at.getTime() / (15 * 60 * 1000));
+        quarters.set(quarter, (quarters.get(quarter) ?? 0) + 1);
+        at = nextWakeAt(at, rng, "Europe/Paris");
+      }
+    }
+    const counts = [...quarters.values()];
+    // 16 waking hours a day, 4 quarters each.
+    const mean = counts.reduce((sum, count) => sum + count, 0) / (7 * 16 * 4);
+    expect(Math.max(...counts)).toBeLessThan(2 * mean);
+  });
 });
