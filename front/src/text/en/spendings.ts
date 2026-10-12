@@ -155,6 +155,7 @@ const spendings: typeof frSpendings = {
     storeSearch: "Search a store…",
     storeEmpty: "No store",
     storeClear: "No store",
+    keepTypedName: (name: string) => `Use "${name}"`,
     storeAddress: "Store address",
     storeAddressPlaceholder: "Street, postcode, city",
     productType: "Product type",

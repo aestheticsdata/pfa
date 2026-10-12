@@ -1,7 +1,8 @@
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover";
+import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import { Check } from "lucide-react";
+import { Check, Pencil } from "lucide-react";
 import { useState } from "react";
 
 import type { NameComboboxText, NameOption } from "@components/spendings/interfaces/receiptLinesTypes";
@@ -24,6 +25,8 @@ interface NameComboboxProps {
 /**
  * A known name to pick, or a new one to type (PFA-218, PFA-219): the store of
  * a receipt, the product type of a line. Closing with a typed name keeps it.
+ * The search opens on the current name, selected: a name misread by the OCR is
+ * corrected in place, or replaced by typing over it (PFA-226).
  */
 const NameCombobox = ({
   options,
@@ -36,6 +39,7 @@ const NameCombobox = ({
   onPick,
   onType,
 }: NameComboboxProps) => {
+  const { receiptLines: t } = useTranslations("spendings");
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const typed = query.trim();
@@ -58,7 +62,9 @@ const NameCombobox = ({
     <Popover
       open={open}
       onOpenChange={(isOpen) => {
-        if (!isOpen && typed) {
+        if (isOpen) setQuery(value ?? "");
+        // Closing on the name as it was changes nothing.
+        if (!isOpen && typed && typed !== value) {
           if (exactMatch) pick(exactMatch);
           else type(typed);
           return;
@@ -92,6 +98,7 @@ const NameCombobox = ({
             placeholder={text.search}
             value={query}
             onValueChange={setQuery}
+            onFocus={(e) => e.currentTarget.select()}
             maxLength={maxLength}
             className="text-ink"
           />
@@ -125,7 +132,8 @@ const NameCombobox = ({
                   value={`__new-${typed}`}
                   onSelect={() => type(typed)}
                 >
-                  <span className="flex-1">{typed}</span>
+                  <Pencil className="size-4 shrink-0 text-ink-4" />
+                  <span className="flex-1 truncate">{t.keepTypedName(typed)}</span>
                 </CommandItem>
               )}
             </CommandGroup>
