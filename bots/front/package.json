@@ -12,7 +12,8 @@
     "start": "next start -p 3014 -H 127.0.0.1",
     "typecheck": "next typegen && tsc --noEmit",
     "lint": "biome check .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "video:generate": "playwright test --config playwright.demo.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.2.0",
@@ -24,10 +25,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.10.0",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "dotenv": "^18.0.7",
     "tailwindcss": "^4.3.3",
     "typescript": "5.9.3",
     "vitest": "^5.0.3"

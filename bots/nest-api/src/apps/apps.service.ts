@@ -64,7 +64,7 @@ function mockApps(): AppEntry[] {
     {
       id: "pfa",
       name: "pfa",
-      host: "ks-b",
+      host: "prod",
       address: "127.0.0.1:7300",
       theme: "pfa",
       timeZone: "Europe/Paris",
@@ -75,7 +75,7 @@ function mockApps(): AppEntry[] {
     {
       id: "sample-app",
       name: "sample-app",
-      host: "ks-c",
+      host: "staging",
       address: "127.0.0.1:9472",
       theme: null,
       timeZone: "Europe/Paris",

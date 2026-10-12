@@ -3,3 +3,7 @@ node_modules
 next-env.d.ts
 *.tsbuildinfo
 .env*.local
+
+# The demo take (e2e/demo/README.md): its output, and the session the setup saves for it.
+/e2e/demo/out
+/e2e/.auth

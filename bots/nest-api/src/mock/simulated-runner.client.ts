@@ -49,6 +49,17 @@ const MAX_ACTIVE_VISITS = 50;
 const FLAKY = new Set([7, 23, 61]);
 /** Turned off by the operator, so the table has a few "paused" rows. */
 const PAUSED = new Set([5, 20, 34, 53]);
+/** How long a load bot has been up at boot, in hours: most of a day, so the day charts are a day. */
+const LOAD_UPTIME_HOURS = { min: 6, max: 22 };
+/**
+ * A day's shape by Paris hour, 0 → 23: the load pace follows waking hours (`LOAD_PACE.daily`), quiet
+ * at night, a lunch and an evening peak — so the 24 h charts read as a day, not a flat line.
+ */
+const WAKING = [
+  0.1, 0.05, 0.05, 0.05, 0.05, 0.1, 0.25, 0.5, 0.75, 0.85, 0.9, 1, 1.1, 0.95, 0.8, 0.8, 0.85, 0.95, 1.1, 1.2, 1.05, 0.8,
+  0.5, 0.25,
+];
+const PARIS_HOUR = new Intl.DateTimeFormat("en-GB", { hour: "numeric", hourCycle: "h23", timeZone: TIME_ZONE });
 
 /** PFA's real registry, with the error rates a busy day would show. */
 const ACTIONS: SimulatedAction[] = [
@@ -447,7 +458,9 @@ export class SimulatedRunnerClient implements RunnerClient {
     const now = Date.now();
     this.fleet.forEach((bot, i) => {
       const daily = bot.kind === "daily";
-      const minutes = daily ? (9 + i * 4) * 1440 * 0.35 : this.random.between(5, 90);
+      const minutes = daily
+        ? (9 + i * 4) * 1440 * 0.35
+        : this.random.between(LOAD_UPTIME_HOURS.min, LOAD_UPTIME_HOURS.max) * 60;
       bot.totalActions = Math.round(bot.pace * minutes);
       bot.errors = Math.round(bot.totalActions * (bot.flaky ? 0.18 : 0.006));
       bot.uploads = Math.round(bot.totalActions * 0.03);
@@ -457,7 +470,8 @@ export class SimulatedRunnerClient implements RunnerClient {
       bot.day = bot.day.map((slice, hour) => {
         const busy = daily ? this.random.chance(0.12) : hour >= DAY_SLICES - Math.ceil(minutes / 60);
         if (!busy || hour === DAY_SLICES - 1) return slice;
-        const actions = daily ? this.random.int(1, 5) : Math.round(bot.pace * this.random.between(20, 60));
+        const shape = WAKING[Number(PARIS_HOUR.format((this.hour - DAY_SLICES + 1 + hour) * HOUR_MS))] ?? 1;
+        const actions = daily ? this.random.int(1, 5) : Math.round(bot.pace * shape * this.random.between(20, 60));
         return { actions, errors: bot.flaky ? Math.round(actions * 0.18) : 0 };
       });
       for (const action of ACTIONS) {
