@@ -153,6 +153,7 @@ const spendings = {
     storeSearch: "Rechercher un magasin…",
     storeEmpty: "Aucun magasin",
     storeClear: "Sans magasin",
+    keepTypedName: (name: string) => `Utiliser « ${name} »`,
     storeAddress: "Adresse du magasin",
     storeAddressPlaceholder: "Rue, code postal, ville",
     productType: "Type de produit",

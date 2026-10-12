@@ -147,8 +147,7 @@ const InvoiceModal = ({
         queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
       });
       setIsLoading(false);
-      // A fresh receipt goes straight to the OCR review (PFA-214).
-      if (canReadLines) readLines();
+      // Reading the lines stays the user's call: no OCR on upload (PFA-226).
     } catch (e) {
       const message = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
       if (message === "INVALID_IMAGE_FILE") {
