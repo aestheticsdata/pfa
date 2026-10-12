@@ -175,8 +175,15 @@ export class Runner<TPersona = unknown> {
     }
   }
 
-  /** Resumes where the last process left off: running only if one of the two switches was on. */
+  /**
+   * Resumes where the last process left off: running only if one of the two switches was on. The
+   * load bots that were up come back up at once, on their usual pace — a restart is not a ramp, and
+   * 500 first visits in a quarter of an hour would show on the charts after every deploy (PFA-228).
+   */
   resume(): void {
+    if (this.loadEnabled()) {
+      this.rampNow(this.state.target ?? 0);
+    }
     this.syncTicker();
   }
 
@@ -276,14 +283,17 @@ export class Runner<TPersona = unknown> {
     return enabled;
   }
 
-  /** Changes how the load bots behave; the ones already up take the new pace from their next visit. */
+  /**
+   * Changes how the load bots behave. Into burst, the ones already up visit within the minute; back
+   * to daily, the next tick plans their visit on the daily pace — not all within the quarter (PFA-228).
+   */
   async setLoadPace(pace: LoadPace): Promise<LoadPace> {
     this.state.loadPace = pace;
     await this.deps.saveState(this.state);
     const now = Date.now();
     for (const id of this.spawned) {
       const bot = this.bots.get(id);
-      if (bot && !bot.busy) bot.nextWakeAt = new Date(now + firstVisitDelayMs(bot.rng, this.isBurst()));
+      if (bot && !bot.busy) bot.nextWakeAt = this.isBurst() ? new Date(now + firstVisitDelayMs(bot.rng, true)) : null;
     }
     return pace;
   }
@@ -672,11 +682,14 @@ export class Runner<TPersona = unknown> {
     }
   }
 
-  /** One ramp decision, applied: who comes up (first visit soon, spread out) and who stops. */
-  private rampNow(): void {
+  /**
+   * One ramp decision, applied: who comes up (first visit soon, spread out) and who stops. With a
+   * `restore` count, that many come up in one step on their usual pace instead: the ones a restart found up.
+   */
+  private rampNow(restore?: number): void {
     const now = Date.now();
     const ramp = this.ramp();
-    const stepDue = now - this.lastStepAt >= ramp.everySec * 1000;
+    const stepDue = restore !== undefined || now - this.lastStepAt >= ramp.everySec * 1000;
     const plan = planRamp({
       // A load bot turned off by hand takes no place in the target: the next one comes up instead.
       order: this.loadOrder.filter(
@@ -686,7 +699,7 @@ export class Runner<TPersona = unknown> {
       target: this.state.target ?? 0,
       enabled: this.loadEnabled(),
       stepDue,
-      step: ramp.step,
+      step: restore ?? ramp.step,
     });
     for (const id of plan.despawn) {
       this.spawned.delete(id);
@@ -696,7 +709,9 @@ export class Runner<TPersona = unknown> {
     for (const id of plan.spawn) {
       this.spawned.add(id);
       const bot = this.bots.get(id);
-      if (bot) bot.nextWakeAt = new Date(now + firstVisitDelayMs(bot.rng, this.isBurst()));
+      // Null: the next tick plans its visit like any other.
+      if (bot)
+        bot.nextWakeAt = restore === undefined ? new Date(now + firstVisitDelayMs(bot.rng, this.isBurst())) : null;
     }
     if (plan.spawn.length > 0) {
       this.lastStepAt = now;

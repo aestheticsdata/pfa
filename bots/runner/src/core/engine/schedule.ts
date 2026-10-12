@@ -2,7 +2,8 @@ import { zonedHour } from "@core/time/zonedTime";
 
 import type { Rng } from "@core/random/rng";
 
-const HOUR_MS = 60 * 60 * 1000;
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
 /** Bots live like people: awake from 07:00, asleep from 23:00 — on the app's clock, not ks-b's UTC. */
 const DAY_START_HOUR = 7;
 const DAY_END_HOUR = 23;
@@ -11,21 +12,37 @@ const MEAN_GAP_MS = 6.4 * HOUR_MS;
 
 /**
  * When a bot next opens the app: an exponential gap (visits at random, no fixed rhythm a reader
- * of the data could spot), pushed to the next morning when it would land in the night.
+ * of the data could spot) counted in waking time only — the clock stops at 23:00 and runs again at
+ * 07:00. A gap that would end in the night carries over into the next day instead of being pushed
+ * to 07:00, so the bots do not all wake together (PFA-228): the morning is as random as the afternoon.
  */
 export function nextWakeAt(from: Date, rng: Rng, timeZone: string): Date {
-  const gap = -Math.log(1 - rng.next()) * MEAN_GAP_MS;
-  const candidate = new Date(from.getTime() + Math.max(5 * 60 * 1000, gap));
-  const hour = zonedHour(candidate, timeZone);
-  if (hour >= DAY_START_HOUR && hour < DAY_END_HOUR) {
-    return candidate;
+  let left = Math.max(5 * MINUTE_MS, -Math.log(1 - rng.next()) * MEAN_GAP_MS);
+  let at = isAwake(from, timeZone) ? from.getTime() : nextMorning(from, timeZone);
+  for (;;) {
+    // No clock change between 07:00 and 23:00: the hours left in the day are plain arithmetic.
+    // The clock reads whole minutes: the seconds past the minute come off too.
+    const awake = (DAY_END_HOUR - zonedHour(new Date(at), timeZone)) * HOUR_MS - (at % MINUTE_MS);
+    if (left < awake) {
+      return new Date(at + left);
+    }
+    left -= awake;
+    at = nextMorning(new Date(at + awake), timeZone);
   }
-  // Hours left until the next 07:00 on the app's clock, then a random start within 90 minutes.
-  const untilMorning = (DAY_START_HOUR - hour + 24) % 24;
-  let morning = candidate.getTime() + untilMorning * HOUR_MS;
+}
+
+function isAwake(date: Date, timeZone: string): boolean {
+  const hour = zonedHour(date, timeZone);
+  return hour >= DAY_START_HOUR && hour < DAY_END_HOUR;
+}
+
+/** The next 07:00 on the app's clock, from a time in the night. */
+function nextMorning(night: Date, timeZone: string): number {
+  const hour = zonedHour(night, timeZone);
+  let morning = night.getTime() + ((DAY_START_HOUR - hour + 24) % 24) * HOUR_MS;
   // On the night the clocks change, that lands an hour off 07:00: read the clock again and correct.
   morning += (DAY_START_HOUR - zonedHour(new Date(morning), timeZone)) * HOUR_MS;
-  return new Date(morning + rng.int(0, 90) * 60 * 1000);
+  return morning;
 }
 
 /** How many actions a visit holds: a glance or a proper session. */

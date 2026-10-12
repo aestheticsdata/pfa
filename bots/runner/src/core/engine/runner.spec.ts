@@ -1,7 +1,7 @@
 import { mkdtemp } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { BOT_STATE } from "@core/constants/bot";
+import { BOT_KIND, BOT_STATE, LOAD_PACE } from "@core/constants/bot";
 import { BotBlockedError, SessionExpiredError } from "@core/engine/errors";
 import { fakeRunner } from "@core/testing/fakeRunner";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -316,7 +316,11 @@ describe("Load bots", () => {
 
     await runner.setLoadEnabled(true);
     expect(load().every((bot) => bot.enabled)).toBe(true);
-    expect(load().filter((bot) => bot.state === BOT_STATE.sleeping).map((bot) => bot.id)).toContain("load-0");
+    expect(
+      load()
+        .filter((bot) => bot.state === BOT_STATE.sleeping)
+        .map((bot) => bot.id),
+    ).toContain("load-0");
     expect(runner.status().spawned).toBe(10);
     await stopAll(runner);
   });
@@ -327,11 +331,53 @@ describe("Load bots", () => {
     await runner.setTarget(10);
     await runner.setBotsEnabled({ ids: ["load-4"], enabled: true });
     expect(runner.status()).toMatchObject({ loadEnabled: true, spawned: 1 });
-    expect(runner.snapshotBots().filter((bot) => bot.enabled).map((bot) => bot.id)).toEqual(["load-4"]);
+    expect(
+      runner
+        .snapshotBots()
+        .filter((bot) => bot.enabled)
+        .map((bot) => bot.id),
+    ).toEqual(["load-4"]);
 
     await runner.setBotsEnabled({ ids: ["bot-0"], enabled: true });
     expect(runner.status().dailyEnabled).toBe(true);
     expect(dailyState(runner)).toBe(BOT_STATE.sleeping);
+    await stopAll(runner);
+  });
+
+  /** Load bots whose next visit falls within the coming quarter of an hour. */
+  const visitingSoon = (runner: Runner) => {
+    const soon = Date.now() + 15 * 60_000;
+    return runner
+      .snapshotBots()
+      .filter((bot) => bot.kind === BOT_KIND.load && bot.nextWakeAt && new Date(bot.nextWakeAt).getTime() < soon);
+  };
+
+  it("a restart brings the load bots that were up back at once, on their usual pace (PFA-228)", async () => {
+    vi.useFakeTimers({ now: new Date(Date.UTC(2026, 9, 12, 12, 0, 0)) });
+    const runner = await fakeRunner({
+      loadBots: 30,
+      initialState: { disabledBots: [], disabledActions: [], loadEnabled: true, target: 30 },
+      secretsPath: await secretsPath(),
+    });
+    runner.resume();
+    expect(runner.status().spawned).toBe(30);
+    // About one in 25 visits within a quarter of an hour on the daily pace, not all thirty.
+    expect(visitingSoon(runner).length).toBeLessThan(6);
+    await stopAll(runner);
+  });
+
+  it("back to the daily pace, the load bots up do not all visit in the next quarter (PFA-228)", async () => {
+    vi.useFakeTimers({ now: new Date(Date.UTC(2026, 9, 12, 12, 0, 0)) });
+    const { runner } = await loadRunner();
+    await runner.setTarget(30);
+    await runner.setLoadPace(LOAD_PACE.burst);
+    await runner.setLoadEnabled(true);
+    await vi.advanceTimersByTimeAsync(2_000);
+    expect(visitingSoon(runner)).toHaveLength(30);
+
+    await runner.setLoadPace(LOAD_PACE.daily);
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(visitingSoon(runner).length).toBeLessThan(6);
     await stopAll(runner);
   });
 
