@@ -151,4 +151,18 @@ describe("panel view", () => {
     const histogram = dayActivityHistogram(days.map((actions) => ({ daySpark: [{ actions, errors: 0 }] }) as BotView));
     expect(histogram.map((bucket) => bucket.count)).toEqual([1, 1, 2, 0, 0, 0, 1]);
   });
+
+  it("lists each bucket's bots, busiest first", () => {
+    const paces = [
+      { id: "ceres", actionsPerMin: 1.2 },
+      { id: "juno", actionsPerMin: 1.8 },
+      { id: "vulcan", actionsPerMin: 0.4 },
+    ];
+    const histogram = activityHistogram(paces as BotView[]);
+    expect(histogram[0]?.bots).toEqual([{ id: "vulcan", value: 0.4 }]);
+    expect(histogram[1]?.bots).toEqual([
+      { id: "juno", value: 1.8 },
+      { id: "ceres", value: 1.2 },
+    ]);
+  });
 });

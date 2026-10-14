@@ -49,45 +49,11 @@ export interface StatusCardProps {
   dailyIds: string[];
 }
 
-export interface DayChartProps {
+export interface StatusChartProps {
   app: string;
   history: ActivityPoint[];
   actionNames: string[];
   dailyIds: string[];
-}
-
-export interface SliceDetailModalProps {
-  app: string;
-  /** The slice shown; undefined once it has slid out of the 24 h window. */
-  point: ActivityPoint | undefined;
-  actionNames: string[];
-  dailyIds: string[];
-  open: boolean;
-  onClose: () => void;
-}
-
-export interface SlicePartProps {
-  point: ActivityPoint;
-}
-
-export interface SliceActionsProps {
-  point: ActivityPoint;
-  actionNames: string[];
-}
-
-export interface SliceBotsProps {
-  app: string;
-  point: ActivityPoint;
-  dailyIds: string[];
-  /** Following a bot's link closes the modal. */
-  onLeave: () => void;
-}
-
-export interface SliceSectionProps {
-  title: string;
-  /** The mono note on the right of the title (a count). */
-  aside?: ReactNode;
-  children: ReactNode;
 }
 
 export interface StatusOnlyProps {

@@ -1,9 +1,9 @@
-import SliceSection from "@components/panel/overview/slice/SliceSection";
+import SliceSection from "@components/panel/shared/slice/SliceSection";
 import { count } from "@lib/format/format";
 import { actionColor } from "@lib/panel/actionColors";
 import { OVERVIEW_TEXT } from "@text/overview";
 
-import type { SliceActionsProps } from "@components/panel/overview/interfaces/overviewTypes";
+import type { SliceActionsProps } from "@components/panel/shared/slice/interfaces/sliceTypes";
 
 /** What the bots did, by action: a bar each (their share of the busiest), successes and failures. */
 const SliceActions = ({ point, actionNames }: SliceActionsProps) => {

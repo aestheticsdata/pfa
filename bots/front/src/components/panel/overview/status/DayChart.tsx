@@ -1,18 +1,20 @@
 "use client";
 
+import usePlotHover from "@components/hooks/usePlotHover";
 import LegendItem from "@components/panel/metrics/LegendItem";
-import SliceDetailModal from "@components/panel/overview/slice/SliceDetailModal";
+import useSliceSelection from "@components/panel/shared/slice/hooks/useSliceSelection";
+import SliceDetailModal from "@components/panel/shared/slice/SliceDetailModal";
+import SliceTooltip from "@components/panel/shared/slice/SliceTooltip";
+import CursorTooltip from "@components/ui/CursorTooltip";
 import StackedColumns from "@lib/dataviz/StackedColumns";
-import { slotRange } from "@lib/format/format";
 import { actionColor } from "@lib/panel/actionColors";
+import { CHART_COLOR } from "@lib/panel/chartColors";
+import { SLICE_SECONDS, sliceSpan } from "@lib/panel/slices";
+import { sliceActionRows } from "@lib/panel/tooltipRows";
 import { OVERVIEW_TEXT } from "@text/overview";
-import { useState } from "react";
 
-import type { DayChartProps } from "@components/panel/overview/interfaces/overviewTypes";
+import type { StatusChartProps } from "@components/panel/overview/interfaces/overviewTypes";
 import type { ActivityPoint } from "@contracts/interfaces/panelTypes";
-
-/** The day chart's slices: 15 minutes each (the runner's `GET /history/day`). */
-export const SLICE_MINUTES = 15;
 
 /** Actions of the slice that no action name accounts for. */
 const unattributed = (slice: ActivityPoint) =>
@@ -20,19 +22,16 @@ const unattributed = (slice: ActivityPoint) =>
 
 /**
  * The last 24 h in daily pace (PFA-206): one bar every 15 min, stacked by action in the Metrics
- * mix's colours, errors on top in red. A bar with activity opens its detail; an empty one doesn't.
+ * mix's colours, errors on top in red. Each bar has its tooltip (PFA-229); a bar with activity
+ * opens its detail, an empty one doesn't.
  */
-const DayChart = ({ app, history, actionNames, dailyIds }: DayChartProps) => {
+const DayChart = ({ app, history, actionNames, dailyIds }: StatusChartProps) => {
   const text = OVERVIEW_TEXT.status;
-  // The slice by its start, not its index: the window slides every 15 min while the modal is open.
-  const [selected, setSelected] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
+  const seconds = SLICE_SECONDS.day;
+  const slices = useSliceSelection(history);
+  const { hover, index, onHover } = usePlotHover();
+  const hovered = index === null ? undefined : history[index];
   const seen = actionNames.filter((name) => history.some((point) => (point.byAction[name] ?? 0) > 0));
-  const point = history.find((slice) => slice.at === selected);
-  const select = (index: number) => {
-    setSelected(history[index]?.at ?? null);
-    setOpen(true);
-  };
   return (
     <>
       <div className="mb-2.5 flex flex-wrap justify-between gap-2 text-xs text-dim">
@@ -47,7 +46,7 @@ const DayChart = ({ app, history, actionNames, dailyIds }: DayChartProps) => {
           ))}
           {history.some((slice) => slice.errors > 0) && (
             <LegendItem
-              color="var(--bad)"
+              color={CHART_COLOR.errors}
               label={text.errorsLegend}
             />
           )}
@@ -56,10 +55,12 @@ const DayChart = ({ app, history, actionNames, dailyIds }: DayChartProps) => {
       <StackedColumns
         className="chart-plot gap-px"
         ariaLabel={text.chartDay}
-        onSelect={select}
+        onSelect={slices.select}
+        onHover={onHover}
+        active={index}
         columns={history.map((slice) => ({
           key: slice.at,
-          label: text.sliceLabel(slotRange(slice.at, SLICE_MINUTES), slice.actions),
+          label: text.sliceLabel(sliceSpan(slice.at, seconds), slice.actions),
           parts: [
             ...actionNames.map((name) => ({
               label: name,
@@ -67,8 +68,8 @@ const DayChart = ({ app, history, actionNames, dailyIds }: DayChartProps) => {
               color: actionColor(actionNames, name),
             })),
             // Slices saved before PFA-206 have no breakdown: their actions show as one grey block.
-            { label: "other", value: unattributed(slice), color: "var(--faint)" },
-            { label: "errors", value: slice.errors, color: "var(--bad)" },
+            { label: "other", value: unattributed(slice), color: CHART_COLOR.other },
+            { label: "errors", value: slice.errors, color: CHART_COLOR.errors },
           ],
         }))}
       />
@@ -77,14 +78,25 @@ const DayChart = ({ app, history, actionNames, dailyIds }: DayChartProps) => {
           <span key={tick}>{tick}</span>
         ))}
       </div>
+      <CursorTooltip point={hover}>
+        {hovered && (
+          <SliceTooltip
+            title={text.chartDay}
+            point={hovered}
+            seconds={seconds}
+            rows={sliceActionRows({ point: hovered, actionNames })}
+          />
+        )}
+      </CursorTooltip>
       {/* Always mounted, so closing plays its animation before the content goes. */}
       <SliceDetailModal
         app={app}
-        point={point}
+        point={slices.point}
+        seconds={seconds}
         actionNames={actionNames}
         dailyIds={dailyIds}
-        open={open && point !== undefined}
-        onClose={() => setOpen(false)}
+        open={slices.open}
+        onClose={slices.close}
       />
     </>
   );

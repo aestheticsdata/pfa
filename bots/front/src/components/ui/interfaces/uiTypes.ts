@@ -1,3 +1,4 @@
+import type { CursorPoint } from "@components/hooks/interfaces/cursorTypes";
 import type { BUTTON_SIZE, BUTTON_VARIANT, TONE } from "@components/ui/variants";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
@@ -71,4 +72,29 @@ export interface ModalProps {
 export interface EyeIconProps {
   /** Struck through: the secret is visible, the button hides it. */
   crossed: boolean;
+}
+
+export interface CursorTooltipProps {
+  /** The pointer, or null to fade the tooltip out. */
+  point: CursorPoint | null;
+  children: ReactNode;
+}
+
+/** A line of a tooltip: swatch, label, figure. */
+export interface TooltipRow {
+  label: string;
+  value: string;
+  /** A CSS colour for the swatch (a token: `var(--ok)`); none = no swatch. */
+  color?: string;
+  /** Draws the figure in the danger colour (errors, 5xx). */
+  bad?: boolean;
+}
+
+export interface TooltipBodyProps {
+  title: string;
+  /** The mono line under the title (the time slot). */
+  sub?: string;
+  rows: TooltipRow[];
+  /** The dim hint at the bottom (`Click for the detail`). */
+  hint?: string;
 }

@@ -4,11 +4,12 @@ import type {
   ActionView,
   ActivityPoint,
   BotView,
+  HistogramBot,
   HistogramBucket,
   StatusView,
   UploadBudgetView,
 } from "#app/contracts/interfaces/panelTypes.js";
-import type { ActionShare, BotFacts } from "#app/panel/interfaces/panelViewTypes.js";
+import type { ActionShare, BotFacts, HistogramSpec } from "#app/panel/interfaces/panelViewTypes.js";
 import type {
   RunnerAction,
   RunnerActivityPoint,
@@ -160,22 +161,31 @@ export function actionViews({ actions, actionsPerMin, quietActive }: ActionShare
   }));
 }
 
-export function activityHistogram(bots: BotView[]): HistogramBucket[] {
-  const counts = ACTIVITY_EDGES.map(() => 0);
+/** Bots into buckets by `value`: a bot lands in the first bucket whose edge it is under. */
+function histogram({ bots, edges, labels }: HistogramSpec): HistogramBucket[] {
+  const members: HistogramBot[][] = edges.map(() => []);
   for (const bot of bots) {
-    const index = ACTIVITY_EDGES.findIndex((edge) => bot.actionsPerMin < edge);
-    counts[index] = (counts[index] ?? 0) + 1;
+    members[edges.findIndex((edge) => bot.value < edge)]?.push(bot);
   }
-  return ACTIVITY_LABELS.map((label, i) => ({ label, count: counts[i] ?? 0 }));
+  return labels.map((label, i) => {
+    const inBucket = (members[i] ?? []).sort((a, b) => b.value - a.value);
+    return { label, count: inBucket.length, bots: inBucket };
+  });
+}
+
+export function activityHistogram(bots: BotView[]): HistogramBucket[] {
+  return histogram({
+    bots: bots.map((bot) => ({ id: bot.id, value: bot.actionsPerMin })),
+    edges: ACTIVITY_EDGES,
+    labels: ACTIVITY_LABELS,
+  });
 }
 
 /** Live bots by how many actions they ran over the last 24 h. */
 export function dayActivityHistogram(bots: BotView[]): HistogramBucket[] {
-  const counts = DAY_ACTIVITY_EDGES.map(() => 0);
-  for (const bot of bots) {
-    const total = bot.daySpark.reduce((sum, slice) => sum + slice.actions, 0);
-    const index = DAY_ACTIVITY_EDGES.findIndex((edge) => total < edge);
-    counts[index] = (counts[index] ?? 0) + 1;
-  }
-  return DAY_ACTIVITY_LABELS.map((label, i) => ({ label, count: counts[i] ?? 0 }));
+  return histogram({
+    bots: bots.map((bot) => ({ id: bot.id, value: bot.daySpark.reduce((sum, slice) => sum + slice.actions, 0) })),
+    edges: DAY_ACTIVITY_EDGES,
+    labels: DAY_ACTIVITY_LABELS,
+  });
 }

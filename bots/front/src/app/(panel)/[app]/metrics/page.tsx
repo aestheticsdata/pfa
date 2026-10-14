@@ -6,7 +6,12 @@ import type { MetricsView as Metrics } from "@contracts/interfaces/panelTypes";
 const MetricsPage = async ({ params }: PageProps<"/[app]/metrics">) => {
   const { app } = await params;
   const view = await pageData<Metrics>(`/apps/${encodeURIComponent(app)}/metrics`);
-  return <MetricsView view={view} />;
+  return (
+    <MetricsView
+      app={app}
+      view={view}
+    />
+  );
 };
 
 export default MetricsPage;
