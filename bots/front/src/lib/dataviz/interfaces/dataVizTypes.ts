@@ -52,3 +52,17 @@ export interface StackedColumn {
   label?: string;
   parts: Segment[];
 }
+
+/** A plot along x: the pointer's offset from its left edge, its width, how many data it spreads. */
+export interface PlotSpan {
+  offset: number;
+  width: number;
+  count: number;
+}
+
+/** The pointer over a datum of a chart: its index, and the pointer in viewport pixels. */
+export interface PlotHover {
+  index: number;
+  x: number;
+  y: number;
+}

@@ -4,15 +4,19 @@ import useNow from "@components/hooks/useNow";
 import { isLive } from "@components/panel/bots/botState";
 import { errorClass } from "@components/panel/bots/errorTone";
 import KvCell from "@components/panel/drawer/KvCell";
+import SparkColumns from "@components/panel/drawer/SparkColumns";
 import Label from "@components/ui/Label";
 import LocalTime from "@components/ui/LocalTime";
 import { BOT_KIND } from "@contracts/panel";
 import { cx } from "@lib/classNames/cx";
-import StackedColumns from "@lib/dataviz/StackedColumns";
 import { ago, count, duration } from "@lib/format/format";
 import { DRAWER_TEXT } from "@text/bots";
+import { CHART_TEXT } from "@text/charts";
 
 import type { DrawerPartProps } from "@components/panel/drawer/interfaces/drawerTypes";
+
+/** A slice of the last 30 s spark lasts 2 s (15 of them). */
+const SPARK_SECONDS = 2;
 
 /** The drawer's scrolling part: figures, last 30 s, by action, recent requests. */
 const DrawerBody = ({ bot }: DrawerPartProps) => {
@@ -56,32 +60,18 @@ const DrawerBody = ({ bot }: DrawerPartProps) => {
       </div>
       <div className={section}>
         <Label className="mb-2.5 block">{DRAWER_TEXT.activity}</Label>
-        <StackedColumns
-          className="h-17.5 gap-0.75"
+        <SparkColumns
+          spark={bot.spark}
           ariaLabel={DRAWER_TEXT.activity}
-          columns={bot.spark.map((slice, index) => ({
-            key: String(index),
-            parts: [
-              { label: "errors", value: slice.errors, color: "var(--bad)" },
-              { label: "actions", value: slice.actions, color: "color-mix(in oklch, var(--ok) 50%, transparent)" },
-            ],
-          }))}
-          max={Math.max(0.1, ...bot.spark.map((slice) => slice.actions + slice.errors))}
+          when={(index) => CHART_TEXT.ago.seconds((bot.spark.length - index) * SPARK_SECONDS)}
         />
       </div>
       <div className={section}>
         <Label className="mb-2.5 block">{DRAWER_TEXT.activityDay}</Label>
-        <StackedColumns
-          className="h-17.5 gap-0.75"
+        <SparkColumns
+          spark={bot.daySpark}
           ariaLabel={DRAWER_TEXT.activityDay}
-          columns={bot.daySpark.map((slice, index) => ({
-            key: String(index),
-            parts: [
-              { label: "errors", value: slice.errors, color: "var(--bad)" },
-              { label: "actions", value: slice.actions, color: "color-mix(in oklch, var(--ok) 50%, transparent)" },
-            ],
-          }))}
-          max={Math.max(0.1, ...bot.daySpark.map((slice) => slice.actions + slice.errors))}
+          when={(index) => CHART_TEXT.ago.hours(bot.daySpark.length - 1 - index)}
         />
       </div>
       <div className={section}>

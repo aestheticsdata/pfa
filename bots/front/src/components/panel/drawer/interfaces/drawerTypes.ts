@@ -1,4 +1,4 @@
-import type { BotDetailView } from "@contracts/interfaces/panelTypes";
+import type { BotDetailView, SparkPoint } from "@contracts/interfaces/panelTypes";
 
 export interface BotDrawerProps {
   app: string;
@@ -22,4 +22,11 @@ export interface KvCellProps {
   label: string;
   value: string;
   valueClass?: string;
+}
+
+export interface SparkColumnsProps {
+  spark: SparkPoint[];
+  ariaLabel: string;
+  /** When the slice at `index` was, for its tooltip (`12s ago`, `3h ago`). */
+  when: (index: number) => string;
 }

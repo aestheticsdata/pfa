@@ -1,10 +1,10 @@
 import LegendItem from "@components/panel/metrics/LegendItem";
-import SliceSection from "@components/panel/overview/slice/SliceSection";
+import SliceSection from "@components/panel/shared/slice/SliceSection";
 import StackedBar from "@lib/dataviz/StackedBar";
 import { count } from "@lib/format/format";
 import { OVERVIEW_TEXT } from "@text/overview";
 
-import type { SlicePartProps } from "@components/panel/overview/interfaces/overviewTypes";
+import type { SlicePartProps } from "@components/panel/shared/slice/interfaces/sliceTypes";
 
 /** How the app answered the slice's requests: 2xx / 4xx / 5xx in one bar, with the counts. */
 const SliceResponses = ({ point }: SlicePartProps) => {

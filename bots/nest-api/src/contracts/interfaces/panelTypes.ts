@@ -219,9 +219,17 @@ export interface ActionsView {
   quietActive: boolean;
 }
 
+/** A bot in a histogram bucket: what put it there (actions/min, or actions over 24 h). */
+export interface HistogramBot {
+  id: string;
+  value: number;
+}
+
 export interface HistogramBucket {
   label: string;
   count: number;
+  /** The bucket's bots, busiest first: its detail lists them (PFA-229). */
+  bots: HistogramBot[];
 }
 
 export interface MetricsView {
@@ -234,6 +242,8 @@ export interface MetricsView {
   /** Live bots by actions over the last 24 h. */
   dayActivity: HistogramBucket[];
   liveBots: number;
+  /** The daily bots' ids: the slice detail tags each bot daily or load (PFA-229). */
+  dailyIds: string[];
   actionMix: ActionView[];
   mixRuns: ActionCount[];
 }

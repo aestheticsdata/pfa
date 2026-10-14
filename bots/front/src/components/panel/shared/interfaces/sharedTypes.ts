@@ -36,3 +36,30 @@ export interface PendingBarProps {
 export interface EmptyNoticeProps {
   children: ReactNode;
 }
+
+/** A figure of a detail: label, value, drawn in the danger colour when `bad`. */
+export interface Fact {
+  label: string;
+  value: string;
+  bad?: boolean;
+}
+
+export interface FactGridProps {
+  facts: Fact[];
+}
+
+/** A bot in a list of the busiest: its figure as a bar (`value`) and as text (`label`). */
+export interface BotBar {
+  id: string;
+  value: number;
+  label: string;
+}
+
+export interface BotBarsProps {
+  app: string;
+  /** Busiest first. */
+  bots: BotBar[];
+  dailyIds: string[];
+  /** Following a bot's link closes the modal. */
+  onLeave: () => void;
+}

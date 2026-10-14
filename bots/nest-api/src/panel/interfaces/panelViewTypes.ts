@@ -1,3 +1,4 @@
+import type { HistogramBot } from "#app/contracts/interfaces/panelTypes.js";
 import type { RunnerAction, RunnerBot } from "#app/runner/interfaces/runnerApiTypes.js";
 
 /** A runner bot and what the back-office knows about it. */
@@ -20,4 +21,11 @@ export interface BotsQuery {
   state: string;
   q: string;
   page: number;
+}
+
+/** A histogram's input: each bot with its value, the buckets' upper edges and their labels. */
+export interface HistogramSpec {
+  bots: HistogramBot[];
+  edges: number[];
+  labels: string[];
 }

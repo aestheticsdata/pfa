@@ -163,6 +163,7 @@ export class PanelService {
       activity: activityHistogram(live),
       dayActivity: dayActivityHistogram(live),
       liveBots: live.length,
+      dailyIds: bots.filter((bot) => bot.kind === BOT_KIND.daily).map((bot) => bot.id),
       actionMix: actionViews({
         actions,
         actionsPerMin: status.actionsPerMin,

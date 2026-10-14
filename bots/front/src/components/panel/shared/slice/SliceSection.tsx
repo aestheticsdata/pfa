@@ -1,4 +1,4 @@
-import type { SliceSectionProps } from "@components/panel/overview/interfaces/overviewTypes";
+import type { SliceSectionProps } from "@components/panel/shared/slice/interfaces/sliceTypes";
 
 /** A titled block of the slice detail, ruled off from the one above. */
 const SliceSection = ({ title, aside, children }: SliceSectionProps) => (
