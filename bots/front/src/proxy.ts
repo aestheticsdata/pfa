@@ -1,3 +1,4 @@
+import { isForgedAction } from "@lib/proxy/forgedAction";
 import { NextResponse } from "next/server";
 
 import type { NextRequest } from "next/server";
@@ -46,6 +47,9 @@ const buildCsp = (nonce: string): string =>
  * checks the session for real on every call; this only spares a round trip.
  */
 const proxy = (request: NextRequest): NextResponse => {
+  // Ahead of the session gate, which would otherwise answer a probe with a redirect to sign in.
+  if (isForgedAction(request.headers)) return new NextResponse(null, { status: 400 });
+
   const { pathname, search } = request.nextUrl;
   const isPublic = PUBLIC_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));
   if (!isPublic && !request.cookies.has(SESSION_COOKIE)) {
