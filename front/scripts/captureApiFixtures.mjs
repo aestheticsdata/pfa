@@ -206,8 +206,8 @@ const months = {
   empty: [EMPTY_YEAR, 0],
 };
 
-const monthQuery = ([y, m]) => `userID=x&from=${ymd(monthStart(y, m))}&to=${ymd(monthEnd(y, m))}`;
-const startQuery = ([y, m]) => `userID=x&start=${ymd(monthStart(y, m))}`;
+const monthQuery = ([y, m]) => `from=${ymd(monthStart(y, m))}&to=${ymd(monthEnd(y, m))}`;
+const startQuery = ([y, m]) => `start=${ymd(monthStart(y, m))}`;
 const isoStart = ([y, m]) => ymd(monthStart(y, m));
 const trendsQuery = ([y, m]) =>
   new URLSearchParams({
@@ -219,7 +219,7 @@ const trendsQuery = ([y, m]) =>
 
 const latestSpendings = await call(`/spendings?${monthQuery(months.latest)}`);
 const term = latestSpendings.find((s) => s.label.length >= 3)?.label.slice(0, 3) ?? "a";
-const categories = await call("/categories?userID=x");
+const categories = await call("/categories");
 const firstSearchPage = await call(`/spendings/search?q=${encodeURIComponent(term)}`);
 const today = new Date();
 const yearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate() + 1);
@@ -230,7 +230,7 @@ const yearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDat
 
 const ENDPOINTS = {
   "auth.me": "/users/me",
-  "categories.list": "/categories?userID=x",
+  "categories.list": "/categories",
   "categoryStats.all": "/category-stats",
   "categoryStats.range": `/category-stats?from=${latestYear}-01-01&to=${ymd(latest)}`,
   "dashboard.month": `/dashboard?${startQuery(months.latest)}`,
@@ -238,7 +238,7 @@ const ENDPOINTS = {
   "dashboard.projection": `/dashboard/projection?${startQuery(months.latest)}`,
   "dashboard.projectionFirstMonth": `/dashboard/projection?${startQuery(months.first)}`,
   "dashboard.monthlyIncome": `/dashboard/monthly-income?year=${latestYear}`,
-  "dashboard.monthlyStats": `/monthlystats?userID=x&from=${ymd(monthStart(...months.latest))}`,
+  "dashboard.monthlyStats": `/monthlystats?from=${ymd(monthStart(...months.latest))}`,
   "dashboard.weeklyStats": `/weeklystats?${startQuery(months.latest)}`,
   "exceptionals.year": `/exceptionals?year=${latestYear}`,
   "exceptionals.all": "/exceptionals",

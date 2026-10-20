@@ -358,13 +358,10 @@ const SpendingModal = ({
                 const mEnd = endOfMonth(recurringMonth);
                 closeModal();
                 copyRecurrings.mutate({
-                  userID: user.id,
-                  dates: {
-                    start: format(mStart, DATE_FORMAT),
-                    end: format(mEnd, DATE_FORMAT),
-                    previousMonthStart: format(subMonths(mStart, 1), DATE_FORMAT),
-                    previousMonthEnd: format(subMonths(mEnd, 1), DATE_FORMAT),
-                  },
+                  start: format(mStart, DATE_FORMAT),
+                  end: format(mEnd, DATE_FORMAT),
+                  previousMonthStart: format(subMonths(mStart, 1), DATE_FORMAT),
+                  previousMonthEnd: format(subMonths(mEnd, 1), DATE_FORMAT),
                 });
               }}
             >

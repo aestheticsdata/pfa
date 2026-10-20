@@ -26,9 +26,7 @@ const useMonthlyStats = () => {
     }
 
     try {
-      const monthlyStats = await privateRequest(
-        `/monthlystats?userID=${userID}&from=${formatIsoDate(startOfMonth(from))}`,
-      );
+      const monthlyStats = await privateRequest(`/monthlystats?from=${formatIsoDate(startOfMonth(from))}`);
       return parseResponse(MonthlyStatsSchema, monthlyStats.data, "/monthlystats");
     } catch (e) {
       console.log("get monthly stats error : ", e);

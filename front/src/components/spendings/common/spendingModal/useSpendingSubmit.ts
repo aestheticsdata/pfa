@@ -94,7 +94,6 @@ const useSpendingSubmit = ({
       amount: Number(amountEvaluatedExpr),
       category: categoryPayload,
       currency: user.baseCurrency,
-      userID: user.id,
       id: spending?.ID,
     };
 

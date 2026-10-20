@@ -54,7 +54,7 @@ const useReccurings = () => {
   };
 
   const getRecurrings = async () => {
-    const response = await privateRequest(`/recurrings?userID=${userID}&start=${formatIsoDate(startOfMonth(from!))}`);
+    const response = await privateRequest(`/recurrings?start=${formatIsoDate(startOfMonth(from!))}`);
     return parseResponse(RecurringListSchema, response.data, "/recurrings");
   };
 
@@ -94,13 +94,10 @@ const useReccurings = () => {
     });
   };
 
-  const copyRecurringsService = async (userID: string, dates: Dates) => {
+  const copyRecurringsService = async (dates: Dates) => {
     return privateRequest(`/recurrings/copy`, {
       method: "POST",
-      data: {
-        userID,
-        dates,
-      },
+      data: { dates },
     });
   };
 
@@ -138,9 +135,9 @@ const useReccurings = () => {
     },
   });
 
-  const copyRecurrings = useMutation<unknown, unknown, { userID: string; dates: Dates }>({
-    mutationFn: ({ userID, dates }) => {
-      return copyRecurringsService(userID, dates);
+  const copyRecurrings = useMutation<unknown, unknown, Dates>({
+    mutationFn: (dates) => {
+      return copyRecurringsService(dates);
     },
 
     onSuccess: () => recurringsActionOnSuccess(spendingsText.toasts.recurringsCopied),

@@ -21,7 +21,7 @@ const useWeeklyStats = () => {
   const queryClient = useQueryClient();
 
   const getWeeklyStats = async () => {
-    const response = await privateRequest(`/weeklystats?userID=${userID}&start=${formatIsoDate(startOfMonth(from!))}`);
+    const response = await privateRequest(`/weeklystats?start=${formatIsoDate(startOfMonth(from!))}`);
     return parseResponse(WeeklyStatsSchema, response.data, "/weeklystats");
   };
 
@@ -34,7 +34,6 @@ const useWeeklyStats = () => {
       return privateRequest(`/dashboard/${dashboard.ID}`, {
         method: "PUT",
         data: {
-          userID,
           ceiling: Number(ceiling),
         },
       });

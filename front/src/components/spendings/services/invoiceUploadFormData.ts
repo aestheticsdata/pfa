@@ -6,14 +6,12 @@ export interface InvoiceUploadTarget {
   ID: string;
   itemType: string;
   label: string;
-  userID: string;
   date?: string | null;
   dateFrom?: string | null;
 }
 
 export const buildInvoiceUploadFormData = (target: InvoiceUploadTarget, file: File): FormData => {
   const formData = new FormData();
-  formData.append("userID", target.userID);
 
   switch (target.itemType) {
     case "recurring":

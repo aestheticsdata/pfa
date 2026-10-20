@@ -106,7 +106,6 @@ export const SpendingMutationPayloadSchema = z.object({
   amount: numberLikeSchema,
   category: SpendingCategoryInputSchema.nullable().optional(),
   currency: z.string(),
-  userID: z.string(),
   id: z.string().optional(),
 });
 
