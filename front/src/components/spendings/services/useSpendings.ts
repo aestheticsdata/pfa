@@ -1,6 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { buildInvoiceUploadFormData } from "@components/spendings/services/invoiceUploadFormData";
+import { formatIsoDate } from "@helpers/dateRoute";
 import { displayPopup } from "@helpers/displayPopup";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
@@ -58,7 +59,9 @@ const useSpendings = () => {
       return [];
     }
 
-    const response = await privateRequest(`/spendings?userID=${userID}&from=${monthStart}&to=${monthEnd}`);
+    const response = await privateRequest(
+      `/spendings?userID=${userID}&from=${formatIsoDate(monthStart)}&to=${formatIsoDate(monthEnd)}`,
+    );
     return parseResponse(SpendingListSchema, response.data, "/spendings");
   };
 
