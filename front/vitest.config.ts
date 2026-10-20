@@ -21,9 +21,8 @@ export default defineConfig({
     },
   },
   test: {
-    // `globals: true` lets the existing `describe/it/expect` tests run without
-    // importing them; new tests import from "vitest" explicitly.
-    globals: true,
+    // No globals: every test imports `describe/it/expect` from "vitest", so `tsc` type-checks the
+    // test files like the rest of the code (PFA-237).
     environment: "node",
     include: ["src/**/*.{test,spec}.{ts,tsx,js,jsx}"],
   },

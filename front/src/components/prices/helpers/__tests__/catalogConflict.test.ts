@@ -1,4 +1,5 @@
 import catalogConflict from "@components/prices/helpers/catalogConflict";
+import { describe, expect, it } from "vitest";
 
 const httpError = (status: number, data: unknown) => Object.assign(new Error("failed"), { response: { status, data } });
 

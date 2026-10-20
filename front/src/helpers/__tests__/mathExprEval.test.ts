@@ -1,4 +1,5 @@
 import toFixedEval, { accurateFixed, applyMinus, sanitizeMathExpr, validateMathExpr } from "@helpers/mathExprEval";
+import { describe, expect, it } from "vitest";
 
 describe("accurateFixed", () => {
   it("should return the correct rounding", () => {

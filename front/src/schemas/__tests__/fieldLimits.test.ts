@@ -3,6 +3,7 @@ import { makeLoginSchema } from "@components/shared/sharedLoginForm/schema";
 import { makeSpendingSchema } from "@components/spendings/common/spendingModal/schema";
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import { dictionaries } from "@text/index";
+import { expect, it } from "vitest";
 
 import type { ZodSafeParseResult } from "zod";
 

@@ -1,5 +1,6 @@
 import { OVERSPEND_DANGER_RATIO } from "@components/spendings/helpers/overspendLevel";
 import { bulletSegments, scaleFrac } from "@components/statistics/helpers/weekdayBullet";
+import { describe, expect, it } from "vitest";
 
 describe("scaleFrac", () => {
   it("maps an amount to its 0–1 position on the scale", () => {

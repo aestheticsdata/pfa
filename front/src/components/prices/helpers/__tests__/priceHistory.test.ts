@@ -6,6 +6,7 @@ import {
   SERIES_COLORS,
   storeColors,
 } from "@components/prices/helpers/priceHistory";
+import { describe, expect, it } from "vitest";
 
 import type { BasisComparison, StorePrice } from "@src/schemas/prices";
 

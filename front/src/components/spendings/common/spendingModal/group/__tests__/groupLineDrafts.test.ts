@@ -5,6 +5,7 @@ import {
   summarizeDrafts,
   toLinePayloads,
 } from "@components/spendings/common/spendingModal/group/groupLineDrafts";
+import { describe, expect, it } from "vitest";
 
 const food = { ID: "c1", userID: "u", name: "Food", color: "#111111" };
 const care = { ID: "c2", userID: "u", name: "Care", color: "#222222" };

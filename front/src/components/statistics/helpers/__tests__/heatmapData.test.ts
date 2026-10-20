@@ -1,4 +1,5 @@
 import { bandFor, buildHeatmap, LEVEL } from "@components/statistics/helpers/heatmapData";
+import { describe, expect, it } from "vitest";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { DailyStat } from "@src/schemas/stats";
