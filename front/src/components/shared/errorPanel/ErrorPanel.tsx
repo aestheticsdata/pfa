@@ -1,13 +1,15 @@
 "use client";
 
 import { Button } from "@components/ui/button";
+import { reportError } from "@lib/report";
 import { useEffect } from "react";
 
 import type { ErrorPanelProps } from "@components/shared/interfaces/errorPanelTypes";
 
 export default function ErrorPanel({ error, retry }: ErrorPanelProps) {
+  // A boundary-caught error never reaches the global `error` listener: report it here (PFA-242).
   useEffect(() => {
-    console.error(error);
+    reportError(error);
   }, [error]);
 
   return (

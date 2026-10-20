@@ -24,14 +24,9 @@ const useCategoryStats = (range?: CategoryStatsRange) => {
   const userID = user?.id;
 
   const getCategoryStatsService = async () => {
-    try {
-      const query = range ? `?from=${range.from}&to=${range.to}` : "";
-      const response = await privateRequest(`/category-stats${query}`);
-      return parseResponse(CategoryStatsResponseSchema, response.data, "/category-stats");
-    } catch (e) {
-      console.log("get category stats error : ", e);
-      throw e; // Re-throw so React Query handles the error properly
-    }
+    const query = range ? `?from=${range.from}&to=${range.to}` : "";
+    const response = await privateRequest(`/category-stats${query}`);
+    return parseResponse(CategoryStatsResponseSchema, response.data, "/category-stats");
   };
 
   const { data: categoryStats, error } = useQuery({

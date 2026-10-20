@@ -17,11 +17,12 @@ const useWeeklyStats = () => {
     get: { data: dashboard },
   } = useDashboard();
   const from = useDatePickerWrapperStore((state) => state.from);
-  const monthBeginning = startOfMonth(from!);
+  const monthBeginning = from ? startOfMonth(from) : null;
   const queryClient = useQueryClient();
 
   const getWeeklyStats = async () => {
-    const response = await privateRequest(`/weeklystats?start=${formatIsoDate(startOfMonth(from!))}`);
+    if (!monthBeginning) throw new Error("No month selected");
+    const response = await privateRequest(`/weeklystats?start=${formatIsoDate(monthBeginning)}`);
     return parseResponse(WeeklyStatsSchema, response.data, "/weeklystats");
   };
 
@@ -30,16 +31,12 @@ const useWeeklyStats = () => {
       return null;
     }
 
-    try {
-      return privateRequest(`/dashboard/${dashboard.ID}`, {
-        method: "PUT",
-        data: {
-          ceiling: Number(ceiling),
-        },
-      });
-    } catch (e) {
-      console.log("error setting initial ceiling", e);
-    }
+    return privateRequest(`/dashboard/${dashboard.ID}`, {
+      method: "PUT",
+      data: {
+        ceiling: Number(ceiling),
+      },
+    });
   };
 
   const get = useQuery({
@@ -54,7 +51,7 @@ const useWeeklyStats = () => {
 
     onSuccess: async () => {
       await queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.DASHBOARD, startOfMonth(from!)],
+        queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
       });
     },
   });

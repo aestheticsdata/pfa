@@ -53,10 +53,7 @@ const useSpendingSubmit = ({
   closeModal,
 }: UseSpendingSubmitOptions) => {
   const onSubmit = (values: SpendingForm) => {
-    if (!user) {
-      console.error("User is not available");
-      return;
-    }
+    if (!user) return;
 
     const amountEvaluatedExpr = evaluateAmountExpression(values.spendingAmount);
     if (amountEvaluatedExpr === null) {

@@ -33,6 +33,9 @@
       "correctness": {
         "useExhaustiveDependencies": "off"
       },
+      "suspicious": {
+        "noConsole": "error"
+      },
       "style": {
         "noRestrictedImports": {
           "level": "error",

@@ -92,10 +92,7 @@ const ExceptionalModal = ({ closeModal: closeModalProp, item, existingCategories
   const exactMatch = existingCategories.find((c) => c.name.toLowerCase() === comboboxQuery.trim().toLowerCase());
 
   const onSubmit = (values: ExceptionalForm) => {
-    if (!user) {
-      console.error("User is not available");
-      return;
-    }
+    if (!user) return;
 
     const amountEvaluated = evaluateAmountExpression(values.amount);
     if (amountEvaluated === null) {

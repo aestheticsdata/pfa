@@ -350,10 +350,6 @@ const SpendingModal = ({
               type="button"
               variant="muted"
               onClick={() => {
-                if (!user) {
-                  console.error("User is not available");
-                  return;
-                }
                 const mStart = startOfMonth(recurringMonth);
                 const mEnd = endOfMonth(recurringMonth);
                 closeModal();

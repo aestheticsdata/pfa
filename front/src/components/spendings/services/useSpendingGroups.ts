@@ -45,8 +45,7 @@ const useSpendingGroups = () => {
   const attachAfterCreation = async (input: ShareReceiptInput) => {
     try {
       await shareReceiptRequest(input);
-    } catch (e) {
-      console.log("error attaching the group's receipt : ", e);
+    } catch {
       toast.error(toasts.receiptUploadFailed);
     }
   };

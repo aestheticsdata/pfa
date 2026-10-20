@@ -32,13 +32,8 @@ const useCategories = () => {
   };
 
   const getCategoriesService = async () => {
-    try {
-      const response = await privateRequest(`/categories`);
-      return parseResponse(CategoryListSchema, response.data, "/categories");
-    } catch (e) {
-      console.log("get categories error : ", e);
-      throw e; // Re-throw so React Query handles the error properly
-    }
+    const response = await privateRequest(`/categories`);
+    return parseResponse(CategoryListSchema, response.data, "/categories");
   };
   const { data: categories } = useQuery({
     queryKey: [QUERY_KEYS.CATEGORIES],
@@ -48,15 +43,11 @@ const useCategories = () => {
   });
 
   const updateCategoryService = async (category: UpdateCategoryPayload) => {
-    try {
-      const payload = UpdateCategoryPayloadSchema.parse(category);
-      return privateRequest(`/categories/${payload.ID}`, {
-        method: "PUT",
-        data: payload,
-      });
-    } catch (e) {
-      console.log(e);
-    }
+    const payload = UpdateCategoryPayloadSchema.parse(category);
+    return privateRequest(`/categories/${payload.ID}`, {
+      method: "PUT",
+      data: payload,
+    });
   };
   const updateCategory = useMutation<unknown, AxiosError, UpdateCategoryVariables>({
     mutationFn: ({ singleCategory: category }) => {
@@ -65,10 +56,6 @@ const useCategories = () => {
 
     onSuccess: async () => {
       await invalidation();
-    },
-
-    onError: (e) => {
-      console.log("error updating category", e);
     },
   });
 
@@ -84,10 +71,6 @@ const useCategories = () => {
 
     onSuccess: async () => {
       await invalidation();
-    },
-
-    onError: (e) => {
-      console.log("error deleting category", e);
     },
   });
 

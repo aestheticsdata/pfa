@@ -22,6 +22,8 @@ const common = {
     toastTitle: "Export à venir",
     toastDescription: "Bientôt disponible.",
   },
+  // Generic toast for a failed mutation that has no dedicated message (PFA-242).
+  mutationFailed: "L'opération a échoué. Réessayer.",
   datePicker: {
     prevWeek: "Semaine précédente",
     nextWeek: "Semaine suivante",

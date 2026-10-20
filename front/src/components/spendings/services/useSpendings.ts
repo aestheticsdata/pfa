@@ -154,8 +154,7 @@ const useSpendings = () => {
               receiptFile,
             ),
           });
-        } catch (e) {
-          console.log("error attaching receipt at creation : ", e);
+        } catch {
           toast.error(spendingsText.toasts.receiptUploadFailed);
         }
       }
@@ -177,10 +176,6 @@ const useSpendings = () => {
         setScrollToDayIso(createdDate);
       }
     },
-
-    onError: (e) => {
-      console.log("error creating spendings : ", e);
-    },
   });
 
   const updateSpendingService = async (spending: SpendingMutationPayload) => {
@@ -198,10 +193,6 @@ const useSpendings = () => {
 
     onSuccess: () => {
       spendingsActionOnSuccess(spendingsText.toasts.spendingUpdated);
-    },
-
-    onError: (e) => {
-      console.log("error updating spending : ", e);
     },
   });
 
