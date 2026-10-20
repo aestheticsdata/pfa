@@ -1,22 +1,14 @@
 "use client";
 
+import WeekPickerCalendar from "@components/datePickerWrapper/calendar/WeekPickerCalendar";
 import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePickerState";
 import { IconButton } from "@components/shared/IconButton";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@components/ui/popover";
-import { useLocale } from "@i18n/LocaleContext";
-import localesDates from "@i18n/localesDates";
 import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
-import DayPicker from "react-day-picker";
-// NOTE: react-day-picker/lib/style.css is intentionally NOT imported — the pfa
-// "Capsule" styling in globals.css fully styles the DayPicker, and the lib CSS
-// (loaded after globals) would otherwise win and reintroduce the blue band,
-// triangle nav arrows and white hover box.
-
-import type { Modifiers } from "react-day-picker";
 
 /**
  * Presentational only: it renders the week held by the shared store and never
@@ -28,36 +20,10 @@ import type { Modifiers } from "react-day-picker";
 const DatePickerWrapper = () => {
   const common = useTranslations("common");
   const dateLocale = useDateLocale();
-  const { locale } = useLocale();
-  const { MONTHS, WEEKDAYS_LONG, WEEKDAYS_SHORT } = localesDates[locale];
 
-  const {
-    isCalendarVisible,
-    hoverRange,
-    selectedDays,
-    setIsCalendarVisible,
-    handleDayChange,
-    stepWeek,
-    handleDayEnter,
-    handleDayLeave,
-  } = useDatePickerState();
+  const { isCalendarVisible, selectedDays, setIsCalendarVisible, handleDayChange, stepWeek } = useDatePickerState();
 
   const daysAreSelected = selectedDays.length > 0;
-
-  const modifiers: Partial<Modifiers> = {};
-  if (hoverRange) {
-    modifiers.hoverRange = hoverRange;
-    modifiers.hoverRangeStart = hoverRange.from;
-    modifiers.hoverRangeEnd = hoverRange.to;
-  }
-  if (daysAreSelected) {
-    modifiers.selectedRange = {
-      from: selectedDays[0],
-      to: selectedDays[selectedDays.length - 1],
-    };
-    modifiers.selectedRangeStart = selectedDays[0];
-    modifiers.selectedRangeEnd = selectedDays[selectedDays.length - 1];
-  }
 
   return (
     /* The wrapper no longer positions anything (the panel is portalled) — it
@@ -122,9 +88,8 @@ const DatePickerWrapper = () => {
             </IconButton>
           </div>
         </PopoverAnchor>
-        {/* Strip the ui/popover chrome (bg/border/padding/shadow): the DayPicker
-            owns its own "Capsule" surface in daypicker.css, same arrangement as
-            MonthPickerPopover. align="start" reproduces the previous desktop
+        {/* Strip the ui/popover chrome (bg/border/padding/shadow): the calendar
+            owns its own "Capsule" surface, same arrangement as MonthPickerPopover. align="start" reproduces the previous desktop
             anchoring; collisionPadding shifts it back into view on mobile, where
             it used to be hard-coded to right-0. */}
         <PopoverContent
@@ -135,20 +100,9 @@ const DatePickerWrapper = () => {
           data-nav-overlay
           className="w-auto border-0 bg-transparent p-0 shadow-none"
         >
-          <DayPicker
-            initialMonth={selectedDays[0]}
-            locale={locale}
-            months={MONTHS}
-            weekdaysLong={WEEKDAYS_LONG}
-            weekdaysShort={WEEKDAYS_SHORT}
+          <WeekPickerCalendar
             selectedDays={selectedDays}
-            showWeekNumbers={false}
-            showOutsideDays
-            modifiers={modifiers}
-            onDayClick={(day) => handleDayChange(day)}
-            onDayMouseEnter={handleDayEnter}
-            onDayMouseLeave={handleDayLeave}
-            onWeekClick={() => {}}
+            onSelectDay={handleDayChange}
           />
         </PopoverContent>
       </Popover>

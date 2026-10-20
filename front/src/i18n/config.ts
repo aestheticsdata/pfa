@@ -1,7 +1,9 @@
 import type { LangKeys } from "@i18n/interfaces/localesTypes";
 
-export const SUPPORTED_LOCALES: readonly LangKeys[] = ["fr", "en"];
-export const DEFAULT_LOCALE: LangKeys = "fr";
+export const LOCALE = { fr: "fr", en: "en" } as const;
+
+export const SUPPORTED_LOCALES: readonly LangKeys[] = [LOCALE.fr, LOCALE.en];
+export const DEFAULT_LOCALE: LangKeys = LOCALE.fr;
 export const LOCALE_STORAGE_KEY = "pfa.locale";
 
 /** Endonyms shown in the language submenu — never translated. */

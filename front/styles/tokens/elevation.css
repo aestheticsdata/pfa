@@ -17,6 +17,8 @@
   /* The floating tooltip bubble — shared by both tooltip modes (COS-126). */
   --shadow-tooltip: 0 16px 40px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.05);
   --shadow-popover: 0 20px 48px oklch(0 0 0 / 0.55);
+  /* The week picker's calendar panel (PFA-245): the popover drop plus the top highlight. */
+  --shadow-calendar: 0 20px 48px oklch(0 0 0 / 0.55), inset 0 1px 0 oklch(1 0 0 / 0.05);
   --shadow-drawer: 24px 0 70px oklch(0 0 0 / 0.55);
   --shadow-modal: 0 34px 90px oklch(0 0 0 / 0.62), inset 0 1px 0 oklch(1 0 0 / 0.05);
   --shadow-lightbox: 0 24px 80px oklch(0 0 0 / 0.6);

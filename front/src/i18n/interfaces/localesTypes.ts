@@ -1,3 +1,3 @@
-import type localesDates from "@i18n/localesDates";
+import type { LOCALE } from "@i18n/config";
 
-export type LangKeys = keyof typeof localesDates;
+export type LangKeys = (typeof LOCALE)[keyof typeof LOCALE];

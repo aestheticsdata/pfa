@@ -28,6 +28,8 @@ const common: typeof frCommon = {
   datePicker: {
     prevWeek: "Previous week",
     nextWeek: "Next week",
+    prevMonth: "Previous month",
+    nextMonth: "Next month",
     placeholder: "Select a period",
   },
   category: {

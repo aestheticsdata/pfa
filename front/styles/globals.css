@@ -20,4 +20,3 @@ layer(base);
 
 /* Component styles */
 @import './components/chrome.css';
-@import './components/daypicker.css';

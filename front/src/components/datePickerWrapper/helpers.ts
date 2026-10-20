@@ -1,5 +1,7 @@
 import {
   addDays,
+  eachDayOfInterval,
+  endOfMonth,
   endOfWeek,
   getDate,
   getDay,
@@ -79,3 +81,13 @@ export const getWeekRange = (date: Date): WeekRange => {
  */
 export const adjacentWeekDay = (range: Date[], step: number): Date =>
   step < 0 ? subDays(range[0], 1) : addDays(range[range.length - 1], 1);
+
+/**
+ * The calendar grid of `month` (PFA-245): its weeks, Sunday first, each padded with the days of
+ * the neighbouring months so every row holds 7 dates. Only the weeks that touch the month are
+ * returned — 4 to 6 rows, as the week picker always showed.
+ */
+export const monthWeeks = (month: Date): Date[][] => {
+  const days = eachDayOfInterval({ start: startOfWeek(startOfMonth(month)), end: endOfWeek(endOfMonth(month)) });
+  return Array.from({ length: days.length / 7 }, (_, row) => days.slice(row * 7, row * 7 + 7));
+};

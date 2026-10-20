@@ -177,9 +177,9 @@ heatmap's cells are real elements and take a plain `moveTo`.
 **Two rows share every action title.** The receipt button says *Add a receipt* until a picture is
 up and *View the receipt* after, so the still's `prepare` matches either.
 
-**The week picker is `react-day-picker` 7.** Its month arrows are `.DayPicker-NavButton--prev`,
-its days `.DayPicker-Day` with the number as text, and the neighbouring months' days carry
-`--outside` — filtered out, or the 15th would match three times.
+**The week picker is our own calendar** (PFA-245). Its month arrows are `week-picker-prev-month` /
+`week-picker-next-month`, its days `week-picker-day` buttons with the number as text (and
+`data-date`). The neighbouring months' days are plain inert spans, so the 15th matches once.
 
 **The combobox is `cmdk`.** Its items are `role="option"`; the category is picked by reading the
 list, typing the first three letters of the second one into the command input, then clicking the

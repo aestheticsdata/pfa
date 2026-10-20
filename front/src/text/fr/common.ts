@@ -27,6 +27,8 @@ const common = {
   datePicker: {
     prevWeek: "Semaine précédente",
     nextWeek: "Semaine suivante",
+    prevMonth: "Mois précédent",
+    nextMonth: "Mois suivant",
     placeholder: "Sélectionner une période",
   },
   category: {
