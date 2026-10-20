@@ -1,4 +1,5 @@
 import adjustFontColor from "@components/common/helpers/adjustFontColor";
+import { describe, expect, it } from "vitest";
 
 describe("adjustFontColor", () => {
   it("should return #ffffff", () => {

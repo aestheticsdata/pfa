@@ -1,5 +1,5 @@
 import { useAuth } from "@auth/context/AuthContext";
-import { displayPopup } from "@helpers/swalHelper";
+import { displayPopup } from "@helpers/displayPopup";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
 import { QUERY_KEYS } from "@lib/query/keys";
