@@ -4,10 +4,10 @@ import useDatePickerState from "@components/datePickerWrapper/helpers/useDatePic
 import { IconButton } from "@components/shared/IconButton";
 import { Popover, PopoverAnchor, PopoverContent, PopoverTrigger } from "@components/ui/popover";
 import { useLocale } from "@i18n/LocaleContext";
+import localesDates from "@i18n/localesDates";
 import useDateLocale from "@i18n/useDateLocale";
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import localesDates from "@src/i18n/locales-dates";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import DayPicker from "react-day-picker";

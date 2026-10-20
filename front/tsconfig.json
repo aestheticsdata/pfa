@@ -11,7 +11,7 @@
     "moduleResolution": "bundler",
     "strict": true,
     "noImplicitAny": false,
-    "allowJs": true,
+    "allowJs": false,
     "noEmit": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
