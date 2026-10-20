@@ -29,3 +29,11 @@ reuses them (`reuseExistingServer: true`). Otherwise it starts both itself.
 - `create-spending.spec.ts` — create a spending through the modal, see it appear, delete it,
   see it disappear. Self-cleaning: an `afterEach` sweep removes any leftover `E2E …`-labelled
   spendings via the API even when the test fails midway.
+- `session-expiry.spec.ts` — the session cookie dies under an open page; the next navigation
+  lands on `/login`, never on the error page (COS-26).
+- `edit-spending.spec.ts` — editing a spending's amount updates its row and, without a reload,
+  the dashboard's monthly totals: cross-module cache invalidation (PFA-253).
+- `receipt.spec.ts` — attach a receipt image to a spending, see it, delete it (upload with
+  progress since PFA-243, modal split in PFA-250).
+- `helpers/sentinel.ts` — creates `E2E …` spendings through the API and sweeps them in `afterEach`,
+  for the specs that need a spending of their own.
