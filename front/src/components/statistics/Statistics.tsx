@@ -47,7 +47,7 @@ const yearOptions = (currentYear: number): number[] => Array.from({ length: 7 },
  * feeds the KPIs, forecast and charts; /exceptionals adds the exceptional layer.
  */
 const Statistics = () => {
-  const { setIsCalendarVisible } = useGlobalStore();
+  const setIsCalendarVisible = useGlobalStore((state) => state.setIsCalendarVisible);
 
   useEffect(() => {
     setIsCalendarVisible(false);

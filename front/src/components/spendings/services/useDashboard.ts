@@ -35,7 +35,7 @@ const useDashboard = (month?: Date): UseDashboard => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
-  const { from: pickerFrom } = useDatePickerWrapperStore();
+  const pickerFrom = useDatePickerWrapperStore((state) => state.from);
   const from = month ?? pickerFrom;
   const monthBeginning = startOfMonth(from!);
   const queryClient = useQueryClient();

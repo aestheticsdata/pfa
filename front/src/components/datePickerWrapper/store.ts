@@ -3,6 +3,8 @@ import { formatIsoDate } from "@helpers/dateRoute";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
+import type { SelectorStore } from "@lib/interfaces/selectorStoreTypes";
+
 export interface DatePickerWrapperStoreProps {
   from: Date | null;
   to: Date | null;
@@ -30,7 +32,7 @@ export interface DatePickerWrapperStoreProps {
 // localStorage leaked a stale day across sessions, which made the NavBar
 // "Spendings" link reopen a past week instead of today (COS-73). "Today" must be
 // resolved fresh, client-side, on each new visit.
-const useStore = create<DatePickerWrapperStoreProps>()(
+const useStore: SelectorStore<DatePickerWrapperStoreProps> = create<DatePickerWrapperStoreProps>()(
   devtools((set) => ({
     from: null,
     to: null,

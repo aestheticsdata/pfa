@@ -39,7 +39,7 @@ const CategoryBreakdown = () => {
   const dashboardText = useTranslations("dashboard");
   const common = useTranslations("common");
   const dateLocale = useDateLocale();
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const { data } = useCategoryTrends(MONTHLY);
   const trends = data?.trends;
   const { remainders, source } = useEndOfMonthProjection();

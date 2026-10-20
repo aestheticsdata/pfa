@@ -23,8 +23,12 @@ const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffec
  * reflects the URL month, so the hooks never fire against a stale week.
  */
 export default function Dashboard() {
-  const { setIsCalendarVisible } = useGlobalStore();
-  const { from, to, setFrom, setTo, setRange } = useDatePickerWrapperStore();
+  const setIsCalendarVisible = useGlobalStore((state) => state.setIsCalendarVisible);
+  const from = useDatePickerWrapperStore((state) => state.from);
+  const to = useDatePickerWrapperStore((state) => state.to);
+  const setFrom = useDatePickerWrapperStore((state) => state.setFrom);
+  const setTo = useDatePickerWrapperStore((state) => state.setTo);
+  const setRange = useDatePickerWrapperStore((state) => state.setRange);
   const [monthParam] = useQueryState(MONTH_QUERY_PARAM, parseAsString);
   const [currentMonthStart] = useState(() => startOfMonth(new Date()));
 

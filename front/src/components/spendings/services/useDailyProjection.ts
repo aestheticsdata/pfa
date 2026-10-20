@@ -19,7 +19,7 @@ const useDailyProjection = (): UseQueryResult<DailyProjection> => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
 
   const isCurrentMonth = !!from && isSameMonth(from, new Date());
   const monthBeginning = from ? startOfMonth(from) : undefined;

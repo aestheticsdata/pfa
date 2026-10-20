@@ -67,8 +67,9 @@ const normalizePath = (path: string): string => {
 const NavBar = () => {
   const text = useTranslations("navBar");
   const { user } = useAuth();
-  const { isCalendarVisible } = useGlobalStore();
-  const { selectedDateIso, setScrollToDayIso } = useDatePickerWrapperStore();
+  const isCalendarVisible = useGlobalStore((state) => state.isCalendarVisible);
+  const selectedDateIso = useDatePickerWrapperStore((state) => state.selectedDateIso);
+  const setScrollToDayIso = useDatePickerWrapperStore((state) => state.setScrollToDayIso);
   const pathname = usePathname();
   const router = useRouter();
   const [monthParam, setMonthParam] = useQueryState(MONTH_QUERY_PARAM, parseAsString);

@@ -30,7 +30,10 @@ const useSpendings = () => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
-  const { from, to, range, setScrollToDayIso } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
+  const to = useDatePickerWrapperStore((state) => state.to);
+  const range = useDatePickerWrapperStore((state) => state.range);
+  const setScrollToDayIso = useDatePickerWrapperStore((state) => state.setScrollToDayIso);
   const monthStart = from ? startOfMonth(from) : undefined;
   const monthEnd = to ? endOfMonth(to) : undefined;
   const monthBeginning = monthStart;

@@ -35,7 +35,7 @@ interface UseEndOfMonthProjection {
  * project.
  */
 const useEndOfMonthProjection = (): UseEndOfMonthProjection => {
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const { monthlyTotal } = useDashboard();
   const { spendingsByMonth } = useSpendings();
   const { data: reference } = useDailyProjection();

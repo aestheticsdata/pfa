@@ -43,7 +43,8 @@ const SpendingSearchModal = () => {
   const { results, total, isSearching, isFetchingNextPage, hasNextPage, fetchNextPage, hasQuery, error } =
     useSpendingSearch(debounced, year);
   const years = useSpendingYears();
-  const { setScrollToDayIso, setSpotlightSpendingId } = useDatePickerWrapperStore();
+  const setScrollToDayIso = useDatePickerWrapperStore((state) => state.setScrollToDayIso);
+  const setSpotlightSpendingId = useDatePickerWrapperStore((state) => state.setSpotlightSpendingId);
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);

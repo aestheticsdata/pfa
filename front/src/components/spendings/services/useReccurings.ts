@@ -36,7 +36,7 @@ const useReccurings = () => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const monthBeginning = startOfMonth(from!);
   const spendingsText = useTranslations("spendings");
 

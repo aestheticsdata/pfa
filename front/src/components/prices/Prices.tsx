@@ -22,7 +22,7 @@ const TYPE_QUERY_PARAM = "type";
 /** Price comparison by store per product type (PFA-220). */
 const Prices = () => {
   const t = useTranslations("prices");
-  const { setIsCalendarVisible } = useGlobalStore();
+  const setIsCalendarVisible = useGlobalStore((state) => state.setIsCalendarVisible);
   const { data: types, isPending } = usePriceTypes();
   const [typeParam, setTypeParam] = useQueryState(TYPE_QUERY_PARAM, parseAsString);
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
