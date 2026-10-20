@@ -4,13 +4,10 @@ import { randomUUID } from "crypto";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createE2eApp } from "./e2e-app";
 import { createAuthenticatedSession } from "./auth-session.helper";
+import { firstDayOfMonth } from "./dates.helper";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;
-
-function firstDayOfMonth(date: Date): string {
-  return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split("T")[0];
-}
 
 function generateYearRange(startYear: number): string {
   const currentYear = new Date().getFullYear();
@@ -97,16 +94,9 @@ describe("StatsController (e2e)", () => {
         .query({ from })
         .expect(200)
         .expect((res) => {
-          const body = res.body as {
-            spendingsSum: { amount: string };
-            recurringsSum: { amount: string };
-          };
-          expect(body).toHaveProperty("spendingsSum");
-          expect(body).toHaveProperty("recurringsSum");
-          expect(body.spendingsSum).toHaveProperty("amount");
-          expect(body.recurringsSum).toHaveProperty("amount");
-          expect(typeof body.spendingsSum.amount).toBe("string");
-          expect(typeof body.recurringsSum.amount).toBe("string");
+          const body = res.body as { spendingsSum: number; recurringsSum: number };
+          expect(typeof body.spendingsSum).toBe("number");
+          expect(typeof body.recurringsSum).toBe("number");
         });
     });
 

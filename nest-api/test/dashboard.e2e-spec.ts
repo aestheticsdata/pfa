@@ -2,6 +2,7 @@ import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { createE2eApp } from "./e2e-app";
 import { createAuthenticatedSession } from "./auth-session.helper";
+import { firstDayOfMonth } from "./dates.helper";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;
@@ -18,10 +19,6 @@ interface DashboardItem {
 interface CreateDashboardResponse {
   insertId: string;
   ID: string;
-}
-
-function firstDayOfMonth(date: Date): string {
-  return new Date(date.getFullYear(), date.getMonth(), 1).toISOString().split("T")[0];
 }
 
 function lastDayOfMonth(date: Date): string {
