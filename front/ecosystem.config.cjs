@@ -12,7 +12,9 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: '3000',
-        HOST: '127.0.0.1'
+        HOST: '127.0.0.1',
+        // SSR session check straight to the API on this machine (PFA-252), see getServerSession.
+        API_INTERNAL_URL: 'http://127.0.0.1:6100'
       }
     }
   ]
