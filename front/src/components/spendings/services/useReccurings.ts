@@ -1,5 +1,6 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { formatIsoDate } from "@helpers/dateRoute";
 import { displayPopup } from "@helpers/displayPopup";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
@@ -53,7 +54,7 @@ const useReccurings = () => {
   };
 
   const getRecurrings = async () => {
-    const response = await privateRequest(`/recurrings?userID=${userID}&start=${startOfMonth(from!)}`);
+    const response = await privateRequest(`/recurrings?userID=${userID}&start=${formatIsoDate(startOfMonth(from!))}`);
     return parseResponse(RecurringListSchema, response.data, "/recurrings");
   };
 

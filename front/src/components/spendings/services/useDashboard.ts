@@ -1,6 +1,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import useMonthlyStats from "@components/spendings/services/useMonthlyStats";
+import { formatIsoDate } from "@helpers/dateRoute";
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DashboardResponseSchema } from "@src/schemas/dashboard";
@@ -41,7 +42,7 @@ const useDashboard = (month?: Date): UseDashboard => {
   const { data: monthlyStats } = useMonthlyStats();
 
   const getDashboard = async () => {
-    const response = await privateRequest(`/dashboard?userID=${userID}&start=${startOfMonth(from!)}`);
+    const response = await privateRequest(`/dashboard?userID=${userID}&start=${formatIsoDate(startOfMonth(from!))}`);
     return parseResponse(DashboardResponseSchema, response.data, "/dashboard");
   };
 

@@ -190,8 +190,6 @@ const pad = (n) => String(n).padStart(2, "0");
 const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 const monthStart = (y, m) => new Date(y, m, 1);
 const monthEnd = (y, m) => new Date(y, m + 1, 0);
-// The front sends `${date}` — a Date's toString — on the older endpoints; replay it as-is.
-const dateParam = (d) => encodeURIComponent(d.toString());
 
 const years = await call("/spendings/years");
 const latestYear = years[0];
@@ -208,8 +206,8 @@ const months = {
   empty: [EMPTY_YEAR, 0],
 };
 
-const monthQuery = ([y, m]) => `userID=x&from=${dateParam(monthStart(y, m))}&to=${dateParam(monthEnd(y, m))}`;
-const startQuery = ([y, m]) => `userID=x&start=${dateParam(monthStart(y, m))}`;
+const monthQuery = ([y, m]) => `userID=x&from=${ymd(monthStart(y, m))}&to=${ymd(monthEnd(y, m))}`;
+const startQuery = ([y, m]) => `userID=x&start=${ymd(monthStart(y, m))}`;
 const isoStart = ([y, m]) => ymd(monthStart(y, m));
 const trendsQuery = ([y, m]) =>
   new URLSearchParams({
@@ -240,7 +238,7 @@ const ENDPOINTS = {
   "dashboard.projection": `/dashboard/projection?${startQuery(months.latest)}`,
   "dashboard.projectionFirstMonth": `/dashboard/projection?${startQuery(months.first)}`,
   "dashboard.monthlyIncome": `/dashboard/monthly-income?year=${latestYear}`,
-  "dashboard.monthlyStats": `/monthlystats?userID=x&from=${dateParam(monthStart(...months.latest))}`,
+  "dashboard.monthlyStats": `/monthlystats?userID=x&from=${ymd(monthStart(...months.latest))}`,
   "dashboard.weeklyStats": `/weeklystats?${startQuery(months.latest)}`,
   "exceptionals.year": `/exceptionals?year=${latestYear}`,
   "exceptionals.all": "/exceptionals",
