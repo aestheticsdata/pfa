@@ -35,10 +35,7 @@ const useGroupSubmit = ({
   closeModal,
 }: UseGroupSubmitOptions) => {
   const onSubmit = (values: SpendingForm) => {
-    if (!user) {
-      console.error("User is not available");
-      return;
-    }
+    if (!user) return;
     const lines = validateLines();
     if (!lines) {
       return;

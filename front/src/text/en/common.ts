@@ -24,6 +24,7 @@ const common: typeof frCommon = {
     toastTitle: "Export coming soon",
     toastDescription: "Available soon.",
   },
+  mutationFailed: "The action failed. Try again.",
   datePicker: {
     prevWeek: "Previous week",
     nextWeek: "Next week",

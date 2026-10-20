@@ -41,7 +41,8 @@ const ShareReceiptModal = ({ selection, onClose, onShared }: ShareReceiptModalPr
         date: entries[0].date.slice(0, 10),
       })
       .then(onShared)
-      .catch((e) => console.log("error sharing a receipt : ", e));
+      // The mutation's own onError already toasted; this only keeps the rejection handled.
+      .catch(() => undefined);
     return true;
   };
 

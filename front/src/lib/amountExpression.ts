@@ -17,8 +17,7 @@ const evaluateAmountExpression = (input: string): number | null => {
     const lexed = mexp.lex(input.trim());
     const postfixed = mexp.toPostfix(lexed);
     result = mexp.postfixEval(postfixed);
-  } catch (error) {
-    console.error("Invalid amount expression", error);
+  } catch {
     return null;
   }
 

@@ -75,10 +75,6 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   const createExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>({
     mutationFn: (payload) => createExceptionalService(payload),
     onSuccess: () => onSuccess(exceptionals.toast.created),
-
-    onError: (e) => {
-      console.log("error creating exceptional", e);
-    },
   });
 
   const updateExceptionalService = async (payload: ExceptionalMutationPayload) => {
@@ -92,10 +88,6 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   const updateExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>({
     mutationFn: (payload) => updateExceptionalService(payload),
     onSuccess: () => onSuccess(exceptionals.toast.updated),
-
-    onError: (e) => {
-      console.log("error updating exceptional", e);
-    },
   });
 
   const deleteExceptionalService = async (id: string) => {
@@ -105,10 +97,6 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   const deleteExceptional = useMutation<unknown, AxiosError, { id: string }>({
     mutationFn: ({ id }) => deleteExceptionalService(id),
     onSuccess: () => onSuccess(exceptionals.toast.deleted),
-
-    onError: (e) => {
-      console.log("error deleting exceptional", e);
-    },
   });
 
   return {

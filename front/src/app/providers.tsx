@@ -1,5 +1,6 @@
 "use client";
 
+import MutationErrorToaster from "@components/shared/MutationErrorToaster";
 import { Toaster } from "@components/ui/sonner";
 import { LocaleProvider } from "@i18n/LocaleContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -37,7 +38,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     >
       <NuqsAdapter>
         <QueryClientProvider client={queryClient}>
-          <LocaleProvider>{children}</LocaleProvider>
+          <LocaleProvider>
+            <MutationErrorToaster />
+            {children}
+          </LocaleProvider>
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </NuqsAdapter>

@@ -25,13 +25,8 @@ const useMonthlyStats = () => {
       throw new Error("Missing date range or user for monthlystats query");
     }
 
-    try {
-      const monthlyStats = await privateRequest(`/monthlystats?from=${formatIsoDate(startOfMonth(from))}`);
-      return parseResponse(MonthlyStatsSchema, monthlyStats.data, "/monthlystats");
-    } catch (e) {
-      console.log("get monthly stats error : ", e);
-      throw e;
-    }
+    const monthlyStats = await privateRequest(`/monthlystats?from=${formatIsoDate(startOfMonth(from))}`);
+    return parseResponse(MonthlyStatsSchema, monthlyStats.data, "/monthlystats");
   };
 
   return useQuery({

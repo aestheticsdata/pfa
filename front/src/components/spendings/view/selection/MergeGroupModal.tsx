@@ -63,7 +63,9 @@ const MergeGroupModal = ({ selection, onClose, onGrouped }: MergeGroupModalProps
         receiptFile: withReceipt ? null : receipt.receiptFile,
       })
       .then(onGrouped)
-      .catch((e) => console.log("error grouping spendings : ", e));
+      // The failure is toasted by the app-wide mutation handler (PFA-242); this only keeps the
+      // rejection handled.
+      .catch(() => undefined);
     return true;
   };
 

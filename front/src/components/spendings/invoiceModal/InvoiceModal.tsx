@@ -24,6 +24,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ScanText, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 import type { ReceiptModalHeader } from "@components/spendings/interfaces/receiptModalTypes";
 import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
@@ -59,6 +60,7 @@ const InvoiceModal = ({
 }: InvoiceModalProps) => {
   const isSharedUpload = (uploadSpendingIDs?.length ?? 0) > 1;
   const texts = useTranslations("spendings");
+  const common = useTranslations("common");
   const { euro } = useFormat();
   const [open, setOpen] = useState(true);
   const handleClickOutside = () => {
@@ -114,8 +116,8 @@ const InvoiceModal = ({
         });
         setIsLoading(false);
       }
-    } catch (e) {
-      console.log("error deleting image : ", e);
+    } catch {
+      toast.error(common.mutationFailed);
       setIsLoading(false);
     }
   };
@@ -162,8 +164,7 @@ const InvoiceModal = ({
     try {
       const res = await privateRequest(`/spendings/upload/${spending.ID}?itemType=${spending.itemType}`);
       setInvoiceImage(res.data);
-    } catch (e) {
-      console.log("error getting image : ", e);
+    } catch {
       setInvoiceImage(null);
     } finally {
       setIsLoading(false);

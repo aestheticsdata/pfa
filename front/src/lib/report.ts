@@ -171,6 +171,14 @@ export function report(event: EcsEvent): void {
 }
 
 /**
+ * Reports a caught error with its stack (PFA-242) — for the ones a React boundary swallows, which
+ * never reach the global `error` listener below.
+ */
+export function reportError(error: unknown): void {
+  report(describe(error));
+}
+
+/**
  * Queues one Core Web Vital (PFA-212), handed over by Next's `useReportWebVitals`.
  *
  * Outside the error budget and the dedupe on purpose: there are at most three per page view, the

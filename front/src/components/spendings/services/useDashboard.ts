@@ -7,7 +7,7 @@ import useRequestHelper from "@src/helpers/useRequestHelper";
 import { DashboardResponseSchema } from "@src/schemas/dashboard";
 import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { endOfMonth, formatISO, startOfMonth } from "date-fns";
+import { endOfMonth, startOfMonth } from "date-fns";
 
 import type { DashboardResponse } from "@src/schemas/dashboard";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
@@ -37,22 +37,24 @@ const useDashboard = (month?: Date): UseDashboard => {
   const userID = user?.id;
   const pickerFrom = useDatePickerWrapperStore((state) => state.from);
   const from = month ?? pickerFrom;
-  const monthBeginning = startOfMonth(from!);
+  const monthBeginning = from ? startOfMonth(from) : null;
   const queryClient = useQueryClient();
   const { data: monthlyStats } = useMonthlyStats();
 
   const getDashboard = async () => {
-    const response = await privateRequest(`/dashboard?start=${formatIsoDate(startOfMonth(from!))}`);
+    if (!monthBeginning) throw new Error("No month selected");
+    const response = await privateRequest(`/dashboard?start=${formatIsoDate(monthBeginning)}`);
     return parseResponse(DashboardResponseSchema, response.data, "/dashboard");
   };
 
   const setInitialSalary = async (amount: string) => {
+    if (!monthBeginning) throw new Error("No month selected");
     return privateRequest("/dashboard", {
       method: "POST",
       data: {
         amount: Number(amount),
-        start: formatISO(startOfMonth(from!), { representation: "date" }),
-        end: formatISO(endOfMonth(from!), { representation: "date" }),
+        start: formatIsoDate(monthBeginning),
+        end: formatIsoDate(endOfMonth(monthBeginning)),
       },
     });
   };

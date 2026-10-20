@@ -37,7 +37,7 @@ const useReccurings = () => {
   const { user } = useAuth();
   const userID = user?.id;
   const from = useDatePickerWrapperStore((state) => state.from);
-  const monthBeginning = startOfMonth(from!);
+  const monthBeginning = from ? startOfMonth(from) : null;
   const spendingsText = useTranslations("spendings");
 
   const recurringsActionOnSuccess = async (message: string) => {
@@ -54,7 +54,8 @@ const useReccurings = () => {
   };
 
   const getRecurrings = async () => {
-    const response = await privateRequest(`/recurrings?start=${formatIsoDate(startOfMonth(from!))}`);
+    if (!monthBeginning) throw new Error("No month selected");
+    const response = await privateRequest(`/recurrings?start=${formatIsoDate(monthBeginning)}`);
     return parseResponse(RecurringListSchema, response.data, "/recurrings");
   };
 
@@ -77,10 +78,6 @@ const useReccurings = () => {
     },
 
     onSuccess: () => recurringsActionOnSuccess(spendingsText.toasts.recurringDeleted),
-
-    onError: (e) => {
-      console.log("error deleting recurring", e);
-    },
   });
 
   const createRecurringService = async (recurring: SpendingMutationPayload, formattedMonth: FormattedMonth) => {
@@ -107,10 +104,6 @@ const useReccurings = () => {
     },
 
     onSuccess: () => recurringsActionOnSuccess(spendingsText.toasts.recurringCreated),
-
-    onError: (e) => {
-      console.log("error creating recurring", e);
-    },
   });
 
   const updateRecurringService = async (recurring: SpendingMutationPayload) => {
@@ -129,10 +122,6 @@ const useReccurings = () => {
     onSuccess: () => {
       recurringsActionOnSuccess(spendingsText.toasts.recurringUpdated);
     },
-
-    onError: (e) => {
-      console.log("error updating recurring ", e);
-    },
   });
 
   const copyRecurrings = useMutation<unknown, unknown, Dates>({
@@ -141,10 +130,6 @@ const useReccurings = () => {
     },
 
     onSuccess: () => recurringsActionOnSuccess(spendingsText.toasts.recurringsCopied),
-
-    onError: (e) => {
-      console.log("error copying recurrings", e);
-    },
   });
 
   return {
