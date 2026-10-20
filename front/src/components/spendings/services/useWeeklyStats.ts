@@ -1,30 +1,19 @@
-import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { weeklyStatsQuery } from "@components/spendings/services/queries";
 import useDashboard from "@components/spendings/services/useDashboard";
-import { formatIsoDate } from "@helpers/dateRoute";
+import { monthStartIso } from "@helpers/dateRoute";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
-import { WeeklyStatsSchema } from "@src/schemas/dashboard";
-import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { startOfMonth } from "date-fns";
 
 const useWeeklyStats = () => {
   const { privateRequest } = useRequestHelper();
-  const { user } = useAuth();
-  const userID = user?.id;
   const {
     get: { data: dashboard },
   } = useDashboard();
   const from = useDatePickerWrapperStore((state) => state.from);
-  const monthBeginning = from ? startOfMonth(from) : null;
   const queryClient = useQueryClient();
-
-  const getWeeklyStats = async () => {
-    if (!monthBeginning) throw new Error("No month selected");
-    const response = await privateRequest(`/weeklystats?start=${formatIsoDate(monthBeginning)}`);
-    return parseResponse(WeeklyStatsSchema, response.data, "/weeklystats");
-  };
 
   const setInitialCeiling = async (ceiling: string) => {
     if (!dashboard?.ID) {
@@ -39,21 +28,12 @@ const useWeeklyStats = () => {
     });
   };
 
-  const get = useQuery({
-    queryKey: [QUERY_KEYS.WEEKLY_STATS, monthBeginning],
-    queryFn: getWeeklyStats,
-    retry: false,
-    enabled: !!from && !!userID,
-  });
+  const get = useQuery(weeklyStatsQuery(privateRequest, monthStartIso(from)));
 
   const mutation = useMutation({
     mutationFn: (ceiling: string) => setInitialCeiling(ceiling),
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
-      });
-    },
+    onSuccess: () => invalidateFamilies(queryClient, [QUERY_KEYS.DASHBOARD]),
   });
 
   return {

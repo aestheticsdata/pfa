@@ -1,17 +1,14 @@
-import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { buildInvoiceUploadFormData } from "@components/spendings/services/invoiceUploadFormData";
+import { spendingsByMonthQuery } from "@components/spendings/services/queries";
 import { formatIsoDate } from "@helpers/dateRoute";
 import { displayPopup } from "@helpers/displayPopup";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { parseResponse } from "@src/schemas/parseResponse";
-import {
-  CreateSpendingResponseSchema,
-  SpendingListSchema,
-  SpendingMutationPayloadSchema,
-} from "@src/schemas/spendings";
+import { CreateSpendingResponseSchema, SpendingMutationPayloadSchema } from "@src/schemas/spendings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth, format, getDate, parseISO, startOfMonth } from "date-fns";
 import { toast } from "sonner";
@@ -28,15 +25,11 @@ interface DeletableSpending {
 const useSpendings = () => {
   const spendingsText = useTranslations("spendings");
   const { privateRequest } = useRequestHelper();
-  const { user } = useAuth();
-  const userID = user?.id;
   const from = useDatePickerWrapperStore((state) => state.from);
   const to = useDatePickerWrapperStore((state) => state.to);
   const range = useDatePickerWrapperStore((state) => state.range);
   const setScrollToDayIso = useDatePickerWrapperStore((state) => state.setScrollToDayIso);
-  const monthStart = from ? startOfMonth(from) : undefined;
-  const monthEnd = to ? endOfMonth(to) : undefined;
-  const monthBeginning = monthStart;
+  const month = from && to ? { from: formatIsoDate(startOfMonth(from)), to: formatIsoDate(endOfMonth(to)) } : null;
 
   const aggregateSpendingByDate = (spendings: SpendingItem[], dateRange: Date[]): SpendingDayGroup[] => {
     const grouped = dateRange.map((currentDate) => ({
@@ -57,25 +50,11 @@ const useSpendings = () => {
     return grouped;
   };
 
-  const getSpendings = async () => {
-    if (!monthStart || !monthEnd) {
-      return [];
-    }
-
-    const response = await privateRequest(`/spendings?from=${formatIsoDate(monthStart)}&to=${formatIsoDate(monthEnd)}`);
-    return parseResponse(SpendingListSchema, response.data, "/spendings");
-  };
-
-  const { data, isPending } = useQuery({
-    queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH, monthStart, monthEnd],
-    queryFn: getSpendings,
-    retry: false,
-
-    // The week lands in the store from the page's `?date=` sync effect, i.e. one
-    // commit after this component first renders — until then from/to are null and
-    // the query must not fire against an undefined month (COS-99).
-    enabled: !!from && !!to && !!userID,
-  });
+  // The week lands in the store from the page's `?date=` sync effect, i.e. one
+  // commit after this component first renders — until then from/to are null and
+  // the query must not fire against an undefined month (COS-99): the factory
+  // keeps it idle while `month` is null.
+  const { data, isPending } = useQuery(spendingsByMonthQuery(privateRequest, month));
 
   const spendingsByMonth = data;
   const spendingsByWeek = data && range ? aggregateSpendingByDate(data, range) : undefined;
@@ -85,29 +64,19 @@ const useSpendings = () => {
   const spendingsActionOnSuccess = async (message: string) => {
     displayPopup({ text: message });
 
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH, from, to],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.WEEKLY_STATS, monthBeginning],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.CATEGORIES],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.CATEGORY_STATS],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.MONTHLY_STATS, monthBeginning],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.CATEGORY_TRENDS, monthBeginning],
-    });
-    // Whole-history search results (COS-114) can include the mutated row — refresh
-    // them too. Inactive when the search modal is closed, so this is a no-op then.
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.SPENDINGS_SEARCH],
-    });
+    // By family (PFA-253): the list used to be invalidated with the week's bounds
+    // while it is cached under the month's, so the refresh only hit in a week
+    // starting on the 1st. Whole-history search results (COS-114) can include the
+    // mutated row too — inactive when the search modal is closed, so a no-op then.
+    await invalidateFamilies(queryClient, [
+      QUERY_KEYS.SPENDINGS_BY_MONTH,
+      QUERY_KEYS.WEEKLY_STATS,
+      QUERY_KEYS.CATEGORIES,
+      QUERY_KEYS.CATEGORY_STATS,
+      QUERY_KEYS.MONTHLY_STATS,
+      QUERY_KEYS.CATEGORY_TRENDS,
+      QUERY_KEYS.SPENDINGS_SEARCH,
+    ]);
   };
 
   const deleteSpendingService = async (spending: DeletableSpending) => {

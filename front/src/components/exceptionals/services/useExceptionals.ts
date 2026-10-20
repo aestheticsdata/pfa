@@ -1,14 +1,10 @@
-import { useAuth } from "@auth/context/AuthContext";
+import { exceptionalsQuery, exceptionalYearsQuery } from "@components/exceptionals/services/queries";
 import { displayPopup } from "@helpers/displayPopup";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
-import {
-  ExceptionalListSchema,
-  ExceptionalMutationPayloadSchema,
-  ExceptionalYearsSchema,
-} from "@src/schemas/exceptionals";
-import { parseResponse } from "@src/schemas/parseResponse";
+import { ExceptionalMutationPayloadSchema } from "@src/schemas/exceptionals";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { ApiError } from "@helpers/http";
@@ -21,17 +17,10 @@ interface UseExceptionalsOptions {
 const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
   const exceptionals = useTranslations("exceptionals");
   const { privateRequest } = useRequestHelper();
-  const { user } = useAuth();
-  const userID = user?.id;
   const queryClient = useQueryClient();
 
   const invalidate = async () => {
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.EXCEPTIONALS],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.EXCEPTIONAL_YEARS],
-    });
+    await invalidateFamilies(queryClient, [QUERY_KEYS.EXCEPTIONALS, QUERY_KEYS.EXCEPTIONAL_YEARS]);
   };
 
   const onSuccess = async (message: string) => {
@@ -39,30 +28,9 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     await invalidate();
   };
 
-  const getExceptionals = async () => {
-    const yearParam = year ? `?year=${year}` : "";
-    const response = await privateRequest(`/exceptionals${yearParam}`);
-    return parseResponse(ExceptionalListSchema, response.data, "/exceptionals");
-  };
+  const list = useQuery(exceptionalsQuery(privateRequest, year));
 
-  const list = useQuery({
-    queryKey: [QUERY_KEYS.EXCEPTIONALS, year ?? "all"],
-    queryFn: getExceptionals,
-    retry: false,
-    enabled: !!userID,
-  });
-
-  const getYears = async () => {
-    const response = await privateRequest(`/exceptionals/years`);
-    return parseResponse(ExceptionalYearsSchema, response.data, "/exceptionals/years");
-  };
-
-  const years = useQuery({
-    queryKey: [QUERY_KEYS.EXCEPTIONAL_YEARS],
-    queryFn: getYears,
-    retry: false,
-    enabled: !!userID,
-  });
+  const years = useQuery(exceptionalYearsQuery(privateRequest));
 
   const createExceptionalService = async (payload: ExceptionalMutationPayload) => {
     const parsed = ExceptionalMutationPayloadSchema.parse(payload);

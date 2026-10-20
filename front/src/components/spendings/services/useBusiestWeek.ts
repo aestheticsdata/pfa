@@ -1,14 +1,8 @@
-import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { DATE_FORMAT } from "@components/spendings/config/constants";
+import { busiestWeekQuery } from "@components/spendings/services/queries";
+import { monthStartIso } from "@helpers/dateRoute";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { QUERY_KEYS } from "@lib/query/keys";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { BusiestWeekResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
-import { format, startOfMonth } from "date-fns";
-
-import type { BusiestWeekResponse } from "@src/schemas/stats";
 
 /**
  * The displayed month's busiest calendar week-range by transaction count
@@ -20,23 +14,7 @@ import type { BusiestWeekResponse } from "@src/schemas/stats";
 const useBusiestWeek = () => {
   const { privateRequest } = useRequestHelper();
   const from = useDatePickerWrapperStore((state) => state.from);
-  const { user } = useAuth();
-  const userID = user?.id;
-  const monthBeginning = from ? startOfMonth(from) : null;
-
-  const getBusiestWeek = async (): Promise<BusiestWeekResponse> => {
-    if (!monthBeginning || !userID) return { count: 0, from: null, to: null };
-    const query = new URLSearchParams({ start: format(monthBeginning, DATE_FORMAT) });
-    const response = await privateRequest(`/busiest-week?${query}`);
-    return parseResponse(BusiestWeekResponseSchema, response.data, "/busiest-week");
-  };
-
-  return useQuery({
-    queryKey: [QUERY_KEYS.BUSIEST_WEEK, monthBeginning],
-    queryFn: getBusiestWeek,
-    retry: false,
-    enabled: !!monthBeginning && !!userID,
-  });
+  return useQuery(busiestWeekQuery(privateRequest, monthStartIso(from)));
 };
 
 export default useBusiestWeek;

@@ -1,14 +1,8 @@
-import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { DATE_FORMAT } from "@components/spendings/config/constants";
+import { spendingPaceQuery } from "@components/spendings/services/queries";
+import { monthStartIso } from "@helpers/dateRoute";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { QUERY_KEYS } from "@lib/query/keys";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { SpendingPaceResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
-import { format, startOfMonth } from "date-fns";
-
-import type { SpendingPaceResponse } from "@src/schemas/stats";
 
 /**
  * The totals of the three months before the displayed month (COS-40), newest→
@@ -20,23 +14,7 @@ import type { SpendingPaceResponse } from "@src/schemas/stats";
 const useSpendingPace = () => {
   const { privateRequest } = useRequestHelper();
   const from = useDatePickerWrapperStore((state) => state.from);
-  const { user } = useAuth();
-  const userID = user?.id;
-  const monthBeginning = from ? startOfMonth(from) : null;
-
-  const getSpendingPace = async (): Promise<SpendingPaceResponse> => {
-    if (!monthBeginning || !userID) return { months: [] };
-    const query = new URLSearchParams({ start: format(monthBeginning, DATE_FORMAT) });
-    const response = await privateRequest(`/spending-pace?${query}`);
-    return parseResponse(SpendingPaceResponseSchema, response.data, "/spending-pace");
-  };
-
-  return useQuery({
-    queryKey: [QUERY_KEYS.SPENDING_PACE, monthBeginning],
-    queryFn: getSpendingPace,
-    retry: false,
-    enabled: !!monthBeginning && !!userID,
-  });
+  return useQuery(spendingPaceQuery(privateRequest, monthStartIso(from)));
 };
 
 export default useSpendingPace;

@@ -1,9 +1,6 @@
-import { useAuth } from "@auth/context/AuthContext";
 import { SEARCH_MIN_LENGTH } from "@components/spendings/config/constants";
+import { spendingSearchQuery } from "@components/spendings/services/queries";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { QUERY_KEYS } from "@lib/query/keys";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { SpendingSearchPageSchema } from "@src/schemas/spendings";
 import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
 
 /**
@@ -15,36 +12,13 @@ import { keepPreviousData, useInfiniteQuery } from "@tanstack/react-query";
  */
 const useSpendingSearch = (query: string, year: number | null) => {
   const { privateRequest } = useRequestHelper();
-  const { user } = useAuth();
-  const userID = user?.id;
   const trimmed = query.trim();
-  const enabled = !!userID && (trimmed.length >= SEARCH_MIN_LENGTH || year !== null);
-
-  const fetchPage = async ({ pageParam }: { pageParam?: string }) => {
-    const yearParam = year !== null ? `&year=${year}` : "";
-    const cursorParam = pageParam ? `&cursor=${encodeURIComponent(pageParam)}` : "";
-    const response = await privateRequest(
-      `/spendings/search?q=${encodeURIComponent(trimmed)}${yearParam}${cursorParam}`,
-    );
-    return parseResponse(SpendingSearchPageSchema, response.data, "/spendings/search");
-  };
+  const enabled = trimmed.length >= SEARCH_MIN_LENGTH || year !== null;
 
   const { data, isPending, isFetchingNextPage, hasNextPage, fetchNextPage, error } = useInfiniteQuery({
-    queryKey: [QUERY_KEYS.SPENDINGS_SEARCH, trimmed, year],
-    queryFn: fetchPage,
+    ...spendingSearchQuery(privateRequest, { query: trimmed, year }),
     enabled,
-    retry: false,
     placeholderData: keepPreviousData,
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    // The modal surfaces failures inline (empty-state message) instead of the
-    // error boundary — a broken search must not take down the whole page (opts
-    // out of the global throwOnError).
-    throwOnError: false,
-    // Keep the loaded pages around longer than the default 5 min so returning
-    // to the modal (browser Back) after a detour restores the full list, not
-    // just the first page (COS-114).
-    gcTime: 30 * 60 * 1000,
   });
 
   const results = data?.pages.flatMap((page) => page.items) ?? [];

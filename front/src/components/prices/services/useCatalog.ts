@@ -1,19 +1,14 @@
-import {
-  CATALOG_ENDPOINT,
-  CATALOG_KIND,
-  CATALOG_QUERY_KEY,
-  CATALOG_USAGE_KEY,
-} from "@components/prices/config/constants";
+import { CATALOG_ENDPOINT, CATALOG_KIND, CATALOG_QUERY_KEY } from "@components/prices/config/constants";
 import catalogConflict from "@components/prices/helpers/catalogConflict";
+import { catalogQuery } from "@components/prices/services/queries";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { ProductTypeEntryListSchema, StoreEntryListSchema } from "@src/schemas/prices";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
-import type { CatalogDraft, CatalogEntry, CatalogKind, CatalogMerge } from "@components/prices/interfaces/catalogTypes";
+import type { CatalogDraft, CatalogKind, CatalogMerge } from "@components/prices/interfaces/catalogTypes";
 
 // What a store or type change shows elsewhere: the pickers, the prices, a spending's store.
 const AFFECTED_KEYS = [
@@ -33,22 +28,9 @@ const useCatalog = (kind: CatalogKind) => {
   const queryClient = useQueryClient();
   const endpoint = CATALOG_ENDPOINT[kind];
 
-  const entries = useQuery({
-    queryKey: [CATALOG_QUERY_KEY[kind], CATALOG_USAGE_KEY],
-    queryFn: async (): Promise<CatalogEntry[]> => {
-      const response = await privateRequest(`${endpoint}/usage`);
-      if (kind === CATALOG_KIND.stores) {
-        return parseResponse(StoreEntryListSchema, response.data, `${endpoint}/usage`);
-      }
-      const types = parseResponse(ProductTypeEntryListSchema, response.data, `${endpoint}/usage`);
-      return types.map((type) => ({ ...type, address: null }));
-    },
-  });
+  const entries = useQuery(catalogQuery(privateRequest, kind));
 
-  const refresh = () =>
-    Promise.all(
-      [CATALOG_QUERY_KEY[kind], ...AFFECTED_KEYS].map((key) => queryClient.invalidateQueries({ queryKey: [key] })),
-    );
+  const refresh = () => invalidateFamilies(queryClient, [CATALOG_QUERY_KEY[kind], ...AFFECTED_KEYS]);
   // A collision is the row's to show, as a merge offer; anything else is a toast.
   const report = (error: unknown) => {
     if (!catalogConflict(error)) toast.error(t.failed);

@@ -1,10 +1,6 @@
-import { QUERY_KEYS } from "@lib/query/keys";
+import { dailyStatsQuery } from "@components/statistics/services/queries";
 import useRequestHelper from "@src/helpers/useRequestHelper";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { DailyStatsResponseSchema } from "@src/schemas/stats";
 import { keepPreviousData as keepPreviousDataFn, useQuery } from "@tanstack/react-query";
-
-import type { DailyStatsResponse } from "@src/schemas/stats";
 
 interface UseDailyStatsOptions {
   year: number;
@@ -23,15 +19,8 @@ interface UseDailyStatsOptions {
 const useDailyStats = ({ year, enabled = true, keepPreviousData = false }: UseDailyStatsOptions) => {
   const { privateRequest } = useRequestHelper();
 
-  const getDailyStats = async (): Promise<DailyStatsResponse> => {
-    const response = await privateRequest(`/daily-stats?year=${year}`);
-    return parseResponse(DailyStatsResponseSchema, response.data, "/daily-stats");
-  };
-
   const { data, isPending } = useQuery({
-    queryKey: [QUERY_KEYS.DAILY_STATS, year],
-    queryFn: getDailyStats,
-    retry: false,
+    ...dailyStatsQuery(privateRequest, year),
     enabled,
     placeholderData: keepPreviousData ? keepPreviousDataFn : undefined,
   });

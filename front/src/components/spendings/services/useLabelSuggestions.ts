@@ -1,8 +1,5 @@
-import { useAuth } from "@auth/context/AuthContext";
+import { labelSuggestionsQuery } from "@components/spendings/services/queries";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { QUERY_KEYS } from "@lib/query/keys";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { LabelSuggestionListSchema } from "@src/schemas/spendings";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import type { LabelSuggestion } from "@src/schemas/spendings";
@@ -18,27 +15,14 @@ import type { LabelSuggestion } from "@src/schemas/spendings";
  */
 const useLabelSuggestions = (query: string, enabled = true): LabelSuggestion[] => {
   const { privateRequest } = useRequestHelper();
-  const { user } = useAuth();
-  const userID = user?.id;
   const trimmed = query.trim();
 
-  const fetchSuggestions = async () => {
-    const response = await privateRequest(`/spendings/label-suggestions?q=${encodeURIComponent(trimmed)}`);
-    return parseResponse(LabelSuggestionListSchema, response.data, "/spendings/label-suggestions");
-  };
-
   const { data } = useQuery({
-    queryKey: [QUERY_KEYS.LABEL_SUGGESTIONS, trimmed],
-    queryFn: fetchSuggestions,
-    enabled: enabled && !!userID,
-    retry: false,
+    ...labelSuggestionsQuery(privateRequest, trimmed),
+    enabled,
     // Keep the previous chips on screen while the next query is in flight:
     // an empty gap between two keystrokes would flicker the row (COS-159).
     placeholderData: keepPreviousData,
-    // Autocomplete is a nice-to-have inside the spending modal — a failure just
-    // means no suggestions, never an error screen (opts out of the global
-    // throwOnError).
-    throwOnError: false,
   });
 
   return data ?? [];

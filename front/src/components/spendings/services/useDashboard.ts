@@ -1,11 +1,10 @@
-import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
+import { dashboardQuery } from "@components/spendings/services/queries";
 import useMonthlyStats from "@components/spendings/services/useMonthlyStats";
-import { formatIsoDate } from "@helpers/dateRoute";
+import { formatIsoDate, monthStartIso } from "@helpers/dateRoute";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
 import useRequestHelper from "@src/helpers/useRequestHelper";
-import { DashboardResponseSchema } from "@src/schemas/dashboard";
-import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth, startOfMonth } from "date-fns";
 
@@ -33,19 +32,11 @@ interface DashboardMutationVariables {
  */
 const useDashboard = (month?: Date): UseDashboard => {
   const { privateRequest } = useRequestHelper();
-  const { user } = useAuth();
-  const userID = user?.id;
   const pickerFrom = useDatePickerWrapperStore((state) => state.from);
   const from = month ?? pickerFrom;
   const monthBeginning = from ? startOfMonth(from) : null;
   const queryClient = useQueryClient();
   const { data: monthlyStats } = useMonthlyStats();
-
-  const getDashboard = async () => {
-    if (!monthBeginning) throw new Error("No month selected");
-    const response = await privateRequest(`/dashboard?start=${formatIsoDate(monthBeginning)}`);
-    return parseResponse(DashboardResponseSchema, response.data, "/dashboard");
-  };
 
   const setInitialSalary = async (amount: string) => {
     if (!monthBeginning) throw new Error("No month selected");
@@ -68,12 +59,7 @@ const useDashboard = (month?: Date): UseDashboard => {
     });
   };
 
-  const get = useQuery({
-    queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
-    queryFn: getDashboard,
-    retry: false,
-    enabled: !!from && !!userID,
-  });
+  const get = useQuery(dashboardQuery(privateRequest, monthStartIso(from)));
 
   const totalOfMonth = get.data && monthlyStats ? monthlyStats.spendingsSum + monthlyStats.recurringsSum : 0;
   const monthlyTotal = Number(totalOfMonth.toFixed(2));
@@ -88,11 +74,7 @@ const useDashboard = (month?: Date): UseDashboard => {
       }
     },
 
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
-      });
-    },
+    onSuccess: () => invalidateFamilies(queryClient, [QUERY_KEYS.DASHBOARD]),
   });
 
   return {

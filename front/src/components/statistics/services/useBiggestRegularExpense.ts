@@ -1,10 +1,6 @@
-import { QUERY_KEYS } from "@lib/query/keys";
+import { biggestRegularExpenseQuery } from "@components/statistics/services/queries";
 import useRequestHelper from "@src/helpers/useRequestHelper";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { BiggestRegularExpenseResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
-
-import type { BiggestRegularExpenseResponse } from "@src/schemas/stats";
 
 interface UseBiggestRegularExpenseOptions {
   year: number;
@@ -18,16 +14,7 @@ interface UseBiggestRegularExpenseOptions {
 const useBiggestRegularExpense = ({ year }: UseBiggestRegularExpenseOptions) => {
   const { privateRequest } = useRequestHelper();
 
-  const getBiggestRegularExpense = async (): Promise<BiggestRegularExpenseResponse> => {
-    const response = await privateRequest(`/biggest-regular-expense?year=${year}`);
-    return parseResponse(BiggestRegularExpenseResponseSchema, response.data, "/biggest-regular-expense");
-  };
-
-  const { data, isPending } = useQuery({
-    queryKey: [QUERY_KEYS.BIGGEST_REGULAR_EXPENSE, year],
-    queryFn: getBiggestRegularExpense,
-    retry: false,
-  });
+  const { data, isPending } = useQuery(biggestRegularExpenseQuery(privateRequest, year));
 
   return { biggestRegular: data?.expense ?? null, isLoading: isPending };
 };
