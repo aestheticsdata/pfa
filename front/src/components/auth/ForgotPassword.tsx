@@ -3,8 +3,8 @@
 import useResetPasswordService from "@auth/useResetPasswordService";
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
+import SharedLoginForm from "@components/shared/sharedLoginForm/SharedLoginForm";
 import useTranslations from "@i18n/useTranslations";
-import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 

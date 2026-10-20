@@ -3,7 +3,7 @@
 import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import useGlobalStore from "@components/shared/globalStore";
 import useDashboard from "@components/spendings/services/useDashboard";
-import useReccurings from "@components/spendings/services/useReccurings";
+import useRecurrings from "@components/spendings/services/useRecurrings";
 import { exceptionalMonthly } from "@components/statistics/helpers/exceptionalsData";
 import { projectedCurrentMonthRemainder, toYearMonthly } from "@components/statistics/helpers/projection";
 import {
@@ -87,7 +87,7 @@ const Statistics = () => {
     year: compareYear,
   });
   const dashboard = useDashboard(now);
-  const { recurrings } = useReccurings();
+  const { recurrings } = useRecurrings();
   const { monthlyIncome } = useMonthlyIncome({ year: selectedYear });
   // "Already debited" is always the real current-year-to-date sum, independent of the
   // selected stats year — the widget's per-line breakdown stays on the current month.
