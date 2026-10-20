@@ -16,7 +16,7 @@ const useWeeklyStats = () => {
   const {
     get: { data: dashboard },
   } = useDashboard();
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const monthBeginning = startOfMonth(from!);
   const queryClient = useQueryClient();
 

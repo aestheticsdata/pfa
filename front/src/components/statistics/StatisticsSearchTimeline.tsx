@@ -65,7 +65,7 @@ const StatisticsSearchTimeline = () => {
   const { euro, euro0 } = useFormat();
   const dateLocale = useDateLocale();
   const router = useRouter();
-  const { setScrollToDayIso } = useDatePickerWrapperStore();
+  const setScrollToDayIso = useDatePickerWrapperStore((state) => state.setScrollToDayIso);
   const [{ term, range }, setParams] = useQueryStates(searchTimelineParsers, searchTimelineUrlOptions);
   const debounced = useDebouncedValue(term, SEARCH_DEBOUNCE_MS);
   const { timeline, isSearching, error, hasQuery, from, to, bucket } = useStatisticsSearchTimeline(debounced, range);

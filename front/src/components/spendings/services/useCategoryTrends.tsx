@@ -63,7 +63,8 @@ const windows = (periodType: PeriodType, from?: Date | null, to?: Date | null) =
  */
 const useCategoryTrends = (periodType: PeriodType) => {
   const { privateRequest } = useRequestHelper();
-  const { from, to } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
+  const to = useDatePickerWrapperStore((state) => state.to);
   const { user } = useAuth();
   const userID = user?.id;
   const range = windows(periodType, from, to);

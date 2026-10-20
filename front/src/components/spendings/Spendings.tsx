@@ -10,7 +10,7 @@ import { useQueryState } from "nuqs";
 import { useEffect } from "react";
 
 export default function Spendings() {
-  const { setIsCalendarVisible } = useGlobalStore();
+  const setIsCalendarVisible = useGlobalStore((state) => state.setIsCalendarVisible);
   // The `?date=` param is the URL source of truth for the selected week; the
   // parser drops any invalid value to null (see parseAsSpendingsDate).
   const [date, setDate] = useQueryState(DATE_QUERY_PARAM, parseAsSpendingsDate);

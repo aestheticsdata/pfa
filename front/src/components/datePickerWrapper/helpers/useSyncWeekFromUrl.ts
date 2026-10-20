@@ -18,7 +18,7 @@ import { useEffect } from "react";
  */
 const useSyncWeekFromUrl = () => {
   const [dateParam] = useQueryState(DATE_QUERY_PARAM, parseAsSpendingsDate);
-  const { setWeek } = useDatePickerWrapperStore();
+  const setWeek = useDatePickerWrapperStore((state) => state.setWeek);
 
   useEffect(() => {
     // No `?date=` (or an invalid one, which the parser drops to null): fall back

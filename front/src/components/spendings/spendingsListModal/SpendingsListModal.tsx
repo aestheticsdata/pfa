@@ -77,7 +77,8 @@ const SpendingsListModal = ({
   const texts = useTranslations("spendings");
   const dateLocale = useDateLocale();
   const { spendingsByWeek, spendingsByMonth } = useSpendings();
-  const { from, to } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
+  const to = useDatePickerWrapperStore((state) => state.to);
   const [searchTerm, setSearchTerm] = useState("");
   const [patternKey, setPatternKey] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);

@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 
 const Exceptionals = () => {
-  const { setIsCalendarVisible } = useGlobalStore();
+  const setIsCalendarVisible = useGlobalStore((state) => state.setIsCalendarVisible);
   // Computed once per instance (stable across re-renders).
   const [currentYear] = useState(() => new Date().getFullYear());
   // null = "All years" (backend fetches all when no year param)

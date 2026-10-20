@@ -17,7 +17,7 @@ const useMonthlyStats = () => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const monthBeginning = from ? startOfMonth(from) : null;
 
   const getMonthlyStats = async () => {

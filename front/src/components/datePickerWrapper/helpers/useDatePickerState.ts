@@ -25,7 +25,9 @@ const useDatePickerState = () => {
   const pathname = usePathname();
   const [dateInUrl, setDateInUrl] = useQueryState(DATE_QUERY_PARAM, parseAsSpendingsDate);
 
-  const { range, setWeek, setScrollToDayIso } = useDatePickerWrapperStore();
+  const range = useDatePickerWrapperStore((state) => state.range);
+  const setWeek = useDatePickerWrapperStore((state) => state.setWeek);
+  const setScrollToDayIso = useDatePickerWrapperStore((state) => state.setScrollToDayIso);
 
   const normalizePath = (path: string): string => {
     const normalized = path.replace(/\/+$/, "");

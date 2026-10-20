@@ -18,7 +18,7 @@ import type { Category } from "@src/schemas/categories";
 const isMock = (id: string) => id.startsWith("mock-");
 
 const Categories = () => {
-  const { setIsCalendarVisible } = useGlobalStore();
+  const setIsCalendarVisible = useGlobalStore((state) => state.setIsCalendarVisible);
 
   useEffect(() => {
     setIsCalendarVisible(false);

@@ -35,7 +35,7 @@ const BudgetHero = () => {
   const { euro0 } = useFormat();
   const dashboardText = useTranslations("dashboard");
   const dateLocale = useDateLocale();
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const {
     get: { data: dashboard },
     mutation,

@@ -26,7 +26,7 @@ const DailySparkline = () => {
   const { euro } = useFormat();
   const dashboardText = useTranslations("dashboard");
   const dateLocale = useDateLocale();
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const { spendingsByMonth } = useSpendings();
   const { data: projectionData } = useDailyProjection();
   const { dailySparkline: t } = dashboardText;

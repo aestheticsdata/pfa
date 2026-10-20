@@ -49,8 +49,13 @@ const SpendingView = () => {
   const common = useTranslations("common");
   const spendings = useTranslations("spendings");
   const dateLocale = useDateLocale();
-  const { from, to, range, scrollToDayIso, setScrollToDayIso, spotlightSpendingId, setSpotlightSpendingId } =
-    useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
+  const to = useDatePickerWrapperStore((state) => state.to);
+  const range = useDatePickerWrapperStore((state) => state.range);
+  const scrollToDayIso = useDatePickerWrapperStore((state) => state.scrollToDayIso);
+  const setScrollToDayIso = useDatePickerWrapperStore((state) => state.setScrollToDayIso);
+  const spotlightSpendingId = useDatePickerWrapperStore((state) => state.spotlightSpendingId);
+  const setSpotlightSpendingId = useDatePickerWrapperStore((state) => state.setSpotlightSpendingId);
   const [now] = useState(() => new Date());
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

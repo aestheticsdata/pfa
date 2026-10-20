@@ -19,7 +19,7 @@ import type { BusiestWeekResponse } from "@src/schemas/stats";
  */
 const useBusiestWeek = () => {
   const { privateRequest } = useRequestHelper();
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const { user } = useAuth();
   const userID = user?.id;
   const monthBeginning = from ? startOfMonth(from) : null;

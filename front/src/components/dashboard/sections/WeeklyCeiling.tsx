@@ -33,7 +33,7 @@ const formatWeekSlice = ({ start, end }: WeekSlice): string => (start === end ? 
 const WeeklyCeiling = () => {
   const { euro, euro0 } = useFormat();
   const dashboardText = useTranslations("dashboard");
-  const { from } = useDatePickerWrapperStore();
+  const from = useDatePickerWrapperStore((state) => state.from);
   const { makeSlices, makeRange, isCurrentWeek } = useWeeklyStatsHelper();
   const {
     get: { data: weeklyStats },
