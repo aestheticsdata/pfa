@@ -111,8 +111,8 @@ export class UsersController {
       throw error;
     }
 
-    await this.redisService.clearSessionsForUser(result.user.id);
     this.openSession(req, result);
+    await this.redisService.trackSession(result.user.id, req.sessionID);
     this.auth({ action: "user-login", outcome: "success", email: dto.email, userId: result.user.id }, req);
 
     return {
@@ -126,8 +126,8 @@ export class UsersController {
   @HttpCode(HttpStatus.CREATED)
   async addUser(@Body() dto: AddUserDto, @Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
     const result = await this.usersService.addUser(dto);
-    await this.redisService.clearSessionsForUser(result.user.id);
     this.openSession(req, result);
+    await this.redisService.trackSession(result.user.id, req.sessionID);
     // An account being created on a single-user instance is the one event worth never missing.
     this.auth({ action: "user-signup", outcome: "success", email: dto.email, userId: result.user.id }, req);
 
@@ -145,6 +145,10 @@ export class UsersController {
     const userId = (req.session as { userId?: string }).userId;
     clearCsrfToken(req);
     this.auth({ action: "user-logout", outcome: "success", userId }, req);
+    // Only this device's session goes; the user's other devices stay signed in (PFA-256).
+    if (userId) {
+      await this.redisService.untrackSession(userId, req.sessionID);
+    }
 
     return new Promise((resolve, reject) => {
       req.session.destroy((err) => {

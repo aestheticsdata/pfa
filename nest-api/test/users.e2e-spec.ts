@@ -213,6 +213,21 @@ describe("UsersController (e2e)", () => {
       return agent.post("/api/users/logout").expect(403);
     });
 
+    it("keeps the user's other sessions signed in (PFA-256)", async () => {
+      const server = app.getHttpServer() as SupertestApp;
+      const laptop = await createAuthenticatedSession(server);
+      const phone = await createAuthenticatedSession(server);
+
+      // Signing in on the phone no longer signs the laptop out.
+      await laptop.agent.get("/api/users/me").expect(200);
+      await phone.agent.get("/api/users/me").expect(200);
+
+      // Logging out of one device leaves the other one signed in.
+      await phone.agent.post("/api/users/logout").expect(200);
+      await phone.agent.get("/api/users/me").expect(401);
+      await laptop.agent.get("/api/users/me").expect(200);
+    });
+
     it("should return 200 even without session (no-op)", () => {
       return request(app.getHttpServer() as SupertestApp)
         .post("/api/users/logout")

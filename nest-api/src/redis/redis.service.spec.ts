@@ -50,3 +50,58 @@ describe("RedisService.countActiveSessions", () => {
     await expect(service.countActiveSessions()).resolves.toEqual({ real: 0, synthetic: 0 });
   });
 });
+
+/** The per-user session index (PFA-256): one session per device, all revocable at once. */
+describe("RedisService session index", () => {
+  const withSets = (
+    sets: Record<string, string[]>,
+    liveKeys: string[],
+  ): { service: RedisService; deleted: string[] } => {
+    const service = new RedisService();
+    const deleted: string[] = [];
+    Object.assign(service.getClient(), {
+      sMembers: (key: string) => Promise.resolve([...(sets[key] ?? [])]),
+      sAdd: (key: string, member: string) => {
+        sets[key] = [...(sets[key] ?? []), member];
+        return Promise.resolve(1);
+      },
+      sRem: (key: string, members: string | string[]) => {
+        const gone = [members].flat();
+        sets[key] = (sets[key] ?? []).filter((id) => !gone.includes(id));
+        return Promise.resolve(gone.length);
+      },
+      exists: (key: string) => Promise.resolve(liveKeys.includes(key) ? 1 : 0),
+      del: (keys: string[]) => {
+        deleted.push(...keys);
+        return Promise.resolve(keys.length);
+      },
+    });
+    return { service, deleted };
+  };
+
+  it("adds the new session and drops the user's expired ones, keeping the live devices", async () => {
+    const sets = { "pfa-user-sessions:u1": ["laptop", "stale"] };
+    const { service } = withSets(sets, ["pfa:laptop"]);
+
+    await service.trackSession("u1", "phone");
+
+    expect(sets["pfa-user-sessions:u1"]).toEqual(["laptop", "phone"]);
+  });
+
+  it("untracks only the session that logs out", async () => {
+    const sets = { "pfa-user-sessions:u1": ["laptop", "phone"] };
+    const { service } = withSets(sets, []);
+
+    await service.untrackSession("u1", "phone");
+
+    expect(sets["pfa-user-sessions:u1"]).toEqual(["laptop"]);
+  });
+
+  it("revokes every session of the user and the index itself", async () => {
+    const { service, deleted } = withSets({ "pfa-user-sessions:u1": ["laptop", "phone"] }, []);
+
+    await service.clearSessionsForUser("u1");
+
+    expect(deleted).toEqual(["pfa:laptop", "pfa:phone", "pfa-user-sessions:u1"]);
+  });
+});
