@@ -1,44 +1,24 @@
 "use client";
 
-import { useAuth } from "@auth/context/AuthContext";
-import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
-import Spinner from "@components/common/Spinner";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
-import { Dropzone } from "@components/shared/Dropzone";
 import { RECEIPT_LINES_MODE } from "@components/spendings/config/constants";
+import InvoiceActions from "@components/spendings/invoiceModal/InvoiceActions";
+import InvoiceModalHeader from "@components/spendings/invoiceModal/InvoiceModalHeader";
+import InvoiceStage from "@components/spendings/invoiceModal/InvoiceStage";
 import InvoiceImageModal from "@components/spendings/invoiceModal/invoiceImageModal/InvoiceImageModal";
-import {
-  buildInvoiceUploadFormData,
-  buildSharedReceiptFormData,
-} from "@components/spendings/services/invoiceUploadFormData";
+import useInvoiceImage from "@components/spendings/services/useInvoiceImage";
 import useReceiptLinesStore from "@components/spendings/stores/receiptLinesStore";
-import { Button } from "@components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui/dialog";
-import useRequestHelper from "@helpers/useRequestHelper";
-import useFormat from "@i18n/useFormat";
+import { Dialog, DialogContent } from "@components/ui/dialog";
 import useTranslations from "@i18n/useTranslations";
-import { invalidateFamilies } from "@lib/query/invalidate";
-import { QUERY_KEYS } from "@lib/query/keys";
-import { cn } from "@lib/utils";
 import { itemTypeSchema } from "@src/schemas/primitives";
-import { useQueryClient } from "@tanstack/react-query";
-import { ScanText, Trash2, Upload } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
 
-import type { ReceiptModalHeader } from "@components/spendings/interfaces/receiptModalTypes";
-import type { SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { InvoiceSpending, ReceiptModalHeader } from "@components/spendings/interfaces/receiptModalTypes";
 import type { ReactNode } from "react";
 
 interface InvoiceModalProps {
   handleClickOutside: () => void;
-  spending: SpendingListItem & {
-    category?: string | null;
-    categoryColor?: string | null;
-    date?: string;
-    dateFrom?: string;
-  };
+  spending: InvoiceSpending;
   /** Replaces the label / category / amount of the header — a group or a shared receipt (PFA-189). */
   header?: ReceiptModalHeader;
   /** When the receipt covers several spendings, an upload goes to all of them (PFA-189). */
@@ -48,12 +28,6 @@ interface InvoiceModalProps {
   children?: ReactNode;
 }
 
-const FILE_SIZE_LIMIT = 32_097_152;
-const FALLBACK_COLOR = CATEGORY_FALLBACK;
-
-/** The image routes answer with a `data:` URL string, or JSON `null` when there is none. */
-const asImageSource = (data: unknown) => (typeof data === "string" && data !== "" ? data : null);
-
 const InvoiceModal = ({
   handleClickOutside: handleClickOutsideProp,
   spending,
@@ -62,34 +36,19 @@ const InvoiceModal = ({
   deleteLabel,
   children,
 }: InvoiceModalProps) => {
-  const isSharedUpload = (uploadSpendingIDs?.length ?? 0) > 1;
-  const texts = useTranslations("spendings");
-  const common = useTranslations("common");
-  const { euro } = useFormat();
+  const { invoiceModal: invoiceModalTexts } = useTranslations("spendings");
   const [open, setOpen] = useState(true);
   const handleClickOutside = () => {
     setOpen(false);
     setTimeout(handleClickOutsideProp, 200);
   };
-  const { privateRequest } = useRequestHelper();
-  const queryClient = useQueryClient();
-  const { invoiceModal: invoiceModalTexts } = texts;
-  const { user } = useAuth();
-  const userID = user?.id;
-  const [invoiceImage, setInvoiceImage] = useState<string | null>(null);
-  const [isFileTooBig, setIsFileTooBig] = useState(false);
-  const [isInvalidFile, setIsInvalidFile] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const image = useInvoiceImage({ spending, uploadSpendingIDs, sharedLabel: header?.title });
   const [isClickOnThumbnail, setIsClickOnThumbnail] = useState(false);
-  const [progressValue, setProgressValue] = useState(0);
-  const [isProgress, setIsProgress] = useState(false);
   const [showConfirmDeleteImage, setShowConfirmDeleteImage] = useState(false);
-  const [pendingFile, setPendingFile] = useState<File | null>(null);
-  const [pendingPreview, setPendingPreview] = useState<string | null>(null);
   const openReceiptLines = useReceiptLinesStore((state) => state.open);
   // A spending's own receipt can be read into lines (PFA-214); a shared one,
   // a group's or an exceptional's cannot.
-  const canReadLines = spending.itemType === itemTypeSchema.enum.spending && !isSharedUpload;
+  const canReadLines = spending.itemType === itemTypeSchema.enum.spending && !image.isSharedUpload;
 
   const readLines = () => {
     openReceiptLines({
@@ -101,124 +60,6 @@ const InvoiceModal = ({
     handleClickOutside();
   };
 
-  const clearPending = () => {
-    setPendingFile(null);
-    setPendingPreview(null);
-  };
-
-  const deleteImage = async () => {
-    try {
-      setIsLoading(true);
-      const res = await privateRequest("/spendings/upload", {
-        method: "DELETE",
-        data: spending,
-      });
-      if ((res as { data?: { msg?: string } })?.data?.msg === "INVOICE_IMAGE_DELETED") {
-        setInvoiceImage(null);
-        await invalidateFamilies(queryClient, [QUERY_KEYS.SPENDINGS_BY_MONTH]);
-        setIsLoading(false);
-      }
-    } catch {
-      toast.error(common.mutationFailed);
-      setIsLoading(false);
-    }
-  };
-
-  const uploadInvoiceImage = async (payload: FormData) => {
-    const options = {
-      method: "POST",
-      data: payload,
-      onUploadProgress: (progressEvent: ProgressEvent) => {
-        const value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-        setProgressValue(value);
-        if (value === 100) {
-          setIsProgress(false);
-          setProgressValue(0);
-        }
-      },
-    };
-    try {
-      setIsProgress(true);
-      setIsLoading(true);
-      const endpoint = isSharedUpload ? "/spendings/receipts" : "/spendings/upload";
-      const uploadedImage = await privateRequest(endpoint, options);
-      if (isSharedUpload) {
-        // The shared endpoint answers with the stored name, not the image.
-        await getInvoiceImage();
-      } else {
-        setInvoiceImage(asImageSource(uploadedImage.data));
-      }
-      clearPending();
-      await invalidateFamilies(queryClient, [QUERY_KEYS.SPENDINGS_BY_MONTH]);
-      setIsLoading(false);
-      // Reading the lines stays the user's call: no OCR on upload (PFA-226).
-    } catch (e) {
-      const message = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      if (message === "INVALID_IMAGE_FILE") {
-        setIsInvalidFile(true);
-      }
-      setIsProgress(false);
-      setIsLoading(false);
-    }
-  };
-
-  const getInvoiceImage = async () => {
-    try {
-      const res = await privateRequest(`/spendings/upload/${spending.ID}?itemType=${spending.itemType}`);
-      setInvoiceImage(asImageSource(res.data));
-    } catch {
-      setInvoiceImage(null);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getInvoiceImage();
-  }, []);
-
-  // Free the local blob URL when the pending preview changes or the modal unmounts
-  useEffect(() => {
-    if (!pendingPreview) return;
-    return () => URL.revokeObjectURL(pendingPreview);
-  }, [pendingPreview]);
-
-  // Selecting/dropping a file only stages it locally (preview) — the upload is
-  // deferred until the user confirms with « Envoyer » (see sendInvoice).
-  const selectFile = (file: File) => {
-    setIsFileTooBig(false);
-    setIsInvalidFile(false);
-    if (!userID) return;
-    if (!file.type.startsWith("image/")) {
-      setIsInvalidFile(true);
-      return;
-    }
-    if (file.size > FILE_SIZE_LIMIT) {
-      setIsFileTooBig(true);
-      return;
-    }
-
-    setPendingFile(file);
-    setPendingPreview(URL.createObjectURL(file));
-  };
-
-  const sendInvoice = () => {
-    if (!pendingFile || !userID) return;
-    uploadInvoiceImage(
-      isSharedUpload && uploadSpendingIDs && "date" in spending && spending.date
-        ? buildSharedReceiptFormData({
-            spendingIDs: uploadSpendingIDs,
-            file: pendingFile,
-            label: header?.title ?? spending.label,
-            date: spending.date.slice(0, 10),
-          })
-        : buildInvoiceUploadFormData(spending, pendingFile),
-    );
-  };
-
-  const category = "category" in spending ? spending.category : null;
-  const categoryColor = "categoryColor" in spending && spending.categoryColor ? spending.categoryColor : FALLBACK_COLOR;
-
   return (
     <>
       <Dialog
@@ -229,171 +70,34 @@ const InvoiceModal = ({
           data-testid="receipt-modal"
           className="max-h-[92vh] gap-0 overflow-y-auto border-line bg-surface-elev p-0 sm:max-w-[600px]"
         >
-          <DialogHeader className="flex-row items-center gap-3 space-y-0 pb-4 pl-5.5 pr-14 pt-5 text-left">
-            <DialogTitle
-              className="min-w-0 flex-1 truncate pr-8 text-xl font-semibold tracking-tight text-ink"
-              title={header?.title ?? spending.label}
-            >
-              {header?.title ?? spending.label}
-            </DialogTitle>
-            {header ? (
-              <span
-                className={cn(
-                  "shrink-0 rounded-md px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider",
-                  header.tagClassName,
-                )}
-              >
-                {header.tag}
-              </span>
-            ) : (
-              category && (
-                <span
-                  className="shrink-0 rounded-md px-2.5 py-1 text-2xs font-semibold uppercase tracking-wider"
-                  style={{
-                    backgroundColor: `${categoryColor}30`,
-                    color: categoryColor,
-                  }}
-                >
-                  {category}
-                </span>
-              )
-            )}
-            <span className="num shrink-0 whitespace-nowrap text-lg font-semibold tracking-tight text-elec">
-              {euro(header?.amount ?? spending.amount)} €
-            </span>
-          </DialogHeader>
+          <InvoiceModalHeader
+            spending={spending}
+            header={header}
+          />
 
           {children}
 
-          {/* #b3ada4 is the design's neutral tan backdrop behind receipt photos
-              (from .facture-stage.is-image) — intentionally a fixed value, not a
-              palette token. */}
-          <div
-            className={cn(
-              "mx-5.5 overflow-hidden rounded-xl border border-line",
-              invoiceImage || pendingPreview ? "bg-[#b3ada4]" : "bg-surface-base",
-            )}
-          >
-            {isLoading && !isProgress ? (
-              <div className="grid min-h-[300px] place-items-center">
-                <Spinner />
-              </div>
-            ) : invoiceImage ? (
-              <button
-                type="button"
-                data-testid="receipt-image"
-                onClick={() => setIsClickOnThumbnail(true)}
-                className="block w-full cursor-zoom-in"
-                aria-label={invoiceModalTexts.enlargeAria}
-              >
-                <Image
-                  src={invoiceImage}
-                  width={1000}
-                  height={800}
-                  alt={invoiceModalTexts.imageAlt}
-                  className="block max-h-[min(460px,60vh)] w-full object-contain"
-                  unoptimized
-                />
-              </button>
-            ) : pendingPreview ? (
-              <Image
-                src={pendingPreview}
-                width={1000}
-                height={800}
-                alt={invoiceModalTexts.previewAlt}
-                className="block max-h-[min(460px,60vh)] w-full object-contain"
-                unoptimized
-              />
-            ) : (
-              <div className="grid min-h-[300px] place-items-center text-base tracking-normal text-ink-4">
-                {invoiceModalTexts.noInvoice}
-              </div>
-            )}
-          </div>
+          <InvoiceStage
+            isLoading={image.isLoading}
+            isProgress={image.isProgress}
+            invoiceImage={image.invoiceImage}
+            pendingPreview={image.pendingPreview}
+            onEnlarge={() => setIsClickOnThumbnail(true)}
+          />
 
-          <div className="flex flex-col gap-2 px-5.5 pb-5.5 pt-4.5">
-            {isFileTooBig && <p className="text-center text-sm text-neg">{invoiceModalTexts.fileTooBig}</p>}
-            {isInvalidFile && <p className="text-center text-sm text-neg">{invoiceModalTexts.invalidFileType}</p>}
-
-            {isProgress ? (
-              <div className="flex flex-col gap-2">
-                <span className="num text-right text-xs text-ink-3">{progressValue} %</span>
-                <div className="h-2 overflow-hidden rounded bg-surface-hi">
-                  <div
-                    className="h-full bg-elec transition-all"
-                    style={{ width: `${progressValue}%` }}
-                  />
-                </div>
-              </div>
-            ) : invoiceImage && !isLoading ? (
-              <>
-                {canReadLines && (
-                  <Button
-                    type="button"
-                    data-testid="receipt-read-lines"
-                    variant="muted"
-                    size="lg"
-                    onClick={readLines}
-                    className="text-base"
-                  >
-                    <ScanText />
-                    {texts.receiptLines.readReceipt}
-                  </Button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmDeleteImage(true)}
-                  className="inline-flex items-center justify-center gap-2.5 rounded-lg bg-danger-solid px-4.5 py-3.5 text-base font-semibold text-on-danger transition-[filter] hover:brightness-110"
-                >
-                  <Trash2 className="size-4" />
-                  {deleteLabel ?? invoiceModalTexts.delete}
-                </button>
-              </>
-            ) : pendingPreview && !isLoading ? (
-              <div className="flex gap-2.5">
-                <Button
-                  type="button"
-                  variant="muted"
-                  size="lg"
-                  onClick={clearPending}
-                  className="flex-1 text-base"
-                >
-                  {texts.actions.cancel}
-                </Button>
-                <Button
-                  type="button"
-                  data-testid="receipt-send"
-                  variant="primary"
-                  size="lg"
-                  onClick={sendInvoice}
-                  className="flex-1 text-base"
-                >
-                  {invoiceModalTexts.send}
-                </Button>
-              </div>
-            ) : !isLoading ? (
-              <Dropzone
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                testId="receipt-pick"
-                onFile={(file) => {
-                  if (file) {
-                    selectFile(file);
-                  }
-                }}
-                className="flex-col items-center gap-1.5 rounded-xl px-5.5 py-7.5 text-center"
-              >
-                <Upload className="size-7.5 text-elec" />
-                <span className="text-base font-semibold text-ink">{invoiceModalTexts.chooseFile}</span>
-                <span className="num text-sm text-ink-4">{invoiceModalTexts.fileTypeWarning}</span>
-              </Dropzone>
-            ) : null}
-          </div>
+          <InvoiceActions
+            image={image}
+            canReadLines={canReadLines}
+            onReadLines={readLines}
+            onAskDelete={() => setShowConfirmDeleteImage(true)}
+            deleteLabel={deleteLabel}
+          />
         </DialogContent>
       </Dialog>
 
-      {isClickOnThumbnail && invoiceImage && (
+      {isClickOnThumbnail && image.invoiceImage && (
         <InvoiceImageModal
-          image={invoiceImage}
+          image={image.invoiceImage}
           closeImage={() => setIsClickOnThumbnail(false)}
         />
       )}
@@ -402,7 +106,7 @@ const InvoiceModal = ({
         open={showConfirmDeleteImage}
         onOpenChange={setShowConfirmDeleteImage}
         title={invoiceModalTexts.deleteConfirmTitle}
-        onConfirm={deleteImage}
+        onConfirm={image.deleteImage}
       />
     </>
   );

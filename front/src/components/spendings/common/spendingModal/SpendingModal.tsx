@@ -1,386 +1,151 @@
 "use client";
 
-import { useAuth } from "@auth/context/AuthContext";
-import useCategoryStats from "@components/categories/services/useCategoryStats";
+import CopyRecurringsButton from "@components/spendings/common/spendingModal/CopyRecurringsButton";
 import AmountField from "@components/spendings/common/spendingModal/fields/AmountField";
 import CategoryField from "@components/spendings/common/spendingModal/fields/CategoryField";
 import DateField from "@components/spendings/common/spendingModal/fields/DateField";
 import LabelField from "@components/spendings/common/spendingModal/fields/LabelField";
 import ReceiptField from "@components/spendings/common/spendingModal/fields/ReceiptField";
 import GroupLinesField from "@components/spendings/common/spendingModal/group/GroupLinesField";
-import { draftsFromGroup, emptyDraft } from "@components/spendings/common/spendingModal/group/groupLineDrafts";
 import ModeSwitch from "@components/spendings/common/spendingModal/group/ModeSwitch";
-import useGroupLines from "@components/spendings/common/spendingModal/group/useGroupLines";
-import useGroupSubmit from "@components/spendings/common/spendingModal/group/useGroupSubmit";
-import { rankFrequentCategories } from "@components/spendings/common/spendingModal/rankFrequentCategories";
-import { makeSpendingSchema } from "@components/spendings/common/spendingModal/schema";
-import Toggle from "@components/spendings/common/spendingModal/Toggle";
-import useReceiptPick from "@components/spendings/common/spendingModal/useReceiptPick";
-import useSpendingSubmit from "@components/spendings/common/spendingModal/useSpendingSubmit";
-import { DATE_FORMAT, SPENDING_MODAL_MODE } from "@components/spendings/config/constants";
-import useDebouncedValue from "@components/spendings/search/useDebouncedValue";
-import useCategories from "@components/spendings/services/useCategories";
-import useLabelSuggestions from "@components/spendings/services/useLabelSuggestions";
-import useRecurrings from "@components/spendings/services/useRecurrings";
-import useSpendingGroups from "@components/spendings/services/useSpendingGroups";
-import useSpendings from "@components/spendings/services/useSpendings";
+import SpendingModalToggles from "@components/spendings/common/spendingModal/SpendingModalToggles";
+import { recurringCopyDates } from "@components/spendings/common/spendingModal/spendingModalDates";
+import useSpendingModalState from "@components/spendings/common/spendingModal/useSpendingModalState";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@components/ui/dialog";
-import { zodResolver } from "@hookform/resolvers/zod";
-import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
-import { endOfMonth, format, startOfMonth, startOfYear, subMonths } from "date-fns";
-import { Copy } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
 
-import type { CategoryOption, SpendingForm } from "@components/spendings/common/spendingModal/schema";
-import type { GroupDayEntry, SpendingModalMode } from "@components/spendings/interfaces/spendingGroupTypes";
-import type { SpendingItem, SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
-import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
-import type { LabelSuggestion } from "@src/schemas/spendings";
+import type { SpendingModalProps } from "@components/spendings/interfaces/spendingModalTypes";
 
-// Debounce the label input before hitting the suggestions endpoint, so a
-// fast-typed label makes one request on pause, not one per keystroke (matches
-// the whole-history search, COS-114).
-const LABEL_SUGGESTIONS_DEBOUNCE_MS = 250;
-
-interface SpendingModalProps {
-  date?: Date;
-  closeModal: () => void;
-  spending: SpendingListItem | null;
-  recurringType?: boolean;
-  isEditing: boolean;
-  month?: MonthRange | null;
-  /** A group to edit (PFA-189) — the modal then opens in group mode. */
-  group?: GroupDayEntry | null;
-}
-
-const SpendingModal = ({
-  date,
-  closeModal: closeModalProp,
-  spending,
-  recurringType = false,
-  isEditing,
-  month = null,
-  group = null,
-}: SpendingModalProps) => {
-  const spendings = useTranslations("spendings");
-  const common = useTranslations("common");
-  const [open, setOpen] = useState(true);
-  const closeModal = () => {
-    setOpen(false);
-    setTimeout(closeModalProp, 200);
-  };
-  const { user } = useAuth();
-  const { createSpending, updateSpending } = useSpendings();
-  const { recurrings, createRecurring, updateRecurring, copyRecurrings } = useRecurrings();
-  const { createGroup, updateGroup } = useSpendingGroups();
-  const { categories } = useCategories();
-  // Per-category usage scoped to the current year to date (client-side "today",
-  // cf COS-73) — ranks the "Frequent" quick-picks on recent habits, not
-  // all-time cumulative usage (COS-137). Never blocks the modal: while stats load
-  // (or on error) the section is simply empty until real usage arrives.
-  const now = new Date();
-  const frequentRange = { from: format(startOfYear(now), "yyyy-MM-dd"), to: format(now, "yyyy-MM-dd") };
-  const { categoryStats } = useCategoryStats(frequentRange);
-
-  const categoryOptions: CategoryOption[] = (categories ?? []).map((c) => ({
-    ID: c.ID,
-    userID: c.userID,
-    name: c.name,
-    color: c.color,
-  }));
-
-  const frequentCategories = rankFrequentCategories(categoryOptions, categoryStats?.byCategory);
-
-  const isSpendingItem = (v: SpendingListItem | null): v is SpendingItem => !!v && "date" in v;
-
-  const initialCategory: CategoryOption | null = spending?.category
-    ? {
-        ID: spending.categoryID ?? null,
-        userID: user?.id ?? null,
-        name: spending.category ?? "",
-        color: spending.categoryColor ?? null,
-      }
-    : null;
-
-  const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(initialCategory);
-  const [comboboxOpen, setComboboxOpen] = useState(false);
-
-  // Single spending or group of lines on one receipt (PFA-189). Editing keeps
-  // the shape of what is edited; a dashboard fixed expense is never a group.
-  const [mode, setMode] = useState<SpendingModalMode>(group ? SPENDING_MODAL_MODE.group : SPENDING_MODAL_MODE.single);
-  const isGroup = mode === SPENDING_MODAL_MODE.group;
-  const canSwitchMode = !isEditing && !recurringType;
-  const groupLines = useGroupLines(() => (group ? draftsFromGroup(group, user?.id ?? null) : []));
-  const [comboboxQuery, setComboboxQuery] = useState("");
-  const [labelQuery, setLabelQuery] = useState(spending?.label ?? "");
-  // "Monthly recurring" toggle — only offered when creating a plain spending
-  // from the timeline (never in edit mode, never when already a recurring).
-  const [isRecurringToggle, setIsRecurringToggle] = useState(false);
-  const asRecurring = recurringType || (isRecurringToggle && !isGroup);
-  const canToggleRecurring = !isEditing && !recurringType;
-
-  // Month a new recurring belongs to (its start/end window): always the viewed
-  // month. A recurring has no single date, so the modal no longer swaps the
-  // Date field for a month stepper — it just disables Date when recurring.
-  const [recurringMonth] = useState<Date>(() => (month?.start ? startOfMonth(month.start) : startOfMonth(new Date())));
-
-  // Receipt picked at creation: kept locally for the preview, then uploaded on
-  // the created row's ID by the create mutation (chained in useSpendings, PFA-5).
-  const [isReceiptToggle, setIsReceiptToggle] = useState(false);
-  const { receiptFile, receiptPreview, onReceiptFile, clearReceipt } = useReceiptPick();
-
-  const initialDateStr = (() => {
-    if (isSpendingItem(spending) && spending.date) {
-      return spending.date.slice(0, 10);
-    }
-    return date ? format(date, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd");
-  })();
-
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    setValue,
-    clearErrors,
-    formState: { errors, isSubmitting },
-  } = useForm<SpendingForm>({
-    resolver: zodResolver(makeSpendingSchema(spendings.modal.validation, common.validation, mode)),
-    mode: "onChange",
-    defaultValues: {
-      spendingLabel: group?.label ?? spending?.label ?? "",
-      spendingAmount: spending?.amount?.toString() ?? "",
-      spendingDate: initialDateStr,
-    },
-  });
-
-  // Suggestions come from the user's real past labels (COS-23); never fetched for
-  // recurrings, which don't show them.
-  const debouncedLabelQuery = useDebouncedValue(labelQuery, LABEL_SUGGESTIONS_DEBOUNCE_MS);
-  const labelSuggestions = useLabelSuggestions(debouncedLabelQuery, !asRecurring);
-
-  const applySuggestion = (suggestion: LabelSuggestion) => {
-    setValue("spendingLabel", suggestion.label, { shouldValidate: true });
-    setLabelQuery(suggestion.label);
-    const category = suggestion.category;
-    if (!category) return;
-    const match = categoryOptions.find((c) => c.name.toLowerCase() === category.toLowerCase());
-    if (match) {
-      setSelectedCategory(match);
-    }
-  };
-
-  const onSubmit = useSpendingSubmit({
-    user,
-    spending,
-    isEditing,
-    recurringType,
-    asRecurring,
-    recurringMonth,
-    categoryOptions,
-    selectedCategory,
-    comboboxQuery,
-    receiptFile,
-    createSpending,
-    updateSpending,
-    createRecurring,
-    updateRecurring,
-    closeModal,
-  });
-
-  const onGroupSubmit = useGroupSubmit({
-    user,
-    group,
-    validateLines: groupLines.validate,
-    receiptFile,
-    createGroup,
-    updateGroup,
-    closeModal,
-  });
-
-  // The first switch to group mode seeds two lines: the category and amount
-  // already typed, then the next most frequent category, empty (PFA-189).
-  const changeMode = (next: SpendingModalMode) => {
-    if (next === SPENDING_MODAL_MODE.group && groupLines.drafts.length === 0) {
-      const second = frequentCategories.find((c) => c.name !== selectedCategory?.name) ?? null;
-      groupLines.replaceLines([emptyDraft(selectedCategory, getValues("spendingAmount")), emptyDraft(second)]);
-    }
-    clearErrors();
-    setMode(next);
-  };
-
-  // Title tracks recurringType (dashboard "fixed expense" entry) only, NOT the
-  // in-modal toggle — so ticking "Monthly recurring" keeps the title stable
-  // instead of making the modal look like a different one.
-  const { modal } = spendings;
-  const { groups: groupTexts } = spendings;
-  const title = group
-    ? groupTexts.editTitle
-    : isEditing
-      ? modal.title.edit(recurringType)
-      : modal.title.create(recurringType);
-  const submitLabel = isEditing
-    ? modal.submit.save
-    : isGroup
-      ? groupTexts.submitAdd(groupLines.drafts.length)
-      : modal.submit.add;
+const SpendingModal = (props: SpendingModalProps) => {
+  const { isEditing, recurringType = false } = props;
+  const state = useSpendingModalState(props);
 
   return (
     <Dialog
-      open={open}
-      onOpenChange={(isOpen) => !isOpen && closeModal()}
+      open={state.open}
+      onOpenChange={(isOpen) => !isOpen && state.closeModal()}
     >
       <DialogContent
         data-testid="spending-modal"
         className={cn(
           "gap-0 overflow-hidden border-line bg-surface-elev p-0",
-          isGroup ? "sm:max-w-170" : "sm:max-w-[480px]",
+          state.isGroup ? "sm:max-w-170" : "sm:max-w-[480px]",
         )}
       >
         <DialogHeader className="flex-row items-center justify-between space-y-0 border-b border-line-soft px-5.5 py-4.5 text-left">
-          <DialogTitle className="pr-8 text-base font-semibold tracking-normal text-ink">{title}</DialogTitle>
+          <DialogTitle className="pr-8 text-base font-semibold tracking-normal text-ink">{state.title}</DialogTitle>
         </DialogHeader>
 
         <form
-          onSubmit={handleSubmit(isGroup ? onGroupSubmit : onSubmit)}
+          onSubmit={state.handleSubmit(state.isGroup ? state.onGroupSubmit : state.onSubmit)}
           className="flex max-h-[min(78vh,720px)] flex-col gap-4.5 overflow-y-auto px-5.5 py-5.5"
         >
-          {canSwitchMode && (
+          {state.canSwitchMode && (
             <ModeSwitch
-              mode={mode}
-              onChange={changeMode}
+              mode={state.mode}
+              onChange={state.changeMode}
             />
           )}
 
           <DateField
-            register={register}
-            getValues={getValues}
-            setValue={setValue}
-            asRecurring={asRecurring}
+            register={state.register}
+            getValues={state.getValues}
+            setValue={state.setValue}
+            asRecurring={state.asRecurring}
           />
 
           <LabelField
-            register={register}
-            error={errors.spendingLabel?.message}
-            clearErrors={clearErrors}
-            hideSuggestions={asRecurring || isGroup}
-            label={isGroup ? groupTexts.nameLabel : modal.fields.label}
-            placeholder={isGroup ? groupTexts.namePlaceholder : modal.fields.labelPlaceholder}
-            labelSuggestions={labelSuggestions}
-            applySuggestion={applySuggestion}
-            setLabelQuery={setLabelQuery}
+            register={state.register}
+            error={state.errors.spendingLabel?.message}
+            clearErrors={state.clearErrors}
+            hideSuggestions={state.asRecurring || state.isGroup}
+            label={state.isGroup ? state.groupTexts.nameLabel : state.modal.fields.label}
+            placeholder={state.isGroup ? state.groupTexts.namePlaceholder : state.modal.fields.labelPlaceholder}
+            labelSuggestions={state.labelSuggestions}
+            applySuggestion={state.applySuggestion}
+            setLabelQuery={state.setLabelQuery}
           />
 
-          {isGroup ? (
+          {state.isGroup ? (
             <GroupLinesField
-              drafts={groupLines.drafts}
-              invalidKeys={groupLines.invalidKeys}
-              categoryOptions={categoryOptions}
-              updateLine={groupLines.updateLine}
-              addLine={groupLines.addLine}
-              removeLine={groupLines.removeLine}
+              drafts={state.groupLines.drafts}
+              invalidKeys={state.groupLines.invalidKeys}
+              categoryOptions={state.categoryOptions}
+              updateLine={state.groupLines.updateLine}
+              addLine={state.groupLines.addLine}
+              removeLine={state.groupLines.removeLine}
             />
           ) : (
             <AmountField
-              register={register}
-              error={errors.spendingAmount?.message}
+              register={state.register}
+              error={state.errors.spendingAmount?.message}
             />
           )}
 
-          {!isGroup && (
+          {!state.isGroup && (
             <CategoryField
-              categoryOptions={categoryOptions}
-              frequentCategories={frequentCategories}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-              comboboxOpen={comboboxOpen}
-              setComboboxOpen={setComboboxOpen}
-              comboboxQuery={comboboxQuery}
-              setComboboxQuery={setComboboxQuery}
-              userId={user?.id ?? null}
+              categoryOptions={state.categoryOptions}
+              frequentCategories={state.frequentCategories}
+              selectedCategory={state.selectedCategory}
+              setSelectedCategory={state.setSelectedCategory}
+              comboboxOpen={state.comboboxOpen}
+              setComboboxOpen={state.setComboboxOpen}
+              comboboxQuery={state.comboboxQuery}
+              setComboboxQuery={state.setComboboxQuery}
+              userId={state.user?.id ?? null}
             />
           )}
 
-          <div className="flex flex-wrap gap-2.5 pt-0.5">
-            {canToggleRecurring && !isGroup && (
-              <Toggle
-                active={isRecurringToggle}
-                onClick={() => setIsRecurringToggle((v) => !v)}
-              >
-                {modal.recurringToggle}
-              </Toggle>
-            )}
-            {/* Receipt is not applicable to a recurring — disabled, not removed.
-                In edit mode the toggle is hidden: the modal has no view of an
-                existing receipt, so attaching here could silently overwrite one —
-                the row's receipt icon (InvoiceModal) is the edit path. */}
-            {!isEditing && (
-              <Toggle
-                active={isReceiptToggle}
-                onClick={() => {
-                  // Turning the section off drops the picked file too — a hidden
-                  // receipt must never be silently uploaded on submit.
-                  if (isReceiptToggle) clearReceipt();
-                  setIsReceiptToggle(!isReceiptToggle);
-                }}
-                disabled={asRecurring}
-              >
-                {isGroup ? groupTexts.attachReceipt : modal.attachReceipt}
-              </Toggle>
-            )}
-          </div>
+          <SpendingModalToggles
+            showRecurringToggle={state.canToggleRecurring && !state.isGroup}
+            isRecurring={state.isRecurringToggle}
+            onToggleRecurring={() => state.setIsRecurringToggle((v) => !v)}
+            showReceiptToggle={!isEditing}
+            isReceipt={state.isReceiptToggle}
+            onToggleReceipt={() => {
+              // Turning the section off drops the picked file too — a hidden
+              // receipt must never be silently uploaded on submit.
+              if (state.isReceiptToggle) state.clearReceipt();
+              state.setIsReceiptToggle(!state.isReceiptToggle);
+            }}
+            receiptDisabled={state.asRecurring}
+            isGroup={state.isGroup}
+          />
 
-          {!asRecurring && isReceiptToggle && (
+          {!state.asRecurring && state.isReceiptToggle && (
             <ReceiptField
-              receiptFile={receiptFile}
-              receiptPreview={receiptPreview}
-              onReceiptFile={onReceiptFile}
-              clearReceipt={clearReceipt}
+              receiptFile={state.receiptFile}
+              receiptPreview={state.receiptPreview}
+              onReceiptFile={state.onReceiptFile}
+              clearReceipt={state.clearReceipt}
             />
           )}
 
-          {recurringType && (recurrings?.length ?? 0) === 0 && (
-            // Copy-previous-month is a recurrings-panel affordance only (gated on
-            // the recurringType prop, NOT asRecurring): we don't surface it in the
-            // timeline "make this recurring" toggle flow, where clicking it would
-            // discard the entry the user is mid-creating.
-            <Button
-              type="button"
-              variant="muted"
-              onClick={() => {
-                const mStart = startOfMonth(recurringMonth);
-                const mEnd = endOfMonth(recurringMonth);
-                closeModal();
-                copyRecurrings.mutate({
-                  start: format(mStart, DATE_FORMAT),
-                  end: format(mEnd, DATE_FORMAT),
-                  previousMonthStart: format(subMonths(mStart, 1), DATE_FORMAT),
-                  previousMonthEnd: format(subMonths(mEnd, 1), DATE_FORMAT),
-                });
+          {recurringType && (state.recurrings?.length ?? 0) === 0 && (
+            <CopyRecurringsButton
+              onCopy={() => {
+                state.closeModal();
+                state.copyRecurrings.mutate(recurringCopyDates(state.recurringMonth));
               }}
-            >
-              <Copy className="size-4" />
-              {modal.copyPreviousMonth}
-            </Button>
+            />
           )}
 
           <DialogFooter className="gap-2.5 border-t border-line-soft pt-4 sm:gap-2.5">
             <Button
               type="button"
               variant="muted"
-              onClick={closeModal}
+              onClick={state.closeModal}
             >
-              {spendings.actions.cancel}
+              {state.spendings.actions.cancel}
             </Button>
             <Button
               type="submit"
               data-testid="spending-submit"
               variant="primary"
-              disabled={isSubmitting}
+              disabled={state.isSubmitting}
             >
-              {submitLabel}
+              {state.submitLabel}
             </Button>
           </DialogFooter>
         </form>
