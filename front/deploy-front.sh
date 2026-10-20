@@ -324,9 +324,63 @@ check_pnpm_baseline() {
   log "➡️  pnpm baseline — local $local_v / server $remote_v"
 }
 
+# Quality gate (PFA-238): there is no CI, so this is the one place every change goes through before
+# it reaches ks-b. Runs on the laptop, against the working tree that rsync is about to upload, and
+# before anything is touched on the server: a failure here leaves production exactly as it was.
+# Types are checked here AND by `next build` on the server (`ignoreBuildErrors: false`), so a type
+# error fails in seconds locally instead of minutes into the remote build.
+#
+# Vitest needs Node >= 20.12. A shell whose default node is older gets `.nvmrc`'s version through
+# nvm when nvm is there; otherwise the gate stops and says which node it found.
+ensure_gate_node() {
+  local v
+  v=$(node -v 2>/dev/null | sed 's/^v//') || v=""
+  if [ -n "$v" ] && [ "$(printf '%s\n%s\n' "20.12.0" "$v" | sort -V | head -1)" = "20.12.0" ]; then
+    return 0
+  fi
+
+  if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    # nvm's scripts are not written for `set -u`.
+    set +u
+    # shellcheck disable=SC1091
+    . "$HOME/.nvm/nvm.sh"
+    nvm use >/dev/null
+    set -u
+    return 0
+  fi
+
+  echo "❌ ERROR: the quality gate needs Node >= 20.12 (found: ${v:-none}). See front/.nvmrc." >&2
+  exit 1
+}
+
+check_quality_gate() {
+  ensure_gate_node
+  log "➡️  Quality gate — install check, lint, types, tests (node $(node -v))"
+
+  pnpm install --frozen-lockfile --prefer-offline >/dev/null || {
+    echo "❌ ERROR: quality gate — local dependencies do not match pnpm-lock.yaml" >&2
+    exit 1
+  }
+  pnpm exec biome ci ./src || {
+    echo "❌ ERROR: quality gate — Biome (lint/format) failed. Fix it, or run \`pnpm lint:fix\`." >&2
+    exit 1
+  }
+  pnpm exec tsc --noEmit -p tsconfig.json || {
+    echo "❌ ERROR: quality gate — TypeScript errors" >&2
+    exit 1
+  }
+  pnpm test || {
+    echo "❌ ERROR: quality gate — unit tests failed" >&2
+    exit 1
+  }
+
+  log "✅ Quality gate passed"
+}
+
 deploy() {
-  check_pnpm_baseline
   cd "$SCRIPT_DIR"
+  check_quality_gate
+  check_pnpm_baseline
 
   # `.env.production` is not committed, and its absence is silent in a way that matters: the
   # NEXT_PUBLIC_ values are inlined at build time, so a missing file does not fail the build — it

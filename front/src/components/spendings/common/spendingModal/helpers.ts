@@ -6,11 +6,7 @@ export const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
 /** Units are locale-dependent ("o/Ko/Mo" in FR, "B/KB/MB" in EN), so the caller
  *  supplies them from the active dictionary along with the number locale. */
-export const humanSize = (
-  bytes: number,
-  units: Dictionary["spendings"]["modal"]["fileSize"],
-  locale: string,
-) => {
+export const humanSize = (bytes: number, units: Dictionary["spendings"]["modal"]["fileSize"], locale: string) => {
   if (bytes < 1024) return `${bytes} ${units.bytes}`;
   if (bytes < 1_048_576) return `${Math.round(bytes / 1024)} ${units.kilobytes}`;
   const megabytes = (bytes / 1_048_576).toLocaleString(locale, {

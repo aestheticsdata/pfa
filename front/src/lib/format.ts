@@ -23,10 +23,7 @@ export const formatPct1 = (n: number, locale: string) =>
  * rendering (see MoneyAmount). `separator` is part of the result because it is
  * locale-dependent ("," in fr-FR, "." in en-US) and callers render it.
  */
-export const formatSplitAmount = (
-  n: number,
-  locale: string,
-): { int: string; dec: string; separator: string } => {
+export const formatSplitAmount = (n: number, locale: string): { int: string; dec: string; separator: string } => {
   const parts = new Intl.NumberFormat(locale, TWO_DECIMALS).formatToParts(Number(n));
   const decimalIndex = parts.findIndex((part) => part.type === "decimal");
   return {
