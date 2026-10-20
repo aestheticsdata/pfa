@@ -15,7 +15,8 @@ test("an expired session sends the user to the login page", async ({ page }) => 
   // A client-side navigation: the layout stays, the next page's queries hit the API with no session.
   await page.getByRole("link", { name: "Statistiques" }).click();
 
-  await expect(page).toHaveURL(/\/login\/?$/);
+  // Generous: under `next dev` the first visit compiles the route on demand.
+  await expect(page).toHaveURL(/\/login\/?$/, { timeout: 20_000 });
   await expect(page.getByLabel("Email")).toBeVisible();
   await expect(page.getByText(ERROR_BOUNDARY)).toBeHidden();
 });

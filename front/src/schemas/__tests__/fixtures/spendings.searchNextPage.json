@@ -15,6 +15,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -32,6 +33,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -49,6 +51,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -66,6 +69,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -83,6 +87,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -100,6 +105,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -117,6 +123,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -134,6 +141,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -151,6 +159,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -168,6 +177,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -185,6 +195,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -202,6 +213,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -219,6 +231,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -236,6 +249,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -253,6 +267,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -270,6 +285,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -287,6 +303,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -304,6 +321,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -321,6 +339,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -338,6 +357,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -355,6 +375,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -372,6 +393,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -389,6 +411,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -406,6 +429,7 @@
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     },
     {
@@ -423,6 +447,7 @@
       "category": "Train pass",
       "categoryColor": "#6DB65B",
       "lineCount": 0,
+      "storeID": null,
       "storeName": null
     }
   ],
