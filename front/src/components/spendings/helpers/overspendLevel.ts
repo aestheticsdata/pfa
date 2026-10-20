@@ -1,6 +1,6 @@
 import { OVERSPEND_LEVEL } from "@components/spendings/config/constants";
 
-export type OverspendLevel = (typeof OVERSPEND_LEVEL)[keyof typeof OVERSPEND_LEVEL];
+import type { OverspendLevel } from "@components/spendings/interfaces/overspendTypes";
 
 /**
  * The total turns red only once it exceeds its budget by this factor; between

@@ -270,7 +270,9 @@ const StatisticsKpis = ({
           mode="cursor"
           point={compareTotalTip.hover}
         >
-          {compareTotalTip.hover ? t.tooltip.total(compareYear, euro0(compareTotal), totalDiffStr, months) : null}
+          {compareTotalTip.hover
+            ? t.tooltip.total({ year: compareYear, total: euro0(compareTotal), diff: totalDiffStr, months })
+            : null}
         </Tooltip>
         <div className="mt-4">
           <StatMiniChart

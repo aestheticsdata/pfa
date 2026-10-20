@@ -21,7 +21,7 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import type { CategoryProps } from "@components/common/interfaces/categoryTypes";
-import type { PeriodType } from "@components/spendings/config/constants";
+import type { PeriodType } from "@components/spendings/interfaces/periodTypes";
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 interface SpendingsListModalProps {

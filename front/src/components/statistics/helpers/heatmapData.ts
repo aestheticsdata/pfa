@@ -1,7 +1,13 @@
 import { format, getDay, getDayOfYear } from "date-fns";
 
-import type { ExceptionalItem } from "@src/schemas/exceptionals";
-import type { DailyStat } from "@src/schemas/stats";
+import type {
+  FilledLevel,
+  HeatmapCell,
+  HeatmapCellExceptional,
+  HeatmapFeeds,
+  HeatmapLevel,
+  HeatmapModel,
+} from "@components/statistics/interfaces/heatmapTypes";
 import type { Locale } from "date-fns/locale";
 
 /**
@@ -20,48 +26,8 @@ export const LEVEL = {
   NEG: "lvl-neg",
 } as const;
 
-export type HeatmapLevel = (typeof LEVEL)[keyof typeof LEVEL];
-export type FilledLevel = Exclude<HeatmapLevel, typeof LEVEL.EMPTY | typeof LEVEL.FUTURE>;
-
 /** Spend bands in ascending order, indexed by the 0–4 band number (`lvl-neg` excluded). */
 export const SPEND_BANDS = [LEVEL.ZERO, LEVEL.ONE, LEVEL.TWO, LEVEL.THREE, LEVEL.FOUR] as const;
-
-export interface HeatmapCellExceptional {
-  label: string;
-  /** Exceptional purchase amount in euros. */
-  amount: number;
-}
-
-export interface HeatmapCell {
-  /** Local calendar date, YYYY-MM-DD. */
-  date: string;
-  /** The day's regular spend total in euros; 0 when the day has no spending. */
-  amount: number;
-  /** Colour band for the day (lvl-neg on an exceptional day). */
-  level: FilledLevel;
-  /** Exceptional purchases on this day, biggest first; empty when none. */
-  exceptionals: HeatmapCellExceptional[];
-}
-
-export interface HeatmapModel {
-  /** [dow 0=Mon..6=Sun][week 0..weeks-1]; "empty" = out-of-year padding, "future" = not yet reached. */
-  rows: HeatmapLevel[][];
-  /** Per-slot tooltip meta, same [dow][week] indexing as `rows`; null for empty/future slots. */
-  cells: (HeatmapCell | null)[][];
-  /** Number of week-columns this year actually spans (52–54, so the grid matches the calendar). */
-  weeks: number;
-  counts: Record<FilledLevel, number>;
-  /** Longest run of consecutive realized "sober" days (lvl-0 / lvl-1). */
-  streak: number;
-  /** Heaviest non-exceptional daily total in euros — colour-scale top + legend. */
-  scaleMax: number;
-  /** The single heaviest non-exceptional day, or null when there is no spending. */
-  busiest: { amount: number; date: string } | null;
-  /** Realized exceptional purchase labels, biggest first (for the "Exceptional peaks" subtext). */
-  exceptionalLabels: string[];
-  /** Day-of-year of the last realized day (today, or Dec 31 for a past year). */
-  realizedDays: number;
-}
 
 const emptyCounts = (): Record<FilledLevel, number> => ({
   [LEVEL.ZERO]: 0,
@@ -101,12 +67,7 @@ export const bandFor = (amount: number, max: number): FilledLevel => {
  * as `lvl-neg`. Days past today (current year) stay `future`; grid slots outside
  * the year are `empty`.
  */
-export const buildHeatmap = (
-  year: number,
-  now: Date,
-  days: DailyStat[],
-  exceptionals: ExceptionalItem[],
-): HeatmapModel => {
+export const buildHeatmap = ({ days, exceptionals }: HeatmapFeeds, year: number, now: Date): HeatmapModel => {
   const isCurrentYear = year === now.getFullYear();
   const realizedDays = isCurrentYear ? getDayOfYear(now) : getDayOfYear(new Date(year, 11, 31));
   const daysInYear = getDayOfYear(new Date(year, 11, 31));

@@ -9,7 +9,7 @@ import { Info, LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import type { Dictionary } from "@text/index";
+import type { Dictionary } from "@text/interfaces/textTypes";
 import type { LucideIcon } from "lucide-react";
 
 type Tab = { path: string; label: (header: Dictionary["login"]["header"]) => string; icon: LucideIcon };

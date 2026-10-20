@@ -2,7 +2,7 @@
 // The coordinate-system layer: turn raw series data into the numbers the path
 // builders (linePaths / arcPaths) draw with.
 
-import type { LinePoint } from "@lib/dataviz/interfaces/dataVizTypes";
+import type { Extent, LinePoint } from "@lib/dataviz/interfaces/dataVizTypes";
 
 /** Coerce a number[] | LinePoint[] into LinePoint[] (index as x for numbers). */
 export const normalizePoints = (points: LinePoint[] | number[]): LinePoint[] =>
@@ -23,6 +23,6 @@ export const extent = (values: number[]): [number, number] => {
 
 /** Linear scale factory: maps a domain onto a pixel range. */
 export const linearScale =
-  (domainMin: number, domainMax: number, rangeMin: number, rangeMax: number) =>
+  ([domainMin, domainMax]: Extent, [rangeMin, rangeMax]: Extent) =>
   (v: number): number =>
     domainMax === domainMin ? rangeMin : rangeMin + ((v - domainMin) / (domainMax - domainMin)) * (rangeMax - rangeMin);

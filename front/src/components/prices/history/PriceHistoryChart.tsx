@@ -46,8 +46,11 @@ const PriceHistoryChart = ({ comparison, colors }: PriceHistoryChartProps) => {
   const [yMin, yMax] = priceDomain(points.map((p) => p.unitPrice));
   const xMin = Math.min(...days);
   const xMax = Math.max(...days);
-  const sx = linearScale(xMin, xMax === xMin ? xMin + 1 : xMax, PAD.left, Math.max(PAD.left + 1, width - PAD.right));
-  const sy = linearScale(yMin, yMax, HEIGHT - PAD.bottom, PAD.top);
+  const sx = linearScale(
+    [xMin, xMax === xMin ? xMin + 1 : xMax],
+    [PAD.left, Math.max(PAD.left + 1, width - PAD.right)],
+  );
+  const sy = linearScale([yMin, yMax], [HEIGHT - PAD.bottom, PAD.top]);
   const pixels = points.map((p) => ({ x: sx(p.day), y: sy(p.unitPrice) }));
   const stores = comparison.stores.filter((store) => colors.has(store.storeID));
   const hidden = comparison.stores.length - stores.length;

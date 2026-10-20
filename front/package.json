@@ -7,7 +7,7 @@
     "build": "next build",
     "deploy-kimsufi": "next build",
     "start": "next start",
-    "lint": "biome check ./src",
+    "lint": "biome check ./src && node scripts/checkTypePlacement.mjs",
     "lint:fix": "biome check --write ./src",
     "test": "vitest run",
     "test:watch": "vitest",

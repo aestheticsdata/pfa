@@ -1,5 +1,6 @@
 import { getDaysInMonth, parseISO } from "date-fns";
 
+import type { PaceComparison } from "@components/spendings/interfaces/spendingPaceTypes";
 import type { MonthlyTotal } from "@src/schemas/stats";
 
 /**
@@ -8,13 +9,6 @@ import type { MonthlyTotal } from "@src/schemas/stats";
  * Past months are always full, so this only gates the in-progress month.
  */
 export const PACE_MIN_DAYS = 7;
-
-export interface PaceComparison {
-  /** Signed gap of the current daily rate vs the recent average, as a % (>0 = faster). */
-  deltaPct: number;
-  /** True when the current month is spending faster than the recent average. */
-  faster: boolean;
-}
 
 /**
  * The current month's spending pace vs the average daily rate of the preceding

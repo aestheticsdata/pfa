@@ -8,7 +8,7 @@ import { CategoryTrendsResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
 
-import type { PeriodType } from "@components/spendings/config/constants";
+import type { PeriodType } from "@components/spendings/interfaces/periodTypes";
 import type { CategoryTrendPoint } from "@src/schemas/stats";
 
 // A user category and a global one can share a name; merge those rows by name —

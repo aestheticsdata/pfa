@@ -1,4 +1,5 @@
 import type frStatistics from "@text/fr/statistics";
+import type { CompareTotalTooltip } from "@text/interfaces/statisticsTextTypes";
 
 const statistics: typeof frStatistics = {
   // Shared "year-to-date" subtitle, rendered identically by the monthly and
@@ -32,8 +33,8 @@ const statistics: typeof frStatistics = {
       regular: "regular",
     },
     tooltip: {
-      total: (compareYear: number, total: string, diff: string, months: number) =>
-        `${compareYear}: ${total} € · ${diff} € over ${months} month${months === 1 ? "" : "s"}`,
+      total: ({ year, total, diff, months }: CompareTotalTooltip) =>
+        `${year}: ${total} € · ${diff} € over ${months} month${months === 1 ? "" : "s"}`,
       avg: (exact: string, total: string, months: number) =>
         `${exact} € · ${total} € ÷ ${months} month${months === 1 ? "" : "s"}`,
       expenseInfo: (label: string, date: string) => `${label} · ${date}`,

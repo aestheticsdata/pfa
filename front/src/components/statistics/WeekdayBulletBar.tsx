@@ -1,6 +1,6 @@
 import { bulletSegments } from "@components/statistics/helpers/weekdayBullet";
 
-import type { OverspendLevel } from "@components/spendings/helpers/overspendLevel";
+import type { OverspendLevel } from "@components/spendings/interfaces/overspendTypes";
 
 interface WeekdayBulletBarProps {
   /** The weekday's average spend, in euros. */

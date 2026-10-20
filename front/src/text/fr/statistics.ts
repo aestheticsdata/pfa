@@ -1,3 +1,5 @@
+import type { CompareTotalTooltip } from "@text/interfaces/statisticsTextTypes";
+
 const statistics = {
   // Shared "year-to-date" subtitle, rendered identically by the monthly and
   // category charts ("2026 · janv. → juil.").
@@ -29,8 +31,8 @@ const statistics = {
       regular: "courante",
     },
     tooltip: {
-      total: (compareYear: number, total: string, diff: string, months: number) =>
-        `${compareYear} : ${total} € · ${diff} € sur ${months} mois`,
+      total: ({ year, total, diff, months }: CompareTotalTooltip) =>
+        `${year} : ${total} € · ${diff} € sur ${months} mois`,
       avg: (exact: string, total: string, months: number) => `${exact} € · ${total} € ÷ ${months} mois`,
       expenseInfo: (label: string, date: string) => `${label} · ${date}`,
     },

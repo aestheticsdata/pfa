@@ -48,10 +48,12 @@ const SharedLoginForm = ({
   const login = useTranslations("login");
   const common = useTranslations("common");
   const schema = makeLoginSchema(
-    !!displayEmailField,
-    !!displayPasswordField,
-    !!displayConfirmPasswordField,
-    !!displayCurrencyField,
+    {
+      email: !!displayEmailField,
+      password: !!displayPasswordField,
+      confirm: !!displayConfirmPasswordField,
+      currency: !!displayCurrencyField,
+    },
     login.validation,
     common.validation,
   );

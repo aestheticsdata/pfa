@@ -99,3 +99,31 @@ export interface CursorPoint {
   /** Cursor Y in viewport coords (clientY). */
   y: number;
 }
+
+// Geometry inputs of the arc helpers (PFA-246): a circle, a ring between two radii, an angular
+// span in degrees clockwise from 12 o'clock, and a numeric extent for the linear scale.
+
+export interface Circle {
+  cx: number;
+  cy: number;
+  r: number;
+}
+
+export interface Ring {
+  cx: number;
+  cy: number;
+  rInner: number;
+  rOuter: number;
+}
+
+export interface AngleSpan {
+  startAngle: number;
+  endAngle: number;
+}
+
+/** A [min, max] numeric interval — a scale's domain or its pixel range. */
+export type Extent = readonly [number, number];
+
+export interface CursorHover<T> extends CursorPoint {
+  data: T;
+}

@@ -32,7 +32,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-import type { NavLabelKey } from "@components/shared/config/constants";
+import type { NavLabelKey } from "@components/shared/interfaces/navTypes";
 import type { LucideIcon } from "lucide-react";
 
 type NavRoute = { path: string; labelKey: NavLabelKey };

@@ -1,6 +1,7 @@
 import { monthlyPresence, monthlyTotals } from "@components/statistics/helpers/statisticsData";
 import { getDaysInMonth } from "date-fns";
 
+import type { YearMonthly, YearMonthlyHistory } from "@components/statistics/interfaces/projectionTypes";
 import type { StatisticsResponse } from "@src/schemas/stats";
 
 /**
@@ -11,13 +12,6 @@ import type { StatisticsResponse } from "@src/schemas/stats";
  * (M-1). The chain resolves per month, so a partial year still projects month by
  * month.
  */
-export interface YearMonthly {
-  /** 12-slot (Jan→Dec) regular monthly totals. */
-  totals: number[];
-  /** 12-slot presence mask: true where the year has ≥1 spending that month. */
-  present: boolean[];
-}
-
 /** Builds a {@link YearMonthly} for `year` from a `/statistics` response. */
 export const toYearMonthly = (data: StatisticsResponse["data"] | undefined, year: number): YearMonthly => ({
   totals: monthlyTotals(data, year),
@@ -30,7 +24,7 @@ export const toYearMonthly = (data: StatisticsResponse["data"] | undefined, year
  * `now` (wrapping January back to last December) — used for any month the two
  * prior years do not cover.
  */
-const makeEstimator = (current: YearMonthly, lastYear: YearMonthly, twoYearsAgo: YearMonthly, now: Date) => {
+const makeEstimator = ({ current, lastYear, twoYearsAgo }: YearMonthlyHistory, now: Date) => {
   const curMonth = now.getMonth();
   const prevIdx = (curMonth + 11) % 12;
   const mMinus1 =
@@ -63,13 +57,8 @@ const remainingMonthShare = (now: Date): number => {
  * are never extrapolated; the caller adds the realized total. Backs the monthly
  * chart's projected current-month bar (COS-50).
  */
-export const projectedCurrentMonthRemainder = (
-  current: YearMonthly,
-  lastYear: YearMonthly,
-  twoYearsAgo: YearMonthly,
-  now: Date,
-): number | null => {
-  const monthEstimate = makeEstimator(current, lastYear, twoYearsAgo, now)(now.getMonth());
+export const projectedCurrentMonthRemainder = (history: YearMonthlyHistory, now: Date): number | null => {
+  const monthEstimate = makeEstimator(history, now)(now.getMonth());
   return monthEstimate === null ? null : monthEstimate * remainingMonthShare(now);
 };
 
@@ -80,14 +69,9 @@ export const projectedCurrentMonthRemainder = (
  * one-offs, so only the year's known ones count (added by the caller). Returns
  * null when no historical reference exists at all (COS-47).
  */
-export const projectedRemainingRegular = (
-  current: YearMonthly,
-  lastYear: YearMonthly,
-  twoYearsAgo: YearMonthly,
-  now: Date,
-): number | null => {
+export const projectedRemainingRegular = (history: YearMonthlyHistory, now: Date): number | null => {
   const curMonth = now.getMonth();
-  const estimate = makeEstimator(current, lastYear, twoYearsAgo, now);
+  const estimate = makeEstimator(history, now);
 
   let remaining = 0;
   let hasEstimate = false;

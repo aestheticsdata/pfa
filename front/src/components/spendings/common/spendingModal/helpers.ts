@@ -1,6 +1,6 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 
-import type { Dictionary } from "@text/index";
+import type { Dictionary } from "@text/interfaces/textTypes";
 
 export const FALLBACK_COLOR = CATEGORY_FALLBACK;
 

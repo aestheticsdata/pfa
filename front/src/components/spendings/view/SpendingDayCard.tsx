@@ -21,9 +21,9 @@ import { format } from "date-fns";
 import { Plus, SquareCheckBig } from "lucide-react";
 import { useState } from "react";
 
+import type { DaySortField } from "@components/spendings/interfaces/daySortTypes";
 import type { GroupDayEntry } from "@components/spendings/interfaces/spendingGroupTypes";
 import type { SpendingItem, SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
-import type { DaySortField } from "@components/spendings/view/helpers/useDaySort";
 import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
 import type { SortDir } from "@lib/interfaces/orderByTypes";
 

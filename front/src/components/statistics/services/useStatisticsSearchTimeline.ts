@@ -7,7 +7,7 @@ import { SearchTimelineResponseSchema } from "@src/schemas/stats";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import type { SearchTimelineRange } from "@components/statistics/helpers/searchTimelineData";
+import type { SearchTimelineRange } from "@components/statistics/interfaces/searchTimelineTypes";
 import type { SearchTimelineResponse } from "@src/schemas/stats";
 
 /**

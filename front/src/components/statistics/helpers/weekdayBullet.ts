@@ -1,15 +1,7 @@
 import { OVERSPEND_LEVEL } from "@components/spendings/config/constants";
 import { OVERSPEND_DANGER_RATIO } from "@components/spendings/helpers/overspendLevel";
 
-import type { OverspendLevel } from "@components/spendings/helpers/overspendLevel";
-
-export interface BulletSegment {
-  level: OverspendLevel;
-  /** Left edge, 0–1 fraction of the bar's fixed scale. */
-  start: number;
-  /** Width, 0–1 fraction of the bar's fixed scale. */
-  width: number;
-}
+import type { BulletSegment } from "@components/statistics/interfaces/weekdayBulletTypes";
 
 /** Position of a euro amount on the bar's fixed scale, clamped to 0–1. */
 export const scaleFrac = (amount: number, scaleMax: number): number =>

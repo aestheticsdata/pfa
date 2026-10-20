@@ -1,15 +1,8 @@
 import { elapsedMonths } from "@components/statistics/helpers/statisticsData";
 import { parseISO } from "date-fns";
 
+import type { ExceptionalStats } from "@components/exceptionals/interfaces/exceptionalStatsTypes";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
-
-export interface ExceptionalStats {
-  total: number;
-  count: number;
-  biggest: { label: string; amount: number; date: Date } | null;
-  average: number;
-  spanMonths: number;
-}
 
 /**
  * Aggregate stats for the exceptionals cards.

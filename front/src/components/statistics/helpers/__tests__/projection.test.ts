@@ -1,7 +1,7 @@
 import { projectedCurrentMonthRemainder, projectedRemainingRegular } from "@components/statistics/helpers/projection";
 import { describe, expect, it } from "vitest";
 
-import type { YearMonthly } from "@components/statistics/helpers/projection";
+import type { YearMonthly } from "@components/statistics/interfaces/projectionTypes";
 
 const ym = (totals: number[], present: boolean[]): YearMonthly => ({ totals, present });
 const zeros = Array<number>(12).fill(0);
@@ -19,7 +19,10 @@ describe("projectedRemainingRegular", () => {
   const julyShare = 12 / 31;
 
   it("estimates the rest of the year from the same months last year (N-1)", () => {
-    const result = projectedRemainingRegular(empty, ym(rising, allTrue), empty, midJuly);
+    const result = projectedRemainingRegular(
+      { current: empty, lastYear: ym(rising, allTrue), twoYearsAgo: empty },
+      midJuly,
+    );
     // July remainder (70 × 12/31) + Aug…Dec in full (80+90+100+110+120).
     expect(result).toBeCloseTo(500 + 70 * julyShare, 6);
   });
@@ -33,7 +36,7 @@ describe("projectedRemainingRegular", () => {
       [...zeros].map((_, i) => (i === 8 ? 999 : 0)),
       allTrue.map((_, i) => i === 8),
     );
-    const result = projectedRemainingRegular(empty, lastYear, twoAgo, midJuly);
+    const result = projectedRemainingRegular({ current: empty, lastYear, twoYearsAgo: twoAgo }, midJuly);
     // Aug 80 + Sep 999 (from N-2) + Oct 100 + Nov 110 + Dec 120 = 1409.
     expect(result).toBeCloseTo(1409 + 70 * julyShare, 6);
   });
@@ -43,7 +46,7 @@ describe("projectedRemainingRegular", () => {
       [...zeros].map((_, i) => (i === 5 ? 600 : 0)),
       allTrue.map((_, i) => i === 5),
     ); // June only
-    const result = projectedRemainingRegular(current, empty, empty, midJuly);
+    const result = projectedRemainingRegular({ current, lastYear: empty, twoYearsAgo: empty }, midJuly);
     // Every remaining month uses June's 600: Aug…Dec (×5) + July remainder.
     expect(result).toBeCloseTo(3000 + 600 * julyShare, 6);
   });
@@ -53,13 +56,16 @@ describe("projectedRemainingRegular", () => {
       zeros,
       allTrue.map((_, i) => i === 6),
     ); // July only, no earlier month
-    const result = projectedRemainingRegular(current, empty, empty, midJuly);
+    const result = projectedRemainingRegular({ current, lastYear: empty, twoYearsAgo: empty }, midJuly);
     expect(result).toBeNull();
   });
 
   it("only prorates the in-progress month when it is the last of the year", () => {
     const midDecember = new Date(2026, 11, 15); // 16 of 31 days remain
-    const result = projectedRemainingRegular(empty, ym(rising, allTrue), empty, midDecember);
+    const result = projectedRemainingRegular(
+      { current: empty, lastYear: ym(rising, allTrue), twoYearsAgo: empty },
+      midDecember,
+    );
     expect(result).toBeCloseTo(120 * (16 / 31), 6);
   });
 
@@ -73,7 +79,7 @@ describe("projectedRemainingRegular", () => {
       [...zeros].map((_, i) => (i === 11 ? 999 : 0)),
       allTrue.map((_, i) => i === 11),
     );
-    const result = projectedRemainingRegular(empty, lastYear, twoAgo, midDecember);
+    const result = projectedRemainingRegular({ current: empty, lastYear, twoYearsAgo: twoAgo }, midDecember);
     // N-1's real 0 wins over N-2's 999 → the December remainder is 0, not null.
     expect(result).toBe(0);
   });
@@ -84,7 +90,10 @@ describe("projectedCurrentMonthRemainder", () => {
   const julyShare = 12 / 31;
 
   it("prorates the current month's same month last year (N-1)", () => {
-    const result = projectedCurrentMonthRemainder(empty, ym(rising, allTrue), empty, midJuly);
+    const result = projectedCurrentMonthRemainder(
+      { current: empty, lastYear: ym(rising, allTrue), twoYearsAgo: empty },
+      midJuly,
+    );
     expect(result).toBeCloseTo(70 * julyShare, 6); // July N-1 = 70
   });
 
@@ -98,20 +107,27 @@ describe("projectedCurrentMonthRemainder", () => {
       [...zeros].map((_, i) => (i === 6 ? 900 : 0)),
       allTrue.map((_, i) => i === 6),
     );
-    expect(projectedCurrentMonthRemainder(empty, n1NoJuly, n2July, midJuly)).toBeCloseTo(900 * julyShare, 6);
+    expect(
+      projectedCurrentMonthRemainder({ current: empty, lastYear: n1NoJuly, twoYearsAgo: n2July }, midJuly),
+    ).toBeCloseTo(900 * julyShare, 6);
 
     // M-1 fallback: no prior years, June (previous month) present.
     const june = ym(
       [...zeros].map((_, i) => (i === 5 ? 600 : 0)),
       allTrue.map((_, i) => i === 5),
     );
-    expect(projectedCurrentMonthRemainder(june, empty, empty, midJuly)).toBeCloseTo(600 * julyShare, 6);
+    expect(projectedCurrentMonthRemainder({ current: june, lastYear: empty, twoYearsAgo: empty }, midJuly)).toBeCloseTo(
+      600 * julyShare,
+      6,
+    );
 
     // No reference anywhere (first month of data) → null.
     const julyOnly = ym(
       zeros,
       allTrue.map((_, i) => i === 6),
     );
-    expect(projectedCurrentMonthRemainder(julyOnly, empty, empty, midJuly)).toBeNull();
+    expect(
+      projectedCurrentMonthRemainder({ current: julyOnly, lastYear: empty, twoYearsAgo: empty }, midJuly),
+    ).toBeNull();
   });
 });

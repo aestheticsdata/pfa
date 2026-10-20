@@ -105,9 +105,11 @@ const Statistics = () => {
   const projectedRemainder =
     selectedYear === currentYear
       ? projectedCurrentMonthRemainder(
-          toYearMonthly(data, selectedYear),
-          toYearMonthly(data, selectedYear - 1),
-          toYearMonthly(data, selectedYear - 2),
+          {
+            current: toYearMonthly(data, selectedYear),
+            lastYear: toYearMonthly(data, selectedYear - 1),
+            twoYearsAgo: toYearMonthly(data, selectedYear - 2),
+          },
           now,
         )
       : null;
