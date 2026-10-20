@@ -4,7 +4,7 @@
     "name": "Bakery",
     "email": "user@example.test",
     "baseCurrency": "EUR",
-    "language": "en"
+    "language": "fr"
   },
   "csrfToken": "csrf-token"
 }

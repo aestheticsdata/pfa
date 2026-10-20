@@ -1,14 +1,10 @@
 [
   {
-    "label": "Train pass 2",
+    "label": "Repair 2",
     "category": "Pharmacy"
   },
   {
-    "label": "Florist 2",
-    "category": "Train pass"
-  },
-  {
-    "label": "Pharmacy 2",
-    "category": "Bookshop"
+    "label": "Stationery 4",
+    "category": "Hardware"
   }
 ]
