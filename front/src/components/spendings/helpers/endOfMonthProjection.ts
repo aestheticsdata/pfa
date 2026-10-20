@@ -1,21 +1,12 @@
 import { ProjectionSourceSchema } from "@src/schemas/dashboard";
 import { getDate, getDaysInMonth, isBefore, isSameMonth, startOfMonth } from "date-fns";
 
+import type {
+  DailyAmounts,
+  MonthPosition,
+  MonthProjection,
+} from "@components/spendings/interfaces/endOfMonthProjectionTypes";
 import type { CategoryDailyTotals, DailyProjection } from "@src/schemas/dashboard";
-
-/** One month's amounts day by day, index i = day (i+1). */
-export type DailyAmounts = readonly number[];
-
-export interface MonthProjection {
-  /** The month's projected end-of-month total, or null when there is none to show. */
-  total: number | null;
-  /**
-   * What each category still has coming before the month is out, keyed by
-   * `categoryKey` — a category with nothing more expected is absent rather than
-   * zero. Empty whenever there is no projection to make.
-   */
-  remainders: Map<string | null, number>;
-}
 
 /**
  * The key categories join on: the reference month, the viewed month's own
@@ -51,8 +42,7 @@ export const referenceDayAmount = (referenceDaily: DailyAmounts, day: number): n
 export const projectedRemainder = (
   referenceDaily: DailyAmounts,
   dailyActuals: DailyAmounts,
-  today: number,
-  daysInMonth: number,
+  { today, daysInMonth }: MonthPosition,
 ): number => {
   let remainder = 0;
   for (let day = today + 1; day <= daysInMonth; day += 1) {
@@ -93,7 +83,7 @@ export const projectedRemaindersByCategory = ({
   for (const slice of byCategory) {
     const key = categoryKey(slice.category);
     const booked = actualsByCategory.get(key) ?? [];
-    const remainder = projectedRemainder(slice.dailyTotals, booked, today, daysInMonth);
+    const remainder = projectedRemainder(slice.dailyTotals, booked, { today, daysInMonth });
     // Nothing more expected is an absent entry, not a zero: the breakdown reads
     // this to decide whether a row has a figure worth showing at all.
     if (remainder > 0) remainders.set(key, (remainders.get(key) ?? 0) + remainder);
@@ -159,7 +149,7 @@ export const endOfMonthProjection = ({
       // stays honest, and the breakdown simply shows no per-category figure
       // until the API catches up.
       const booked = flattenActuals(actualsByCategory, daysInMonth);
-      const total = monthlyTotal + projectedRemainder(referenceDaily, booked, today, daysInMonth);
+      const total = monthlyTotal + projectedRemainder(referenceDaily, booked, { today, daysInMonth });
       return { total: round2(total), remainders: new Map() };
     }
 

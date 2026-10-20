@@ -57,8 +57,8 @@ const StatMiniChart = ({ id, values, count, average, height = MINI_CHART_HEIGHT 
   const dataMax = Math.max(...points.map((p) => p.y), average ?? 0, 1);
   const max = niceCeil(dataMax);
 
-  const sx = linearScale(0, Math.max(1, count - 1), PAD.left, W - PAD.right);
-  const sy = linearScale(0, max, height - PAD.bottom, PAD.top);
+  const sx = linearScale([0, Math.max(1, count - 1)], [PAD.left, W - PAD.right]);
+  const sy = linearScale([0, max], [height - PAD.bottom, PAD.top]);
   const pixels = points.map((p) => ({ x: sx(p.x), y: sy(p.y) }));
   const baseY = sy(0);
 

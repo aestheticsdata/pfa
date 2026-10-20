@@ -71,8 +71,8 @@ const LineChart = ({
   const yMin = yDomain ? yMinRaw : Math.min(0, yMinRaw);
   const yMax = yMaxRaw;
 
-  const sx = linearScale(xMin, xMax, pad.left, width - pad.right);
-  const sy = linearScale(yMin, yMax, height - pad.bottom, pad.top);
+  const sx = linearScale([xMin, xMax], [pad.left, width - pad.right]);
+  const sy = linearScale([yMin, yMax], [height - pad.bottom, pad.top]);
   const baseY = sy(baseline ?? yMin);
 
   return (

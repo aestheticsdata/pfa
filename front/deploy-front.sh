@@ -355,7 +355,7 @@ ensure_gate_node() {
 
 check_quality_gate() {
   ensure_gate_node
-  log "➡️  Quality gate — install check, lint, types, tests (node $(node -v))"
+  log "➡️  Quality gate — install check, lint, type placement, types, tests (node $(node -v))"
 
   pnpm install --frozen-lockfile --prefer-offline >/dev/null || {
     echo "❌ ERROR: quality gate — local dependencies do not match pnpm-lock.yaml" >&2
@@ -363,6 +363,10 @@ check_quality_gate() {
   }
   pnpm exec biome ci ./src || {
     echo "❌ ERROR: quality gate — Biome (lint/format) failed. Fix it, or run \`pnpm lint:fix\`." >&2
+    exit 1
+  }
+  node scripts/checkTypePlacement.mjs || {
+    echo "❌ ERROR: quality gate — exported types outside an interfaces/ folder" >&2
     exit 1
   }
   pnpm exec tsc --noEmit -p tsconfig.json || {

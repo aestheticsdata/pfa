@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 
-import type { CursorPoint } from "@lib/dataviz/interfaces/dataVizTypes";
-
-export interface CursorHover<T> extends CursorPoint {
-  data: T;
-}
+import type { CursorHover } from "@lib/dataviz/interfaces/dataVizTypes";
 
 /**
  * Local hover state driving a `<Tooltip mode="cursor">`: viewport coords + an

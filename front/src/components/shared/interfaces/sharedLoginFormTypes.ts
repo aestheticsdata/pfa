@@ -23,3 +23,11 @@ export interface SharedLoginFormProps {
   /** Disables every field and the submit button while leaving the form in place (COS-419). */
   disabled?: boolean;
 }
+
+/** Which login-form fields are shown, so validated (PFA-246): a hidden one validates as any string. */
+export interface LoginFieldsShown {
+  email: boolean;
+  password: boolean;
+  confirm: boolean;
+  currency: boolean;
+}

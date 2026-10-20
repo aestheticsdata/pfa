@@ -57,9 +57,11 @@ const StatisticsForecast = ({
   // first month of data (no reference) → no projection shown.
   const remaining = isCurrent
     ? projectedRemainingRegular(
-        toYearMonthly(data, year),
-        toYearMonthly(data, year - 1),
-        toYearMonthly(data, year - 2),
+        {
+          current: toYearMonthly(data, year),
+          lastYear: toYearMonthly(data, year - 1),
+          twoYearsAgo: toYearMonthly(data, year - 2),
+        },
         now,
       )
     : 0;

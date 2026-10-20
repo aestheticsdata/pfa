@@ -19,7 +19,11 @@ const { common, exceptionals, login, spendings } = dictionaries.fr;
 
 const spendingSchema = makeSpendingSchema(spendings.modal.validation, common.validation);
 const exceptionalSchema = makeExceptionalSchema(exceptionals.modal.errors, common.validation);
-const loginSchema = makeLoginSchema(true, true, true, true, login.validation, common.validation);
+const loginSchema = makeLoginSchema(
+  { email: true, password: true, confirm: true, currency: true },
+  login.validation,
+  common.validation,
+);
 
 const validSpending = { spendingLabel: "Courses", spendingAmount: "12", spendingDate: "2026-07-01" };
 const validExceptional = { label: "Réparation", amount: "320", date: "2026-07-01", description: "Garage" };

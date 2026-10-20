@@ -27,8 +27,9 @@ import frSpendings from "@text/fr/spendings";
 import frStatistics from "@text/fr/statistics";
 
 import type { LangKeys } from "@i18n/interfaces/localesTypes";
+import type { Dictionary } from "@text/interfaces/textTypes";
 
-const fr = {
+export const fr = {
   app: frApp,
   categories: frCategories,
   common: frCommon,
@@ -41,9 +42,6 @@ const fr = {
   spendings: frSpendings,
   statistics: frStatistics,
 };
-
-export type Dictionary = typeof fr;
-export type TextZone = keyof Dictionary;
 
 export const dictionaries: Record<LangKeys, Dictionary> = {
   fr,

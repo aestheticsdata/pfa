@@ -1,7 +1,4 @@
-import type { Dictionary } from "@text/index";
-
-/** Key into navBar.links — resolved to the active-locale label via useTranslations("navBar"). */
-export type NavLabelKey = keyof Dictionary["navBar"]["links"];
+import type { NavLabelKey } from "@components/shared/interfaces/navTypes";
 
 export const ROUTES = {
   dashboard: { path: "/dashboard", labelKey: "dashboard" as NavLabelKey },

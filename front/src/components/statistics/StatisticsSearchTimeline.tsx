@@ -104,7 +104,7 @@ const StatisticsSearchTimeline = () => {
   // Dense series over the window — the window only depends on the range, so the
   // frame (ticks, bands) renders with or without data; the API only ships
   // non-empty buckets and zero-filled bars simply draw nothing.
-  const points = fillTimeline(hasMatches ? (timeline?.buckets ?? []) : [], from, to, bucket);
+  const points = fillTimeline(hasMatches ? (timeline?.buckets ?? []) : [], { from, to }, bucket);
   const rolling = rollingCounts(points, rollingWindowBuckets(range));
   const maxRolling = Math.max(1, ...rolling);
   const yMax = niceCeil(Math.max(0, ...points.map((p) => p.total)));

@@ -12,7 +12,7 @@ import { useCursorHover } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import { format, parseISO } from "date-fns";
 
-import type { FilledLevel, HeatmapCell } from "@components/statistics/helpers/heatmapData";
+import type { FilledLevel, HeatmapCell } from "@components/statistics/interfaces/heatmapTypes";
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { DailyStat } from "@src/schemas/stats";
 
@@ -89,10 +89,9 @@ const StatisticsHeatmap = ({ year, now, days, exceptionals }: StatisticsHeatmapP
   }
 
   const { rows, cells, weeks, counts, streak, scaleMax, busiest, exceptionalLabels, realizedDays } = buildHeatmap(
+    { days, exceptionals },
     year,
     now,
-    days,
-    exceptionals,
   );
 
   const gridColumns = `16px repeat(${weeks}, minmax(0, 1fr))`;

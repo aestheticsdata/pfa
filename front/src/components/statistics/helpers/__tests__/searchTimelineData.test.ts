@@ -36,8 +36,7 @@ describe("fillTimeline", () => {
   it("densifies daily buckets over the window, zero-filling the gaps", () => {
     const points = fillTimeline(
       [bucket("2026-03-02", 12.5, 1)],
-      "2026-03-01",
-      "2026-03-04",
+      { from: "2026-03-01", to: "2026-03-04" },
       SEARCH_TIMELINE_BUCKET.day,
     );
     expect(points).toEqual([
@@ -50,7 +49,11 @@ describe("fillTimeline", () => {
 
   it("steps a week at a time for weekly buckets (Sunday keys)", () => {
     // 2026-03-01 is a Sunday.
-    const points = fillTimeline([bucket("2026-03-08", 40, 2)], "2026-03-01", "2026-03-21", SEARCH_TIMELINE_BUCKET.week);
+    const points = fillTimeline(
+      [bucket("2026-03-08", 40, 2)],
+      { from: "2026-03-01", to: "2026-03-21" },
+      SEARCH_TIMELINE_BUCKET.week,
+    );
     expect(points.map((p) => p.date)).toEqual(["2026-03-01", "2026-03-08", "2026-03-15"]);
     expect(points[1]).toEqual({ date: "2026-03-08", total: 40, count: 2 });
   });
@@ -72,21 +75,21 @@ describe("rollingCounts", () => {
 
 describe("timelineTicks", () => {
   it("labels every 7th day on the month range", () => {
-    const points = fillTimeline([], "2026-06-22", "2026-07-21", SEARCH_TIMELINE_BUCKET.day);
+    const points = fillTimeline([], { from: "2026-06-22", to: "2026-07-21" }, SEARCH_TIMELINE_BUCKET.day);
     const ticks = timelineTicks(points, SEARCH_TIMELINE_RANGE.month, fr);
     expect(ticks.map((t) => t.index)).toEqual([0, 7, 14, 21, 28]);
     expect(ticks[0].label).toBe("22 juin");
   });
 
   it("labels the 1st of every other month on the year range", () => {
-    const points = fillTimeline([], "2025-07-22", "2026-07-21", SEARCH_TIMELINE_BUCKET.day);
+    const points = fillTimeline([], { from: "2025-07-22", to: "2026-07-21" }, SEARCH_TIMELINE_BUCKET.day);
     const ticks = timelineTicks(points, SEARCH_TIMELINE_RANGE.year, fr);
     // Even JS month indexes: sept., nov., janv., mars, mai, juil.
     expect(ticks.map((t) => t.label)).toEqual(["sept.", "nov.", "janv.", "mars", "mai", "juil."]);
   });
 
   it("labels the first week of each quarter on the 3-year range", () => {
-    const points = fillTimeline([], "2026-01-04", "2026-12-27", SEARCH_TIMELINE_BUCKET.week);
+    const points = fillTimeline([], { from: "2026-01-04", to: "2026-12-27" }, SEARCH_TIMELINE_BUCKET.week);
     const ticks = timelineTicks(points, SEARCH_TIMELINE_RANGE.threeYears, fr);
     expect(ticks.map((t) => t.label)).toEqual(["janv. 26", "avr. 26", "juil. 26", "oct. 26"]);
   });

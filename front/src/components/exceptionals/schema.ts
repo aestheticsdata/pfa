@@ -1,7 +1,7 @@
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import { z } from "zod";
 
-import type { Dictionary } from "@text/index";
+import type { Dictionary } from "@text/interfaces/textTypes";
 
 export const makeExceptionalSchema = (
   errors: Dictionary["exceptionals"]["modal"]["errors"],

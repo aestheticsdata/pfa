@@ -1,16 +1,7 @@
 import { itemTypeSchema } from "@src/schemas/primitives";
 
+import type { InvoiceUploadTarget } from "@components/spendings/interfaces/invoiceUploadTypes";
 import type { ShareReceiptInput } from "@components/spendings/interfaces/spendingGroupTypes";
-
-// Multipart body of POST /spendings/upload — shared by the row's InvoiceModal
-// and the receipt-at-creation chain (PFA-5).
-export interface InvoiceUploadTarget {
-  ID: string;
-  itemType: string;
-  label: string;
-  date?: string | null;
-  dateFrom?: string | null;
-}
 
 export const buildInvoiceUploadFormData = (target: InvoiceUploadTarget, file: File): FormData => {
   const formData = new FormData();

@@ -1,13 +1,8 @@
 import { format, parseISO } from "date-fns";
 
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
+import type { SpendingMonthGroup } from "@components/spendings/interfaces/spendingSearchTypes";
 import type { Locale } from "date-fns/locale";
-
-export interface SpendingMonthGroup {
-  key: string;
-  label: string;
-  items: SpendingItem[];
-}
 
 const capitalize = (value: string): string => (value ? value.charAt(0).toUpperCase() + value.slice(1) : value);
 

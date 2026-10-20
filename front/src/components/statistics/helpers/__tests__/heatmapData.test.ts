@@ -33,13 +33,13 @@ describe("buildHeatmap", () => {
   const exceptionals = [exc("2023-01-05", 800, "ordinateur"), exc("2023-01-08", 300, "vélo")];
 
   it("derives the colour scale and busiest day from non-exceptional days only", () => {
-    const { scaleMax, busiest } = buildHeatmap(2023, now, days, exceptionals);
+    const { scaleMax, busiest } = buildHeatmap({ days, exceptionals }, 2023, now);
     expect(scaleMax).toBe(100);
     expect(busiest).toEqual({ amount: 100, date: "2023-01-02" });
   });
 
   it("counts realized days by level, exceptional days overriding the spend band", () => {
-    const { counts } = buildHeatmap(2023, now, days, exceptionals);
+    const { counts } = buildHeatmap({ days, exceptionals }, 2023, now);
     expect(counts).toEqual({
       [LEVEL.ZERO]: 6,
       [LEVEL.ONE]: 1,
@@ -51,18 +51,18 @@ describe("buildHeatmap", () => {
   });
 
   it("measures the longest run of consecutive sober (lvl-0/lvl-1) days", () => {
-    const { streak } = buildHeatmap(2023, now, days, exceptionals);
+    const { streak } = buildHeatmap({ days, exceptionals }, 2023, now);
     expect(streak).toBe(2);
   });
 
   it("lists realized exceptional labels, biggest first, and reports realized days", () => {
-    const { exceptionalLabels, realizedDays } = buildHeatmap(2023, now, days, exceptionals);
+    const { exceptionalLabels, realizedDays } = buildHeatmap({ days, exceptionals }, 2023, now);
     expect(exceptionalLabels).toEqual(["ordinateur", "vélo"]);
     expect(realizedDays).toBe(10);
   });
 
   it("places days on the calendar grid (Jan 1 2023 = Sunday) and pads/futures the rest", () => {
-    const { rows } = buildHeatmap(2023, now, days, exceptionals);
+    const { rows } = buildHeatmap({ days, exceptionals }, 2023, now);
     expect(rows[6][0]).toBe(LEVEL.ZERO); // Sun 01-01
     expect(rows[0][1]).toBe(LEVEL.FOUR); // Mon 01-02 (heaviest day)
     expect(rows[0][0]).toBe(LEVEL.EMPTY); // Mon of week 0 = 2022-12-26, out of year
@@ -70,7 +70,7 @@ describe("buildHeatmap", () => {
   });
 
   it("carries per-cell tooltip metadata; future and out-of-year slots stay null", () => {
-    const { cells } = buildHeatmap(2023, now, days, exceptionals);
+    const { cells } = buildHeatmap({ days, exceptionals }, 2023, now);
     expect(cells[0][1]).toEqual({ date: "2023-01-02", amount: 100, level: LEVEL.FOUR, exceptionals: [] });
     expect(cells[3][1]).toEqual({
       date: "2023-01-05",
@@ -83,7 +83,11 @@ describe("buildHeatmap", () => {
   });
 
   it("handles a year with no spending: no scale, no busiest day, every day sober", () => {
-    const { scaleMax, busiest, counts, streak, realizedDays } = buildHeatmap(2023, new Date(2023, 5, 1), [], []);
+    const { scaleMax, busiest, counts, streak, realizedDays } = buildHeatmap(
+      { days: [], exceptionals: [] },
+      2023,
+      new Date(2023, 5, 1),
+    );
     expect(scaleMax).toBe(0);
     expect(busiest).toBeNull();
     expect(counts[LEVEL.ZERO]).toBe(realizedDays);

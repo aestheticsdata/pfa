@@ -36,6 +36,12 @@
       "suspicious": {
         "noConsole": "error"
       },
+      "complexity": {
+        "useMaxParams": {
+          "level": "error",
+          "options": { "max": 3 }
+        }
+      },
       "style": {
         "noRestrictedImports": {
           "level": "error",

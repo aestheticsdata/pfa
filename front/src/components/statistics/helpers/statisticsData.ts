@@ -1,6 +1,7 @@
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import { format } from "date-fns";
 
+import type { CategoryTotal } from "@components/statistics/interfaces/statisticsDataTypes";
 import type { StatisticsResponse } from "@src/schemas/stats";
 import type { Locale } from "date-fns/locale";
 
@@ -114,12 +115,6 @@ export const cumulative = (values: number[]): number[] => {
   }, 0);
   return out;
 };
-
-export interface CategoryTotal {
-  name: string;
-  value: number;
-  color: string;
-}
 
 /** Total per category for `year`, sorted descending. */
 export const perCategoryTotals = (

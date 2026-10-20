@@ -173,7 +173,7 @@ const Donut = ({
       const end = angle + sweep - gap / 2;
       angle += sweep;
       if (end > start) {
-        wedges.push({ d: wedgePath(CX, CY, r, start, end), color: seg.color });
+        wedges.push({ d: wedgePath({ cx: CX, cy: CY, r }, { startAngle: start, endAngle: end }), color: seg.color });
       }
     }
     body = wedges.map((w, i) => (
@@ -323,12 +323,11 @@ const Donut = ({
             ) : (
               <path
                 d={annularSectorPath(
-                  CX,
-                  CY,
-                  rInnerHover,
-                  rOuterHover,
-                  (offset / circumference) * 360,
-                  ((offset + emptyDash) / circumference) * 360,
+                  { cx: CX, cy: CY, rInner: rInnerHover, rOuter: rOuterHover },
+                  {
+                    startAngle: (offset / circumference) * 360,
+                    endAngle: ((offset + emptyDash) / circumference) * 360,
+                  },
                 )}
                 {...dotProps}
                 {...maskProps}

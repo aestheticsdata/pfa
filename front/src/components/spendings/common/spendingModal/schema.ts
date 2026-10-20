@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import type { SpendingModalMode } from "@components/spendings/interfaces/spendingGroupTypes";
 import type { SpendingCategoryInputSchema } from "@src/schemas/spendings";
-import type { Dictionary } from "@text/index";
+import type { Dictionary } from "@text/interfaces/textTypes";
 
 export const makeSpendingSchema = (
   validation: Dictionary["spendings"]["modal"]["validation"],

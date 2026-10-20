@@ -2,10 +2,9 @@ import { DAY_SORT_FIELD } from "@components/spendings/config/constants";
 import { orderBy, SORT_DIR } from "@lib/orderBy";
 import { useState } from "react";
 
+import type { DaySortField } from "@components/spendings/interfaces/daySortTypes";
 import type { DaySortable } from "@components/spendings/interfaces/spendingGroupTypes";
 import type { SortDir } from "@lib/interfaces/orderByTypes";
-
-export type DaySortField = (typeof DAY_SORT_FIELD)[keyof typeof DAY_SORT_FIELD];
 
 interface DaySortState {
   field: DaySortField | null;

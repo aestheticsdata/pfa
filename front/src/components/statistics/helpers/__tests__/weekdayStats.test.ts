@@ -6,7 +6,7 @@ import {
 } from "@components/statistics/helpers/weekdayStats";
 import { describe, expect, it } from "vitest";
 
-import type { WeekdayStat } from "@components/statistics/helpers/weekdayStats";
+import type { WeekdayStat } from "@components/statistics/interfaces/weekdayStatsTypes";
 import type { DailyStat } from "@src/schemas/stats";
 
 const day = (date: string, total: number, count: number): DailyStat => ({ date, total, count });

@@ -5,6 +5,13 @@
 import { DATE_FORMAT } from "@components/spendings/config/constants";
 import { addDays, format, isAfter, parseISO, startOfWeek, subMonths, subYears } from "date-fns";
 
+import type {
+  SearchTimelineBucketSize,
+  SearchTimelineRange,
+  TimelinePoint,
+  TimelineTick,
+  TimelineWindow,
+} from "@components/statistics/interfaces/searchTimelineTypes";
 import type { SearchTimelineBucket } from "@src/schemas/stats";
 import type { Locale } from "date-fns/locale";
 
@@ -15,10 +22,8 @@ export const SEARCH_TIMELINE_RANGE_VALUES = [
   SEARCH_TIMELINE_RANGE.year,
   SEARCH_TIMELINE_RANGE.threeYears,
 ] as const;
-export type SearchTimelineRange = (typeof SEARCH_TIMELINE_RANGE_VALUES)[number];
 
 export const SEARCH_TIMELINE_BUCKET = { day: "day", week: "week" } as const;
-export type SearchTimelineBucketSize = (typeof SEARCH_TIMELINE_BUCKET)[keyof typeof SEARCH_TIMELINE_BUCKET];
 
 interface SearchTimelineRangeConfig {
   /** Bucket granularity requested from the API (1 bar = 1 day / 1 week). */
@@ -41,7 +46,7 @@ export const SEARCH_TIMELINE_RANGES: Record<SearchTimelineRange, SearchTimelineR
  * snap `from` back to the Sunday of its week so the API's Sunday-keyed buckets
  * tile the window exactly.
  */
-export const searchTimelineWindow = (range: SearchTimelineRange, today: Date): { from: string; to: string } => {
+export const searchTimelineWindow = (range: SearchTimelineRange, today: Date): TimelineWindow => {
   const spanStart =
     range === SEARCH_TIMELINE_RANGE.month
       ? addDays(subMonths(today, 1), 1)
@@ -53,13 +58,6 @@ export const searchTimelineWindow = (range: SearchTimelineRange, today: Date): {
   return { from: format(from, DATE_FORMAT), to: format(today, DATE_FORMAT) };
 };
 
-export interface TimelinePoint {
-  /** ISO day of the bucket start. */
-  date: string;
-  total: number;
-  count: number;
-}
-
 /**
  * Materializes the sparse API buckets into a dense series over [from, to] —
  * one point per day, or per Sunday-keyed week — zero-filling the gaps the
@@ -67,8 +65,7 @@ export interface TimelinePoint {
  */
 export const fillTimeline = (
   buckets: SearchTimelineBucket[],
-  from: string,
-  to: string,
+  { from, to }: TimelineWindow,
   bucket: SearchTimelineBucketSize,
 ): TimelinePoint[] => {
   const byDate = new Map(buckets.map((b) => [b.date, b]));
@@ -105,12 +102,6 @@ export const rollingCounts = (points: TimelinePoint[], windowBuckets: number): n
   }
   return counts;
 };
-
-export interface TimelineTick {
-  /** Bucket index the label sits under. */
-  index: number;
-  label: string;
-}
 
 /**
  * Sparse x-axis labels, one strategy per range: 1 mois → every 7th day
