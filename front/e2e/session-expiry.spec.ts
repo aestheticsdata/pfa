@@ -6,9 +6,16 @@ const ERROR_BOUNDARY = "Something went wrong";
 
 // An expired session must land on /login, never on the error page (COS-26): the
 // request layer turns the API's 401 into a redirect and leaves the query pending.
-// Runs in its own project, after every other test (see playwright.config.ts): it
-// destroys the session they all share.
+// The test signs in a session of its own and destroys that one: the API keeps one
+// session per device (PFA-256), so the session the other tests share is untouched.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test("an expired session sends the user to the login page", async ({ page }) => {
+  const signIn = await page.request.post(`${API}/users`, {
+    data: { email: process.env.E2E_EMAIL ?? "local.dev@mock.io", password: process.env.E2E_PASSWORD },
+  });
+  expect(signIn.ok()).toBeTruthy();
+
   await page.goto("/dashboard");
   await expect(page.getByRole("heading", { name: "Plafond hebdomadaire" })).toBeVisible();
   await page.waitForLoadState("networkidle");

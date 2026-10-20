@@ -4,6 +4,15 @@ import { createClient, type RedisClientType } from "redis";
 import type { SessionCounts } from "@redis/interfaces/redisTypes";
 
 const SESSION_PREFIX = "pfa:";
+/**
+ * Outside `pfa:` on purpose: that prefix is the session store's keyspace, which the metrics
+ * count walks and expects to hold sessions only.
+ */
+const USER_SESSIONS_PREFIX = "pfa-user-sessions:";
+
+function userSessionsKey(userId: string): string {
+  return `${USER_SESSIONS_PREFIX}${userId}`;
+}
 
 @Injectable()
 export class RedisService implements OnModuleInit, OnModuleDestroy {
@@ -34,24 +43,37 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   /**
-   * Removes all sessions for a given user in Redis.
-   * Ensures only one active session per user (called before creating new session on login).
+   * Indexes a freshly signed-in session under its user (PFA-256): a user keeps one session per
+   * device, and this set is what lets them all be revoked at once without walking the keyspace.
+   * Entries whose session has since expired are dropped first, so the set stays as small as the
+   * user's live devices.
    */
-  async clearSessionsForUser(userId: string): Promise<void> {
-    const keys = await this.client.keys(`${SESSION_PREFIX}*`);
-    for (const key of keys) {
-      try {
-        const value = await this.client.get(key);
-        if (value) {
-          const session = JSON.parse(value) as { userId?: string };
-          if (session.userId === userId) {
-            await this.client.del(key);
-          }
-        }
-      } catch {
-        // Skip malformed entries
+  async trackSession(userId: string, sessionId: string): Promise<void> {
+    const key = userSessionsKey(userId);
+    const tracked = await this.client.sMembers(key);
+    if (tracked.length > 0) {
+      const alive = await Promise.all(tracked.map((id) => this.client.exists(`${SESSION_PREFIX}${id}`)));
+      const expired = tracked.filter((_, index) => alive[index] === 0);
+      if (expired.length > 0) {
+        await this.client.sRem(key, expired);
       }
     }
+    await this.client.sAdd(key, sessionId);
+  }
+
+  /** Drops one session from its user's index, on logout. */
+  async untrackSession(userId: string, sessionId: string): Promise<void> {
+    await this.client.sRem(userSessionsKey(userId), sessionId);
+  }
+
+  /**
+   * Revokes every session of a user — all devices — through the per-user index (PFA-256).
+   * Used when a bot account is disabled or purged; nothing calls it on sign-in any more.
+   */
+  async clearSessionsForUser(userId: string): Promise<void> {
+    const key = userSessionsKey(userId);
+    const tracked = await this.client.sMembers(key);
+    await this.client.del([...tracked.map((id) => `${SESSION_PREFIX}${id}`), key]);
   }
 
   /**

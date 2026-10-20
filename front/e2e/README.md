@@ -30,9 +30,9 @@ reuses them (`reuseExistingServer: true`). Otherwise it starts both itself.
   see it disappear. Self-cleaning: an `afterEach` sweep removes any leftover `E2E …`-labelled
   spendings via the API even when the test fails midway.
 - `session-expiry.spec.ts` — the session is destroyed server-side under an open page; the next
-  navigation lands on `/login`, never on the error page (COS-26). Its own `session` project runs it
-  after every other test: the API keeps one session per user, so destroying it (or logging in
-  again) would log the rest of the suite out. `clearCookies()` does not simulate an expiry: the
+  navigation lands on `/login`, never on the error page (COS-26). It signs in a session of its own
+  and destroys that one: the API keeps one session per device (PFA-256), so the session the rest of
+  the suite shares is untouched. `clearCookies()` does not simulate an expiry: the
   session is rolling, and any response in flight sets the cookie again.
 - `edit-spending.spec.ts` — editing a spending's amount updates its row and, without a reload,
   the dashboard's monthly totals: cross-module cache invalidation (PFA-253).

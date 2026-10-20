@@ -33,16 +33,8 @@ export default defineConfig({
     // Authenticated pages, reusing the saved session.
     {
       name: "chromium",
-      testIgnore: [/auth\.setup\.ts/, /public\.spec\.ts/, /session-expiry\.spec\.ts/],
+      testIgnore: [/auth\.setup\.ts/, /public\.spec\.ts/],
       dependencies: ["setup"],
-      use: { ...devices["Desktop Chrome"], storageState: AUTH_STATE },
-    },
-    // Last, on its own: it destroys the session, and the API keeps one session per user —
-    // every test of "chromium" shares that session, so this must not run alongside them.
-    {
-      name: "session",
-      testMatch: /session-expiry\.spec\.ts/,
-      dependencies: ["chromium"],
       use: { ...devices["Desktop Chrome"], storageState: AUTH_STATE },
     },
   ],
