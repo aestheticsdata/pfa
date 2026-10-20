@@ -1,3 +1,4 @@
+import { OVERSPEND_LEVEL } from "@components/spendings/config/constants";
 import { OVERSPEND_DANGER_RATIO } from "@components/spendings/helpers/overspendLevel";
 
 import type { OverspendLevel } from "@components/spendings/helpers/overspendLevel";
@@ -29,12 +30,18 @@ export function bulletSegments(value: number, dayBudget: number, scaleMax: numbe
   const dangerFrac = scaleFrac(dangerBudget, scaleMax);
   const valueFrac = scaleFrac(value, scaleMax);
 
-  const segments: BulletSegment[] = [{ level: "normal", start: 0, width: Math.min(valueFrac, budgetFrac) }];
+  const segments: BulletSegment[] = [
+    { level: OVERSPEND_LEVEL.normal, start: 0, width: Math.min(valueFrac, budgetFrac) },
+  ];
   if (value > dayBudget) {
-    segments.push({ level: "warn", start: budgetFrac, width: Math.min(valueFrac, dangerFrac) - budgetFrac });
+    segments.push({
+      level: OVERSPEND_LEVEL.warn,
+      start: budgetFrac,
+      width: Math.min(valueFrac, dangerFrac) - budgetFrac,
+    });
   }
   if (value > dangerBudget) {
-    segments.push({ level: "danger", start: dangerFrac, width: valueFrac - dangerFrac });
+    segments.push({ level: OVERSPEND_LEVEL.danger, start: dangerFrac, width: valueFrac - dangerFrac });
   }
   return segments;
 }

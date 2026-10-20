@@ -1,6 +1,7 @@
 "use client";
 
 import { angleFromCenter, annularSectorPath, wedgePath } from "@lib/dataviz/arcPaths";
+import { DONUT_VARIANT } from "@lib/dataviz/constants";
 import { cn } from "@lib/utils";
 import { useId, useState } from "react";
 
@@ -13,7 +14,7 @@ interface DonutProps {
   size?: number;
   /** Ring stroke width in viewBox units (ring variant only). */
   thickness?: number;
-  variant?: "ring" | "pie";
+  variant?: (typeof DONUT_VARIANT)[keyof typeof DONUT_VARIANT];
   /** Gap between wedges in degrees (pie variant). */
   gap?: number;
   /** Round the ring segment ends. */
@@ -80,7 +81,7 @@ const Donut = ({
   segments,
   size = 160,
   thickness = 14,
-  variant = "ring",
+  variant = DONUT_VARIANT.ring,
   gap = 0,
   rounded = false,
   animate = false,
@@ -99,7 +100,7 @@ const Donut = ({
   // Gauge full-scale denominator (ring): segments + the leftover "available" band,
   // so a segment's angular share = value / ringTotal — the same fraction the arc
   // is drawn with, and what the hover hit-test maps the cursor angle against.
-  const isRing = variant !== "pie";
+  const isRing = variant !== DONUT_VARIANT.pie;
   const leftover = isRing && capacity != null ? Math.max(0, capacity - segmentsTotal) : 0;
   const ringTotal = segmentsTotal + leftover || 1;
   // Stable prefix for the reveal-mask id (unique across mounted Donuts).
@@ -161,7 +162,7 @@ const Donut = ({
 
   // cumulative geometry computed imperatively (no reassignment inside JSX)
   let body: ReactNode;
-  if (variant === "pie") {
+  if (variant === DONUT_VARIANT.pie) {
     const r = 50;
     const total = segmentsTotal || 1;
     const wedges: { d: string; color: string }[] = [];

@@ -1,3 +1,5 @@
+import { itemTypeSchema } from "@src/schemas/primitives";
+
 import type { ShareReceiptInput } from "@components/spendings/interfaces/spendingGroupTypes";
 
 // Multipart body of POST /spendings/upload — shared by the row's InvoiceModal
@@ -14,14 +16,14 @@ export const buildInvoiceUploadFormData = (target: InvoiceUploadTarget, file: Fi
   const formData = new FormData();
 
   switch (target.itemType) {
-    case "recurring":
-      formData.append("itemType", "recurring");
+    case itemTypeSchema.enum.recurring:
+      formData.append("itemType", itemTypeSchema.enum.recurring);
       if (target.dateFrom) {
         formData.append("dateFrom", target.dateFrom);
       }
       break;
-    case "spending":
-      formData.append("itemType", "spending");
+    case itemTypeSchema.enum.spending:
+      formData.append("itemType", itemTypeSchema.enum.spending);
       if (target.date) {
         formData.append("date", target.date);
       }
@@ -44,7 +46,7 @@ export const buildInvoiceUploadFormData = (target: InvoiceUploadTarget, file: Fi
 export const buildSharedReceiptFormData = ({ spendingIDs, file, label, date }: ShareReceiptInput): FormData => {
   const formData = new FormData();
   formData.append("spendingIDs", JSON.stringify(spendingIDs));
-  formData.append("itemType", "spending");
+  formData.append("itemType", itemTypeSchema.enum.spending);
   formData.append("date", date);
   formData.append("label", label);
   formData.append("invoiceImageUpload", file);

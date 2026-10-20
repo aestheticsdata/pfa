@@ -19,6 +19,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { CategoryTooltipContent, CategoryTrend, categoriesToSegments, StackedBar } from "@lib/dataviz";
+import { ProjectionSourceSchema } from "@src/schemas/dashboard";
 import { format } from "date-fns";
 import { useState } from "react";
 
@@ -145,7 +146,7 @@ const CategoryBreakdown = () => {
           </div>
           {/* Named only when a row actually carries a projection, so the card
               never explains a figure it is not showing. */}
-          <ProjectionBasisCaption source={remainders.size > 0 ? source : "none"} />
+          <ProjectionBasisCaption source={remainders.size > 0 ? source : ProjectionSourceSchema.enum.none} />
         </>
       ) : (
         <EmptyState className="py-10">{t.empty}</EmptyState>

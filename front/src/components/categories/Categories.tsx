@@ -3,6 +3,7 @@
 import { useAuth } from "@auth/context/AuthContext";
 import CategoryFormModal from "@components/categories/CategoryFormModal";
 import CategoryItem from "@components/categories/CategoryItem";
+import { CATEGORY_FORM_MODE } from "@components/categories/config/constants";
 import useCategoryStats from "@components/categories/services/useCategoryStats";
 import Spinner from "@components/common/Spinner";
 import useGlobalStore from "@components/shared/globalStore";
@@ -151,7 +152,7 @@ const Categories = () => {
       <CategoryFormModal
         open={createOpen}
         onOpenChange={setCreateOpen}
-        mode="create"
+        mode={CATEGORY_FORM_MODE.create}
         takenNames={allCats.map((c) => c.name.toLowerCase())}
         onSubmit={handleCreate}
       />

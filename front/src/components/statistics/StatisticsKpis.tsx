@@ -2,6 +2,7 @@
 
 import GlowCard from "@components/shared/GlowCard";
 import { Overline } from "@components/shared/Overline";
+import { KPI_ROW_HOVER, KPI_ROW_KIND, KPI_TITLE_VARIANT } from "@components/statistics/config/constants";
 import {
   biggestExceptional,
   exceptionalMonthly,
@@ -27,6 +28,10 @@ import { useState } from "react";
 
 import type { ExceptionalItem } from "@src/schemas/exceptionals";
 import type { BiggestRegularExpense, StatisticsResponse } from "@src/schemas/stats";
+
+type KpiRowKind = (typeof KPI_ROW_KIND)[keyof typeof KPI_ROW_KIND];
+type KpiTitleVariant = (typeof KPI_TITLE_VARIANT)[keyof typeof KPI_TITLE_VARIANT];
+type KpiRowHover = (typeof KPI_ROW_HOVER)[keyof typeof KPI_ROW_HOVER];
 
 interface StatisticsKpisProps {
   statistics: StatisticsResponse | undefined;
@@ -95,7 +100,7 @@ const CmpRow = ({
   tag,
   kind,
   title,
-  titleVariant = "month",
+  titleVariant = KPI_TITLE_VARIANT.month,
   amount,
   regWidth,
   excWidth,
@@ -103,9 +108,9 @@ const CmpRow = ({
   barTooltip,
 }: {
   tag: string;
-  kind: "exc" | "reg";
+  kind: KpiRowKind;
   title: string;
-  titleVariant?: "month" | "expense";
+  titleVariant?: KpiTitleVariant;
   amount: number;
   regWidth: number;
   excWidth: number;
@@ -115,14 +120,14 @@ const CmpRow = ({
   barTooltip?: React.ReactNode;
 }) => {
   const { euro0 } = useFormat();
-  const rowTip = useCursorHover<"title" | "bar">();
+  const rowTip = useCursorHover<KpiRowHover>();
   return (
     <div className="flex flex-col gap-1.5">
       <div className="flex items-baseline gap-2">
         <span
           className={cn(
             "num shrink-0 rounded-xs px-1.5 py-0.5 text-3xs font-semibold uppercase tracking-wider",
-            kind === "exc" ? "bg-exc-bg text-exc" : "bg-accent-bg text-accent-strong",
+            kind === KPI_ROW_KIND.exc ? "bg-exc-bg text-exc" : "bg-accent-bg text-accent-strong",
           )}
         >
           {tag}
@@ -130,11 +135,13 @@ const CmpRow = ({
         <span
           className={cn(
             "truncate",
-            titleVariant === "month" ? "text-2xs uppercase tracking-caps text-ink-3" : "text-sm text-ink-2",
+            titleVariant === KPI_TITLE_VARIANT.month
+              ? "text-2xs uppercase tracking-caps text-ink-3"
+              : "text-sm text-ink-2",
           )}
           role="img"
           aria-label={title}
-          onMouseMove={titleTooltip ? rowTip.move("title") : undefined}
+          onMouseMove={titleTooltip ? rowTip.move(KPI_ROW_HOVER.title) : undefined}
           onMouseLeave={titleTooltip ? rowTip.clear : undefined}
         >
           {title}
@@ -145,7 +152,7 @@ const CmpRow = ({
         className="flex h-2 overflow-hidden rounded-xs bg-surface-hi"
         role="img"
         aria-label={tag}
-        onMouseMove={barTooltip ? rowTip.move("bar") : undefined}
+        onMouseMove={barTooltip ? rowTip.move(KPI_ROW_HOVER.bar) : undefined}
         onMouseLeave={barTooltip ? rowTip.clear : undefined}
       >
         <span
@@ -161,7 +168,7 @@ const CmpRow = ({
         mode="cursor"
         point={rowTip.hover}
       >
-        {rowTip.hover ? (rowTip.hover.data === "title" ? titleTooltip : barTooltip) : null}
+        {rowTip.hover ? (rowTip.hover.data === KPI_ROW_HOVER.title ? titleTooltip : barTooltip) : null}
       </Tooltip>
     </div>
   );
@@ -297,7 +304,7 @@ const StatisticsKpis = ({
           {showExceptionals && excYearTotal > 0 && (
             <CmpRow
               tag={t.tag.withExceptional}
-              kind="exc"
+              kind={KPI_ROW_KIND.exc}
               title={cap(monthLabels[totalIdx])}
               amount={totalMonthly[totalIdx]}
               regWidth={regMonthly[totalIdx] / cmpScale}
@@ -307,7 +314,7 @@ const StatisticsKpis = ({
           )}
           <CmpRow
             tag={t.tag.withoutExceptional}
-            kind="reg"
+            kind={KPI_ROW_KIND.reg}
             title={cap(monthLabels[regIdx])}
             amount={regMonthly[regIdx]}
             regWidth={regMonthly[regIdx] / cmpScale}
@@ -321,9 +328,9 @@ const StatisticsKpis = ({
           {showExceptionals && topExc && (
             <CmpRow
               tag={t.tag.exceptional}
-              kind="exc"
+              kind={KPI_ROW_KIND.exc}
               title={cap(topExc.label)}
-              titleVariant="expense"
+              titleVariant={KPI_TITLE_VARIANT.expense}
               amount={Number(topExc.amount)}
               regWidth={0}
               excWidth={Number(topExc.amount) / expenseScale}
@@ -335,9 +342,9 @@ const StatisticsKpis = ({
           )}
           <CmpRow
             tag={t.tag.regular}
-            kind="reg"
+            kind={KPI_ROW_KIND.reg}
             title={regularBiggest.label}
-            titleVariant="expense"
+            titleVariant={KPI_TITLE_VARIANT.expense}
             amount={regularBiggest.amount}
             regWidth={regularBiggest.amount / expenseScale}
             excWidth={0}

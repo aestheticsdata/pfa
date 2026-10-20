@@ -4,6 +4,7 @@ import { DividedStrip } from "@components/shared/DividedStrip";
 import { MoneyAmount } from "@components/shared/MoneyAmount";
 import { Overline } from "@components/shared/Overline";
 import { StatTile } from "@components/shared/StatTile";
+import { OVERSPEND_LEVEL } from "@components/spendings/config/constants";
 import overspendLevel from "@components/spendings/helpers/overspendLevel";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
@@ -68,10 +69,10 @@ const SpendingSummary = ({
   const ceilingLevel = overspendLevel(weekTotal, weeklyCeiling);
   const ceilingSub =
     weeklyCeiling != null && weeklyCeiling > 0 ? (
-      ceilingLevel === "normal" ? (
+      ceilingLevel === OVERSPEND_LEVEL.normal ? (
         <span className="text-accent-strong">{t.underCeiling(Math.round(weeklyCeiling - weekTotal))}</span>
       ) : (
-        <span className={ceilingLevel === "danger" ? "text-neg" : "text-warn"}>
+        <span className={ceilingLevel === OVERSPEND_LEVEL.danger ? "text-neg" : "text-warn"}>
           {t.overCeiling(Math.round(weekTotal - weeklyCeiling))}
         </span>
       )

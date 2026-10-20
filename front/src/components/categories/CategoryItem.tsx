@@ -2,6 +2,7 @@
 
 import { CategoryColorDot } from "@components/categories/CategoryColorDot";
 import CategoryFormModal from "@components/categories/CategoryFormModal";
+import { CATEGORY_FORM_MODE } from "@components/categories/config/constants";
 import ConfirmDeleteDialog from "@components/shared/ConfirmDeleteDialog";
 import GlowCard from "@components/shared/GlowCard";
 import { IconButton } from "@components/shared/IconButton";
@@ -82,7 +83,7 @@ const CategoryItem = ({ category, used, share, takenNames, onSave, onDelete }: C
       <CategoryFormModal
         open={isEditOpen}
         onOpenChange={setIsEditOpen}
-        mode="edit"
+        mode={CATEGORY_FORM_MODE.edit}
         initialName={category.name}
         initialColor={category.color}
         takenNames={takenNames}

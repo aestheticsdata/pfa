@@ -1,5 +1,6 @@
 "use client";
 
+import { TREND_DIRECTION } from "@lib/dataviz/constants";
 import { cn } from "@lib/utils";
 import { ArrowDown, ArrowUp } from "lucide-react";
 
@@ -21,14 +22,14 @@ const CategoryTrend = ({ direction, label, className }: CategoryTrendProps) => (
   <span
     className={cn(
       "num flex items-center justify-end gap-1 text-2xs",
-      direction === "up" && "text-neg",
-      direction === "down" && "text-accent-strong",
-      direction === "flat" && "text-ink-4",
+      direction === TREND_DIRECTION.up && "text-neg",
+      direction === TREND_DIRECTION.down && "text-accent-strong",
+      direction === TREND_DIRECTION.flat && "text-ink-4",
       className,
     )}
   >
-    {direction === "up" && <ArrowUp className="size-2.5" />}
-    {direction === "down" && <ArrowDown className="size-2.5" />}
+    {direction === TREND_DIRECTION.up && <ArrowUp className="size-2.5" />}
+    {direction === TREND_DIRECTION.down && <ArrowDown className="size-2.5" />}
     {label}
   </span>
 );

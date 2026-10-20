@@ -9,6 +9,7 @@ export {
 export { default as BarChart } from "@lib/dataviz/BarChart";
 export { default as CategoryTooltipContent } from "@lib/dataviz/CategoryTooltipContent";
 export { default as CategoryTrend } from "@lib/dataviz/CategoryTrend";
+export { BAR_ORIENTATION, DONUT_VARIANT, TREND_DIRECTION } from "@lib/dataviz/constants";
 export { default as Donut } from "@lib/dataviz/Donut";
 export { default as LineChart } from "@lib/dataviz/LineChart";
 export { default as ProgressTrack } from "@lib/dataviz/ProgressTrack";
