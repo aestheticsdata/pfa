@@ -120,9 +120,7 @@ interface Entry {
 const splitWords = (label: string, stripDiacritics: boolean): string[] => {
   // The token pass flattens case and accents; the surface pass keeps the label
   // as written, so a group can display the brand's own casing ("HM", not "Hm").
-  const base = stripDiacritics
-    ? label.toLowerCase().normalize("NFD").replace(DIACRITICS, "")
-    : label.normalize("NFC");
+  const base = stripDiacritics ? label.toLowerCase().normalize("NFD").replace(DIACRITICS, "") : label.normalize("NFC");
   return base
     .replace(QUANTITIES, " ")
     .replace(NON_WORD, " ")
