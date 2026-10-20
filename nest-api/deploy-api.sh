@@ -295,9 +295,72 @@ check_pnpm_baseline() {
   log "➡️  pnpm baseline — local $local_v / server $remote_v"
 }
 
+# Quality gate (PFA-258): there is no CI, so this is the one place every API change goes through
+# before it reaches ks-b — same shape as front/deploy-front.sh (PFA-238). Runs on the laptop,
+# against the tree about to be uploaded, before anything is touched on the server.
+#
+# Jest needs a recent Node: a shell whose default is older gets `.nvmrc`'s through nvm.
+ensure_gate_node() {
+  local v
+  v=$(node -v 2>/dev/null | sed 's/^v//') || v=""
+  if [ -n "$v" ] && [ "$(printf '%s\n%s\n' "20.12.0" "$v" | sort -V | head -1)" = "20.12.0" ]; then
+    return 0
+  fi
+
+  if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    # nvm's scripts are not written for `set -u`.
+    set +u
+    # shellcheck disable=SC1091
+    . "$HOME/.nvm/nvm.sh"
+    nvm use >/dev/null
+    set -u
+    return 0
+  fi
+
+  echo "❌ ERROR: the quality gate needs Node >= 20.12 (found: ${v:-none}). See nest-api/.nvmrc." >&2
+  exit 1
+}
+
+check_quality_gate() {
+  ensure_gate_node
+  log "➡️  Quality gate — install check, lint, types, unit tests (node $(node -v))"
+
+  pnpm install --frozen-lockfile --prefer-offline >/dev/null || {
+    echo "❌ ERROR: quality gate — local dependencies do not match pnpm-lock.yaml" >&2
+    exit 1
+  }
+  # Specs join the lint scope with PFA-261, which fixes the errors they carry today.
+  pnpm exec eslint "src/**/*.ts" --ignore-pattern "**/*.spec.ts" || {
+    echo "❌ ERROR: quality gate — ESLint failed" >&2
+    exit 1
+  }
+  pnpm exec tsc --noEmit -p tsconfig.json || {
+    echo "❌ ERROR: quality gate — TypeScript errors" >&2
+    exit 1
+  }
+  pnpm exec jest || {
+    echo "❌ ERROR: quality gate — unit tests failed" >&2
+    exit 1
+  }
+
+  # The e2e suite needs the local MySQL (it starts its own Redis): run it when MySQL answers,
+  # say so when it does not rather than failing a deploy from a machine without a database.
+  if (exec 3<>/dev/tcp/127.0.0.1/3306) 2>/dev/null; then
+    pnpm test:e2e || {
+      echo "❌ ERROR: quality gate — e2e tests failed" >&2
+      exit 1
+    }
+  else
+    log "⚠️  Quality gate — local MySQL not reachable, e2e tests skipped"
+  fi
+
+  log "✅ Quality gate passed"
+}
+
 deploy() {
-  check_pnpm_baseline
   cd "$SCRIPT_DIR"
+  check_quality_gate
+  check_pnpm_baseline
 
   ######################################
   # Git metadata for release naming
@@ -565,7 +628,8 @@ fi
 # Nest: install + build (DATABASE_URL needed for prisma generate)
 cd "$NEST_DIR"
 rm -rf node_modules dist
-pnpm install
+# The lockfile is the contract: the server installs exactly what the laptop tested (PFA-258).
+pnpm install --frozen-lockfile
 export DATABASE_URL
 pnpm build
 
