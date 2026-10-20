@@ -1,5 +1,6 @@
 import { groupSpendingsByMonth } from "@components/spendings/search/groupByMonth";
 import { DATE_FNS_LOCALES } from "@i18n/useDateLocale";
+import { describe, expect, it } from "vitest";
 
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 

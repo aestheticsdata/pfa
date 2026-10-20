@@ -1,4 +1,5 @@
 import { MonthlyStatsSchema } from "@src/schemas/dashboard";
+import { describe, expect, it } from "vitest";
 
 /**
  * The /monthlystats contract (COS-179). This query is not in `throwOnError:

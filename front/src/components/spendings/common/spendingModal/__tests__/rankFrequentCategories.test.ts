@@ -1,4 +1,5 @@
 import { rankFrequentCategories } from "@components/spendings/common/spendingModal/rankFrequentCategories";
+import { describe, expect, it } from "vitest";
 
 import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
 import type { CategoryStat } from "@src/schemas/categoryStats";

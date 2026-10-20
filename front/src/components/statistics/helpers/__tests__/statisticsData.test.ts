@@ -5,6 +5,7 @@ import {
   monthlyTotals,
   perCategoryTotals,
 } from "@components/statistics/helpers/statisticsData";
+import { describe, expect, it } from "vitest";
 
 import type { StatisticsResponse } from "@src/schemas/stats";
 

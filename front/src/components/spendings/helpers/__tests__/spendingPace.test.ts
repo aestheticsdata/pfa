@@ -1,4 +1,5 @@
 import { PACE_MIN_DAYS, spendingPaceDelta } from "@components/spendings/helpers/spendingPace";
+import { describe, expect, it } from "vitest";
 
 import type { MonthlyTotal } from "@src/schemas/stats";
 

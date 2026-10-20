@@ -1,4 +1,5 @@
 import { projectedCurrentMonthRemainder, projectedRemainingRegular } from "@components/statistics/helpers/projection";
+import { describe, expect, it } from "vitest";
 
 import type { YearMonthly } from "@components/statistics/helpers/projection";
 

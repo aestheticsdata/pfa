@@ -7,6 +7,7 @@ import {
   SearchTimelineResponseSchema,
   StatisticsResponseSchema,
 } from "@src/schemas/stats";
+import { describe, expect, it } from "vitest";
 
 import type { z } from "zod";
 

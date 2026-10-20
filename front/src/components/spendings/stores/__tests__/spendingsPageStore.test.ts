@@ -1,4 +1,5 @@
 import { createSpendingsPageStore } from "@components/spendings/stores/spendingsPageStore";
+import { describe, expect, it } from "vitest";
 
 const MON = "2026-05-04";
 const TUE = "2026-05-05";

@@ -4,6 +4,7 @@ import {
   projectedOverBudget,
   referenceDayAmount,
 } from "@components/spendings/helpers/endOfMonthProjection";
+import { describe, expect, it } from "vitest";
 
 import type { CategoryDailyTotals, DailyProjection } from "@src/schemas/dashboard";
 

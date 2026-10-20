@@ -4,6 +4,7 @@ import {
   weekdayAverages,
   weekdayInsights,
 } from "@components/statistics/helpers/weekdayStats";
+import { describe, expect, it } from "vitest";
 
 import type { WeekdayStat } from "@components/statistics/helpers/weekdayStats";
 import type { DailyStat } from "@src/schemas/stats";

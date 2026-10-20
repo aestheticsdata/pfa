@@ -1,4 +1,5 @@
 import overspendLevel, { OVERSPEND_DANGER_RATIO } from "@components/spendings/helpers/overspendLevel";
+import { describe, expect, it } from "vitest";
 
 describe("overspendLevel", () => {
   it("is normal when the budget is null or non-positive (no ceiling defined)", () => {

@@ -6,6 +6,7 @@ import {
   sumLines,
   toReceiptLines,
 } from "@components/spendings/receiptLines/receiptLineDrafts";
+import { describe, expect, it } from "vitest";
 
 import type { ReceiptLineDraft } from "@components/spendings/interfaces/receiptLinesTypes";
 

@@ -6,6 +6,7 @@ import {
   timelineTicks,
 } from "@components/statistics/helpers/searchTimelineData";
 import { fr } from "date-fns/locale";
+import { describe, expect, it } from "vitest";
 
 import type { SearchTimelineBucket } from "@src/schemas/stats";
 

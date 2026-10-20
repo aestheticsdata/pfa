@@ -7,6 +7,7 @@ import {
   stackedPillGradient,
   suggestMerge,
 } from "@components/spendings/helpers/dayEntries";
+import { describe, expect, it } from "vitest";
 
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
@@ -25,6 +26,8 @@ const spending = (over: Partial<SpendingItem>): SpendingItem => ({
   groupID: null,
   detail: null,
   groupLabel: null,
+  lineCount: 0,
+  storeName: null,
   ...over,
 });
 
