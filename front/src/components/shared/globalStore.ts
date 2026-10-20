@@ -1,4 +1,3 @@
-import produce from "immer";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
@@ -11,11 +10,7 @@ export const useGlobalStore = create<GlobalStore>()(
   devtools((set) => ({
     isCalendarVisible: false,
     setIsCalendarVisible: (isVisible: boolean) =>
-      set(
-        produce((draft: GlobalStore) => {
-          draft.isCalendarVisible = isVisible;
-        }),
-      ),
+      set((state) => (state.isCalendarVisible === isVisible ? state : { isCalendarVisible: isVisible })),
   })),
 );
 

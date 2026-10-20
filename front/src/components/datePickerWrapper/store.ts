@@ -1,6 +1,5 @@
 import { getWeekDays, getWeekRange } from "@components/datePickerWrapper/helpers";
 import { formatIsoDate } from "@helpers/dateRoute";
-import produce from "immer";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
@@ -57,53 +56,34 @@ const useStore = create<DatePickerWrapperStoreProps>()(
      * a `?date=` param would otherwise compare as two different weeks.
      */
     setWeek: (date: Date) =>
-      set(
-        produce((draft: DatePickerWrapperStoreProps) => {
-          const weekRange = getWeekRange(date);
-          const isSameWeek =
-            draft.from !== null &&
-            draft.to !== null &&
-            formatIsoDate(draft.from) === formatIsoDate(weekRange.from) &&
-            formatIsoDate(draft.to) === formatIsoDate(weekRange.to);
+      set((state) => {
+        const weekRange = getWeekRange(date);
+        const selectedDateIso = formatIsoDate(date);
+        const isSameWeek =
+          state.from !== null &&
+          state.to !== null &&
+          formatIsoDate(state.from) === formatIsoDate(weekRange.from) &&
+          formatIsoDate(state.to) === formatIsoDate(weekRange.to);
 
-          if (!isSameWeek) {
-            draft.from = weekRange.from;
-            draft.to = weekRange.to;
-            draft.range = getWeekDays(weekRange.from, date);
-          }
-          draft.selectedDateIso = formatIsoDate(date);
-        }),
-      ),
-    setFrom: (from: Date) =>
-      set(
-        produce((draft: DatePickerWrapperStoreProps) => {
-          draft.from = from;
-        }),
-      ),
-    setTo: (to: Date) =>
-      set(
-        produce((draft: DatePickerWrapperStoreProps) => {
-          draft.to = to;
-        }),
-      ),
-    setRange: (range: Date[]) =>
-      set(
-        produce((draft: DatePickerWrapperStoreProps) => {
-          draft.range = range;
-        }),
-      ),
+        if (isSameWeek) {
+          return state.selectedDateIso === selectedDateIso ? state : { selectedDateIso };
+        }
+        return {
+          from: weekRange.from,
+          to: weekRange.to,
+          range: getWeekDays(weekRange.from, date),
+          selectedDateIso,
+        };
+      }),
+    // Each setter hands the store back unchanged when the value is already there, so zustand
+    // notifies nobody — what immer's `produce` gave for free before PFA-236.
+    setFrom: (from: Date) => set((state) => (state.from === from ? state : { from })),
+    setTo: (to: Date) => set((state) => (state.to === to ? state : { to })),
+    setRange: (range: Date[]) => set((state) => (state.range === range ? state : { range })),
     setScrollToDayIso: (dateIso: string | null) =>
-      set(
-        produce((draft: DatePickerWrapperStoreProps) => {
-          draft.scrollToDayIso = dateIso;
-        }),
-      ),
+      set((state) => (state.scrollToDayIso === dateIso ? state : { scrollToDayIso: dateIso })),
     setSpotlightSpendingId: (spendingId: string | null) =>
-      set(
-        produce((draft: DatePickerWrapperStoreProps) => {
-          draft.spotlightSpendingId = spendingId;
-        }),
-      ),
+      set((state) => (state.spotlightSpendingId === spendingId ? state : { spotlightSpendingId: spendingId })),
   })),
 );
 

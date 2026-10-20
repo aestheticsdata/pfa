@@ -10,7 +10,6 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "strict": true,
-    "noImplicitAny": false,
     "allowJs": false,
     "noEmit": true,
     "esModuleInterop": true,

@@ -1,10 +1,10 @@
-import orderBy from "lodash/orderBy";
+import { orderBy, SORT_DIR } from "@lib/orderBy";
 import { useState } from "react";
 
 import type { DaySortable } from "@components/spendings/interfaces/spendingGroupTypes";
+import type { SortDir } from "@lib/interfaces/orderByTypes";
 
 export type DaySortField = "label" | "category" | "amount";
-type SortDir = "asc" | "desc";
 
 interface DaySortState {
   field: DaySortField | null;
@@ -16,16 +16,16 @@ const sortSpendings = <T extends DaySortable>(spendings: T[], sort: DaySortState
     return spendings;
   }
   if (sort.field === "label") {
-    return orderBy(spendings, (s) => s.label?.toLowerCase() ?? "", [sort.dir]);
+    return orderBy(spendings, [(s) => s.label?.toLowerCase() ?? ""], [sort.dir]);
   }
   if (sort.field === "category") {
     return orderBy(
       spendings,
       [(s) => (("category" in s ? s.category : "") ?? "").toLowerCase(), (s) => Number(s.amount)],
-      [sort.dir, "desc"],
+      [sort.dir, SORT_DIR.desc],
     );
   }
-  return orderBy(spendings, (s) => Number(s.amount), [sort.dir]);
+  return orderBy(spendings, [(s) => Number(s.amount)], [sort.dir]);
 };
 
 /**
@@ -33,15 +33,15 @@ const sortSpendings = <T extends DaySortable>(spendings: T[], sort: DaySortState
  * Spendings day cards can render the active button + arrow glyph.
  */
 const useDaySort = <T extends DaySortable>(spendings: T[]) => {
-  const [sort, setSort] = useState<DaySortState>({ field: null, dir: "asc" });
+  const [sort, setSort] = useState<DaySortState>({ field: null, dir: SORT_DIR.asc });
 
   const onSort = (field: DaySortField) => {
     setSort((current) => {
       if (current.field !== field) {
         // amount defaults to descending (biggest first), like the design
-        return { field, dir: field === "amount" ? "desc" : "asc" };
+        return { field, dir: field === "amount" ? SORT_DIR.desc : SORT_DIR.asc };
       }
-      return { field, dir: current.dir === "asc" ? "desc" : "asc" };
+      return { field, dir: current.dir === SORT_DIR.asc ? SORT_DIR.desc : SORT_DIR.asc };
     });
   };
 

@@ -47,7 +47,7 @@ export const redactIssuePath = (schema: z.core.$ZodType, path: readonly Property
   let node: z.core.$ZodType | undefined = schema;
 
   for (const segment of path) {
-    const def = node ? defOf(unwrap(node)) : undefined;
+    const def: WalkedDef | undefined = node ? defOf(unwrap(node)) : undefined;
 
     if (def?.type === "object" && typeof segment === "string" && def.shape && segment in def.shape) {
       safe.push(segment);
