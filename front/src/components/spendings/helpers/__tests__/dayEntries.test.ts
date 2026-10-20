@@ -27,6 +27,7 @@ const spending = (over: Partial<SpendingItem>): SpendingItem => ({
   detail: null,
   groupLabel: null,
   lineCount: 0,
+  storeID: null,
   storeName: null,
   ...over,
 });

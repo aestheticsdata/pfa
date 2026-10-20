@@ -69,6 +69,7 @@ const VALID: [z.ZodType, unknown][] = [
         groupID: null,
         detail: null,
         lineCount: 0,
+        storeID: null,
         storeName: null,
       },
     ],
