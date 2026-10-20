@@ -1,40 +1,20 @@
 {
   "buckets": [
     {
-      "date": "2026-09-14",
-      "total": 112.26,
-      "count": 1
-    },
-    {
-      "date": "2026-09-18",
-      "total": 213.08,
-      "count": 1
-    },
-    {
-      "date": "2026-09-25",
-      "total": 132.34,
-      "count": 1
-    },
-    {
-      "date": "2026-09-30",
-      "total": 74.67,
+      "date": "2026-09-28",
+      "total": 39.88,
       "count": 1
     },
     {
       "date": "2026-10-01",
-      "total": 100.26,
+      "total": 155.12,
       "count": 1
-    },
-    {
-      "date": "2026-10-09",
-      "total": 191.51,
-      "count": 2
     }
   ],
   "summary": {
-    "total": 219.72,
-    "count": 7,
-    "firstDate": "2026-09-14",
-    "lastDate": "2026-10-09"
+    "total": 178.63,
+    "count": 2,
+    "firstDate": "2026-09-28",
+    "lastDate": "2026-10-01"
   }
 }

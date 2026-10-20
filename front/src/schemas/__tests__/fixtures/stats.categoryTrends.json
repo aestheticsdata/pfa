@@ -3,87 +3,87 @@
     {
       "category": "Garden",
       "categoryColor": "#1ABC9C",
-      "value": 42.19,
-      "previousValue": 97.18
+      "value": 40.64,
+      "previousValue": 60.06
     },
     {
       "category": "Train pass",
       "categoryColor": "#6DB65B",
-      "value": 20.61,
-      "previousValue": 17.1
+      "value": 37.73,
+      "previousValue": 256.06
     },
     {
       "category": "Stationery",
       "categoryColor": "#F39C12",
-      "value": 146.86,
-      "previousValue": 92.28
+      "value": 286.36,
+      "previousValue": 55.46
     },
     {
       "category": "Gym",
       "categoryColor": "#16A085",
-      "value": 24.65,
-      "previousValue": 170.84
+      "value": 212.45,
+      "previousValue": 295.29
     },
     {
       "category": "Laundry",
       "categoryColor": "#FD79A8",
-      "value": 279.92,
-      "previousValue": 189.84
+      "value": 97.5,
+      "previousValue": 34.82
     },
     {
       "category": "Bookshop",
       "categoryColor": "#E8663D",
-      "value": 294.13,
-      "previousValue": 108.53
+      "value": 211.87,
+      "previousValue": 288.85
     },
     {
       "category": "Market",
       "categoryColor": "#E84393",
-      "value": 37.67,
-      "previousValue": 41.73
+      "value": 148.16,
+      "previousValue": 161.09
     },
     {
       "category": "Museum",
       "categoryColor": "#E74C3C",
-      "value": 3.12,
-      "previousValue": 293.14
+      "value": 154.5,
+      "previousValue": 77.47
     },
     {
       "category": "Pharmacy",
       "categoryColor": "#C0894B",
-      "value": 138.63,
-      "previousValue": 88.68
+      "value": 267.94,
+      "previousValue": 119.46
     },
     {
       "category": "Florist",
       "categoryColor": "#2ECC71",
-      "value": 181.24,
-      "previousValue": 109.84
+      "value": 247.75,
+      "previousValue": 57.44
     },
     {
       "category": "Hardware",
       "categoryColor": "#9B59B6",
-      "value": 190.21,
-      "previousValue": 126.99
+      "value": 8.72,
+      "previousValue": 184
     },
     {
       "category": "Cinema",
       "categoryColor": "#4A90D9",
-      "value": 80.35,
-      "previousValue": 132.72
+      "value": 254.57,
+      "previousValue": 247.29
     },
     {
       "category": "Repair",
       "categoryColor": "#34495E",
-      "value": 255.37,
-      "previousValue": 175.17
+      "value": 11.23,
+      "previousValue": 84.35
     },
     {
       "category": "Toys",
       "categoryColor": "#7F8C8D",
-      "value": 41.19,
-      "previousValue": 91.39
+      "value": 60.16,
+      "previousValue": 154.43
     }
   ],
-  "previousTotal": 219.3
+  "previousTotal": 271.76
 }

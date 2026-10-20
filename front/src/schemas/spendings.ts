@@ -79,6 +79,8 @@ export const RecurringItemSchema = apiObject({
   currency: z.string().nullable(),
   dateFrom: z.string(),
   dateTo: z.string(),
+  // The recurring's receipt, when one was attached from its row (PFA-254).
+  invoicefile: z.string().nullable(),
   itemType: itemTypeSchema,
   label: z.string(),
   userID: z.string(),
