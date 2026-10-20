@@ -11,8 +11,8 @@ import {
 import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { ApiError } from "@helpers/http";
 import type { ExceptionalMutationPayload } from "@src/schemas/exceptionals";
-import type { AxiosError } from "axios";
 
 interface UseExceptionalsOptions {
   year?: number;
@@ -72,7 +72,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     });
   };
 
-  const createExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>({
+  const createExceptional = useMutation<unknown, ApiError, ExceptionalMutationPayload>({
     mutationFn: (payload) => createExceptionalService(payload),
     onSuccess: () => onSuccess(exceptionals.toast.created),
   });
@@ -85,7 +85,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     });
   };
 
-  const updateExceptional = useMutation<unknown, AxiosError, ExceptionalMutationPayload>({
+  const updateExceptional = useMutation<unknown, ApiError, ExceptionalMutationPayload>({
     mutationFn: (payload) => updateExceptionalService(payload),
     onSuccess: () => onSuccess(exceptionals.toast.updated),
   });
@@ -94,7 +94,7 @@ const useExceptionals = ({ year }: UseExceptionalsOptions = {}) => {
     return privateRequest(`/exceptionals/${id}`, { method: "DELETE" });
   };
 
-  const deleteExceptional = useMutation<unknown, AxiosError, { id: string }>({
+  const deleteExceptional = useMutation<unknown, ApiError, { id: string }>({
     mutationFn: ({ id }) => deleteExceptionalService(id),
     onSuccess: () => onSuccess(exceptionals.toast.deleted),
   });

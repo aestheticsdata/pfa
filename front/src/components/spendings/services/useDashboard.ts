@@ -9,13 +9,13 @@ import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { endOfMonth, startOfMonth } from "date-fns";
 
+import type { ApiError } from "@helpers/http";
 import type { DashboardResponse } from "@src/schemas/dashboard";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
-import type { AxiosError } from "axios";
 
 interface UseDashboard {
   get: UseQueryResult<DashboardResponse>;
-  mutation: UseMutationResult<unknown, AxiosError, DashboardMutationVariables>;
+  mutation: UseMutationResult<unknown, ApiError, DashboardMutationVariables>;
   remaining: number;
   monthlyTotal: number;
 }
@@ -79,7 +79,7 @@ const useDashboard = (month?: Date): UseDashboard => {
   const monthlyTotal = Number(totalOfMonth.toFixed(2));
   const remaining = get.data ? Number((get.data.initialAmount - totalOfMonth).toFixed(2)) : 0;
 
-  const mutation = useMutation<unknown, AxiosError, DashboardMutationVariables>({
+  const mutation = useMutation<unknown, ApiError, DashboardMutationVariables>({
     mutationFn: ({ dashboardID, initialAmount }) => {
       if (dashboardID) {
         return updateInitialSalary(dashboardID, initialAmount);

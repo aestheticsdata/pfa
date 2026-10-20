@@ -10,7 +10,7 @@ import { toast } from "sonner";
 
 import type { AuthResponse } from "@auth/interfaces/authTypes";
 import type { LoginValues } from "@components/shared/interfaces/sharedLoginFormTypes";
-import type { AxiosError } from "axios";
+import type { ApiError } from "@helpers/http";
 
 const useSignupService = () => {
   const { request } = useRequestHelper();
@@ -35,7 +35,7 @@ const useSignupService = () => {
       });
       return parseResponse(AuthResponseSchema, res.data, "/users/add");
     } catch (e) {
-      const status = (e as AxiosError)?.response?.status;
+      const status = (e as ApiError)?.response?.status;
       toast.error(status === 409 ? t.emailAlreadyExists : t.error);
     }
   };

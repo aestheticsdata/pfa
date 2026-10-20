@@ -5,8 +5,8 @@ import { CategoryListSchema, UpdateCategoryPayloadSchema } from "@src/schemas/ca
 import { parseResponse } from "@src/schemas/parseResponse";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { ApiError } from "@helpers/http";
 import type { UpdateCategoryPayload } from "@src/schemas/categories";
-import type { AxiosError } from "axios";
 
 const useCategories = () => {
   const { privateRequest } = useRequestHelper();
@@ -49,7 +49,7 @@ const useCategories = () => {
       data: payload,
     });
   };
-  const updateCategory = useMutation<unknown, AxiosError, UpdateCategoryVariables>({
+  const updateCategory = useMutation<unknown, ApiError, UpdateCategoryVariables>({
     mutationFn: ({ singleCategory: category }) => {
       return updateCategoryService(category);
     },

@@ -18,8 +18,8 @@ import { toast } from "sonner";
 
 import type { SpendingDayGroup, SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { CreateSpendingInput } from "@components/spendings/interfaces/spendingMutationTypes";
+import type { ApiError } from "@helpers/http";
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
-import type { AxiosError } from "axios";
 
 interface DeletableSpending {
   ID: string;
@@ -132,7 +132,7 @@ const useSpendings = () => {
     });
   };
 
-  const createSpending = useMutation<unknown, AxiosError, CreateSpendingInput>({
+  const createSpending = useMutation<unknown, ApiError, CreateSpendingInput>({
     mutationFn: async ({ spendingEdited, receiptFile }) => {
       const response = await createSpendingService(spendingEdited);
       if (receiptFile) {
@@ -186,7 +186,7 @@ const useSpendings = () => {
     });
   };
 
-  const updateSpending = useMutation<unknown, AxiosError, SpendingMutationPayload>({
+  const updateSpending = useMutation<unknown, ApiError, SpendingMutationPayload>({
     mutationFn: (spending) => {
       return updateSpendingService(spending);
     },

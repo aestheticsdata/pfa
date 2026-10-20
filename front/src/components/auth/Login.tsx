@@ -12,7 +12,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import type { LoginValues } from "@components/shared/interfaces/sharedLoginFormTypes";
-import type { AxiosError } from "axios";
+import type { ApiError } from "@helpers/http";
 
 export default function Login() {
   const login = useTranslations("login");
@@ -33,7 +33,7 @@ export default function Login() {
         await setCredentials(result);
       }
     } catch (e) {
-      const status = (e as AxiosError)?.response?.status;
+      const status = (e as ApiError)?.response?.status;
       setServerError(status === 401 ? login.errors.invalidCredentials : login.errors.generic);
     }
   };

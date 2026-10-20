@@ -2,9 +2,9 @@
 
 import { useAuth } from "@auth/context/AuthContext";
 import { ROUTES } from "@components/shared/config/constants";
-import axios from "axios";
+import { isApiError, send } from "@helpers/http";
 
-import type { AxiosRequestConfig, AxiosResponse } from "axios";
+import type { ApiResponse, RequestOptions } from "@helpers/interfaces/httpTypes";
 
 const SAFE_HTTP_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 
@@ -48,18 +48,9 @@ const redirectToLogin = (): boolean => {
 const useRequestHelper = () => {
   const { user, csrfToken, setCsrfToken } = useAuth();
 
-  const request = (url: string, options?: AxiosRequestConfig): Promise<AxiosResponse> => {
-    return axios(getRequestUrl(url), {
-      withCredentials: true,
-      ...options,
-    });
-  };
+  const request = (url: string, options?: RequestOptions): Promise<ApiResponse> => send(getRequestUrl(url), options);
 
-  const privateRequest = async (
-    url: string,
-    options?: AxiosRequestConfig,
-    config?: AxiosRequestConfig,
-  ): Promise<AxiosResponse> => {
+  const privateRequest = async (url: string, options: RequestOptions = {}): Promise<ApiResponse> => {
     if (!user) {
       if (redirectToLogin()) {
         return new Promise<never>(() => {});
@@ -67,39 +58,25 @@ const useRequestHelper = () => {
       throw new Error("User not logged in");
     }
 
-    const method = options?.method ?? "GET";
-    const normalizedMethod = method.toUpperCase();
-    const requestHeaders = {
-      ...(options?.headers ?? {}),
-    };
+    const method = (options.method ?? "GET").toUpperCase();
+    const requestHeaders: Record<string, string> = { ...options.headers };
 
-    if (csrfToken && isUnsafeMethod(normalizedMethod)) {
+    if (csrfToken && isUnsafeMethod(method)) {
       requestHeaders["x-csrf-token"] = csrfToken;
     }
 
-    const axiosInstance = axios.create({
-      withCredentials: true,
-      ...config,
-    });
-
-    const executeRequest = (headers = requestHeaders): Promise<AxiosResponse> =>
-      axiosInstance(getRequestUrl(url), {
-        ...options,
-        method,
-        headers,
-      });
+    const executeRequest = (headers = requestHeaders): Promise<ApiResponse> =>
+      send(getRequestUrl(url), { ...options, method, headers });
 
     try {
       return await executeRequest();
     } catch (error: unknown) {
-      const status = (error as { response?: { status?: number } })?.response?.status;
+      const status = isApiError(error) ? error.response.status : undefined;
 
-      if (status === 403 && isUnsafeMethod(normalizedMethod)) {
+      if (status === 403 && isUnsafeMethod(method)) {
         try {
-          const csrfResponse = await axiosInstance(getRequestUrl("/users/csrf"), {
-            method: "GET",
-          });
-          const refreshedToken = (csrfResponse.data as { csrfToken?: string })?.csrfToken;
+          const csrfResponse = await send(getRequestUrl("/users/csrf"));
+          const refreshedToken = (csrfResponse.data as { csrfToken?: string } | null)?.csrfToken;
           if (refreshedToken) {
             setCsrfToken(refreshedToken);
             return await executeRequest({
