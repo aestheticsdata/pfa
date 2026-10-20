@@ -9,17 +9,13 @@ import { QUERY_KEYS } from "@lib/query/keys";
 import { RecurringMutationPayloadSchema, SpendingMutationPayloadSchema } from "@src/schemas/spendings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { RecurringCopyDates } from "@components/spendings/interfaces/spendingMutationTypes";
 import type { ApiError } from "@helpers/http";
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
 
 interface FormattedMonth {
   start: string;
   end: string;
-}
-
-interface Dates extends FormattedMonth {
-  previousMonthStart: string;
-  previousMonthEnd: string;
 }
 
 interface CreateRecurring {
@@ -64,7 +60,7 @@ const useRecurrings = () => {
     });
   };
 
-  const copyRecurringsService = async (dates: Dates) => {
+  const copyRecurringsService = async (dates: RecurringCopyDates) => {
     return privateRequest(`/recurrings/copy`, {
       method: "POST",
       data: { dates },
@@ -97,7 +93,7 @@ const useRecurrings = () => {
     },
   });
 
-  const copyRecurrings = useMutation<unknown, unknown, Dates>({
+  const copyRecurrings = useMutation<unknown, unknown, RecurringCopyDates>({
     mutationFn: (dates) => {
       return copyRecurringsService(dates);
     },

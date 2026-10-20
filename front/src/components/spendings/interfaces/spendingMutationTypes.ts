@@ -6,3 +6,11 @@ export interface CreateSpendingInput {
   spendingEdited: SpendingMutationPayload;
   receiptFile?: File | null;
 }
+
+// Body of "copy last month's recurrings": the target month's bounds and the previous month's.
+export interface RecurringCopyDates {
+  start: string;
+  end: string;
+  previousMonthStart: string;
+  previousMonthEnd: string;
+}
