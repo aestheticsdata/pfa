@@ -1,3 +1,4 @@
+import { OVERSPEND_LEVEL } from "@components/spendings/config/constants";
 import { OVERSPEND_DANGER_RATIO } from "@components/spendings/helpers/overspendLevel";
 import { bulletSegments, scaleFrac } from "@components/statistics/helpers/weekdayBullet";
 import { describe, expect, it } from "vitest";
@@ -21,36 +22,38 @@ describe("bulletSegments", () => {
   const scaleMax = 400;
 
   it("stays green-only under the budget", () => {
-    expect(bulletSegments(50, budget, scaleMax)).toEqual([{ level: "normal", start: 0, width: 0.125 }]);
+    expect(bulletSegments(50, budget, scaleMax)).toEqual([{ level: OVERSPEND_LEVEL.normal, start: 0, width: 0.125 }]);
   });
 
   it("stays green-only at exactly the budget (boundary is not over)", () => {
-    expect(bulletSegments(budget, budget, scaleMax)).toEqual([{ level: "normal", start: 0, width: 0.25 }]);
+    expect(bulletSegments(budget, budget, scaleMax)).toEqual([
+      { level: OVERSPEND_LEVEL.normal, start: 0, width: 0.25 },
+    ]);
   });
 
   it("adds an orange zone above the budget, green base at full width", () => {
     expect(bulletSegments(150, budget, scaleMax)).toEqual([
-      { level: "normal", start: 0, width: 0.25 },
-      { level: "warn", start: 0.25, width: 0.125 },
+      { level: OVERSPEND_LEVEL.normal, start: 0, width: 0.25 },
+      { level: OVERSPEND_LEVEL.warn, start: 0.25, width: 0.125 },
     ]);
   });
 
   it("caps orange at 2×budget without a red zone at exactly the danger multiple", () => {
     expect(bulletSegments(budget * OVERSPEND_DANGER_RATIO, budget, scaleMax)).toEqual([
-      { level: "normal", start: 0, width: 0.25 },
-      { level: "warn", start: 0.25, width: 0.25 },
+      { level: OVERSPEND_LEVEL.normal, start: 0, width: 0.25 },
+      { level: OVERSPEND_LEVEL.warn, start: 0.25, width: 0.25 },
     ]);
   });
 
   it("adds a red zone past 2×budget, with green and orange at full width", () => {
     expect(bulletSegments(300, budget, scaleMax)).toEqual([
-      { level: "normal", start: 0, width: 0.25 },
-      { level: "warn", start: 0.25, width: 0.25 },
-      { level: "danger", start: 0.5, width: 0.25 },
+      { level: OVERSPEND_LEVEL.normal, start: 0, width: 0.25 },
+      { level: OVERSPEND_LEVEL.warn, start: 0.25, width: 0.25 },
+      { level: OVERSPEND_LEVEL.danger, start: 0.5, width: 0.25 },
     ]);
   });
 
   it("emits an empty green zone for a zero-spend weekday", () => {
-    expect(bulletSegments(0, budget, scaleMax)).toEqual([{ level: "normal", start: 0, width: 0 }]);
+    expect(bulletSegments(0, budget, scaleMax)).toEqual([{ level: OVERSPEND_LEVEL.normal, start: 0, width: 0 }]);
   });
 });

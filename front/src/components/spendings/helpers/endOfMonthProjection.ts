@@ -1,3 +1,4 @@
+import { ProjectionSourceSchema } from "@src/schemas/dashboard";
 import { getDate, getDaysInMonth, isBefore, isSameMonth, startOfMonth } from "date-fns";
 
 import type { CategoryDailyTotals, DailyProjection } from "@src/schemas/dashboard";
@@ -146,9 +147,10 @@ export const endOfMonthProjection = ({
     // Nothing left to project on the last day — the month is its own total.
     if (today >= daysInMonth) return { total: monthlyTotal, remainders: new Map() };
 
-    const source = projection?.source ?? "none";
+    const source = projection?.source ?? ProjectionSourceSchema.enum.none;
     const referenceDaily = projection?.dailyTotals ?? [];
-    if (source === "none" || referenceDaily.length === 0) return { total: null, remainders: new Map() };
+    if (source === ProjectionSourceSchema.enum.none || referenceDaily.length === 0)
+      return { total: null, remainders: new Map() };
 
     const byCategory = projection?.byCategory ?? [];
     if (byCategory.length === 0) {

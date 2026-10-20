@@ -4,6 +4,7 @@ import {
   projectedOverBudget,
   referenceDayAmount,
 } from "@components/spendings/helpers/endOfMonthProjection";
+import { ProjectionSourceSchema } from "@src/schemas/dashboard";
 import { describe, expect, it } from "vitest";
 
 import type { CategoryDailyTotals, DailyProjection } from "@src/schemas/dashboard";
@@ -28,7 +29,7 @@ const actuals = (entries: [string | null, number[]][]): Map<string | null, numbe
 /** A reference month. Unless sliced explicitly, it all sits under one category,
  *  which makes the figure identical to projecting the month as a whole. */
 const reference = (dailyTotals: number[], byCategory?: CategoryDailyTotals[]): DailyProjection => ({
-  source: "sameMonthLastYear",
+  source: ProjectionSourceSchema.enum.sameMonthLastYear,
   referenceMonth: "2025-09-01",
   dailyTotals,
   byCategory: byCategory ?? (dailyTotals.length > 0 ? [slice(GROCERIES, dailyTotals)] : []),
@@ -63,7 +64,7 @@ describe("endOfMonthProjection", () => {
     const result = endOfMonthProjection({
       monthlyTotal: 1750,
       actualsByCategory: actuals([[GROCERIES, [1750]]]),
-      projection: { source: "none", referenceMonth: null, dailyTotals: [], byCategory: [] },
+      projection: { source: ProjectionSourceSchema.enum.none, referenceMonth: null, dailyTotals: [], byCategory: [] },
       monthRef: SEPT_4,
       now: SEPT_4,
     });
@@ -300,7 +301,7 @@ describe("endOfMonthProjection", () => {
       monthlyTotal: 1750,
       actualsByCategory: actuals([[GROCERIES, [40, 30, 50, 30]]]),
       projection: {
-        source: "sameMonthLastYear",
+        source: ProjectionSourceSchema.enum.sameMonthLastYear,
         referenceMonth: "2025-09-01",
         dailyTotals: flat(30, 50),
         byCategory: [],

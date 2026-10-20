@@ -17,6 +17,7 @@ import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
 import { LineChart } from "@lib/dataviz";
+import { ProjectionSourceSchema } from "@src/schemas/dashboard";
 import { format, getDate, getDaysInMonth, isSameMonth, parseISO } from "date-fns";
 
 import type { LinePoint } from "@lib/dataviz";
@@ -62,9 +63,10 @@ const DailySparkline = () => {
   // A reference month shorter than the current one carries its last day's value
   // forward for the overhanging days — `referenceDayAmount` owns that rule, so
   // this curve and the forecast strip's summed figure stay in step (PFA-175).
-  const source: ProjectionSource = projectionData?.source ?? "none";
+  const source: ProjectionSource = projectionData?.source ?? ProjectionSourceSchema.enum.none;
   const refDaily = projectionData?.dailyTotals ?? [];
-  const canProject = isThisMonth && today < daysInMonth && source !== "none" && refDaily.length > 0;
+  const canProject =
+    isThisMonth && today < daysInMonth && source !== ProjectionSourceSchema.enum.none && refDaily.length > 0;
   const projection: LinePoint[] = canProject
     ? [
         { x: today, y: totals[today] ?? 0 },
@@ -74,7 +76,7 @@ const DailySparkline = () => {
         }),
       ]
     : [];
-  const projectionSource: ProjectionSource = canProject ? source : "none";
+  const projectionSource: ProjectionSource = canProject ? source : ProjectionSourceSchema.enum.none;
   const todayY = totals[today] ?? 0;
 
   const ticks = Array.from({ length: 6 }, (_, i) => Math.round(1 + ((daysInMonth - 1) * i) / 5));

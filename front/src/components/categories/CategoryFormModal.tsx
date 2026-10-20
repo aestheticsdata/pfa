@@ -1,5 +1,6 @@
 "use client";
 
+import { CATEGORY_FORM_MODE } from "@components/categories/config/constants";
 import { cssColorToHex, paletteHex } from "@components/categories/helpers/categoryColors";
 import { Overline, overlineClass } from "@components/shared/Overline";
 import { Button } from "@components/ui/button";
@@ -16,7 +17,7 @@ const INPUT =
 interface CategoryFormModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  mode: "create" | "edit";
+  mode: (typeof CATEGORY_FORM_MODE)[keyof typeof CATEGORY_FORM_MODE];
   initialName?: string;
   initialColor?: string;
   /** Lowercased names already taken (excluding the one being edited). */
@@ -67,7 +68,7 @@ const CategoryFormBody = ({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{mode === "create" ? categories.newCategory : form.editTitle}</DialogTitle>
+        <DialogTitle>{mode === CATEGORY_FORM_MODE.create ? categories.newCategory : form.editTitle}</DialogTitle>
       </DialogHeader>
 
       <div className="flex flex-col gap-5">
@@ -146,7 +147,7 @@ const CategoryFormBody = ({
           variant="primary"
           onClick={submit}
         >
-          {mode === "create" ? form.submitCreate : form.submitEdit}
+          {mode === CATEGORY_FORM_MODE.create ? form.submitCreate : form.submitEdit}
         </Button>
       </DialogFooter>
     </>

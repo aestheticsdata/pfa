@@ -44,6 +44,21 @@ export const GROUP_ROW_ACTION = {
   ungroup: "ungroup",
 } as const;
 
+// How far a total is over its budget (COS-34, COS-36): `overspendLevel` produces it, the
+// day cards, weekly ceiling and weekday bars colour by it.
+export const OVERSPEND_LEVEL = {
+  normal: "normal",
+  warn: "warn",
+  danger: "danger",
+} as const;
+
+// The columns a day card can sort its rows on (useDaySort).
+export const DAY_SORT_FIELD = {
+  label: "label",
+  category: "category",
+  amount: "amount",
+} as const;
+
 // The batch dialogs opened from a day card's selection bar (PFA-189, PFA-197).
 export const BATCH_MODAL = {
   merge: "merge",

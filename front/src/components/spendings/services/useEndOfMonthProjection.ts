@@ -3,6 +3,7 @@ import { categoryKey, endOfMonthProjection } from "@components/spendings/helpers
 import useDailyProjection from "@components/spendings/services/useDailyProjection";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useSpendings from "@components/spendings/services/useSpendings";
+import { ProjectionSourceSchema } from "@src/schemas/dashboard";
 import { getDate, getDaysInMonth, isSameMonth, parseISO } from "date-fns";
 
 import type { ProjectionSource } from "@src/schemas/dashboard";
@@ -70,13 +71,13 @@ const useEndOfMonthProjection = (): UseEndOfMonthProjection => {
     now,
   });
 
-  const source = reference?.source ?? "none";
+  const source = reference?.source ?? ProjectionSourceSchema.enum.none;
 
   return {
     projection: total,
     remainders,
     source,
-    noHistory: isSameMonth(monthRef, now) && source === "none",
+    noHistory: isSameMonth(monthRef, now) && source === ProjectionSourceSchema.enum.none,
   };
 };
 

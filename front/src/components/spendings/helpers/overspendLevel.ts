@@ -1,4 +1,6 @@
-export type OverspendLevel = "normal" | "warn" | "danger";
+import { OVERSPEND_LEVEL } from "@components/spendings/config/constants";
+
+export type OverspendLevel = (typeof OVERSPEND_LEVEL)[keyof typeof OVERSPEND_LEVEL];
 
 /**
  * The total turns red only once it exceeds its budget by this factor; between
@@ -22,9 +24,9 @@ export const OVERSPEND_DANGER_RATIO = 2;
  */
 export default function overspendLevel(value: number, budget: number | null): OverspendLevel {
   if (budget == null || budget <= 0 || value <= budget) {
-    return "normal";
+    return OVERSPEND_LEVEL.normal;
   }
-  return value > budget * OVERSPEND_DANGER_RATIO ? "danger" : "warn";
+  return value > budget * OVERSPEND_DANGER_RATIO ? OVERSPEND_LEVEL.danger : OVERSPEND_LEVEL.warn;
 }
 
 /**
@@ -35,4 +37,4 @@ export default function overspendLevel(value: number, budget: number | null): Ov
  * turns into a rainbow.
  */
 export const overspendTextClass = (level: OverspendLevel): string =>
-  level === "warn" ? "text-warn" : level === "danger" ? "text-neg" : "text-ink";
+  level === OVERSPEND_LEVEL.warn ? "text-warn" : level === OVERSPEND_LEVEL.danger ? "text-neg" : "text-ink";

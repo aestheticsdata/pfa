@@ -12,6 +12,7 @@ import {
   fillTimeline,
   rollingCounts,
   rollingWindowBuckets,
+  SEARCH_TIMELINE_BUCKET,
   SEARCH_TIMELINE_RANGE_VALUES,
   SEARCH_TIMELINE_RANGES,
   timelineTicks,
@@ -113,7 +114,7 @@ const StatisticsSearchTimeline = () => {
   const peak = points.reduce((best, p) => (p.total > best.total ? p : best), points[0]);
   const peakLabel =
     hasMatches && peak.total > 0
-      ? (bucket === "day" ? t.peakDay : t.peakWeek)(
+      ? (bucket === SEARCH_TIMELINE_BUCKET.day ? t.peakDay : t.peakWeek)(
           euro(peak.total),
           format(parseISO(peak.date), "d MMM yy", { locale: dateLocale }),
         )
@@ -445,7 +446,7 @@ const StatisticsSearchTimeline = () => {
         {hoveredPoint && (
           <>
             <div className="font-medium capitalize">
-              {bucket === "day"
+              {bucket === SEARCH_TIMELINE_BUCKET.day
                 ? format(parseISO(hoveredPoint.date), "EEE d MMM yyyy", { locale: dateLocale })
                 : t.tooltip.weekOf(format(parseISO(hoveredPoint.date), "d MMM yyyy", { locale: dateLocale }))}
             </div>

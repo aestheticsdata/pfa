@@ -1,4 +1,4 @@
-import { SEARCH_TIMELINE_RANGE_VALUES } from "@components/statistics/helpers/searchTimelineData";
+import { SEARCH_TIMELINE_RANGE, SEARCH_TIMELINE_RANGE_VALUES } from "@components/statistics/helpers/searchTimelineData";
 import { parseAsString, parseAsStringLiteral } from "nuqs";
 
 /**
@@ -10,7 +10,7 @@ import { parseAsString, parseAsStringLiteral } from "nuqs";
  */
 export const searchTimelineParsers = {
   term: parseAsString.withDefault(""),
-  range: parseAsStringLiteral(SEARCH_TIMELINE_RANGE_VALUES).withDefault("year"),
+  range: parseAsStringLiteral(SEARCH_TIMELINE_RANGE_VALUES).withDefault(SEARCH_TIMELINE_RANGE.year),
 };
 
 // Typing must not spam history; each param drops at its default so an untouched

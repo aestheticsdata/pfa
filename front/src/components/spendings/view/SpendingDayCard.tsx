@@ -2,7 +2,7 @@
 
 import { CATEGORY_FALLBACK } from "@components/categories/helpers/categoryColors";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
-import { DAY_ENTRY_KIND } from "@components/spendings/config/constants";
+import { DAY_ENTRY_KIND, DAY_SORT_FIELD, OVERSPEND_LEVEL } from "@components/spendings/config/constants";
 import { buildDayEntries } from "@components/spendings/helpers/dayEntries";
 import overspendLevel from "@components/spendings/helpers/overspendLevel";
 import useSpendingDayItem from "@components/spendings/helpers/useSpendingDayItem";
@@ -177,7 +177,7 @@ const SpendingDayCard = ({
           <div
             className={cn(
               "whitespace-nowrap font-mono text-base font-medium tabular-nums",
-              level === "warn" ? "text-warn" : level === "danger" ? "text-neg" : "text-ink",
+              level === OVERSPEND_LEVEL.warn ? "text-warn" : level === OVERSPEND_LEVEL.danger ? "text-neg" : "text-ink",
             )}
           >
             <span className="mr-2 font-sans text-2xs font-medium tracking-widest text-ink-4">{dayCard.total}</span>
@@ -185,7 +185,11 @@ const SpendingDayCard = ({
             <span
               className={cn(
                 "text-sm font-normal",
-                level === "warn" ? "text-warn/70" : level === "danger" ? "text-neg/70" : "text-ink-3",
+                level === OVERSPEND_LEVEL.warn
+                  ? "text-warn/70"
+                  : level === OVERSPEND_LEVEL.danger
+                    ? "text-neg/70"
+                    : "text-ink-3",
               )}
             >
               {" "}
@@ -195,21 +199,21 @@ const SpendingDayCard = ({
         </div>
         <div className="mt-3.25 flex flex-wrap gap-2">
           <SortButton
-            field="label"
+            field={DAY_SORT_FIELD.label}
             label={sortItem.label}
             activeField={field}
             dir={dir}
             onSort={onSort}
           />
           <SortButton
-            field="category"
+            field={DAY_SORT_FIELD.category}
             label={sortItem.category}
             activeField={field}
             dir={dir}
             onSort={onSort}
           />
           <SortButton
-            field="amount"
+            field={DAY_SORT_FIELD.amount}
             label={sortItem.amount}
             activeField={field}
             dir={dir}

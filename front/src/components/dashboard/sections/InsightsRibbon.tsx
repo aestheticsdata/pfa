@@ -8,7 +8,7 @@
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DividedStrip } from "@components/shared/DividedStrip";
 import { Overline } from "@components/shared/Overline";
-import { MONTHLY } from "@components/spendings/config/constants";
+import { MONTHLY, OVERSPEND_LEVEL } from "@components/spendings/config/constants";
 import { categoryDeltaPct, STABLE_TREND_THRESHOLD } from "@components/spendings/helpers/categoryTrend";
 import dailyRemainingBudget from "@components/spendings/helpers/dailyBudget";
 import { projectedOverBudget } from "@components/spendings/helpers/endOfMonthProjection";
@@ -172,7 +172,12 @@ const InsightsRibbon = () => {
           : remaining < 0
             ? interpolate(t.overspentSentence, {
                 amount: (
-                  <b className={cn("num font-semibold", balanceLevel === "danger" ? "text-neg" : "text-warn")}>
+                  <b
+                    className={cn(
+                      "num font-semibold",
+                      balanceLevel === OVERSPEND_LEVEL.danger ? "text-neg" : "text-warn",
+                    )}
+                  >
                     {euro0(-remaining)} €
                   </b>
                 ),

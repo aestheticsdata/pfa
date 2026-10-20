@@ -2,6 +2,7 @@
 
 import useTranslations from "@i18n/useTranslations";
 import { cn } from "@lib/utils";
+import { ProjectionSourceSchema } from "@src/schemas/dashboard";
 
 import type { ProjectionSource } from "@src/schemas/dashboard";
 
@@ -23,7 +24,7 @@ interface ProjectionBasisCaptionProps {
 const ProjectionBasisCaption = ({ source, className }: ProjectionBasisCaptionProps) => {
   const { projectionBasis } = useTranslations("dashboard");
 
-  if (source === "none") return null;
+  if (source === ProjectionSourceSchema.enum.none) return null;
 
   return <p className={cn("mt-1.5 text-right text-3xs text-ink-4", className)}>{projectionBasis[source]}</p>;
 };

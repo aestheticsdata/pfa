@@ -1,3 +1,5 @@
+import type { TREND_DIRECTION } from "@lib/dataviz/constants";
+
 // pfa data-viz lib — shared data contracts.
 // Generic on purpose ({ label, value, color }) so any consumer can use it, with
 // thin project adapters (see adapters.ts) mapping our API shapes onto these.
@@ -49,7 +51,7 @@ export interface SeriesDot {
 // Interaction contracts — hover state and tooltip data shared by the charts and
 // the app's tooltip in cursor mode (see `@components/ui/tooltip`).
 
-export type TrendDirection = "up" | "down" | "flat";
+export type TrendDirection = (typeof TREND_DIRECTION)[keyof typeof TREND_DIRECTION];
 
 export interface CategoryTrendData {
   direction: TrendDirection;

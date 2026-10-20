@@ -1,12 +1,13 @@
 "use client";
 
+import { BAR_ORIENTATION } from "@lib/dataviz/constants";
 import { cn } from "@lib/utils";
 
 import type { BarDatum } from "@lib/dataviz/interfaces/dataVizTypes";
 
 interface BarChartProps {
   bars: BarDatum[];
-  orientation?: "vertical" | "horizontal";
+  orientation?: (typeof BAR_ORIENTATION)[keyof typeof BAR_ORIENTATION];
   width?: number;
   height?: number;
   /** Domain max; defaults to the largest bar value. */
@@ -37,7 +38,7 @@ const DEFAULT_COLOR = "var(--accent-strong)";
 /** Generic SVG bar graph — vertical (default) or horizontal. */
 const BarChart = ({
   bars,
-  orientation = "vertical",
+  orientation = BAR_ORIENTATION.vertical,
   width = 300,
   height = 160,
   max,
@@ -89,7 +90,7 @@ const BarChart = ({
       {bars.map((b, i) => {
         const frac = Math.max(0, b.value) / domainMax;
         const fill = b.color ?? defaultFill;
-        if (orientation === "horizontal") {
+        if (orientation === BAR_ORIENTATION.horizontal) {
           const band = height / n;
           const barH = band * (1 - gap);
           const y = i * band + (band - barH) / 2;

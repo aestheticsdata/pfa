@@ -1,3 +1,5 @@
+import { TREND_DIRECTION } from "@lib/dataviz/constants";
+
 import type { CategoryTrendData } from "@lib/dataviz";
 
 /** Below this |Δ%|, a category is shown as "stable" rather than up/down. */
@@ -24,9 +26,9 @@ export const categoryTrend = (
   labels: { stable: string; fresh: string },
 ): CategoryTrendData => {
   const delta = categoryDeltaPct(value, previousValue);
-  if (delta === null) return { direction: "flat", label: labels.fresh };
-  if (Math.abs(delta) < STABLE_TREND_THRESHOLD) return { direction: "flat", label: labels.stable };
+  if (delta === null) return { direction: TREND_DIRECTION.flat, label: labels.fresh };
+  if (Math.abs(delta) < STABLE_TREND_THRESHOLD) return { direction: TREND_DIRECTION.flat, label: labels.stable };
   return delta > 0
-    ? { direction: "up", label: `+${Math.round(delta)}%` }
-    : { direction: "down", label: `−${Math.round(Math.abs(delta))}%` };
+    ? { direction: TREND_DIRECTION.up, label: `+${Math.round(delta)}%` }
+    : { direction: TREND_DIRECTION.down, label: `−${Math.round(Math.abs(delta))}%` };
 };
