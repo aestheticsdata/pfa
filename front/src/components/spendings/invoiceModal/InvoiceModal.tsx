@@ -50,6 +50,9 @@ interface InvoiceModalProps {
 const FILE_SIZE_LIMIT = 32_097_152;
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 
+/** The image routes answer with a `data:` URL string, or JSON `null` when there is none. */
+const asImageSource = (data: unknown) => (typeof data === "string" && data !== "" ? data : null);
+
 const InvoiceModal = ({
   handleClickOutside: handleClickOutsideProp,
   spending,
@@ -123,7 +126,9 @@ const InvoiceModal = ({
   };
 
   const uploadInvoiceImage = async (payload: FormData) => {
-    const config = {
+    const options = {
+      method: "POST",
+      data: payload,
       onUploadProgress: (progressEvent: ProgressEvent) => {
         const value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
         setProgressValue(value);
@@ -137,12 +142,12 @@ const InvoiceModal = ({
       setIsProgress(true);
       setIsLoading(true);
       const endpoint = isSharedUpload ? "/spendings/receipts" : "/spendings/upload";
-      const uploadedImage = await privateRequest(endpoint, { method: "POST", data: payload }, config);
+      const uploadedImage = await privateRequest(endpoint, options);
       if (isSharedUpload) {
         // The shared endpoint answers with the stored name, not the image.
         await getInvoiceImage();
       } else {
-        setInvoiceImage(uploadedImage.data);
+        setInvoiceImage(asImageSource(uploadedImage.data));
       }
       clearPending();
       await queryClient.invalidateQueries({
@@ -163,7 +168,7 @@ const InvoiceModal = ({
   const getInvoiceImage = async () => {
     try {
       const res = await privateRequest(`/spendings/upload/${spending.ID}?itemType=${spending.itemType}`);
-      setInvoiceImage(res.data);
+      setInvoiceImage(asImageSource(res.data));
     } catch {
       setInvoiceImage(null);
     } finally {

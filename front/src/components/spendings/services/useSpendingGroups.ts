@@ -15,7 +15,7 @@ import type {
   SpendingGroupLinePayload,
   UpdateSpendingGroupInput,
 } from "@components/spendings/interfaces/spendingGroupTypes";
-import type { AxiosError } from "axios";
+import type { ApiError } from "@helpers/http";
 
 // A line's category goes as the single-spending flow sends it: an existing one
 // by ID, a typed one by name + colour, none at all when left empty.
@@ -50,7 +50,7 @@ const useSpendingGroups = () => {
     }
   };
 
-  const createGroup = useMutation<unknown, AxiosError, CreateSpendingGroupInput>({
+  const createGroup = useMutation<unknown, ApiError, CreateSpendingGroupInput>({
     mutationFn: async ({ date, label, currency, lines, receiptFile }) => {
       const response = await privateRequest("/spendings/groups", {
         method: "POST",
@@ -65,23 +65,23 @@ const useSpendingGroups = () => {
     onSuccess: () => refreshAfterMutation(toasts.groupCreated),
   });
 
-  const updateGroup = useMutation<unknown, AxiosError, UpdateSpendingGroupInput>({
+  const updateGroup = useMutation<unknown, ApiError, UpdateSpendingGroupInput>({
     mutationFn: ({ ID, label, lines }) =>
       privateRequest(`/spendings/groups/${ID}`, { method: "PUT", data: { label, lines: lines.map(toLineBody) } }),
     onSuccess: () => refreshAfterMutation(toasts.groupUpdated),
   });
 
-  const deleteGroup = useMutation<unknown, AxiosError, string>({
+  const deleteGroup = useMutation<unknown, ApiError, string>({
     mutationFn: (groupID) => privateRequest(`/spendings/groups/${groupID}`, { method: "DELETE" }),
     onSuccess: () => refreshAfterMutation(toasts.groupDeleted),
   });
 
-  const ungroup = useMutation<unknown, AxiosError, string>({
+  const ungroup = useMutation<unknown, ApiError, string>({
     mutationFn: (groupID) => privateRequest(`/spendings/groups/${groupID}/ungroup`, { method: "POST" }),
     onSuccess: () => refreshAfterMutation(toasts.ungrouped),
   });
 
-  const mergeGroup = useMutation<string, AxiosError, MergeSpendingGroupInput>({
+  const mergeGroup = useMutation<string, ApiError, MergeSpendingGroupInput>({
     mutationFn: async ({ label, date, lines, receiptFile }) => {
       const response = await privateRequest("/spendings/groups/merge", {
         method: "POST",
@@ -96,7 +96,7 @@ const useSpendingGroups = () => {
     onSuccess: () => refreshAfterMutation(toasts.grouped),
   });
 
-  const shareReceipt = useMutation<unknown, AxiosError, ShareReceiptInput>({
+  const shareReceipt = useMutation<unknown, ApiError, ShareReceiptInput>({
     mutationFn: shareReceiptRequest,
     onSuccess: () => refreshAfterMutation(toasts.receiptShared),
     onError: () => {
@@ -104,7 +104,7 @@ const useSpendingGroups = () => {
     },
   });
 
-  const detachReceipt = useMutation<unknown, AxiosError, string[]>({
+  const detachReceipt = useMutation<unknown, ApiError, string[]>({
     mutationFn: (spendingIDs) =>
       privateRequest("/spendings/receipts/detach", { method: "POST", data: { spendingIDs } }),
     onSuccess: () => refreshAfterMutation(toasts.receiptDetached),

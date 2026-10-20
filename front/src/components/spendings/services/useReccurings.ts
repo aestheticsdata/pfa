@@ -14,8 +14,8 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { startOfMonth } from "date-fns";
 
+import type { ApiError } from "@helpers/http";
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
-import type { AxiosError } from "axios";
 
 interface FormattedMonth {
   start: string;
@@ -98,7 +98,7 @@ const useReccurings = () => {
     });
   };
 
-  const createRecurring = useMutation<unknown, AxiosError, CreateRecurring>({
+  const createRecurring = useMutation<unknown, ApiError, CreateRecurring>({
     mutationFn: ({ spendingEdited, formattedMonth }: CreateRecurring) => {
       return createRecurringService(spendingEdited, formattedMonth);
     },
@@ -114,7 +114,7 @@ const useReccurings = () => {
     });
   };
 
-  const updateRecurring = useMutation<unknown, AxiosError, SpendingMutationPayload>({
+  const updateRecurring = useMutation<unknown, ApiError, SpendingMutationPayload>({
     mutationFn: (recurring) => {
       return updateRecurringService(recurring);
     },
