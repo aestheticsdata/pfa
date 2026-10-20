@@ -16,6 +16,7 @@ import { interpolate } from "@i18n/interpolate";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
+import { isAmountWithinLimit } from "@lib/amountExpression";
 import { CategoryTooltipContent, Donut, useCountUp } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import { format, isSameMonth } from "date-fns";
@@ -180,7 +181,7 @@ const BudgetHero = () => {
                           if (e.key === "Escape") setEditing(false);
                         }}
                         autoFocus
-                        {...register("initialAmount")}
+                        {...register("initialAmount", { validate: isAmountWithinLimit })}
                       />
                       {" €"}
                     </>

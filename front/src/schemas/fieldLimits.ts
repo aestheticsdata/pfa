@@ -40,3 +40,9 @@ export const FIELD_LIMITS = {
   /** `Users.email`. */
   email: 250,
 } as const;
+
+/**
+ * Largest amount a money column holds: every one is a `DECIMAL(10, 2)` (PFA-259).
+ * Mirrors `nest-api/src/config/amount-limits.ts`.
+ */
+export const MAX_AMOUNT = 99_999_999.99;

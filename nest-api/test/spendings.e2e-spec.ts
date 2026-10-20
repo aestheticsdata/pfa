@@ -128,17 +128,11 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should return 400 when from is missing", () => {
-      return agent
-        .get("/api/spendings")
-        .query({ to: "2030-12-31" })
-        .expect(400);
+      return agent.get("/api/spendings").query({ to: "2030-12-31" }).expect(400);
     });
 
     it("should return 400 when to is missing", () => {
-      return agent
-        .get("/api/spendings")
-        .query({ from: "2020-01-01" })
-        .expect(400);
+      return agent.get("/api/spendings").query({ from: "2020-01-01" }).expect(400);
     });
   });
 
@@ -156,10 +150,7 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await agent
-        .get("/api/spendings")
-        .query({ from: "2020-01-01", to: "2030-12-31" })
-;
+      const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const spendings = listRes.body as SpendingItem[];
       const found = spendings.find((s) => s.label === "e2e-upload-test");
       uploadSpendingID = found!.ID;
@@ -180,11 +171,7 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should be retrievable via GET /upload/:id after upload", async () => {
-      const res = await agent
-        .get(`/api/spendings/upload/${uploadSpendingID}`)
-        .query({ itemType: "spending" })
-;
-
+      const res = await agent.get(`/api/spendings/upload/${uploadSpendingID}`).query({ itemType: "spending" });
       expect(res.status).toBe(200);
       const body = res.text ?? (Buffer.isBuffer(res.body) ? res.body.toString() : String(res.body));
       expect(body).toMatch(/^data:image\/\w+;base64,/);
@@ -232,19 +219,12 @@ describe("SpendingsController (e2e)", () => {
 
   describe("GET /api/spendings/upload/:id", () => {
     it("should return 200 with null when spending has no invoice", async () => {
-      const listRes = await agent
-        .get("/api/spendings")
-        .query({ from: "2020-01-01", to: "2030-12-31" })
-;
+      const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const spendings = listRes.body as SpendingItem[];
       const withoutInvoice = spendings.find((s) => s.label === "e2e-spending-no-category");
       const spendingID = withoutInvoice?.ID ?? "00000000-0000-0000-0000-000000000000";
 
-      const res = await agent
-        .get(`/api/spendings/upload/${spendingID}`)
-        .query({ itemType: "spending" })
-;
-
+      const res = await agent.get(`/api/spendings/upload/${spendingID}`).query({ itemType: "spending" });
       expect(res.status).toBe(200);
     });
 
@@ -264,9 +244,7 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should return 400 when itemType is missing", () => {
-      return agent
-        .get("/api/spendings/upload/00000000-0000-0000-0000-000000000000")
-        .expect(400);
+      return agent.get("/api/spendings/upload/00000000-0000-0000-0000-000000000000").expect(400);
     });
   });
 
@@ -286,10 +264,7 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await agent
-        .get("/api/spendings")
-        .query({ from: "2020-01-01", to: "2030-12-31" })
-;
+      const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const created = (listRes.body as SpendingItem[]).find((s) => s.label === deleteInvoiceLabel);
       spendingID = created!.ID;
 
@@ -302,10 +277,7 @@ describe("SpendingsController (e2e)", () => {
         .attach("invoiceImageUpload", FIXTURE_IMAGE)
         .expect(200);
 
-      const updatedListRes = await agent
-        .get("/api/spendings")
-        .query({ from: "2020-01-01", to: "2030-12-31" })
-;
+      const updatedListRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const updated = (updatedListRes.body as SpendingItem[]).find((s) => s.ID === spendingID);
       if (!updated?.invoicefile) {
         throw new Error("Expected invoicefile to be set after upload");
@@ -383,10 +355,7 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await agent
-        .get("/api/spendings")
-        .query({ from: "2020-01-01", to: "2030-12-31" })
-        .expect(200);
+      const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" }).expect(200);
       const spendings = listRes.body as SpendingItem[];
       const seeded = spendings.find((s) => s.label === seedLabel);
       if (!seeded?.categoryID) {
@@ -406,6 +375,22 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201)
         .expect(assertSuccess);
+    });
+
+    // PFA-259: amounts of 10,000 and more used to overflow DECIMAL(6, 2) and come back as a 500.
+    it("accepts an amount of 12,000", () => {
+      return agent
+        .post("/api/spendings")
+        .send({ date: todayISO(), label: "e2e-spending-large-amount", amount: 12000, currency: "EUR" })
+        .expect(201)
+        .expect(assertSuccess);
+    });
+
+    it("refuses an amount beyond the column with a 400, never a 500", () => {
+      return agent
+        .post("/api/spendings")
+        .send({ date: todayISO(), label: "e2e-spending-huge-amount", amount: 1e9, currency: "EUR" })
+        .expect(400);
     });
 
     it("should create spending with new category", () => {
@@ -479,31 +464,19 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should return 400 when date is missing", () => {
-      return agent
-        .post("/api/spendings")
-        .send({ label: "test", amount: 10, currency: "EUR" })
-        .expect(400);
+      return agent.post("/api/spendings").send({ label: "test", amount: 10, currency: "EUR" }).expect(400);
     });
 
     it("should return 400 when label is missing", () => {
-      return agent
-        .post("/api/spendings")
-        .send({ date: todayISO(), amount: 10, currency: "EUR" })
-        .expect(400);
+      return agent.post("/api/spendings").send({ date: todayISO(), amount: 10, currency: "EUR" }).expect(400);
     });
 
     it("should return 400 when amount is missing", () => {
-      return agent
-        .post("/api/spendings")
-        .send({ date: todayISO(), label: "test", currency: "EUR" })
-        .expect(400);
+      return agent.post("/api/spendings").send({ date: todayISO(), label: "test", currency: "EUR" }).expect(400);
     });
 
     it("should return 400 when currency is missing", () => {
-      return agent
-        .post("/api/spendings")
-        .send({ date: todayISO(), label: "test", amount: 10 })
-        .expect(400);
+      return agent.post("/api/spendings").send({ date: todayISO(), label: "test", amount: 10 }).expect(400);
     });
   });
 
@@ -521,10 +494,7 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await agent
-        .get("/api/spendings")
-        .query({ from: "2020-01-01", to: "2030-12-31" })
-;
+      const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const found = (listRes.body as SpendingItem[]).find((s) => s.label === "e2e-update-test");
       updateSpendingID = found!.ID;
     }, 15000);
@@ -590,10 +560,7 @@ describe("SpendingsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await agent
-        .get("/api/spendings")
-        .query({ from: "2020-01-01", to: "2030-12-31" })
-;
+      const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const found = (listRes.body as SpendingItem[]).find((s) => s.label === "e2e-delete-test");
       deleteSpendingID = found!.ID;
     }, 15000);
@@ -608,15 +575,11 @@ describe("SpendingsController (e2e)", () => {
     });
 
     it("should return 404 when deleting already deleted spending", () => {
-      return agent
-        .delete(`/api/spendings/${deleteSpendingID}`)
-        .expect(404);
+      return agent.delete(`/api/spendings/${deleteSpendingID}`).expect(404);
     });
 
     it("should return 404 for non-existent spending", () => {
-      return agent
-        .delete("/api/spendings/00000000-0000-0000-0000-000000000000")
-        .expect(404);
+      return agent.delete("/api/spendings/00000000-0000-0000-0000-000000000000").expect(404);
     });
 
     it("should return 401 without session cookie", () => {

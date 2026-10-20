@@ -1,4 +1,5 @@
 import { SPENDING_MODAL_MODE } from "@components/spendings/config/constants";
+import { isAmountWithinLimit } from "@lib/amountExpression";
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import { z } from "zod";
 
@@ -19,7 +20,9 @@ export const makeSpendingSchema = (
     spendingLabel: z.string().min(1, validation.labelRequired).max(labelMax, common.tooLong(labelMax)),
     // Deliberately a string, not a number (COS-109): the field accepts an
     // arithmetic expression ("12+3"), evaluated on submit by @lib/amountExpression.
-    spendingAmount: isGroup ? z.string() : z.string().min(1, validation.amountRequired),
+    spendingAmount: isGroup
+      ? z.string()
+      : z.string().min(1, validation.amountRequired).refine(isAmountWithinLimit, common.amountTooLarge),
     spendingDate: z.string().optional(),
   });
 };

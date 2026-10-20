@@ -1,5 +1,6 @@
-import { IsNumber, IsOptional, IsPositive, IsString, MaxLength, ValidateNested } from "class-validator";
+import { IsNumber, IsOptional, IsPositive, IsString, Max, MaxLength, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
+import { MAX_AMOUNT } from "@config/amount-limits";
 import { FIELD_LIMITS } from "@config/field-limits";
 import { CreateSpendingCategoryDto } from "@spendings/dto/create-spending-category.dto";
 
@@ -17,6 +18,7 @@ export class SpendingGroupLineDto {
 
   @IsNumber()
   @IsPositive()
+  @Max(MAX_AMOUNT)
   @Type(() => Number)
   amount: number;
 

@@ -1,3 +1,4 @@
+import { isAmountWithinLimit } from "@lib/amountExpression";
 import { FIELD_LIMITS } from "@src/schemas/fieldLimits";
 import { z } from "zod";
 
@@ -11,7 +12,7 @@ export const makeExceptionalSchema = (
     label: z.string().min(1, errors.labelRequired).max(FIELD_LIMITS.label, common.tooLong(FIELD_LIMITS.label)),
     // As in the spending modal, a string on purpose: it holds a Mexp expression,
     // evaluated on submit by @lib/amountExpression (COS-109).
-    amount: z.string().min(1, errors.amountRequired),
+    amount: z.string().min(1, errors.amountRequired).refine(isAmountWithinLimit, common.amountTooLarge),
     date: z.string().min(1, errors.dateRequired),
     description: z.string().max(FIELD_LIMITS.description, common.tooLong(FIELD_LIMITS.description)).optional(),
   });

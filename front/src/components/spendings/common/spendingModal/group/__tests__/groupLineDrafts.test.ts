@@ -22,6 +22,9 @@ describe("draftAmount", () => {
     ["0", null],
     ["-4", null],
     ["abc", null],
+    // PFA-259: beyond the DECIMAL(10, 2) money columns.
+    ["12000", 12000],
+    ["100000000", null],
   ])("%s → %s", (amount, expected) => {
     expect(draftAmount({ ...emptyDraft(), amount })).toBe(expected);
   });
