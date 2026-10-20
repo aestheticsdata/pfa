@@ -1,54 +1,32 @@
-import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_FORMAT, MONTHLY } from "@components/spendings/config/constants";
-import { QUERY_KEYS } from "@lib/query/keys";
+import { categoryTrendsQuery } from "@components/spendings/services/queries";
 import useRequestHelper from "@src/helpers/useRequestHelper";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { CategoryTrendsResponseSchema } from "@src/schemas/stats";
 import { useQuery } from "@tanstack/react-query";
 import { endOfMonth, format, startOfMonth, subDays, subMonths } from "date-fns";
 
 import type { PeriodType } from "@components/spendings/interfaces/periodTypes";
-import type { CategoryTrendPoint } from "@src/schemas/stats";
-
-// A user category and a global one can share a name; merge those rows by name —
-// summing both period totals — then sort by current amount desc, mirroring
-// useCharts' old aggregateByCategory but carrying the comparison-period value.
-// `previousValue` stays null (a "new" category) only when every merged row was.
-const aggregateByCategory = (items: CategoryTrendPoint[]): CategoryTrendPoint[] => {
-  const map = new Map<string, CategoryTrendPoint>();
-  for (const item of items) {
-    const key = item.category ?? "__uncategorized__";
-    const existing = map.get(key);
-    if (existing) {
-      existing.value += item.value;
-      if (item.previousValue !== null) {
-        existing.previousValue = (existing.previousValue ?? 0) + item.previousValue;
-      }
-    } else {
-      map.set(key, { ...item });
-    }
-  }
-  return Array.from(map.values()).sort((a, b) => b.value - a.value);
-};
+import type { CategoryTrendsWindows, DateBounds } from "@components/spendings/interfaces/spendingQueryTypes";
 
 // The current period plus the one it is compared against, per period type. The
 // front owns this math (server-timezone-agnostic): monthly = the selected month
 // vs the one before it (dashboard, COS-41); weekly = the picked range vs the 7
 // days before it (Spendings, COS-35).
-const windows = (periodType: PeriodType, from?: Date | null, to?: Date | null) => {
+const bounds = (from: Date, to: Date): DateBounds => ({ from: format(from, DATE_FORMAT), to: format(to, DATE_FORMAT) });
+
+const windows = (periodType: PeriodType, from?: Date | null, to?: Date | null): CategoryTrendsWindows | null => {
   if (periodType === MONTHLY) {
     if (!from) return null;
     const previousMonth = subMonths(from, 1);
     return {
-      current: { from: startOfMonth(from), to: endOfMonth(from) },
-      previous: { from: startOfMonth(previousMonth), to: endOfMonth(previousMonth) },
+      current: bounds(startOfMonth(from), endOfMonth(from)),
+      previous: bounds(startOfMonth(previousMonth), endOfMonth(previousMonth)),
     };
   }
   if (!from || !to) return null;
   return {
-    current: { from, to },
-    previous: { from: subDays(from, 7), to: subDays(to, 7) },
+    current: bounds(from, to),
+    previous: bounds(subDays(from, 7), subDays(to, 7)),
   };
 };
 
@@ -65,31 +43,7 @@ const useCategoryTrends = (periodType: PeriodType) => {
   const { privateRequest } = useRequestHelper();
   const from = useDatePickerWrapperStore((state) => state.from);
   const to = useDatePickerWrapperStore((state) => state.to);
-  const { user } = useAuth();
-  const userID = user?.id;
-  const range = windows(periodType, from, to);
-
-  const getCategoryTrends = async (): Promise<{ trends: CategoryTrendPoint[]; previousTotal: number }> => {
-    if (!range || !userID) return { trends: [], previousTotal: 0 };
-    const { current, previous } = range;
-    // userID is read from the session (@GetUserId()) server-side, not the query.
-    const query = new URLSearchParams({
-      from: format(current.from, DATE_FORMAT),
-      to: format(current.to, DATE_FORMAT),
-      prevFrom: format(previous.from, DATE_FORMAT),
-      prevTo: format(previous.to, DATE_FORMAT),
-    });
-    const response = await privateRequest(`/category-trends?${query}`);
-    const parsed = parseResponse(CategoryTrendsResponseSchema, response.data, "/category-trends");
-    return { trends: aggregateByCategory(parsed.trends), previousTotal: parsed.previousTotal };
-  };
-
-  return useQuery({
-    queryKey: [QUERY_KEYS.CATEGORY_TRENDS, range?.current.from, range?.current.to],
-    queryFn: getCategoryTrends,
-    retry: false,
-    enabled: !!range && !!userID,
-  });
+  return useQuery(categoryTrendsQuery(privateRequest, windows(periodType, from, to)));
 };
 
 export default useCategoryTrends;

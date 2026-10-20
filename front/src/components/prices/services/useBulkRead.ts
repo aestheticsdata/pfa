@@ -1,9 +1,9 @@
+import { bulkReadStatusQuery, nextProposalQuery } from "@components/prices/services/queries";
 import { RECEIPT_LINES_MODE } from "@components/spendings/config/constants";
 import useReceiptLinesStore from "@components/spendings/stores/receiptLinesStore";
 import useRequestHelper from "@helpers/useRequestHelper";
-import { QUERY_KEYS } from "@lib/query/keys";
 import { parseResponse } from "@src/schemas/parseResponse";
-import { BulkReadStatusSchema, PendingProposalSchema } from "@src/schemas/receiptLines";
+import { BulkReadStatusSchema } from "@src/schemas/receiptLines";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // While receipts are being read, the progress is polled this often.
@@ -21,14 +21,8 @@ const useBulkRead = () => {
   const open = useReceiptLinesStore((state) => state.open);
   const close = useReceiptLinesStore((state) => state.close);
 
-  const fetchStatus = async () => {
-    const response = await privateRequest(ENDPOINT);
-    return parseResponse(BulkReadStatusSchema, response.data, ENDPOINT);
-  };
-
   const status = useQuery({
-    queryKey: [QUERY_KEYS.RECEIPT_PROPOSALS],
-    queryFn: fetchStatus,
+    ...bulkReadStatusQuery(privateRequest),
     refetchInterval: (query) => ((query.state.data?.queued ?? 0) > 0 ? POLL_MS : false),
   });
 
@@ -37,21 +31,14 @@ const useBulkRead = () => {
       const response = await privateRequest(ENDPOINT, { method: "POST" });
       return parseResponse(BulkReadStatusSchema, response.data, ENDPOINT);
     },
-    onSuccess: (started) => queryClient.setQueryData([QUERY_KEYS.RECEIPT_PROPOSALS], started),
+    onSuccess: (started) => queryClient.setQueryData(bulkReadStatusQuery(privateRequest).queryKey, started),
   });
 
   /** Opens the next read receipt in the review modal, or ends the queue. */
   const reviewNext = async () => {
     const [next, progress] = await Promise.all([
-      queryClient.fetchQuery({
-        queryKey: [QUERY_KEYS.RECEIPT_PROPOSAL_NEXT],
-        queryFn: async () => {
-          const response = await privateRequest(`${ENDPOINT}/next`);
-          return parseResponse(PendingProposalSchema, response.data, `${ENDPOINT}/next`);
-        },
-        staleTime: 0,
-      }),
-      queryClient.fetchQuery({ queryKey: [QUERY_KEYS.RECEIPT_PROPOSALS], queryFn: fetchStatus, staleTime: 0 }),
+      queryClient.fetchQuery({ ...nextProposalQuery(privateRequest), staleTime: 0 }),
+      queryClient.fetchQuery({ ...bulkReadStatusQuery(privateRequest), staleTime: 0 }),
     ]);
     if (!next) {
       close();

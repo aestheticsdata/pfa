@@ -1,8 +1,8 @@
-import { useAuth } from "@auth/context/AuthContext";
+import { categoriesQuery } from "@components/spendings/services/queries";
 import useRequestHelper from "@helpers/useRequestHelper";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
-import { CategoryListSchema, UpdateCategoryPayloadSchema } from "@src/schemas/categories";
-import { parseResponse } from "@src/schemas/parseResponse";
+import { UpdateCategoryPayloadSchema } from "@src/schemas/categories";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { ApiError } from "@helpers/http";
@@ -10,37 +10,20 @@ import type { UpdateCategoryPayload } from "@src/schemas/categories";
 
 const useCategories = () => {
   const { privateRequest } = useRequestHelper();
-  const { user } = useAuth();
-  const userID = user?.id;
   const queryClient = useQueryClient();
   type UpdateCategoryVariables = { singleCategory: UpdateCategoryPayload };
   type DeleteCategoryVariables = { categoryID: string };
 
   const invalidation = async () => {
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.CATEGORIES],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.CATEGORY_STATS],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.CATEGORY_TRENDS],
-    });
+    await invalidateFamilies(queryClient, [
+      QUERY_KEYS.CATEGORIES,
+      QUERY_KEYS.CATEGORY_STATS,
+      QUERY_KEYS.SPENDINGS_BY_MONTH,
+      QUERY_KEYS.CATEGORY_TRENDS,
+    ]);
   };
 
-  const getCategoriesService = async () => {
-    const response = await privateRequest(`/categories`);
-    return parseResponse(CategoryListSchema, response.data, "/categories");
-  };
-  const { data: categories } = useQuery({
-    queryKey: [QUERY_KEYS.CATEGORIES],
-    queryFn: getCategoriesService,
-    retry: 2, // Retry 2 fois en cas d'erreur
-    enabled: !!userID,
-  });
+  const { data: categories } = useQuery(categoriesQuery(privateRequest));
 
   const updateCategoryService = async (category: UpdateCategoryPayload) => {
     const payload = UpdateCategoryPayloadSchema.parse(category);

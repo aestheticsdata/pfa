@@ -4,6 +4,9 @@ export interface ApiResponse<Data = unknown> {
   status: number;
 }
 
+/** `privateRequest` as a value (PFA-253): what a query factory is handed to fetch with. */
+export type PrivateRequest = (url: string, options?: RequestOptions) => Promise<ApiResponse>;
+
 /** The request as callers describe it (PFA-243): plain-object or FormData `data`, extra headers. */
 export interface RequestOptions {
   method?: string;

@@ -12,6 +12,9 @@ export const formatIsoDate = (date: Date): string => formatISO(date, { represent
 
 export const getTodayIsoDate = (): string => formatIsoDate(new Date());
 
+/** The 1st of `date`'s month as yyyy-MM-dd — the month key of every month-scoped query (PFA-253). */
+export const monthStartIso = (date: Date | null): string | null => (date ? formatIsoDate(startOfMonth(date)) : null);
+
 export const isValidIsoDate = (value?: string): value is string => {
   if (!value || !ISO_DATE_PATTERN.test(value)) {
     return false;

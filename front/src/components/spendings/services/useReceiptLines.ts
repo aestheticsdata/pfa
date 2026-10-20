@@ -1,12 +1,10 @@
+import { receiptLinesQuery, receiptOcrQuery } from "@components/spendings/services/queries";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { parseResponse } from "@src/schemas/parseResponse";
-import {
-  ReceiptLinesResponseSchema,
-  ReceiptProposalSchema,
-  SaveReceiptLinesPayloadSchema,
-} from "@src/schemas/receiptLines";
+import { ReceiptLinesResponseSchema, SaveReceiptLinesPayloadSchema } from "@src/schemas/receiptLines";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -29,29 +27,11 @@ const useReceiptLines = (spendingID: string, queries: ReceiptLinesQueries) => {
   const queryClient = useQueryClient();
   const endpoint = `/spendings/${spendingID}/lines`;
 
-  const saved = useQuery({
-    queryKey: [QUERY_KEYS.RECEIPT_LINES, spendingID],
-    queryFn: async () => {
-      const response = await privateRequest(endpoint);
-      return parseResponse(ReceiptLinesResponseSchema, response.data, endpoint);
-    },
-    enabled: queries.withSaved,
-  });
+  const saved = useQuery({ ...receiptLinesQuery(privateRequest, spendingID), enabled: queries.withSaved });
 
   // A POST, but read like a query: one OCR run per opening, never cached
   // past it, never retried behind the user's back.
-  const proposal = useQuery({
-    queryKey: [QUERY_KEYS.RECEIPT_OCR, spendingID],
-    queryFn: async () => {
-      const response = await privateRequest(`${endpoint}/ocr`, { method: "POST" });
-      return parseResponse(ReceiptProposalSchema, response.data, `${endpoint}/ocr`);
-    },
-    enabled: queries.withProposal,
-    gcTime: 0,
-    staleTime: Number.POSITIVE_INFINITY,
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
+  const proposal = useQuery({ ...receiptOcrQuery(privateRequest, spendingID), enabled: queries.withProposal });
 
   const save = useMutation({
     mutationFn: async (receipt: SavedReceipt) => {
@@ -61,17 +41,19 @@ const useReceiptLines = (spendingID: string, queries: ReceiptLinesQueries) => {
     },
     onSuccess: async (receipt) => {
       toast.success(t.saved);
-      queryClient.setQueryData([QUERY_KEYS.RECEIPT_LINES, spendingID], receipt);
-      // A store or a type typed for the first time joins its list (PFA-218, PFA-219).
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.STORES] });
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRODUCT_TYPES] });
-      // New lines change the price comparison (PFA-220).
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.PRICES] });
-      // A saved receipt leaves the bulk-read queue (PFA-223).
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.RECEIPT_PROPOSALS] });
-      // The rows' line mark and store come with the spendings.
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH] });
-      await queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.SPENDINGS_SEARCH] });
+      queryClient.setQueryData(receiptLinesQuery(privateRequest, spendingID).queryKey, receipt);
+      await invalidateFamilies(queryClient, [
+        // A store or a type typed for the first time joins its list (PFA-218, PFA-219).
+        QUERY_KEYS.STORES,
+        QUERY_KEYS.PRODUCT_TYPES,
+        // New lines change the price comparison (PFA-220).
+        QUERY_KEYS.PRICES,
+        // A saved receipt leaves the bulk-read queue (PFA-223).
+        QUERY_KEYS.RECEIPT_PROPOSALS,
+        // The rows' line mark and store come with the spendings.
+        QUERY_KEYS.SPENDINGS_BY_MONTH,
+        QUERY_KEYS.SPENDINGS_SEARCH,
+      ]);
     },
     onError: () => toast.error(t.saveFailed),
   });

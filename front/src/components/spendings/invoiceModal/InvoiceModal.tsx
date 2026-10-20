@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@components/ui
 import useRequestHelper from "@helpers/useRequestHelper";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
 import { cn } from "@lib/utils";
 import { itemTypeSchema } from "@src/schemas/primitives";
@@ -114,9 +115,7 @@ const InvoiceModal = ({
       });
       if ((res as { data?: { msg?: string } })?.data?.msg === "INVOICE_IMAGE_DELETED") {
         setInvoiceImage(null);
-        await queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
-        });
+        await invalidateFamilies(queryClient, [QUERY_KEYS.SPENDINGS_BY_MONTH]);
         setIsLoading(false);
       }
     } catch {
@@ -150,9 +149,7 @@ const InvoiceModal = ({
         setInvoiceImage(asImageSource(uploadedImage.data));
       }
       clearPending();
-      await queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.SPENDINGS_BY_MONTH],
-      });
+      await invalidateFamilies(queryClient, [QUERY_KEYS.SPENDINGS_BY_MONTH]);
       setIsLoading(false);
       // Reading the lines stays the user's call: no OCR on upload (PFA-226).
     } catch (e) {

@@ -1,14 +1,11 @@
 import { SEARCH_MIN_LENGTH } from "@components/spendings/config/constants";
 import { SEARCH_TIMELINE_RANGES, searchTimelineWindow } from "@components/statistics/helpers/searchTimelineData";
-import { QUERY_KEYS } from "@lib/query/keys";
+import { searchTimelineQuery } from "@components/statistics/services/queries";
 import useRequestHelper from "@src/helpers/useRequestHelper";
-import { parseResponse } from "@src/schemas/parseResponse";
-import { SearchTimelineResponseSchema } from "@src/schemas/stats";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
 import type { SearchTimelineRange } from "@components/statistics/interfaces/searchTimelineTypes";
-import type { SearchTimelineResponse } from "@src/schemas/stats";
 
 /**
  * Aggregated time distribution of the spendings matching a term (COS-160) —
@@ -28,20 +25,10 @@ const useStatisticsSearchTimeline = (query: string, range: SearchTimelineRange) 
   const { bucket } = SEARCH_TIMELINE_RANGES[range];
   const { from, to } = searchTimelineWindow(range, today);
 
-  const getSearchTimeline = async (): Promise<SearchTimelineResponse> => {
-    const response = await privateRequest(
-      `/search-timeline?q=${encodeURIComponent(trimmed)}&from=${from}&to=${to}&bucket=${bucket}`,
-    );
-    return parseResponse(SearchTimelineResponseSchema, response.data, "/search-timeline");
-  };
-
   const { data, isPending, error } = useQuery({
-    queryKey: [QUERY_KEYS.SEARCH_TIMELINE, trimmed, range, from, to],
-    queryFn: getSearchTimeline,
+    ...searchTimelineQuery(privateRequest, { query: trimmed, from, to, bucket }),
     enabled,
-    retry: false,
     placeholderData: keepPreviousData,
-    throwOnError: false,
   });
 
   return {

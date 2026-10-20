@@ -1,18 +1,13 @@
-import { useAuth } from "@auth/context/AuthContext";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
-import { formatIsoDate } from "@helpers/dateRoute";
+import { recurringsQuery } from "@components/spendings/services/queries";
+import { monthStartIso } from "@helpers/dateRoute";
 import { displayPopup } from "@helpers/displayPopup";
 import useRequestHelper from "@helpers/useRequestHelper";
 import useTranslations from "@i18n/useTranslations";
+import { invalidateFamilies } from "@lib/query/invalidate";
 import { QUERY_KEYS } from "@lib/query/keys";
-import { parseResponse } from "@src/schemas/parseResponse";
-import {
-  RecurringListSchema,
-  RecurringMutationPayloadSchema,
-  SpendingMutationPayloadSchema,
-} from "@src/schemas/spendings";
+import { RecurringMutationPayloadSchema, SpendingMutationPayloadSchema } from "@src/schemas/spendings";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { startOfMonth } from "date-fns";
 
 import type { ApiError } from "@helpers/http";
 import type { SpendingMutationPayload } from "@src/schemas/spendings";
@@ -34,37 +29,15 @@ interface CreateRecurring {
 
 const useRecurrings = () => {
   const { privateRequest } = useRequestHelper();
-  const { user } = useAuth();
-  const userID = user?.id;
   const from = useDatePickerWrapperStore((state) => state.from);
-  const monthBeginning = from ? startOfMonth(from) : null;
   const spendingsText = useTranslations("spendings");
 
   const recurringsActionOnSuccess = async (message: string) => {
     displayPopup({ text: message });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.RECURRINGS, monthBeginning],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.DASHBOARD, monthBeginning],
-    });
-    await queryClient.invalidateQueries({
-      queryKey: [QUERY_KEYS.MONTHLY_STATS, monthBeginning],
-    });
+    await invalidateFamilies(queryClient, [QUERY_KEYS.RECURRINGS, QUERY_KEYS.DASHBOARD, QUERY_KEYS.MONTHLY_STATS]);
   };
 
-  const getRecurrings = async () => {
-    if (!monthBeginning) throw new Error("No month selected");
-    const response = await privateRequest(`/recurrings?start=${formatIsoDate(monthBeginning)}`);
-    return parseResponse(RecurringListSchema, response.data, "/recurrings");
-  };
-
-  const { data, isPending } = useQuery({
-    queryKey: [QUERY_KEYS.RECURRINGS, monthBeginning],
-    queryFn: getRecurrings,
-    retry: false,
-    enabled: !!from && !!userID,
-  });
+  const { data, isPending } = useQuery(recurringsQuery(privateRequest, monthStartIso(from)));
 
   const queryClient = useQueryClient();
 
