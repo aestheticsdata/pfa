@@ -12,6 +12,7 @@ import { Input } from "@components/ui/input";
 import { buildSpendingsPath, formatIsoDate } from "@helpers/dateRoute";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
+import { isAmountWithinLimit } from "@lib/amountExpression";
 import { ProgressTrack } from "@lib/dataviz";
 import { cn } from "@lib/utils";
 import { format, getDate, isAfter, isBefore, startOfMonth } from "date-fns";
@@ -116,7 +117,7 @@ const WeeklyCeiling = () => {
                   if (e.key === "Escape") setEditing(false);
                 }}
                 autoFocus
-                {...register("initialCeiling")}
+                {...register("initialCeiling", { validate: isAmountWithinLimit })}
               />
             </form>
           )

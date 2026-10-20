@@ -24,9 +24,9 @@ model Dashboards {
   ID             String   @id @db.Char(36)
   dateFrom       DateTime @db.Date
   dateTo         DateTime @db.Date
-  initialAmount  Decimal  @db.Decimal(6, 2)
+  initialAmount  Decimal  @db.Decimal(10, 2)
   userID         String   @db.Char(36)
-  initialCeiling Decimal? @db.Decimal(6, 2)
+  initialCeiling Decimal? @db.Decimal(10, 2)
 
   @@index([userID, dateFrom])
 }
@@ -38,7 +38,7 @@ model Recurrings {
   dateTo      DateTime    @db.Date
   itemType    String      @db.VarChar(11)
   label       String      @db.VarChar(100)
-  amount      Decimal     @db.Decimal(6, 2)
+  amount      Decimal     @db.Decimal(10, 2)
   currency    String?     @db.VarChar(3)
   invoicefile String?     @db.VarChar(255)
   categoryID  String?     @db.Char(36)
@@ -55,7 +55,7 @@ model Spendings {
   date            DateTime          @db.Date
   itemType        String            @db.VarChar(11)
   label           String            @db.VarChar(100)
-  amount          Decimal           @db.Decimal(6, 2)
+  amount          Decimal           @db.Decimal(10, 2)
   categoryID      String?           @db.Char(36)
   currency        String?           @db.VarChar(3)
   invoicefile     String?           @db.VarChar(255)
@@ -89,7 +89,7 @@ model ReceiptLines {
   spendingID    String        @db.Char(36)
   position      Int
   label         String        @db.VarChar(100)
-  amount        Decimal       @db.Decimal(6, 2)
+  amount        Decimal       @db.Decimal(10, 2)
   // What a unit price needs (PFA-219): how many were bought, and the size of
   // one (1 L, 250 g; null when sold by the piece). A weighed item is one item
   // of its weight.

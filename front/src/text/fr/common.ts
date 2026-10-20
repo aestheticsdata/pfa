@@ -37,6 +37,8 @@ const common = {
   validation: {
     /** Shared by every bounded text field — the bound comes from its DB column (COS-180). */
     tooLong: (max: number) => `${max} caractères maximum`,
+    /** Every amount field — the bound is the money columns' (PFA-259). */
+    amountTooLarge: "Montant trop élevé",
   },
   loading: "Chargement…",
   searchPlaceholder: "Rechercher…",

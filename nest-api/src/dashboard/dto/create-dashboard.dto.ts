@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString, Max, Min } from "class-validator";
 import { Type } from "class-transformer";
+import { MAX_AMOUNT } from "@config/amount-limits";
 
 export class CreateDashboardDto {
   @IsString()
@@ -11,6 +12,8 @@ export class CreateDashboardDto {
   end: string;
 
   @IsNumber()
+  @Min(-MAX_AMOUNT)
+  @Max(MAX_AMOUNT)
   @Type(() => Number)
   amount: number;
 }

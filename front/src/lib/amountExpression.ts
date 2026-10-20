@@ -1,3 +1,4 @@
+import { MAX_AMOUNT } from "@src/schemas/fieldLimits";
 import Mexp from "math-expression-evaluator";
 
 // The amount fields of the spending and exceptional modals accept an arithmetic
@@ -22,6 +23,15 @@ const evaluateAmountExpression = (input: string): number | null => {
   }
 
   return Number.isNaN(result) ? null : result;
+};
+
+/**
+ * Whether a typed amount fits the money columns (PFA-259). An expression that does
+ * not evaluate passes: the submit already aborts on it.
+ */
+export const isAmountWithinLimit = (input: string): boolean => {
+  const value = evaluateAmountExpression(input);
+  return value === null || Math.abs(value) <= MAX_AMOUNT;
 };
 
 export default evaluateAmountExpression;

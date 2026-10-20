@@ -37,6 +37,8 @@ const common: typeof frCommon = {
   },
   validation: {
     tooLong: (max: number) => `${max} characters max`,
+    /** Every amount field — the bound is the money columns' (PFA-259). */
+    amountTooLarge: "Amount too large",
   },
   loading: "Loading…",
   searchPlaceholder: "Search…",

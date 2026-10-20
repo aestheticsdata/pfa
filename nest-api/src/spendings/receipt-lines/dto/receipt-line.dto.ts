@@ -1,11 +1,10 @@
 import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 import { Type } from "class-transformer";
+import { MAX_AMOUNT } from "@config/amount-limits";
 import { FIELD_LIMITS } from "@config/field-limits";
 import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
 import type { SizeUnit } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 
-// `ReceiptLines.amount` is a Decimal(6, 2); a discount line is negative.
-const MAX_LINE_AMOUNT = 9999.99;
 // `quantity` and `size` are Decimal(8, 3).
 const MAX_MEASURE = 99999.999;
 const MIN_MEASURE = 0.001;
@@ -17,9 +16,10 @@ export class ReceiptLineDto {
   @MaxLength(FIELD_LIMITS.receiptLineLabel)
   label: string;
 
+  // A discount line is negative.
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(-MAX_LINE_AMOUNT)
-  @Max(MAX_LINE_AMOUNT)
+  @Min(-MAX_AMOUNT)
+  @Max(MAX_AMOUNT)
   @Type(() => Number)
   amount: number;
 

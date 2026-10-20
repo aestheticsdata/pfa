@@ -1,4 +1,5 @@
 import evaluateAmountExpression from "@lib/amountExpression";
+import { MAX_AMOUNT } from "@src/schemas/fieldLimits";
 
 import type { CategoryOption } from "@components/spendings/common/spendingModal/schema";
 import type {
@@ -38,13 +39,14 @@ const normalizeAmount = (amount: string) => amount.replace(/\s/g, "").replaceAll
 
 /**
  * A line's amount: the typed expression evaluated with the single amount
- * field's parser, rounded to the cent, or null when unusable or not positive.
+ * field's parser, rounded to the cent, or null when unusable, not positive or
+ * beyond the money columns (PFA-259).
  */
 export const draftAmount = (draft: GroupLineDraft): number | null => {
   const input = normalizeAmount(draft.amount);
   if (!EXPRESSION_SHAPE.test(input)) return null;
   const value = evaluateAmountExpression(input);
-  return value !== null && value > 0 ? Math.round(value * 100) / 100 : null;
+  return value !== null && value > 0 && value <= MAX_AMOUNT ? Math.round(value * 100) / 100 : null;
 };
 
 /** Whether the typed amount is a sum (or any operation) rather than a plain number. */
