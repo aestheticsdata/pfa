@@ -160,9 +160,7 @@ const InvoiceModal = ({
 
   const getInvoiceImage = async () => {
     try {
-      const res = await privateRequest(
-        `/spendings/upload/${spending.ID}?userID=${userID}&itemType=${spending.itemType}`,
-      );
+      const res = await privateRequest(`/spendings/upload/${spending.ID}?itemType=${spending.itemType}`);
       setInvoiceImage(res.data);
     } catch (e) {
       console.log("error getting image : ", e);

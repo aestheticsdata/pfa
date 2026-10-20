@@ -28,7 +28,7 @@ const useDailyProjection = (): UseQueryResult<DailyProjection> => {
   const start = monthBeginning ? formatISO(monthBeginning, { representation: "date" }) : undefined;
 
   const getDailyProjection = async () => {
-    const response = await privateRequest(`/dashboard/projection?userID=${userID}&start=${start}`);
+    const response = await privateRequest(`/dashboard/projection?start=${start}`);
     return parseResponse(DailyProjectionSchema, response.data, "/dashboard/projection");
   };
 

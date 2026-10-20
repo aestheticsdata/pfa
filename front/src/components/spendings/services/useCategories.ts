@@ -33,7 +33,7 @@ const useCategories = () => {
 
   const getCategoriesService = async () => {
     try {
-      const response = await privateRequest(`/categories?userID=${userID}`);
+      const response = await privateRequest(`/categories`);
       return parseResponse(CategoryListSchema, response.data, "/categories");
     } catch (e) {
       console.log("get categories error : ", e);

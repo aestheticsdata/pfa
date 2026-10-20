@@ -42,7 +42,7 @@ const useDashboard = (month?: Date): UseDashboard => {
   const { data: monthlyStats } = useMonthlyStats();
 
   const getDashboard = async () => {
-    const response = await privateRequest(`/dashboard?userID=${userID}&start=${formatIsoDate(startOfMonth(from!))}`);
+    const response = await privateRequest(`/dashboard?start=${formatIsoDate(startOfMonth(from!))}`);
     return parseResponse(DashboardResponseSchema, response.data, "/dashboard");
   };
 
@@ -50,7 +50,6 @@ const useDashboard = (month?: Date): UseDashboard => {
     return privateRequest("/dashboard", {
       method: "POST",
       data: {
-        userID,
         amount: Number(amount),
         start: formatISO(startOfMonth(from!), { representation: "date" }),
         end: formatISO(endOfMonth(from!), { representation: "date" }),
@@ -62,7 +61,6 @@ const useDashboard = (month?: Date): UseDashboard => {
     return privateRequest(`/dashboard/${dashboardID}`, {
       method: "PUT",
       data: {
-        userID,
         amount: Number(amount),
       },
     });

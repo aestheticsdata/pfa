@@ -59,9 +59,7 @@ const useSpendings = () => {
       return [];
     }
 
-    const response = await privateRequest(
-      `/spendings?userID=${userID}&from=${formatIsoDate(monthStart)}&to=${formatIsoDate(monthEnd)}`,
-    );
+    const response = await privateRequest(`/spendings?from=${formatIsoDate(monthStart)}&to=${formatIsoDate(monthEnd)}`);
     return parseResponse(SpendingListSchema, response.data, "/spendings");
   };
 
@@ -148,7 +146,6 @@ const useSpendings = () => {
                 ID,
                 itemType: "spending",
                 label: spendingEdited.label,
-                userID: spendingEdited.userID,
                 date: spendingEdited.date,
               },
               receiptFile,
