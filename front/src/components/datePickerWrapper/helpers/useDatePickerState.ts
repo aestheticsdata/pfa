@@ -1,26 +1,23 @@
 "use client";
 
-import { adjacentWeekDay, getWeekRange } from "@components/datePickerWrapper/helpers";
+import { adjacentWeekDay } from "@components/datePickerWrapper/helpers";
 import useDatePickerWrapperStore from "@components/datePickerWrapper/store";
 import { DATE_QUERY_PARAM, formatIsoDate, parseAsSpendingsDate, SPENDINGS_PATH } from "@helpers/dateRoute";
 import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { useState } from "react";
 
-import type { HoverRange } from "@components/datePickerWrapper/interfaces/datePickerTypes";
-
 /**
  * View state of a single DatePickerWrapper instance. The selected week is NOT
  * held here — it is read from the shared store, so the desktop and mobile copies
  * of the picker can no longer show different weeks (COS-99). What stays local is
  * strictly the ephemeral UI of the copy the user is interacting with: whether
- * its popover is open and which week the pointer is hovering. Only one copy is
- * ever displayed (the other is `display:none`, so it takes neither clicks nor
- * hovers), so those two cannot diverge in any observable way.
+ * its popover is open. Only one copy is ever displayed (the other is
+ * `display:none`, so it takes no clicks), so that state cannot diverge in any
+ * observable way.
  */
 const useDatePickerState = () => {
   const [isCalendarVisible, setIsCalendarVisible] = useState<boolean>(false);
-  const [hoverRange, setHoverRange] = useState<HoverRange>(null);
 
   const pathname = usePathname();
   const [dateInUrl, setDateInUrl] = useQueryState(DATE_QUERY_PARAM, parseAsSpendingsDate);
@@ -67,23 +64,12 @@ const useDatePickerState = () => {
     handleDayChange(adjacentWeekDay(range, step));
   };
 
-  const handleDayEnter = (date: Date) => {
-    setHoverRange(getWeekRange(date));
-  };
-
-  const handleDayLeave = () => {
-    setHoverRange(null);
-  };
-
   return {
     isCalendarVisible,
-    hoverRange,
     selectedDays: range ?? [],
     setIsCalendarVisible,
     handleDayChange,
     stepWeek,
-    handleDayEnter,
-    handleDayLeave,
   };
 };
 

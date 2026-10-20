@@ -400,17 +400,17 @@ test("pfa, end to end", async ({ demo }) => {
   await demo.dwell(1800);
 
   // The week picker, two months back to the 15th, and `Today` to come home. Weeks are calendar
-  // ranges cut to the month, so the cards change count as well as content. The calendar is
-  // `react-day-picker` 7: its arrows and days are the library's own classes.
+  // ranges cut to the month, so the cards change count as well as content. Only the month's own
+  // days are `week-picker-day` buttons — the neighbouring months' are inert — so the 15th is unique.
   await demo.click(visible("week-picker"));
-  const previousMonth = page.locator(".DayPicker-NavButton--prev");
+  const previousMonth = page.getByTestId("week-picker-prev-month");
   await expect(previousMonth).toBeVisible();
   await demo.dwell(500);
   await demo.click(previousMonth);
   await demo.dwell(500);
   await demo.click(previousMonth);
   await demo.dwell(700);
-  await demo.click(page.locator(".DayPicker-Day:not(.DayPicker-Day--outside)").filter({ hasText: /^15$/ }));
+  await demo.click(page.getByTestId("week-picker-day").filter({ hasText: /^15$/ }));
   await expect(page).toHaveURL(/date=\d{4}-\d{2}-15/);
   await expect(cards.first()).toBeVisible();
   await demo.dwell(2600);

@@ -1,4 +1,4 @@
-import { adjacentWeekDay, getWeekRange, parseDateParam } from "@components/datePickerWrapper/helpers";
+import { adjacentWeekDay, getWeekRange, monthWeeks, parseDateParam } from "@components/datePickerWrapper/helpers";
 import { format } from "date-fns";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -63,5 +63,22 @@ describe("adjacentWeekDay", () => {
     expect(step("2026-08-30", 1)).toBe("2026-09-01/2026-09-05");
     expect(step("2026-09-02", -1)).toBe("2026-08-30/2026-08-31");
     expect(step("2026-08-01", -1)).toBe("2026-07-26/2026-07-31");
+  });
+});
+
+describe("monthWeeks", () => {
+  it("lays a month out in Sunday-first weeks padded with the neighbouring days", () => {
+    const weeks = monthWeeks(new Date(2026, 9, 15)); // October 2026: Thu 1st → Sat 31st
+    expect(weeks).toHaveLength(5);
+    expect(weeks.every((week) => week.length === 7)).toBe(true);
+    expect(format(weeks[0][0], "yyyy-MM-dd")).toBe("2026-09-27");
+    expect(format(weeks[4][6], "yyyy-MM-dd")).toBe("2026-10-31");
+  });
+
+  it("returns six rows when the month spans six weeks", () => {
+    const weeks = monthWeeks(new Date(2026, 7, 1)); // August 2026: Sat 1st → Mon 31st
+    expect(weeks).toHaveLength(6);
+    expect(format(weeks[0][6], "yyyy-MM-dd")).toBe("2026-08-01");
+    expect(format(weeks[5][0], "yyyy-MM-dd")).toBe("2026-08-30");
   });
 });
