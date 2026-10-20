@@ -4,6 +4,7 @@ import useExceptionals from "@components/exceptionals/services/useExceptionals";
 import useGlobalStore from "@components/shared/globalStore";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useRecurrings from "@components/spendings/services/useRecurrings";
+import StatisticsDayOfWeek from "@components/statistics/dayOfWeek/StatisticsDayOfWeek";
 import { exceptionalMonthly } from "@components/statistics/helpers/exceptionalsData";
 import { projectedCurrentMonthRemainder, toYearMonthly } from "@components/statistics/helpers/projection";
 import {
@@ -13,15 +14,14 @@ import {
   perCategoryTotals,
 } from "@components/statistics/helpers/statisticsData";
 import StatisticsCategoryChart from "@components/statistics/StatisticsCategoryChart";
-import StatisticsDayOfWeek from "@components/statistics/StatisticsDayOfWeek";
 import StatisticsFilters from "@components/statistics/StatisticsFilters";
 import StatisticsFixedExpenses from "@components/statistics/StatisticsFixedExpenses";
 import StatisticsForecast from "@components/statistics/StatisticsForecast";
 import StatisticsHeatmap from "@components/statistics/StatisticsHeatmap";
 import StatisticsKpis from "@components/statistics/StatisticsKpis";
 import StatisticsMonthlyChart from "@components/statistics/StatisticsMonthlyChart";
-import StatisticsSearchTimeline from "@components/statistics/StatisticsSearchTimeline";
 import StatisticsTopCategories from "@components/statistics/StatisticsTopCategories";
+import StatisticsSearchTimeline from "@components/statistics/searchTimeline/StatisticsSearchTimeline";
 import useBiggestRegularExpense from "@components/statistics/services/useBiggestRegularExpense";
 import useDailyStats from "@components/statistics/services/useDailyStats";
 import useMonthlyIncome from "@components/statistics/services/useMonthlyIncome";
