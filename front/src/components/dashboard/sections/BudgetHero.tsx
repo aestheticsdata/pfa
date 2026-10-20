@@ -9,7 +9,7 @@ import { MoneyAmount } from "@components/shared/MoneyAmount";
 import { projectedOverBudget } from "@components/spendings/helpers/endOfMonthProjection";
 import useDashboard from "@components/spendings/services/useDashboard";
 import useEndOfMonthProjection from "@components/spendings/services/useEndOfMonthProjection";
-import useReccurings from "@components/spendings/services/useReccurings";
+import useRecurrings from "@components/spendings/services/useRecurrings";
 import { Input } from "@components/ui/input";
 import { Tooltip } from "@components/ui/tooltip";
 import { interpolate } from "@i18n/interpolate";
@@ -42,7 +42,7 @@ const BudgetHero = () => {
     remaining,
     monthlyTotal,
   } = useDashboard();
-  const { recurrings } = useReccurings();
+  const { recurrings } = useRecurrings();
   const { projection } = useEndOfMonthProjection();
   const [editing, setEditing] = useState(false);
   const [hover, setHover] = useState<BarHover<number> | null>(null);

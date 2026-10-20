@@ -5,9 +5,9 @@ import useLoginService from "@auth/useLoginService";
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
 import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
+import SharedLoginForm from "@components/shared/sharedLoginForm/SharedLoginForm";
 import useTranslations from "@i18n/useTranslations";
 import { report } from "@lib/report";
-import SharedLoginForm from "@src/components/shared/sharedLoginForm/sharedLoginForm";
 import Link from "next/link";
 import { useState } from "react";
 

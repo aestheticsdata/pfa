@@ -21,7 +21,7 @@ import { DATE_FORMAT, SPENDING_MODAL_MODE } from "@components/spendings/config/c
 import useDebouncedValue from "@components/spendings/search/useDebouncedValue";
 import useCategories from "@components/spendings/services/useCategories";
 import useLabelSuggestions from "@components/spendings/services/useLabelSuggestions";
-import useReccurings from "@components/spendings/services/useReccurings";
+import useRecurrings from "@components/spendings/services/useRecurrings";
 import useSpendingGroups from "@components/spendings/services/useSpendingGroups";
 import useSpendings from "@components/spendings/services/useSpendings";
 import { Button } from "@components/ui/button";
@@ -74,7 +74,7 @@ const SpendingModal = ({
   };
   const { user } = useAuth();
   const { createSpending, updateSpending } = useSpendings();
-  const { recurrings, createRecurring, updateRecurring, copyRecurrings } = useReccurings();
+  const { recurrings, createRecurring, updateRecurring, copyRecurrings } = useRecurrings();
   const { createGroup, updateGroup } = useSpendingGroups();
   const { categories } = useCategories();
   // Per-category usage scoped to the current year to date (client-side "today",

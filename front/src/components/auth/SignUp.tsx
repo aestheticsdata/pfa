@@ -5,7 +5,7 @@ import useSignupService from "@auth/useSignupService";
 import AuthBrand from "@components/auth/AuthBrand";
 import AuthCard from "@components/auth/AuthCard";
 import { AuthSwitchLink } from "@components/auth/AuthSwitchLink";
-import SharedLoginForm from "@components/shared/sharedLoginForm/sharedLoginForm";
+import SharedLoginForm from "@components/shared/sharedLoginForm/SharedLoginForm";
 import useTranslations from "@i18n/useTranslations";
 
 import type { LoginValues } from "@components/shared/interfaces/sharedLoginFormTypes";

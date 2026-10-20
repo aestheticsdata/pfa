@@ -10,7 +10,7 @@ import { Overline } from "@components/shared/Overline";
 import SpendingModal from "@components/spendings/common/spendingModal/SpendingModal";
 import useSpendingDayItem from "@components/spendings/helpers/useSpendingDayItem";
 import InvoiceModal from "@components/spendings/invoiceModal/InvoiceModal";
-import useReccurings from "@components/spendings/services/useReccurings";
+import useRecurrings from "@components/spendings/services/useRecurrings";
 import { interpolate } from "@i18n/interpolate";
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
@@ -42,7 +42,7 @@ const FixedExpenses = ({ month }: FixedExpensesProps) => {
   const { euro } = useFormat();
   const dashboardText = useTranslations("dashboard");
   const dateLocale = useDateLocale();
-  const { recurrings, deleteRecurring } = useReccurings();
+  const { recurrings, deleteRecurring } = useRecurrings();
   const { isModalVisible, spending, isEditing, addSpending, closeModal, editSpending } = useSpendingDayItem();
   const [invoiceFor, setInvoiceFor] = useState<RecurringItem | null>(null);
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);

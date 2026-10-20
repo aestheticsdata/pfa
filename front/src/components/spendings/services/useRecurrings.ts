@@ -32,7 +32,7 @@ interface CreateRecurring {
   formattedMonth: FormattedMonth;
 }
 
-const useReccurings = () => {
+const useRecurrings = () => {
   const { privateRequest } = useRequestHelper();
   const { user } = useAuth();
   const userID = user?.id;
@@ -142,7 +142,7 @@ const useReccurings = () => {
   };
 };
 
-export default useReccurings;
+export default useRecurrings;
 interface DeletableRecurring {
   ID: string;
 }
