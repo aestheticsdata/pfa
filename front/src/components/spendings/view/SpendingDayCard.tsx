@@ -15,6 +15,7 @@ import DaySelectionBar from "@components/spendings/view/selection/DaySelectionBa
 import useDateLocale from "@i18n/useDateLocale";
 import useFormat from "@i18n/useFormat";
 import useTranslations from "@i18n/useTranslations";
+import { SORT_DIR } from "@lib/orderBy";
 import { cn } from "@lib/utils";
 import { format } from "date-fns";
 import { Plus, SquareCheckBig } from "lucide-react";
@@ -24,6 +25,7 @@ import type { GroupDayEntry } from "@components/spendings/interfaces/spendingGro
 import type { SpendingItem, SpendingListItem } from "@components/spendings/interfaces/spendingListTypes";
 import type { DaySortField } from "@components/spendings/view/helpers/useDaySort";
 import type { MonthRange } from "@lib/interfaces/dateRangeTypes";
+import type { SortDir } from "@lib/interfaces/orderByTypes";
 
 const FALLBACK_COLOR = CATEGORY_FALLBACK;
 const UNCATEGORIZED_KEY = "none";
@@ -44,11 +46,11 @@ const SortButton = ({
   field: DaySortField;
   label: string;
   activeField: DaySortField | null;
-  dir: "asc" | "desc";
+  dir: SortDir;
   onSort: (field: DaySortField) => void;
 }) => {
   const active = activeField === field;
-  const glyph = active ? (dir === "desc" ? "↓" : "↑") : "⇅";
+  const glyph = active ? (dir === SORT_DIR.desc ? "↓" : "↑") : "⇅";
   return (
     <button
       type="button"
