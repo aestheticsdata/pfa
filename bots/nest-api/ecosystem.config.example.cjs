@@ -39,6 +39,9 @@ module.exports = {
       instances: 1,
       exec_mode: "fork",
       autorestart: true,
+      // A reload lets the requests in flight finish (PFA-266): Nest drains on SIGINT, PM2 waits up
+      // to this long before SIGKILL (default 1.6 s).
+      kill_timeout: 15000,
       env_production: {
         NODE_ENV: "production",
         ...config,

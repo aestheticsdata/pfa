@@ -6,3 +6,7 @@ allowBuilds:
   "@swc/core": true
   "@parcel/watcher": false
   unrs-resolver: false
+# House rule: TypeScript stays on the latest 5.x. @nestjs/cli 12 asks for ~6.0; it builds fine on
+# 5.9.3, so the whole tree is held there (PFA-266, as in the main API's PFA-265).
+overrides:
+  typescript: 5.9.3
