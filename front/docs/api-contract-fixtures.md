@@ -1,8 +1,9 @@
 # API contract fixtures
 
 PFA-177. The front parses every api response with zod (`src/schemas/`), but the api has no output
-contract of its own: its responses are hand-written interfaces or raw Prisma rows. The fixtures
-are what proves a schema describes the api, not just a payload someone once looked at.
+contract of its own beyond its response interfaces. Since PFA-257 every row it returns goes through
+an explicit Prisma `select`, so a new column reaches no response until someone lists it. The
+fixtures are what proves a schema describes the api, not just a payload someone once looked at.
 
 ## The three pieces
 
@@ -34,6 +35,13 @@ pnpm test src/schemas
 ```
 
 Review the fixture diff before committing it: it is the api's contract change, written out.
+
+## Checked before every API deploy
+
+`pnpm contract:check` (PFA-257) captures the local api into a scratch folder and runs the contract
+test on that capture; the committed fixtures are not touched. `nest-api/deploy-api.sh` runs it in
+its quality gate whenever the local api answers on :6100, and stops the deploy when it is red.
+Start the api first (`pnpm --dir ../nest-api start:dev`) to have it checked rather than skipped.
 
 ### What the capture covers
 

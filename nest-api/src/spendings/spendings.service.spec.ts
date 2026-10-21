@@ -1,4 +1,5 @@
 import { SpendingsService } from "./spendings.service";
+import { SPENDING_ROW_SELECT } from "@spendings/spending-row";
 
 /**
  * Unit tests for SpendingsService.searchSpendings — the whole-history, keyset-
@@ -51,7 +52,7 @@ describe("SpendingsService.searchSpendings", () => {
     expect(findMany).toHaveBeenCalledWith({
       where,
       orderBy: [{ date: "desc" }, { ID: "desc" }],
-      include: { category: true, store: { select: { name: true } }, _count: { select: { receiptLines: true } } },
+      select: SPENDING_ROW_SELECT,
       // Over-fetch one row to detect a further page without a spurious empty call.
       take: 51,
     });
@@ -68,9 +69,7 @@ describe("SpendingsService.searchSpendings", () => {
 
     const result = await service.searchSpendings("carre", "user-1", "cursor-id");
 
-    expect(findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ take: 51, cursor: { ID: "cursor-id" }, skip: 1 }),
-    );
+    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, cursor: { ID: "cursor-id" }, skip: 1 }));
     expect(count).not.toHaveBeenCalled();
     expect(result.total).toBeUndefined();
   });
@@ -120,10 +119,7 @@ describe("SpendingsService.searchSpendings", () => {
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         where: expect.objectContaining({
-          OR: [
-            { label: { contains: "100\\%\\_x" } },
-            { category: { is: { name: { contains: "100\\%\\_x" } } } },
-          ],
+          OR: [{ label: { contains: "100\\%\\_x" } }, { category: { is: { name: { contains: "100\\%\\_x" } } } }],
         }),
       }),
     );

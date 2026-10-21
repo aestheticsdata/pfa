@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
+import { JOINED_CATEGORY_SELECT, accessibleCategory } from "@categories/accessible-category";
 import { resolveCategoryID } from "@categories/category-resolver";
+import type { RecurringItem } from "@recurrings/interfaces/recurringItemTypes";
 import type { SpendingCategoryInput } from "@spendings/dto/spending-category-input.interface";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -8,22 +10,30 @@ import { PrismaService } from "../prisma/prisma.service";
 export class RecurringsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getRecurrings(start: string, userID: string) {
+  async getRecurrings(start: string, userID: string): Promise<RecurringItem[]> {
     const results = await this.prisma.recurrings.findMany({
       where: {
         userID,
         dateFrom: new Date(start),
       },
       orderBy: { amount: "desc" },
-      include: { category: true },
+      // Listed, never spread: a new column stays out of the response until asked for (PFA-257).
+      select: {
+        ID: true,
+        dateFrom: true,
+        dateTo: true,
+        itemType: true,
+        label: true,
+        amount: true,
+        currency: true,
+        invoicefile: true,
+        categoryID: true,
+        category: JOINED_CATEGORY_SELECT,
+      },
     });
 
     // Flattened to name/colour exactly like getSpendings (PFA-38).
-    return results.map(({ category, ...recurring }) => ({
-      ...recurring,
-      category: category && (category.userID === userID || category.userID === null) ? category.name : null,
-      categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
-    }));
+    return results.map(({ category, ...recurring }) => ({ ...recurring, ...accessibleCategory(category, userID) }));
   }
 
   /**

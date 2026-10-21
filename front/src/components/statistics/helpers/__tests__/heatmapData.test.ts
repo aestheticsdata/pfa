@@ -6,7 +6,7 @@ import type { DailyStat } from "@src/schemas/stats";
 
 const day = (date: string, total: number, count = 1): DailyStat => ({ date, total, count });
 const exc = (date: string, amount: number, label: string): ExceptionalItem =>
-  ({ ID: date, userID: "u1", date, itemType: "exceptional", label, amount }) as ExceptionalItem;
+  ({ ID: date, date, itemType: "exceptional", label, amount }) as ExceptionalItem;
 
 describe("bandFor", () => {
   it("is lvl-0 at or below zero, or when there is no scale", () => {

@@ -354,6 +354,17 @@ check_quality_gate() {
     log "⚠️  Quality gate — local MySQL not reachable, e2e tests skipped"
   fi
 
+  # The API contract (PFA-257): what the local API sends, parsed by the front's schemas. Needs the
+  # local API up (and the front's e2e account): run when it answers, say so when it does not.
+  if [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:6100/api/users/csrf 2>/dev/null)" != "000" ]; then
+    pnpm --dir "$SCRIPT_DIR/../front" contract:check || {
+      echo "❌ ERROR: quality gate — the API and the front's schemas disagree (front: pnpm contract:check)" >&2
+      exit 1
+    }
+  else
+    log "⚠️  Quality gate — local API not running on :6100, contract check skipped"
+  fi
+
   log "✅ Quality gate passed"
 }
 

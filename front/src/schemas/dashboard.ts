@@ -8,7 +8,6 @@ export const DashboardSchema = apiObject({
   dateTo: z.string(),
   initialAmount: numberLikeWithZeroFallbackSchema,
   initialCeiling: numberLikeWithZeroFallbackSchema,
-  userID: z.string(),
 });
 
 export type Dashboard = z.infer<typeof DashboardSchema>;

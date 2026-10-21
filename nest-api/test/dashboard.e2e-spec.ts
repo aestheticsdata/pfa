@@ -74,9 +74,7 @@ describe("DashboardController (e2e)", () => {
     });
 
     it("should return 400 when start is missing", () => {
-      return agent
-        .get("/api/dashboard")
-        .expect(400);
+      return agent.get("/api/dashboard").expect(400);
     });
   });
 
@@ -111,17 +109,11 @@ describe("DashboardController (e2e)", () => {
     });
 
     it("should return 400 when amount is missing", () => {
-      return agent
-        .post("/api/dashboard")
-        .send({ start, end })
-        .expect(400);
+      return agent.post("/api/dashboard").send({ start, end }).expect(400);
     });
 
     it("should return 400 when start is missing", () => {
-      return agent
-        .post("/api/dashboard")
-        .send({ end, amount: 100 })
-        .expect(400);
+      return agent.post("/api/dashboard").send({ end, amount: 100 }).expect(400);
     });
   });
 
@@ -131,10 +123,7 @@ describe("DashboardController (e2e)", () => {
     const end = lastDayOfMonth(nextMonth);
 
     beforeAll(async () => {
-      await agent
-        .post("/api/dashboard")
-        .send({ start, end, amount: 2000 })
-        .expect(201);
+      await agent.post("/api/dashboard").send({ start, end, amount: 2000 }).expect(201);
     }, 15000);
 
     it("should return dashboard with initialAmount and initialCeiling", () => {
@@ -150,7 +139,7 @@ describe("DashboardController (e2e)", () => {
           expect(d).toHaveProperty("dateTo");
           expect(d).toHaveProperty("initialAmount");
           expect(d).toHaveProperty("initialCeiling");
-          expect(d).toHaveProperty("userID");
+          expect(d).not.toHaveProperty("userID"); // PFA-257: explicit shape, no owner id
           expect(typeof d.initialAmount).toBe("number");
           expect(d.initialAmount).toBe(2000);
         });
@@ -165,40 +154,25 @@ describe("DashboardController (e2e)", () => {
       const start = firstDayOfMonth(now);
       const end = lastDayOfMonth(now);
 
-      const createRes = await agent
-        .post("/api/dashboard")
-        .send({ start, end, amount: 3000 })
-        .expect(201);
+      const createRes = await agent.post("/api/dashboard").send({ start, end, amount: 3000 }).expect(201);
 
       dashboardID = (createRes.body as CreateDashboardResponse).ID;
     }, 15000);
 
     it("should update amount", () => {
-      return agent
-        .put(`/api/dashboard/${dashboardID}`)
-        .send({ amount: 3500 })
-        .expect(200);
+      return agent.put(`/api/dashboard/${dashboardID}`).send({ amount: 3500 }).expect(200);
     });
 
     it("should update ceiling", () => {
-      return agent
-        .put(`/api/dashboard/${dashboardID}`)
-        .send({ ceiling: 500 })
-        .expect(200);
+      return agent.put(`/api/dashboard/${dashboardID}`).send({ ceiling: 500 }).expect(200);
     });
 
     it("should update both amount and ceiling", () => {
-      return agent
-        .put(`/api/dashboard/${dashboardID}`)
-        .send({ amount: 4000, ceiling: 600 })
-        .expect(200);
+      return agent.put(`/api/dashboard/${dashboardID}`).send({ amount: 4000, ceiling: 600 }).expect(200);
     });
 
     it("should return 404 for non-existent dashboard", () => {
-      return agent
-        .put("/api/dashboard/00000000-0000-0000-0000-000000000000")
-        .send({ amount: 100 })
-        .expect(404);
+      return agent.put("/api/dashboard/00000000-0000-0000-0000-000000000000").send({ amount: 100 }).expect(404);
     });
 
     it("should return 401 without session cookie", () => {

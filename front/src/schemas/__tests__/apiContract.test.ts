@@ -1,4 +1,5 @@
 import { readdirSync, readFileSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 import { AuthResponseSchema } from "@src/schemas/auth";
 import { CategoryListSchema } from "@src/schemas/categories";
 import { CategoryStatsResponseSchema } from "@src/schemas/categoryStats";
@@ -79,7 +80,9 @@ const CONTRACTS: Record<string, z.ZodType> = {
   "stats.searchTimelineWeek": SearchTimelineResponseSchema,
 };
 
-const FIXTURES_DIR = new URL("./fixtures/", import.meta.url);
+// The pre-deploy contract check (PFA-257) points this at a fresh capture of the local API.
+const CAPTURED_DIR = process.env.API_CONTRACT_FIXTURES_DIR;
+const FIXTURES_DIR = CAPTURED_DIR ? pathToFileURL(`${CAPTURED_DIR}/`) : new URL("./fixtures/", import.meta.url);
 const fixtureNames = readdirSync(FIXTURES_DIR)
   .filter((file) => file.endsWith(".json"))
   .map((file) => file.slice(0, -".json".length));

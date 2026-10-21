@@ -10,7 +10,7 @@ import type { LabelPatternGroup } from "@components/spendings/interfaces/labelPa
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 const makeItem = (ID: string, label: string, amount = 10): SpendingItem =>
-  ({ ID, label, amount, date: "2026-08-12", itemType: "spending", userID: "u-1" }) as SpendingItem;
+  ({ ID, label, amount, date: "2026-08-12", itemType: "spending" }) as SpendingItem;
 
 /** Named groups only, as `[key, count]` — the shape most assertions care about. */
 const named = (items: SpendingItem[]): [string, number][] =>

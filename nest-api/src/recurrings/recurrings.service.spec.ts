@@ -1,3 +1,4 @@
+import { JOINED_CATEGORY_SELECT } from "@categories/accessible-category";
 import { RecurringsService } from "./recurrings.service";
 
 /**
@@ -77,7 +78,9 @@ describe("RecurringsService category", () => {
 
     const rows = await service.getRecurrings("2026-10-01", userID);
 
-    expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ include: { category: true } }));
+    expect(findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ select: expect.objectContaining({ category: JOINED_CATEGORY_SELECT }) }),
+    );
     expect(rows.map(({ category, categoryColor }) => ({ category, categoryColor }))).toEqual([
       { category: "Housing", categoryColor: "#111" },
       { category: null, categoryColor: null },

@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import type { SpendingItem } from "@components/spendings/interfaces/spendingListTypes";
 
 const makeItem = (ID: string, date: string): SpendingItem =>
-  ({ ID, date, label: ID, amount: 1, itemType: "spending", userID: "u1" }) as SpendingItem;
+  ({ ID, date, label: ID, amount: 1, itemType: "spending" }) as SpendingItem;
 
 describe("groupSpendingsByMonth", () => {
   it("returns an empty array for no items", () => {

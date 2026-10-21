@@ -9,7 +9,6 @@ const NOW = new Date(2026, 6, 11);
 
 const item = (date: string, amount: number, label = "Achat"): ExceptionalItem => ({
   ID: "1",
-  userID: "user-1",
   date,
   itemType: "exceptional",
   label,

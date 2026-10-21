@@ -20,7 +20,9 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
-const FIXTURES_DIR = join(ROOT, "src/schemas/__tests__/fixtures");
+// Overridden by the pre-deploy contract check (PFA-257), which captures into a scratch folder
+// rather than rewriting the committed fixtures.
+const FIXTURES_DIR = process.env.CAPTURE_FIXTURES_DIR ?? join(ROOT, "src/schemas/__tests__/fixtures");
 const API = process.env.CAPTURE_API_URL ?? "http://localhost:6100/api";
 const MAX_LIST_ITEMS = 25;
 
@@ -284,4 +286,6 @@ for (const [name, path] of Object.entries(ENDPOINTS)) {
 }
 
 // Written in the repo's own format, so a re-capture diffs only on what the api changed.
-execFileSync(join(ROOT, "node_modules/.bin/biome"), ["format", "--write", FIXTURES_DIR], { stdio: "inherit" });
+if (!process.env.CAPTURE_FIXTURES_DIR) {
+  execFileSync(join(ROOT, "node_modules/.bin/biome"), ["format", "--write", FIXTURES_DIR], { stdio: "inherit" });
+}

@@ -65,7 +65,6 @@ const VALID: [z.ZodType, unknown][] = [
         invoicefile: null,
         itemType: "spending",
         label: "Market",
-        userID: "u1",
         groupID: null,
         detail: null,
         lineCount: 0,
