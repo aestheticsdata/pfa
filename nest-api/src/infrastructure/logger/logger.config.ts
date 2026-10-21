@@ -5,6 +5,7 @@ import { readReleaseMarker } from "@monitoring/release-marker";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Params } from "nestjs-pino";
 import type { LoggerOptions } from "pino";
+import { env } from "@config/env";
 
 /**
  * Structured logging for the API — ECS NDJSON on stdout, nothing else (IKN-1).
@@ -110,16 +111,15 @@ const REDACTED = [
 ];
 
 export function buildLoggerParams(): Params {
-  const environment = process.env.NODE_ENV ?? "development";
-  const isProduction = environment === "production";
-  const isTest = environment === "test";
+  const isProduction = env.isProduction;
+  const isTest = env.isTest;
   const release = readReleaseMarker();
 
   return {
     pinoHttp: {
       // Silent in test: a suite that prints a hundred access lines per run teaches everyone to
       // stop reading the output, which is where real failures then hide.
-      level: isTest ? "silent" : (process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug")),
+      level: isTest ? "silent" : (env.logLevel ?? (isProduction ? "info" : "debug")),
 
       ...withReleaseCommit(
         withEventDuration(
@@ -129,7 +129,7 @@ export function buildLoggerParams(): Params {
             // `app_build_info` and the health `version`, from the same marker. No marker (dev), no
             // field: never a value rebuilt from `package.json`.
             serviceVersion: release?.version,
-            serviceEnvironment: environment,
+            serviceEnvironment: env.nodeEnv,
             // Off by default, and the whole point of this ticket: without it `req` and `res` are
             // logged as raw objects and no consumer finds a method, a path or a status code.
             convertReqRes: true,

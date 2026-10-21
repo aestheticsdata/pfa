@@ -3,6 +3,7 @@ import type { Request } from "express";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { isSyntheticEmail } from "@users/synthetic-email.util";
 import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
+import { env } from "@config/env";
 
 interface SyntheticSession {
   userId?: string;
@@ -33,7 +34,7 @@ export class SyntheticIpGuard implements CanActivate {
     const email = typeof body?.email === "string" ? body.email : undefined;
 
     const touchesSynthetic = session?.isSynthetic === true || (email !== undefined && isSyntheticEmail(email));
-    if (!touchesSynthetic || isSyntheticIpAllowed(req.ip, process.env.SYNTHETIC_ALLOWED_IPS)) {
+    if (!touchesSynthetic || isSyntheticIpAllowed(req.ip, env.syntheticAllowedIps)) {
       return true;
     }
 

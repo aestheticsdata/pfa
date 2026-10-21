@@ -2,11 +2,12 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@
 import type { Request } from "express";
 import { isSyntheticEmail } from "@users/synthetic-email.util";
 import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
+import { env } from "@config/env";
 
 @Injectable()
 export class SignupGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
-    if (process.env.SIGNUPS_ENABLED !== "false") {
+    if (env.signupsEnabled) {
       return true;
     }
 
@@ -14,11 +15,7 @@ export class SignupGuard implements CanActivate {
     // allowlisted address, and nothing else.
     const req = context.switchToHttp().getRequest<Request>();
     const email = (req.body as { email?: unknown } | undefined)?.email;
-    if (
-      typeof email === "string" &&
-      isSyntheticEmail(email) &&
-      isSyntheticIpAllowed(req.ip, process.env.SYNTHETIC_ALLOWED_IPS)
-    ) {
+    if (typeof email === "string" && isSyntheticEmail(email) && isSyntheticIpAllowed(req.ip, env.syntheticAllowedIps)) {
       return true;
     }
 

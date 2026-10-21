@@ -10,6 +10,7 @@ import { HttpMetricsMiddleware } from "./monitoring/http-metrics.middleware";
 import { RedisService } from "@redis/redis.service";
 
 import type { Application } from "express";
+import { env } from "@config/env";
 
 const SESSION_TTL_SECONDS = 10 * 60; // 10 minutes
 
@@ -35,7 +36,7 @@ async function bootstrap() {
   });
 
   // Cookie secure: en prod sans HTTPS, mettre COOKIE_SECURE=false dans .env
-  const cookieSecure = process.env.COOKIE_SECURE !== "false" && process.env.NODE_ENV === "production";
+  const cookieSecure = env.cookieSecure;
 
   // Registered before Nest initialises, so it runs ahead of the request logger — which is what
   // lets the access line carry `user.id`.
@@ -43,7 +44,7 @@ async function bootstrap() {
     session({
       name: "pfa.sid",
       store: redisStore,
-      secret: process.env.SESSION_SECRET as string,
+      secret: env.sessionSecret,
       resave: false,
       saveUninitialized: false,
       rolling: true,
@@ -59,7 +60,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? "http://localhost:3000",
+    origin: env.frontendUrl,
     credentials: true,
   });
 

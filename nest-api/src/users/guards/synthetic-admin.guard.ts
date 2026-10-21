@@ -1,6 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, NotFoundException } from "@nestjs/common";
 import { createHash, timingSafeEqual } from "crypto";
 import type { Request } from "express";
+import { env } from "@config/env";
 
 const MIN_TOKEN_LENGTH = 32;
 const LOOPBACK = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
@@ -23,7 +24,7 @@ const digest = (value: string): Buffer => createHash("sha256").update(value).dig
 export class SyntheticAdminGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest<Request>();
-    if (!isAllowed(req, process.env.SYNTHETIC_ADMIN_TOKEN)) {
+    if (!isAllowed(req, env.syntheticAdminToken)) {
       throw new NotFoundException();
     }
     return true;

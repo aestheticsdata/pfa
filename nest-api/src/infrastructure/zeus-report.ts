@@ -48,6 +48,8 @@
  *    Zeus catch that one as overdue.
  */
 
+import { env } from "@config/env";
+
 const TIMEOUT_MS = 2000;
 
 /**
@@ -62,11 +64,7 @@ const TIMEOUT_MS = 2000;
  * anywhere, and the difference invisible until someone wondered why `/cron` only ever fills up
  * from the server.
  */
-const settings = () => ({
-  url: process.env.ZEUS_INGEST_URL ?? "http://127.0.0.1:6600/api/cron-runs",
-  token: process.env.ZEUS_INGEST_TOKEN,
-  app: process.env.ZEUS_APP_NAME,
-});
+const settings = () => env.zeus;
 
 /** `skipped` means the job ran and found nothing to do — healthy, and not the same as `ok`. */
 export type ZeusCronStatus = "ok" | "failed" | "skipped";

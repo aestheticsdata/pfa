@@ -4,6 +4,7 @@ import { open, mkdir } from "fs/promises";
 import { join } from "path";
 import { randomBytes } from "crypto";
 import { format } from "date-fns";
+import { env } from "@config/env";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 
@@ -30,7 +31,7 @@ export async function isValidImageFile(filepath: string): Promise<boolean> {
 }
 
 function getInvoicesPath(): string {
-  return process.env.PFA_INVOICES_IMAGES_PATH ?? join(process.cwd(), "invoicesUpload");
+  return env.invoicesPath;
 }
 
 function sanitizeForFilename(s: string): string {

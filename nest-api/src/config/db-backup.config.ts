@@ -1,4 +1,5 @@
 import { registerAs } from "@nestjs/config";
+import { env } from "@config/env";
 
 export interface DbBackupConfig {
   enabled: boolean;
@@ -10,14 +11,5 @@ export interface DbBackupConfig {
 }
 
 export default registerAs("dbBackup", (): DbBackupConfig => {
-  const enabled = process.env.NODE_ENV === "production";
-
-  return {
-    enabled,
-    dbUser: process.env.DB_USER ?? "",
-    dbPassword: process.env.DB_PASSWORD ?? "",
-    dbName: process.env.DB ?? "",
-    dumpPath: process.env.PFA_DUMP_PATH ?? "",
-    remoteBackupPath: process.env.PFA_BACKUP_SERVER_PATH ?? "",
-  };
+  return { enabled: env.isProduction, ...env.dbBackup };
 });
