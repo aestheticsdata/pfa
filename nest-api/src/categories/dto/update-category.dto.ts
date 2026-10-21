@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 
 export class UpdateCategoryDto {
   @IsString()

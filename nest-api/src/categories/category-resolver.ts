@@ -1,5 +1,5 @@
+import { randomUUID } from "node:crypto";
 import { BadRequestException } from "@nestjs/common";
-import { randomUUID } from "crypto";
 import type { SpendingCategoryInput } from "@spendings/dto/spending-category-input.interface";
 import type { PrismaService } from "../prisma/prisma.service";
 

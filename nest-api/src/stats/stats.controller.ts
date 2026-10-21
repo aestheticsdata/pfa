@@ -1,21 +1,21 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
+import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { BiggestRegularExpenseQueryDto } from "@stats/dto/biggest-regular-expense-query.dto";
+import { BusiestWeekQueryDto } from "@stats/dto/busiest-week-query.dto";
+import { CategoryStatsQueryDto } from "@stats/dto/category-stats-query.dto";
+import { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
+import { DailyStatsQueryDto } from "@stats/dto/daily-stats-query.dto";
+import { MonthlyStatsQueryDto } from "@stats/dto/monthly-stats-query.dto";
+import { RegularMonthlyAverageQueryDto } from "@stats/dto/regular-monthly-average-query.dto";
+import { SearchTimelineQueryDto } from "@stats/dto/search-timeline-query.dto";
+import { SpendingPaceQueryDto } from "@stats/dto/spending-pace-query.dto";
+import { StatisticsQueryDto } from "@stats/dto/statistics-query.dto";
+import { WeekdayCategoriesQueryDto } from "@stats/dto/weekday-categories-query.dto";
+import { WeeklyStatsQueryDto } from "@stats/dto/weekly-stats-query.dto";
 import { CategoryStatsService } from "@stats/services/category-stats.service";
 import { SpendingsStatsService } from "@stats/services/spendings-stats.service";
 import { YearlyStatsService } from "@stats/services/yearly-stats.service";
-import { WeeklyStatsQueryDto } from "@stats/dto/weekly-stats-query.dto";
-import { MonthlyStatsQueryDto } from "@stats/dto/monthly-stats-query.dto";
-import { StatisticsQueryDto } from "@stats/dto/statistics-query.dto";
-import { RegularMonthlyAverageQueryDto } from "@stats/dto/regular-monthly-average-query.dto";
-import { DailyStatsQueryDto } from "@stats/dto/daily-stats-query.dto";
-import { CategoryStatsQueryDto } from "@stats/dto/category-stats-query.dto";
-import { BiggestRegularExpenseQueryDto } from "@stats/dto/biggest-regular-expense-query.dto";
-import { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
-import { BusiestWeekQueryDto } from "@stats/dto/busiest-week-query.dto";
-import { SpendingPaceQueryDto } from "@stats/dto/spending-pace-query.dto";
-import { WeekdayCategoriesQueryDto } from "@stats/dto/weekday-categories-query.dto";
-import { SearchTimelineQueryDto } from "@stats/dto/search-timeline-query.dto";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
 
 @Controller("weeklystats")
 @UseGuards(SessionAuthGuard)

@@ -1,8 +1,9 @@
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { createE2eApp } from "./e2e-app";
 import { createAuthenticatedSession } from "./auth-session.helper";
 import { firstDayOfMonth } from "./dates.helper";
+import { defined } from "./defined.helper";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;
@@ -76,9 +77,7 @@ describe("RecurringsController (e2e)", () => {
     });
 
     it("should return 400 when start is missing", () => {
-      return agent
-        .get("/api/recurrings")
-        .expect(400);
+      return agent.get("/api/recurrings").expect(400);
     });
   });
 
@@ -111,17 +110,11 @@ describe("RecurringsController (e2e)", () => {
     });
 
     it("should return 400 when label is missing", () => {
-      return agent
-        .post("/api/recurrings")
-        .send({ start, end, amount: 10, currency: "EUR" })
-        .expect(400);
+      return agent.post("/api/recurrings").send({ start, end, amount: 10, currency: "EUR" }).expect(400);
     });
 
     it("should return 400 when amount is missing", () => {
-      return agent
-        .post("/api/recurrings")
-        .send({ start, end, label: "test", currency: "EUR" })
-        .expect(400);
+      return agent.post("/api/recurrings").send({ start, end, label: "test", currency: "EUR" }).expect(400);
     });
   });
 
@@ -144,11 +137,9 @@ describe("RecurringsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await agent
-        .get("/api/recurrings")
-        .query({ start });
+      const listRes = await agent.get("/api/recurrings").query({ start });
       const found = (listRes.body as RecurringItem[]).find((r) => r.label === "e2e-update-recurring");
-      updateRecurringID = found!.ID;
+      updateRecurringID = defined(found, "the created row").ID;
     }, 15000);
 
     it("should update label and amount", () => {
@@ -227,11 +218,9 @@ describe("RecurringsController (e2e)", () => {
         })
         .expect(201);
 
-      const listRes = await agent
-        .get("/api/recurrings")
-        .query({ start });
+      const listRes = await agent.get("/api/recurrings").query({ start });
       const found = (listRes.body as RecurringItem[]).find((r) => r.label === "e2e-delete-recurring");
-      deleteRecurringID = found!.ID;
+      deleteRecurringID = defined(found, "the created row").ID;
     }, 15000);
 
     it("should delete recurring and return success", () => {
@@ -244,15 +233,11 @@ describe("RecurringsController (e2e)", () => {
     });
 
     it("should return 404 when deleting already deleted recurring", () => {
-      return agent
-        .delete(`/api/recurrings/${deleteRecurringID}`)
-        .expect(404);
+      return agent.delete(`/api/recurrings/${deleteRecurringID}`).expect(404);
     });
 
     it("should return 404 for non-existent recurring", () => {
-      return agent
-        .delete("/api/recurrings/00000000-0000-0000-0000-000000000000")
-        .expect(404);
+      return agent.delete("/api/recurrings/00000000-0000-0000-0000-000000000000").expect(404);
     });
   });
 });

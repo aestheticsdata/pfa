@@ -1,10 +1,10 @@
+import { randomUUID } from "node:crypto";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { randomUUID } from "crypto";
 import { PrismaService } from "../src/prisma/prisma.service";
-import { createE2eApp } from "./e2e-app";
 import { createAuthenticatedSession } from "./auth-session.helper";
 import { firstDayOfMonth } from "./dates.helper";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;
@@ -78,9 +78,7 @@ describe("StatsController (e2e)", () => {
     });
 
     it("should return 400 when start is missing", () => {
-      return agent
-        .get("/api/weeklystats")
-        .expect(400);
+      return agent.get("/api/weeklystats").expect(400);
     });
   });
 
@@ -108,9 +106,7 @@ describe("StatsController (e2e)", () => {
     });
 
     it("should return 400 when from is missing", () => {
-      return agent
-        .get("/api/monthlystats")
-        .expect(400);
+      return agent.get("/api/monthlystats").expect(400);
     });
   });
 
@@ -139,17 +135,11 @@ describe("StatsController (e2e)", () => {
     });
 
     it("should return 400 when categories is missing", () => {
-      return agent
-        .get("/api/statistics")
-        .query({ years })
-        .expect(400);
+      return agent.get("/api/statistics").query({ years }).expect(400);
     });
 
     it("should return 400 when years is missing", () => {
-      return agent
-        .get("/api/statistics")
-        .query({ categories: categoryID })
-        .expect(400);
+      return agent.get("/api/statistics").query({ categories: categoryID }).expect(400);
     });
   });
 });

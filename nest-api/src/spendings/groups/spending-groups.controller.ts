@@ -1,15 +1,14 @@
-import { Body, Controller, Delete, Param, Post, Put, UseGuards } from "@nestjs/common";
-import { SpendingGroupsService } from "@spendings/groups/spending-groups.service";
-import { CreateSpendingGroupDto } from "@spendings/dto/create-spending-group.dto";
-import { UpdateSpendingGroupDto } from "@spendings/dto/update-spending-group.dto";
-import { MergeSpendingGroupDto } from "@spendings/dto/merge-spending-group.dto";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { CsrfGuard } from "@users/guards/csrf.guard";
+import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
 import { MetricsService } from "@monitoring/metrics.service";
 import { GetUserKind } from "@monitoring/user-kind.decorator";
-
-import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
+import { Body, Controller, Delete, Param, Post, Put, UseGuards } from "@nestjs/common";
+import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { CreateSpendingGroupDto } from "@spendings/dto/create-spending-group.dto";
+import { MergeSpendingGroupDto } from "@spendings/dto/merge-spending-group.dto";
+import { UpdateSpendingGroupDto } from "@spendings/dto/update-spending-group.dto";
+import { SpendingGroupsService } from "@spendings/groups/spending-groups.service";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("spendings/groups")
 @UseGuards(SessionAuthGuard, CsrfGuard)

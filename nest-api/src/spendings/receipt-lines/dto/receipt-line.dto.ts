@@ -1,9 +1,9 @@
-import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
-import { Type } from "class-transformer";
 import { MAX_AMOUNT } from "@config/amount-limits";
 import { FIELD_LIMITS } from "@config/field-limits";
-import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
 import type { SizeUnit } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
+import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
+import { Type } from "class-transformer";
+import { IsIn, IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 
 // `quantity` and `size` are Decimal(8, 3).
 const MAX_MEASURE = 99999.999;

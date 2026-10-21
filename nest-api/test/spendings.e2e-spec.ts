@@ -1,8 +1,9 @@
+import { join } from "node:path";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { join } from "path";
-import { createE2eApp } from "./e2e-app";
 import { createAuthenticatedSession } from "./auth-session.helper";
+import { defined } from "./defined.helper";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;
@@ -153,7 +154,7 @@ describe("SpendingsController (e2e)", () => {
       const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const spendings = listRes.body as SpendingItem[];
       const found = spendings.find((s) => s.label === "e2e-upload-test");
-      uploadSpendingID = found!.ID;
+      uploadSpendingID = defined(found, "the created row").ID;
     }, 15000);
 
     it("should upload, resize and return image as base64", async () => {
@@ -266,7 +267,7 @@ describe("SpendingsController (e2e)", () => {
 
       const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const created = (listRes.body as SpendingItem[]).find((s) => s.label === deleteInvoiceLabel);
-      spendingID = created!.ID;
+      spendingID = defined(created, "the created row").ID;
 
       await agent
         .post("/api/spendings/upload")
@@ -496,7 +497,7 @@ describe("SpendingsController (e2e)", () => {
 
       const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const found = (listRes.body as SpendingItem[]).find((s) => s.label === "e2e-update-test");
-      updateSpendingID = found!.ID;
+      updateSpendingID = defined(found, "the created row").ID;
     }, 15000);
 
     it("should update label and amount", () => {
@@ -562,7 +563,7 @@ describe("SpendingsController (e2e)", () => {
 
       const listRes = await agent.get("/api/spendings").query({ from: "2020-01-01", to: "2030-12-31" });
       const found = (listRes.body as SpendingItem[]).find((s) => s.label === "e2e-delete-test");
-      deleteSpendingID = found!.ID;
+      deleteSpendingID = defined(found, "the created row").ID;
     }, 15000);
 
     it("should delete spending and return success", () => {

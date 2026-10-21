@@ -1,10 +1,10 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { markDuplicates, sameProductType } from "@spendings/catalog/catalog-duplicates";
-import { textKey } from "@spendings/text-key";
 import type { CatalogEntry } from "@spendings/catalog/interfaces/catalogTypes";
 import type { ProductTypeRef } from "@spendings/product-types/interfaces/productTypesTypes";
+import { textKey } from "@spendings/text-key";
 import { PrismaService } from "../../prisma/prisma.service";
 
 /** The user's generic products (PFA-219): one row per name, whatever its spelling. */

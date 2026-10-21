@@ -22,7 +22,9 @@ describe("DashboardService.getDailyProjection", () => {
   });
 
   it("uses the same month last year (N-1) when it has spendings, aggregated by day-of-month", async () => {
-    const findMany = jest.fn().mockResolvedValueOnce([row("2025-03-02", 10), row("2025-03-02", 5), row("2025-03-10", 20)]);
+    const findMany = jest
+      .fn()
+      .mockResolvedValueOnce([row("2025-03-02", 10), row("2025-03-02", 5), row("2025-03-10", 20)]);
     const service = makeService(findMany);
 
     const result = await service.getDailyProjection("2026-03-01", "user-1");
@@ -109,7 +111,11 @@ describe("DashboardService.getDailyProjection", () => {
   it("slices the reference month per category, heaviest first", async () => {
     const findMany = jest
       .fn()
-      .mockResolvedValueOnce([row("2025-03-02", 10, "cat-food"), row("2025-03-10", 30, "cat-rent"), row("2025-03-11", 5)]);
+      .mockResolvedValueOnce([
+        row("2025-03-02", 10, "cat-food"),
+        row("2025-03-10", 30, "cat-rent"),
+        row("2025-03-11", 5),
+      ]);
     const categories = jest.fn().mockResolvedValue([
       { ID: "cat-food", name: "food", color: "#111111" },
       { ID: "cat-rent", name: "rent", color: "#222222" },
@@ -129,7 +135,9 @@ describe("DashboardService.getDailyProjection", () => {
   });
 
   it("merges a user category and a global one sharing a name, as the front does", async () => {
-    const findMany = jest.fn().mockResolvedValueOnce([row("2025-03-02", 10, "cat-user"), row("2025-03-02", 4, "cat-global")]);
+    const findMany = jest
+      .fn()
+      .mockResolvedValueOnce([row("2025-03-02", 10, "cat-user"), row("2025-03-02", 4, "cat-global")]);
     const categories = jest.fn().mockResolvedValue([
       { ID: "cat-user", name: "transport", color: "#111111" },
       { ID: "cat-global", name: "transport", color: "#333333" },
@@ -161,7 +169,11 @@ describe("DashboardService.getDailyProjection", () => {
   it("cuts slices that add back up to the month's own totals", async () => {
     const findMany = jest
       .fn()
-      .mockResolvedValueOnce([row("2025-03-02", 10, "cat-food"), row("2025-03-02", 30, "cat-rent"), row("2025-03-10", 5)]);
+      .mockResolvedValueOnce([
+        row("2025-03-02", 10, "cat-food"),
+        row("2025-03-02", 30, "cat-rent"),
+        row("2025-03-10", 5),
+      ]);
     const categories = jest.fn().mockResolvedValue([
       { ID: "cat-food", name: "food", color: "#111111" },
       { ID: "cat-rent", name: "rent", color: "#222222" },
@@ -192,13 +204,18 @@ describe("DashboardService.getMonthlyIncome", () => {
   const row = (dateFrom: string, initialAmount: number | string) => ({ dateFrom: new Date(dateFrom), initialAmount });
 
   it("returns a 12-slot array keyed by the dashboard month, null where absent", async () => {
-    const findMany = jest.fn().mockResolvedValue([row("2026-01-01", 3000), row("2026-03-01", 3200), row("2026-12-01", 3500)]);
+    const findMany = jest
+      .fn()
+      .mockResolvedValue([row("2026-01-01", 3000), row("2026-03-01", 3200), row("2026-12-01", 3500)]);
     const service = makeService(findMany);
 
     const result = await service.getMonthlyIncome("2026", "user-1");
 
     expect(findMany).toHaveBeenCalledWith({
-      where: { userID: "user-1", dateFrom: { gte: new Date(Date.UTC(2026, 0, 1)), lt: new Date(Date.UTC(2027, 0, 1)) } },
+      where: {
+        userID: "user-1",
+        dateFrom: { gte: new Date(Date.UTC(2026, 0, 1)), lt: new Date(Date.UTC(2027, 0, 1)) },
+      },
       select: { dateFrom: true, initialAmount: true },
     });
     expect(result.income).toEqual([3000, null, 3200, null, null, null, null, null, null, null, null, 3500]);

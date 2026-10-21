@@ -1,8 +1,8 @@
-import { mkdtemp, unlink } from "fs/promises";
-import { tmpdir } from "os";
-import { join } from "path";
-import sharp from "sharp";
+import { mkdtemp, unlink } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
+import sharp from "sharp";
 
 jest.mock("fs/promises", () => ({
   ...jest.requireActual<typeof import("fs/promises")>("fs/promises"),

@@ -1,3 +1,6 @@
+import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
+import { MetricsService } from "@monitoring/metrics.service";
+import { GetUserKind } from "@monitoring/user-kind.decorator";
 import {
   BadRequestException,
   Body,
@@ -14,22 +17,18 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import type { Response } from "express";
-import { SpendingsService } from "@spendings/spendings.service";
+import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { CreateSpendingDto } from "@spendings/dto/create-spending.dto";
-import { UpdateSpendingDto } from "@spendings/dto/update-spending.dto";
 import { DeleteInvoiceImageDto } from "@spendings/dto/delete-invoice-image.dto";
+import { LabelSuggestionsQueryDto } from "@spendings/dto/label-suggestions-query.dto";
 import { SpendingsQueryDto } from "@spendings/dto/spendings-query.dto";
 import { SpendingsSearchQueryDto } from "@spendings/dto/spendings-search-query.dto";
-import { LabelSuggestionsQueryDto } from "@spendings/dto/label-suggestions-query.dto";
+import { UpdateSpendingDto } from "@spendings/dto/update-spending.dto";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { SpendingsService } from "@spendings/spendings.service";
 import { invoiceUploadOptions } from "@spendings/upload/upload.config";
 import { CsrfGuard } from "@users/guards/csrf.guard";
-import { MetricsService } from "@monitoring/metrics.service";
-import { GetUserKind } from "@monitoring/user-kind.decorator";
-
-import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
+import type { Response } from "express";
 
 @Controller("spendings")
 @UseGuards(SessionAuthGuard, CsrfGuard)
@@ -53,7 +52,7 @@ export class SpendingsController {
 
   @Get("search")
   async searchSpendings(@Query() query: SpendingsSearchQueryDto, @GetUserId() userID: string) {
-    return this.spendingsService.searchSpendings(query.q, userID, query.cursor, query.year);
+    return this.spendingsService.searchSpendings(userID, query);
   }
 
   @Get("years")
@@ -68,13 +67,7 @@ export class SpendingsController {
 
   @Delete("upload")
   async deleteInvoiceImage(@Body() dto: DeleteInvoiceImageDto, @GetUserId() userID: string): Promise<{ msg: string }> {
-    const result: { msg: string } = await this.spendingsService.deleteInvoiceImage(
-      dto.ID,
-      userID,
-      dto.itemType,
-      dto.invoicefile,
-    );
-    return result;
+    return this.spendingsService.deleteInvoiceImage(userID, dto);
   }
 
   @Put(":id")
@@ -101,13 +94,12 @@ export class SpendingsController {
     if (!body.spendingID || !body.itemType) {
       throw new BadRequestException("spendingID and itemType are required");
     }
-    const result = await this.spendingsService.uploadInvoiceImage(
-      file.path,
-      file.filename,
-      body.spendingID,
-      userID,
-      body.itemType,
-    );
+    const result = await this.spendingsService.uploadInvoiceImage(userID, {
+      filepath: file.path,
+      filename: file.filename,
+      spendingID: body.spendingID,
+      itemType: body.itemType,
+    });
     res.status(200).setHeader("Content-Type", result.contentType);
     return res.send(result.data);
   }

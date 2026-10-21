@@ -1,8 +1,7 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { USER_KIND } from "@monitoring/user-kind";
-
-import type { Request } from "express";
 import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
+import { USER_KIND } from "@monitoring/user-kind";
+import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import type { Request } from "express";
 
 /**
  * Whether the signed-in user is a person or a synthetic bot, for the business metrics (PFA-212).

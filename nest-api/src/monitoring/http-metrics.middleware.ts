@@ -1,7 +1,6 @@
 import { Injectable, NestMiddleware } from "@nestjs/common";
-import { MetricsService } from "./metrics.service";
-
 import type { NextFunction, Request, Response } from "express";
+import { MetricsService } from "./metrics.service";
 
 /**
  * Feeds `http_requests_total` and `http_request_duration_seconds` (IKN-2).
@@ -45,7 +44,7 @@ export class HttpMetricsMiddleware implements NestMiddleware {
       }
 
       const seconds = Number(process.hrtime.bigint() - start) / 1e9;
-      this.metrics.observeHttpRequest(req.method, route, res.statusCode, seconds);
+      this.metrics.observeHttpRequest({ method: req.method, route, statusCode: res.statusCode, seconds });
     };
 
     res.on("finish", record);

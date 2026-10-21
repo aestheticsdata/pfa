@@ -1,7 +1,7 @@
-import { CanActivate, ExecutionContext, Injectable, NotFoundException } from "@nestjs/common";
-import { createHash, timingSafeEqual } from "crypto";
-import type { Request } from "express";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { env } from "@config/env";
+import { CanActivate, ExecutionContext, Injectable, NotFoundException } from "@nestjs/common";
+import type { Request } from "express";
 
 const MIN_TOKEN_LENGTH = 32;
 const LOOPBACK = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);

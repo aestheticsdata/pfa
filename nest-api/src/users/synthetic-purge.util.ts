@@ -1,8 +1,7 @@
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
-import { SYNTHETIC_ACCOUNTS_WHERE, isSyntheticEmail } from "./synthetic-email.util";
-
 import type { PrismaClient } from "../../generated/prisma/client";
+import { isSyntheticEmail, SYNTHETIC_ACCOUNTS_WHERE } from "./synthetic-email.util";
 
 export interface SyntheticAccountRef {
   ID: string;

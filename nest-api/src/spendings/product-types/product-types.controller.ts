@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
-import { ProductTypesService } from "@spendings/product-types/product-types.service";
-import { ProductTypeNameDto } from "@spendings/catalog/dto/product-type-name.dto";
 import { MergeDto } from "@spendings/catalog/dto/merge.dto";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { ProductTypeNameDto } from "@spendings/catalog/dto/product-type-name.dto";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { ProductTypesService } from "@spendings/product-types/product-types.service";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("product-types")

@@ -1,7 +1,6 @@
 import { Controller, Get, Res } from "@nestjs/common";
-import { MetricsService } from "./metrics.service";
-
 import type { Response } from "express";
+import { MetricsService } from "./metrics.service";
 
 /**
  * `GET /api/metrics` (IKN-2), Prometheus text format. No session guard — the Iknos collector

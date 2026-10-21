@@ -1,8 +1,7 @@
 import { Controller, Get, Res } from "@nestjs/common";
-import { HealthService } from "./health.service";
-
 import type { Response } from "express";
 import type { HealthReport } from "./health.service";
+import { HealthService } from "./health.service";
 
 /**
  * `GET /api/health` (IKN-2). The body is the full report either way; the status code carries the

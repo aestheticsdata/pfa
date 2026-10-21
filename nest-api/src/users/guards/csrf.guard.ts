@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
-import type { Request } from "express";
 import { hasAuthenticatedSession, hasValidCsrfToken, isSafeHttpMethod } from "@users/csrf-token.util";
+import type { Request } from "express";
 
 @Injectable()
 export class CsrfGuard implements CanActivate {

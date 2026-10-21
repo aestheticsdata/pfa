@@ -1,8 +1,7 @@
-import { Catch, HttpException, HttpStatus } from "@nestjs/common";
-import { PinoLogger } from "nestjs-pino";
-
 import type { ArgumentsHost, ExceptionFilter } from "@nestjs/common";
+import { Catch, HttpException, HttpStatus } from "@nestjs/common";
 import type { Response } from "express";
+import { PinoLogger } from "nestjs-pino";
 
 /** A plain number rather than the enum: `status` is a number, and comparing the two is a lint error. */
 const SERVER_ERROR = 500;

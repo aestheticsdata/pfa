@@ -1,21 +1,21 @@
+import { randomUUID } from "node:crypto";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { randomUUID } from "crypto";
-import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
-import { ReceiptOcrService } from "@spendings/receipt-lines/receipt-ocr.service";
-import { parseReceiptPages, pickProposal } from "@spendings/receipt-lines/receipt-text-parser";
-import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
+import type { LinkedLine } from "@spendings/product-types/interfaces/productTypesTypes";
 import { linkProductTypes, storeKey } from "@spendings/product-types/product-links";
 import { ProductTypesService } from "@spendings/product-types/product-types.service";
-import { StoresService } from "@spendings/stores/stores.service";
-import { textKey } from "@spendings/text-key";
-import type { LinkedLine } from "@spendings/product-types/interfaces/productTypesTypes";
-import type { StoreIdentity } from "@spendings/stores/interfaces/storesTypes";
 import type {
   ReceiptLine,
   ReceiptProposal,
   SavedReceipt,
   SizeUnit,
 } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
+import { ReceiptOcrService } from "@spendings/receipt-lines/receipt-ocr.service";
+import { parseReceiptPages, pickProposal } from "@spendings/receipt-lines/receipt-text-parser";
+import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
+import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
+import type { StoreIdentity } from "@spendings/stores/interfaces/storesTypes";
+import { StoresService } from "@spendings/stores/stores.service";
+import { textKey } from "@spendings/text-key";
 import { PrismaService } from "../../prisma/prisma.service";
 
 // How far back the auto-link learns from: plenty for a household's receipts.
@@ -30,6 +30,7 @@ const isSizeUnit = (unit: string | null): unit is SizeUnit => unit !== null && S
  */
 @Injectable()
 export class ReceiptLinesService {
+  // biome-ignore lint/complexity/useMaxParams: Nest injects each dependency as its own constructor parameter.
   constructor(
     private readonly prisma: PrismaService,
     private readonly receiptFiles: ReceiptFilesService,

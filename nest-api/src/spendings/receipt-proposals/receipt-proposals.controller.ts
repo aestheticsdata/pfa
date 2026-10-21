@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
-import { ReceiptProposalsService } from "@spendings/receipt-proposals/receipt-proposals.service";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { ReceiptProposalsService } from "@spendings/receipt-proposals/receipt-proposals.service";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 
 /** Reading the user's saved receipts in bulk, then reviewing them (PFA-223). */

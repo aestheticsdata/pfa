@@ -1,26 +1,25 @@
 import { markDuplicates, sameProductType, sameStore } from "@spendings/catalog/catalog-duplicates";
+import type { StoreEntry } from "@spendings/catalog/interfaces/catalogTypes";
+import type { StoreRef } from "@spendings/stores/interfaces/storesTypes";
 
 /** PFA-224 — likely duplicates among the user's stores and product types. Invented names. */
 describe("markDuplicates", () => {
-  const store = (ID: string, name: string, address: string | null, uses = 1) => ({
-    ID,
-    name,
-    address,
-    uses,
-    duplicateOf: null,
-  });
+  const store = (entry: StoreRef & Partial<StoreEntry>): StoreEntry => ({ uses: 1, ...entry, duplicateOf: null });
   const type = (ID: string, name: string, uses = 1) => ({ ID, name, uses, duplicateOf: null });
 
   it("points a store saved without its address to the one with it, the most used kept", () => {
-    const entries = [store("a", "MARCHE EXPRESS", null), store("b", "Marché Express", "4 rue des Lilas", 5)];
+    const entries = [
+      store({ ID: "a", name: "MARCHE EXPRESS", address: null }),
+      store({ ID: "b", name: "Marché Express", address: "4 rue des Lilas", uses: 5 }),
+    ];
     expect(markDuplicates(entries, sameStore).map((entry) => entry.duplicateOf)).toEqual(["b", null]);
   });
 
   it("keeps two shops of one chain apart, and reads a typo in the address as the same", () => {
     const entries = [
-      store("a", "Marché Express", "4 rue des Lilas, 00001 VILLE", 3),
-      store("b", "Marché Express", "18 avenue du Port, 00002 BOURG"),
-      store("c", "Marche Expres", "4 rue des Lila, 00001 VILLE"),
+      store({ ID: "a", name: "Marché Express", address: "4 rue des Lilas, 00001 VILLE", uses: 3 }),
+      store({ ID: "b", name: "Marché Express", address: "18 avenue du Port, 00002 BOURG" }),
+      store({ ID: "c", name: "Marche Expres", address: "4 rue des Lila, 00001 VILLE" }),
     ];
     expect(markDuplicates(entries, sameStore).map((entry) => entry.duplicateOf)).toEqual([null, null, "a"]);
   });

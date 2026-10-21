@@ -1,10 +1,10 @@
-import { Injectable, UnauthorizedException, ConflictException, ForbiddenException } from "@nestjs/common";
-import { randomUUID } from "crypto";
-import { PrismaService } from "../prisma/prisma.service";
+import { randomUUID } from "node:crypto";
+import { ConflictException, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
+import * as bcrypt from "bcryptjs";
 import type { Users } from "../../generated/prisma/client";
+import { PrismaService } from "../prisma/prisma.service";
 import type { AddUserDto } from "./dto/add-user.dto";
 import type { UpdateUserDto } from "./dto/update-user.dto";
-import * as bcrypt from "bcryptjs";
 import { isSyntheticEmail } from "./synthetic-email.util";
 
 export interface SignInResponse {

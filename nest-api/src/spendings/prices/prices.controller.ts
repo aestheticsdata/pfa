@@ -1,7 +1,7 @@
 import { Controller, Get, Param, UseGuards } from "@nestjs/common";
-import { PricesService } from "@spendings/prices/prices.service";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { PricesService } from "@spendings/prices/prices.service";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 
 /** Price comparison by store per product type (PFA-220). */

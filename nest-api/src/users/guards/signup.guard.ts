@@ -1,8 +1,8 @@
+import { env } from "@config/env";
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
-import type { Request } from "express";
 import { isSyntheticEmail } from "@users/synthetic-email.util";
 import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
-import { env } from "@config/env";
+import type { Request } from "express";
 
 @Injectable()
 export class SignupGuard implements CanActivate {

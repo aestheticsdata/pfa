@@ -1,5 +1,5 @@
-import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
 import type { ItemSize, QuantityDetail, SizeUnit } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
+import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
 
 /**
  * Quantities and sizes on a receipt (PFA-219): what a unit price needs. Pure

@@ -1,9 +1,8 @@
+import { SshBackupConfig } from "@config/ssh-backup.config";
 import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { Client } from "ssh2";
-import { SshBackupConfig } from "@config/ssh-backup.config";
-
 import type { SFTPWrapper } from "ssh2";
+import { Client } from "ssh2";
 
 @Injectable()
 export class SshBackupService implements OnModuleDestroy {
@@ -48,7 +47,7 @@ export class SshBackupService implements OnModuleDestroy {
     try {
       await new Promise<void>((resolve, reject) => {
         sftp.unlink(remotePath, (err) => {
-          if (err && (err as { code?: number | string }).code == 2) {
+          if (err && String((err as { code?: number | string }).code) === "2") {
             this.logger.warn(`Backup file not found (already deleted?): ${remotePath}`);
             resolve();
             return;
@@ -116,7 +115,7 @@ export class SshBackupService implements OnModuleDestroy {
         this.mkdirRecursive(sftp, parent)
           .then(() => {
             sftp.mkdir(dir, (mkdirErr) => {
-              if (mkdirErr && (mkdirErr as { code?: number | string }).code != 4) {
+              if (mkdirErr && String((mkdirErr as { code?: number | string }).code) !== "4") {
                 reject(mkdirErr);
                 return;
               }

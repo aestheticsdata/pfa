@@ -1,8 +1,7 @@
 import { Injectable } from "@nestjs/common";
+import type { CategoryStat, CategoryStatsResponse } from "@stats/dto/category-stats-response.interface";
 import { dateWindow } from "@stats/helpers/date-window.helper";
 import { PrismaService } from "../../prisma/prisma.service";
-
-import type { CategoryStat, CategoryStatsResponse } from "@stats/dto/category-stats-response.interface";
 
 /** Stats behind the Catégories and Exceptionnels pages. */
 @Injectable()

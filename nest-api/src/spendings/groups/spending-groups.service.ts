@@ -1,12 +1,12 @@
+import { randomUUID } from "node:crypto";
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import { randomUUID } from "crypto";
-import { SpendingsService } from "@spendings/spendings.service";
-import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
-import { composeGroupLineLabel, isSameDay } from "@spendings/groups/group-label";
 import type { CreateSpendingGroupDto } from "@spendings/dto/create-spending-group.dto";
-import type { UpdateSpendingGroupDto } from "@spendings/dto/update-spending-group.dto";
 import type { MergeSpendingGroupDto } from "@spendings/dto/merge-spending-group.dto";
 import type { SpendingGroupLineDto } from "@spendings/dto/spending-group-line.dto";
+import type { UpdateSpendingGroupDto } from "@spendings/dto/update-spending-group.dto";
+import { composeGroupLineLabel, isSameDay } from "@spendings/groups/group-label";
+import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
+import { SpendingsService } from "@spendings/spendings.service";
 import { PrismaService } from "../../prisma/prisma.service";
 
 /**
@@ -173,7 +173,8 @@ export class SpendingGroupsService {
     }
 
     const byID = new Map(rows.map((row) => [row.ID, row]));
-    const ordered = ids.map((id) => byID.get(id)!);
+    // Every id was found above (same count), so the lookup never misses.
+    const ordered = ids.flatMap((id) => byID.get(id) ?? []);
     const invoicefile = ordered.find((row) => row.invoicefile)?.invoicefile ?? null;
     const formerGroupIDs = [...new Set(rows.flatMap((row) => (row.groupID ? [row.groupID] : [])))];
     const groupID = randomUUID();

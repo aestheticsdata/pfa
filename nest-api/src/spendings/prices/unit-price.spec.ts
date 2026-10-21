@@ -1,6 +1,5 @@
-import { compareStores, unitPrice } from "@spendings/prices/unit-price";
-
 import type { Purchase } from "@spendings/prices/interfaces/pricesTypes";
+import { compareStores, unitPrice } from "@spendings/prices/unit-price";
 
 /** PFA-220 — fair prices per kilo / litre / piece, stores ranked. Invented stores and prices. */
 const purchase = (patch: Partial<Purchase>): Purchase => ({

@@ -66,6 +66,19 @@ The E2E tests require a dedicated test user in your local database. Create it on
 
 Optional: `E2E_SPENDING_ID_WITH_INVOICE` — ID of a spending with an invoice for the e2e-test user. When set, the GET image test asserts the image case (data URL), otherwise it accepts any 200 response.
 
+## Lint and format
+
+Biome, like the front (PFA-262): `pnpm lint` checks, `pnpm lint:fix` fixes, `pnpm format` formats.
+`deploy-api.sh` runs `biome ci .` in its gate.
+
+- No ESLint left. typescript-eslint's type-checked set is covered by `tsc` (strict) plus Biome's
+  type-aware `noFloatingPromises` / `noMisusedPromises` (nursery). The `no-unsafe-*` family has no
+  Biome equivalent; `src` holds no explicit `any`, and strict mode (PFA-261) closes the implicit ones.
+- `useImportType` is off: Nest's dependency injection reads constructor parameter types through
+  decorator metadata, which an `import type` erases.
+- `useMaxParams` (3) is off for controllers, whose decorated handlers take what Nest injects; the one
+  injected constructor past three carries a justified `biome-ignore`. CLI scripts may use `console`.
+
 ## Production deployment
 
 - `prebuild` runs `prisma generate` automatically before each build

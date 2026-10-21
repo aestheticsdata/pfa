@@ -1,11 +1,11 @@
+import { randomUUID } from "node:crypto";
 import { Injectable, Logger } from "@nestjs/common";
-import { randomUUID } from "crypto";
-import { format } from "date-fns";
+import type { ReceiptProposal } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 import { ReceiptLinesService } from "@spendings/receipt-lines/receipt-lines.service";
 import { ownReceipts } from "@spendings/receipt-proposals/bulk-candidates";
-import { PROPOSAL_STATUS } from "@spendings/receipt-proposals/proposal-status";
-import type { ReceiptProposal } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 import type { BulkReadStatus, PendingProposal } from "@spendings/receipt-proposals/interfaces/receiptProposalsTypes";
+import { PROPOSAL_STATUS } from "@spendings/receipt-proposals/proposal-status";
+import { format } from "date-fns";
 import type { Prisma } from "../../../generated/prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 

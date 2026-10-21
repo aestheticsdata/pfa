@@ -1,4 +1,4 @@
-import * as path from "path";
+import * as path from "node:path";
 
 /**
  * NODE_ENV values the code branches on. Anything else behaves like development.

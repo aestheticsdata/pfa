@@ -3,21 +3,21 @@
 import "reflect-metadata";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { FIELD_LIMITS } from "@config/field-limits";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { FIELD_LIMITS } from "@config/field-limits";
-import { CreateSpendingDto } from "../spendings/dto/create-spending.dto";
-import { UpdateSpendingDto } from "../spendings/dto/update-spending.dto";
-import { CreateSpendingCategoryDto } from "../spendings/dto/create-spending-category.dto";
 import { UpdateCategoryDto } from "../categories/dto/update-category.dto";
-import { CreateRecurringDto } from "../recurrings/dto/create-recurring.dto";
-import { UpdateRecurringDto } from "../recurrings/dto/update-recurring.dto";
 import { CreateExceptionalDto } from "../exceptionals/dto/create-exceptional.dto";
 import { UpdateExceptionalDto } from "../exceptionals/dto/update-exceptional.dto";
+import { CreateRecurringDto } from "../recurrings/dto/create-recurring.dto";
+import { UpdateRecurringDto } from "../recurrings/dto/update-recurring.dto";
+import { CreateSpendingDto } from "../spendings/dto/create-spending.dto";
+import { CreateSpendingCategoryDto } from "../spendings/dto/create-spending-category.dto";
 import { CreateSpendingGroupDto } from "../spendings/dto/create-spending-group.dto";
-import { UpdateSpendingGroupDto } from "../spendings/dto/update-spending-group.dto";
-import { SpendingGroupLineDto } from "../spendings/dto/spending-group-line.dto";
 import { MergeSpendingGroupDto, MergeSpendingGroupLineDto } from "../spendings/dto/merge-spending-group.dto";
+import { SpendingGroupLineDto } from "../spendings/dto/spending-group-line.dto";
+import { UpdateSpendingDto } from "../spendings/dto/update-spending.dto";
+import { UpdateSpendingGroupDto } from "../spendings/dto/update-spending-group.dto";
 import { GROUP_LABEL_SEPARATOR } from "../spendings/groups/group-label";
 import { AddUserDto } from "../users/dto/add-user.dto";
 import { SignInDto } from "../users/dto/sign-in.dto";
@@ -160,18 +160,18 @@ describe("DTO length bounds", () => {
     return errors.filter((error) => error.property === property);
   };
 
-  const valueOf = ({ build }: Case, length: number) => (build ?? ((n: number) => "x".repeat(n)))(length);
+  const inputOf = ({ build }: Case, length: number) => (build ?? ((n: number) => "x".repeat(n)))(length);
 
   it.each(cases)("$Dto.name — $field accepts exactly $max characters", async (testCase) => {
     const { Dto, base, field, max } = testCase;
 
-    expect(await errorsFor(Dto, { ...base, [field]: valueOf(testCase, max) }, field)).toEqual([]);
+    expect(await errorsFor(Dto, { ...base, [field]: inputOf(testCase, max) }, field)).toEqual([]);
   });
 
   it.each(cases)("$Dto.name — $field rejects one character over $max", async (testCase) => {
     const { Dto, base, field, max } = testCase;
 
-    const errors = await errorsFor(Dto, { ...base, [field]: valueOf(testCase, max + 1) }, field);
+    const errors = await errorsFor(Dto, { ...base, [field]: inputOf(testCase, max + 1) }, field);
     expect(errors).toHaveLength(1);
     expect(errors[0].constraints).toHaveProperty("maxLength");
   });

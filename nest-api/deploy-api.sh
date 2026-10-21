@@ -323,15 +323,15 @@ ensure_gate_node() {
 
 check_quality_gate() {
   ensure_gate_node
-  log "➡️  Quality gate — install check, lint, types, unit tests (node $(node -v))"
+  log "➡️  Quality gate — install check, Biome, types, unit tests (node $(node -v))"
 
   pnpm install --frozen-lockfile --prefer-offline >/dev/null || {
     echo "❌ ERROR: quality gate — local dependencies do not match pnpm-lock.yaml" >&2
     exit 1
   }
-  # Specs join the lint scope with PFA-261, which fixes the errors they carry today.
-  pnpm exec eslint "src/**/*.ts" --ignore-pattern "**/*.spec.ts" || {
-    echo "❌ ERROR: quality gate — ESLint failed" >&2
+  # Biome (PFA-262): lint and format, sources, specs, e2e and scripts alike.
+  pnpm exec biome ci . || {
+    echo "❌ ERROR: quality gate — Biome failed" >&2
     exit 1
   }
   pnpm exec tsc --noEmit -p tsconfig.json || {

@@ -1,11 +1,10 @@
+import { USER_KIND } from "@monitoring/user-kind";
+import type { SessionCounts } from "@redis/interfaces/redisTypes";
+import type { RedisService } from "@redis/redis.service";
+import type { DbPoolStats } from "../prisma/db-pool-stats";
+import type { PrismaService } from "../prisma/prisma.service";
 import { MetricsService } from "./metrics.service";
 import { readReleaseMarker } from "./release-marker";
-import { USER_KIND } from "@monitoring/user-kind";
-
-import type { PrismaService } from "../prisma/prisma.service";
-import type { RedisService } from "@redis/redis.service";
-import type { SessionCounts } from "@redis/interfaces/redisTypes";
-import type { DbPoolStats } from "../prisma/db-pool-stats";
 
 jest.mock("./release-marker");
 
@@ -38,9 +37,9 @@ describe("MetricsService", () => {
 
   it("counts http requests by method, route pattern and status code", async () => {
     const service = build();
-    service.observeHttpRequest("GET", "/api/spendings/:id", 200, 0.03);
-    service.observeHttpRequest("GET", "/api/spendings/:id", 200, 0.05);
-    service.observeHttpRequest("POST", "/api/spendings", 500, 1.2);
+    service.observeHttpRequest({ method: "GET", route: "/api/spendings/:id", statusCode: 200, seconds: 0.03 });
+    service.observeHttpRequest({ method: "GET", route: "/api/spendings/:id", statusCode: 200, seconds: 0.05 });
+    service.observeHttpRequest({ method: "POST", route: "/api/spendings", statusCode: 500, seconds: 1.2 });
 
     const text = await service.metricsText();
 
@@ -50,7 +49,7 @@ describe("MetricsService", () => {
 
   it("observes durations in a histogram with the agreed buckets, without a status label", async () => {
     const service = build();
-    service.observeHttpRequest("GET", "/api/dashboard", 200, 0.07);
+    service.observeHttpRequest({ method: "GET", route: "/api/dashboard", statusCode: 200, seconds: 0.07 });
 
     const text = await service.metricsText();
 

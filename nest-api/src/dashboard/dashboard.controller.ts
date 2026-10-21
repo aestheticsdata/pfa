@@ -1,13 +1,13 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from "@nestjs/common";
-import type { Response } from "express";
 import { DashboardService } from "@dashboard/dashboard.service";
+import { CreateDashboardDto } from "@dashboard/dto/create-dashboard.dto";
 import { DashboardQueryDto } from "@dashboard/dto/dashboard-query.dto";
 import { MonthlyIncomeQueryDto } from "@dashboard/dto/monthly-income-query.dto";
-import { CreateDashboardDto } from "@dashboard/dto/create-dashboard.dto";
 import { UpdateDashboardDto } from "@dashboard/dto/update-dashboard.dto";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from "@nestjs/common";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { CsrfGuard } from "@users/guards/csrf.guard";
+import type { Response } from "express";
 
 @Controller("dashboard")
 @UseGuards(SessionAuthGuard, CsrfGuard)

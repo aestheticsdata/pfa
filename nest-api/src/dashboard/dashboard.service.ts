@@ -1,9 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { randomUUID } from "crypto";
-import type { DashboardItem } from "@dashboard/interfaces/dashboardTypes";
-import { PrismaService } from "../prisma/prisma.service";
-
+import { randomUUID } from "node:crypto";
 import type { MonthlyIncomeResponse } from "@dashboard/dto/monthly-income-response.interface";
+import type { DashboardItem } from "@dashboard/interfaces/dashboardTypes";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { PrismaService } from "../prisma/prisma.service";
 
 // Which historical period the sparkline projection is based on (COS-27). Follows
 // the GLOBAL projection chain; "none" is the very-first-month case (no reference

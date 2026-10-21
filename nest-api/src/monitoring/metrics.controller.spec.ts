@@ -1,6 +1,5 @@
-import { MetricsController } from "./metrics.controller";
-
 import type { Response } from "express";
+import { MetricsController } from "./metrics.controller";
 import type { MetricsService } from "./metrics.service";
 
 /**

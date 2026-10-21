@@ -1,7 +1,6 @@
-import { buildLoggerParams } from "./logger.config";
-import { readReleaseMarker } from "@monitoring/release-marker";
-
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { readReleaseMarker } from "@monitoring/release-marker";
+import { buildLoggerParams } from "./logger.config";
 
 jest.mock("@monitoring/release-marker");
 

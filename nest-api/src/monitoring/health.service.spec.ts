@@ -1,8 +1,7 @@
+import type { RedisService } from "@redis/redis.service";
+import type { PrismaService } from "../prisma/prisma.service";
 import { HealthService } from "./health.service";
 import { readReleaseMarker } from "./release-marker";
-
-import type { PrismaService } from "../prisma/prisma.service";
-import type { RedisService } from "@redis/redis.service";
 
 jest.mock("./release-marker");
 

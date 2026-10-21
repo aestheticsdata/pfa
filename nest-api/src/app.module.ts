@@ -1,25 +1,25 @@
-import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import { APP_FILTER } from "@nestjs/core";
-import { ConfigModule } from "@nestjs/config";
-import { ScheduleModule } from "@nestjs/schedule";
-import { LoggerModule } from "nestjs-pino";
+import { CategoriesModule } from "@categories/categories.module";
 import appConfig from "@config/app.config";
-import sshBackupConfig from "@config/ssh-backup.config";
 import dbBackupConfig from "@config/db-backup.config";
 import { validate } from "@config/env.validation";
-import { AllExceptionsFilter, buildLoggerParams, TraceIdMiddleware } from "@infrastructure/logger";
-import { RedisModule } from "@redis/redis.module";
-import { SshBackupModule } from "@infrastructure/ssh-backup/ssh-backup.module";
-import { DbBackupModule } from "@infrastructure/db-backup/db-backup.module";
-import { PrismaModule } from "./prisma/prisma.module";
-import { MonitoringModule } from "./monitoring/monitoring.module";
-import { UsersModule } from "@users/users.module";
-import { SpendingsModule } from "@spendings/spendings.module";
-import { RecurringsModule } from "@recurrings/recurrings.module";
+import sshBackupConfig from "@config/ssh-backup.config";
 import { DashboardModule } from "@dashboard/dashboard.module";
-import { StatsModule } from "@stats/stats.module";
-import { CategoriesModule } from "@categories/categories.module";
 import { ExceptionalsModule } from "@exceptionals/exceptionals.module";
+import { DbBackupModule } from "@infrastructure/db-backup/db-backup.module";
+import { AllExceptionsFilter, buildLoggerParams, TraceIdMiddleware } from "@infrastructure/logger";
+import { SshBackupModule } from "@infrastructure/ssh-backup/ssh-backup.module";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { APP_FILTER } from "@nestjs/core";
+import { ScheduleModule } from "@nestjs/schedule";
+import { RecurringsModule } from "@recurrings/recurrings.module";
+import { RedisModule } from "@redis/redis.module";
+import { SpendingsModule } from "@spendings/spendings.module";
+import { StatsModule } from "@stats/stats.module";
+import { UsersModule } from "@users/users.module";
+import { LoggerModule } from "nestjs-pino";
+import { MonitoringModule } from "./monitoring/monitoring.module";
+import { PrismaModule } from "./prisma/prisma.module";
 
 @Module({
   imports: [

@@ -1,15 +1,14 @@
 import { Injectable } from "@nestjs/common";
-import { endOfMonth, format, startOfMonth } from "date-fns";
-import { dateWindow } from "@stats/helpers/date-window.helper";
-import { round2 } from "@stats/helpers/rounding.helper";
-import { makeRange, weekRangesOfMonth } from "@stats/helpers/week-ranges.helper";
-import { PrismaService } from "../../prisma/prisma.service";
-
-import type { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
 import type { BusiestWeekResponse } from "@stats/dto/busiest-week-response.interface";
+import type { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
 import type { CategoryTrendPoint, CategoryTrendsResponse } from "@stats/dto/category-trends-response.interface";
 import type { MonthlyStatsResponse } from "@stats/dto/monthly-stats-response.interface";
 import type { SpendingPaceResponse } from "@stats/dto/spending-pace-response.interface";
+import { dateWindow } from "@stats/helpers/date-window.helper";
+import { round2 } from "@stats/helpers/rounding.helper";
+import { makeRange, weekRangesOfMonth } from "@stats/helpers/week-ranges.helper";
+import { endOfMonth, format, startOfMonth } from "date-fns";
+import { PrismaService } from "../../prisma/prisma.service";
 
 /** Stats behind the Dépenses and Dashboard pages. */
 @Injectable()

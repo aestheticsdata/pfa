@@ -1,8 +1,8 @@
+import { env } from "@config/env";
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
-import { createClient, type RedisClientType } from "redis";
 
 import type { SessionCounts } from "@redis/interfaces/redisTypes";
-import { env } from "@config/env";
+import { createClient, type RedisClientType } from "redis";
 
 const SESSION_PREFIX = "pfa:";
 /**
