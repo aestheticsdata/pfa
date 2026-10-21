@@ -1,5 +1,5 @@
-import { IsEmail, IsString, MaxLength, MinLength } from "class-validator";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { IsEmail, IsString, MaxLength, MinLength } from "class-validator";
 
 export class SignInDto {
   @IsEmail()

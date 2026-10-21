@@ -1,13 +1,16 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { randomUUID } from "crypto";
-import { readFile } from "fs/promises";
+import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import { assertCategoryAccessible, resolveCategoryID } from "@categories/category-resolver";
-import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
+import { Injectable, NotFoundException } from "@nestjs/common";
+import type { DeleteInvoiceImageDto } from "@spendings/dto/delete-invoice-image.dto";
 import type { SpendingCategoryInput } from "@spendings/dto/spending-category-input.interface";
+import type { SpendingLabelSuggestion } from "@spendings/dto/spending-label-suggestion.interface";
+import type { SpendingsSearchQueryDto } from "@spendings/dto/spendings-search-query.dto";
+import type { InvoiceUpload } from "@spendings/interfaces/invoiceUploadTypes";
+import type { SpendingListItem, SpendingSearchPage } from "@spendings/interfaces/spendingItemTypes";
+import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
 import { SPENDING_ROW_SELECT, toSpendingItem } from "@spendings/spending-row";
-import type { SpendingListItem, SpendingSearchPage } from "@spendings/interfaces/spendingItemTypes";
-import type { SpendingLabelSuggestion } from "@spendings/dto/spending-label-suggestion.interface";
 import { PrismaService } from "../prisma/prisma.service";
 
 const MIME_BY_EXT: Record<string, string> = {
@@ -206,7 +209,10 @@ export class SpendingsService {
   // capped page plus the unbounded total so the UI can say "N résultats". The
   // category is flattened to name/color exactly like getSpendings, and a category
   // owned by another user is nulled out defensively.
-  async searchSpendings(query: string, userID: string, cursor?: string, year?: string): Promise<SpendingSearchPage> {
+  async searchSpendings(
+    userID: string,
+    { q: query, cursor, year }: SpendingsSearchQueryDto,
+  ): Promise<SpendingSearchPage> {
     const q = query.trim();
     const hasText = q.length >= MIN_SEARCH_LENGTH;
     const yearNum = year ? Number(year) : Number.NaN;
@@ -384,10 +390,8 @@ export class SpendingsService {
   }
 
   async deleteInvoiceImage(
-    spendingID: string,
     userID: string,
-    itemType: string,
-    invoicefile: string,
+    { ID: spendingID, itemType, invoicefile }: DeleteInvoiceImageDto,
   ): Promise<{ msg: string }> {
     // Rejects a traversal before anything is touched.
     this.receiptFiles.safePath(userID, invoicefile);
@@ -412,11 +416,8 @@ export class SpendingsService {
   }
 
   async uploadInvoiceImage(
-    filepath: string,
-    filename: string,
-    spendingID: string,
     userID: string,
-    itemType: string,
+    { filepath, filename, spendingID, itemType }: InvoiceUpload,
   ): Promise<{ data: string; contentType: string }> {
     const storedFilename = await this.receiptFiles.store(filepath, filename, userID);
 

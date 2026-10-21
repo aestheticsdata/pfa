@@ -1,9 +1,8 @@
-import { BadRequestException, HttpException, HttpStatus, NotFoundException } from "@nestjs/common";
-import { AllExceptionsFilter } from "./all-exceptions.filter";
-
 import type { ArgumentsHost } from "@nestjs/common";
+import { BadRequestException, HttpException, HttpStatus, NotFoundException } from "@nestjs/common";
 import type { Request, Response } from "express";
 import type { PinoLogger } from "nestjs-pino";
+import { AllExceptionsFilter } from "./all-exceptions.filter";
 
 /**
  * The filter's whole contract is the pair "log everything, change nothing" (IKN-1), and IKN-31

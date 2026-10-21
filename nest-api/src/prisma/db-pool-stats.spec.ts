@@ -1,4 +1,4 @@
-import { capturePool, poolStats, type MariaDbPoolLike } from "./db-pool-stats";
+import { capturePool, type MariaDbPoolLike, poolStats } from "./db-pool-stats";
 
 /**
  * `db_pool_connections` (IKN-2) needs the mariadb pool that `@prisma/adapter-mariadb` creates

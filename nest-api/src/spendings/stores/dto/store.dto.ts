@@ -1,5 +1,5 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
 
 /** A store as the user confirmed it: name and address (PFA-218, PFA-219). */
 export class StoreDto {

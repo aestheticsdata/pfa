@@ -1,12 +1,11 @@
+import { AppConfig } from "@config/app.config";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { AppConfig } from "@config/app.config";
 import { RedisService } from "@redis/redis.service";
-import { SYNTHETIC_ACCOUNTS_WHERE, isSyntheticEmail } from "@users/synthetic-email.util";
+import { isSyntheticEmail, SYNTHETIC_ACCOUNTS_WHERE } from "@users/synthetic-email.util";
+import type { PurgeCounts, SyntheticAccountRef } from "@users/synthetic-purge.util";
 import { purgeSyntheticAccounts } from "@users/synthetic-purge.util";
 import { PrismaService } from "../prisma/prisma.service";
-
-import type { PurgeCounts, SyntheticAccountRef } from "@users/synthetic-purge.util";
 
 /**
  * Disable or purge **one** bot account, on the bot back-office's request (PFA-127). Every lookup

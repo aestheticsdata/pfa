@@ -30,7 +30,7 @@ loadEnv();
 
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client";
-import { SYNTHETIC_ACCOUNTS_WHERE, isSyntheticEmail } from "../src/users/synthetic-email.util";
+import { isSyntheticEmail, SYNTHETIC_ACCOUNTS_WHERE } from "../src/users/synthetic-email.util";
 import { purgeSyntheticAccounts } from "../src/users/synthetic-purge.util";
 
 function makePrisma(): PrismaClient {

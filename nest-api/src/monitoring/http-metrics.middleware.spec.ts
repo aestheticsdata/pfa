@@ -1,7 +1,7 @@
 import { EventEmitter } from "node:events";
-import { HttpMetricsMiddleware } from "./http-metrics.middleware";
-
+import type { HttpObservation } from "@monitoring/interfaces/monitoringTypes";
 import type { NextFunction, Request, Response } from "express";
+import { HttpMetricsMiddleware } from "./http-metrics.middleware";
 import type { MetricsService } from "./metrics.service";
 
 /**
@@ -23,8 +23,8 @@ describe("HttpMetricsMiddleware", () => {
   beforeEach(() => {
     observations = [];
     const metrics = {
-      observeHttpRequest: (method: string, route: string, statusCode: number, seconds: number) => {
-        observations.push({ method, route, statusCode, seconds });
+      observeHttpRequest: (observation: HttpObservation) => {
+        observations.push(observation);
       },
     } as unknown as MetricsService;
     middleware = new HttpMetricsMiddleware(metrics);

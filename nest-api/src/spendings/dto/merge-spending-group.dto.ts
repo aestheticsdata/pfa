@@ -1,6 +1,6 @@
-import { ArrayMinSize, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
-import { Type } from "class-transformer";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { Type } from "class-transformer";
+import { ArrayMinSize, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from "class-validator";
 
 /** An existing spending joining the new group, with its detail in the group. */
 export class MergeSpendingGroupLineDto {

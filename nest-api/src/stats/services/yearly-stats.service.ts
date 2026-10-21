@@ -1,16 +1,15 @@
 import { Injectable } from "@nestjs/common";
+import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
+import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-expense-response.interface";
+import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-response.interface";
+import type { SearchTimelineQueryDto } from "@stats/dto/search-timeline-query.dto";
+import type { SearchTimelineBucket, SearchTimelineResponse } from "@stats/dto/search-timeline-response.interface";
+import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
+import type { WeekdayCategoriesResponse, WeekdayCategory } from "@stats/dto/weekday-categories-response.interface";
+import { round2, roundCurrency } from "@stats/helpers/rounding.helper";
 import { format, getYear, parse } from "date-fns";
 import { fr } from "date-fns/locale";
-import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
-import { round2, roundCurrency } from "@stats/helpers/rounding.helper";
 import { PrismaService } from "../../prisma/prisma.service";
-
-import type { SearchTimelineQueryDto } from "@stats/dto/search-timeline-query.dto";
-import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
-import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-response.interface";
-import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-expense-response.interface";
-import type { WeekdayCategoriesResponse, WeekdayCategory } from "@stats/dto/weekday-categories-response.interface";
-import type { SearchTimelineBucket, SearchTimelineResponse } from "@stats/dto/search-timeline-response.interface";
 
 /** Stats behind the Statistiques page. */
 @Injectable()
@@ -222,14 +221,11 @@ export class YearlyStatsService {
       const categoryName = row.category.name.toLowerCase();
 
       const key = `${year}-${monthLabel}`;
-      if (!monthTotals.has(key)) {
-        monthTotals.set(key, {
-          year,
-          month: monthLabel,
-          totals: { ...categoryTemplate },
-        });
+      let entry = monthTotals.get(key);
+      if (!entry) {
+        entry = { year, month: monthLabel, totals: { ...categoryTemplate } };
+        monthTotals.set(key, entry);
       }
-      const entry = monthTotals.get(key)!;
       const amount = Number(row.amount.toString());
       entry.totals[categoryName] = (entry.totals[categoryName] ?? 0) + amount;
     }
@@ -241,8 +237,7 @@ export class YearlyStatsService {
       return monthOrder.indexOf(monthA) - monthOrder.indexOf(monthB);
     });
 
-    for (const key of sortedKeys) {
-      const entry = monthTotals.get(key)!;
+    for (const entry of sortedKeys.flatMap((key) => monthTotals.get(key) ?? [])) {
       const yearStr = String(entry.year);
       if (!output.data[yearStr]) {
         output.data[yearStr] = [];

@@ -1,7 +1,7 @@
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import session from "express-session";
 import { RedisStore } from "connect-redis";
+import session from "express-session";
 import { AppModule } from "../src/app.module";
 import { HttpMetricsMiddleware } from "../src/monitoring/http-metrics.middleware";
 import { RedisService } from "../src/redis/redis.service";

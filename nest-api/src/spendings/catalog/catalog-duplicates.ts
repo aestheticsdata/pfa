@@ -1,5 +1,5 @@
-import { keyDistance, textKey } from "@spendings/text-key";
 import type { CatalogEntry, SameEntry, StoreEntry } from "@spendings/catalog/interfaces/catalogTypes";
+import { keyDistance, textKey } from "@spendings/text-key";
 
 // An abbreviated word ("LIQ" for "LIQUIDE") keeps this many letters at least.
 const MIN_ABBREVIATION = 3;

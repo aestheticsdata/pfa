@@ -1,7 +1,7 @@
-import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
-import { Type } from "class-transformer";
 import { MAX_AMOUNT } from "@config/amount-limits";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Max, MaxLength, Min } from "class-validator";
 
 export class UpdateExceptionalDto {
   @IsString()

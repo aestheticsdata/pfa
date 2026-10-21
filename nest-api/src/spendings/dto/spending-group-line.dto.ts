@@ -1,8 +1,8 @@
-import { IsNumber, IsOptional, IsPositive, IsString, Max, MaxLength, ValidateNested } from "class-validator";
-import { Type } from "class-transformer";
 import { MAX_AMOUNT } from "@config/amount-limits";
 import { FIELD_LIMITS } from "@config/field-limits";
 import { CreateSpendingCategoryDto } from "@spendings/dto/create-spending-category.dto";
+import { Type } from "class-transformer";
+import { IsNumber, IsOptional, IsPositive, IsString, Max, MaxLength, ValidateNested } from "class-validator";
 
 /** One line of a group (PFA-189): its own category, optional detail and amount. */
 export class SpendingGroupLineDto {

@@ -120,9 +120,11 @@ const report = async (body: Record<string, unknown>): Promise<void> => {
  *
  *     await withZeusReport('daily-digest', '0 8 * * *', async () => { ... }, 'Europe/Paris');
  */
+// biome-ignore lint/complexity/useMaxParams: Zeus's shared helper, copied as is into every app — same signature everywhere.
 export const withZeusReport = async (
   cron: string,
   schedule: string,
+  // biome-ignore lint/suspicious/noConfusingVoidType: a job with nothing to say returns nothing.
   fn: () => Promise<ZeusCronOutcome | void>,
   timezone?: string,
 ): Promise<void> => {

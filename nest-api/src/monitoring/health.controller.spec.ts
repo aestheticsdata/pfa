@@ -1,6 +1,5 @@
-import { HealthController } from "./health.controller";
-
 import type { Response } from "express";
+import { HealthController } from "./health.controller";
 import type { HealthReport, HealthService } from "./health.service";
 
 /**

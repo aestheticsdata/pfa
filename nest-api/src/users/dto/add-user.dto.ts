@@ -1,5 +1,5 @@
-import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { IsEmail, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class AddUserDto {
   @IsString()

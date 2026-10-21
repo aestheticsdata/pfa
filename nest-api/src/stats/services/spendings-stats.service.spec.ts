@@ -243,7 +243,7 @@ describe("SpendingsStatsService.getSpendingPace", () => {
   const makeService = (totals: number[]) => {
     // One aggregate call per month back (M-1, M-2, M-3), resolved in call order.
     const aggregate = jest.fn();
-    totals.forEach((total) => aggregate.mockResolvedValueOnce({ _sum: { amount: total } }));
+    for (const total of totals) aggregate.mockResolvedValueOnce({ _sum: { amount: total } });
     const prisma = { spendings: { aggregate } } as unknown as never;
     return { service: new SpendingsStatsService(prisma), aggregate };
   };

@@ -1,10 +1,9 @@
+import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
+import type { HealthReport } from "../src/monitoring/health.service";
 import { PrismaService } from "../src/prisma/prisma.service";
 import { createAuthenticatedSession } from "./auth-session.helper";
 import { createE2eApp } from "./e2e-app";
-
-import type { INestApplication } from "@nestjs/common";
-import type { HealthReport } from "../src/monitoring/health.service";
 
 /**
  * IKN-2 against the real app: the scrape endpoint and the health probe exactly as the Iknos

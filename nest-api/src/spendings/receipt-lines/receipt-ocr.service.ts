@@ -1,10 +1,10 @@
+import { join } from "node:path";
 import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
-import { join } from "path";
-import sharp from "sharp";
-import { createWorker, OEM } from "tesseract.js";
-import type { Worker } from "tesseract.js";
-import { findSlips, flattenLighting, inkPerColumn } from "@spendings/receipt-lines/receipt-image";
 import type { GrayImage, SlipBounds } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
+import { findSlips, flattenLighting, inkPerColumn } from "@spendings/receipt-lines/receipt-image";
+import sharp from "sharp";
+import type { Worker } from "tesseract.js";
+import { createWorker, OEM } from "tesseract.js";
 
 // The French model ships in an npm package and is read from disk: no CDN
 // download, no API call — the OCR runs entirely on the server (PFA-214).

@@ -1,9 +1,9 @@
+import { randomUUID } from "node:crypto";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { randomUUID } from "crypto";
 import { PrismaService } from "../src/prisma/prisma.service";
-import { createE2eApp } from "./e2e-app";
 import { createAuthenticatedSession } from "./auth-session.helper";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;
@@ -89,8 +89,8 @@ describe("CategoriesController (e2e)", () => {
           expect(Array.isArray(res.body)).toBe(true);
           const updated = (res.body as CategoryItem[]).find((c) => c.ID === categoryID);
           expect(updated).toBeDefined();
-          expect(updated!.name).toBe("e2e-updated-category");
-          expect(updated!.color).toBe("#00ff00");
+          expect(updated?.name).toBe("e2e-updated-category");
+          expect(updated?.color).toBe("#00ff00");
         });
     });
 
@@ -109,10 +109,7 @@ describe("CategoriesController (e2e)", () => {
     });
 
     it("should return 400 when name is missing", () => {
-      return agent
-        .put(`/api/categories/${categoryID}`)
-        .send({ color: "#000" })
-        .expect(400);
+      return agent.put(`/api/categories/${categoryID}`).send({ color: "#000" }).expect(400);
     });
   });
 
@@ -142,15 +139,11 @@ describe("CategoriesController (e2e)", () => {
     });
 
     it("should return 404 when deleting already deleted category", () => {
-      return agent
-        .delete(`/api/categories/${deleteCategoryID}`)
-        .expect(404);
+      return agent.delete(`/api/categories/${deleteCategoryID}`).expect(404);
     });
 
     it("should return 404 for non-existent category", () => {
-      return agent
-        .delete("/api/categories/00000000-0000-0000-0000-000000000000")
-        .expect(404);
+      return agent.delete("/api/categories/00000000-0000-0000-0000-000000000000").expect(404);
     });
 
     it("should return 401 without session cookie", () => {

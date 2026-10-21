@@ -1,4 +1,4 @@
-import { randomBytes, timingSafeEqual } from "crypto";
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import type { Request } from "express";
 
 const CSRF_TOKEN_SIZE_BYTES = 32;

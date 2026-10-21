@@ -1,8 +1,8 @@
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { createE2eApp } from "./e2e-app";
 import { createAuthenticatedSession } from "./auth-session.helper";
 import { firstDayOfMonth } from "./dates.helper";
+import { createE2eApp } from "./e2e-app";
 
 type SupertestApp = Parameters<typeof request>[0];
 type Agent = ReturnType<typeof request.agent>;

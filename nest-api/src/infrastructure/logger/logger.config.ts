@@ -1,11 +1,10 @@
 import { randomUUID } from "node:crypto";
+import type { IncomingMessage, ServerResponse } from "node:http";
+import { env } from "@config/env";
 import ecsFormat from "@elastic/ecs-pino-format";
 import { readReleaseMarker } from "@monitoring/release-marker";
-
-import type { IncomingMessage, ServerResponse } from "node:http";
 import type { Params } from "nestjs-pino";
 import type { LoggerOptions } from "pino";
-import { env } from "@config/env";
 
 /**
  * Structured logging for the API — ECS NDJSON on stdout, nothing else (IKN-1).
@@ -145,7 +144,7 @@ export function buildLoggerParams(): Params {
        * `TraceIdMiddleware`. The ECS name is deliberate: the day an OpenTelemetry SDK is added,
        * the field is already the one it populates, and nothing downstream changes.
        */
-      genReqId(req: IncomingMessage, res: ServerResponse): string {
+      genReqId(_req: IncomingMessage, res: ServerResponse): string {
         const id = randomUUID();
         res.setHeader("x-request-id", id);
         return id;

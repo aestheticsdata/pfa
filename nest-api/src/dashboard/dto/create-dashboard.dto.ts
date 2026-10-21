@@ -1,6 +1,6 @@
-import { IsNotEmpty, IsNumber, IsString, Max, Min } from "class-validator";
-import { Type } from "class-transformer";
 import { MAX_AMOUNT } from "@config/amount-limits";
+import { Type } from "class-transformer";
+import { IsNotEmpty, IsNumber, IsString, Max, Min } from "class-validator";
 
 export class CreateDashboardDto {
   @IsString()

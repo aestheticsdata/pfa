@@ -1,12 +1,12 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { access, unlink } from "fs/promises";
-import { constants } from "fs";
-import { resolve } from "path";
-import sharp from "sharp";
+import { constants } from "node:fs";
+import { access, unlink } from "node:fs/promises";
+import { resolve } from "node:path";
 import { AppConfig } from "@config/app.config";
 import { SshBackupService } from "@infrastructure/ssh-backup/ssh-backup.service";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { isValidImageFile } from "@spendings/upload/upload.config";
+import sharp from "sharp";
 import { PrismaService } from "../../prisma/prisma.service";
 
 /**
@@ -35,7 +35,7 @@ export class ReceiptFilesService {
   safePath(userID: string, filename: string): string {
     const userDir = resolve(this.invoicesPath, userID);
     const filePath = resolve(userDir, filename);
-    if (!filePath.startsWith(userDir + "/")) {
+    if (!filePath.startsWith(`${userDir}/`)) {
       throw new BadRequestException("Invalid file path");
     }
     return filePath;
@@ -61,7 +61,7 @@ export class ReceiptFilesService {
 
     const parts = filepath.split(".");
     const fileExtension = parts.pop() ?? "jpg";
-    const outputPath = parts.join(".") + "-r." + fileExtension;
+    const outputPath = `${parts.join(".")}-r.${fileExtension}`;
 
     await sharp(filepath)
       .resize({
@@ -76,7 +76,7 @@ export class ReceiptFilesService {
 
     await unlink(filepath);
 
-    const resizedFilename = filename.slice(0, filename.search(/\./)) + "-r." + fileExtension;
+    const resizedFilename = `${filename.slice(0, filename.search(/\./))}-r.${fileExtension}`;
     this.backupCopy(outputPath, userID, resizedFilename);
     return resizedFilename;
   }

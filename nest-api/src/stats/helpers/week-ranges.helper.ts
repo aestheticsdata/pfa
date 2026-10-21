@@ -1,7 +1,6 @@
-import { format, getDay, getDaysInMonth, getMonth, getYear } from "date-fns";
 import { roundCurrency } from "@stats/helpers/rounding.helper";
-
 import type { DatedAmount, WeekRange } from "@stats/interfaces/statsTypes";
+import { format, getDay, getDaysInMonth, getMonth, getYear } from "date-fns";
 
 /**
  * Per-week spending totals of the month containing `startDate`, over its

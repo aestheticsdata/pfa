@@ -1,6 +1,6 @@
-import { registerAs } from "@nestjs/config";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import { env } from "@config/env";
+import { registerAs } from "@nestjs/config";
 
 export interface SshBackupConfig {
   enabled: boolean;

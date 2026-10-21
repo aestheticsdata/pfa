@@ -1,7 +1,7 @@
-import { ArrayMaxSize, IsArray, IsOptional, ValidateNested } from "class-validator";
+import { ReceiptLineDto } from "@spendings/receipt-lines/dto/receipt-line.dto";
 import { StoreDto } from "@spendings/stores/dto/store.dto";
 import { Type } from "class-transformer";
-import { ReceiptLineDto } from "@spendings/receipt-lines/dto/receipt-line.dto";
+import { ArrayMaxSize, IsArray, IsOptional, ValidateNested } from "class-validator";
 
 // Far above any till receipt; bounds the write a single request can ask for.
 const MAX_LINES = 300;

@@ -1,11 +1,11 @@
 import { FIELD_LIMITS } from "@config/field-limits";
+import type { ItemSize, ReceiptLine, ReceiptProposal } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 import {
   readQuantityDetail,
   readSize,
   splitColumns,
   splitLeadingCount,
 } from "@spendings/receipt-lines/receipt-quantities";
-import type { ItemSize, ReceiptLine, ReceiptProposal } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 import type { StoreIdentity } from "@spendings/stores/interfaces/storesTypes";
 
 /**

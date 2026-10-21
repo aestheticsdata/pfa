@@ -1,3 +1,4 @@
+import { LOG_LEVELS, NODE_ENV } from "@config/env";
 import { plainToInstance } from "class-transformer";
 import {
   IsIn,
@@ -11,7 +12,6 @@ import {
   ValidateIf,
   validateSync,
 } from "class-validator";
-import { LOG_LEVELS, NODE_ENV } from "@config/env";
 
 const BOOLEAN_STRINGS = ["true", "false"];
 

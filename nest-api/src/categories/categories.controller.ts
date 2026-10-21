@@ -1,11 +1,10 @@
-import { Body, Controller, Delete, Get, Param, Put, UseGuards } from "@nestjs/common";
 import { CategoriesService } from "@categories/categories.service";
 import { UpdateCategoryDto } from "@categories/dto/update-category.dto";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { CsrfGuard } from "@users/guards/csrf.guard";
-
 import type { CategoryItem } from "@categories/interfaces/categoryTypes";
+import { Body, Controller, Delete, Get, Param, Put, UseGuards } from "@nestjs/common";
+import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("categories")
 @UseGuards(SessionAuthGuard, CsrfGuard)

@@ -1,5 +1,5 @@
-import { registerAs } from "@nestjs/config";
 import { env } from "@config/env";
+import { registerAs } from "@nestjs/config";
 
 export interface DbBackupConfig {
   enabled: boolean;

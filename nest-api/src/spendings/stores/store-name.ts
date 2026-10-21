@@ -1,5 +1,5 @@
-import { keyDistance, textKey } from "@spendings/text-key";
 import type { StoreIdentity, StoreRef } from "@spendings/stores/interfaces/storesTypes";
+import { keyDistance, textKey } from "@spendings/text-key";
 
 /**
  * The known store a receipt stands for (PFA-219). A store is a name and an

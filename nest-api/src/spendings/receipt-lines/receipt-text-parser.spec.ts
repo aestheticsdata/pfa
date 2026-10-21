@@ -183,12 +183,15 @@ describe("store name (PFA-218)", () => {
     expect(parseReceiptText("PAIN 1,00\nBOULANGERIE CENTRALE\nTOTAL 1,00").store).toBeNull();
   });
 
-  it.each(["CARTE BANCAIRE", "Le 01/01/2026 a 10:00", "SIRET 000 000 000", "A0000000421010", "LCL"])(
-    "%s is no store name",
-    (line) => {
-      expect(storeNameCandidate(line)).toBeNull();
-    },
-  );
+  it.each([
+    "CARTE BANCAIRE",
+    "Le 01/01/2026 a 10:00",
+    "SIRET 000 000 000",
+    "A0000000421010",
+    "LCL",
+  ])("%s is no store name", (line) => {
+    expect(storeNameCandidate(line)).toBeNull();
+  });
 
   it("comes from a receipt slip, never from the card slip beside it", () => {
     const card = "CARTE BANCAIRE\nPRIMEUR DU MARCHE\nMONTANT :\n2,40 EUR";

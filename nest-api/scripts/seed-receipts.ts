@@ -8,9 +8,8 @@
 import { mkdir, readdir, unlink } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import sharp from "sharp";
-import { SEED_RECEIPT_PREFIX } from "./seed-groups";
-
 import type { ReceiptSheet } from "./seed-groups";
+import { SEED_RECEIPT_PREFIX } from "./seed-groups";
 
 const WIDTH = 520;
 const LINE_HEIGHT = 34;

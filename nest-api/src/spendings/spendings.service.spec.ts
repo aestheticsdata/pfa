@@ -1,5 +1,5 @@
-import { SpendingsService } from "./spendings.service";
 import { SPENDING_ROW_SELECT } from "@spendings/spending-row";
+import { SpendingsService } from "./spendings.service";
 
 /**
  * Unit tests for SpendingsService.searchSpendings — the whole-history, keyset-
@@ -30,7 +30,7 @@ describe("SpendingsService.searchSpendings", () => {
   it("returns empty without hitting the DB when the trimmed query is shorter than 2 chars", async () => {
     const { service, findMany, count } = makeService([]);
 
-    await expect(service.searchSpendings(" a ", "user-1")).resolves.toEqual({
+    await expect(service.searchSpendings("user-1", { q: " a " })).resolves.toEqual({
       items: [],
       nextCursor: null,
       total: 0,
@@ -43,7 +43,7 @@ describe("SpendingsService.searchSpendings", () => {
   it("fetches the first page: label OR category name, scoped to the user, newest-first with ID tiebreaker, no cursor", async () => {
     const { service, findMany, count } = makeService([], 12);
 
-    const result = await service.searchSpendings("carre", "user-1");
+    const result = await service.searchSpendings("user-1", { q: "carre" });
 
     const where = {
       userID: "user-1",
@@ -67,7 +67,7 @@ describe("SpendingsService.searchSpendings", () => {
   it("continues from a cursor and does NOT recount the total on later pages", async () => {
     const { service, findMany, count } = makeService([], 0);
 
-    const result = await service.searchSpendings("carre", "user-1", "cursor-id");
+    const result = await service.searchSpendings("user-1", { q: "carre", cursor: "cursor-id" });
 
     expect(findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 51, cursor: { ID: "cursor-id" }, skip: 1 }));
     expect(count).not.toHaveBeenCalled();
@@ -79,7 +79,7 @@ describe("SpendingsService.searchSpendings", () => {
     const overFetched = Array.from({ length: 51 }, (_, i) => makeRow(`s${i}`));
     const { service } = makeService(overFetched, 120);
 
-    const result = await service.searchSpendings("carre", "user-1");
+    const result = await service.searchSpendings("user-1", { q: "carre" });
 
     expect(result.items).toHaveLength(50);
     expect(result.items.at(-1)?.ID).toBe("s49");
@@ -91,7 +91,7 @@ describe("SpendingsService.searchSpendings", () => {
     const lastPage = Array.from({ length: 50 }, (_, i) => makeRow(`s${i}`));
     const { service } = makeService(lastPage, 50);
 
-    const result = await service.searchSpendings("carre", "user-1");
+    const result = await service.searchSpendings("user-1", { q: "carre" });
 
     expect(result.items).toHaveLength(50);
     expect(result.nextCursor).toBeNull();
@@ -100,7 +100,7 @@ describe("SpendingsService.searchSpendings", () => {
   it("trims the query before matching", async () => {
     const { service, findMany } = makeService([]);
 
-    await service.searchSpendings("  carrefour  ", "user-1");
+    await service.searchSpendings("user-1", { q: "  carrefour  " });
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -114,7 +114,7 @@ describe("SpendingsService.searchSpendings", () => {
   it("escapes LIKE wildcards so % and _ match literally", async () => {
     const { service, findMany } = makeService([]);
 
-    await service.searchSpendings("100%_x", "user-1");
+    await service.searchSpendings("user-1", { q: "100%_x" });
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -128,7 +128,7 @@ describe("SpendingsService.searchSpendings", () => {
   it("adds a half-open year date range to the where clause when a year is given", async () => {
     const { service, findMany } = makeService([]);
 
-    await service.searchSpendings("carre", "user-1", undefined, "2025");
+    await service.searchSpendings("user-1", { q: "carre", year: "2025" });
 
     expect(findMany).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -145,7 +145,7 @@ describe("SpendingsService.searchSpendings", () => {
   it("allows a year-only query (short/empty text) to still search, without a text OR clause", async () => {
     const { service, findMany } = makeService([]);
 
-    await service.searchSpendings("", "user-1", undefined, "2025");
+    await service.searchSpendings("user-1", { q: "", year: "2025" });
 
     expect(findMany).toHaveBeenCalled();
     expect(findMany.mock.calls[0][0].where).not.toHaveProperty("OR");
@@ -155,7 +155,7 @@ describe("SpendingsService.searchSpendings", () => {
   it("ignores a non-numeric year and, with too-short text, searches nothing", async () => {
     const { service, findMany } = makeService([]);
 
-    const result = await service.searchSpendings("a", "user-1", undefined, "abc");
+    const result = await service.searchSpendings("user-1", { q: "a", year: "abc" });
 
     expect(findMany).not.toHaveBeenCalled();
     expect(result).toEqual({ items: [], nextCursor: null, total: 0 });
@@ -173,7 +173,7 @@ describe("SpendingsService.searchSpendings", () => {
     };
     const { service } = makeService([row], 1);
 
-    const result = await service.searchSpendings("carre", "user-1");
+    const result = await service.searchSpendings("user-1", { q: "carre" });
 
     expect(result.items[0]).toMatchObject({
       ID: "s1",
@@ -200,7 +200,7 @@ describe("SpendingsService.searchSpendings", () => {
     };
     const { service } = makeService([row], 1);
 
-    const result = await service.searchSpendings("sec", "user-1");
+    const result = await service.searchSpendings("user-1", { q: "sec" });
 
     expect(result.items[0].category).toBeNull();
     expect(result.items[0].categoryColor).toBeNull();
@@ -218,7 +218,7 @@ describe("SpendingsService.searchSpendings", () => {
     };
     const { service } = makeService([row], 1);
 
-    const result = await service.searchSpendings("loy", "user-1");
+    const result = await service.searchSpendings("user-1", { q: "loy" });
 
     expect(result.items[0].category).toBe("Logement");
     expect(result.items[0].categoryColor).toBe("#185FA5");

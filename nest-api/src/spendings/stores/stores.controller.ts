@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
-import { StoresService } from "@spendings/stores/stores.service";
-import { StoreDto } from "@spendings/stores/dto/store.dto";
 import { MergeDto } from "@spendings/catalog/dto/merge.dto";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
+import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { StoreDto } from "@spendings/stores/dto/store.dto";
+import { StoresService } from "@spendings/stores/stores.service";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("stores")

@@ -1,11 +1,10 @@
-import { Injectable } from "@nestjs/common";
-import { collectDefaultMetrics, Counter, Gauge, Histogram, Registry } from "prom-client";
-import { RedisService } from "@redis/redis.service";
+import type { HttpObservation, UserKind } from "@monitoring/interfaces/monitoringTypes";
 import { USER_KIND } from "@monitoring/user-kind";
+import { Injectable } from "@nestjs/common";
+import { RedisService } from "@redis/redis.service";
+import { Counter, collectDefaultMetrics, Gauge, Histogram, Registry } from "prom-client";
 import { PrismaService } from "../prisma/prisma.service";
 import { readReleaseMarker } from "./release-marker";
-
-import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
 
 /**
  * The Prometheus registry behind `GET /api/metrics` (IKN-2).
@@ -116,7 +115,7 @@ export class MetricsService {
     }
   }
 
-  observeHttpRequest(method: string, route: string, statusCode: number, seconds: number): void {
+  observeHttpRequest({ method, route, statusCode, seconds }: HttpObservation): void {
     this.httpRequestsTotal.inc({ method, route, status_code: statusCode });
     this.httpRequestDuration.observe({ method, route }, seconds);
   }

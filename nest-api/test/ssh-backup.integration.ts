@@ -1,10 +1,10 @@
-import { Test, TestingModule } from "@nestjs/testing";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { join } from "path";
-import { homedir } from "os";
-import { readFileSync } from "fs";
-import { SshBackupService } from "@infrastructure/ssh-backup/ssh-backup.service";
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { SshBackupConfig } from "@config/ssh-backup.config";
+import { SshBackupService } from "@infrastructure/ssh-backup/ssh-backup.service";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { Test, TestingModule } from "@nestjs/testing";
 
 const FIXTURE_IMAGE = join(__dirname, "fixtures", "galaxy.jpg");
 

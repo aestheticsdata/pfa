@@ -1,3 +1,4 @@
+import { env } from "@config/env";
 import {
   Body,
   Controller,
@@ -11,23 +12,21 @@ import {
   Res,
   UseGuards,
 } from "@nestjs/common";
-import type { Request, Response } from "express";
-import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
-import { UsersService } from "@users/users.service";
-import { SignInDto } from "@users/dto/sign-in.dto";
-import { AddUserDto } from "@users/dto/add-user.dto";
-import { UpdateUserDto } from "@users/dto/update-user.dto";
 import { RedisService } from "@redis/redis.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@users/csrf-token.util";
+import { AddUserDto } from "@users/dto/add-user.dto";
+import { SignInDto } from "@users/dto/sign-in.dto";
+import { UpdateUserDto } from "@users/dto/update-user.dto";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 import { SignupGuard } from "@users/guards/signup.guard";
+import { SignInLimiterService } from "@users/sign-in-limiter.service";
 import { isSyntheticEmail } from "@users/synthetic-email.util";
 import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
-import { SignInLimiterService } from "@users/sign-in-limiter.service";
-import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@users/csrf-token.util";
-
 import type { SignInResponse } from "@users/users.service";
-import { env } from "@config/env";
+import { UsersService } from "@users/users.service";
+import type { Request, Response } from "express";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 /**
  * ECS's vocabulary for an authentication event, so that "show me the failed sign-ins" is one

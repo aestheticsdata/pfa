@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
 import type { CategoryItem } from "@categories/interfaces/categoryTypes";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 
 /** Listed, never the whole row: a new column stays out of the response until asked for (PFA-257). */

@@ -1,9 +1,8 @@
 import { Controller, Delete, HttpCode, HttpStatus, Param, Post, UseGuards } from "@nestjs/common";
-import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { SyntheticAdminGuard } from "@users/guards/synthetic-admin.guard";
 import { SyntheticAccountsService } from "@users/synthetic-accounts.service";
-
 import type { PurgeCounts } from "@users/synthetic-purge.util";
+import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 /**
  * Called by the bot runner on ks-b, on behalf of the bot back-office (PFA-127). Never public: see

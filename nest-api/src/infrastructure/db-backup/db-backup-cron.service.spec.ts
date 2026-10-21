@@ -1,7 +1,6 @@
+import type { DbBackupConfig } from "@config/db-backup.config";
 import { Logger } from "@nestjs/common";
 import { DbBackupCronService } from "./db-backup-cron.service";
-
-import type { DbBackupConfig } from "@config/db-backup.config";
 
 // `promisify(exec)` calls this with a node-style callback, so a mock resolves by calling back with
 // no error and rejects by calling back with one.
@@ -16,7 +15,7 @@ jest.mock("fs/promises", () => ({
   stat: jest.fn().mockResolvedValue({ size: 4_194_304 }),
 }));
 
-import { exec } from "child_process";
+import { exec } from "node:child_process";
 
 /**
  * COS-422 — the twelve-hourly database backup reports each run to Zeus (COS-398).

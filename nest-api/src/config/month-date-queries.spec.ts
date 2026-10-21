@@ -1,8 +1,8 @@
 // The DTO decorators write their metadata through Reflect — Nest loads this in
 // main.ts, a bare unit spec has to do it itself.
 import "reflect-metadata";
-import { plainToInstance } from "class-transformer";
 import type { ClassConstructor } from "class-transformer";
+import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { DashboardQueryDto } from "../dashboard/dto/dashboard-query.dto";
 import { RecurringsQueryDto } from "../recurrings/dto/recurrings-query.dto";

@@ -1,11 +1,11 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
-import { randomUUID } from "crypto";
+import { randomUUID } from "node:crypto";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { markDuplicates, sameStore } from "@spendings/catalog/catalog-duplicates";
-import { recogniseStore } from "@spendings/stores/store-name";
-import { textKey } from "@spendings/text-key";
 import type { StoreEntry } from "@spendings/catalog/interfaces/catalogTypes";
 import type { StoreIdentity, StoreRef } from "@spendings/stores/interfaces/storesTypes";
+import { recogniseStore } from "@spendings/stores/store-name";
+import { textKey } from "@spendings/text-key";
 import { PrismaService } from "../../prisma/prisma.service";
 
 /** The user's stores (PFA-218): one row per shop — name and address (PFA-219). */

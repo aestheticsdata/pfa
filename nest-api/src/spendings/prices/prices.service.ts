@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { format } from "date-fns";
-import { compareStores } from "@spendings/prices/unit-price";
-import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
 import type { PriceComparison, ProductTypeSummary, Purchase } from "@spendings/prices/interfaces/pricesTypes";
+import { compareStores } from "@spendings/prices/unit-price";
 import type { SizeUnit } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
+import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
+import { format } from "date-fns";
 import { PrismaService } from "../../prisma/prisma.service";
 
 const SIZE_UNITS = new Set<string>(Object.values(SIZE_UNIT));

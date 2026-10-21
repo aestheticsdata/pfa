@@ -1,5 +1,5 @@
-import { IsOptional, IsString, MaxLength } from "class-validator";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { IsOptional, IsString, MaxLength } from "class-validator";
 
 export class CreateSpendingCategoryDto {
   @IsOptional()

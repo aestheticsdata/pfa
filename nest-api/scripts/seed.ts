@@ -40,9 +40,9 @@
  * See scripts/seeding-guide.md for the full guide.
  */
 
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { randomUUID } from "node:crypto";
 
 // --- inline .env loader (dotenv is not installed; Node 18 has no --env-file) ---
 function loadEnv(): void {
@@ -58,10 +58,9 @@ loadEnv();
 
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client";
+import type { Decoration, SeedSpending } from "./seed-groups";
 import { decorate } from "./seed-groups";
 import { wipeSeedReceipts, writeReceipts } from "./seed-receipts";
-
-import type { Decoration, SeedSpending } from "./seed-groups";
 
 function makePrisma(): PrismaClient {
   const parsed = new URL(process.env.DATABASE_URL as string);
@@ -176,7 +175,11 @@ function parseArgs(argv: string[]): Options {
     const eq = a.indexOf("=");
     const flag = eq === -1 ? a : a.slice(0, eq);
     const inlineVal = eq === -1 ? undefined : a.slice(eq + 1);
-    const nextVal = (): string | undefined => inlineVal ?? argv[(i += 1)];
+    const nextVal = (): string | undefined => {
+      if (inlineVal !== undefined) return inlineVal;
+      i += 1;
+      return argv[i];
+    };
     switch (flag) {
       case "--":
         break; // pnpm forwards the `--` separator literally; ignore it
@@ -297,34 +300,187 @@ interface CatDef {
 }
 
 const CATS: CatDef[] = [
-  { id: "a1000000-0000-4000-8000-000000000001", name: "Groceries", color: "#6DB65B", share: 0.27, min: 4, max: 85, boost: 1.0,
-    labels: ["Corner Shop", "Supermarket", "Express Market", "Health Foods", "Lidl", "Farmers Market", "Frozen Foods", "Night Shop", "Organic Co-op", "Aldi"] },
-  { id: "a1000000-0000-4000-8000-000000000002", name: "Restaurants", color: "#E8663D", share: 0.20, min: 12, max: 70, boost: 1.9,
-    labels: ["Thai Kitchen", "Italian Kitchen", "The Diner", "Sushi Shop", "Burger Joint", "Noodle Bar", "Deliveroo", "Uber Eats", "Steakhouse", "Pizza Place"] },
-  { id: "a1000000-0000-4000-8000-000000000003", name: "Coffee & Drinks", color: "#C0894B", share: 0.09, min: 3, max: 28, boost: 1.7,
-    labels: ["Starbucks", "Coffee House", "The Local Pub", "Corner Bar", "Espresso Bar", "Wine Bar", "Cocktail Lounge"] },
-  { id: "a1000000-0000-4000-8000-000000000004", name: "Transport", color: "#4A90D9", share: 0.05, min: 2, max: 45, boost: 1.0,
-    labels: ["Metro top-up", "Uber", "Taxi", "Bike share", "Commuter train", "Trainline", "Bolt"] },
-  { id: "a1000000-0000-4000-8000-000000000005", name: "Leisure", color: "#9B59B6", share: 0.07, min: 8, max: 120, boost: 1.6,
-    labels: ["Cinema", "Arthouse Cinema", "Concert tickets", "Art museum", "Theatre", "Bowling", "Escape room", "Steam"] },
-  { id: "a1000000-0000-4000-8000-000000000006", name: "Shopping", color: "#E84393", share: 0.09, min: 15, max: 260, boost: 1.3,
-    labels: ["Zara", "Uniqlo", "H&M", "Mango", "Electronics Store", "Decathlon", "Department Store", "Zalando", "Nike Store"] },
-  { id: "a1000000-0000-4000-8000-000000000007", name: "Health", color: "#2ECC71", share: 0.04, min: 6, max: 90, boost: 0.5,
-    labels: ["Pharmacy", "GP visit", "Optician", "Lab tests", "Physio", "Dentist"] },
-  { id: "a1000000-0000-4000-8000-000000000008", name: "Home", color: "#16A085", share: 0.05, min: 5, max: 190, boost: 1.1,
-    labels: ["IKEA", "Hardware Store", "Zara Home", "Appliance Store", "Furniture Store", "Garden Centre", "Amazon"] },
-  { id: "a1000000-0000-4000-8000-000000000009", name: "Travel", color: "#F39C12", share: 0.03, min: 20, max: 380, boost: 1.0,
-    labels: ["High-speed train", "Airbnb", "Booking.com", "BlaBlaCar", "FlixBus", "Trainline"] },
-  { id: "a1000000-0000-4000-8000-000000000010", name: "Beauty", color: "#FD79A8", share: 0.03, min: 8, max: 90, boost: 1.2,
-    labels: ["Hairdresser", "Beauty salon", "Sephora", "Perfumery", "Nail bar", "Barber"] },
-  { id: "a1000000-0000-4000-8000-000000000011", name: "Gifts", color: "#E74C3C", share: 0.03, min: 10, max: 150, boost: 1.2,
-    labels: ["Amazon", "Bookshop", "Gift Shop", "Florist", "Toy Shop"] },
-  { id: "a1000000-0000-4000-8000-000000000012", name: "Sport", color: "#1ABC9C", share: 0.02, min: 5, max: 120, boost: 1.1,
-    labels: ["Decathlon", "Nike", "Swimming pool", "Climbing session", "Yoga studio"] },
-  { id: "a1000000-0000-4000-8000-000000000013", name: "Subscriptions", color: "#34495E", share: 0.02, min: 3, max: 60, boost: 1.0,
-    labels: ["App Store", "Google One", "PlayStation Plus", "Kindle", "The Guardian", "Audible"] },
-  { id: "a1000000-0000-4000-8000-000000000014", name: "Bank", color: "#7F8C8D", share: 0.01, min: 2, max: 40, boost: 1.0,
-    labels: ["Bank fees", "ATM withdrawal", "Transfer fee", "Card fee"] },
+  {
+    id: "a1000000-0000-4000-8000-000000000001",
+    name: "Groceries",
+    color: "#6DB65B",
+    share: 0.27,
+    min: 4,
+    max: 85,
+    boost: 1.0,
+    labels: [
+      "Corner Shop",
+      "Supermarket",
+      "Express Market",
+      "Health Foods",
+      "Lidl",
+      "Farmers Market",
+      "Frozen Foods",
+      "Night Shop",
+      "Organic Co-op",
+      "Aldi",
+    ],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000002",
+    name: "Restaurants",
+    color: "#E8663D",
+    share: 0.2,
+    min: 12,
+    max: 70,
+    boost: 1.9,
+    labels: [
+      "Thai Kitchen",
+      "Italian Kitchen",
+      "The Diner",
+      "Sushi Shop",
+      "Burger Joint",
+      "Noodle Bar",
+      "Deliveroo",
+      "Uber Eats",
+      "Steakhouse",
+      "Pizza Place",
+    ],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000003",
+    name: "Coffee & Drinks",
+    color: "#C0894B",
+    share: 0.09,
+    min: 3,
+    max: 28,
+    boost: 1.7,
+    labels: ["Starbucks", "Coffee House", "The Local Pub", "Corner Bar", "Espresso Bar", "Wine Bar", "Cocktail Lounge"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000004",
+    name: "Transport",
+    color: "#4A90D9",
+    share: 0.05,
+    min: 2,
+    max: 45,
+    boost: 1.0,
+    labels: ["Metro top-up", "Uber", "Taxi", "Bike share", "Commuter train", "Trainline", "Bolt"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000005",
+    name: "Leisure",
+    color: "#9B59B6",
+    share: 0.07,
+    min: 8,
+    max: 120,
+    boost: 1.6,
+    labels: [
+      "Cinema",
+      "Arthouse Cinema",
+      "Concert tickets",
+      "Art museum",
+      "Theatre",
+      "Bowling",
+      "Escape room",
+      "Steam",
+    ],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000006",
+    name: "Shopping",
+    color: "#E84393",
+    share: 0.09,
+    min: 15,
+    max: 260,
+    boost: 1.3,
+    labels: [
+      "Zara",
+      "Uniqlo",
+      "H&M",
+      "Mango",
+      "Electronics Store",
+      "Decathlon",
+      "Department Store",
+      "Zalando",
+      "Nike Store",
+    ],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000007",
+    name: "Health",
+    color: "#2ECC71",
+    share: 0.04,
+    min: 6,
+    max: 90,
+    boost: 0.5,
+    labels: ["Pharmacy", "GP visit", "Optician", "Lab tests", "Physio", "Dentist"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000008",
+    name: "Home",
+    color: "#16A085",
+    share: 0.05,
+    min: 5,
+    max: 190,
+    boost: 1.1,
+    labels: ["IKEA", "Hardware Store", "Zara Home", "Appliance Store", "Furniture Store", "Garden Centre", "Amazon"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000009",
+    name: "Travel",
+    color: "#F39C12",
+    share: 0.03,
+    min: 20,
+    max: 380,
+    boost: 1.0,
+    labels: ["High-speed train", "Airbnb", "Booking.com", "BlaBlaCar", "FlixBus", "Trainline"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000010",
+    name: "Beauty",
+    color: "#FD79A8",
+    share: 0.03,
+    min: 8,
+    max: 90,
+    boost: 1.2,
+    labels: ["Hairdresser", "Beauty salon", "Sephora", "Perfumery", "Nail bar", "Barber"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000011",
+    name: "Gifts",
+    color: "#E74C3C",
+    share: 0.03,
+    min: 10,
+    max: 150,
+    boost: 1.2,
+    labels: ["Amazon", "Bookshop", "Gift Shop", "Florist", "Toy Shop"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000012",
+    name: "Sport",
+    color: "#1ABC9C",
+    share: 0.02,
+    min: 5,
+    max: 120,
+    boost: 1.1,
+    labels: ["Decathlon", "Nike", "Swimming pool", "Climbing session", "Yoga studio"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000013",
+    name: "Subscriptions",
+    color: "#34495E",
+    share: 0.02,
+    min: 3,
+    max: 60,
+    boost: 1.0,
+    labels: ["App Store", "Google One", "PlayStation Plus", "Kindle", "The Guardian", "Audible"],
+  },
+  {
+    id: "a1000000-0000-4000-8000-000000000014",
+    name: "Bank",
+    color: "#7F8C8D",
+    share: 0.01,
+    min: 2,
+    max: 40,
+    boost: 1.0,
+    labels: ["Bank fees", "ATM withdrawal", "Transfer fee", "Card fee"],
+  },
 ];
 
 // --------------------------------------------------------------------------
@@ -349,7 +505,7 @@ const RECURRINGS: RecDef[] = [
   { label: "iCloud+", amount: 2.99 },
   { label: "Amazon Prime", amount: 6.99 },
 ];
-const rentForYear = (y: number): number => ({ 2023: 1180, 2024: 1210, 2025: 1250, 2026: 1290 }[y] ?? 1290);
+const rentForYear = (y: number): number => ({ 2023: 1180, 2024: 1210, 2025: 1250, 2026: 1290 })[y] ?? 1290;
 
 // --------------------------------------------------------------------------
 // Exceptionals (inserted when their date falls in the requested range and the
@@ -367,12 +523,56 @@ interface ExcDef {
   description?: string;
 }
 const EXCEPTIONALS: ExcDef[] = [
-  { y: 2023, m: 7, d: 14, label: "Holiday in Greece", amount: 1450, categoryName: "Travel", categoryColor: "#F39C12", description: "Flights + hotel, Santorini" },
-  { y: 2024, m: 6, d: 20, label: "Holiday in Portugal", amount: 1650, categoryName: "Travel", categoryColor: "#F39C12", description: "Lisbon + Porto" },
+  {
+    y: 2023,
+    m: 7,
+    d: 14,
+    label: "Holiday in Greece",
+    amount: 1450,
+    categoryName: "Travel",
+    categoryColor: "#F39C12",
+    description: "Flights + hotel, Santorini",
+  },
+  {
+    y: 2024,
+    m: 6,
+    d: 20,
+    label: "Holiday in Portugal",
+    amount: 1650,
+    categoryName: "Travel",
+    categoryColor: "#F39C12",
+    description: "Lisbon + Porto",
+  },
   { y: 2024, m: 10, d: 28, label: "New smartphone", amount: 1090, categoryName: "Shopping", categoryColor: "#E84393" },
-  { y: 2025, m: 4, d: 16, label: "Dental work", amount: 640, categoryName: "Health", categoryColor: "#2ECC71", description: "A crown" },
-  { y: 2025, m: 8, d: 12, label: "Sofa + living-room furniture", amount: 1290, categoryName: "Home", categoryColor: "#16A085" },
-  { y: 2026, m: 0, d: 18, label: "Ski week in the Alps", amount: 1150, categoryName: "Travel", categoryColor: "#F39C12", description: "A week in Chamonix" },
+  {
+    y: 2025,
+    m: 4,
+    d: 16,
+    label: "Dental work",
+    amount: 640,
+    categoryName: "Health",
+    categoryColor: "#2ECC71",
+    description: "A crown",
+  },
+  {
+    y: 2025,
+    m: 8,
+    d: 12,
+    label: "Sofa + living-room furniture",
+    amount: 1290,
+    categoryName: "Home",
+    categoryColor: "#16A085",
+  },
+  {
+    y: 2026,
+    m: 0,
+    d: 18,
+    label: "Ski week in the Alps",
+    amount: 1150,
+    categoryName: "Travel",
+    categoryColor: "#F39C12",
+    description: "A week in Chamonix",
+  },
 ];
 
 /**
@@ -447,27 +647,92 @@ const WORKDAYS = [1, 2, 3, 4, 5];
 const WEEKEND = [0, 6];
 const EVERY_DAY = [0, 1, 2, 3, 4, 5, 6];
 const HABITS: HabitDef[] = [
-  { category: "Coffee & Drinks", chance: 0.85, min: 2.4, max: 5.8, days: WORKDAYS,
-    labels: ["Coffee House", "Espresso Bar", "Starbucks", "Coffee cart", "Bakery cafe"] },
-  { category: "Restaurants", chance: 0.65, min: 7.5, max: 15.5, days: WORKDAYS,
-    labels: ["Pret A Manger", "Sandwich Bar", "Office canteen", "Salad Bar", "Falafel stand", "Banh mi shop", "Poke Bowl"] },
-  { category: "Coffee & Drinks", chance: 0.3, min: 4, max: 14, days: [4, 5],
-    labels: ["After-work drinks", "The Local Pub", "Corner Bar", "Wine Bar"] },
-  { category: "Coffee & Drinks", chance: 0.55, min: 3.5, max: 18, days: WEEKEND,
-    labels: ["Brunch cafe", "Coffee House", "Bakery cafe", "Juice bar"] },
-  { category: "Groceries", chance: 0.55, min: 2.5, max: 19, days: EVERY_DAY,
-    labels: ["Corner Shop", "Express Market", "Night Shop", "Bakery", "Fruit stall", "Butcher", "Cheese shop"] },
-  { category: "Groceries", chance: 0.4, min: 1.2, max: 4.5, days: WORKDAYS,
-    labels: ["Bakery", "Vending machine", "Newsagent", "Snack bar"] },
-  { category: "Transport", chance: 0.22, min: 1.9, max: 16, days: EVERY_DAY,
-    labels: ["Bike share", "Metro ticket", "Bus ticket", "Uber", "Bolt", "Taxi", "E-scooter"] },
+  {
+    category: "Coffee & Drinks",
+    chance: 0.85,
+    min: 2.4,
+    max: 5.8,
+    days: WORKDAYS,
+    labels: ["Coffee House", "Espresso Bar", "Starbucks", "Coffee cart", "Bakery cafe"],
+  },
+  {
+    category: "Restaurants",
+    chance: 0.65,
+    min: 7.5,
+    max: 15.5,
+    days: WORKDAYS,
+    labels: [
+      "Pret A Manger",
+      "Sandwich Bar",
+      "Office canteen",
+      "Salad Bar",
+      "Falafel stand",
+      "Banh mi shop",
+      "Poke Bowl",
+    ],
+  },
+  {
+    category: "Coffee & Drinks",
+    chance: 0.3,
+    min: 4,
+    max: 14,
+    days: [4, 5],
+    labels: ["After-work drinks", "The Local Pub", "Corner Bar", "Wine Bar"],
+  },
+  {
+    category: "Coffee & Drinks",
+    chance: 0.55,
+    min: 3.5,
+    max: 18,
+    days: WEEKEND,
+    labels: ["Brunch cafe", "Coffee House", "Bakery cafe", "Juice bar"],
+  },
+  {
+    category: "Groceries",
+    chance: 0.55,
+    min: 2.5,
+    max: 19,
+    days: EVERY_DAY,
+    labels: ["Corner Shop", "Express Market", "Night Shop", "Bakery", "Fruit stall", "Butcher", "Cheese shop"],
+  },
+  {
+    category: "Groceries",
+    chance: 0.4,
+    min: 1.2,
+    max: 4.5,
+    days: WORKDAYS,
+    labels: ["Bakery", "Vending machine", "Newsagent", "Snack bar"],
+  },
+  {
+    category: "Transport",
+    chance: 0.22,
+    min: 1.9,
+    max: 16,
+    days: EVERY_DAY,
+    labels: ["Bike share", "Metro ticket", "Bus ticket", "Uber", "Bolt", "Taxi", "E-scooter"],
+  },
 ];
 
 /**
  * Pick a day from `days` along the week's rhythm, which a category's `boost` sharpens (above 1:
  * restaurants, bars) or softens (below 1: health).
  */
-function pickDay(y: number, m: number, days: number[], boost: number): number {
+/** One generated spending: its day, category, amount, and the labels to pick from (the category's by default). */
+interface GeneratedSpending {
+  day: number;
+  cat: CatDef;
+  amt: number;
+  labels?: string[];
+}
+
+/** The days of one month a spending may fall on. */
+interface MonthDays {
+  y: number;
+  m: number;
+  days: number[];
+}
+
+function pickDay({ y, m, days }: MonthDays, boost: number): number {
   const at = (): number => days[Math.floor(rand() * days.length)];
   if (days.length === 1) return days[0];
   const weight = (d: number): number => WEEK_RHYTHM[weekdayOf(y, m, d)] ** boost;
@@ -493,7 +758,10 @@ interface Existing {
 
 async function loadExisting(prisma: PrismaClient): Promise<Existing> {
   const cats = await prisma.categories.findMany({ where: { userID: USER_ID }, select: { ID: true } });
-  const dashes = await prisma.dashboards.findMany({ where: { userID: USER_ID }, select: { dateFrom: true, initialAmount: true } });
+  const dashes = await prisma.dashboards.findMany({
+    where: { userID: USER_ID },
+    select: { dateFrom: true, initialAmount: true },
+  });
   const recs = await prisma.recurrings.findMany({ where: { userID: USER_ID }, select: { dateFrom: true } });
   const excs = await prisma.exceptionals.findMany({ where: { userID: USER_ID }, select: { label: true } });
 
@@ -612,7 +880,7 @@ function generate(
     const shareSum = adjShares.reduce((s, v) => s + v, 0);
 
     const dayCount = new Map<number, number>();
-    const addSpending = (day: number, cat: CatDef, amt: number, labels: string[] = cat.labels): void => {
+    const addSpending = ({ day, cat, amt, labels = cat.labels }: GeneratedSpending): void => {
       spendingRows.push({
         ID: randomUUID(),
         userID: USER_ID,
@@ -636,7 +904,7 @@ function generate(
         if (rand() >= habit.chance) continue;
         const cat = CATS.find((c) => c.name === habit.category) as CatDef;
         const amt = money(rnd(habit.min, habit.max));
-        addSpending(day, cat, amt, habit.labels);
+        addSpending({ day, cat, amt, labels: habit.labels });
         habitSpent.set(cat.name, (habitSpent.get(cat.name) ?? 0) + amt);
       }
     }
@@ -648,9 +916,9 @@ function generate(
       while (spent < catTarget && guard < 80) {
         guard += 1;
         // Skew toward the low end → many small everyday purchases, few large ones.
-        const amt = money(cat.min + (cat.max - cat.min) * Math.pow(rand(), 2.6));
+        const amt = money(cat.min + (cat.max - cat.min) * rand() ** 2.6);
         if (spent + amt > catTarget * 1.2 && (spent > 0 || catTarget <= 0)) break;
-        addSpending(pickDay(y, m, targetDays, cat.boost), cat, amt);
+        addSpending({ day: pickDay({ y, m, days: targetDays }, cat.boost), cat, amt });
         spent += amt;
       }
     });
@@ -660,7 +928,7 @@ function generate(
     for (const day of targetDays) {
       for (let n = dayCount.get(day) ?? 0; n < MIN_PER_DAY; n += 1) {
         const cat = weightedPick(QUIET_DAY, QUIET_DAY_WEIGHTS);
-        addSpending(day, cat, money(cat.min + (cat.max - cat.min) * 0.35 * rand()));
+        addSpending({ day, cat, amt: money(cat.min + (cat.max - cat.min) * 0.35 * rand()) });
       }
     }
   }
@@ -791,18 +1059,24 @@ async function addGroupsToExisting(prisma: PrismaClient, from: Ymd | null, to: Y
   );
   const candidates: SeedSpending[] = rows
     .filter((r) => !taken.has((r.date as Date).toISOString().slice(0, 10)))
-    .map((r) => ({ ID: r.ID, date: r.date as Date, label: r.label, amount: Number(r.amount), categoryID: r.categoryID }));
+    .map((r) => ({
+      ID: r.ID,
+      date: r.date as Date,
+      label: r.label,
+      amount: Number(r.amount),
+      categoryID: r.categoryID,
+    }));
 
   const { groups, updates, receipts } = decorateSpendings(candidates);
-  console.log(`Decorating: groups=${groups.length} regrouped/receipt rows=${updates.length} receipts=${receipts.length}`);
+  console.log(
+    `Decorating: groups=${groups.length} regrouped/receipt rows=${updates.length} receipts=${receipts.length}`,
+  );
 
   if (groups.length) {
     await prisma.spendingGroups.createMany({ data: groups.map((g) => ({ ...g, userID: USER_ID })) });
   }
   for (const c of chunk(updates, 200)) {
-    await prisma.$transaction(
-      c.map(({ ID, ...data }) => prisma.spendings.update({ where: { ID }, data })),
-    );
+    await prisma.$transaction(c.map(({ ID, ...data }) => prisma.spendings.update({ where: { ID }, data })));
   }
   await writeReceipts(USER_ID, receipts);
 }

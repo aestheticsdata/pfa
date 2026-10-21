@@ -1,8 +1,8 @@
+import { env } from "@config/env";
 import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../../generated/prisma/client";
-import { capturePool, poolStats, type DbPoolStats, type MariaDbPoolLike } from "./db-pool-stats";
-import { env } from "@config/env";
+import { capturePool, type DbPoolStats, type MariaDbPoolLike, poolStats } from "./db-pool-stats";
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {

@@ -1,16 +1,15 @@
-import { NestFactory } from "@nestjs/core";
-import { ConfigService } from "@nestjs/config";
+import { AppConfig } from "@config/app.config";
+import { env } from "@config/env";
 import { ValidationPipe } from "@nestjs/common";
-import session from "express-session";
+import { ConfigService } from "@nestjs/config";
+import { NestFactory } from "@nestjs/core";
+import { RedisService } from "@redis/redis.service";
 import { RedisStore } from "connect-redis";
+import type { Application } from "express";
+import session from "express-session";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
-import { AppConfig } from "@config/app.config";
 import { HttpMetricsMiddleware } from "./monitoring/http-metrics.middleware";
-import { RedisService } from "@redis/redis.service";
-
-import type { Application } from "express";
-import { env } from "@config/env";
 
 const SESSION_TTL_SECONDS = 10 * 60; // 10 minutes
 
