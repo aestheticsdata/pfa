@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Patch, Post, Req, Res, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpException,
+  HttpStatus,
+  Patch,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import type { Request, Response } from "express";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 import { UsersService } from "@users/users.service";
@@ -10,6 +22,8 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 import { SignupGuard } from "@users/guards/signup.guard";
 import { isSyntheticEmail } from "@users/synthetic-email.util";
+import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
+import { SignInLimiterService } from "@users/sign-in-limiter.service";
 import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@users/csrf-token.util";
 
 import type { SignInResponse } from "@users/users.service";
@@ -34,6 +48,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly redisService: RedisService,
+    private readonly signInLimiter: SignInLimiterService,
     @InjectPinoLogger(UsersController.name) private readonly logger: PinoLogger,
   ) {}
 
@@ -73,6 +88,22 @@ export class UsersController {
     }
   }
 
+  /**
+   * Refuses a sign-in or sign-up with a 429 while the address or the email has used up its
+   * failures (PFA-260). The bot runner's address is exempt: its daily run must never trip it.
+   */
+  private async assertNotLocked(req: Request, email: string): Promise<boolean> {
+    if (isSyntheticIpAllowed(req.ip, process.env.SYNTHETIC_ALLOWED_IPS)) {
+      return false;
+    }
+    const retryAfter = await this.signInLimiter.retryAfter(req.ip, email);
+    if (retryAfter !== null) {
+      req.res?.setHeader("Retry-After", String(retryAfter));
+      throw new HttpException("Too many attempts, try again later", HttpStatus.TOO_MANY_REQUESTS);
+    }
+    return true;
+  }
+
   @Get("me")
   @UseGuards(SessionAuthGuard)
   async me(@Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
@@ -102,13 +133,20 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() dto: SignInDto, @Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
+    const isLimited = await this.assertNotLocked(req, dto.email);
     let result: SignInResponse;
     try {
       result = await this.usersService.signIn(dto.email, dto.password);
     } catch (error) {
       // Logged, then rethrown untouched: the caller's response is exactly what it was before.
       this.auth({ action: "user-login", outcome: "failure", email: dto.email }, req);
+      if (isLimited) {
+        await this.signInLimiter.recordAttempt(req.ip, dto.email);
+      }
       throw error;
+    }
+    if (isLimited) {
+      await this.signInLimiter.clear(req.ip, dto.email);
     }
 
     this.openSession(req, result);
@@ -125,6 +163,10 @@ export class UsersController {
   @UseGuards(SignupGuard)
   @HttpCode(HttpStatus.CREATED)
   async addUser(@Body() dto: AddUserDto, @Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
+    // Every sign-up counts, a created account included: nobody needs ten in a quarter of an hour.
+    if (await this.assertNotLocked(req, dto.email)) {
+      await this.signInLimiter.recordAttempt(req.ip, dto.email);
+    }
     const result = await this.usersService.addUser(dto);
     this.openSession(req, result);
     await this.redisService.trackSession(result.user.id, req.sessionID);

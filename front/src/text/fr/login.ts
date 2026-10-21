@@ -31,6 +31,8 @@ const login = {
   errors: {
     invalidCredentials: "Email ou mot de passe incorrect.",
     generic: "Une erreur est survenue. Réessayer.",
+    /** 429 — too many failed attempts from this address or on this email (PFA-260). */
+    tooManyAttempts: "Trop de tentatives. Réessayer dans quelques minutes.",
   },
   switch: {
     toSignup: "Pas encore de compte ?",

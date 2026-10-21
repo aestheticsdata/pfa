@@ -34,7 +34,13 @@ export default function Login() {
       }
     } catch (e) {
       const status = (e as ApiError)?.response?.status;
-      setServerError(status === 401 ? login.errors.invalidCredentials : login.errors.generic);
+      setServerError(
+        status === 401
+          ? login.errors.invalidCredentials
+          : status === 429
+            ? login.errors.tooManyAttempts
+            : login.errors.generic,
+      );
     }
   };
 

@@ -3,6 +3,8 @@ import request from "supertest";
 import { createE2eApp } from "./e2e-app";
 import { createAuthenticatedSession } from "./auth-session.helper";
 import { PrismaService } from "../src/prisma/prisma.service";
+import { RedisService } from "../src/redis/redis.service";
+import { MAX_SIGN_IN_FAILURES } from "../src/users/sign-in-limiter.service";
 
 type SupertestApp = Parameters<typeof request>[0];
 
@@ -178,6 +180,43 @@ describe("UsersController (e2e)", () => {
         .post("/api/users/add")
         .send({ name: "Test", email: uniqueEmail() })
         .expect(400);
+    });
+  });
+
+  describe("sign-in attempts are limited (PFA-260)", () => {
+    const email = `e2e-locked-${Date.now()}@test.com`;
+    const previousIps = process.env.SYNTHETIC_ALLOWED_IPS;
+
+    // The suite's earlier failures came from the same loopback address: start, and leave, with
+    // no counter behind.
+    const clearCounters = async () => {
+      const client = app.get(RedisService).getClient();
+      const keys: string[] = [];
+      for await (const batch of client.scanIterator({ MATCH: "pfa-sign-in-failures:*" })) {
+        keys.push(...batch);
+      }
+      if (keys.length > 0) await client.del(keys);
+    };
+
+    beforeAll(async () => {
+      // Loopback is the bot runner's address in some specs; here it must be an ordinary caller.
+      process.env.SYNTHETIC_ALLOWED_IPS = "";
+      await clearCounters();
+    });
+
+    afterAll(async () => {
+      process.env.SYNTHETIC_ALLOWED_IPS = previousIps;
+      await clearCounters();
+    });
+
+    it("answers 429 with Retry-After once the failures are used up", async () => {
+      const server = app.getHttpServer() as SupertestApp;
+      for (let attempt = 0; attempt < MAX_SIGN_IN_FAILURES; attempt += 1) {
+        await request(server).post("/api/users").send({ email, password: "wrong" }).expect(401);
+      }
+
+      const locked = await request(server).post("/api/users").send({ email, password: "wrong" }).expect(429);
+      expect(Number(locked.headers["retry-after"])).toBeGreaterThan(0);
     });
   });
 
