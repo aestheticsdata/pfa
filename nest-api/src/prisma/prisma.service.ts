@@ -1,11 +1,11 @@
 import { env } from "@config/env";
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnApplicationShutdown, OnModuleInit } from "@nestjs/common";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../../generated/prisma/client";
 import { capturePool, type DbPoolStats, type MariaDbPoolLike, poolStats } from "./db-pool-stats";
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService extends PrismaClient implements OnModuleInit, OnApplicationShutdown {
   private pool: MariaDbPoolLike | null = null;
 
   constructor() {
@@ -38,7 +38,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$connect();
   }
 
-  async onModuleDestroy() {
+  /**
+   * After the HTTP server has drained (PFA-265): Nest runs `onModuleDestroy` before it closes the
+   * server, so a request still in flight at a deploy would find this closed under it.
+   */
+  async onApplicationShutdown() {
     await this.$disconnect();
   }
 

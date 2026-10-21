@@ -1,5 +1,5 @@
 import { env } from "@config/env";
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnApplicationShutdown, OnModuleInit } from "@nestjs/common";
 
 import type { SessionCounts } from "@redis/interfaces/redisTypes";
 import { createClient, type RedisClientType } from "redis";
@@ -16,7 +16,7 @@ function userSessionsKey(userId: string): string {
 }
 
 @Injectable()
-export class RedisService implements OnModuleInit, OnModuleDestroy {
+export class RedisService implements OnModuleInit, OnApplicationShutdown {
   private readonly logger = new Logger(RedisService.name);
   private client: RedisClientType;
 
@@ -35,7 +35,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     await this.client.connect();
   }
 
-  async onModuleDestroy(): Promise<void> {
+  /**
+   * After the HTTP server has drained (PFA-265): Nest runs `onModuleDestroy` before it closes the
+   * server, so a request still in flight at a deploy would find this closed under it.
+   */
+  async onApplicationShutdown(): Promise<void> {
     await this.client.quit();
   }
 

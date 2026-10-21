@@ -59,6 +59,6 @@ import { PrismaModule } from "./prisma/prisma.module";
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
     // Every route, so that a line written anywhere during a request carries the same trace.id.
-    consumer.apply(TraceIdMiddleware).forRoutes("*");
+    consumer.apply(TraceIdMiddleware).forRoutes("{*splat}");
   }
 }

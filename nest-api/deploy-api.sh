@@ -299,11 +299,12 @@ check_pnpm_baseline() {
 # before it reaches ks-b — same shape as front/deploy-front.sh (PFA-238). Runs on the laptop,
 # against the tree about to be uploaded, before anything is touched on the server.
 #
-# Jest needs a recent Node: a shell whose default is older gets `.nvmrc`'s through nvm.
+# Jest needs Node >= 24.9 to load Nest 12's ESM packages (PFA-265): a shell whose default is older
+# gets `.nvmrc`'s through nvm.
 ensure_gate_node() {
   local v
   v=$(node -v 2>/dev/null | sed 's/^v//') || v=""
-  if [ -n "$v" ] && [ "$(printf '%s\n%s\n' "20.12.0" "$v" | sort -V | head -1)" = "20.12.0" ]; then
+  if [ -n "$v" ] && [ "$(printf '%s\n%s\n' "24.9.0" "$v" | sort -V | head -1)" = "24.9.0" ]; then
     return 0
   fi
 
@@ -317,7 +318,7 @@ ensure_gate_node() {
     return 0
   fi
 
-  echo "❌ ERROR: the quality gate needs Node >= 20.12 (found: ${v:-none}). See nest-api/.nvmrc." >&2
+  echo "❌ ERROR: the quality gate needs Node >= 24.9 (found: ${v:-none}). See nest-api/.nvmrc." >&2
   exit 1
 }
 
@@ -338,7 +339,7 @@ check_quality_gate() {
     echo "❌ ERROR: quality gate — TypeScript errors" >&2
     exit 1
   }
-  pnpm exec jest || {
+  NODE_OPTIONS="--experimental-vm-modules" pnpm exec jest || {
     echo "❌ ERROR: quality gate — unit tests failed" >&2
     exit 1
   }
@@ -642,7 +643,8 @@ rm -rf node_modules dist
 # The lockfile is the contract: the server installs exactly what the laptop tested (PFA-258).
 pnpm install --frozen-lockfile
 export DATABASE_URL
-pnpm build
+# No type-check here (PFA-265): the quality gate ran strict tsc on this exact tree before upload.
+pnpm build:deploy
 
 # Start or reload Nest with pm2
 cd "$API_ROOT"

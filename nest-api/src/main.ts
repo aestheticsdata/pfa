@@ -9,6 +9,7 @@ import type { Application } from "express";
 import session from "express-session";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
+import { ROUTING_OPTIONS } from "./app-options";
 import { HttpMetricsMiddleware } from "./monitoring/http-metrics.middleware";
 
 const SESSION_TTL_SECONDS = 10 * 60; // 10 minutes
@@ -16,7 +17,7 @@ const SESSION_TTL_SECONDS = 10 * 60; // 10 minutes
 async function bootstrap() {
   // bufferLogs holds Nest's startup lines until pino is attached, so the first thing written to
   // stdout is already ECS rather than Nest's coloured console format.
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { bufferLogs: true, ...ROUTING_OPTIONS });
   app.useLogger(app.get(Logger));
 
   (app.getHttpAdapter().getInstance() as Application).set("trust proxy", 1);
@@ -74,6 +75,10 @@ async function bootstrap() {
   // Loopback only (PFA-122): everything reaches the API through nginx, so nothing outside the
   // machine should be able to talk to it — and skip nginx to forge the client address that the
   // synthetic-user allowlist relies on — even if the firewall changes one day.
+  // A deploy's `pm2 reload` sends SIGINT (PFA-265): Nest stops accepting connections, lets the
+  // requests in flight finish, then closes Prisma, Redis and the OCR worker. PM2's `kill_timeout`
+  // (ecosystem.config.js) bounds how long it may take.
+  app.enableShutdownHooks();
   await app.listen(appConfig.port, "127.0.0.1");
 }
 
