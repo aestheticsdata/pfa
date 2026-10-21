@@ -2,13 +2,14 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../../generated/prisma/client";
 import { capturePool, poolStats, type DbPoolStats, type MariaDbPoolLike } from "./db-pool-stats";
+import { env } from "@config/env";
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   private pool: MariaDbPoolLike | null = null;
 
   constructor() {
-    const url = process.env.DATABASE_URL;
+    const url = env.databaseUrl;
     if (!url) {
       throw new Error("DATABASE_URL is required");
     }

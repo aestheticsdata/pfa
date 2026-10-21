@@ -1,5 +1,5 @@
 import { registerAs } from "@nestjs/config";
-import * as path from "path";
+import { env } from "@config/env";
 
 export interface AppConfig {
   port: number;
@@ -7,6 +7,6 @@ export interface AppConfig {
 }
 
 export default registerAs("app", (): AppConfig => ({
-  port: parseInt(process.env.PORT!, 10),
-  invoicesPath: process.env.PFA_INVOICES_IMAGES_PATH ?? path.resolve(process.cwd(), "invoicesUpload"),
+  port: env.port,
+  invoicesPath: env.invoicesPath,
 }));

@@ -27,6 +27,7 @@ import { SignInLimiterService } from "@users/sign-in-limiter.service";
 import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@users/csrf-token.util";
 
 import type { SignInResponse } from "@users/users.service";
+import { env } from "@config/env";
 
 /**
  * ECS's vocabulary for an authentication event, so that "show me the failed sign-ins" is one
@@ -93,7 +94,7 @@ export class UsersController {
    * failures (PFA-260). The bot runner's address is exempt: its daily run must never trip it.
    */
   private async assertNotLocked(req: Request, email: string): Promise<boolean> {
-    if (isSyntheticIpAllowed(req.ip, process.env.SYNTHETIC_ALLOWED_IPS)) {
+    if (isSyntheticIpAllowed(req.ip, env.syntheticAllowedIps)) {
       return false;
     }
     const retryAfter = await this.signInLimiter.retryAfter(req.ip, email);

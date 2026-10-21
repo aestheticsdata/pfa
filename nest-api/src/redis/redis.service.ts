@@ -2,6 +2,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/commo
 import { createClient, type RedisClientType } from "redis";
 
 import type { SessionCounts } from "@redis/interfaces/redisTypes";
+import { env } from "@config/env";
 
 const SESSION_PREFIX = "pfa:";
 /**
@@ -20,7 +21,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   private client: RedisClientType;
 
   constructor() {
-    const redisUrl = process.env.REDIS_URL ?? "redis://localhost:6379";
+    const redisUrl = env.redisUrl;
     this.client = createClient({ url: redisUrl });
     // Without a listener, the socket error emitted when Redis goes away is an unhandled 'error'
     // event and kills the process — a Redis outage must end up as a 503 on /api/health, not as a
