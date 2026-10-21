@@ -6,10 +6,7 @@ export interface AppConfig {
   invoicesPath: string;
 }
 
-export default registerAs(
-  "app",
-  (): AppConfig => ({
-    port: parseInt(process.env.PORT!, 10),
-    invoicesPath: process.env.PFA_INVOICES_IMAGES_PATH ?? path.resolve(process.cwd(), "invoicesUpload"),
-  }),
-);
+export default registerAs("app", (): AppConfig => ({
+  port: parseInt(process.env.PORT!, 10),
+  invoicesPath: process.env.PFA_INVOICES_IMAGES_PATH ?? path.resolve(process.cwd(), "invoicesUpload"),
+}));

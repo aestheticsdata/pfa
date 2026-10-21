@@ -6,6 +6,7 @@ import { ownReceipts } from "@spendings/receipt-proposals/bulk-candidates";
 import { PROPOSAL_STATUS } from "@spendings/receipt-proposals/proposal-status";
 import type { ReceiptProposal } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 import type { BulkReadStatus, PendingProposal } from "@spendings/receipt-proposals/interfaces/receiptProposalsTypes";
+import type { Prisma } from "../../../generated/prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 
 /**
@@ -133,7 +134,7 @@ export class ReceiptProposalsService {
         const proposal = await this.receiptLines.propose(queued.spendingID, userID);
         await this.prisma.receiptProposals.update({
           where: { ID: queued.ID },
-          data: { status: PROPOSAL_STATUS.ready, proposal: proposal as object },
+          data: { status: PROPOSAL_STATUS.ready, proposal: proposal as unknown as Prisma.InputJsonValue },
         });
       } catch (err) {
         this.logger.warn(`Bulk receipt read failed for ${queued.spendingID}: ${(err as Error).message}`);
