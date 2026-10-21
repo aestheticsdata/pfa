@@ -14,7 +14,7 @@ import type { ApiError } from "@helpers/http";
 
 const useSignupService = () => {
   const { request } = useRequestHelper();
-  const { signup: t } = useTranslations("login");
+  const { signup: t, errors } = useTranslations("login");
 
   const signupService = async (user: LoginValues): Promise<AuthResponse | undefined> => {
     const { email, password } = user;
@@ -36,7 +36,7 @@ const useSignupService = () => {
       return parseResponse(AuthResponseSchema, res.data, "/users/add");
     } catch (e) {
       const status = (e as ApiError)?.response?.status;
-      toast.error(status === 409 ? t.emailAlreadyExists : t.error);
+      toast.error(status === 409 ? t.emailAlreadyExists : status === 429 ? errors.tooManyAttempts : t.error);
     }
   };
 

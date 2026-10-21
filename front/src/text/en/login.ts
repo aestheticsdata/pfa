@@ -33,6 +33,8 @@ const login: typeof frLogin = {
   errors: {
     invalidCredentials: "Incorrect email or password.",
     generic: "An error occurred. Try again.",
+    /** 429 — too many failed attempts from this address or on this email (PFA-260). */
+    tooManyAttempts: "Too many attempts. Try again in a few minutes.",
   },
   switch: {
     toSignup: "No account yet?",
