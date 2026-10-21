@@ -22,7 +22,6 @@ const spending = (over: Partial<SpendingItem>): SpendingItem => ({
   invoicefile: null,
   itemType: "spending",
   label: "Bakery",
-  userID: "u",
   groupID: null,
   detail: null,
   groupLabel: null,

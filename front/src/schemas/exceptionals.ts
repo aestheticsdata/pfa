@@ -4,7 +4,6 @@ import { z } from "zod";
 
 export const ExceptionalItemSchema = apiObject({
   ID: z.string(),
-  userID: z.string(),
   date: z.string(),
   itemType: itemTypeSchema,
   label: z.string(),

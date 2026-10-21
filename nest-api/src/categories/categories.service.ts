@@ -1,18 +1,22 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import type { Categories } from "../../generated/prisma/client";
+import type { CategoryItem } from "@categories/interfaces/categoryTypes";
 import { PrismaService } from "../prisma/prisma.service";
+
+/** Listed, never the whole row: a new column stays out of the response until asked for (PFA-257). */
+const CATEGORY_ITEM_SELECT = { ID: true, userID: true, name: true, color: true } as const;
 
 @Injectable()
 export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getCategories(userID: string): Promise<Categories[]> {
+  async getCategories(userID: string): Promise<CategoryItem[]> {
     return this.prisma.categories.findMany({
       where: { userID },
+      select: CATEGORY_ITEM_SELECT,
     });
   }
 
-  async updateCategory(id: string, userID: string, dto: { name: string; color: string }): Promise<Categories[]> {
+  async updateCategory(id: string, userID: string, dto: { name: string; color: string }): Promise<CategoryItem[]> {
     const updated = await this.prisma.categories.updateMany({
       where: { ID: id, userID },
       data: { name: dto.name, color: dto.color },
@@ -24,6 +28,7 @@ export class CategoriesService {
 
     return this.prisma.categories.findMany({
       where: { userID },
+      select: CATEGORY_ITEM_SELECT,
     });
   }
 

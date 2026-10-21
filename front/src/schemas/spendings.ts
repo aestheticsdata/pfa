@@ -9,10 +9,9 @@ export const SpendingCategoryInputSchema = z.object({
   color: z.string().nullable(),
 });
 
-// Response shape of GET /spendings and the search page. Every field below is a
-// real column returned by an unprojected Prisma `findMany`, so nullable fields
-// arrive as `null`, never absent — hence `.nullable()` without `.optional()`
-// (COS-107).
+// Response shape of GET /spendings and the search page: exactly the fields the
+// API's `select` lists (PFA-257). Nullable columns arrive as `null`, never absent
+// — hence `.nullable()` without `.optional()` (COS-107).
 export const SpendingItemSchema = apiObject({
   ID: z.string(),
   amount: numberLikeSchema,
@@ -24,7 +23,6 @@ export const SpendingItemSchema = apiObject({
   invoicefile: z.string().nullable(),
   itemType: itemTypeSchema,
   label: z.string(),
-  userID: z.string(),
   // A line of a group (PFA-189): `label` already reads "<group> — <detail>";
   // `detail` is the part after the group name, null on a plain spending.
   groupID: z.string().nullable(),
@@ -83,7 +81,6 @@ export const RecurringItemSchema = apiObject({
   invoicefile: z.string().nullable(),
   itemType: itemTypeSchema,
   label: z.string(),
-  userID: z.string(),
 });
 
 export const RecurringListSchema = z.compile(z.array(RecurringItemSchema));

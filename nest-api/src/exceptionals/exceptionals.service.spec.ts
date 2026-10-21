@@ -21,6 +21,7 @@ describe("ExceptionalsService", () => {
       expect(findMany).toHaveBeenCalledWith({
         where: { userID: "user-1", date: { gte: new Date("2026-01-01"), lte: new Date("2026-12-31") } },
         orderBy: { date: "desc" },
+        select: expect.not.objectContaining({ userID: true }),
       });
     });
 

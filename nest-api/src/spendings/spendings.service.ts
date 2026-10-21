@@ -5,6 +5,8 @@ import { assertCategoryAccessible, resolveCategoryID } from "@categories/categor
 import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 import type { SpendingCategoryInput } from "@spendings/dto/spending-category-input.interface";
 import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
+import { SPENDING_ROW_SELECT, toSpendingItem } from "@spendings/spending-row";
+import type { SpendingListItem, SpendingSearchPage } from "@spendings/interfaces/spendingItemTypes";
 import type { SpendingLabelSuggestion } from "@spendings/dto/spending-label-suggestion.interface";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -182,30 +184,20 @@ export class SpendingsService {
     return { success: true };
   }
 
-  async getSpendings(from: string, to: string, userID: string) {
+  async getSpendings(from: string, to: string, userID: string): Promise<SpendingListItem[]> {
     const results = await this.prisma.spendings.findMany({
       where: {
         userID,
         date: { gte: new Date(from), lte: new Date(to) },
       },
       orderBy: { date: "asc" },
-      include: {
-        category: true,
-        group: { select: { label: true } },
-        store: { select: { name: true } },
-        _count: { select: { receiptLines: true } },
-      },
+      select: { ...SPENDING_ROW_SELECT, group: { select: { label: true } } },
     });
 
-    return results.map(({ category, group, store, _count, ...spending }) => ({
-      ...spending,
-      storeName: store?.name ?? null,
+    return results.map((row) => ({
+      ...toSpendingItem(row, userID),
       // The front folds rows sharing a groupID into one collapsible row (PFA-189).
-      groupLabel: group?.label ?? null,
-      // Rows with their receipt read into lines get a mark and open the detail (PFA-214).
-      lineCount: _count.receiptLines,
-      category: category && (category.userID === userID || category.userID === null) ? category.name : null,
-      categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
+      groupLabel: row.group?.label ?? null,
     }));
   }
 
@@ -214,7 +206,7 @@ export class SpendingsService {
   // capped page plus the unbounded total so the UI can say "N résultats". The
   // category is flattened to name/color exactly like getSpendings, and a category
   // owned by another user is nulled out defensively.
-  async searchSpendings(query: string, userID: string, cursor?: string, year?: string) {
+  async searchSpendings(query: string, userID: string, cursor?: string, year?: string): Promise<SpendingSearchPage> {
     const q = query.trim();
     const hasText = q.length >= MIN_SEARCH_LENGTH;
     const yearNum = year ? Number(year) : Number.NaN;
@@ -250,7 +242,7 @@ export class SpendingsService {
     const rows = await this.prisma.spendings.findMany({
       where,
       orderBy: [{ date: "desc" }, { ID: "desc" }],
-      include: { category: true, store: { select: { name: true } }, _count: { select: { receiptLines: true } } },
+      select: SPENDING_ROW_SELECT,
       take: SEARCH_PAGE_SIZE + 1,
       ...(cursor ? { cursor: { ID: cursor }, skip: 1 } : {}),
     });
@@ -258,13 +250,7 @@ export class SpendingsService {
     const hasMore = rows.length > SEARCH_PAGE_SIZE;
     const pageRows = hasMore ? rows.slice(0, SEARCH_PAGE_SIZE) : rows;
 
-    const items = pageRows.map(({ category, store, _count, ...spending }) => ({
-      ...spending,
-      storeName: store?.name ?? null,
-      lineCount: _count.receiptLines,
-      category: category && (category.userID === userID || category.userID === null) ? category.name : null,
-      categoryColor: category && (category.userID === userID || category.userID === null) ? category.color : null,
-    }));
+    const items = pageRows.map((row) => toSpendingItem(row, userID));
 
     const nextCursor = hasMore ? items[items.length - 1].ID : null;
     const total = cursor ? undefined : await this.prisma.spendings.count({ where });

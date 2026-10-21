@@ -5,7 +5,7 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 
-import type { Categories } from "../../generated/prisma/client";
+import type { CategoryItem } from "@categories/interfaces/categoryTypes";
 
 @Controller("categories")
 @UseGuards(SessionAuthGuard, CsrfGuard)
@@ -13,7 +13,7 @@ export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   @Get()
-  async getCategories(@GetUserId() userID: string): Promise<Categories[]> {
+  async getCategories(@GetUserId() userID: string): Promise<CategoryItem[]> {
     return await this.categoriesService.getCategories(userID);
   }
 
@@ -22,7 +22,7 @@ export class CategoriesController {
     @Param("id") id: string,
     @Body() dto: UpdateCategoryDto,
     @GetUserId() userID: string,
-  ): Promise<Categories[]> {
+  ): Promise<CategoryItem[]> {
     return await this.categoriesService.updateCategory(id, userID, dto);
   }
 

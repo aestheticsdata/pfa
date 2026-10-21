@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
+import type { ExceptionalItem } from "@exceptionals/interfaces/exceptionalItemTypes";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class ExceptionalsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getExceptionals(userID: string, year?: string) {
+  async getExceptionals(userID: string, year?: string): Promise<ExceptionalItem[]> {
     const where: { userID: string; date?: { gte: Date; lte: Date } } = { userID };
     if (year) {
       const y = parseInt(year, 10);
@@ -20,6 +21,19 @@ export class ExceptionalsService {
     return this.prisma.exceptionals.findMany({
       where,
       orderBy: { date: "desc" },
+      // Listed, never the whole row: a new column stays out of the response until asked for (PFA-257).
+      select: {
+        ID: true,
+        date: true,
+        itemType: true,
+        label: true,
+        description: true,
+        amount: true,
+        currency: true,
+        categoryName: true,
+        categoryColor: true,
+        invoicefile: true,
+      },
     });
   }
 

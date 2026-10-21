@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { randomUUID } from "crypto";
+import type { DashboardItem } from "@dashboard/interfaces/dashboardTypes";
 import { PrismaService } from "../prisma/prisma.service";
 
 import type { MonthlyIncomeResponse } from "@dashboard/dto/monthly-income-response.interface";
@@ -184,12 +185,14 @@ export class DashboardService {
     return { income };
   }
 
-  async getDashboard(start: string, userID: string) {
+  async getDashboard(start: string, userID: string): Promise<DashboardItem | null> {
     const dashboard = await this.prisma.dashboards.findFirst({
       where: {
         userID,
         dateFrom: new Date(start),
       },
+      // Listed, never the whole row: a new column stays out of the response until asked for (PFA-257).
+      select: { ID: true, dateFrom: true, dateTo: true, initialAmount: true, initialCeiling: true },
     });
 
     if (!dashboard) {
