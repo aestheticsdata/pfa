@@ -1,9 +1,9 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable, OnApplicationShutdown, OnModuleInit } from "@nestjs/common";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "#prisma-client/client.js";
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService extends PrismaClient implements OnModuleInit, OnApplicationShutdown {
   constructor() {
     const parsed = new URL(process.env.DATABASE_URL ?? "");
     super({
@@ -24,7 +24,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     await this.$connect();
   }
 
-  async onModuleDestroy(): Promise<void> {
+  /**
+   * After the HTTP server has drained (PFA-266): Nest runs `onModuleDestroy` before it closes the
+   * server, so a request still in flight at a reload would find this closed under it.
+   */
+  async onApplicationShutdown(): Promise<void> {
     await this.$disconnect();
   }
 }

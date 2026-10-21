@@ -3,6 +3,7 @@ import { ConsoleLogger, StandardSchemaValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "#app/app.module.js";
+import { ROUTING_OPTIONS } from "#app/app-options.js";
 import { sessionMiddleware } from "#app/infrastructure/session.js";
 import { RedisService } from "#app/redis/redis.service.js";
 
@@ -16,6 +17,7 @@ import type { AppConfig } from "#app/config/interfaces/configTypes.js";
 const BIND_HOST = "127.0.0.1";
 
 const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+  ...ROUTING_OPTIONS,
   // One JSON object per line (Nest 12 structured params), the shape Iknos ingests.
   logger: new ConsoleLogger({ json: process.env.NODE_ENV === "production", prefix: "bots-api" }),
 });
@@ -25,6 +27,7 @@ app.use(sessionMiddleware(app.get(RedisService), process.env.SESSION_SECRET ?? "
 app.useGlobalPipes(new StandardSchemaValidationPipe());
 app.setGlobalPrefix("api");
 // Nest 12 drains in-flight requests on SIGTERM: a PM2 reload never cuts a control action in half.
+// Prisma and Redis close after the drain (onApplicationShutdown); PM2's `kill_timeout` bounds it.
 app.enableShutdownHooks();
 
 await app.listen(app.get(ConfigService).getOrThrow<AppConfig>("app").port, BIND_HOST);
