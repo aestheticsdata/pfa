@@ -16,3 +16,7 @@ onlyBuiltDependencies:
   - sharp
   - ssh2
   - unrs-resolver
+# House rule: TypeScript stays on the latest 5.x. @nestjs/cli 12 asks for ~6.0 (PFA-265); it builds
+# fine on 5.9.3, so the whole tree is held there.
+overrides:
+  typescript: 5.9.3

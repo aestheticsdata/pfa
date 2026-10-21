@@ -1,5 +1,5 @@
 import { join } from "node:path";
-import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
+import { Injectable, Logger, OnApplicationShutdown } from "@nestjs/common";
 import type { GrayImage, SlipBounds } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 import { findSlips, flattenLighting, inkPerColumn } from "@spendings/receipt-lines/receipt-image";
 import sharp from "sharp";
@@ -31,7 +31,7 @@ const IDLE_SHUTDOWN_MS = 5 * 60_000;
  * than one core, however many uploads arrive together.
  */
 @Injectable()
-export class ReceiptOcrService implements OnModuleDestroy {
+export class ReceiptOcrService implements OnApplicationShutdown {
   private readonly logger = new Logger(ReceiptOcrService.name);
   private worker: Promise<Worker> | null = null;
   private queue: Promise<unknown> = Promise.resolve();
@@ -48,7 +48,11 @@ export class ReceiptOcrService implements OnModuleDestroy {
     return job;
   }
 
-  async onModuleDestroy(): Promise<void> {
+  /**
+   * After the HTTP server has drained (PFA-265): Nest runs `onModuleDestroy` before it closes the
+   * server, so a request still in flight at a deploy would find this closed under it.
+   */
+  async onApplicationShutdown(): Promise<void> {
     await this.shutdown();
   }
 

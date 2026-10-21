@@ -3,6 +3,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { RedisStore } from "connect-redis";
 import session from "express-session";
 import { AppModule } from "../src/app.module";
+import { ROUTING_OPTIONS } from "../src/app-options";
 import { HttpMetricsMiddleware } from "../src/monitoring/http-metrics.middleware";
 import { RedisService } from "../src/redis/redis.service";
 
@@ -17,7 +18,7 @@ export async function createE2eApp(): Promise<INestApplication> {
     imports: [AppModule],
   }).compile();
 
-  const app = moduleFixture.createNestApplication();
+  const app = moduleFixture.createNestApplication(ROUTING_OPTIONS);
 
   // Same as main.ts: on the raw Express app, so unmatched 404s are counted too (IKN-2).
   const httpMetrics = app.get(HttpMetricsMiddleware);
