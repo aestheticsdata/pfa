@@ -1,3 +1,6 @@
 allowBuilds:
   sharp: true
   unrs-resolver: true
+overrides:
+  # Patched for GHSA source-map-js event-loop DoS (>=1.2.2); pulled in by next > postcss.
+  source-map-js: ">=1.2.2"
