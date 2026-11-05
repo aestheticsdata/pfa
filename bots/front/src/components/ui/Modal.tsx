@@ -47,7 +47,7 @@ const Modal = ({ open, onClose, title, sub, footer, testId, className, children 
       </div>
       <div
         className={cx(
-          "min-h-0 flex-1 overflow-y-auto px-gut py-4 tablet:px-5.5",
+          "min-h-0 flex-1 overflow-y-auto overscroll-y-none px-gut py-4 tablet:px-5.5",
           !footer && "pb-sheet-bottom tablet:pb-5",
         )}
       >

@@ -33,7 +33,7 @@ const UserMenu = ({ email }: UserMenuProps) => {
       {open && (
         <div
           role="menu"
-          className="absolute top-10 right-0 z-15 min-w-60 overscroll-y-none rounded-menu border border-line bg-panel p-1.5 shadow-float"
+          className="absolute top-10 right-0 z-15 min-w-60 rounded-menu border border-line bg-panel p-1.5 shadow-float"
         >
           <p className="m-0 px-2 pt-1.5 pb-1 text-tiny font-medium uppercase tracking-label text-dim">
             {PANEL_TEXT.signedIn}

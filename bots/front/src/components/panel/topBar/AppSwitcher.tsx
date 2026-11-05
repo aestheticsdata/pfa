@@ -41,7 +41,7 @@ const AppSwitcher = ({ app, apps }: AppSwitcherProps) => {
       {open && (
         <div
           role="menu"
-          className="absolute top-11 left-0 z-15 w-menu-mobile overscroll-y-none rounded-menu border border-line bg-panel p-1.5 shadow-float tablet:top-10 tablet:w-auto tablet:min-w-70"
+          className="absolute top-11 left-0 z-15 w-menu-mobile rounded-menu border border-line bg-panel p-1.5 shadow-float tablet:top-10 tablet:w-auto tablet:min-w-70"
         >
           <p className="m-0 px-2 pt-1.5 pb-1 text-tiny font-medium uppercase tracking-label text-dim">
             {PANEL_TEXT.switcher.title}
