@@ -9,6 +9,12 @@ WEB_ROOT_BASE="/var/www/pfa"
 CURRENT_DIR="$WEB_ROOT_BASE/public_html"
 BACKUP_DIR="$WEB_ROOT_BASE/public_html.bak"
 RELEASES_DIR="$CURRENT_DIR/releases"
+# How many releases stay under $RELEASES_DIR after a successful switch: the one just
+# deployed plus the two before it. The directory is history only — what is live is a
+# copy of a release (`cp -a` into $CURRENT_DIR), and rollback restores $BACKUP_DIR —
+# so pruning it can never touch what is served or what a rollback would bring back.
+# Nothing bounded it before PFA-268, by which time it held ~200 releases and 15 GB.
+KEEP_RELEASES="${KEEP_RELEASES:-3}"
 PM2_ECOSYSTEM_FILE="ecosystem.config.cjs"
 
 ######################################
@@ -620,7 +626,12 @@ if [ -d "$TMP_RELEASES_DIR" ]; then
   mv "$TMP_RELEASES_DIR" "$CURRENT_DIR/releases"
 fi
 
-cp -a "$STAGING_DIR"/. "$CURRENT_DIR"/
+# Hardlinks, not a copy (PFA-268). A `cp -a` gave public_html its own inodes, which cut the links
+# pnpm's install had to its shared store: the live tree and public_html.bak each carried a full
+# ~700 MB node_modules + .next. Linked, both share their files with the releases they came from
+# (kept by the prune below), so they cost next to nothing. Same filesystem by construction —
+# releases/ lives inside public_html. Paths, pm2 cwd and rollback are unchanged.
+cp -al "$STAGING_DIR"/. "$CURRENT_DIR"/
 
 echo "✅ New release activated from $STAGING_DIR"
 EOF
@@ -631,6 +642,24 @@ EOF
   remote_pm2_reload
 
   trap - ERR
+
+  # After the switch and the pm2 reload, and non-fatal: a prune that failed must not
+  # turn a deploy that worked into one that reports failure. Release names carry their
+  # timestamp, so newest-first order is a reverse sort, and what gets removed is
+  # everything after the first N of it — this deploy's own release is always among them.
+  log "➡️  Pruning releases, keeping the last $KEEP_RELEASES"
+  ssh "$REMOTE_USER_HOST" \
+    RELEASES_DIR="$RELEASES_DIR" \
+    KEEP="$KEEP_RELEASES" \
+    'bash -s' << 'EOF' || log "⚠️  Release pruning skipped (non-fatal)"
+set -Eeuo pipefail
+cd "$RELEASES_DIR"
+removed=0
+while read -r old; do
+  if rm -rf -- "$old"; then echo "🗑  $old"; removed=$((removed + 1)); else echo "⚠️  could not remove $old" >&2; fi
+done < <(find . -mindepth 1 -maxdepth 1 -name 'release-*' -printf '%f\n' | sort -r | tail -n +"$((KEEP + 1))")
+echo "✅ $removed removed, $(find . -mindepth 1 -maxdepth 1 -name 'release-*' | wc -l) kept"
+EOF
 
   write_deploy_log || log "⚠️  Deploy changelog update skipped (non-fatal)"
   zeus_report "success" || log "⚠️  Zeus was not told about this deploy (non-fatal)"
