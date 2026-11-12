@@ -322,6 +322,10 @@ ensure_gate_node() {
   exit 1
 }
 
+# Set when the contract check below had to install the front's dependencies, so the exit cleanup
+# removes what this deploy added and nothing else.
+FRONT_DEPS_INSTALLED="false"
+
 check_quality_gate() {
   ensure_gate_node
   log "➡️  Quality gate — install check, Biome, types, unit tests (node $(node -v))"
@@ -349,6 +353,17 @@ check_quality_gate() {
   # The API contract (PFA-257): what the local API sends, parsed by the front's schemas. Needs the
   # local API up (and the front's e2e account): run when it answers, say so when it does not.
   if [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:6100/api/users/csrf 2>/dev/null)" != "000" ]; then
+    # The check runs the front's vitest, and a front deploy deletes the front's node_modules (its
+    # `clean_local_build`). Reinstalled from the front's lockfile when missing, and removed again
+    # on exit by this script's `clean_local_build`.
+    if [ ! -d "$SCRIPT_DIR/../front/node_modules" ]; then
+      log "➡️  Installing the front's dependencies for the contract check"
+      FRONT_DEPS_INSTALLED="true"
+      pnpm --dir "$SCRIPT_DIR/../front" install --frozen-lockfile --prefer-offline >/dev/null || {
+        echo "❌ ERROR: quality gate — the front's dependencies do not match front/pnpm-lock.yaml" >&2
+        exit 1
+      }
+    fi
     pnpm --dir "$SCRIPT_DIR/../front" contract:check || {
       echo "❌ ERROR: quality gate — the API and the front's schemas disagree (front: pnpm contract:check)" >&2
       exit 1
@@ -360,7 +375,50 @@ check_quality_gate() {
   log "✅ Quality gate passed"
 }
 
+# The laptop is short on disk: a deploy leaves no build output behind, whether it succeeds or not.
+# The server builds the release; a local `dist` is only ever left over from an earlier build, and
+# `coverage` from a `test:cov` run. A `nest start --watch` running from this checkout lives in
+# `dist`, so it is kept while one is.
+#
+# Installed as the EXIT trap of `deploy()`. The `trap cleanup EXIT` higher up runs on the server,
+# inside the Zeus-report heredoc, so there is no local EXIT trap for this one to replace.
+clean_local_build() {
+  local freed=()
+  if pgrep -f "$SCRIPT_DIR/node_modules/.*nest.js start" > /dev/null 2>&1; then
+    log "ℹ️  nest start is running: local dist kept"
+  elif [ -d "$SCRIPT_DIR/dist" ]; then
+    freed+=("$(du -sh "$SCRIPT_DIR/dist" 2>/dev/null | cut -f1 || true) dist")
+    rm -rf -- "$SCRIPT_DIR/dist"
+  fi
+  if [ -d "$SCRIPT_DIR/coverage" ]; then
+    freed+=("$(du -sh "$SCRIPT_DIR/coverage" 2>/dev/null | cut -f1 || true) coverage")
+    rm -rf -- "$SCRIPT_DIR/coverage"
+  fi
+  [ ${#freed[@]} -gt 0 ] && log "🧹 Local build output removed: ${freed[*]}"
+  # node_modules too: the next deploy's quality gate reinstalls it from the lockfile (the
+  # `pnpm install --frozen-lockfile` in `check_quality_gate`). Kept while a `nest start` runs
+  # from here, which loads from it.
+  if pgrep -f "$SCRIPT_DIR/node_modules/.*nest.js start" > /dev/null 2>&1; then
+    log "ℹ️  nest start is running: local node_modules kept"
+  elif [ -d "$SCRIPT_DIR/node_modules" ]; then
+    log "🧹 Removing $(du -sh "$SCRIPT_DIR/node_modules" 2>/dev/null | cut -f1) node_modules"
+    rm -rf -- "$SCRIPT_DIR/node_modules"
+  fi
+  # The front's dependencies, when the contract check had to install them (see `check_quality_gate`):
+  # put back the way this deploy found them.
+  if [ "$FRONT_DEPS_INSTALLED" = "true" ]; then
+    if pgrep -f "$(cd "$SCRIPT_DIR/.." && pwd)/front/node_modules/.*next dev" > /dev/null 2>&1; then
+      log "ℹ️  next dev is running: front node_modules kept"
+    else
+      log "🧹 Removing the front node_modules installed for the contract check"
+      rm -rf -- "$SCRIPT_DIR/../front/node_modules"
+    fi
+  fi
+  return 0
+}
+
 deploy() {
+  trap clean_local_build EXIT
   cd "$SCRIPT_DIR"
   check_quality_gate
   check_pnpm_baseline

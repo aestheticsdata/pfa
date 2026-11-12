@@ -387,7 +387,45 @@ check_quality_gate() {
   log "✅ Quality gate passed"
 }
 
+# The laptop is short on disk: a deploy leaves no build output behind, whether it succeeds or not.
+# Nothing here builds locally (the server does), but a `next build`, a test run or a demo-film run
+# from an earlier session leaves hundreds of MB in `.next` and `test-results`, plus Playwright's
+# HTML `playwright-report` and a stray `tsc` emit in `dist`. The one exception is a `next dev`
+# running from this checkout: its `.next/dev` is live, and pulling it out from under the dev
+# server breaks it, so `.next` is left alone while one is running.
+#
+# Installed as the EXIT trap of `deploy()`. The `trap cleanup EXIT` higher up runs on the server,
+# inside the Zeus-report heredoc, so there is no local EXIT trap for this one to replace.
+clean_local_build() {
+  local freed=()
+  if pgrep -f "$SCRIPT_DIR/node_modules/.*next dev" > /dev/null 2>&1; then
+    log "ℹ️  next dev is running: local .next kept"
+  elif [ -d "$SCRIPT_DIR/.next" ]; then
+    freed+=("$(du -sh "$SCRIPT_DIR/.next" 2>/dev/null | cut -f1 || true) .next")
+    rm -rf -- "$SCRIPT_DIR/.next"
+  fi
+  local dir
+  for dir in test-results playwright-report dist; do
+    if [ -d "$SCRIPT_DIR/$dir" ]; then
+      freed+=("$(du -sh "$SCRIPT_DIR/$dir" 2>/dev/null | cut -f1 || true) $dir")
+      rm -rf -- "${SCRIPT_DIR:?}/$dir"
+    fi
+  done
+  [ ${#freed[@]} -gt 0 ] && log "🧹 Local build output removed: ${freed[*]}"
+  # node_modules too: the next deploy's quality gate reinstalls it from the lockfile (the
+  # `pnpm install --frozen-lockfile` in `check_quality_gate`). Kept while a `next dev` runs
+  # from here, which loads from it.
+  if pgrep -f "$SCRIPT_DIR/node_modules/.*next dev" > /dev/null 2>&1; then
+    log "ℹ️  next dev is running: local node_modules kept"
+  elif [ -d "$SCRIPT_DIR/node_modules" ]; then
+    log "🧹 Removing $(du -sh "$SCRIPT_DIR/node_modules" 2>/dev/null | cut -f1) node_modules"
+    rm -rf -- "$SCRIPT_DIR/node_modules"
+  fi
+  return 0
+}
+
 deploy() {
+  trap clean_local_build EXIT
   cd "$SCRIPT_DIR"
   check_quality_gate
   check_pnpm_baseline
