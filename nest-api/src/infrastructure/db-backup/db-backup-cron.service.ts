@@ -17,7 +17,7 @@ const execAsync = promisify(exec);
  * same string the scheduler runs on, and the two drifting apart is exactly how a healthy job starts
  * being reported as late.
  */
-const BACKUP_SCHEDULE = "0 0 */12 * * *";
+const BACKUP_SCHEDULE = "0 0 */3 * * *";
 
 /** The slug this job reports under. Stable: it is the identity of the row on Zeus's `/cron`. */
 const BACKUP_CRON_KEY = "db-backup";
@@ -44,8 +44,10 @@ export class DbBackupCronService {
   ) {}
 
   /**
-   * Dumps the database and copies it to the backup VPS, twice a day — and tells Zeus what happened
-   * (COS-422).
+   * Dumps the database and copies it to the backup VPS every three hours — and tells Zeus what
+   * happened (COS-422). Three hours, not twelve, since binlogs were turned off on ks-b (2026-11-12):
+   * these dumps are now the only recovery point, so they bound how much can be lost. One file,
+   * overwritten here and on the VPS — there is no history to rotate.
    *
    * Before the report, this job had two failure modes that were indistinguishable from success
    * anywhere outside pm2's log: a `mysqldump` that had been erroring for weeks, and a deploy that
