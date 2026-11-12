@@ -9,6 +9,12 @@ REMOTE_USER_HOST="debian@ks-b"
 # Base dir of the bots stack on the server
 API_ROOT="/var/www/bots"
 
+# ZEU-93. The one rollback, as a file on ks-b: this script's own auto-rollback, `./deploy-runner.sh rollback`
+# and Zeus's post-deploy verification all run it. Rewritten on every deploy by `install_rollback_script`.
+# Its own folder: the bots API keeps `$API_ROOT/rollback-api.sh`, and to Zeus the runner is the `api`
+# role of `bots-runner`, so its file must be named `rollback-api.sh` too.
+ROLLBACK_SCRIPT_REMOTE="$API_ROOT/runner-rollback/rollback-api.sh"
+
 # The bot runner (PFA-124) — one of the three parts of `bots/`, each deployed by its own script:
 # this one, `nest-api/deploy-api.sh` and `front/deploy-front.sh`. Same shape as folio's,
 # pfa's and Zeus's: a release folder, a switch with the previous release kept as a backup, a pm2
@@ -239,6 +245,10 @@ zeus_report() {
     [ -n "${ZEUS_COMMIT:-}" ] && printf ',"commit":"%s"' "$(json_escape "$ZEUS_COMMIT")"
     [ -n "${ZEUS_BRANCH:-}" ] && printf ',"branch":"%s"' "$(json_escape "$ZEUS_BRANCH")"
     [ -n "$summary" ] && printf ',"summary":"%s"' "$(json_escape "$summary")"
+    # ZEU-93. Only a release that is now live has a rollback, and only the deploy knows whether it
+    # changed the schema — absent, Zeus assumes it may have, and never rolls it back on its own.
+    [[ "${ZEUS_MIGRATIONS_APPLIED:-}" =~ ^[0-9]+$ ]] && printf ',"migrationsApplied":%s' "$ZEUS_MIGRATIONS_APPLIED"
+    [ "$status" = "success" ] && [ -n "${ZEUS_ROLLBACK_SCRIPT:-}" ] && printf ',"rollbackScript":"%s"' "$ZEUS_ROLLBACK_SCRIPT"
     printf ',"commits":%s}' "$commits"
   } > "$payload"
 
@@ -306,13 +316,41 @@ EOF
 }
 
 # Remote rollback helper (used by manual and auto rollback)
-remote_rollback() {
+# ZEU-93. The reload the manual rollback runs, as a function, so the rollback file can carry it.
+remote_pm2_reload() {
+  ssh "$REMOTE_USER_HOST" \
+    API_ROOT="$API_ROOT" \
+    'bash -s' << 'EOF'
+set -Eeuo pipefail
+cd "$API_ROOT"
+pm2 startOrReload runner.ecosystem.config.cjs --env production --update-env
+pm2 save
+EOF
+}
+
+# ZEU-93. Writes `rollback-runner.sh` on ks-b with this script's paths resolved into it: the restore,
+# then the reload. Written to a temporary name and moved, so Zeus never runs half a file.
+install_rollback_script() {
   ssh "$REMOTE_USER_HOST" \
     NEST_DIR="$NEST_DIR" \
     NEST_BACKUP_DIR="$NEST_BACKUP_DIR" \
     API_ROOT="$API_ROOT" \
+    TARGET="$ROLLBACK_SCRIPT_REMOTE" \
     'bash -s' << 'EOF'
 set -Eeuo pipefail
+mkdir -p "$(dirname "$TARGET")"
+TMP="$TARGET.tmp.$$"
+{
+  echo '#!/usr/bin/env bash'
+  echo '# Written by deploy-runner.sh on every deploy (ZEU-93) - do not edit it here, edit the script.'
+  echo '# Restores the previous runner release and reloads it: run by the deploy on failure, by'
+  echo '# ./deploy-runner.sh rollback, and by Zeus when a release degrades.'
+  echo 'set -Eeuo pipefail'
+  echo 'export PATH="$HOME/.npm-global/bin:$HOME/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin:$PATH"'
+  printf 'NEST_DIR=%q\n' "$NEST_DIR"
+  printf 'NEST_BACKUP_DIR=%q\n' "$NEST_BACKUP_DIR"
+  printf 'API_ROOT=%q\n' "$API_ROOT"
+  cat << 'BODY'
 
 cd "$API_ROOT"
 
@@ -325,7 +363,20 @@ rm -rf "$NEST_DIR"
 mv "$NEST_BACKUP_DIR" "$NEST_DIR"
 
 echo "✅ Runner rollback done on server (restored from backup)"
+cd "$API_ROOT"
+pm2 startOrReload runner.ecosystem.config.cjs --env production --update-env
+pm2 save
+echo "previous runner release restored and reloaded"
+BODY
+} > "$TMP"
+chmod 700 "$TMP"
+mv "$TMP" "$TARGET"
 EOF
+}
+
+# Restores the previous release and reloads — by running the file above, never steps of its own.
+remote_rollback() {
+  install_rollback_script && ssh "$REMOTE_USER_HOST" "bash '$ROLLBACK_SCRIPT_REMOTE'"
 }
 
 # The pnpm version is deliberately not written down here. Each project pins it
@@ -410,6 +461,10 @@ deploy() {
   ZEUS_BRANCH="$GIT_BRANCH_RAW"
   ZEUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || true)
   ZEUS_BASE_HASH=$(resolve_base_hash)
+  ZEUS_ROLLBACK_SCRIPT="$ROLLBACK_SCRIPT_REMOTE"
+  ZEUS_MIGRATIONS_APPLIED=0
+  # ZEU-93. Only paths in it, so it can go in before anything changes on ks-b.
+  install_rollback_script
 
   ######################################
   # Error handler (rollback if needed)
