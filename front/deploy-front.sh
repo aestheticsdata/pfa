@@ -9,6 +9,10 @@ WEB_ROOT_BASE="/var/www/pfa"
 CURRENT_DIR="$WEB_ROOT_BASE/public_html"
 BACKUP_DIR="$WEB_ROOT_BASE/public_html.bak"
 RELEASES_DIR="$CURRENT_DIR/releases"
+
+# ZEU-93. The one rollback, as a file on ks-b — see `install_rollback_script`. The auto-rollback,
+# `./deploy-front.sh rollback` and Zeus's post-deploy verification all run it.
+ROLLBACK_SCRIPT_REMOTE="$WEB_ROOT_BASE/rollback-front.sh"
 # How many releases stay under $RELEASES_DIR after a successful switch: the one just
 # deployed plus the two before it. The directory is history only — what is live is a
 # copy of a release (`cp -a` into $CURRENT_DIR), and rollback restores $BACKUP_DIR —
@@ -159,6 +163,9 @@ zeus_report() {
     [ -n "${ZEUS_COMMIT:-}" ] && printf ',"commit":"%s"' "$(json_escape "$ZEUS_COMMIT")"
     [ -n "${ZEUS_BRANCH:-}" ] && printf ',"branch":"%s"' "$(json_escape "$ZEUS_BRANCH")"
     [ -n "$summary" ] && printf ',"summary":"%s"' "$(json_escape "$summary")"
+    # ZEU-93. A front never migrates a database: 0, said out loud, so Zeus may roll it back.
+    [[ "${ZEUS_MIGRATIONS_APPLIED:-}" =~ ^[0-9]+$ ]] && printf ',"migrationsApplied":%s' "$ZEUS_MIGRATIONS_APPLIED"
+    [ "$status" = "success" ] && [ -n "${ZEUS_ROLLBACK_SCRIPT:-}" ] && printf ',"rollbackScript":"%s"' "$ZEUS_ROLLBACK_SCRIPT"
     printf ',"commits":%s}' "$commits"
   } > "$payload"
 
@@ -246,14 +253,29 @@ pm2 save
 EOF
 }
 
-# Remote rollback helper (used by manual and auto rollback)
-remote_rollback() {
+# ZEU-93. Writes `rollback-front.sh` on ks-b with this script's paths resolved into it: the restore
+# below, then the pm2 reload. Written to a temporary name and moved, so Zeus never runs half a file.
+install_rollback_script() {
   ssh "$REMOTE_USER_HOST" \
     CURRENT_DIR="$CURRENT_DIR" \
     BACKUP_DIR="$BACKUP_DIR" \
     WEB_ROOT_BASE="$WEB_ROOT_BASE" \
+    PM2_ECOSYSTEM_FILE="$PM2_ECOSYSTEM_FILE" \
+    TARGET="$ROLLBACK_SCRIPT_REMOTE" \
     'bash -s' << 'EOF'
 set -Eeuo pipefail
+TMP="$TARGET.tmp.$$"
+{
+  echo '#!/usr/bin/env bash'
+  echo '# Written by deploy-front.sh on every deploy (ZEU-93) - do not edit it here, edit the script.'
+  echo '# Restores the previous front release and reloads it. Run by the deploy on failure, by'
+  echo '# ./deploy-front.sh rollback, and by Zeus when a release degrades.'
+  echo 'set -Eeuo pipefail'
+  printf 'CURRENT_DIR=%q\n' "$CURRENT_DIR"
+  printf 'BACKUP_DIR=%q\n' "$BACKUP_DIR"
+  printf 'WEB_ROOT_BASE=%q\n' "$WEB_ROOT_BASE"
+  printf 'PM2_ECOSYSTEM_FILE=%q\n' "$PM2_ECOSYSTEM_FILE"
+  cat << 'BODY'
 
 cd "$WEB_ROOT_BASE"
 
@@ -291,7 +313,29 @@ if [ -d "$BACKUP_DIR" ]; then
 fi
 
 rm -rf "$BACKUP_DIR"
+
+export PATH="/home/debian/.npm-global/bin:/home/debian/.local/share/pnpm:/usr/local/bin:/usr/bin:/bin:/usr/sbin:$PATH"
+
+cd "$CURRENT_DIR"
+
+if [ ! -f "$PM2_ECOSYSTEM_FILE" ]; then
+  echo "❌ ERROR: Missing PM2 ecosystem file: $CURRENT_DIR/$PM2_ECOSYSTEM_FILE" >&2
+  exit 1
+fi
+
+pm2 startOrReload "$CURRENT_DIR/$PM2_ECOSYSTEM_FILE" --update-env
+pm2 save
+echo "previous front release restored and reloaded"
+BODY
+} > "$TMP"
+chmod 700 "$TMP"
+mv "$TMP" "$TARGET"
 EOF
+}
+
+# Restores the previous release and reloads pm2 — by running the file above, never steps of its own.
+remote_rollback() {
+  install_rollback_script && ssh "$REMOTE_USER_HOST" "bash '$ROLLBACK_SCRIPT_REMOTE'"
 }
 
 # The pnpm version is deliberately not written down here. Each project pins it
@@ -472,6 +516,8 @@ deploy() {
   ZEUS_BRANCH="$GIT_BRANCH_RAW"
   ZEUS_COMMIT=$(git rev-parse HEAD 2>/dev/null || true)
   ZEUS_BASE_HASH=$(resolve_base_hash)
+  ZEUS_ROLLBACK_SCRIPT="$ROLLBACK_SCRIPT_REMOTE"
+  ZEUS_MIGRATIONS_APPLIED=0
 
   on_error() {
     local lineno=$1
@@ -480,8 +526,7 @@ deploy() {
     if [[ "$SWITCH_DONE" == "true" ]]; then
       log "↩️  Auto rollback: switching back to previous version"
       if remote_rollback; then
-        remote_pm2_reload || true
-        log "✅ Auto rollback succeeded"
+        log "✅ Auto rollback succeeded (the rollback script reloads pm2 itself)"
         # `rolled_back`, not `failed`, and the distinction is the whole reason Zeus has three
         # statuses: the deploy did fail, and ks-b is serving exactly what it served before.
         zeus_report "rolled_back" "deploy failed at line $lineno — previous release restored" || true
@@ -624,6 +669,10 @@ if [ ! -f "$PM2_ECOSYSTEM_FILE" ]; then
 fi
 EOF
 
+  # ZEU-93. Before the switch, so the file exists the moment there is something to roll back to.
+  log "➡️  Installing the rollback script on server"
+  install_rollback_script
+
   log "➡️  Performing atomic release switch (with server-side backup, keeping releases/)"
 
   ssh "$REMOTE_USER_HOST" \
@@ -721,8 +770,6 @@ rollback() {
   ZEUS_REPORT_COMMITS="false"
 
   if remote_rollback; then
-    log "➡️  Reloading PM2 from ecosystem"
-    remote_pm2_reload
     zeus_report "rolled_back" "manual rollback — the previous release is live again" || true
     log "✅ Rollback completed. Previous version is now live."
   else
