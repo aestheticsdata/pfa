@@ -344,16 +344,7 @@ check_quality_gate() {
     exit 1
   }
 
-  # The e2e suite needs the local MySQL (it starts its own Redis): run it when MySQL answers,
-  # say so when it does not rather than failing a deploy from a machine without a database.
-  if (exec 3<>/dev/tcp/127.0.0.1/3306) 2>/dev/null; then
-    pnpm test:e2e || {
-      echo "❌ ERROR: quality gate — e2e tests failed" >&2
-      exit 1
-    }
-  else
-    log "⚠️  Quality gate — local MySQL not reachable, e2e tests skipped"
-  fi
+  # No e2e here (PFA-269): the gate is the fast checks only. `pnpm test:e2e` is run on demand.
 
   # The API contract (PFA-257): what the local API sends, parsed by the front's schemas. Needs the
   # local API up (and the front's e2e account): run when it answers, say so when it does not.
