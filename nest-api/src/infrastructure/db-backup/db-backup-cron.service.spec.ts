@@ -18,7 +18,7 @@ jest.mock("fs/promises", () => ({
 import { exec } from "node:child_process";
 
 /**
- * COS-422 — the twelve-hourly database backup reports each run to Zeus (COS-398).
+ * COS-422 — the three-hourly database backup reports each run to Zeus (COS-398).
  *
  * The assertions are all on the payload that leaves the process, because that payload is the whole
  * feature: before this, a backup failing for three weeks and one succeeding looked identical from
@@ -84,7 +84,7 @@ describe("DbBackupCronService.handleDbBackup", () => {
       expect(reported()).toMatchObject({
         app: "pfa",
         cron: "db-backup",
-        schedule: "0 0 */12 * * *",
+        schedule: "0 0 */3 * * *",
         status: "ok",
       });
     });
