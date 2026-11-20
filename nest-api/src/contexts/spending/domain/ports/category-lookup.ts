@@ -1,4 +1,4 @@
-import type { TypedCategory } from "@contexts/spending/domain/interfaces/spendingTypes";
+import type { TypedCategory } from "@contexts/budget-planning/domain/interfaces/budgetPlanningTypes";
 
 /**
  * What the Spending context asks of the categories (PFA-273). Categories belong to budget planning;

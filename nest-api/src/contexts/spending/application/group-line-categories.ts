@@ -1,6 +1,6 @@
+import { chosenCategory } from "@contexts/budget-planning/domain/category-choice";
 import { resolveCategory } from "@contexts/spending/application/category-resolution";
 import type { GroupLineInput } from "@contexts/spending/application/interfaces/spendingCommandTypes";
-import { chosenCategory } from "@contexts/spending/domain/category-choice";
 import type { CategoryLookup } from "@contexts/spending/domain/ports/category-lookup";
 
 /** Each line's category, resolved in order: two lines typing the same new name create it once. */

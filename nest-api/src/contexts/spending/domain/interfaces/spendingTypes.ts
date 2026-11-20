@@ -1,26 +1,5 @@
-import type { CATEGORY_CHOICE } from "@contexts/spending/domain/category-choice";
 import type { CalendarDay } from "@shared-kernel/calendar-day";
 import type { Money } from "@shared-kernel/money";
-
-/** The category picked or typed in the spending modal, as the front sends it. */
-export interface CategoryPick {
-  ID?: string | null;
-  name?: string;
-  color?: string | null;
-}
-
-/** A category typed by name in the modal, created on the fly when the user has none by that name. */
-export interface TypedCategory {
-  name: string;
-  color: string;
-}
-
-/** What a category pick asks for, before any lookup (PFA-273). */
-export type CategoryChoice =
-  | { kind: typeof CATEGORY_CHOICE.existing; categoryId: string }
-  | { kind: typeof CATEGORY_CHOICE.unchanged; categoryId: string }
-  | { kind: typeof CATEGORY_CHOICE.typed; category: TypedCategory }
-  | { kind: typeof CATEGORY_CHOICE.none };
 
 export interface SpendingState {
   id: string;

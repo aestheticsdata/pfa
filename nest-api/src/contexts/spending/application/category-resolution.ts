@@ -1,5 +1,5 @@
-import { CATEGORY_CHOICE } from "@contexts/spending/domain/category-choice";
-import type { CategoryChoice } from "@contexts/spending/domain/interfaces/spendingTypes";
+import { CATEGORY_CHOICE } from "@contexts/budget-planning/domain/category-choice";
+import type { CategoryChoice } from "@contexts/budget-planning/domain/interfaces/budgetPlanningTypes";
 import type { CategoryLookup } from "@contexts/spending/domain/ports/category-lookup";
 import { CategoryNotUsable } from "@contexts/spending/domain/spending-errors";
 
