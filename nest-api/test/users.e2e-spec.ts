@@ -22,6 +22,7 @@ interface SignInResponseBody {
  * - POST /api/users (sign-in)
  * - POST /api/users/add (create user)
  * - POST /api/users/logout
+ * - POST /api/users/token, POST /api/users/token/revoke (mobile Bearer token)
  * - POST /api/users/resetpassword - TODO
  */
 describe("UsersController (e2e)", () => {
@@ -217,6 +218,70 @@ describe("UsersController (e2e)", () => {
 
       const locked = await request(server).post("/api/users").send({ email, password: "wrong" }).expect(429);
       expect(Number(locked.headers["retry-after"])).toBeGreaterThan(0);
+    });
+  });
+
+  describe("POST /api/users/token (mobile Bearer sign-in, PFA-286)", () => {
+    interface TokenBody {
+      user: { id: string; email: string };
+      token: string;
+      expiresIn: number;
+    }
+
+    const signInForToken = async (): Promise<TokenBody> => {
+      const res = await request(app.getHttpServer() as SupertestApp)
+        .post("/api/users/token")
+        .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
+        .expect(200);
+      return res.body as TokenBody;
+    };
+
+    it("returns a token and no session cookie", async () => {
+      const res = await request(app.getHttpServer() as SupertestApp)
+        .post("/api/users/token")
+        .send({ email: "e2e-test@test.com", password: "e2e-test-password" })
+        .expect(200);
+
+      const body = res.body as TokenBody & { csrfToken?: string };
+      expect(body.user.email).toBe("e2e-test@test.com");
+      expect(body.token).toMatch(/^[\w-]{43}$/);
+      expect(body.expiresIn).toBeGreaterThan(0);
+      expect(body).not.toHaveProperty("csrfToken");
+      expect(res.headers["set-cookie"]).toBeUndefined();
+    });
+
+    it("refuses wrong credentials like the cookie sign-in", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .post("/api/users/token")
+        .send({ email: "e2e-test@test.com", password: "wrong-password" })
+        .expect(401);
+    });
+
+    it("opens the protected routes, writes included, without a CSRF token", async () => {
+      const { token } = await signInForToken();
+      const server = app.getHttpServer() as SupertestApp;
+
+      await request(server).get("/api/categories").set("Authorization", `Bearer ${token}`).expect(200);
+      await request(server)
+        .put("/api/dashboard/does-not-exist")
+        .set("Authorization", `Bearer ${token}`)
+        .send({ amount: 1 })
+        .expect((res) => expect(res.status).not.toBe(403));
+    });
+
+    it("stops working once revoked", async () => {
+      const { token } = await signInForToken();
+      const server = app.getHttpServer() as SupertestApp;
+
+      await request(server).post("/api/users/token/revoke").set("Authorization", `Bearer ${token}`).expect(200);
+      await request(server).get("/api/categories").set("Authorization", `Bearer ${token}`).expect(401);
+    });
+
+    it("refuses an unknown token", () => {
+      return request(app.getHttpServer() as SupertestApp)
+        .get("/api/categories")
+        .set("Authorization", "Bearer not-a-real-token")
+        .expect(401);
     });
   });
 

@@ -16,6 +16,7 @@ import { RecurringsModule } from "@recurrings/recurrings.module";
 import { RedisModule } from "@redis/redis.module";
 import { SpendingsModule } from "@spendings/spendings.module";
 import { StatsModule } from "@stats/stats.module";
+import { AuthTokenModule } from "@users/auth-token.module";
 import { UsersModule } from "@users/users.module";
 import { LoggerModule } from "nestjs-pino";
 import { MonitoringModule } from "./monitoring/monitoring.module";
@@ -31,6 +32,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     RedisModule,
     PrismaModule,
     MonitoringModule,
+    AuthTokenModule,
     UsersModule,
     SpendingsModule,
     RecurringsModule,

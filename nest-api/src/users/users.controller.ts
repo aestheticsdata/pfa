@@ -2,6 +2,7 @@ import { env } from "@config/env";
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpException,
@@ -14,12 +15,15 @@ import {
 } from "@nestjs/common";
 import { RedisService } from "@redis/redis.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
+import { AUTH_TOKEN_TTL_SECONDS, AuthTokenService } from "@users/auth-token.service";
+import { readBearerToken } from "@users/bearer-token.util";
 import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@users/csrf-token.util";
 import { AddUserDto } from "@users/dto/add-user.dto";
 import { SignInDto } from "@users/dto/sign-in.dto";
 import { UpdateUserDto } from "@users/dto/update-user.dto";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 import { SignupGuard } from "@users/guards/signup.guard";
+import type { TokenSignInResponse } from "@users/interfaces/authTokenTypes";
 import { SignInLimiterService } from "@users/sign-in-limiter.service";
 import { isSyntheticEmail } from "@users/synthetic-email.util";
 import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
@@ -49,6 +53,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly redisService: RedisService,
     private readonly signInLimiter: SignInLimiterService,
+    private readonly authTokens: AuthTokenService,
     @InjectPinoLogger(UsersController.name) private readonly logger: PinoLogger,
   ) {}
 
@@ -104,6 +109,29 @@ export class UsersController {
     return true;
   }
 
+  /**
+   * Email + password, behind the sign-in limiter: a failure is logged and counted, then rethrown
+   * untouched, so the caller's response is exactly what it was before. Shared by the cookie
+   * sign-in and the mobile token sign-in (PFA-286).
+   */
+  private async verifyCredentials(dto: SignInDto, req: Request): Promise<SignInResponse> {
+    const isLimited = await this.assertNotLocked(req, dto.email);
+    let result: SignInResponse;
+    try {
+      result = await this.usersService.signIn(dto.email, dto.password);
+    } catch (error) {
+      this.auth({ action: "user-login", outcome: "failure", email: dto.email }, req);
+      if (isLimited) {
+        await this.signInLimiter.recordAttempt(req.ip, dto.email);
+      }
+      throw error;
+    }
+    if (isLimited) {
+      await this.signInLimiter.clear(req.ip, dto.email);
+    }
+    return result;
+  }
+
   @Get("me")
   @UseGuards(SessionAuthGuard)
   async me(@Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
@@ -133,21 +161,7 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() dto: SignInDto, @Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
-    const isLimited = await this.assertNotLocked(req, dto.email);
-    let result: SignInResponse;
-    try {
-      result = await this.usersService.signIn(dto.email, dto.password);
-    } catch (error) {
-      // Logged, then rethrown untouched: the caller's response is exactly what it was before.
-      this.auth({ action: "user-login", outcome: "failure", email: dto.email }, req);
-      if (isLimited) {
-        await this.signInLimiter.recordAttempt(req.ip, dto.email);
-      }
-      throw error;
-    }
-    if (isLimited) {
-      await this.signInLimiter.clear(req.ip, dto.email);
-    }
+    const result = await this.verifyCredentials(dto, req);
 
     this.openSession(req, result);
     await this.redisService.trackSession(result.user.id, req.sessionID);
@@ -157,6 +171,35 @@ export class UsersController {
       ...result,
       csrfToken: rotateCsrfToken(req),
     };
+  }
+
+  /**
+   * The mobile app's sign-in (PFA-286): the same credentials and limiter as `POST /users`, but
+   * the answer is a Bearer token instead of a session cookie, so there is no CSRF token either.
+   * Synthetic accounts are refused: bots use the cookie flow, the one SyntheticIpGuard watches.
+   */
+  @Post("token")
+  @HttpCode(HttpStatus.OK)
+  async issueToken(@Body() dto: SignInDto, @Req() req: Request): Promise<TokenSignInResponse> {
+    if (isSyntheticEmail(dto.email)) {
+      throw new ForbiddenException();
+    }
+    const result = await this.verifyCredentials(dto, req);
+    const token = await this.authTokens.issue(result.user.id);
+    this.auth({ action: "user-login", outcome: "success", email: dto.email, userId: result.user.id }, req);
+
+    return { ...result, token, expiresIn: AUTH_TOKEN_TTL_SECONDS };
+  }
+
+  /** Signs the mobile app out: the token presented is forgotten. Idempotent. */
+  @Post("token/revoke")
+  @HttpCode(HttpStatus.OK)
+  async revokeToken(@Req() req: Request): Promise<{ ok: boolean }> {
+    const token = readBearerToken(req);
+    if (token) {
+      await this.authTokens.revoke(token);
+    }
+    return { ok: true };
   }
 
   @Post("add")
