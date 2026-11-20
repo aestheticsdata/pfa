@@ -1,18 +1,21 @@
+import { dateWindow } from "@contexts/analytics/domain/date-window";
+import { round2 } from "@contexts/analytics/domain/rounding";
+import { makeRange, weekRangesOfMonth } from "@contexts/analytics/domain/week-ranges";
+import type { BusiestWeekResponse } from "@contexts/analytics/interface/dto/busiest-week-response.interface";
+import type { CategoryTrendsQueryDto } from "@contexts/analytics/interface/dto/category-trends-query.dto";
+import type {
+  CategoryTrendPoint,
+  CategoryTrendsResponse,
+} from "@contexts/analytics/interface/dto/category-trends-response.interface";
+import type { MonthlyStatsResponse } from "@contexts/analytics/interface/dto/monthly-stats-response.interface";
+import type { SpendingPaceResponse } from "@contexts/analytics/interface/dto/spending-pace-response.interface";
+import { PrismaService } from "@db/prisma.service";
 import { Injectable } from "@nestjs/common";
-import type { BusiestWeekResponse } from "@stats/dto/busiest-week-response.interface";
-import type { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
-import type { CategoryTrendPoint, CategoryTrendsResponse } from "@stats/dto/category-trends-response.interface";
-import type { MonthlyStatsResponse } from "@stats/dto/monthly-stats-response.interface";
-import type { SpendingPaceResponse } from "@stats/dto/spending-pace-response.interface";
-import { dateWindow } from "@stats/helpers/date-window.helper";
-import { round2 } from "@stats/helpers/rounding.helper";
-import { makeRange, weekRangesOfMonth } from "@stats/helpers/week-ranges.helper";
 import { endOfMonth, format, startOfMonth } from "date-fns";
-import { PrismaService } from "../../prisma/prisma.service";
 
 /** Stats behind the Dépenses and Dashboard pages. */
 @Injectable()
-export class SpendingsStatsService {
+export class SpendingsStatsQueries {
   constructor(private readonly prisma: PrismaService) {}
 
   async getWeeklyStats(start: string, userID: string): Promise<number[]> {

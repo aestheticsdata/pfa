@@ -1,19 +1,29 @@
+import { round2, roundCurrency } from "@contexts/analytics/domain/rounding";
+import type { BiggestRegularExpenseResponse } from "@contexts/analytics/interface/dto/biggest-regular-expense-response.interface";
+import type { DailyStat, DailyStatsResponse } from "@contexts/analytics/interface/dto/daily-stats-response.interface";
+import type { SearchTimelineQueryDto } from "@contexts/analytics/interface/dto/search-timeline-query.dto";
+import type {
+  SearchTimelineBucket,
+  SearchTimelineResponse,
+} from "@contexts/analytics/interface/dto/search-timeline-response.interface";
+import type { StatisticsResponse } from "@contexts/analytics/interface/dto/statistics-response.interface";
+import type {
+  WeekdayCategoriesResponse,
+  WeekdayCategory,
+} from "@contexts/analytics/interface/dto/weekday-categories-response.interface";
+import {
+  escapeLikeQuery,
+  MIN_SEARCH_LENGTH,
+  spendingSearchTextWhere,
+} from "@contexts/spending/infrastructure/queries/search-where";
+import { PrismaService } from "@db/prisma.service";
 import { Injectable } from "@nestjs/common";
-import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
-import type { BiggestRegularExpenseResponse } from "@stats/dto/biggest-regular-expense-response.interface";
-import type { DailyStat, DailyStatsResponse } from "@stats/dto/daily-stats-response.interface";
-import type { SearchTimelineQueryDto } from "@stats/dto/search-timeline-query.dto";
-import type { SearchTimelineBucket, SearchTimelineResponse } from "@stats/dto/search-timeline-response.interface";
-import type { StatisticsResponse } from "@stats/dto/statistics-response.interface";
-import type { WeekdayCategoriesResponse, WeekdayCategory } from "@stats/dto/weekday-categories-response.interface";
-import { round2, roundCurrency } from "@stats/helpers/rounding.helper";
 import { format, getYear, parse } from "date-fns";
 import { fr } from "date-fns/locale";
-import { PrismaService } from "../../prisma/prisma.service";
 
 /** Stats behind the Statistiques page. */
 @Injectable()
-export class YearlyStatsService {
+export class YearlyStatsQueries {
   constructor(private readonly prisma: PrismaService) {}
 
   /**

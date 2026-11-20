@@ -1,4 +1,4 @@
-import type { DateWindow } from "@stats/interfaces/statsTypes";
+import type { DateWindow } from "@contexts/analytics/domain/interfaces/analyticsTypes";
 
 /**
  * Turns inclusive calendar-date bounds (yyyy-MM-dd) into a half-open UTC range

@@ -1,5 +1,5 @@
-import { roundCurrency } from "@stats/helpers/rounding.helper";
-import type { DatedAmount, WeekRange } from "@stats/interfaces/statsTypes";
+import type { DatedAmount, WeekRange } from "@contexts/analytics/domain/interfaces/analyticsTypes";
+import { roundCurrency } from "@contexts/analytics/domain/rounding";
 import { format, getDay, getDaysInMonth, getMonth, getYear } from "date-fns";
 
 /**

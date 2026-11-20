@@ -1,4 +1,4 @@
-import { dateWindow } from "@stats/helpers/date-window.helper";
+import { dateWindow } from "@contexts/analytics/domain/date-window";
 
 describe("dateWindow", () => {
   it("is undefined when neither bound is given (all-time)", () => {

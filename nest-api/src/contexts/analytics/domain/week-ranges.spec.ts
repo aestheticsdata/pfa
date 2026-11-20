@@ -1,4 +1,4 @@
-import { makeRange, weekRangesOfMonth } from "@stats/helpers/week-ranges.helper";
+import { makeRange, weekRangesOfMonth } from "@contexts/analytics/domain/week-ranges";
 
 describe("weekRangesOfMonth", () => {
   it("slices a month into Sun→Sat ranges truncated at its edges", () => {

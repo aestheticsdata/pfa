@@ -1,14 +1,14 @@
 // The DTO decorators write their metadata through Reflect — Nest loads this in
 // main.ts, a bare unit spec has to do it itself.
 import "reflect-metadata";
+import { MonthlyStatsQueryDto } from "@contexts/analytics/interface/dto/monthly-stats-query.dto";
+import { WeeklyStatsQueryDto } from "@contexts/analytics/interface/dto/weekly-stats-query.dto";
 import { DashboardQueryDto } from "@contexts/budget-planning/interface/dto/dashboard-query.dto";
 import { RecurringsQueryDto } from "@contexts/budget-planning/interface/dto/recurrings-query.dto";
 import { SpendingsQueryDto } from "@contexts/spending/interface/dto/spendings-query.dto";
 import type { ClassConstructor } from "class-transformer";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { MonthlyStatsQueryDto } from "../stats/dto/monthly-stats-query.dto";
-import { WeeklyStatsQueryDto } from "../stats/dto/weekly-stats-query.dto";
 
 /**
  * PFA-239 — the month-scoped reads take yyyy-MM-dd dates only. They used to accept a

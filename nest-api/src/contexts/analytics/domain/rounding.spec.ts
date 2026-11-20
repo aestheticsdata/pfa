@@ -1,4 +1,4 @@
-import { round2, roundCurrency } from "@stats/helpers/rounding.helper";
+import { round2, roundCurrency } from "@contexts/analytics/domain/rounding";
 
 describe("roundCurrency", () => {
   it("rounds to the whole unit", () => {

@@ -2,11 +2,11 @@ import appConfig from "@config/app.config";
 import dbBackupConfig from "@config/db-backup.config";
 import { validate } from "@config/env.validation";
 import sshBackupConfig from "@config/ssh-backup.config";
+import { AnalyticsModule } from "@contexts/analytics/analytics.module";
 import { BudgetPlanningModule } from "@contexts/budget-planning/budget-planning.module";
 import { PriceComparisonModule } from "@contexts/price-comparison/price-comparison.module";
 import { ReceiptReadingModule } from "@contexts/receipt-reading/receipt-reading.module";
 import { SpendingModule } from "@contexts/spending/spending.module";
-import { DashboardModule } from "@dashboard/dashboard.module";
 import { DbBackupModule } from "@infrastructure/db-backup/db-backup.module";
 import { AllExceptionsFilter, buildLoggerParams, TraceIdMiddleware } from "@infrastructure/logger";
 import { SshBackupModule } from "@infrastructure/ssh-backup/ssh-backup.module";
@@ -15,7 +15,6 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER } from "@nestjs/core";
 import { ScheduleModule } from "@nestjs/schedule";
 import { RedisModule } from "@redis/redis.module";
-import { StatsModule } from "@stats/stats.module";
 import { UsersModule } from "@users/users.module";
 import { LoggerModule } from "nestjs-pino";
 import { MonitoringModule } from "./monitoring/monitoring.module";
@@ -36,8 +35,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     ReceiptReadingModule,
     PriceComparisonModule,
     BudgetPlanningModule,
-    DashboardModule,
-    StatsModule,
+    AnalyticsModule,
     SshBackupModule,
     DbBackupModule,
     ConfigModule.forRoot({

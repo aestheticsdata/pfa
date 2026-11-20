@@ -1,26 +1,26 @@
+import { CategoryStatsQueries } from "@contexts/analytics/infrastructure/queries/category-stats.queries";
+import { SpendingsStatsQueries } from "@contexts/analytics/infrastructure/queries/spendings-stats.queries";
+import { YearlyStatsQueries } from "@contexts/analytics/infrastructure/queries/yearly-stats.queries";
+import { BiggestRegularExpenseQueryDto } from "@contexts/analytics/interface/dto/biggest-regular-expense-query.dto";
+import { BusiestWeekQueryDto } from "@contexts/analytics/interface/dto/busiest-week-query.dto";
+import { CategoryStatsQueryDto } from "@contexts/analytics/interface/dto/category-stats-query.dto";
+import { CategoryTrendsQueryDto } from "@contexts/analytics/interface/dto/category-trends-query.dto";
+import { DailyStatsQueryDto } from "@contexts/analytics/interface/dto/daily-stats-query.dto";
+import { MonthlyStatsQueryDto } from "@contexts/analytics/interface/dto/monthly-stats-query.dto";
+import { RegularMonthlyAverageQueryDto } from "@contexts/analytics/interface/dto/regular-monthly-average-query.dto";
+import { SearchTimelineQueryDto } from "@contexts/analytics/interface/dto/search-timeline-query.dto";
+import { SpendingPaceQueryDto } from "@contexts/analytics/interface/dto/spending-pace-query.dto";
+import { StatisticsQueryDto } from "@contexts/analytics/interface/dto/statistics-query.dto";
+import { WeekdayCategoriesQueryDto } from "@contexts/analytics/interface/dto/weekday-categories-query.dto";
+import { WeeklyStatsQueryDto } from "@contexts/analytics/interface/dto/weekly-stats-query.dto";
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { BiggestRegularExpenseQueryDto } from "@stats/dto/biggest-regular-expense-query.dto";
-import { BusiestWeekQueryDto } from "@stats/dto/busiest-week-query.dto";
-import { CategoryStatsQueryDto } from "@stats/dto/category-stats-query.dto";
-import { CategoryTrendsQueryDto } from "@stats/dto/category-trends-query.dto";
-import { DailyStatsQueryDto } from "@stats/dto/daily-stats-query.dto";
-import { MonthlyStatsQueryDto } from "@stats/dto/monthly-stats-query.dto";
-import { RegularMonthlyAverageQueryDto } from "@stats/dto/regular-monthly-average-query.dto";
-import { SearchTimelineQueryDto } from "@stats/dto/search-timeline-query.dto";
-import { SpendingPaceQueryDto } from "@stats/dto/spending-pace-query.dto";
-import { StatisticsQueryDto } from "@stats/dto/statistics-query.dto";
-import { WeekdayCategoriesQueryDto } from "@stats/dto/weekday-categories-query.dto";
-import { WeeklyStatsQueryDto } from "@stats/dto/weekly-stats-query.dto";
-import { CategoryStatsService } from "@stats/services/category-stats.service";
-import { SpendingsStatsService } from "@stats/services/spendings-stats.service";
-import { YearlyStatsService } from "@stats/services/yearly-stats.service";
 
 @Controller("weeklystats")
 @UseGuards(SessionAuthGuard)
 export class WeeklyStatsController {
-  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsQueries) {}
 
   @Get()
   async getWeeklyStats(@Query() query: WeeklyStatsQueryDto, @GetUserId() userID: string) {
@@ -31,7 +31,7 @@ export class WeeklyStatsController {
 @Controller("monthlystats")
 @UseGuards(SessionAuthGuard)
 export class MonthlyStatsController {
-  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsQueries) {}
 
   @Get()
   async getMonthlyStats(@Query() query: MonthlyStatsQueryDto, @GetUserId() userID: string) {
@@ -42,7 +42,7 @@ export class MonthlyStatsController {
 @Controller("statistics")
 @UseGuards(SessionAuthGuard)
 export class StatisticsController {
-  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsQueries) {}
 
   @Get()
   async getStatistics(@Query() query: StatisticsQueryDto, @GetUserId() userID: string) {
@@ -61,7 +61,7 @@ export class StatisticsController {
 @Controller("regular-monthly-average")
 @UseGuards(SessionAuthGuard)
 export class RegularMonthlyAverageController {
-  constructor(private readonly categoryStatsService: CategoryStatsService) {}
+  constructor(private readonly categoryStatsService: CategoryStatsQueries) {}
 
   @Get()
   async getRegularMonthlyAverage(@Query() query: RegularMonthlyAverageQueryDto, @GetUserId() userID: string) {
@@ -72,7 +72,7 @@ export class RegularMonthlyAverageController {
 @Controller("category-stats")
 @UseGuards(SessionAuthGuard)
 export class CategoryStatsController {
-  constructor(private readonly categoryStatsService: CategoryStatsService) {}
+  constructor(private readonly categoryStatsService: CategoryStatsQueries) {}
 
   @Get()
   async getCategoryStats(@Query() query: CategoryStatsQueryDto, @GetUserId() userID: string) {
@@ -83,7 +83,7 @@ export class CategoryStatsController {
 @Controller("category-trends")
 @UseGuards(SessionAuthGuard)
 export class CategoryTrendsController {
-  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsQueries) {}
 
   @Get()
   async getCategoryTrends(@Query() query: CategoryTrendsQueryDto, @GetUserId() userID: string) {
@@ -94,7 +94,7 @@ export class CategoryTrendsController {
 @Controller("busiest-week")
 @UseGuards(SessionAuthGuard)
 export class BusiestWeekController {
-  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsQueries) {}
 
   @Get()
   async getBusiestWeek(@Query() query: BusiestWeekQueryDto, @GetUserId() userID: string) {
@@ -105,7 +105,7 @@ export class BusiestWeekController {
 @Controller("spending-pace")
 @UseGuards(SessionAuthGuard)
 export class SpendingPaceController {
-  constructor(private readonly spendingsStatsService: SpendingsStatsService) {}
+  constructor(private readonly spendingsStatsService: SpendingsStatsQueries) {}
 
   @Get()
   async getSpendingPace(@Query() query: SpendingPaceQueryDto, @GetUserId() userID: string) {
@@ -116,7 +116,7 @@ export class SpendingPaceController {
 @Controller("daily-stats")
 @UseGuards(SessionAuthGuard)
 export class DailyStatsController {
-  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsQueries) {}
 
   @Get()
   async getDailyStats(@Query() query: DailyStatsQueryDto, @GetUserId() userID: string) {
@@ -127,7 +127,7 @@ export class DailyStatsController {
 @Controller("biggest-regular-expense")
 @UseGuards(SessionAuthGuard)
 export class BiggestRegularExpenseController {
-  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsQueries) {}
 
   @Get()
   async getBiggestRegularExpense(@Query() query: BiggestRegularExpenseQueryDto, @GetUserId() userID: string) {
@@ -138,7 +138,7 @@ export class BiggestRegularExpenseController {
 @Controller("weekday-categories")
 @UseGuards(SessionAuthGuard)
 export class WeekdayCategoriesController {
-  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsQueries) {}
 
   @Get()
   async getWeekdayCategories(@Query() query: WeekdayCategoriesQueryDto, @GetUserId() userID: string) {
@@ -149,7 +149,7 @@ export class WeekdayCategoriesController {
 @Controller("search-timeline")
 @UseGuards(SessionAuthGuard)
 export class SearchTimelineController {
-  constructor(private readonly yearlyStatsService: YearlyStatsService) {}
+  constructor(private readonly yearlyStatsService: YearlyStatsQueries) {}
 
   @Get()
   async getSearchTimeline(@Query() query: SearchTimelineQueryDto, @GetUserId() userID: string) {
