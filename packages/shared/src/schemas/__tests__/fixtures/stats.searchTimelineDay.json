@@ -1,0 +1,20 @@
+{
+  "buckets": [
+    {
+      "date": "2026-09-28",
+      "total": 39.88,
+      "count": 1
+    },
+    {
+      "date": "2026-10-01",
+      "total": 155.12,
+      "count": 1
+    }
+  ],
+  "summary": {
+    "total": 178.63,
+    "count": 2,
+    "firstDate": "2026-09-28",
+    "lastDate": "2026-10-01"
+  }
+}

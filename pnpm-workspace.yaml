@@ -1,0 +1,11 @@
+# The workspace shared by the mobile app and the code it reuses (PFA-284).
+#
+# Only these folders belong to it. `front/`, `nest-api/` and `bots/*` keep their own
+# pnpm-workspace.yaml and lockfile: pnpm stops at the closest workspace file, so they are
+# installed, built and deployed exactly as before — ks-b's layout does not change.
+packages:
+  - packages/*
+
+# House rule: TypeScript stays on the latest 5.x.
+overrides:
+  typescript: 5.9.3

@@ -1,0 +1,48 @@
+/**
+ * Maximum lengths of the user-writable text fields, mirroring the `VarChar`
+ * columns they land in (COS-180). Nothing validated a length before: an
+ * oversized input travelled all the way to MySQL and came back as a raw SQL
+ * error instead of a form message.
+ *
+ * The backend mirrors this table in `nest-api/src/config/field-limits.ts`, where
+ * a spec asserts it against `schema.prisma` — the two must move together, and
+ * both only ever move with the column.
+ */
+export const FIELD_LIMITS = {
+  /** `Spendings.label` and `Recurrings.label` — the spending modal's label. */
+  label: 100,
+  /**
+   * A group's store/name and a line's detail (PFA-189): the line is stored as
+   * "<group> — <detail>" in `Spendings.label` — 40 + 3 + 57 = 100.
+   */
+  groupLabel: 40,
+  groupDetail: 57,
+  /** `ReceiptLines.label` — one line read on a receipt (PFA-214). */
+  receiptLineLabel: 100,
+  /** `Stores.name` — a shop as read on its receipts (PFA-218). */
+  storeName: 60,
+  /** `Stores.address` — street and city as read on its receipts (PFA-219). */
+  storeAddress: 120,
+  /** `ProductTypes.name` — a generic product such as "Liquid soap" (PFA-219). */
+  productTypeName: 40,
+  /** `Exceptionals.description`. */
+  description: 255,
+  /** `Categories.name` — the categories the spendings reference. */
+  categoryName: 20,
+  /**
+   * `Exceptionals.categoryName` — exceptionals keep their category inline
+   * instead of referencing `Categories`, and the column is wider. Each field is
+   * bounded on its own column; the divergence predates COS-180.
+   */
+  exceptionalCategoryName: 50,
+  /** `Users.name` — derived from the email's local part at signup. */
+  userName: 20,
+  /** `Users.email`. */
+  email: 250,
+} as const;
+
+/**
+ * Largest amount a money column holds: every one is a `DECIMAL(10, 2)` (PFA-259).
+ * Mirrors `nest-api/src/config/amount-limits.ts`.
+ */
+export const MAX_AMOUNT = 99_999_999.99;

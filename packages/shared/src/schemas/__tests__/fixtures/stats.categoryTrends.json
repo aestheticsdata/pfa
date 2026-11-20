@@ -1,0 +1,89 @@
+{
+  "trends": [
+    {
+      "category": "Garden",
+      "categoryColor": "#1ABC9C",
+      "value": 40.64,
+      "previousValue": 60.06
+    },
+    {
+      "category": "Train pass",
+      "categoryColor": "#6DB65B",
+      "value": 37.73,
+      "previousValue": 256.06
+    },
+    {
+      "category": "Stationery",
+      "categoryColor": "#F39C12",
+      "value": 286.36,
+      "previousValue": 55.46
+    },
+    {
+      "category": "Gym",
+      "categoryColor": "#16A085",
+      "value": 212.45,
+      "previousValue": 295.29
+    },
+    {
+      "category": "Laundry",
+      "categoryColor": "#FD79A8",
+      "value": 97.5,
+      "previousValue": 34.82
+    },
+    {
+      "category": "Bookshop",
+      "categoryColor": "#E8663D",
+      "value": 211.87,
+      "previousValue": 288.85
+    },
+    {
+      "category": "Market",
+      "categoryColor": "#E84393",
+      "value": 148.16,
+      "previousValue": 161.09
+    },
+    {
+      "category": "Museum",
+      "categoryColor": "#E74C3C",
+      "value": 154.5,
+      "previousValue": 77.47
+    },
+    {
+      "category": "Pharmacy",
+      "categoryColor": "#C0894B",
+      "value": 267.94,
+      "previousValue": 119.46
+    },
+    {
+      "category": "Florist",
+      "categoryColor": "#2ECC71",
+      "value": 247.75,
+      "previousValue": 57.44
+    },
+    {
+      "category": "Hardware",
+      "categoryColor": "#9B59B6",
+      "value": 8.72,
+      "previousValue": 184
+    },
+    {
+      "category": "Cinema",
+      "categoryColor": "#4A90D9",
+      "value": 254.57,
+      "previousValue": 247.29
+    },
+    {
+      "category": "Repair",
+      "categoryColor": "#34495E",
+      "value": 11.23,
+      "previousValue": 84.35
+    },
+    {
+      "category": "Toys",
+      "categoryColor": "#7F8C8D",
+      "value": 60.16,
+      "previousValue": 154.43
+    }
+  ],
+  "previousTotal": 271.76
+}

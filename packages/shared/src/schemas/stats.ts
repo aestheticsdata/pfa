@@ -1,0 +1,184 @@
+import { z } from "zod";
+import { apiObject } from "#schemas/apiObject";
+import { numberLikeSchema } from "#schemas/primitives";
+
+// A statistics row arrives flat from the backend — the month label sits among the
+// per-category totals: { month: "janv.", food: 10, rent: 5 }. Splitting it at the
+// parse boundary is what lets every consumer read `totals` as plain numbers,
+// instead of walking the row re-discriminating the "month" key and casting the
+// rest to `string | number` (COS-109).
+//
+// The coercion stays lenient — a malformed cell becomes 0 rather than throwing.
+// The entire Statistics page (KPIs, forecast, charts) renders off this single
+// parse, so one bad value must degrade a cell, not blank the page.
+const statisticsMonthEntrySchema = z.record(z.string(), z.union([z.string(), z.number()])).transform((row) => {
+  const { month, ...categories } = row;
+  const totals: Record<string, number> = {};
+  for (const [name, value] of Object.entries(categories)) {
+    totals[name] = typeof value === "number" ? value : Number(value) || 0;
+  }
+  return { month: String(month ?? ""), totals };
+});
+
+// The two outer `z.record`s stay dynamically keyed on purpose (COS-109): the keys
+// are the user's own category names and the years they have data for, both only
+// known at runtime. Typing them further is impossible without changing the
+// backend contract, which is out of scope here.
+//
+// This one and the other series payloads below go through `z.compile()`
+// (PFA-176): they are the heavy parses, and the output and errors stay the same.
+export const StatisticsResponseSchema = z.compile(
+  apiObject({
+    colors: z.record(z.string(), z.string()),
+    data: z.record(z.string(), z.array(statisticsMonthEntrySchema)),
+  }),
+);
+
+export type StatisticsResponse = z.infer<typeof StatisticsResponseSchema>;
+
+export const ChartsCategorySchema = apiObject({
+  category: z.string().nullable(),
+  categoryColor: z.string().nullable(),
+  value: numberLikeSchema,
+});
+
+export type ChartsCategory = z.infer<typeof ChartsCategorySchema>;
+
+// Per-category totals for the current period and the one it is compared against
+// (GET /category-trends). Feeds the dashboard's monthly "Breakdown by
+// category" trend column + "Rising category" insight (COS-41); the delta %
+// and its up/down/stable/new styling are derived on the front.
+// `previousValue` is null when the category is new to the comparison window.
+export const CategoryTrendPointSchema = apiObject({
+  category: z.string().nullable(),
+  categoryColor: z.string().nullable(),
+  value: numberLikeSchema,
+  previousValue: numberLikeSchema.nullable(),
+});
+
+export type CategoryTrendPoint = z.infer<typeof CategoryTrendPointSchema>;
+
+export const CategoryTrendsResponseSchema = z.compile(
+  apiObject({
+    trends: z.array(CategoryTrendPointSchema),
+    // Total spent across every category in the comparison window (incl. ones
+    // absent from the current window). Drives the Spendings "Average / day vs last
+    // week" delta (COS-35); unused by the dashboard monthly breakdown.
+    previousTotal: numberLikeSchema,
+  }),
+);
+
+// Per-day spending totals for a year (COS-45) — GET /daily-stats. Sparse: one
+// entry per day that has at least one spending. Feeds the daily heatmap and the
+// day-of-week averages (COS-48).
+export const DailyStatSchema = apiObject({
+  date: z.string(),
+  total: numberLikeSchema,
+  count: numberLikeSchema,
+});
+
+export type DailyStat = z.infer<typeof DailyStatSchema>;
+
+export const DailyStatsResponseSchema = z.compile(
+  apiObject({
+    days: z.array(DailyStatSchema),
+  }),
+);
+
+export type DailyStatsResponse = z.infer<typeof DailyStatsResponseSchema>;
+
+// Dominant spending category per weekday for a year (COS-127) — GET
+// /weekday-categories. `weekdays` is length 7, index 0 = Monday … 6 = Sunday;
+// each entry's name/color is null when that weekday has no categorized spending.
+// Backs the day-of-week widget's hover tooltip.
+export const WeekdayCategorySchema = apiObject({
+  name: z.string().nullable(),
+  color: z.string().nullable(),
+});
+
+export type WeekdayCategory = z.infer<typeof WeekdayCategorySchema>;
+
+export const WeekdayCategoriesResponseSchema = apiObject({
+  weekdays: z.array(WeekdayCategorySchema),
+});
+
+export type WeekdayCategoriesResponse = z.infer<typeof WeekdayCategoriesResponseSchema>;
+
+// Biggest single one-off (non-exceptional) expense of a year (COS-46) — GET
+// /biggest-regular-expense. `expense` is null when the user has no spending that
+// year. Backs the "regular" row of the "Biggest expense" KPI card.
+export const BiggestRegularExpenseSchema = apiObject({
+  label: z.string(),
+  amount: numberLikeSchema,
+  date: z.string(),
+  categoryName: z.string().nullable(),
+  categoryColor: z.string().nullable(),
+});
+
+export type BiggestRegularExpense = z.infer<typeof BiggestRegularExpenseSchema>;
+
+export const BiggestRegularExpenseResponseSchema = apiObject({
+  expense: BiggestRegularExpenseSchema.nullable(),
+});
+
+export type BiggestRegularExpenseResponse = z.infer<typeof BiggestRegularExpenseResponseSchema>;
+
+// Busiest calendar week-range of a month by transaction count (COS-139) — GET
+// /busiest-week. "Week" = the month's calendar-aligned Sun→Sat slices, truncated
+// at the month edges (not a rolling window). `from`/`to` are null when the month
+// has no spending. Backs the dashboard's 4th ribbon insight.
+export const BusiestWeekResponseSchema = apiObject({
+  count: numberLikeSchema,
+  from: z.string().nullable(),
+  to: z.string().nullable(),
+});
+
+export type BusiestWeekResponse = z.infer<typeof BusiestWeekResponseSchema>;
+
+// Totals of the three months before the displayed month (COS-40) — GET
+// /spending-pace. Newest→oldest (M-1, M-2, M-3); `month` is the month's first day
+// (YYYY-MM-DD). Feeds the dashboard's "On pace" insight, which turns these
+// into daily rates and compares them to the current month's pace.
+export const MonthlyTotalSchema = apiObject({
+  month: z.string(),
+  total: numberLikeSchema,
+});
+
+export type MonthlyTotal = z.infer<typeof MonthlyTotalSchema>;
+
+export const SpendingPaceResponseSchema = apiObject({
+  months: z.array(MonthlyTotalSchema),
+});
+
+export type SpendingPaceResponse = z.infer<typeof SpendingPaceResponseSchema>;
+
+// Time distribution of the spendings matching a search term (COS-160) — GET
+// /search-timeline. Sparse: only buckets with at least one match come back (the
+// widget fills the gaps), each keyed by its start day (the day itself, or the
+// Sunday of the Sun→Sat week). Backs the Statistics search-timeline widget.
+export const SearchTimelineBucketSchema = apiObject({
+  date: z.string(),
+  total: numberLikeSchema,
+  count: numberLikeSchema,
+});
+
+export type SearchTimelineBucket = z.infer<typeof SearchTimelineBucketSchema>;
+
+export const SearchTimelineResponseSchema = z.compile(
+  apiObject({
+    buckets: z.array(SearchTimelineBucketSchema),
+    summary: apiObject({
+      total: numberLikeSchema,
+      count: numberLikeSchema,
+      firstDate: z.string().nullable(),
+      lastDate: z.string().nullable(),
+    }),
+  }),
+);
+
+export type SearchTimelineResponse = z.infer<typeof SearchTimelineResponseSchema>;
+
+/** The `bucket` query of GET /search-timeline: one bar per day, or per Sun→Sat week. */
+export const SEARCH_TIMELINE_BUCKET = { day: "day", week: "week" } as const;
+
+export type SearchTimelineBucketSize = (typeof SEARCH_TIMELINE_BUCKET)[keyof typeof SEARCH_TIMELINE_BUCKET];

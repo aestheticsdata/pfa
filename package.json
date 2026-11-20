@@ -1,0 +1,10 @@
+{
+  "name": "pfa-workspace",
+  "private": true,
+  "packageManager": "pnpm@12.2.1",
+  "scripts": {
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  }
+}

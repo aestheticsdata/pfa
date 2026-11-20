@@ -1,0 +1,31 @@
+{
+  "name": "@pfa/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "What the web and mobile clients share: API schemas and types, the HTTP client, fetchers, query keys, money and week helpers.",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "imports": {
+    "#*": "./src/*.ts"
+  },
+  "scripts": {
+    "lint": "biome check ./src && node scripts/checkTypePlacement.mjs",
+    "lint:fix": "biome check --write ./src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "date-fns": "^4.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.3",
+    "@types/node": "^22.20.5",
+    "typescript": "5.9.3",
+    "vitest": "^5.1.1"
+  }
+}
