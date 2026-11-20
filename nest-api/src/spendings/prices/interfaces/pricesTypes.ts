@@ -1,5 +1,5 @@
+import type { SizeUnit } from "@contexts/receipt-reading/domain/interfaces/receiptReadingTypes";
 import type { PRICE_BASIS } from "@spendings/prices/price-basis";
-import type { SizeUnit } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
 
 export type PriceBasis = (typeof PRICE_BASIS)[keyof typeof PRICE_BASIS];
 

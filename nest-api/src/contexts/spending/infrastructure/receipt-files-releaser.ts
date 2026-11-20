@@ -1,11 +1,11 @@
+import { ReceiptFileStore } from "@contexts/receipt-reading/domain/ports/receipt-file-store";
 import { ReceiptReleaser } from "@contexts/spending/domain/ports/receipt-releaser";
 import { Injectable } from "@nestjs/common";
-import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 
-/** Hands released receipts to the receipt file store, which keeps any file still held (PFA-273). */
+/** Hands released receipts to the receipt context's file store, which keeps any file still held (PFA-273). */
 @Injectable()
 export class ReceiptFilesReleaser extends ReceiptReleaser {
-  constructor(private readonly files: ReceiptFilesService) {
+  constructor(private readonly files: ReceiptFileStore) {
     super();
   }
 

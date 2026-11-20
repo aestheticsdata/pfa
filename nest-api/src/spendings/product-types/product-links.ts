@@ -1,6 +1,5 @@
+import type { ReceiptLine, StoreIdentity } from "@contexts/receipt-reading/domain/interfaces/receiptReadingTypes";
 import type { LinkedLine } from "@spendings/product-types/interfaces/productTypesTypes";
-import type { ReceiptLine } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
-import type { StoreIdentity } from "@spendings/stores/interfaces/storesTypes";
 import { textKey } from "@spendings/text-key";
 
 /** One store's identity as one key: its name and its address (PFA-219). */

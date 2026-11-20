@@ -1,8 +1,8 @@
+import type { SizeUnit } from "@contexts/receipt-reading/domain/interfaces/receiptReadingTypes";
+import { SIZE_UNIT } from "@contexts/receipt-reading/domain/size-units";
 import { Injectable, NotFoundException } from "@nestjs/common";
 import type { PriceComparison, ProductTypeSummary, Purchase } from "@spendings/prices/interfaces/pricesTypes";
 import { compareStores } from "@spendings/prices/unit-price";
-import type { SizeUnit } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
-import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
 import { format } from "date-fns";
 import { PrismaService } from "../../prisma/prisma.service";
 

@@ -5,42 +5,15 @@ import { PricesController } from "@spendings/prices/prices.controller";
 import { PricesService } from "@spendings/prices/prices.service";
 import { ProductTypesController } from "@spendings/product-types/product-types.controller";
 import { ProductTypesService } from "@spendings/product-types/product-types.service";
-import { ReceiptLinesController } from "@spendings/receipt-lines/receipt-lines.controller";
-import { ReceiptLinesService } from "@spendings/receipt-lines/receipt-lines.service";
-import { ReceiptOcrService } from "@spendings/receipt-lines/receipt-ocr.service";
-import { ReceiptProposalsController } from "@spendings/receipt-proposals/receipt-proposals.controller";
-import { ReceiptProposalsService } from "@spendings/receipt-proposals/receipt-proposals.service";
-import { InvoiceImagesService } from "@spendings/receipts/invoice-images.service";
-import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
-import { SpendingReceiptsController } from "@spendings/receipts/spending-receipts.controller";
-import { SpendingReceiptsService } from "@spendings/receipts/spending-receipts.service";
 import { StoresController } from "@spendings/stores/stores.controller";
 import { StoresService } from "@spendings/stores/stores.service";
 
+/** Stores, product types and prices: the price comparison context, still to be moved (PFA-275). */
 @Module({
   imports: [MonitoringModule],
-  controllers: [
-    SpendingReceiptsController,
-    ReceiptLinesController,
-    StoresController,
-    ProductTypesController,
-    PricesController,
-    ReceiptProposalsController,
-  ],
-  providers: [
-    InvoiceImagesService,
-    SpendingReceiptsService,
-    ReceiptFilesService,
-    ReceiptLinesService,
-    ReceiptOcrService,
-    StoresService,
-    ProductTypesService,
-    PricesService,
-    ReceiptProposalsService,
-    SessionAuthGuard,
-  ],
-  // The Spending context (PFA-273) releases receipts and serves invoice images through these
-  // until the receipt context takes them over.
-  exports: [ReceiptFilesService, InvoiceImagesService],
+  controllers: [StoresController, ProductTypesController, PricesController],
+  providers: [StoresService, ProductTypesService, PricesService, SessionAuthGuard],
+  // Receipt reading recognises stores and links product types through these (PFA-274).
+  exports: [StoresService, ProductTypesService],
 })
 export class SpendingsModule {}
