@@ -1,3 +1,4 @@
+import { PriceComparisonModule } from "@contexts/price-comparison/price-comparison.module";
 import { BulkReceiptReadService } from "@contexts/receipt-reading/application/bulk-receipt-read.service";
 import { InvoiceImagesService } from "@contexts/receipt-reading/application/invoice-images.service";
 import { ReceiptAttachmentsService } from "@contexts/receipt-reading/application/receipt-attachments.service";
@@ -23,14 +24,13 @@ import { ReceiptProposalsController } from "@contexts/receipt-reading/interface/
 import { SpendingReceiptsController } from "@contexts/receipt-reading/interface/spending-receipts.controller";
 import { Module } from "@nestjs/common";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { SpendingsModule } from "@spendings/spendings.module";
 
 /**
  * The receipt reading context (PFA-274): receipt files, the OCR, the saved lines and the bulk
  * read. Its composition root: Tesseract, the disk and MySQL are bound to their ports here only.
  */
 @Module({
-  imports: [SpendingsModule],
+  imports: [PriceComparisonModule],
   controllers: [SpendingReceiptsController, ReceiptLinesController, ReceiptProposalsController],
   providers: [
     ReceiptLinesService,
