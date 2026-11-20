@@ -101,7 +101,9 @@
       "^@spendings/(.*)$": "<rootDir>/spendings/$1",
       "^@stats/(.*)$": "<rootDir>/stats/$1",
       "^@categories/(.*)$": "<rootDir>/categories/$1",
-      "^@monitoring/(.*)$": "<rootDir>/monitoring/$1"
+      "^@monitoring/(.*)$": "<rootDir>/monitoring/$1",
+      "^@shared-kernel/(.*)$": "<rootDir>/shared-kernel/$1",
+      "^@contexts/(.*)$": "<rootDir>/contexts/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

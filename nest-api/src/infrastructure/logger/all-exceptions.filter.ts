@@ -1,3 +1,4 @@
+import { toHttpException } from "@infrastructure/http/domain-error-http";
 import type { ArgumentsHost, ExceptionFilter } from "@nestjs/common";
 import { Catch, HttpException, HttpStatus } from "@nestjs/common";
 import type { Response } from "express";
@@ -15,13 +16,16 @@ const SERVER_ERROR = 500;
  * **The response is reproduced exactly as Nest would have sent it.** That constraint is what
  * makes this safe to add to a running application: an `HttpException` keeps its status and its
  * body verbatim, anything else is a 500 with Nest's own wording. The filter observes; it does not
- * participate.
+ * participate. The one translation it makes is a domain error into the HTTP exception the route
+ * used to throw itself (PFA-272): the domain never imports `@nestjs/common`.
  */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   constructor(private readonly logger: PinoLogger) {}
 
-  catch(exception: unknown, host: ArgumentsHost): void {
+  catch(thrown: unknown, host: ArgumentsHost): void {
+    // A rule the domain refused reaches the client as the HTTP exception it always got (PFA-272).
+    const exception = toHttpException(thrown);
     const http = host.switchToHttp();
     const res = http.getResponse<Response>();
 
