@@ -3,6 +3,7 @@ import appConfig from "@config/app.config";
 import dbBackupConfig from "@config/db-backup.config";
 import { validate } from "@config/env.validation";
 import sshBackupConfig from "@config/ssh-backup.config";
+import { SpendingModule } from "@contexts/spending/spending.module";
 import { DashboardModule } from "@dashboard/dashboard.module";
 import { ExceptionalsModule } from "@exceptionals/exceptionals.module";
 import { DbBackupModule } from "@infrastructure/db-backup/db-backup.module";
@@ -32,6 +33,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     PrismaModule,
     MonitoringModule,
     UsersModule,
+    SpendingModule,
     SpendingsModule,
     RecurringsModule,
     DashboardModule,

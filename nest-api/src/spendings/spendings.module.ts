@@ -1,7 +1,5 @@
 import { MonitoringModule } from "@monitoring/monitoring.module";
 import { Module } from "@nestjs/common";
-import { SpendingGroupsController } from "@spendings/groups/spending-groups.controller";
-import { SpendingGroupsService } from "@spendings/groups/spending-groups.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { PricesController } from "@spendings/prices/prices.controller";
 import { PricesService } from "@spendings/prices/prices.service";
@@ -12,19 +10,16 @@ import { ReceiptLinesService } from "@spendings/receipt-lines/receipt-lines.serv
 import { ReceiptOcrService } from "@spendings/receipt-lines/receipt-ocr.service";
 import { ReceiptProposalsController } from "@spendings/receipt-proposals/receipt-proposals.controller";
 import { ReceiptProposalsService } from "@spendings/receipt-proposals/receipt-proposals.service";
+import { InvoiceImagesService } from "@spendings/receipts/invoice-images.service";
 import { ReceiptFilesService } from "@spendings/receipts/receipt-files.service";
 import { SpendingReceiptsController } from "@spendings/receipts/spending-receipts.controller";
 import { SpendingReceiptsService } from "@spendings/receipts/spending-receipts.service";
-import { SpendingsController } from "@spendings/spendings.controller";
-import { SpendingsService } from "@spendings/spendings.service";
 import { StoresController } from "@spendings/stores/stores.controller";
 import { StoresService } from "@spendings/stores/stores.service";
 
 @Module({
   imports: [MonitoringModule],
   controllers: [
-    SpendingsController,
-    SpendingGroupsController,
     SpendingReceiptsController,
     ReceiptLinesController,
     StoresController,
@@ -33,8 +28,7 @@ import { StoresService } from "@spendings/stores/stores.service";
     ReceiptProposalsController,
   ],
   providers: [
-    SpendingsService,
-    SpendingGroupsService,
+    InvoiceImagesService,
     SpendingReceiptsService,
     ReceiptFilesService,
     ReceiptLinesService,
@@ -45,5 +39,8 @@ import { StoresService } from "@spendings/stores/stores.service";
     ReceiptProposalsService,
     SessionAuthGuard,
   ],
+  // The Spending context (PFA-273) releases receipts and serves invoice images through these
+  // until the receipt context takes them over.
+  exports: [ReceiptFilesService, InvoiceImagesService],
 })
 export class SpendingsModule {}

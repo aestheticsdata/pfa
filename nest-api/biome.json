@@ -86,7 +86,7 @@
                 },
                 "patterns": [
                   {
-                    "group": ["@nestjs/*", "@prisma/*", "**/generated/prisma/**", "**/prisma/prisma.service", "nestjs-pino"],
+                    "group": ["@nestjs/*", "@prisma/*", "@generated/*", "@db/*", "**/generated/prisma/**", "**/prisma/prisma.service", "nestjs-pino"],
                     "message": "The domain is pure TypeScript (PFA-272): frameworks and persistence plug in from infrastructure/, through a port."
                   },
                   {

@@ -1,4 +1,4 @@
-import type { Prisma } from "../../../generated/prisma/client";
+import type { Prisma } from "@generated/prisma/client";
 
 /**
  * A spending row as GET /spendings and the search return it (PFA-257): exactly the fields the

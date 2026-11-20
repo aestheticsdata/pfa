@@ -103,7 +103,9 @@
       "^@categories/(.*)$": "<rootDir>/categories/$1",
       "^@monitoring/(.*)$": "<rootDir>/monitoring/$1",
       "^@shared-kernel/(.*)$": "<rootDir>/shared-kernel/$1",
-      "^@contexts/(.*)$": "<rootDir>/contexts/$1"
+      "^@contexts/(.*)$": "<rootDir>/contexts/$1",
+      "^@db/(.*)$": "<rootDir>/prisma/$1",
+      "^@generated/(.*)$": "<rootDir>/../generated/$1"
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"

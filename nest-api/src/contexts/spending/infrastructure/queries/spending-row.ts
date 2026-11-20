@@ -1,6 +1,6 @@
 import { accessibleCategory, JOINED_CATEGORY_SELECT } from "@categories/accessible-category";
-import type { SpendingItem } from "@spendings/interfaces/spendingItemTypes";
-import type { Prisma } from "../../generated/prisma/client";
+import type { SpendingItem } from "@contexts/spending/infrastructure/queries/interfaces/spendingItemTypes";
+import type { Prisma } from "@generated/prisma/client";
 
 /**
  * The columns a spending row sends (PFA-257). A `select`, never a spread of the row: a column

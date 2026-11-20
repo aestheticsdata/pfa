@@ -1,7 +1,18 @@
 import { InvalidInputError } from "@shared-kernel/domain-error";
 
 const CENTS_PER_UNIT = 100;
-const DECIMAL_AMOUNT = /^-?\d+(\.\d{1,2})?$/;
+const DECIMAL_AMOUNT = /^(-?)(\d+)(?:\.(\d+))?$/;
+const HALF = 5;
+
+/** A decimal's text in whole cents, the third decimal rounded half away from zero like DECIMAL(10,2). */
+function toCents(text: string): number | null {
+  const match = DECIMAL_AMOUNT.exec(text);
+  if (!match) return null;
+  const [, sign, units, fraction = ""] = match;
+  const digits = fraction.padEnd(3, "0");
+  const cents = Number(units) * CENTS_PER_UNIT + Number(digits.slice(0, 2)) + (Number(digits[2]) >= HALF ? 1 : 0);
+  return sign && cents !== 0 ? -cents : cents;
+}
 
 export class CurrencyMismatch extends InvalidInputError {
   constructor() {
@@ -20,13 +31,16 @@ export class Money {
     readonly currency: string,
   ) {}
 
-  /** From a number (a DTO) or a decimal string (a Prisma `Decimal`'s `toString()`). */
+  /**
+   * From a number (a DTO) or a decimal string (a Prisma `Decimal`'s `toString()`). A number is read
+   * from its shortest text, never multiplied as a float: 1.005 is 1.01, as MySQL would store it.
+   */
   static of(amount: number | string, currency: string): Money {
-    const text = typeof amount === "number" ? amount.toFixed(2) : amount.trim();
-    if (!DECIMAL_AMOUNT.test(text)) {
+    const cents = toCents(String(amount).trim());
+    if (cents === null) {
       throw new InvalidInputError(`Invalid amount: ${amount}`);
     }
-    return new Money(Math.round(Number(text) * CENTS_PER_UNIT), currency);
+    return new Money(cents, currency);
   }
 
   static zero(currency: string): Money {

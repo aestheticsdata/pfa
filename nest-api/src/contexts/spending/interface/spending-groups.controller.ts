@@ -1,12 +1,16 @@
+import { CreateSpendingGroup } from "@contexts/spending/application/create-spending-group.use-case";
+import { DeleteSpendingGroup } from "@contexts/spending/application/delete-spending-group.use-case";
+import { EditSpendingGroup } from "@contexts/spending/application/edit-spending-group.use-case";
+import { MergeSpendingsIntoGroup } from "@contexts/spending/application/merge-spendings-into-group.use-case";
+import { UngroupSpendingGroup } from "@contexts/spending/application/ungroup-spending-group.use-case";
+import { CreateSpendingGroupDto } from "@contexts/spending/interface/dto/create-spending-group.dto";
+import { MergeSpendingGroupDto } from "@contexts/spending/interface/dto/merge-spending-group.dto";
+import { UpdateSpendingGroupDto } from "@contexts/spending/interface/dto/update-spending-group.dto";
 import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
 import { MetricsService } from "@monitoring/metrics.service";
 import { GetUserKind } from "@monitoring/user-kind.decorator";
 import { Body, Controller, Delete, Param, Post, Put, UseGuards } from "@nestjs/common";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { CreateSpendingGroupDto } from "@spendings/dto/create-spending-group.dto";
-import { MergeSpendingGroupDto } from "@spendings/dto/merge-spending-group.dto";
-import { UpdateSpendingGroupDto } from "@spendings/dto/update-spending-group.dto";
-import { SpendingGroupsService } from "@spendings/groups/spending-groups.service";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { CsrfGuard } from "@users/guards/csrf.guard";
 
@@ -14,21 +18,25 @@ import { CsrfGuard } from "@users/guards/csrf.guard";
 @UseGuards(SessionAuthGuard, CsrfGuard)
 export class SpendingGroupsController {
   constructor(
-    private readonly groups: SpendingGroupsService,
+    private readonly createGroup: CreateSpendingGroup,
+    private readonly mergeSpendings: MergeSpendingsIntoGroup,
+    private readonly editGroup: EditSpendingGroup,
+    private readonly ungroupGroup: UngroupSpendingGroup,
+    private readonly deleteGroup: DeleteSpendingGroup,
     private readonly metrics: MetricsService,
   ) {}
 
   /** Each line of a group is a spending, and counts as one (PFA-212). */
   @Post()
   async create(@Body() dto: CreateSpendingGroupDto, @GetUserId() userID: string, @GetUserKind() userKind: UserKind) {
-    const created = await this.groups.create(dto, userID);
+    const created = await this.createGroup.execute({ ...dto, ownerId: userID });
     this.metrics.countSpendingsCreated(userKind, created.spendingIDs.length);
     return created;
   }
 
   @Post("merge")
   async merge(@Body() dto: MergeSpendingGroupDto, @GetUserId() userID: string) {
-    return this.groups.merge(dto, userID);
+    return this.mergeSpendings.execute({ ...dto, ownerId: userID });
   }
 
   /** A line without an ID is added while editing: a new spending. */
@@ -39,18 +47,18 @@ export class SpendingGroupsController {
     @GetUserId() userID: string,
     @GetUserKind() userKind: UserKind,
   ) {
-    const updated = await this.groups.update(id, dto, userID);
+    const updated = await this.editGroup.execute({ ...dto, groupId: id, ownerId: userID });
     this.metrics.countSpendingsCreated(userKind, dto.lines.filter((line) => !line.ID).length);
     return updated;
   }
 
   @Post(":id/ungroup")
   async ungroup(@Param("id") id: string, @GetUserId() userID: string) {
-    return this.groups.ungroup(id, userID);
+    return this.ungroupGroup.execute({ id, ownerId: userID });
   }
 
   @Delete(":id")
   async delete(@Param("id") id: string, @GetUserId() userID: string) {
-    return this.groups.delete(id, userID);
+    return this.deleteGroup.execute({ id, ownerId: userID });
   }
 }

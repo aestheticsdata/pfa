@@ -1,4 +1,4 @@
-import { composeGroupLineLabel, isSameDay } from "@spendings/groups/group-label";
+import { composeGroupLineLabel, isSameDay } from "@contexts/spending/domain/group-label";
 
 describe("composeGroupLineLabel", () => {
   it("joins the group name and the detail", () => {

@@ -4,6 +4,17 @@ import "reflect-metadata";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { FIELD_LIMITS } from "@config/field-limits";
+import { GROUP_LABEL_SEPARATOR } from "@contexts/spending/domain/group-label";
+import { CreateSpendingDto } from "@contexts/spending/interface/dto/create-spending.dto";
+import { CreateSpendingGroupDto } from "@contexts/spending/interface/dto/create-spending-group.dto";
+import {
+  MergeSpendingGroupDto,
+  MergeSpendingGroupLineDto,
+} from "@contexts/spending/interface/dto/merge-spending-group.dto";
+import { SpendingGroupLineDto } from "@contexts/spending/interface/dto/spending-group-line.dto";
+import { UpdateSpendingDto } from "@contexts/spending/interface/dto/update-spending.dto";
+import { UpdateSpendingGroupDto } from "@contexts/spending/interface/dto/update-spending-group.dto";
+import { CreateSpendingCategoryDto } from "@spendings/dto/create-spending-category.dto";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
 import { UpdateCategoryDto } from "../categories/dto/update-category.dto";
@@ -11,14 +22,6 @@ import { CreateExceptionalDto } from "../exceptionals/dto/create-exceptional.dto
 import { UpdateExceptionalDto } from "../exceptionals/dto/update-exceptional.dto";
 import { CreateRecurringDto } from "../recurrings/dto/create-recurring.dto";
 import { UpdateRecurringDto } from "../recurrings/dto/update-recurring.dto";
-import { CreateSpendingDto } from "../spendings/dto/create-spending.dto";
-import { CreateSpendingCategoryDto } from "../spendings/dto/create-spending-category.dto";
-import { CreateSpendingGroupDto } from "../spendings/dto/create-spending-group.dto";
-import { MergeSpendingGroupDto, MergeSpendingGroupLineDto } from "../spendings/dto/merge-spending-group.dto";
-import { SpendingGroupLineDto } from "../spendings/dto/spending-group-line.dto";
-import { UpdateSpendingDto } from "../spendings/dto/update-spending.dto";
-import { UpdateSpendingGroupDto } from "../spendings/dto/update-spending-group.dto";
-import { GROUP_LABEL_SEPARATOR } from "../spendings/groups/group-label";
 import { AddUserDto } from "../users/dto/add-user.dto";
 import { SignInDto } from "../users/dto/sign-in.dto";
 

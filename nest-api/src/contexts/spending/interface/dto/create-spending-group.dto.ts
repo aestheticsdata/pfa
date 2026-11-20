@@ -1,14 +1,21 @@
 import { FIELD_LIMITS } from "@config/field-limits";
-import { SpendingGroupLineDto } from "@spendings/dto/spending-group-line.dto";
+import { SpendingGroupLineDto } from "@contexts/spending/interface/dto/spending-group-line.dto";
 import { Type } from "class-transformer";
 import { ArrayMinSize, IsNotEmpty, IsString, MaxLength, ValidateNested } from "class-validator";
 
-/** The group's whole new state: lines missing from `lines` are deleted. */
-export class UpdateSpendingGroupDto {
+export class CreateSpendingGroupDto {
+  @IsString()
+  @IsNotEmpty()
+  date: string;
+
   @IsString()
   @IsNotEmpty()
   @MaxLength(FIELD_LIMITS.groupLabel)
   label: string;
+
+  @IsString()
+  @MaxLength(FIELD_LIMITS.currency)
+  currency: string;
 
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
