@@ -1,19 +1,19 @@
-import { SPENDING_ROW_SELECT } from "@spendings/spending-row";
-import { SpendingsService } from "./spendings.service";
+import { SpendingQueries } from "@contexts/spending/infrastructure/queries/spending.queries";
+import { SPENDING_ROW_SELECT } from "@contexts/spending/infrastructure/queries/spending-row";
 
 /**
- * Unit tests for SpendingsService.searchSpendings — the whole-history, keyset-
+ * Unit tests for SpendingQueries.searchSpendings — the whole-history, keyset-
  * paginated text search backing the Dashboard "Rechercher une dépense" modal
  * (COS-114). Prisma is mocked, so these assert the query shape and the JS
  * transformation without touching the DB.
  */
-describe("SpendingsService.searchSpendings", () => {
+describe("SpendingQueries.searchSpendings", () => {
   const makeService = (findManyResult: unknown[], countResult = 0) => {
     const findMany = jest.fn().mockResolvedValue(findManyResult);
     const count = jest.fn().mockResolvedValue(countResult);
     // Only spendings.findMany / count are exercised; the other deps are unused.
     const prisma = { spendings: { findMany, count } } as unknown as never;
-    const service = new SpendingsService(prisma, {} as never);
+    const service = new SpendingQueries(prisma);
     return { service, findMany, count };
   };
 
@@ -225,11 +225,11 @@ describe("SpendingsService.searchSpendings", () => {
   });
 });
 
-describe("SpendingsService.getSpendingYears", () => {
+describe("SpendingQueries.getSpendingYears", () => {
   const makeYearsService = (aggregateResult: unknown) => {
     const aggregate = jest.fn().mockResolvedValue(aggregateResult);
     const prisma = { spendings: { aggregate } } as unknown as never;
-    const service = new SpendingsService(prisma, {} as never);
+    const service = new SpendingQueries(prisma);
     return { service, aggregate };
   };
 
@@ -266,17 +266,17 @@ describe("SpendingsService.getSpendingYears", () => {
 });
 
 /**
- * Unit tests for SpendingsService.getLabelSuggestions — the label autocomplete
+ * Unit tests for SpendingQueries.getLabelSuggestions — the label autocomplete
  * backing the spending modal's chip row (COS-23). Prisma is mocked, so these
  * assert the query shape and the JS aggregation (frequency ranking, dominant
  * category, empty-result fallback, cap) without touching the DB.
  */
-describe("SpendingsService.getLabelSuggestions", () => {
+describe("SpendingQueries.getLabelSuggestions", () => {
   const makeService = (groupByResult: unknown[], categoriesResult: unknown[] = []) => {
     const groupBy = jest.fn().mockResolvedValue(groupByResult);
     const findMany = jest.fn().mockResolvedValue(categoriesResult);
     const prisma = { spendings: { groupBy }, categories: { findMany } } as unknown as never;
-    const service = new SpendingsService(prisma, {} as never);
+    const service = new SpendingQueries(prisma);
     return { service, groupBy, findMany };
   };
 
@@ -439,23 +439,5 @@ describe("SpendingsService.getLabelSuggestions", () => {
     const result = await service.getLabelSuggestions("sec", "user-1");
 
     expect(result).toEqual([{ label: "Secret", category: null }]);
-  });
-});
-
-describe("SpendingsService.createSpending", () => {
-  it("returns the created spending's ID so the front can chain the receipt upload (PFA-5)", async () => {
-    const create = jest.fn().mockResolvedValue(undefined);
-    const prisma = { spendings: { create } } as unknown as never;
-    const service = new SpendingsService(prisma, {} as never);
-
-    const result = await service.createSpending(
-      { date: "2026-08-21", label: "lunch", amount: 12.5, currency: "EUR" },
-      "user-1",
-    );
-
-    expect(create).toHaveBeenCalledTimes(1);
-    const created = create.mock.calls[0][0].data as { ID: string; userID: string; label: string; itemType: string };
-    expect(created).toMatchObject({ userID: "user-1", label: "lunch", itemType: "spending" });
-    expect(result).toEqual({ ID: created.ID });
   });
 });

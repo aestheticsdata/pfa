@@ -12,8 +12,15 @@ describe("Money", () => {
     expect(Money.of("-4.05", "EUR").toDecimalString()).toBe("-4.05");
   });
 
-  it("refuses an amount it would have to round", () => {
-    expect(() => Money.of("1.234", "EUR")).toThrow("Invalid amount: 1.234");
+  it("rounds the third decimal half away from zero, as a DECIMAL(10,2) column does", () => {
+    expect(Money.of(1.005, "EUR").toDecimalString()).toBe("1.01");
+    expect(Money.of("-2.344", "EUR").toDecimalString()).toBe("-2.34");
+    expect(Money.of(12.5, "EUR").toDecimalString()).toBe("12.50");
+  });
+
+  it("refuses what is not a decimal", () => {
+    expect(() => Money.of("12,30", "EUR")).toThrow("Invalid amount: 12,30");
+    expect(() => Money.of(Number.NaN, "EUR")).toThrow("Invalid amount: NaN");
   });
 
   it("never adds two currencies", () => {

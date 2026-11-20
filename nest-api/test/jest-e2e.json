@@ -18,6 +18,8 @@
     "^@exceptionals/(.*)$": "<rootDir>/src/exceptionals/$1",
     "^@monitoring/(.*)$": "<rootDir>/src/monitoring/$1",
     "^@shared-kernel/(.*)$": "<rootDir>/src/shared-kernel/$1",
-    "^@contexts/(.*)$": "<rootDir>/src/contexts/$1"
+    "^@contexts/(.*)$": "<rootDir>/src/contexts/$1",
+    "^@db/(.*)$": "<rootDir>/src/prisma/$1",
+    "^@generated/(.*)$": "<rootDir>/generated/$1"
   }
 }
