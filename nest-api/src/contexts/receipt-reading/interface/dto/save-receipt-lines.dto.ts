@@ -1,5 +1,5 @@
+import { StoreDto } from "@contexts/price-comparison/interface/dto/store.dto";
 import { ReceiptLineDto } from "@contexts/receipt-reading/interface/dto/receipt-line.dto";
-import { StoreDto } from "@spendings/stores/dto/store.dto";
 import { Type } from "class-transformer";
 import { ArrayMaxSize, IsArray, IsOptional, ValidateNested } from "class-validator";
 

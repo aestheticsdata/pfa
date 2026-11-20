@@ -18,7 +18,11 @@ export const DOMAIN_ERROR_KIND = {
 export abstract class DomainError extends Error {
   abstract readonly kind: DomainErrorKind;
 
-  constructor(message: string) {
+  /** Extra fields of the response body, next to `message` (a conflict names what it collides with). */
+  constructor(
+    message: string,
+    readonly details?: Record<string, unknown>,
+  ) {
     super(message);
     this.name = new.target.name;
   }

@@ -3,6 +3,7 @@ import appConfig from "@config/app.config";
 import dbBackupConfig from "@config/db-backup.config";
 import { validate } from "@config/env.validation";
 import sshBackupConfig from "@config/ssh-backup.config";
+import { PriceComparisonModule } from "@contexts/price-comparison/price-comparison.module";
 import { ReceiptReadingModule } from "@contexts/receipt-reading/receipt-reading.module";
 import { SpendingModule } from "@contexts/spending/spending.module";
 import { DashboardModule } from "@dashboard/dashboard.module";
@@ -16,7 +17,6 @@ import { APP_FILTER } from "@nestjs/core";
 import { ScheduleModule } from "@nestjs/schedule";
 import { RecurringsModule } from "@recurrings/recurrings.module";
 import { RedisModule } from "@redis/redis.module";
-import { SpendingsModule } from "@spendings/spendings.module";
 import { StatsModule } from "@stats/stats.module";
 import { UsersModule } from "@users/users.module";
 import { LoggerModule } from "nestjs-pino";
@@ -36,7 +36,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     UsersModule,
     SpendingModule,
     ReceiptReadingModule,
-    SpendingsModule,
+    PriceComparisonModule,
     RecurringsModule,
     DashboardModule,
     StatsModule,

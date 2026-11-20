@@ -1,3 +1,8 @@
+import { ProductTypesService } from "@contexts/price-comparison/application/product-types.service";
+import { StoresService } from "@contexts/price-comparison/application/stores.service";
+import type { LinkedLine } from "@contexts/price-comparison/domain/interfaces/priceComparisonTypes";
+import { linkProductTypes, storeKey } from "@contexts/price-comparison/domain/product-links";
+import { textKey } from "@contexts/price-comparison/domain/text-key";
 import type {
   ReceiptLine,
   StoreIdentity,
@@ -7,11 +12,6 @@ import { ProductTypeCatalog } from "@contexts/receipt-reading/domain/ports/produ
 import { StoreDirectory } from "@contexts/receipt-reading/domain/ports/store-directory";
 import { PrismaService } from "@db/prisma.service";
 import { Injectable } from "@nestjs/common";
-import type { LinkedLine } from "@spendings/product-types/interfaces/productTypesTypes";
-import { linkProductTypes, storeKey } from "@spendings/product-types/product-links";
-import { ProductTypesService } from "@spendings/product-types/product-types.service";
-import { StoresService } from "@spendings/stores/stores.service";
-import { textKey } from "@spendings/text-key";
 
 // How far back the auto-link learns from: plenty for a household's receipts.
 const LINK_HISTORY = 2000;

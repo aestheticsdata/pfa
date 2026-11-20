@@ -8,7 +8,7 @@ import {
 import { DOMAIN_ERROR_KIND, DomainError } from "@shared-kernel/domain-error";
 import type { DomainErrorKind } from "@shared-kernel/interfaces/sharedKernelTypes";
 
-const HTTP_EXCEPTION_BY_KIND: Record<DomainErrorKind, new (message: string) => HttpException> = {
+const HTTP_EXCEPTION_BY_KIND: Record<DomainErrorKind, new (response: string | object) => HttpException> = {
   [DOMAIN_ERROR_KIND.notFound]: NotFoundException,
   [DOMAIN_ERROR_KIND.invalidInput]: BadRequestException,
   [DOMAIN_ERROR_KIND.conflict]: ConflictException,
@@ -22,7 +22,9 @@ const HTTP_EXCEPTION_BY_KIND: Record<DomainErrorKind, new (message: string) => H
  */
 export function toHttpException(exception: unknown): unknown {
   if (!(exception instanceof DomainError)) return exception;
-  const translated = new HTTP_EXCEPTION_BY_KIND[exception.kind](exception.message);
+  // With details, the body is `{ message, ...details }` — what `new ConflictException({ … })` sent.
+  const response = exception.details ? { message: exception.message, ...exception.details } : exception.message;
+  const translated = new HTTP_EXCEPTION_BY_KIND[exception.kind](response);
   translated.stack = exception.stack;
   return translated;
 }

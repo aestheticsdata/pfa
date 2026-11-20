@@ -15,6 +15,15 @@ describe("toHttpException", () => {
     expect(translated.getResponse()).toEqual(new NotFoundException("Group not found").getResponse());
   });
 
+  it("sends the details beside the message, as an object body did", () => {
+    const translated = toHttpException(
+      new ConflictError("Store already exists", { conflictID: "s-2" }),
+    ) as ConflictException;
+    expect(translated.getResponse()).toEqual(
+      new ConflictException({ message: "Store already exists", conflictID: "s-2" }).getResponse(),
+    );
+  });
+
   it("leaves anything else alone", () => {
     const error = new Error("boom");
     expect(toHttpException(error)).toBe(error);
