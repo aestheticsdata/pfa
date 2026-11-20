@@ -16,6 +16,8 @@
     "^@stats/(.*)$": "<rootDir>/src/stats/$1",
     "^@categories/(.*)$": "<rootDir>/src/categories/$1",
     "^@exceptionals/(.*)$": "<rootDir>/src/exceptionals/$1",
-    "^@monitoring/(.*)$": "<rootDir>/src/monitoring/$1"
+    "^@monitoring/(.*)$": "<rootDir>/src/monitoring/$1",
+    "^@shared-kernel/(.*)$": "<rootDir>/src/shared-kernel/$1",
+    "^@contexts/(.*)$": "<rootDir>/src/contexts/$1"
   }
 }

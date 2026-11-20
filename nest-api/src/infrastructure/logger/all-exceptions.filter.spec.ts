@@ -1,5 +1,6 @@
 import type { ArgumentsHost } from "@nestjs/common";
 import { BadRequestException, HttpException, HttpStatus, NotFoundException } from "@nestjs/common";
+import { NotFoundError } from "@shared-kernel/domain-error";
 import type { Request, Response } from "express";
 import type { PinoLogger } from "nestjs-pino";
 import { AllExceptionsFilter } from "./all-exceptions.filter";
@@ -100,5 +101,12 @@ describe("AllExceptionsFilter", () => {
 
     expect(status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
     expect(json).toHaveBeenCalledWith({ statusCode: 500, message: "Internal server error" });
+  });
+  it("answers a domain error as the HTTP exception the route used to throw (PFA-272)", () => {
+    filter.catch(new NotFoundError("Group not found"), host());
+
+    expect(status).toHaveBeenCalledWith(HttpStatus.NOT_FOUND);
+    expect(json).toHaveBeenCalledWith(new NotFoundException("Group not found").getResponse());
+    expect(only().level).toBe("warn");
   });
 });

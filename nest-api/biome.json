@@ -67,6 +67,45 @@
     },
     {
       "includes": [
+        "src/shared-kernel/**",
+        "src/contexts/*/domain/**"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "sharp": "The domain is pure TypeScript (PFA-272): image work is an adapter in infrastructure/.",
+                  "tesseract.js": "The domain is pure TypeScript (PFA-272): OCR is an adapter in infrastructure/.",
+                  "redis": "The domain is pure TypeScript (PFA-272): Redis is an adapter in infrastructure/.",
+                  "node:fs": "The domain is pure TypeScript (PFA-272): files are an adapter in infrastructure/.",
+                  "node:fs/promises": "The domain is pure TypeScript (PFA-272): files are an adapter in infrastructure/.",
+                  "express": "The domain is pure TypeScript (PFA-272): HTTP belongs in interface/."
+                },
+                "patterns": [
+                  {
+                    "group": ["@nestjs/*", "@prisma/*", "**/generated/prisma/**", "**/prisma/prisma.service", "nestjs-pino"],
+                    "message": "The domain is pure TypeScript (PFA-272): frameworks and persistence plug in from infrastructure/, through a port."
+                  },
+                  {
+                    "group": ["@contexts/*/application/**", "@contexts/*/infrastructure/**", "@contexts/*/interface/**"],
+                    "message": "Dependencies point inwards (PFA-272): the domain never imports the layers around it."
+                  },
+                  {
+                    "group": ["@spendings/*", "@categories/*", "@recurrings/*", "@exceptionals/*", "@dashboard/*", "@stats/*", "@users/*", "@infrastructure/*", "@monitoring/*", "@redis/*", "@config/*"],
+                    "message": "The domain does not reach into the legacy feature modules (PFA-272): ask through a port."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
         "scripts/**"
       ],
       "linter": {

@@ -24,7 +24,9 @@
       "@stats/*": ["./src/stats/*"],
       "@categories/*": ["./src/categories/*"],
       "@exceptionals/*": ["./src/exceptionals/*"],
-      "@monitoring/*": ["./src/monitoring/*"]
+      "@monitoring/*": ["./src/monitoring/*"],
+      "@shared-kernel/*": ["./src/shared-kernel/*"],
+      "@contexts/*": ["./src/contexts/*"]
     },
     "incremental": true,
     "skipLibCheck": true,
