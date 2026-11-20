@@ -3,6 +3,7 @@ import appConfig from "@config/app.config";
 import dbBackupConfig from "@config/db-backup.config";
 import { validate } from "@config/env.validation";
 import sshBackupConfig from "@config/ssh-backup.config";
+import { ReceiptReadingModule } from "@contexts/receipt-reading/receipt-reading.module";
 import { SpendingModule } from "@contexts/spending/spending.module";
 import { DashboardModule } from "@dashboard/dashboard.module";
 import { ExceptionalsModule } from "@exceptionals/exceptionals.module";
@@ -34,6 +35,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     MonitoringModule,
     UsersModule,
     SpendingModule,
+    ReceiptReadingModule,
     SpendingsModule,
     RecurringsModule,
     DashboardModule,

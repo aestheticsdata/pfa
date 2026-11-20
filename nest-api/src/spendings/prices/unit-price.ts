@@ -1,3 +1,5 @@
+import type { SizeUnit } from "@contexts/receipt-reading/domain/interfaces/receiptReadingTypes";
+import { SIZE_UNIT } from "@contexts/receipt-reading/domain/size-units";
 import type {
   BasisComparison,
   PriceBasis,
@@ -6,8 +8,6 @@ import type {
   UnitPrice,
 } from "@spendings/prices/interfaces/pricesTypes";
 import { PRICE_BASIS } from "@spendings/prices/price-basis";
-import type { SizeUnit } from "@spendings/receipt-lines/interfaces/receiptLinesTypes";
-import { SIZE_UNIT } from "@spendings/receipt-lines/size-units";
 
 /** Each size unit as a share of its basis: 250 g is 0.25 kg, 33 cl 0.33 L (PFA-220). */
 const IN_BASIS: Record<SizeUnit, { basis: PriceBasis; factor: number }> = {

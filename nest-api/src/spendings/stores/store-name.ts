@@ -1,4 +1,5 @@
-import type { StoreIdentity, StoreRef } from "@spendings/stores/interfaces/storesTypes";
+import type { StoreIdentity } from "@contexts/receipt-reading/domain/interfaces/receiptReadingTypes";
+import type { StoreRef } from "@spendings/stores/interfaces/storesTypes";
 import { keyDistance, textKey } from "@spendings/text-key";
 
 /**

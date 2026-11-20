@@ -1,3 +1,4 @@
+import { ReceiptReadingModule } from "@contexts/receipt-reading/receipt-reading.module";
 import { CreateSpendingGroup } from "@contexts/spending/application/create-spending-group.use-case";
 import { DeleteSpending } from "@contexts/spending/application/delete-spending.use-case";
 import { DeleteSpendingGroup } from "@contexts/spending/application/delete-spending-group.use-case";
@@ -20,14 +21,13 @@ import { SpendingsController } from "@contexts/spending/interface/spendings.cont
 import { MonitoringModule } from "@monitoring/monitoring.module";
 import { Module } from "@nestjs/common";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { SpendingsModule } from "@spendings/spendings.module";
 
 /**
  * The Spending context (PFA-273), and its composition root: the one place that knows which adapter
  * plugs into which port. A test swaps a binding, nothing else.
  */
 @Module({
-  imports: [MonitoringModule, SpendingsModule],
+  imports: [MonitoringModule, ReceiptReadingModule],
   controllers: [SpendingsController, SpendingGroupsController],
   providers: [
     RecordSpending,

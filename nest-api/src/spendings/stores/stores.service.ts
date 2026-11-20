@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { FIELD_LIMITS } from "@config/field-limits";
+import type { StoreIdentity } from "@contexts/receipt-reading/domain/interfaces/receiptReadingTypes";
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
 import { markDuplicates, sameStore } from "@spendings/catalog/catalog-duplicates";
 import type { StoreEntry } from "@spendings/catalog/interfaces/catalogTypes";
-import type { StoreIdentity, StoreRef } from "@spendings/stores/interfaces/storesTypes";
+import type { StoreRef } from "@spendings/stores/interfaces/storesTypes";
 import { recogniseStore } from "@spendings/stores/store-name";
 import { textKey } from "@spendings/text-key";
 import { PrismaService } from "../../prisma/prisma.service";
