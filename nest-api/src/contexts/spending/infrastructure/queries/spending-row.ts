@@ -1,4 +1,4 @@
-import { accessibleCategory, JOINED_CATEGORY_SELECT } from "@categories/accessible-category";
+import { accessibleCategory, JOINED_CATEGORY_SELECT } from "@contexts/budget-planning/domain/accessible-category";
 import type { SpendingItem } from "@contexts/spending/infrastructure/queries/interfaces/spendingItemTypes";
 import type { Prisma } from "@generated/prisma/client";
 

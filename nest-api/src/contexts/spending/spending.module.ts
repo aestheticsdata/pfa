@@ -1,3 +1,4 @@
+import { BudgetPlanningModule } from "@contexts/budget-planning/budget-planning.module";
 import { ReceiptReadingModule } from "@contexts/receipt-reading/receipt-reading.module";
 import { CreateSpendingGroup } from "@contexts/spending/application/create-spending-group.use-case";
 import { DeleteSpending } from "@contexts/spending/application/delete-spending.use-case";
@@ -11,7 +12,7 @@ import { CategoryLookup } from "@contexts/spending/domain/ports/category-lookup"
 import { ReceiptReleaser } from "@contexts/spending/domain/ports/receipt-releaser";
 import { SpendingRepository } from "@contexts/spending/domain/ports/spending.repository";
 import { SpendingGroupRepository } from "@contexts/spending/domain/ports/spending-group.repository";
-import { PrismaCategoryLookup } from "@contexts/spending/infrastructure/prisma-category-lookup";
+import { BudgetPlanningCategoryLookup } from "@contexts/spending/infrastructure/budget-planning-category-lookup";
 import { PrismaSpendingRepository } from "@contexts/spending/infrastructure/prisma-spending.repository";
 import { PrismaSpendingGroupRepository } from "@contexts/spending/infrastructure/prisma-spending-group.repository";
 import { SpendingQueries } from "@contexts/spending/infrastructure/queries/spending.queries";
@@ -27,7 +28,7 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
  * plugs into which port. A test swaps a binding, nothing else.
  */
 @Module({
-  imports: [MonitoringModule, ReceiptReadingModule],
+  imports: [MonitoringModule, ReceiptReadingModule, BudgetPlanningModule],
   controllers: [SpendingsController, SpendingGroupsController],
   providers: [
     RecordSpending,
@@ -42,7 +43,7 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
     SessionAuthGuard,
     { provide: SpendingRepository, useClass: PrismaSpendingRepository },
     { provide: SpendingGroupRepository, useClass: PrismaSpendingGroupRepository },
-    { provide: CategoryLookup, useClass: PrismaCategoryLookup },
+    { provide: CategoryLookup, useClass: BudgetPlanningCategoryLookup },
     { provide: ReceiptReleaser, useClass: ReceiptFilesReleaser },
   ],
 })

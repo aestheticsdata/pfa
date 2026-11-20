@@ -1,7 +1,5 @@
-import { randomUUID } from "node:crypto";
 import type { MonthlyIncomeResponse } from "@dashboard/dto/monthly-income-response.interface";
-import type { DashboardItem } from "@dashboard/interfaces/dashboardTypes";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 
 // Which historical period the sparkline projection is based on (COS-27). Follows
@@ -182,67 +180,5 @@ export class DashboardService {
     }
 
     return { income };
-  }
-
-  async getDashboard(start: string, userID: string): Promise<DashboardItem | null> {
-    const dashboard = await this.prisma.dashboards.findFirst({
-      where: {
-        userID,
-        dateFrom: new Date(start),
-      },
-      // Listed, never the whole row: a new column stays out of the response until asked for (PFA-257).
-      select: { ID: true, dateFrom: true, dateTo: true, initialAmount: true, initialCeiling: true },
-    });
-
-    if (!dashboard) {
-      return null;
-    }
-
-    return {
-      ...dashboard,
-      initialAmount: Number(dashboard.initialAmount),
-      initialCeiling: dashboard.initialCeiling ? Number(dashboard.initialCeiling) : null,
-    };
-  }
-
-  async createDashboard(dto: { start: string; end: string; amount: number }, userID: string) {
-    const id = randomUUID();
-    await this.prisma.dashboards.create({
-      data: {
-        ID: id,
-        dateFrom: new Date(dto.start),
-        dateTo: new Date(dto.end),
-        initialAmount: dto.amount,
-        userID,
-      },
-    });
-    return { insertId: id, ID: id };
-  }
-
-  async updateDashboard(id: string, userID: string, dto: { amount?: number; ceiling?: number }) {
-    const existing = await this.prisma.dashboards.findFirst({
-      where: { ID: id, userID },
-    });
-
-    if (!existing) {
-      throw new NotFoundException("Dashboard not found");
-    }
-
-    const data: { initialAmount?: number; initialCeiling?: number } = {};
-    if (dto.amount !== undefined && dto.amount !== null) {
-      data.initialAmount = dto.amount;
-    }
-    if (dto.ceiling !== undefined && dto.ceiling !== null) {
-      data.initialCeiling = dto.ceiling;
-    }
-
-    if (Object.keys(data).length === 0) {
-      return existing;
-    }
-
-    return this.prisma.dashboards.update({
-      where: { ID: id },
-      data,
-    });
   }
 }

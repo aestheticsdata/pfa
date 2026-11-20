@@ -1,24 +1,15 @@
+import { DashboardQueryDto } from "@contexts/budget-planning/interface/dto/dashboard-query.dto";
 import { DashboardService } from "@dashboard/dashboard.service";
-import { CreateDashboardDto } from "@dashboard/dto/create-dashboard.dto";
-import { DashboardQueryDto } from "@dashboard/dto/dashboard-query.dto";
 import { MonthlyIncomeQueryDto } from "@dashboard/dto/monthly-income-query.dto";
-import { UpdateDashboardDto } from "@dashboard/dto/update-dashboard.dto";
-import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from "@nestjs/common";
+import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 import { CsrfGuard } from "@users/guards/csrf.guard";
-import type { Response } from "express";
 
 @Controller("dashboard")
 @UseGuards(SessionAuthGuard, CsrfGuard)
 export class DashboardController {
   constructor(private readonly dashboardService: DashboardService) {}
-
-  @Get()
-  async getDashboard(@Query() query: DashboardQueryDto, @GetUserId() userID: string, @Res() res: Response) {
-    const result = await this.dashboardService.getDashboard(query.start, userID);
-    res.json(result);
-  }
 
   // Day-by-day totals of the historical reference period (COS-27), used to draw
   // the in-progress month's projected sparkline tail. `start` = viewed month's
@@ -33,25 +24,5 @@ export class DashboardController {
   @Get("monthly-income")
   async getMonthlyIncome(@Query() query: MonthlyIncomeQueryDto, @GetUserId() userID: string) {
     return this.dashboardService.getMonthlyIncome(query.year, userID);
-  }
-
-  @Post()
-  async createDashboard(@Body() dto: CreateDashboardDto, @GetUserId() userID: string) {
-    return this.dashboardService.createDashboard(
-      {
-        start: dto.start,
-        end: dto.end,
-        amount: dto.amount,
-      },
-      userID,
-    );
-  }
-
-  @Put(":id")
-  async updateDashboard(@Param("id") id: string, @Body() dto: UpdateDashboardDto, @GetUserId() userID: string) {
-    return this.dashboardService.updateDashboard(id, userID, {
-      amount: dto.amount,
-      ceiling: dto.ceiling,
-    });
   }
 }

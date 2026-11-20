@@ -94,7 +94,7 @@
                     "message": "Dependencies point inwards (PFA-272): the domain never imports the layers around it."
                   },
                   {
-                    "group": ["@spendings/*", "@categories/*", "@recurrings/*", "@exceptionals/*", "@dashboard/*", "@stats/*", "@users/*", "@infrastructure/*", "@monitoring/*", "@redis/*", "@config/*", "!@config/field-limits"],
+                    "group": ["@spendings/*", "@dashboard/*", "@stats/*", "@users/*", "@infrastructure/*", "@monitoring/*", "@redis/*", "@config/*", "!@config/field-limits"],
                     "message": "The domain does not reach into the legacy feature modules (PFA-272): ask through a port. Field limits are plain constants and allowed."
                   }
                 ]

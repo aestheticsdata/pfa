@@ -1,4 +1,4 @@
-import type { TypedCategory } from "@contexts/spending/domain/interfaces/spendingTypes";
+import type { TypedCategory } from "@contexts/budget-planning/domain/interfaces/budgetPlanningTypes";
 import { CategoryLookup } from "@contexts/spending/domain/ports/category-lookup";
 
 /** Usable categories are listed up front; a typed one is "created" as `new:<name>`, once. */

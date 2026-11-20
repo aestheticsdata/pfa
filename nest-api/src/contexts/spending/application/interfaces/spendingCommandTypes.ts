@@ -1,4 +1,4 @@
-import type { CategoryPick } from "@contexts/spending/domain/interfaces/spendingTypes";
+import type { CategoryPick } from "@contexts/budget-planning/domain/interfaces/budgetPlanningTypes";
 
 export interface RecordSpendingCommand {
   ownerId: string;

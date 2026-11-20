@@ -1,6 +1,6 @@
+import { revisedCategory } from "@contexts/budget-planning/domain/category-choice";
 import { resolveCategory } from "@contexts/spending/application/category-resolution";
 import type { ReviseSpendingCommand } from "@contexts/spending/application/interfaces/spendingCommandTypes";
-import { revisedCategory } from "@contexts/spending/domain/category-choice";
 import { CategoryLookup } from "@contexts/spending/domain/ports/category-lookup";
 import { SpendingRepository } from "@contexts/spending/domain/ports/spending.repository";
 import { SpendingNotFound } from "@contexts/spending/domain/spending-errors";
