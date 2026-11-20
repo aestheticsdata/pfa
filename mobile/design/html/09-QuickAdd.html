@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Saisie rapide d’une dépense</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+body{margin:0}
+a{color:#0A66C2}a:hover{color:#084F96}
+.board{display:flex;gap:56px;padding:40px;box-sizing:border-box;background:#E6E8EC;font-family:'Geist',system-ui,sans-serif}
+.col{display:flex;flex-direction:column;gap:12px}
+.cap{font-size:13px;font-weight:500;color:#3F4855;height:16px;line-height:16px}
+.light{--bg:#F3F7FA;--sf:#FFFFFF;--sf2:#EBEEF2;--sf3:#E0E4E9;--ln:#D4D8DD;--ln2:#E3E7EA;--ink:#0B1015;--ink2:#3E4348;--ink3:#5F6469;--acc:#0075AD;--accbg:rgba(0,117,173,.10);--pos:#257C3A;--posbg:rgba(37,124,58,.09);--posln:rgba(37,124,58,.45);--neg:#C2272D;--negbg:rgba(194,39,45,.08);--exc:#006AAA;--excbg:rgba(0,106,170,.09);--warn:#975800;--warnbg:rgba(151,88,0,.08);--warnln:rgba(151,88,0,.25);--onInk:#FFFFFF;--segon:#FFFFFF;--glass:rgba(255,255,255,.86);--scrim:rgba(11,16,21,.36);--sheet:#FFFFFF;--key:#E8EBEF;--onNeg:#FFFFFF;--negsolid:#C2272D;--bar:#5FB46E;--toast:#15171A;--onToast:#F5F7F9;--toastAcc:#47D2E8;--cta:linear-gradient(100deg,#73D885 0%,#49D9B9 55%,#3ECCE2 100%);--onCta:#0F130F;--fill:linear-gradient(90deg,#2F8A45,#5FC271);--glow:linear-gradient(135deg,rgba(37,124,58,.28),rgba(11,16,21,.06) 45%,rgba(0,117,173,.18));--shadow:0 1px 2px rgba(11,16,21,.05),0 6px 18px rgba(11,16,21,.05);--c-groceries:#57914A;--c-restaurants:#B36D2A;--c-shopping:#B4608A;--c-transport:#4284C5;--c-coffee:#A57710;--c-leisure:#009696;--c-travel:#85861F;--c-home:#0092A8;--c-sport:#00977C;--c-health:#389560;--c-gifts:#BD615B;--c-beauty:#BA5F76;--c-subs:#64748B;--c-bank:#6B7280;--c-other:#64748B;}
+.dark{--bg:#000B18;--sf:#15171A;--sf2:#212428;--sf3:#2A2D31;--ln:#2E3236;--ln2:#1F2225;--ink:#F5F7F9;--ink2:#B5B8BA;--ink3:#878A8E;--acc:#00B4F0;--accbg:rgba(0,180,240,.14);--pos:#87E496;--posbg:rgba(135,228,150,.10);--posln:rgba(135,228,150,.45);--neg:#FD736D;--negbg:rgba(253,115,109,.12);--exc:#44A8E7;--excbg:rgba(68,168,231,.14);--warn:#FAAB3F;--warnbg:rgba(250,171,63,.12);--warnln:rgba(250,171,63,.3);--onInk:#000B18;--segon:#2E3237;--glass:rgba(21,23,26,.82);--scrim:rgba(0,0,0,.6);--sheet:#15171A;--key:#24272B;--onNeg:#FBEDEC;--negsolid:#C53637;--bar:#5FB46E;--toast:#F5F7F9;--onToast:#0B1015;--toastAcc:#0075AD;--cta:linear-gradient(100deg,#87E496 0%,#52DFBF 55%,#47D2E8 100%);--onCta:#0F130F;--fill:linear-gradient(90deg,#45814F,#87E496);--glow:linear-gradient(135deg,rgba(135,228,150,.30),rgba(255,255,255,.05) 45%,rgba(71,210,232,.16));--shadow:0 12px 32px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.045);--c-groceries:#9FCC95;--c-restaurants:#E9B082;--c-shopping:#EBA6C6;--c-transport:#91C3F6;--c-coffee:#DCB87A;--c-leisure:#72D0D0;--c-travel:#C1C37E;--c-home:#72CEDE;--c-sport:#7BD1BA;--c-health:#8ECFA4;--c-gifts:#F2A7A1;--c-beauty:#F0A6B6;--c-subs:#94A3B8;--c-bank:#A3A8B0;--c-other:#94A3B8;}
+.phone{width:393px;height:852px;border-radius:54px;overflow:hidden;position:relative;background:#000;color:var(--ink);font-family:'Geist',system-ui,sans-serif;box-shadow:0 0 0 1px rgba(11,15,20,.14),0 24px 60px rgba(11,15,20,.16)}
+.island{position:absolute;top:11px;left:134px;width:125px;height:36px;border-radius:20px;background:#000;z-index:9}
+.home{position:absolute;bottom:8px;left:126px;width:141px;height:5px;border-radius:3px;background:var(--ink);z-index:9}
+.num{font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.dec{color:var(--ink3)}
+.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ovl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.gb{width:44px;height:44px;border-radius:22px;background:var(--sf2);color:var(--ink);display:flex;align-items:center;justify-content:center;border:0;padding:0;font-family:inherit;flex:none}
+.chip{height:36px;padding:0 12px;border-radius:18px;background:var(--sf2);color:var(--ink2);font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;border:0;white-space:nowrap;font-family:inherit;flex:none}
+.chip.on{background:var(--posbg);color:var(--pos);box-shadow:inset 0 0 0 1px var(--posln)}
+.key{height:48px;border-radius:12px;background:var(--key);border:0;color:var(--ink);font-family:'Geist Mono',monospace;font-size:22px;display:flex;align-items:center;justify-content:center}
+.sw{width:51px;height:31px;border-radius:16px;background:var(--sf3);position:relative;flex:none;border:0;padding:0}
+.sw span{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:14px;background:#FFFFFF;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+
+</style>
+</head>
+<body>
+
+
+<div class="board" style="width: 922px; height: 960px">
+
+<div class="col">
+<div class="cap">Clair — sheet grande détente</div>
+<div class="phone light">
+<div class="island"></div>
+<div style="position: absolute; left: 12px; right: 12px; top: 58px; bottom: 0; border-radius: 22px 22px 0 0; background: var(--bg); padding: 22px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Dépenses</span>
+<div style="height: 70px; border-radius: 18px; background: var(--sf)"></div>
+<div style="height: 120px; border-radius: 18px; background: var(--sf)"></div>
+</div>
+<div style="position: absolute; inset: 0; background: var(--scrim)"></div>
+<section aria-label="Nouvelle dépense" style="position: absolute; left: 0; right: 0; bottom: 0; top: 84px; border-radius: 28px 28px 0 0; background: var(--sheet); padding: 8px 16px 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<div style="width: 36px; height: 5px; border-radius: 3px; background: var(--ln); align-self: center"></div>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: -4px">
+<button class="gb" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<span style="font-size: 17px; font-weight: 600">Nouvelle dépense</span>
+<span style="width: 44px"></span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+<div style="display: flex; align-items: baseline"><span class="num" style="font-size: 52px; font-weight: 500; letter-spacing: -0.03em; line-height: 56px">12,40</span><span style="width: 2px; height: 42px; background: var(--acc); margin: 0 4px; align-self: center"></span><span class="num dec" style="font-size: 28px">€</span></div>
+<button class="chip" style="height: 32px"><svg class="i" viewBox="0 0 24 24" style="width: 16px; height: 16px" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg>Aujourd’hui · <span class="num">21:18</span></button>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px"><span class="ovl">Libellé</span><input value="Boulangerie Ménard" style="height: 48px; border-radius: 12px; border: 1.5px solid var(--acc); background: var(--sf); padding: 0 14px; font-family: inherit; font-size: 17px; color: var(--ink); outline: none; box-sizing: border-box"></label>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: -2px">
+<span class="ovl">Catégorie <span style="text-transform: none; letter-spacing: 0; font-weight: 500">· suggérée par l’historique</span></span>
+<div style="display: flex; gap: 8px; margin-right: -16px">
+<button class="chip on"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-restaurants)"></span>Restaurants</button>
+<button class="chip"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-groceries)"></span>Courses</button>
+<button class="chip"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-coffee)"></span>Café</button>
+<button class="chip">Autre…</button>
+</div>
+</div>
+<div style="display: flex; gap: 10px">
+<div style="flex: 1; display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 8px 0 14px; border-radius: 12px; background: var(--sf2)"><span style="font-size: 15px">Exceptionnelle</span><button class="sw" role="switch" aria-checked="false" aria-label="Dépense exceptionnelle"><span></span></button></div>
+<button style="height: 48px; padding: 0 14px; border-radius: 12px; background: var(--sf2); border: 0; color: var(--ink); font-family: inherit; font-size: 15px; display: flex; align-items: center; gap: 8px"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"></path><circle cx="12" cy="13" r="3.2"></circle></svg>Ticket</button>
+</div>
+<button style="height: 54px; border-radius: 27px; border: 0; background: var(--cta); color: var(--onCta); font-family: inherit; font-size: 17px; font-weight: 600">Ajouter <span class="num">12,40 €</span></button>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 -16px; padding: 8px 8px 40px; flex: 1; align-content: start; background: var(--sf2); border-radius: 0">
+
+<button class="key" aria-label="1">1</button>
+
+<button class="key" aria-label="2">2</button>
+
+<button class="key" aria-label="3">3</button>
+
+<button class="key" aria-label="4">4</button>
+
+<button class="key" aria-label="5">5</button>
+
+<button class="key" aria-label="6">6</button>
+
+<button class="key" aria-label="7">7</button>
+
+<button class="key" aria-label="8">8</button>
+
+<button class="key" aria-label="9">9</button>
+
+<button class="key" aria-label="Virgule">,</button>
+
+<button class="key" aria-label="0">0</button>
+
+<button class="key" aria-label="Effacer">⌫</button>
+
+</div>
+</section>
+<div class="home"></div>
+</div>
+</div>
+
+<div class="col">
+<div class="cap">Sombre — sheet grande détente</div>
+<div class="phone dark">
+<div class="island"></div>
+<div style="position: absolute; left: 12px; right: 12px; top: 58px; bottom: 0; border-radius: 22px 22px 0 0; background: var(--bg); padding: 22px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<span style="font-size: 28px; font-weight: 700; letter-spacing: -0.02em">Dépenses</span>
+<div style="height: 70px; border-radius: 18px; background: var(--sf)"></div>
+<div style="height: 120px; border-radius: 18px; background: var(--sf)"></div>
+</div>
+<div style="position: absolute; inset: 0; background: var(--scrim)"></div>
+<section aria-label="Nouvelle dépense" style="position: absolute; left: 0; right: 0; bottom: 0; top: 84px; border-radius: 28px 28px 0 0; background: var(--sheet); padding: 8px 16px 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<div style="width: 36px; height: 5px; border-radius: 3px; background: var(--ln); align-self: center"></div>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: -4px">
+<button class="gb" aria-label="Fermer"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<span style="font-size: 17px; font-weight: 600">Nouvelle dépense</span>
+<span style="width: 44px"></span>
+</div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 8px">
+<div style="display: flex; align-items: baseline"><span class="num" style="font-size: 52px; font-weight: 500; letter-spacing: -0.03em; line-height: 56px">12,40</span><span style="width: 2px; height: 42px; background: var(--acc); margin: 0 4px; align-self: center"></span><span class="num dec" style="font-size: 28px">€</span></div>
+<button class="chip" style="height: 32px"><svg class="i" viewBox="0 0 24 24" style="width: 16px; height: 16px" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 10h16M9 3v4M15 3v4"></path></svg>Aujourd’hui · <span class="num">21:18</span></button>
+</div>
+<label style="display: flex; flex-direction: column; gap: 6px"><span class="ovl">Libellé</span><input value="Boulangerie Ménard" style="height: 48px; border-radius: 12px; border: 1.5px solid var(--acc); background: var(--sf); padding: 0 14px; font-family: inherit; font-size: 17px; color: var(--ink); outline: none; box-sizing: border-box"></label>
+<div style="display: flex; flex-direction: column; gap: 6px; margin-top: -2px">
+<span class="ovl">Catégorie <span style="text-transform: none; letter-spacing: 0; font-weight: 500">· suggérée par l’historique</span></span>
+<div style="display: flex; gap: 8px; margin-right: -16px">
+<button class="chip on"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-restaurants)"></span>Restaurants</button>
+<button class="chip"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-groceries)"></span>Courses</button>
+<button class="chip"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-coffee)"></span>Café</button>
+<button class="chip">Autre…</button>
+</div>
+</div>
+<div style="display: flex; gap: 10px">
+<div style="flex: 1; display: flex; align-items: center; justify-content: space-between; height: 48px; padding: 0 8px 0 14px; border-radius: 12px; background: var(--sf2)"><span style="font-size: 15px">Exceptionnelle</span><button class="sw" role="switch" aria-checked="false" aria-label="Dépense exceptionnelle"><span></span></button></div>
+<button style="height: 48px; padding: 0 14px; border-radius: 12px; background: var(--sf2); border: 0; color: var(--ink); font-family: inherit; font-size: 15px; display: flex; align-items: center; gap: 8px"><svg class="i" viewBox="0 0 24 24" style="width: 20px; height: 20px" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"></path><circle cx="12" cy="13" r="3.2"></circle></svg>Ticket</button>
+</div>
+<button style="height: 54px; border-radius: 27px; border: 0; background: var(--cta); color: var(--onCta); font-family: inherit; font-size: 17px; font-weight: 600">Ajouter <span class="num">12,40 €</span></button>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 0 -16px; padding: 8px 8px 40px; flex: 1; align-content: start; background: var(--sf2); border-radius: 0">
+
+<button class="key" aria-label="1">1</button>
+
+<button class="key" aria-label="2">2</button>
+
+<button class="key" aria-label="3">3</button>
+
+<button class="key" aria-label="4">4</button>
+
+<button class="key" aria-label="5">5</button>
+
+<button class="key" aria-label="6">6</button>
+
+<button class="key" aria-label="7">7</button>
+
+<button class="key" aria-label="8">8</button>
+
+<button class="key" aria-label="9">9</button>
+
+<button class="key" aria-label="Virgule">,</button>
+
+<button class="key" aria-label="0">0</button>
+
+<button class="key" aria-label="Effacer">⌫</button>
+
+</div>
+</section>
+<div class="home"></div>
+</div>
+</div>
+
+</div>
+
+</body>
+</html>

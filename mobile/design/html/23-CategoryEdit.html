@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Nouvelle catégorie</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+body{margin:0}
+a{color:#0A66C2}a:hover{color:#084F96}
+.board{display:flex;gap:56px;padding:40px;box-sizing:border-box;background:#E6E8EC;font-family:'Geist',system-ui,sans-serif}
+.col{display:flex;flex-direction:column;gap:12px}
+.cap{font-size:13px;font-weight:500;color:#3F4855;height:16px;line-height:16px}
+.light{--bg:#F3F7FA;--sf:#FFFFFF;--sf2:#EBEEF2;--sf3:#E0E4E9;--ln:#D4D8DD;--ln2:#E3E7EA;--ink:#0B1015;--ink2:#3E4348;--ink3:#5F6469;--acc:#0075AD;--accbg:rgba(0,117,173,.10);--pos:#257C3A;--posbg:rgba(37,124,58,.09);--posln:rgba(37,124,58,.45);--neg:#C2272D;--negbg:rgba(194,39,45,.08);--exc:#006AAA;--excbg:rgba(0,106,170,.09);--warn:#975800;--warnbg:rgba(151,88,0,.08);--warnln:rgba(151,88,0,.25);--onInk:#FFFFFF;--segon:#FFFFFF;--glass:rgba(255,255,255,.86);--scrim:rgba(11,16,21,.36);--sheet:#FFFFFF;--key:#E8EBEF;--onNeg:#FFFFFF;--negsolid:#C2272D;--bar:#5FB46E;--toast:#15171A;--onToast:#F5F7F9;--toastAcc:#47D2E8;--cta:linear-gradient(100deg,#73D885 0%,#49D9B9 55%,#3ECCE2 100%);--onCta:#0F130F;--fill:linear-gradient(90deg,#2F8A45,#5FC271);--glow:linear-gradient(135deg,rgba(37,124,58,.28),rgba(11,16,21,.06) 45%,rgba(0,117,173,.18));--shadow:0 1px 2px rgba(11,16,21,.05),0 6px 18px rgba(11,16,21,.05);--c-groceries:#57914A;--c-restaurants:#B36D2A;--c-shopping:#B4608A;--c-transport:#4284C5;--c-coffee:#A57710;--c-leisure:#009696;--c-travel:#85861F;--c-home:#0092A8;--c-sport:#00977C;--c-health:#389560;--c-gifts:#BD615B;--c-beauty:#BA5F76;--c-subs:#64748B;--c-bank:#6B7280;--c-other:#64748B;}
+.dark{--bg:#000B18;--sf:#15171A;--sf2:#212428;--sf3:#2A2D31;--ln:#2E3236;--ln2:#1F2225;--ink:#F5F7F9;--ink2:#B5B8BA;--ink3:#878A8E;--acc:#00B4F0;--accbg:rgba(0,180,240,.14);--pos:#87E496;--posbg:rgba(135,228,150,.10);--posln:rgba(135,228,150,.45);--neg:#FD736D;--negbg:rgba(253,115,109,.12);--exc:#44A8E7;--excbg:rgba(68,168,231,.14);--warn:#FAAB3F;--warnbg:rgba(250,171,63,.12);--warnln:rgba(250,171,63,.3);--onInk:#000B18;--segon:#2E3237;--glass:rgba(21,23,26,.82);--scrim:rgba(0,0,0,.6);--sheet:#15171A;--key:#24272B;--onNeg:#FBEDEC;--negsolid:#C53637;--bar:#5FB46E;--toast:#F5F7F9;--onToast:#0B1015;--toastAcc:#0075AD;--cta:linear-gradient(100deg,#87E496 0%,#52DFBF 55%,#47D2E8 100%);--onCta:#0F130F;--fill:linear-gradient(90deg,#45814F,#87E496);--glow:linear-gradient(135deg,rgba(135,228,150,.30),rgba(255,255,255,.05) 45%,rgba(71,210,232,.16));--shadow:0 12px 32px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.045);--c-groceries:#9FCC95;--c-restaurants:#E9B082;--c-shopping:#EBA6C6;--c-transport:#91C3F6;--c-coffee:#DCB87A;--c-leisure:#72D0D0;--c-travel:#C1C37E;--c-home:#72CEDE;--c-sport:#7BD1BA;--c-health:#8ECFA4;--c-gifts:#F2A7A1;--c-beauty:#F0A6B6;--c-subs:#94A3B8;--c-bank:#A3A8B0;--c-other:#94A3B8;}
+.phone{width:393px;height:852px;border-radius:54px;overflow:hidden;position:relative;background:var(--bg);color:var(--ink);font-family:'Geist',system-ui,sans-serif;box-shadow:0 0 0 1px rgba(11,15,20,.14),0 24px 60px rgba(11,15,20,.16)}
+.island{position:absolute;top:11px;left:134px;width:125px;height:36px;border-radius:20px;background:#000;z-index:9}
+.home{position:absolute;bottom:8px;left:126px;width:141px;height:5px;border-radius:3px;background:var(--ink);z-index:9}
+.num{font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.dec{color:var(--ink3)}
+.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.scr{position:absolute;inset:0;padding:54px 16px 0;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.hdr{display:flex;align-items:center;justify-content:space-between;min-height:44px;gap:8px}
+.lt{font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:38px;margin:0}
+.ovl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.card{background:linear-gradient(var(--sf),var(--sf)) padding-box,var(--glow) border-box;border:1px solid transparent;border-radius:20px;box-shadow:var(--shadow)}
+.gb{width:44px;height:44px;border-radius:22px;background:var(--sf2);color:var(--ink);display:flex;align-items:center;justify-content:center;border:0;padding:0;font-family:inherit}
+.mt{height:8px;border-radius:4px;background:var(--sf3);position:relative}
+.bdg{font-size:12px;font-weight:600;padding:3px 7px;border-radius:6px;white-space:nowrap}
+.up{color:var(--neg);background:var(--negbg)}
+.dn{color:var(--pos);background:var(--posbg)}
+.row{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px}
+.sep{height:1px;background:var(--ln2);margin-left:16px}
+.tb{position:absolute;left:16px;right:16px;bottom:26px;display:flex;gap:10px;align-items:center;z-index:6}
+.tbc{flex:1;display:flex;height:62px;padding:5px;box-sizing:border-box;border-radius:31px;background:var(--glass);border:1px solid var(--ln);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 8px 24px rgba(11,15,20,.12)}
+.tbi{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:26px;font-size:10px;font-weight:500;color:var(--ink2);border:0;background:none;font-family:inherit;padding:0}
+.tbi.on{background:var(--sf3);color:var(--ink)}
+.fab{width:62px;height:62px;border-radius:31px;background:var(--cta);color:var(--onCta);display:flex;align-items:center;justify-content:center;border:0;box-shadow:0 8px 24px rgba(11,15,20,.2);flex:none}
+.fadeb{position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(to top,var(--bg) 35%,rgba(0,0,0,0));z-index:5}
+.chip{height:36px;padding:0 14px;border-radius:18px;background:var(--sf2);color:var(--ink2);font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;border:0;white-space:nowrap;font-family:inherit;flex:none}
+.chip.on{background:var(--posbg);color:var(--pos);box-shadow:inset 0 0 0 1px var(--posln)}
+.seg{display:flex;padding:3px;border-radius:12px;background:var(--sf2);height:38px;box-sizing:border-box}
+.sgi{flex:1;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px;font-weight:500;color:var(--ink2);border:0;background:none;font-family:inherit}
+.sgi.on{background:var(--segon);color:var(--ink);box-shadow:0 1px 3px rgba(11,15,20,.12)}
+.sw{width:51px;height:31px;border-radius:16px;background:var(--sf3);position:relative;flex:none;border:0;padding:0}
+.sw span{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:14px;background:#FFFFFF;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.sw.on{background:var(--pos)}
+.sw.on span{left:22px}
+.cm{width:4px;height:30px;border-radius:2px;flex:none}
+.back{height:44px;display:flex;align-items:center;gap:2px;background:none;border:0;color:var(--acc);font-family:inherit;font-size:17px;padding:0 8px 0 0;margin-left:-8px}
+.gl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:8px 16px 0}
+.val{font-size:15px;color:var(--ink3);display:flex;align-items:center;gap:2px}
+.fld{height:48px;border-radius:12px;border:1px solid var(--ln);background:var(--sf);padding:0 14px;font-family:inherit;font-size:16px;color:var(--ink);box-sizing:border-box;width:100%;outline:none}
+.tile{padding:14px;display:flex;flex-direction:column;gap:6px}
+.btn{height:54px;border-radius:27px;border:0;font-family:'Geist',sans-serif;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 22px}
+
+</style>
+</head>
+<body>
+
+
+<div class="board" style="width: 922px; height: 960px">
+
+<div class="col">
+<div class="cap">Clair — iPhone 393 × 852</div>
+<div class="phone light">
+<div class="island"></div>
+<div class="scr">
+<div style="position: absolute; inset: 0; padding: 70px 16px 0; background: var(--bg); display: flex; flex-direction: column; gap: 12px"><span style="font-size: 32px; font-weight: 700">Catégories</span><div style="height: 300px; border-radius: 20px; background: var(--sf)"></div></div>
+<div style="position: absolute; inset: 0; background: var(--scrim)"></div>
+<section aria-label="Nouvelle catégorie" style="position: absolute; left: 0; right: 0; bottom: 0; top: 200px; border-radius: 28px 28px 0 0; background: var(--sheet); padding: 8px 16px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+<div style="width: 36px; height: 5px; border-radius: 3px; background: var(--ln); align-self: center"></div>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: -4px"><button class="back" style="margin: 0">Annuler</button><span style="font-size: 17px; font-weight: 600">Nouvelle catégorie</span><span style="width: 64px"></span></div>
+<label style="display: flex; flex-direction: column; gap: 6px"><span class="ovl">Nom</span><input class="fld" value="Animaux" style="border: 1.5px solid var(--acc)"></label>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="ovl">Couleur</span>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px">
+<button aria-label="Teinte beauty" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-beauty); box-shadow: none"></button><button aria-label="Teinte gifts" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-gifts); box-shadow: none"></button><button aria-label="Teinte restaurants" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-restaurants); box-shadow: none"></button><button aria-label="Teinte coffee" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-coffee); box-shadow: none"></button><button aria-label="Teinte travel" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-travel); box-shadow: none"></button><button aria-label="Teinte groceries" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-groceries); box-shadow: none"></button><button aria-label="Teinte sport" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-sport); box-shadow: none"></button><button aria-label="Teinte home" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-home); box-shadow: 0 0 0 2px var(--sheet), 0 0 0 4px var(--ink)"></button><button aria-label="Teinte transport" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-transport); box-shadow: none"></button><button aria-label="Teinte shopping" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-shopping); box-shadow: none"></button>
+</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="ovl">Libellés reconnus automatiquement</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip">Truffaut <span aria-hidden="true">×</span></span><span class="chip">Zooplus <span aria-hidden="true">×</span></span><button class="chip" style="color: var(--acc)">+ Ajouter</button></div></div>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink3)">Aperçu<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink2); background: var(--sf2); padding: 4px 10px; border-radius: 8px"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-home)"></span>Animaux</span></div>
+<div style="flex: 1"></div>
+<button class="btn" style="background: var(--cta); color: var(--onCta)">Créer la catégorie</button>
+</section>
+
+</div>
+<div class="home"></div>
+</div>
+</div>
+
+<div class="col">
+<div class="cap">Sombre — iPhone 393 × 852</div>
+<div class="phone dark">
+<div class="island"></div>
+<div class="scr">
+<div style="position: absolute; inset: 0; padding: 70px 16px 0; background: var(--bg); display: flex; flex-direction: column; gap: 12px"><span style="font-size: 32px; font-weight: 700">Catégories</span><div style="height: 300px; border-radius: 20px; background: var(--sf)"></div></div>
+<div style="position: absolute; inset: 0; background: var(--scrim)"></div>
+<section aria-label="Nouvelle catégorie" style="position: absolute; left: 0; right: 0; bottom: 0; top: 200px; border-radius: 28px 28px 0 0; background: var(--sheet); padding: 8px 16px 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px">
+<div style="width: 36px; height: 5px; border-radius: 3px; background: var(--ln); align-self: center"></div>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: -4px"><button class="back" style="margin: 0">Annuler</button><span style="font-size: 17px; font-weight: 600">Nouvelle catégorie</span><span style="width: 64px"></span></div>
+<label style="display: flex; flex-direction: column; gap: 6px"><span class="ovl">Nom</span><input class="fld" value="Animaux" style="border: 1.5px solid var(--acc)"></label>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="ovl">Couleur</span>
+<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px">
+<button aria-label="Teinte beauty" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-beauty); box-shadow: none"></button><button aria-label="Teinte gifts" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-gifts); box-shadow: none"></button><button aria-label="Teinte restaurants" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-restaurants); box-shadow: none"></button><button aria-label="Teinte coffee" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-coffee); box-shadow: none"></button><button aria-label="Teinte travel" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-travel); box-shadow: none"></button><button aria-label="Teinte groceries" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-groceries); box-shadow: none"></button><button aria-label="Teinte sport" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-sport); box-shadow: none"></button><button aria-label="Teinte home" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-home); box-shadow: 0 0 0 2px var(--sheet), 0 0 0 4px var(--ink)"></button><button aria-label="Teinte transport" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-transport); box-shadow: none"></button><button aria-label="Teinte shopping" style="height: 44px; border-radius: 12px; border: 0; background: var(--c-shopping); box-shadow: none"></button>
+</div></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><span class="ovl">Libellés reconnus automatiquement</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="chip">Truffaut <span aria-hidden="true">×</span></span><span class="chip">Zooplus <span aria-hidden="true">×</span></span><button class="chip" style="color: var(--acc)">+ Ajouter</button></div></div>
+<div style="display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--ink3)">Aperçu<span style="display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink2); background: var(--sf2); padding: 4px 10px; border-radius: 8px"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-home)"></span>Animaux</span></div>
+<div style="flex: 1"></div>
+<button class="btn" style="background: var(--cta); color: var(--onCta)">Créer la catégorie</button>
+</section>
+
+</div>
+<div class="home"></div>
+</div>
+</div>
+
+</div>
+
+</body>
+</html>

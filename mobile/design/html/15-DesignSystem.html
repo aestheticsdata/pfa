@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Design system PFA mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+body{margin:0}
+a{color:#0A66C2}a:hover{color:#084F96}
+.num{font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.h2{font-size:28px;font-weight:700;letter-spacing:-0.02em;margin:0}
+.lab{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5C6674}
+.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th{text-align:left;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5C6674;padding:0 10px 10px 0;border-bottom:1px solid #D6DBE1}
+.tbl td{padding:9px 10px 9px 0;border-bottom:1px solid #E6E9ED;vertical-align:middle}
+.sw{display:inline-block;width:22px;height:22px;border-radius:6px;vertical-align:middle;margin-right:8px;box-shadow:inset 0 0 0 1px rgba(11,15,20,.14)}
+.light{--bg:#F3F7FA;--sf:#FFFFFF;--sf2:#EBEEF2;--sf3:#E0E4E9;--ln:#D4D8DD;--ln2:#E3E7EA;--ink:#0B1015;--ink2:#3E4348;--ink3:#5F6469;--acc:#0075AD;--accbg:rgba(0,117,173,.10);--pos:#257C3A;--posbg:rgba(37,124,58,.09);--posln:rgba(37,124,58,.45);--neg:#C2272D;--negbg:rgba(194,39,45,.08);--exc:#006AAA;--excbg:rgba(0,106,170,.09);--warn:#975800;--warnbg:rgba(151,88,0,.08);--warnln:rgba(151,88,0,.25);--onInk:#FFFFFF;--segon:#FFFFFF;--glass:rgba(255,255,255,.86);--scrim:rgba(11,16,21,.36);--sheet:#FFFFFF;--key:#E8EBEF;--onNeg:#FFFFFF;--negsolid:#C2272D;--bar:#5FB46E;--toast:#15171A;--onToast:#F5F7F9;--toastAcc:#47D2E8;--cta:linear-gradient(100deg,#73D885 0%,#49D9B9 55%,#3ECCE2 100%);--onCta:#0F130F;--fill:linear-gradient(90deg,#2F8A45,#5FC271);--glow:linear-gradient(135deg,rgba(37,124,58,.28),rgba(11,16,21,.06) 45%,rgba(0,117,173,.18));--shadow:0 1px 2px rgba(11,16,21,.05),0 6px 18px rgba(11,16,21,.05);--c-groceries:#57914A;--c-restaurants:#B36D2A;--c-shopping:#B4608A;--c-transport:#4284C5;--c-coffee:#A57710;--c-leisure:#009696;--c-travel:#85861F;--c-home:#0092A8;--c-sport:#00977C;--c-health:#389560;--c-gifts:#BD615B;--c-beauty:#BA5F76;--c-subs:#64748B;--c-bank:#6B7280;--c-other:#64748B;}
+.dark{--bg:#000B18;--sf:#15171A;--sf2:#212428;--sf3:#2A2D31;--ln:#2E3236;--ln2:#1F2225;--ink:#F5F7F9;--ink2:#B5B8BA;--ink3:#878A8E;--acc:#00B4F0;--accbg:rgba(0,180,240,.14);--pos:#87E496;--posbg:rgba(135,228,150,.10);--posln:rgba(135,228,150,.45);--neg:#FD736D;--negbg:rgba(253,115,109,.12);--exc:#44A8E7;--excbg:rgba(68,168,231,.14);--warn:#FAAB3F;--warnbg:rgba(250,171,63,.12);--warnln:rgba(250,171,63,.3);--onInk:#000B18;--segon:#2E3237;--glass:rgba(21,23,26,.82);--scrim:rgba(0,0,0,.6);--sheet:#15171A;--key:#24272B;--onNeg:#FBEDEC;--negsolid:#C53637;--bar:#5FB46E;--toast:#F5F7F9;--onToast:#0B1015;--toastAcc:#0075AD;--cta:linear-gradient(100deg,#87E496 0%,#52DFBF 55%,#47D2E8 100%);--onCta:#0F130F;--fill:linear-gradient(90deg,#45814F,#87E496);--glow:linear-gradient(135deg,rgba(135,228,150,.30),rgba(255,255,255,.05) 45%,rgba(71,210,232,.16));--shadow:0 12px 32px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.045);--c-groceries:#9FCC95;--c-restaurants:#E9B082;--c-shopping:#EBA6C6;--c-transport:#91C3F6;--c-coffee:#DCB87A;--c-leisure:#72D0D0;--c-travel:#C1C37E;--c-home:#72CEDE;--c-sport:#7BD1BA;--c-health:#8ECFA4;--c-gifts:#F2A7A1;--c-beauty:#F0A6B6;--c-subs:#94A3B8;--c-bank:#A3A8B0;--c-other:#94A3B8;}
+.pnl{background:var(--bg);color:var(--ink);border-radius:28px;padding:32px;display:flex;flex-direction:column;gap:28px;box-shadow:0 0 0 1px rgba(11,15,20,.1)}
+.pl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.btn{height:54px;border-radius:27px;border:0;font-family:'Geist',sans-serif;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 24px}
+.card{background:linear-gradient(var(--sf),var(--sf)) padding-box,var(--glow) border-box;border:1px solid transparent;border-radius:20px;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:12px;min-height:58px;padding:0 16px}
+.sep{height:1px;background:var(--ln2);margin-left:32px}
+.bdg{font-size:12px;font-weight:600;padding:3px 7px;border-radius:6px;white-space:nowrap}
+.chip{height:36px;padding:0 14px;border-radius:18px;background:var(--sf2);color:var(--ink2);font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;border:0;font-family:inherit}
+.seg{display:flex;padding:3px;border-radius:12px;background:var(--sf2);height:38px;box-sizing:border-box;width:260px}
+.sgi{flex:1;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px;font-weight:500;color:var(--ink2);border:0;background:none;font-family:inherit}
+.sgi.on{background:var(--segon);color:var(--ink);box-shadow:0 1px 3px rgba(11,15,20,.12)}
+.swt{width:51px;height:31px;border-radius:16px;background:var(--sf3);position:relative;border:0;padding:0;flex:none}
+.swt span{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:14px;background:#FFFFFF;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.swt.on{background:var(--acc)}
+.swt.on span{left:22px}
+.fld{height:48px;border-radius:12px;border:1px solid var(--ln);background:var(--sf);padding:0 14px;font-family:inherit;font-size:16px;color:var(--ink);box-sizing:border-box;width:100%;outline:none}
+.tbi{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:26px;font-size:10px;font-weight:500;color:var(--ink2);border:0;background:none;font-family:inherit;padding:0}
+.tbi.on{background:var(--sf3);color:var(--ink)}
+
+</style>
+</head>
+<body>
+
+
+<div style="width: 1960px; height: 2700px; box-sizing: border-box; padding: 64px; background: #F7F8FA; color: #0B0F14; font-family: 'Geist', system-ui, sans-serif; display: flex; flex-direction: column; gap: 48px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 40px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span class="lab">PFA mobile · React Native · iOS + Android</span>
+<h1 style="margin: 0; font-size: 56px; font-weight: 700; letter-spacing: -0.03em; line-height: 60px">Design system</h1>
+<span style="font-size: 17px; color: #3A4350; max-width: 860px; line-height: 25px">Le mode sombre reprend les tokens de PFA web (surface-base, surface-elev, ink, accent-strong, elec, neg, exc, warn, GlowCard, CTA vert → bleu). Le mode clair en est dérivé : mêmes teintes, luminosités inversées, contrastes ≥ 4,5:1. Montants en Geist Mono à chasse fixe.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: #3A4350; text-align: right"><span>Unités : pt (iOS) = dp (Android)</span><span>Cible tactile min. 44 pt / 48 dp</span><span>Fichier de tokens : <span class="num">pfa-mobile-tokens.ts</span></span></div>
+</div>
+<div style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 64px">
+<div style="display: flex; flex-direction: column; gap: 20px">
+<h2 class="h2">Couleurs</h2>
+<table class="tbl">
+<thead><tr><th>Token</th><th>Clair</th><th>Sombre</th><th>Usage</th></tr></thead>
+<tbody>
+
+<tr><td class="num" style="font-size: 13px">bg</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #F3F7FA"></span>#F3F7FA</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #000B18"></span>#000B18</td><td style="color: #3A4350">Fond d’écran (surface-base PFA)</td></tr>
+
+<tr><td class="num" style="font-size: 13px">surface</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #FFFFFF"></span>#FFFFFF</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #15171A"></span>#15171A</td><td style="color: #3A4350">Cartes GlowCard, listes (surface-elev)</td></tr>
+
+<tr><td class="num" style="font-size: 13px">surface2</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #EBEEF2"></span>#EBEEF2</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #212428"></span>#212428</td><td style="color: #3A4350">Champs, chips, bouton secondaire</td></tr>
+
+<tr><td class="num" style="font-size: 13px">surface3</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #E0E4E9"></span>#E0E4E9</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #2A2D31"></span>#2A2D31</td><td style="color: #3A4350">Piste de jauge, onglet actif, squelette</td></tr>
+
+<tr><td class="num" style="font-size: 13px">line</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #D4D8DD"></span>#D4D8DD</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #2E3236"></span>#2E3236</td><td style="color: #3A4350">Bordures de champ, barre d’onglets</td></tr>
+
+<tr><td class="num" style="font-size: 13px">lineSoft</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #E3E7EA"></span>#E3E7EA</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #1F2225"></span>#1F2225</td><td style="color: #3A4350">Séparateurs</td></tr>
+
+<tr><td class="num" style="font-size: 13px">ink</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #0B1015"></span>#0B1015</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #F5F7F9"></span>#F5F7F9</td><td style="color: #3A4350">Texte principal</td></tr>
+
+<tr><td class="num" style="font-size: 13px">ink2</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #3E4348"></span>#3E4348</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #B5B8BA"></span>#B5B8BA</td><td style="color: #3A4350">Texte secondaire</td></tr>
+
+<tr><td class="num" style="font-size: 13px">ink3</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #5F6469"></span>#5F6469</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #878A8E"></span>#878A8E</td><td style="color: #3A4350">Libellés, décimales (≥ 4,5:1)</td></tr>
+
+<tr><td class="num" style="font-size: 13px">accent (elec)</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #0075AD"></span>#0075AD</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #00B4F0"></span>#00B4F0</td><td style="color: #3A4350">Sélection, « aujourd’hui », liens</td></tr>
+
+<tr><td class="num" style="font-size: 13px">positive (accent-strong)</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #257C3A"></span>#257C3A</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #87E496"></span>#87E496</td><td style="color: #3A4350">Sous le budget, baisse, filtre actif</td></tr>
+
+<tr><td class="num" style="font-size: 13px">negative (neg)</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #C2272D"></span>#C2272D</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #FD736D"></span>#FD736D</td><td style="color: #3A4350">Hausse, dépassement, destructif</td></tr>
+
+<tr><td class="num" style="font-size: 13px">exceptional (exc)</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #006AAA"></span>#006AAA</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #44A8E7"></span>#44A8E7</td><td style="color: #3A4350">Dépenses exceptionnelles</td></tr>
+
+<tr><td class="num" style="font-size: 13px">warning (warn)</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #975800"></span>#975800</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: #FAAB3F"></span>#FAAB3F</td><td style="color: #3A4350">Hors ligne, échéance proche</td></tr>
+
+<tr><td class="num" style="font-size: 13px">cta</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: linear-gradient(100deg,#73D885,#49D9B9,#3ECCE2)"></span>linear-gradient(100deg,#73D885,#49D9B9,#3ECCE2)</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: linear-gradient(100deg,#87E496,#52DFBF,#47D2E8)"></span>linear-gradient(100deg,#87E496,#52DFBF,#47D2E8)</td><td style="color: #3A4350">Action principale (vert → bleu), texte #0F130F</td></tr>
+
+<tr><td class="num" style="font-size: 13px">fill</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: linear-gradient(90deg,#2F8A45,#5FC271)"></span>linear-gradient(90deg,#2F8A45,#5FC271)</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: linear-gradient(90deg,#45814F,#87E496)"></span>linear-gradient(90deg,#45814F,#87E496)</td><td style="color: #3A4350">Remplissage des jauges (bar-fill)</td></tr>
+
+<tr><td class="num" style="font-size: 13px">glow</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: linear-gradient(135deg,rgba(37,124,58,.28),rgba(11,16,21,.06),rgba(0,117,173,.18))"></span>linear-gradient(135deg,rgba(37,124,58,.28),rgba(11,16,21,.06),rgba(0,117,173,.18))</td><td class="num" style="font-size: 12px; color: #3A4350; max-width: 260px; word-break: break-all"><span class="sw" style="background: linear-gradient(135deg,rgba(135,228,150,.30),rgba(255,255,255,.05),rgba(71,210,232,.16))"></span>linear-gradient(135deg,rgba(135,228,150,.30),rgba(255,255,255,.05),rgba(71,210,232,.16))</td><td style="color: #3A4350">Bordure 1 px des cartes (GlowCard)</td></tr>
+
+</tbody>
+</table>
+<span class="lab" style="margin-top: 12px">Catégories — teintes PFA oklch(0.80 0.09 h) en sombre, oklch(0.60 0.12 h) en clair · gauche clair, droite sombre</span>
+<div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px">
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #57914A"></div><div style="flex: 1; background: #9FCC95"></div></div><span style="font-size: 13px">Courses</span><span class="num" style="font-size: 11px; color: #5C6674">#57914A · #9FCC95</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #B36D2A"></div><div style="flex: 1; background: #E9B082"></div></div><span style="font-size: 13px">Restaurants</span><span class="num" style="font-size: 11px; color: #5C6674">#B36D2A · #E9B082</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #B4608A"></div><div style="flex: 1; background: #EBA6C6"></div></div><span style="font-size: 13px">Shopping</span><span class="num" style="font-size: 11px; color: #5C6674">#B4608A · #EBA6C6</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #4284C5"></div><div style="flex: 1; background: #91C3F6"></div></div><span style="font-size: 13px">Transport</span><span class="num" style="font-size: 11px; color: #5C6674">#4284C5 · #91C3F6</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #A57710"></div><div style="flex: 1; background: #DCB87A"></div></div><span style="font-size: 13px">Café</span><span class="num" style="font-size: 11px; color: #5C6674">#A57710 · #DCB87A</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #009696"></div><div style="flex: 1; background: #72D0D0"></div></div><span style="font-size: 13px">Loisirs</span><span class="num" style="font-size: 11px; color: #5C6674">#009696 · #72D0D0</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #85861F"></div><div style="flex: 1; background: #C1C37E"></div></div><span style="font-size: 13px">Voyage</span><span class="num" style="font-size: 11px; color: #5C6674">#85861F · #C1C37E</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #0092A8"></div><div style="flex: 1; background: #72CEDE"></div></div><span style="font-size: 13px">Maison</span><span class="num" style="font-size: 11px; color: #5C6674">#0092A8 · #72CEDE</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #00977C"></div><div style="flex: 1; background: #7BD1BA"></div></div><span style="font-size: 13px">Sport</span><span class="num" style="font-size: 11px; color: #5C6674">#00977C · #7BD1BA</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #389560"></div><div style="flex: 1; background: #8ECFA4"></div></div><span style="font-size: 13px">Santé</span><span class="num" style="font-size: 11px; color: #5C6674">#389560 · #8ECFA4</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #BD615B"></div><div style="flex: 1; background: #F2A7A1"></div></div><span style="font-size: 13px">Cadeaux</span><span class="num" style="font-size: 11px; color: #5C6674">#BD615B · #F2A7A1</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #BA5F76"></div><div style="flex: 1; background: #F0A6B6"></div></div><span style="font-size: 13px">Beauté</span><span class="num" style="font-size: 11px; color: #5C6674">#BA5F76 · #F0A6B6</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #64748B"></div><div style="flex: 1; background: #94A3B8"></div></div><span style="font-size: 13px">Abonnements</span><span class="num" style="font-size: 11px; color: #5C6674">#64748B · #94A3B8</span></div>
+
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; height: 36px; border-radius: 8px; overflow: hidden"><div style="flex: 1; background: #6B7280"></div><div style="flex: 1; background: #A3A8B0"></div></div><span style="font-size: 13px">Banque</span><span class="num" style="font-size: 11px; color: #5C6674">#6B7280 · #A3A8B0</span></div>
+
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 20px">
+<h2 class="h2">Typographie</h2>
+<span style="font-size: 14px; color: #3A4350">Geist (texte) · Geist Mono, tabular figures (montants, dates, %). Suit Dynamic Type / échelle de police système, plafonnée à 1,4× pour les montants.</span>
+<div style="display: flex; flex-direction: column">
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">largeTitle</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">32/38 · 700</span>
+<span style="font-family: 'Geist', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: -0.02em; text-transform: none; color: #0B0F14">Dépenses</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">title2</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">20/26 · 600</span>
+<span style="font-family: 'Geist', sans-serif; font-size: 20px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #0B0F14">Aucune dépense</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">headline</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">17/22 · 600</span>
+<span style="font-family: 'Geist', sans-serif; font-size: 17px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #0B0F14">Nouvelle dépense</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">body</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">16/22 · 400</span>
+<span style="font-family: 'Geist', sans-serif; font-size: 16px; font-weight: 400; letter-spacing: 0; text-transform: none; color: #0B0F14">Boulangerie Ménard</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">callout</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">15/20 · 400</span>
+<span style="font-family: 'Geist', sans-serif; font-size: 15px; font-weight: 400; letter-spacing: 0; text-transform: none; color: #0B0F14">Données du 20 nov.</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">footnote</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">13/18 · 400</span>
+<span style="font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; color: #5C6674">Restaurants · 3 opérations</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">overline</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">11/14 · 600 · +8 %</span>
+<span style="font-family: 'Geist', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #5C6674">Reste à dépenser</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">amountXL</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">Mono 44/48 · 500</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 44px; font-weight: 500; letter-spacing: -0.03em; text-transform: none; color: #0B0F14">1 577,18 €</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">amountL</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">Mono 28/32 · 500</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 28px; font-weight: 500; letter-spacing: 0; text-transform: none; color: #0B0F14">378,77 €</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">amount</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">Mono 16/20 · 500</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 16px; font-weight: 500; letter-spacing: 0; text-transform: none; color: #0B0F14">65,14 €</span>
+</div>
+
+<div style="display: flex; align-items: baseline; gap: 16px; padding: 8px 0; border-bottom: 1px solid #E6E9ED">
+<span class="num" style="width: 110px; font-size: 12px; color: #5C6674; flex: none">amountS</span>
+<span class="num" style="width: 120px; font-size: 12px; color: #5C6674; flex: none">Mono 13/16 · 400</span>
+<span style="font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 400; letter-spacing: 0; text-transform: none; color: #0B0F14">30,8 % · 869</span>
+</div>
+
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; margin-top: 12px">
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 20px; font-weight: 600">Espacements</h3>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">xxs</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 2px"></div><span class="num" style="font-size: 12px">2</span></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">xs</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 4px"></div><span class="num" style="font-size: 12px">4</span></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">sm</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 8px"></div><span class="num" style="font-size: 12px">8</span></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">md</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 12px"></div><span class="num" style="font-size: 12px">12</span></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">lg</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 16px"></div><span class="num" style="font-size: 12px">16 (marge écran)</span></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">xl</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 20px"></div><span class="num" style="font-size: 12px">20</span></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">2xl</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 24px"></div><span class="num" style="font-size: 12px">24</span></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">3xl</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 32px"></div><span class="num" style="font-size: 12px">32</span></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><span class="num" style="width: 64px; font-size: 12px; color: #5C6674">4xl</span><div style="height: 12px; background: #0075AD; border-radius: 2px; width: 48px"></div><span class="num" style="font-size: 12px">48</span></div>
+
+</div>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<h3 style="margin: 0; font-size: 20px; font-weight: 600">Rayons</h3>
+
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 44px; height: 32px; border: 1.5px solid #0B0F14; border-radius: 6px; flex: none"></div><div style="display: flex; flex-direction: column"><span class="num" style="font-size: 13px">xs · 6px</span><span style="font-size: 12px; color: #5C6674">Badges, pastilles</span></div></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 44px; height: 32px; border: 1.5px solid #0B0F14; border-radius: 12px; flex: none"></div><div style="display: flex; flex-direction: column"><span class="num" style="font-size: 13px">sm · 12px</span><span style="font-size: 12px; color: #5C6674">Champs, segmented, touches</span></div></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 44px; height: 32px; border: 1.5px solid #0B0F14; border-radius: 16px; flex: none"></div><div style="display: flex; flex-direction: column"><span class="num" style="font-size: 13px">md · 16px</span><span style="font-size: 12px; color: #5C6674">Cartes Android, listes de réglages</span></div></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 44px; height: 32px; border: 1.5px solid #0B0F14; border-radius: 20px; flex: none"></div><div style="display: flex; flex-direction: column"><span class="num" style="font-size: 13px">lg · 20px</span><span style="font-size: 12px; color: #5C6674">Cartes iOS</span></div></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 44px; height: 32px; border: 1.5px solid #0B0F14; border-radius: 28px; flex: none"></div><div style="display: flex; flex-direction: column"><span class="num" style="font-size: 13px">xl · 28px</span><span style="font-size: 12px; color: #5C6674">Bottom sheet</span></div></div>
+
+<div style="display: flex; align-items: center; gap: 12px"><div style="width: 44px; height: 32px; border: 1.5px solid #0B0F14; border-radius: 999px; flex: none"></div><div style="display: flex; flex-direction: column"><span class="num" style="font-size: 13px">pill · 999px</span><span style="font-size: 12px; color: #5C6674">Boutons, chips, barre d’onglets</span></div></div>
+
+</div>
+</div>
+</div>
+</div>
+<h2 class="h2">Composants</h2>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 48px">
+
+<div class="pnl light">
+<span style="font-size: 18px; font-weight: 600">Mode clair</span>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Boutons — 54 pt (principal), 48 pt (secondaire), 44 pt (icône)</span>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+<button class="btn" style="background: var(--cta); color: var(--onCta)">Ajouter</button>
+<button class="btn" style="background: var(--sf2); color: var(--ink); height: 48px">Annuler</button>
+<button class="btn" style="background: none; color: var(--acc); height: 48px; padding: 0 12px">Saisir le code</button>
+<button class="btn" style="background: var(--negbg); color: var(--neg); height: 48px">Supprimer</button>
+<button style="width: 44px; height: 44px; border-radius: 22px; background: var(--sf2); color: var(--ink); border: 0; display: flex; align-items: center; justify-content: center" aria-label="Rechercher"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg></button>
+<button style="width: 62px; height: 62px; border-radius: 31px; background: var(--cta); color: var(--onCta); border: 0; display: flex; align-items: center; justify-content: center" aria-label="Ajouter une dépense"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Carte · montant · jauge</span>
+<div class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<span class="pl">Reste à dépenser</span>
+<div style="display: flex; align-items: baseline"><span class="num" style="font-size: 36px; font-weight: 500; letter-spacing: -0.03em">1 577</span><span class="num" style="font-size: 20px; color: var(--ink3)">,18 €</span></div>
+<div style="height: 8px; border-radius: 4px; background: var(--sf3); position: relative"><div style="position: absolute; left: 0; top: 0; bottom: 0; width: 66%; border-radius: 4px; background: var(--fill)"></div><div style="position: absolute; left: 66.7%; top: -5px; width: 2px; height: 18px; background: var(--acc)"></div></div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="bdg" style="color: var(--pos); background: var(--posbg)">↓ 37 %</span><span class="bdg" style="color: var(--neg); background: var(--negbg)">↑ 4 069 €</span><span class="bdg" style="color: var(--exc); background: var(--excbg)">Exceptionnel</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Champs — défaut · focus · erreur</span>
+<input class="fld" placeholder="Libellé" aria-label="Libellé">
+<input class="fld" value="Boulangerie Ménard" aria-label="Libellé (focus)" style="border: 1.5px solid var(--acc)">
+<div style="display: flex; flex-direction: column; gap: 6px"><input class="fld num" value="" placeholder="0,00 €" aria-label="Montant (erreur)" style="border: 1.5px solid var(--neg)"><span style="font-size: 13px; color: var(--neg)">Saisissez un montant supérieur à 0</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Lignes de liste — 58 pt (2 lignes), 52 pt (1 ligne) · en-tête de section</span>
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px"><span style="font-size: 15px; font-weight: 600">Jeu. 19 nov.</span><span class="num" style="font-size: 14px; color: var(--ink2)">326,99 €</span></div>
+<div class="card" style="overflow: hidden">
+<div class="row"><span style="width: 4px; height: 30px; border-radius: 2px; background: var(--c-restaurants)"></span><div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px">Pizzeria Napoli</span><span style="font-size: 13px; color: var(--ink3)">Restaurants</span></div><span class="num" style="font-size: 16px; font-weight: 500">65,14 €</span></div>
+<div class="sep"></div>
+<div class="row" style="min-height: 52px"><span style="width: 28px; height: 28px; border-radius: 8px; background: var(--c-groceries)"></span><span style="flex: 1; font-size: 16px">Courses</span><span class="num" style="font-size: 13px; color: var(--ink3)">30,8 %</span><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: var(--ink3)" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div class="sep"></div>
+<div class="row" style="min-height: 52px"><span style="flex: 1; font-size: 16px">Plafond hebdo dépassé</span><button class="swt on" role="switch" aria-checked="true" aria-label="Plafond hebdo dépassé"><span></span></button></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Chips · segmented control · switch</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<button class="chip" style="background: var(--posbg); color: var(--pos); box-shadow: inset 0 0 0 1px var(--posln)">Toutes <span class="num" style="opacity: .7">13</span></button>
+<button class="chip"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-groceries)"></span>Courses <span class="num" style="color: var(--ink3)">4</span></button>
+<div class="seg" role="tablist"><button class="sgi on" role="tab" aria-selected="true">Par enseigne</button><button class="sgi" role="tab" aria-selected="false">Par jour</button></div>
+<button class="swt" role="switch" aria-checked="false" aria-label="Désactivé"><span></span></button>
+<button class="swt on" role="switch" aria-checked="true" aria-label="Activé"><span></span></button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Barre d’onglets iOS (verre) + « + »</span>
+<div style="display: flex; gap: 8px; align-items: center; padding: 16px 0">
+<div style="flex: 1; display: flex; height: 62px; padding: 5px; box-sizing: border-box; border-radius: 31px; background: var(--glass); border: 1px solid var(--ln); box-shadow: 0 8px 24px rgba(11,15,20,.12)">
+<button class="tbi on"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"></path></svg>Accueil</button>
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"></path></svg>Dépenses</button>
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"></path></svg>Stats</button>
+</div>
+<button style="width: 62px; height: 62px; border-radius: 31px; background: var(--cta); color: var(--onCta); border: 0; display: flex; align-items: center; justify-content: center; flex: none" aria-label="Ajouter"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+<span class="pl">Navigation bar Android (M3)</span>
+<div style="display: flex; background: var(--sf2); border-radius: 16px; padding: 12px 8px">
+
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: var(--ink2)"><span style="width: 64px; height: 32px; border-radius: 16px; background: var(--accbg); color: var(--acc); display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"></path></svg></span>Accueil</div>
+
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: var(--ink2)"><span style="width: 64px; height: 32px; border-radius: 16px; background: transparent; color: var(--ink2); display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"></path></svg></span>Dépenses</div>
+
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: var(--ink2)"><span style="width: 64px; height: 32px; border-radius: 16px; background: transparent; color: var(--ink2); display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"></path></svg></span>Stats</div>
+
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Bottom sheet — rayon 28, poignée 36 × 5</span>
+<div style="border-radius: 20px; background: rgba(11,15,20,.4); padding: 40px 0 0; overflow: hidden">
+<div style="background: var(--sheet); border-radius: 28px 28px 0 0; padding: 8px 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="width: 36px; height: 5px; border-radius: 3px; background: var(--ln); align-self: center"></div>
+<span style="font-size: 17px; font-weight: 600; text-align: center">Nouvelle dépense</span>
+<div style="text-align: center"><span class="num" style="font-size: 40px; font-weight: 500">12,40</span><span class="num" style="font-size: 22px; color: var(--ink3)"> €</span></div>
+<div style="display: flex; gap: 8px; justify-content: center"><span class="chip" style="background: var(--posbg); color: var(--pos); box-shadow: inset 0 0 0 1px var(--posln)">Restaurants</span><span class="chip">Courses</span></div>
+<button class="btn" style="background: var(--cta); color: var(--onCta)">Ajouter</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="pnl dark">
+<span style="font-size: 18px; font-weight: 600">Mode sombre</span>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Boutons — 54 pt (principal), 48 pt (secondaire), 44 pt (icône)</span>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+<button class="btn" style="background: var(--cta); color: var(--onCta)">Ajouter</button>
+<button class="btn" style="background: var(--sf2); color: var(--ink); height: 48px">Annuler</button>
+<button class="btn" style="background: none; color: var(--acc); height: 48px; padding: 0 12px">Saisir le code</button>
+<button class="btn" style="background: var(--negbg); color: var(--neg); height: 48px">Supprimer</button>
+<button style="width: 44px; height: 44px; border-radius: 22px; background: var(--sf2); color: var(--ink); border: 0; display: flex; align-items: center; justify-content: center" aria-label="Rechercher"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4.2-4.2"></path></svg></button>
+<button style="width: 62px; height: 62px; border-radius: 31px; background: var(--cta); color: var(--onCta); border: 0; display: flex; align-items: center; justify-content: center" aria-label="Ajouter une dépense"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Carte · montant · jauge</span>
+<div class="card" style="padding: 18px; display: flex; flex-direction: column; gap: 10px">
+<span class="pl">Reste à dépenser</span>
+<div style="display: flex; align-items: baseline"><span class="num" style="font-size: 36px; font-weight: 500; letter-spacing: -0.03em">1 577</span><span class="num" style="font-size: 20px; color: var(--ink3)">,18 €</span></div>
+<div style="height: 8px; border-radius: 4px; background: var(--sf3); position: relative"><div style="position: absolute; left: 0; top: 0; bottom: 0; width: 66%; border-radius: 4px; background: var(--fill)"></div><div style="position: absolute; left: 66.7%; top: -5px; width: 2px; height: 18px; background: var(--acc)"></div></div>
+<div style="display: flex; gap: 8px; flex-wrap: wrap"><span class="bdg" style="color: var(--pos); background: var(--posbg)">↓ 37 %</span><span class="bdg" style="color: var(--neg); background: var(--negbg)">↑ 4 069 €</span><span class="bdg" style="color: var(--exc); background: var(--excbg)">Exceptionnel</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Champs — défaut · focus · erreur</span>
+<input class="fld" placeholder="Libellé" aria-label="Libellé">
+<input class="fld" value="Boulangerie Ménard" aria-label="Libellé (focus)" style="border: 1.5px solid var(--acc)">
+<div style="display: flex; flex-direction: column; gap: 6px"><input class="fld num" value="" placeholder="0,00 €" aria-label="Montant (erreur)" style="border: 1.5px solid var(--neg)"><span style="font-size: 13px; color: var(--neg)">Saisissez un montant supérieur à 0</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Lignes de liste — 58 pt (2 lignes), 52 pt (1 ligne) · en-tête de section</span>
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding: 0 4px"><span style="font-size: 15px; font-weight: 600">Jeu. 19 nov.</span><span class="num" style="font-size: 14px; color: var(--ink2)">326,99 €</span></div>
+<div class="card" style="overflow: hidden">
+<div class="row"><span style="width: 4px; height: 30px; border-radius: 2px; background: var(--c-restaurants)"></span><div style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px">Pizzeria Napoli</span><span style="font-size: 13px; color: var(--ink3)">Restaurants</span></div><span class="num" style="font-size: 16px; font-weight: 500">65,14 €</span></div>
+<div class="sep"></div>
+<div class="row" style="min-height: 52px"><span style="width: 28px; height: 28px; border-radius: 8px; background: var(--c-groceries)"></span><span style="flex: 1; font-size: 16px">Courses</span><span class="num" style="font-size: 13px; color: var(--ink3)">30,8 %</span><svg class="i" viewBox="0 0 24 24" style="width: 18px; height: 18px; color: var(--ink3)" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></div>
+<div class="sep"></div>
+<div class="row" style="min-height: 52px"><span style="flex: 1; font-size: 16px">Plafond hebdo dépassé</span><button class="swt on" role="switch" aria-checked="true" aria-label="Plafond hebdo dépassé"><span></span></button></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Chips · segmented control · switch</span>
+<div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+<button class="chip" style="background: var(--posbg); color: var(--pos); box-shadow: inset 0 0 0 1px var(--posln)">Toutes <span class="num" style="opacity: .7">13</span></button>
+<button class="chip"><span style="width: 8px; height: 8px; border-radius: 2px; background: var(--c-groceries)"></span>Courses <span class="num" style="color: var(--ink3)">4</span></button>
+<div class="seg" role="tablist"><button class="sgi on" role="tab" aria-selected="true">Par enseigne</button><button class="sgi" role="tab" aria-selected="false">Par jour</button></div>
+<button class="swt" role="switch" aria-checked="false" aria-label="Désactivé"><span></span></button>
+<button class="swt on" role="switch" aria-checked="true" aria-label="Activé"><span></span></button>
+</div>
+</div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Barre d’onglets iOS (verre) + « + »</span>
+<div style="display: flex; gap: 8px; align-items: center; padding: 16px 0">
+<div style="flex: 1; display: flex; height: 62px; padding: 5px; box-sizing: border-box; border-radius: 31px; background: var(--glass); border: 1px solid var(--ln); box-shadow: 0 8px 24px rgba(11,15,20,.12)">
+<button class="tbi on"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"></path></svg>Accueil</button>
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"></path></svg>Dépenses</button>
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"></path></svg>Stats</button>
+</div>
+<button style="width: 62px; height: 62px; border-radius: 31px; background: var(--cta); color: var(--onCta); border: 0; display: flex; align-items: center; justify-content: center; flex: none" aria-label="Ajouter"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+<span class="pl">Navigation bar Android (M3)</span>
+<div style="display: flex; background: var(--sf2); border-radius: 16px; padding: 12px 8px">
+
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: var(--ink2)"><span style="width: 64px; height: 32px; border-radius: 16px; background: var(--accbg); color: var(--acc); display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"></path></svg></span>Accueil</div>
+
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: var(--ink2)"><span style="width: 64px; height: 32px; border-radius: 16px; background: transparent; color: var(--ink2); display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"></path></svg></span>Dépenses</div>
+
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; color: var(--ink2)"><span style="width: 64px; height: 32px; border-radius: 16px; background: transparent; color: var(--ink2); display: flex; align-items: center; justify-content: center"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"></path></svg></span>Stats</div>
+
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="pl">Bottom sheet — rayon 28, poignée 36 × 5</span>
+<div style="border-radius: 20px; background: rgba(11,15,20,.4); padding: 40px 0 0; overflow: hidden">
+<div style="background: var(--sheet); border-radius: 28px 28px 0 0; padding: 8px 18px 20px; display: flex; flex-direction: column; gap: 12px">
+<div style="width: 36px; height: 5px; border-radius: 3px; background: var(--ln); align-self: center"></div>
+<span style="font-size: 17px; font-weight: 600; text-align: center">Nouvelle dépense</span>
+<div style="text-align: center"><span class="num" style="font-size: 40px; font-weight: 500">12,40</span><span class="num" style="font-size: 22px; color: var(--ink3)"> €</span></div>
+<div style="display: flex; gap: 8px; justify-content: center"><span class="chip" style="background: var(--posbg); color: var(--pos); box-shadow: inset 0 0 0 1px var(--posln)">Restaurants</span><span class="chip">Courses</span></div>
+<button class="btn" style="background: var(--cta); color: var(--onCta)">Ajouter</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+</body>
+</html>

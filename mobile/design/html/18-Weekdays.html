@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Jours de la semaine</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+body{margin:0}
+a{color:#0A66C2}a:hover{color:#084F96}
+.board{display:flex;gap:56px;padding:40px;box-sizing:border-box;background:#E6E8EC;font-family:'Geist',system-ui,sans-serif}
+.col{display:flex;flex-direction:column;gap:12px}
+.cap{font-size:13px;font-weight:500;color:#3F4855;height:16px;line-height:16px}
+.light{--bg:#F3F7FA;--sf:#FFFFFF;--sf2:#EBEEF2;--sf3:#E0E4E9;--ln:#D4D8DD;--ln2:#E3E7EA;--ink:#0B1015;--ink2:#3E4348;--ink3:#5F6469;--acc:#0075AD;--accbg:rgba(0,117,173,.10);--pos:#257C3A;--posbg:rgba(37,124,58,.09);--posln:rgba(37,124,58,.45);--neg:#C2272D;--negbg:rgba(194,39,45,.08);--exc:#006AAA;--excbg:rgba(0,106,170,.09);--warn:#975800;--warnbg:rgba(151,88,0,.08);--warnln:rgba(151,88,0,.25);--onInk:#FFFFFF;--segon:#FFFFFF;--glass:rgba(255,255,255,.86);--scrim:rgba(11,16,21,.36);--sheet:#FFFFFF;--key:#E8EBEF;--onNeg:#FFFFFF;--negsolid:#C2272D;--bar:#5FB46E;--toast:#15171A;--onToast:#F5F7F9;--toastAcc:#47D2E8;--cta:linear-gradient(100deg,#73D885 0%,#49D9B9 55%,#3ECCE2 100%);--onCta:#0F130F;--fill:linear-gradient(90deg,#2F8A45,#5FC271);--glow:linear-gradient(135deg,rgba(37,124,58,.28),rgba(11,16,21,.06) 45%,rgba(0,117,173,.18));--shadow:0 1px 2px rgba(11,16,21,.05),0 6px 18px rgba(11,16,21,.05);--c-groceries:#57914A;--c-restaurants:#B36D2A;--c-shopping:#B4608A;--c-transport:#4284C5;--c-coffee:#A57710;--c-leisure:#009696;--c-travel:#85861F;--c-home:#0092A8;--c-sport:#00977C;--c-health:#389560;--c-gifts:#BD615B;--c-beauty:#BA5F76;--c-subs:#64748B;--c-bank:#6B7280;--c-other:#64748B;}
+.dark{--bg:#000B18;--sf:#15171A;--sf2:#212428;--sf3:#2A2D31;--ln:#2E3236;--ln2:#1F2225;--ink:#F5F7F9;--ink2:#B5B8BA;--ink3:#878A8E;--acc:#00B4F0;--accbg:rgba(0,180,240,.14);--pos:#87E496;--posbg:rgba(135,228,150,.10);--posln:rgba(135,228,150,.45);--neg:#FD736D;--negbg:rgba(253,115,109,.12);--exc:#44A8E7;--excbg:rgba(68,168,231,.14);--warn:#FAAB3F;--warnbg:rgba(250,171,63,.12);--warnln:rgba(250,171,63,.3);--onInk:#000B18;--segon:#2E3237;--glass:rgba(21,23,26,.82);--scrim:rgba(0,0,0,.6);--sheet:#15171A;--key:#24272B;--onNeg:#FBEDEC;--negsolid:#C53637;--bar:#5FB46E;--toast:#F5F7F9;--onToast:#0B1015;--toastAcc:#0075AD;--cta:linear-gradient(100deg,#87E496 0%,#52DFBF 55%,#47D2E8 100%);--onCta:#0F130F;--fill:linear-gradient(90deg,#45814F,#87E496);--glow:linear-gradient(135deg,rgba(135,228,150,.30),rgba(255,255,255,.05) 45%,rgba(71,210,232,.16));--shadow:0 12px 32px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.045);--c-groceries:#9FCC95;--c-restaurants:#E9B082;--c-shopping:#EBA6C6;--c-transport:#91C3F6;--c-coffee:#DCB87A;--c-leisure:#72D0D0;--c-travel:#C1C37E;--c-home:#72CEDE;--c-sport:#7BD1BA;--c-health:#8ECFA4;--c-gifts:#F2A7A1;--c-beauty:#F0A6B6;--c-subs:#94A3B8;--c-bank:#A3A8B0;--c-other:#94A3B8;}
+.phone{width:393px;height:852px;border-radius:54px;overflow:hidden;position:relative;background:var(--bg);color:var(--ink);font-family:'Geist',system-ui,sans-serif;box-shadow:0 0 0 1px rgba(11,15,20,.14),0 24px 60px rgba(11,15,20,.16)}
+.island{position:absolute;top:11px;left:134px;width:125px;height:36px;border-radius:20px;background:#000;z-index:9}
+.home{position:absolute;bottom:8px;left:126px;width:141px;height:5px;border-radius:3px;background:var(--ink);z-index:9}
+.num{font-family:'Geist Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.dec{color:var(--ink3)}
+.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.scr{position:absolute;inset:0;padding:54px 16px 0;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+.hdr{display:flex;align-items:center;justify-content:space-between;min-height:44px;gap:8px}
+.lt{font-size:32px;font-weight:700;letter-spacing:-0.02em;line-height:38px;margin:0}
+.ovl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+.card{background:linear-gradient(var(--sf),var(--sf)) padding-box,var(--glow) border-box;border:1px solid transparent;border-radius:20px;box-shadow:var(--shadow)}
+.gb{width:44px;height:44px;border-radius:22px;background:var(--sf2);color:var(--ink);display:flex;align-items:center;justify-content:center;border:0;padding:0;font-family:inherit}
+.mt{height:8px;border-radius:4px;background:var(--sf3);position:relative}
+.bdg{font-size:12px;font-weight:600;padding:3px 7px;border-radius:6px;white-space:nowrap}
+.up{color:var(--neg);background:var(--negbg)}
+.dn{color:var(--pos);background:var(--posbg)}
+.row{display:flex;align-items:center;gap:12px;min-height:52px;padding:0 16px}
+.sep{height:1px;background:var(--ln2);margin-left:16px}
+.tb{position:absolute;left:16px;right:16px;bottom:26px;display:flex;gap:10px;align-items:center;z-index:6}
+.tbc{flex:1;display:flex;height:62px;padding:5px;box-sizing:border-box;border-radius:31px;background:var(--glass);border:1px solid var(--ln);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 8px 24px rgba(11,15,20,.12)}
+.tbi{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border-radius:26px;font-size:10px;font-weight:500;color:var(--ink2);border:0;background:none;font-family:inherit;padding:0}
+.tbi.on{background:var(--sf3);color:var(--ink)}
+.fab{width:62px;height:62px;border-radius:31px;background:var(--cta);color:var(--onCta);display:flex;align-items:center;justify-content:center;border:0;box-shadow:0 8px 24px rgba(11,15,20,.2);flex:none}
+.fadeb{position:absolute;left:0;right:0;bottom:0;height:130px;background:linear-gradient(to top,var(--bg) 35%,rgba(0,0,0,0));z-index:5}
+.chip{height:36px;padding:0 14px;border-radius:18px;background:var(--sf2);color:var(--ink2);font-size:14px;font-weight:500;display:flex;align-items:center;gap:6px;border:0;white-space:nowrap;font-family:inherit;flex:none}
+.chip.on{background:var(--posbg);color:var(--pos);box-shadow:inset 0 0 0 1px var(--posln)}
+.seg{display:flex;padding:3px;border-radius:12px;background:var(--sf2);height:38px;box-sizing:border-box}
+.sgi{flex:1;display:flex;align-items:center;justify-content:center;border-radius:9px;font-size:14px;font-weight:500;color:var(--ink2);border:0;background:none;font-family:inherit}
+.sgi.on{background:var(--segon);color:var(--ink);box-shadow:0 1px 3px rgba(11,15,20,.12)}
+.sw{width:51px;height:31px;border-radius:16px;background:var(--sf3);position:relative;flex:none;border:0;padding:0}
+.sw span{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:14px;background:#FFFFFF;box-shadow:0 2px 4px rgba(0,0,0,.2)}
+.sw.on{background:var(--pos)}
+.sw.on span{left:22px}
+.cm{width:4px;height:30px;border-radius:2px;flex:none}
+.back{height:44px;display:flex;align-items:center;gap:2px;background:none;border:0;color:var(--acc);font-family:inherit;font-size:17px;padding:0 8px 0 0;margin-left:-8px}
+.gl{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);padding:8px 16px 0}
+.val{font-size:15px;color:var(--ink3);display:flex;align-items:center;gap:2px}
+.fld{height:48px;border-radius:12px;border:1px solid var(--ln);background:var(--sf);padding:0 14px;font-family:inherit;font-size:16px;color:var(--ink);box-sizing:border-box;width:100%;outline:none}
+.tile{padding:14px;display:flex;flex-direction:column;gap:6px}
+.btn{height:54px;border-radius:27px;border:0;font-family:'Geist',sans-serif;font-size:17px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 22px}
+
+</style>
+</head>
+<body>
+
+
+<div class="board" style="width: 922px; height: 960px">
+
+<div class="col">
+<div class="cap">Clair — iPhone 393 × 852</div>
+<div class="phone light">
+<div class="island"></div>
+<div class="scr">
+<div class="hdr"><button class="back"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Statistiques</button><span class="num" style="font-size: 15px; color: var(--ink2)">2026</span></div>
+<h1 class="lt" style="font-size: 28px; line-height: 34px">Jours de la semaine</h1>
+<span style="font-size: 14px; color: var(--ink3); margin-top: -8px">Moyenne par jour sur l’année · <span class="num">2,0</span> opérations/jour</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<span class="chip" style="height: 32px; font-size: 13px"><span style="width: 7px; height: 7px; border-radius: 4px; background: var(--neg)"></span>Pic samedi · <span class="num">143 €</span></span>
+<span class="chip" style="height: 32px; font-size: 13px"><span style="width: 7px; height: 7px; border-radius: 4px; background: var(--pos)"></span>Creux lundi · <span class="num">15 €</span></span>
+<span class="chip" style="height: 32px; font-size: 13px">Week-end <span class="num">+199 %</span></span>
+</div>
+<div class="card" style="overflow: hidden">
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Lundi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--pos)">15,01 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 11%; background: var(--pos)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">1,1</span> op./jour</span><span>2025 <span class="num">27,72 €</span> · <span style="color: var(--pos)">↓ 46 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Mardi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--pos)">33,79 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 24%; background: var(--pos)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">1,5</span> op./jour</span><span>2025 <span class="num">30,10 €</span> · <span style="color: var(--neg)">↑ 12 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Mercredi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--pos)">28,40 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 20%; background: var(--pos)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">1,4</span> op./jour</span><span>2025 <span class="num">31,05 €</span> · <span style="color: var(--pos)">↓ 9 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Jeudi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--pos)">41,22 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 29%; background: var(--pos)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">1,8</span> op./jour</span><span>2025 <span class="num">39,90 €</span> · <span style="color: var(--neg)">↑ 3 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Vendredi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--warn)">71,11 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 50%; background: var(--warn)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">2,1</span> op./jour</span><span>2025 <span class="num">87,00 €</span> · <span style="color: var(--pos)">↓ 18 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Samedi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--neg)">142,57 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 100%; background: var(--neg)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">4,7</span> op./jour</span><span>2025 <span class="num">166,33 €</span> · <span style="color: var(--pos)">↓ 14 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Dimanche</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--warn)">65,81 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 46%; background: var(--warn)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">2,3</span> op./jour</span><span>2025 <span class="num">59,16 €</span> · <span style="color: var(--neg)">↑ 11 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--ink2)">
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: var(--pos)"></span>≤ 60 €</span>
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: var(--warn)"></span>60–120 €</span>
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: var(--neg)"></span>&gt; 120 €</span>
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 12px; border-top: 1.5px dashed var(--ink3)"></span>moyenne 55 €</span>
+</div>
+
+</div>
+<div class="fadeb"></div>
+<nav class="tb" aria-label="Navigation principale">
+<div class="tbc">
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"></path></svg>Accueil</button>
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"></path></svg>Dépenses</button>
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.4 5.2 5.6.6-4.2 3.8 1.2 5.5L12 15.8l-5 2.8 1.2-5.5L4 9.3l5.6-.6z"></path></svg>Exceptionnels</button>
+<button class="tbi on" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"></path></svg>Stats</button>
+</div>
+<button class="fab" aria-label="Ajouter une dépense"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</nav>
+<div class="home"></div>
+</div>
+</div>
+
+<div class="col">
+<div class="cap">Sombre — iPhone 393 × 852</div>
+<div class="phone dark">
+<div class="island"></div>
+<div class="scr">
+<div class="hdr"><button class="back"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>Statistiques</button><span class="num" style="font-size: 15px; color: var(--ink2)">2026</span></div>
+<h1 class="lt" style="font-size: 28px; line-height: 34px">Jours de la semaine</h1>
+<span style="font-size: 14px; color: var(--ink3); margin-top: -8px">Moyenne par jour sur l’année · <span class="num">2,0</span> opérations/jour</span>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+<span class="chip" style="height: 32px; font-size: 13px"><span style="width: 7px; height: 7px; border-radius: 4px; background: var(--neg)"></span>Pic samedi · <span class="num">143 €</span></span>
+<span class="chip" style="height: 32px; font-size: 13px"><span style="width: 7px; height: 7px; border-radius: 4px; background: var(--pos)"></span>Creux lundi · <span class="num">15 €</span></span>
+<span class="chip" style="height: 32px; font-size: 13px">Week-end <span class="num">+199 %</span></span>
+</div>
+<div class="card" style="overflow: hidden">
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Lundi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--pos)">15,01 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 11%; background: var(--pos)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">1,1</span> op./jour</span><span>2025 <span class="num">27,72 €</span> · <span style="color: var(--pos)">↓ 46 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Mardi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--pos)">33,79 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 24%; background: var(--pos)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">1,5</span> op./jour</span><span>2025 <span class="num">30,10 €</span> · <span style="color: var(--neg)">↑ 12 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Mercredi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--pos)">28,40 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 20%; background: var(--pos)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">1,4</span> op./jour</span><span>2025 <span class="num">31,05 €</span> · <span style="color: var(--pos)">↓ 9 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Jeudi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--pos)">41,22 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 29%; background: var(--pos)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">1,8</span> op./jour</span><span>2025 <span class="num">39,90 €</span> · <span style="color: var(--neg)">↑ 3 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Vendredi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--warn)">71,11 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 50%; background: var(--warn)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">2,1</span> op./jour</span><span>2025 <span class="num">87,00 €</span> · <span style="color: var(--pos)">↓ 18 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Samedi</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--neg)">142,57 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 100%; background: var(--neg)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">4,7</span> op./jour</span><span>2025 <span class="num">166,33 €</span> · <span style="color: var(--pos)">↓ 14 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+<div style="display: flex; flex-direction: column; gap: 8px; padding: 12px 16px">
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 16px; font-weight: 500; flex: 1">Dimanche</span><span class="num" style="font-size: 16px; font-weight: 500; color: var(--warn)">65,81 €</span></div>
+<div style="position: relative; height: 10px; border-radius: 5px; background: var(--sf3)"><div style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 5px; width: 46%; background: var(--warn)"></div><div style="position: absolute; left: 39%; top: -3px; bottom: -3px; width: 0; border-left: 1.5px dashed var(--ink3)"></div></div>
+<div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink3)"><span><span class="num">2,3</span> op./jour</span><span>2025 <span class="num">59,16 €</span> · <span style="color: var(--neg)">↑ 11 %</span></span></div>
+</div>
+<div class="sep"></div>
+
+</div>
+<div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--ink2)">
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: var(--pos)"></span>≤ 60 €</span>
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: var(--warn)"></span>60–120 €</span>
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 10px; height: 10px; border-radius: 3px; background: var(--neg)"></span>&gt; 120 €</span>
+<span style="display: flex; align-items: center; gap: 5px"><span style="width: 12px; border-top: 1.5px dashed var(--ink3)"></span>moyenne 55 €</span>
+</div>
+
+</div>
+<div class="fadeb"></div>
+<nav class="tb" aria-label="Navigation principale">
+<div class="tbc">
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10.5L12 4l8 6.5V19a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"></path></svg>Accueil</button>
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"></path></svg>Dépenses</button>
+<button class="tbi"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.4 5.2 5.6.6-4.2 3.8 1.2 5.5L12 15.8l-5 2.8 1.2-5.5L4 9.3l5.6-.6z"></path></svg>Exceptionnels</button>
+<button class="tbi on" aria-current="page"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-8M12 20V5M19 20v-5"></path></svg>Stats</button>
+</div>
+<button class="fab" aria-label="Ajouter une dépense"><svg class="i" viewBox="0 0 24 24" style="width: 26px; height: 26px; stroke-width: 2" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</nav>
+<div class="home"></div>
+</div>
+</div>
+
+</div>
+
+</body>
+</html>

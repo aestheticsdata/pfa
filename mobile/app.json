@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "PFA",
+    "slug": "pfa-mobile",
+    "scheme": "pfa",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#000B18",
+    "ios": {
+      "bundleIdentifier": "com.aestheticsdata.pfa",
+      "supportsTablet": false
+    },
+    "android": {
+      "package": "com.aestheticsdata.pfa",
+      "adaptiveIcon": {
+        "backgroundColor": "#000B18",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 120,
+          "backgroundColor": "#F3F7FA",
+          "dark": { "backgroundColor": "#000B18" }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true,
+      "tsconfigPaths": true
+    }
+  }
+}

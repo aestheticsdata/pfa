@@ -5,6 +5,12 @@
 # installed, built and deployed exactly as before — ks-b's layout does not change.
 packages:
   - packages/*
+  - mobile
+
+# Packages allowed to run install scripts. Watchman covers file watching, so @parcel/watcher's
+# native build is skipped, as in nest-api.
+allowBuilds:
+  '@parcel/watcher': false
 
 # House rule: TypeScript stays on the latest 5.x.
 overrides:
