@@ -1,16 +1,16 @@
-import { CategoryStatsService } from "@stats/services/category-stats.service";
+import { CategoryStatsQueries } from "@contexts/analytics/infrastructure/queries/category-stats.queries";
 
 /**
- * Unit tests for CategoryStatsService.getCategoryStats — the all-time per-category usage
+ * Unit tests for CategoryStatsQueries.getCategoryStats — the all-time per-category usage
  * aggregate backing the Categories page (COS-20). Prisma is mocked, so these
  * assert the query shape and the JS transformation without touching the DB.
  */
-describe("CategoryStatsService.getCategoryStats", () => {
+describe("CategoryStatsQueries.getCategoryStats", () => {
   const makeService = (groupByResult: unknown[]) => {
     const groupBy = jest.fn().mockResolvedValue(groupByResult);
     // Only spendings.groupBy is exercised; cast keeps the mock minimal.
     const prisma = { spendings: { groupBy } } as unknown as never;
-    return { service: new CategoryStatsService(prisma), groupBy };
+    return { service: new CategoryStatsQueries(prisma), groupBy };
   };
 
   it("queries all-history per-category aggregates scoped to the user", async () => {

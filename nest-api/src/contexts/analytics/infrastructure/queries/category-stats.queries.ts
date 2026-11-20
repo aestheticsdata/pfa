@@ -1,11 +1,14 @@
+import { dateWindow } from "@contexts/analytics/domain/date-window";
+import type {
+  CategoryStat,
+  CategoryStatsResponse,
+} from "@contexts/analytics/interface/dto/category-stats-response.interface";
+import { PrismaService } from "@db/prisma.service";
 import { Injectable } from "@nestjs/common";
-import type { CategoryStat, CategoryStatsResponse } from "@stats/dto/category-stats-response.interface";
-import { dateWindow } from "@stats/helpers/date-window.helper";
-import { PrismaService } from "../../prisma/prisma.service";
 
 /** Stats behind the Catégories and Exceptionnels pages. */
 @Injectable()
-export class CategoryStatsService {
+export class CategoryStatsQueries {
   constructor(private readonly prisma: PrismaService) {}
 
   /**

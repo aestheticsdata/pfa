@@ -2,12 +2,16 @@ import type {
   SpendingListItem,
   SpendingSearchPage,
 } from "@contexts/spending/infrastructure/queries/interfaces/spendingItemTypes";
+import {
+  escapeLikeQuery,
+  MIN_SEARCH_LENGTH,
+  spendingSearchTextWhere,
+} from "@contexts/spending/infrastructure/queries/search-where";
 import { SPENDING_ROW_SELECT, toSpendingItem } from "@contexts/spending/infrastructure/queries/spending-row";
 import type { SpendingLabelSuggestion } from "@contexts/spending/interface/dto/spending-label-suggestion.interface";
 import type { SpendingsSearchQueryDto } from "@contexts/spending/interface/dto/spendings-search-query.dto";
 import { PrismaService } from "@db/prisma.service";
 import { Injectable } from "@nestjs/common";
-import { escapeLikeQuery, MIN_SEARCH_LENGTH, spendingSearchTextWhere } from "@spendings/search-where.helper";
 
 // Whole-history search (COS-114) streams results a page at a time. The minimum
 // query length and the text-match clause live in search-where.helper.ts, shared

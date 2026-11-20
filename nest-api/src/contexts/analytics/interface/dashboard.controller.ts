@@ -1,6 +1,6 @@
+import { DashboardQueries } from "@contexts/analytics/infrastructure/queries/dashboard.queries";
+import { MonthlyIncomeQueryDto } from "@contexts/analytics/interface/dto/monthly-income-query.dto";
 import { DashboardQueryDto } from "@contexts/budget-planning/interface/dto/dashboard-query.dto";
-import { DashboardService } from "@dashboard/dashboard.service";
-import { MonthlyIncomeQueryDto } from "@dashboard/dto/monthly-income-query.dto";
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
 import { GetUserId } from "@spendings/decorators/get-user.decorator";
 import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
@@ -9,7 +9,7 @@ import { CsrfGuard } from "@users/guards/csrf.guard";
 @Controller("dashboard")
 @UseGuards(SessionAuthGuard, CsrfGuard)
 export class DashboardController {
-  constructor(private readonly dashboardService: DashboardService) {}
+  constructor(private readonly dashboardService: DashboardQueries) {}
 
   // Day-by-day totals of the historical reference period (COS-27), used to draw
   // the in-progress month's projected sparkline tail. `start` = viewed month's

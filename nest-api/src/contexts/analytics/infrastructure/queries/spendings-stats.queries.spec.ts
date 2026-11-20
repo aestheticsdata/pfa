@@ -1,7 +1,7 @@
-import { SpendingsStatsService } from "@stats/services/spendings-stats.service";
+import { SpendingsStatsQueries } from "@contexts/analytics/infrastructure/queries/spendings-stats.queries";
 
 /**
- * Unit tests for SpendingsStatsService.getCategoryTrends — the per-category two-window
+ * Unit tests for SpendingsStatsQueries.getCategoryTrends — the per-category two-window
  * aggregate backing the dashboard's monthly trend column + "Catégorie en hausse"
  * insight (COS-41) and the Dépenses weekly breakdown + avg/day delta (COS-35).
  * Prisma is mocked, so these assert the two query shapes, the category-name
@@ -9,14 +9,14 @@ import { SpendingsStatsService } from "@stats/services/spendings-stats.service";
  * the comparison-window `previousTotal` — without touching the DB. The delta %
  * lives on the front.
  */
-describe("SpendingsStatsService.getCategoryTrends", () => {
+describe("SpendingsStatsQueries.getCategoryTrends", () => {
   // groupBy is called twice (current window then previous); findMany resolves
   // names/colours for the current window's categories.
   const makeService = (current: unknown[], previous: unknown[], categories: unknown[] = []) => {
     const groupBy = jest.fn().mockResolvedValueOnce(current).mockResolvedValueOnce(previous);
     const findMany = jest.fn().mockResolvedValue(categories);
     const prisma = { spendings: { groupBy }, categories: { findMany } } as unknown as never;
-    return { service: new SpendingsStatsService(prisma), groupBy, findMany };
+    return { service: new SpendingsStatsQueries(prisma), groupBy, findMany };
   };
 
   const args = [
@@ -143,18 +143,18 @@ describe("SpendingsStatsService.getCategoryTrends", () => {
 });
 
 /**
- * Unit tests for SpendingsStatsService.getBusiestWeek — the calendar week-range of a month
+ * Unit tests for SpendingsStatsQueries.getBusiestWeek — the calendar week-range of a month
  * with the most one-off spendings, backing the dashboard's 4th ribbon insight
  * (COS-139). "Week" = the month's calendar-aligned Sun→Sat ranges truncated at
  * the month edges (the same slices the app shows everywhere), NOT a rolling
  * window. Prisma is mocked; these assert the query shape (per-day counts over a
  * half-open UTC month range) and the JS bucketing/max/tie-break.
  */
-describe("SpendingsStatsService.getBusiestWeek", () => {
+describe("SpendingsStatsQueries.getBusiestWeek", () => {
   const makeService = (groupByResult: { date: Date; _count: number }[]) => {
     const groupBy = jest.fn().mockResolvedValue(groupByResult);
     const prisma = { spendings: { groupBy } } as unknown as never;
-    return { service: new SpendingsStatsService(prisma), groupBy };
+    return { service: new SpendingsStatsQueries(prisma), groupBy };
   };
 
   it("counts spendings per day over a half-open UTC month range, scoped to the user", async () => {
@@ -234,18 +234,18 @@ describe("SpendingsStatsService.getBusiestWeek", () => {
 });
 
 /**
- * Unit tests for SpendingsStatsService.getSpendingPace — the totals of the three months
+ * Unit tests for SpendingsStatsQueries.getSpendingPace — the totals of the three months
  * before a reference month, backing the dashboard's "Sur le rythme" insight
  * (COS-40). Prisma is mocked, so these assert the (half-open, UTC) query shape
  * and the newest→oldest transformation without a DB.
  */
-describe("SpendingsStatsService.getSpendingPace", () => {
+describe("SpendingsStatsQueries.getSpendingPace", () => {
   const makeService = (totals: number[]) => {
     // One aggregate call per month back (M-1, M-2, M-3), resolved in call order.
     const aggregate = jest.fn();
     for (const total of totals) aggregate.mockResolvedValueOnce({ _sum: { amount: total } });
     const prisma = { spendings: { aggregate } } as unknown as never;
-    return { service: new SpendingsStatsService(prisma), aggregate };
+    return { service: new SpendingsStatsQueries(prisma), aggregate };
   };
 
   it("sums each of the three preceding months over a half-open UTC range, scoped to the user", async () => {
@@ -307,13 +307,13 @@ describe("SpendingsStatsService.getSpendingPace", () => {
 });
 
 /**
- * Unit tests for SpendingsStatsService.getMonthlyStats — the two halves of a month's
+ * Unit tests for SpendingsStatsQueries.getMonthlyStats — the two halves of a month's
  * total spend (one-off spendings + that month's fixed expenses), backing the
  * dashboard's "spent this month" and remaining-budget figures. Prisma is mocked;
  * these assert the query shape and the flat `{ spendingsSum, recurringsSum }`
  * contract introduced by COS-179.
  */
-describe("SpendingsStatsService.getMonthlyStats", () => {
+describe("SpendingsStatsQueries.getMonthlyStats", () => {
   const makeService = (spendingsTotal: unknown, recurringsTotal: unknown) => {
     const spendingsAggregate = jest.fn().mockResolvedValue({ _sum: { amount: spendingsTotal } });
     const recurringsAggregate = jest.fn().mockResolvedValue({ _sum: { amount: recurringsTotal } });
@@ -321,7 +321,7 @@ describe("SpendingsStatsService.getMonthlyStats", () => {
       spendings: { aggregate: spendingsAggregate },
       recurrings: { aggregate: recurringsAggregate },
     } as unknown as never;
-    return { service: new SpendingsStatsService(prisma), spendingsAggregate, recurringsAggregate };
+    return { service: new SpendingsStatsQueries(prisma), spendingsAggregate, recurringsAggregate };
   };
 
   it("sums the month's spendings over an inclusive range and its recurrings on their exact bounds", async () => {

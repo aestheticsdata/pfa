@@ -1,18 +1,18 @@
-import { DashboardService } from "./dashboard.service";
+import { DashboardQueries } from "@contexts/analytics/infrastructure/queries/dashboard.queries";
 
 /**
- * Unit tests for DashboardService.getDailyProjection — the reference-period
+ * Unit tests for DashboardQueries.getDailyProjection — the reference-period
  * resolver backing the Dashboard sparkline projection (COS-27). It walks the
  * GLOBAL projection chain (same month N-1 → same month N-2 → previous month M-1
  * → none) and returns the chosen month's day-by-day totals, plus the same month
  * sliced per category (PFA-181). Prisma is mocked, so these assert the query
  * window per candidate and the day-of-month aggregation without touching the DB.
  */
-describe("DashboardService.getDailyProjection", () => {
+describe("DashboardQueries.getDailyProjection", () => {
   const makeService = (findMany: jest.Mock, categoriesFindMany: jest.Mock = jest.fn().mockResolvedValue([])) => {
     // getDailyProjection reads spendings, then the categories naming its slices.
     const prisma = { spendings: { findMany }, categories: { findMany: categoriesFindMany } } as unknown as never;
-    return new DashboardService(prisma);
+    return new DashboardQueries(prisma);
   };
 
   const row = (date: string, amount: number, categoryID: string | null = null) => ({
@@ -191,14 +191,14 @@ describe("DashboardService.getDailyProjection", () => {
 });
 
 /**
- * Unit tests for DashboardService.getMonthlyIncome — the per-month income series
+ * Unit tests for DashboardQueries.getMonthlyIncome — the per-month income series
  * backing the monthly chart's stepped budget line (COS-50). Prisma is mocked, so
  * these assert the query window and the month-of-year bucketing.
  */
-describe("DashboardService.getMonthlyIncome", () => {
+describe("DashboardQueries.getMonthlyIncome", () => {
   const makeService = (findMany: jest.Mock) => {
     const prisma = { dashboards: { findMany } } as unknown as never;
-    return new DashboardService(prisma);
+    return new DashboardQueries(prisma);
   };
 
   const row = (dateFrom: string, initialAmount: number | string) => ({ dateFrom: new Date(dateFrom), initialAmount });

@@ -1,15 +1,15 @@
-import { YearlyStatsService } from "@stats/services/yearly-stats.service";
+import { YearlyStatsQueries } from "@contexts/analytics/infrastructure/queries/yearly-stats.queries";
 
 /**
- * Unit tests for YearlyStatsService.getDailyStats — the per-day spending totals for a
+ * Unit tests for YearlyStatsQueries.getDailyStats — the per-day spending totals for a
  * year backing the daily heatmap (COS-45) and the day-of-week averages (COS-48).
  * Prisma is mocked; these assert the query range/scoping and the JS bucketing.
  */
-describe("YearlyStatsService.getDailyStats", () => {
+describe("YearlyStatsQueries.getDailyStats", () => {
   const makeService = (findManyResult: { date: Date; amount: unknown }[]) => {
     const findMany = jest.fn().mockResolvedValue(findManyResult);
     const prisma = { spendings: { findMany } } as unknown as never;
-    return { service: new YearlyStatsService(prisma), findMany };
+    return { service: new YearlyStatsQueries(prisma), findMany };
   };
 
   it("returns no days and skips the query for a non-numeric year", async () => {
@@ -78,17 +78,17 @@ describe("YearlyStatsService.getDailyStats", () => {
 });
 
 /**
- * Unit tests for YearlyStatsService.getBiggestRegularExpense — the single biggest
+ * Unit tests for YearlyStatsQueries.getBiggestRegularExpense — the single biggest
  * one-off (non-exceptional) expense of a year, backing the "courante" row of the
  * Statistiques "Plus grosse dépense" KPI card (COS-46). Prisma is mocked; these
  * assert the query shape (max-amount row in the Spendings table only) and the
  * mapping to the response envelope.
  */
-describe("YearlyStatsService.getBiggestRegularExpense", () => {
+describe("YearlyStatsQueries.getBiggestRegularExpense", () => {
   const makeService = (findFirstResult: unknown) => {
     const findFirst = jest.fn().mockResolvedValue(findFirstResult);
     const prisma = { spendings: { findFirst } } as unknown as never;
-    return { service: new YearlyStatsService(prisma), findFirst };
+    return { service: new YearlyStatsQueries(prisma), findFirst };
   };
 
   it("returns a null expense and skips the query for a non-numeric year", async () => {
@@ -171,13 +171,13 @@ describe("YearlyStatsService.getBiggestRegularExpense", () => {
 });
 
 /**
- * Unit tests for YearlyStatsService.getWeekdayCategories — the dominant spending
+ * Unit tests for YearlyStatsQueries.getWeekdayCategories — the dominant spending
  * category per weekday for a year, backing the day-of-week widget's hover tooltip
  * (COS-127). Prisma is mocked; these assert the query shape (categorized
  * Spendings over a half-open UTC year range) and the JS weekday×category
  * bucketing / winner selection.
  */
-describe("YearlyStatsService.getWeekdayCategories", () => {
+describe("YearlyStatsQueries.getWeekdayCategories", () => {
   const emptyWeekdays = () => Array.from({ length: 7 }, () => ({ name: null, color: null }));
 
   const makeService = (spendingRows: unknown[], categories: unknown[] = []) => {
@@ -187,7 +187,7 @@ describe("YearlyStatsService.getWeekdayCategories", () => {
       spendings: { findMany: spendingsFindMany },
       categories: { findMany: categoriesFindMany },
     } as unknown as never;
-    return { service: new YearlyStatsService(prisma), spendingsFindMany, categoriesFindMany };
+    return { service: new YearlyStatsQueries(prisma), spendingsFindMany, categoriesFindMany };
   };
 
   it("returns seven null weekdays and skips the query for a non-numeric year", async () => {
@@ -266,16 +266,16 @@ describe("YearlyStatsService.getWeekdayCategories", () => {
 });
 
 /**
- * Unit tests for YearlyStatsService.getSearchTimeline — the time distribution of the
+ * Unit tests for YearlyStatsQueries.getSearchTimeline — the time distribution of the
  * spendings matching a search term (COS-160). Prisma is mocked; these assert
  * the shared search where clause, the day/week bucketisation and the summary.
  */
-describe("YearlyStatsService.getSearchTimeline", () => {
+describe("YearlyStatsQueries.getSearchTimeline", () => {
   const makeService = (rows: { date: Date; amount: unknown }[]) => {
     const findMany = jest.fn().mockResolvedValue(rows);
     // Only spendings.findMany is exercised; cast keeps the mock minimal.
     const prisma = { spendings: { findMany } } as unknown as never;
-    return { service: new YearlyStatsService(prisma), findMany };
+    return { service: new YearlyStatsQueries(prisma), findMany };
   };
 
   const emptyResponse = { buckets: [], summary: { total: 0, count: 0, firstDate: null, lastDate: null } };

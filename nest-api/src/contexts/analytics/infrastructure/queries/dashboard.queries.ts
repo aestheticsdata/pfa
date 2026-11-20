@@ -1,39 +1,12 @@
-import type { MonthlyIncomeResponse } from "@dashboard/dto/monthly-income-response.interface";
+import type { CategoryDailyTotals, DailyProjection } from "@contexts/analytics/domain/interfaces/analyticsTypes";
+import { dailyBuckets, NO_PROJECTION, projectionCandidates } from "@contexts/analytics/domain/projection";
+import type { MonthlyIncomeResponse } from "@contexts/analytics/interface/dto/monthly-income-response.interface";
+import { PrismaService } from "@db/prisma.service";
 import { Injectable } from "@nestjs/common";
-import { PrismaService } from "../prisma/prisma.service";
-
-// Which historical period the sparkline projection is based on (COS-27). Follows
-// the GLOBAL projection chain; "none" is the very-first-month case (no reference
-// exists yet — the front shows no projection tail, never an average fallback).
-export type ProjectionSource = "sameMonthLastYear" | "sameMonthTwoYearsAgo" | "previousMonth" | "none";
-
-/** One category's slice of the reference month, day by day (PFA-181). */
-export interface CategoryDailyTotals {
-  /** Category name; null = uncategorized. */
-  category: string | null;
-  /** Category colour; null = uncategorized/fallback. */
-  categoryColor: string | null;
-  /** The category's day-by-day totals in the reference month; index i = day (i+1). */
-  dailyTotals: number[];
-}
-
-export interface DailyProjection {
-  source: ProjectionSource;
-  /** ISO date (YYYY-MM-DD) of the reference month's first day, or null when source is "none". */
-  referenceMonth: string | null;
-  /** Day-by-day spending totals of the reference month; index i = day (i+1). */
-  dailyTotals: number[];
-  /**
-   * The same reference month, sliced per category (PFA-181). The chain above is
-   * resolved ONCE, globally; this only cuts its result up, so every category is
-   * projected from the same month and the slices always add back up to
-   * `dailyTotals`. Empty whenever `dailyTotals` is.
-   */
-  byCategory: CategoryDailyTotals[];
-}
+import { CalendarMonth } from "@shared-kernel/calendar-month";
 
 @Injectable()
-export class DashboardService {
+export class DashboardQueries {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
@@ -51,59 +24,28 @@ export class DashboardService {
    */
   async getDailyProjection(start: string, userID: string): Promise<DailyProjection> {
     const base = new Date(start);
-    if (Number.isNaN(base.getTime())) {
-      return { source: "none", referenceMonth: null, dailyTotals: [], byCategory: [] };
-    }
+    if (Number.isNaN(base.getTime())) return NO_PROJECTION;
 
-    const year = base.getUTCFullYear();
-    const month = base.getUTCMonth();
-
-    const candidates: { source: ProjectionSource; year: number; month: number }[] = [
-      { source: "sameMonthLastYear", year: year - 1, month },
-      { source: "sameMonthTwoYearsAgo", year: year - 2, month },
-      // Previous calendar month, wrapping January → previous December.
-      { source: "previousMonth", year: month === 0 ? year - 1 : year, month: (month + 11) % 12 },
-    ];
-
-    for (const candidate of candidates) {
-      const monthStart = new Date(Date.UTC(candidate.year, candidate.month, 1));
-      const nextMonthStart = new Date(Date.UTC(candidate.year, candidate.month + 1, 1));
-
+    for (const candidate of projectionCandidates(CalendarMonth.containing(base))) {
       const rows = await this.prisma.spendings.findMany({
-        where: { userID, date: { gte: monthStart, lt: nextMonthStart } },
+        where: { userID, date: { gte: candidate.month.start(), lt: candidate.month.end() } },
         select: { date: true, amount: true, categoryID: true },
       });
-
       if (rows.length === 0) continue;
 
-      // Day 0 of the next month == last day of this month → number of days.
-      const daysInMonth = new Date(Date.UTC(candidate.year, candidate.month + 1, 0)).getUTCDate();
-      const dailyTotals = new Array<number>(daysInMonth).fill(0);
-      // Same pass, bucketed twice: the month as a whole and each category's
-      // share of it, so the two can never tell different stories (PFA-181).
-      const byCategoryID = new Map<string | null, number[]>();
-      for (const rowItem of rows) {
-        const day = rowItem.date.getUTCDate();
-        if (day < 1 || day > daysInMonth) continue;
-        const amount = Number(rowItem.amount);
-        dailyTotals[day - 1] += amount;
-        let categoryDaily = byCategoryID.get(rowItem.categoryID);
-        if (!categoryDaily) {
-          categoryDaily = new Array<number>(daysInMonth).fill(0);
-          byCategoryID.set(rowItem.categoryID, categoryDaily);
-        }
-        categoryDaily[day - 1] += amount;
-      }
-
+      const buckets = dailyBuckets(
+        rows.map((row) => ({ date: row.date, amount: Number(row.amount), categoryId: row.categoryID })),
+        candidate.month,
+      );
       return {
         source: candidate.source,
-        referenceMonth: monthStart.toISOString().slice(0, 10),
-        dailyTotals,
-        byCategory: await this.namedCategoryTotals(byCategoryID, userID, daysInMonth),
+        referenceMonth: candidate.month.firstDayIso(),
+        dailyTotals: buckets.dailyTotals,
+        byCategory: await this.namedCategoryTotals(buckets.byCategoryId, userID, candidate.month.daysIn()),
       };
     }
 
-    return { source: "none", referenceMonth: null, dailyTotals: [], byCategory: [] };
+    return NO_PROJECTION;
   }
 
   /**
