@@ -31,7 +31,21 @@
           "image": "./assets/splash-icon.png",
           "imageWidth": 120,
           "backgroundColor": "#F3F7FA",
-          "dark": { "backgroundColor": "#000B18" }
+          "dark": {
+            "backgroundColor": "#000B18"
+          }
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "faceIDPermission": "PFA utilise Face ID pour déverrouiller l’app et protéger les montants."
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "PFA utilise Face ID pour déverrouiller l’app et protéger les montants."
         }
       ]
     ],

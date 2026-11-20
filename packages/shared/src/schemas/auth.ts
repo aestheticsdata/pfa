@@ -28,3 +28,14 @@ export type AuthResponse = z.infer<typeof AuthResponseSchema>;
 
 /** GET /users/csrf — the session's current CSRF token, fetched again after a 403 on a write. */
 export const CsrfTokenSchema = z.object({ csrfToken: z.string() });
+
+/** POST /users/token (PFA-286): the mobile sign-in. A Bearer token instead of a cookie, no CSRF token. */
+export const TokenSignInResponseSchema = z.object({
+  user: AuthUserSchema,
+  token: z.string().min(1),
+  expiresIn: z.number().int().positive(),
+});
+
+export type TokenSignInResponse = z.infer<typeof TokenSignInResponseSchema>;
+
+export const RevokeTokenResponseSchema = z.object({ ok: z.boolean() });

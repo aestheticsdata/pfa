@@ -4,20 +4,53 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "types": ["jest"],
+    "types": [
+      "jest"
+    ],
     "paths": {
-      "@app/*": ["./src/app/*"],
-      "@charts/*": ["./src/charts/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@lib/*": ["./src/lib/*"],
-      "@navigation/*": ["./src/navigation/*"],
-      "@screens/*": ["./src/screens/*"],
-      "@stores/*": ["./src/stores/*"],
-      "@text/*": ["./src/text/*"],
-      "@theme/*": ["./src/theme/*"],
-      "@ui/*": ["./src/ui/*"]
+      "@app/*": [
+        "./src/app/*"
+      ],
+      "@auth/*": [
+        "./src/auth/*"
+      ],
+      "@charts/*": [
+        "./src/charts/*"
+      ],
+      "@hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@lib/*": [
+        "./src/lib/*"
+      ],
+      "@navigation/*": [
+        "./src/navigation/*"
+      ],
+      "@screens/*": [
+        "./src/screens/*"
+      ],
+      "@stores/*": [
+        "./src/stores/*"
+      ],
+      "@text/*": [
+        "./src/text/*"
+      ],
+      "@theme/*": [
+        "./src/theme/*"
+      ],
+      "@ui/*": [
+        "./src/ui/*"
+      ]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
-  "exclude": ["node_modules", "design"]
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "design"
+  ]
 }

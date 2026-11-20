@@ -24,3 +24,9 @@ export interface RecurringCreateInput {
   payload: RecurringMutationPayload;
   month: MonthBounds;
 }
+
+/** Email + password, as both sign-ins take them. */
+export interface Credentials {
+  email: string;
+  password: string;
+}

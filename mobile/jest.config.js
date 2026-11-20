@@ -1,5 +1,5 @@
 /** jest-expo, with the tsconfig aliases mirrored and pnpm's `.pnpm` store let through Babel. */
-const ALIASES = ["app", "charts", "hooks", "lib", "navigation", "screens", "stores", "text", "theme", "ui"];
+const ALIASES = ["app", "auth", "charts", "hooks", "lib", "navigation", "screens", "stores", "text", "theme", "ui"];
 
 module.exports = {
   preset: "jest-expo",

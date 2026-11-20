@@ -1,0 +1,30 @@
+/** Sign-in, lock screen and sign-out. Impersonal copy, as on the web. */
+export const authText = {
+  appName: "PFA",
+  tagline: "Finances personnelles",
+  signIn: {
+    title: "Connexion",
+    email: "Email",
+    password: "Mot de passe",
+    submit: "Se connecter",
+    submitting: "Connexion…",
+    emailMissing: "Saisir l’email du compte",
+    passwordMissing: "Saisir le mot de passe",
+    wrongCredentials: "Email ou mot de passe incorrect",
+    tooManyAttempts: "Trop de tentatives. Réessayer dans quelques minutes.",
+    unreachable: "Serveur injoignable. Vérifier la connexion puis réessayer.",
+    unexpected: "La connexion a échoué. Réessayer dans un instant.",
+  },
+  lock: {
+    remaining: (month: string) => `Reste à dépenser · ${month}`,
+    maskedHint: "Montants masqués tant que l’app est verrouillée",
+    unlockFace: "Déverrouiller avec Face ID",
+    unlock: "Déverrouiller",
+    enterCode: "Saisir le code",
+    prompt: "Déverrouiller PFA",
+    cancel: "Annuler",
+    autoLock: (delay: string) => `Verrouillage auto après ${delay} en arrière-plan`,
+    delays: { immediate: "fermeture", oneMinute: "1 min", fiveMinutes: "5 min" },
+  },
+  signOut: "Se déconnecter",
+} as const;
