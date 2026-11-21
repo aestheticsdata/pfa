@@ -17,8 +17,8 @@ export class PrismaExceptionalRepository extends ExceptionalRepository {
     super();
   }
 
-  list(ownerId: string, year: ClosedRange | null): Promise<ExceptionalItem[]> {
-    return this.prisma.exceptionals.findMany({
+  async list(ownerId: string, year: ClosedRange | null): Promise<ExceptionalItem[]> {
+    const rows = await this.prisma.exceptionals.findMany({
       where: { userID: ownerId, ...(year ? { date: year } : {}) },
       orderBy: { date: "desc" },
       // Listed, never the whole row: a new column stays out of the response until asked for (PFA-257).
@@ -35,6 +35,8 @@ export class PrismaExceptionalRepository extends ExceptionalRepository {
         invoicefile: true,
       },
     });
+    // The Decimal as the text it serialises to: the response is unchanged.
+    return rows.map((row) => ({ ...row, amount: row.amount.toString() }));
   }
 
   async dates(ownerId: string): Promise<Date[]> {

@@ -37,7 +37,12 @@ export class PrismaRecurringRepository extends RecurringRepository {
       },
     });
     // Flattened to name/colour exactly like the spendings (PFA-38).
-    return results.map(({ category, ...recurring }) => ({ ...recurring, ...accessibleCategory(category, ownerId) }));
+    return results.map(({ category, amount, ...recurring }) => ({
+      ...recurring,
+      // The Decimal as the text it serialises to: the response is unchanged.
+      amount: amount.toString(),
+      ...accessibleCategory(category, ownerId),
+    }));
   }
 
   async chargesOf(start: Date, ownerId: string): Promise<RecurringCharge[]> {
