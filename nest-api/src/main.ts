@@ -1,5 +1,6 @@
 import { AppConfig } from "@config/app.config";
 import { env } from "@config/env";
+import { HttpMetricsMiddleware } from "@monitoring/http-metrics.middleware";
 import { ValidationPipe } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
@@ -10,7 +11,6 @@ import session from "express-session";
 import { Logger } from "nestjs-pino";
 import { AppModule } from "./app.module";
 import { ROUTING_OPTIONS } from "./app-options";
-import { HttpMetricsMiddleware } from "./monitoring/http-metrics.middleware";
 
 const SESSION_TTL_SECONDS = 10 * 60; // 10 minutes
 

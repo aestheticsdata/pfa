@@ -1,6 +1,6 @@
+import { PrismaService } from "@db/prisma.service";
 import { Injectable, Logger } from "@nestjs/common";
 import { RedisService } from "@redis/redis.service";
-import { PrismaService } from "../prisma/prisma.service";
 import { readReleaseMarker } from "./release-marker";
 
 export interface DependencyCheck {

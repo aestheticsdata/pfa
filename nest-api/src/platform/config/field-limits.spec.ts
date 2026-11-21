@@ -34,7 +34,7 @@ import { validate } from "class-validator";
  * actually carries the bound.
  */
 describe("FIELD_LIMITS", () => {
-  const schema = readFileSync(join(__dirname, "..", "..", "prisma", "schema.prisma"), "utf8");
+  const schema = readFileSync(join(__dirname, "..", "..", "..", "prisma", "schema.prisma"), "utf8");
 
   /** Width of a model's `@db.VarChar(n)` column, read straight from the schema. */
   const columnWidth = (model: string, column: string): number | null => {

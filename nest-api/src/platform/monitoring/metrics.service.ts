@@ -1,9 +1,9 @@
+import { PrismaService } from "@db/prisma.service";
 import type { HttpObservation, UserKind } from "@monitoring/interfaces/monitoringTypes";
 import { USER_KIND } from "@monitoring/user-kind";
 import { Injectable } from "@nestjs/common";
 import { RedisService } from "@redis/redis.service";
 import { Counter, collectDefaultMetrics, Gauge, Histogram, Registry } from "prom-client";
-import { PrismaService } from "../prisma/prisma.service";
 import { readReleaseMarker } from "./release-marker";
 
 /**

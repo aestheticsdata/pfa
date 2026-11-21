@@ -1,8 +1,8 @@
 import { MAX_SIGN_IN_FAILURES } from "@contexts/identity/infrastructure/redis-sign-in-throttle";
+import { PrismaService } from "@db/prisma.service";
 import { INestApplication } from "@nestjs/common";
+import { RedisService } from "@redis/redis.service";
 import request from "supertest";
-import { PrismaService } from "../src/prisma/prisma.service";
-import { RedisService } from "../src/redis/redis.service";
 import { createAuthenticatedSession } from "./auth-session.helper";
 import { createE2eApp } from "./e2e-app";
 

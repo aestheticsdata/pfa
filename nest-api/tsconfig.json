@@ -14,13 +14,13 @@
     "sourceMap": true,
     "outDir": "./dist",
     "paths": {
-      "@config/*": ["./src/config/*"],
-      "@infrastructure/*": ["./src/infrastructure/*"],
-      "@redis/*": ["./src/redis/*"],
-      "@monitoring/*": ["./src/monitoring/*"],
+      "@config/*": ["./src/platform/config/*"],
+      "@infrastructure/*": ["./src/platform/infrastructure/*"],
+      "@redis/*": ["./src/platform/redis/*"],
+      "@monitoring/*": ["./src/platform/monitoring/*"],
       "@shared-kernel/*": ["./src/shared-kernel/*"],
       "@contexts/*": ["./src/contexts/*"],
-      "@db/*": ["./src/prisma/*"],
+      "@db/*": ["./src/platform/prisma/*"],
       "@generated/*": ["./generated/*"]
     },
     "incremental": true,

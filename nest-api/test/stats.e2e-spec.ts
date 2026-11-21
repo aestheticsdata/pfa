@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
+import { PrismaService } from "@db/prisma.service";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import { PrismaService } from "../src/prisma/prisma.service";
 import { createAuthenticatedSession } from "./auth-session.helper";
 import { firstDayOfMonth } from "./dates.helper";
 import { createE2eApp } from "./e2e-app";
