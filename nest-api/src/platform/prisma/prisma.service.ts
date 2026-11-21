@@ -1,7 +1,7 @@
 import { env } from "@config/env";
+import { PrismaClient } from "@generated/prisma/client";
 import { Injectable, OnApplicationShutdown, OnModuleInit } from "@nestjs/common";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
-import { PrismaClient } from "../../generated/prisma/client";
 import { capturePool, type DbPoolStats, type MariaDbPoolLike, poolStats } from "./db-pool-stats";
 
 @Injectable()

@@ -8,18 +8,18 @@ import { IdentityModule } from "@contexts/identity/identity.module";
 import { PriceComparisonModule } from "@contexts/price-comparison/price-comparison.module";
 import { ReceiptReadingModule } from "@contexts/receipt-reading/receipt-reading.module";
 import { SpendingModule } from "@contexts/spending/spending.module";
+import { PrismaModule } from "@db/prisma.module";
 import { DbBackupModule } from "@infrastructure/db-backup/db-backup.module";
 import { EventsModule } from "@infrastructure/events/events.module";
 import { AllExceptionsFilter, buildLoggerParams, TraceIdMiddleware } from "@infrastructure/logger";
 import { SshBackupModule } from "@infrastructure/ssh-backup/ssh-backup.module";
+import { MonitoringModule } from "@monitoring/monitoring.module";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER } from "@nestjs/core";
 import { ScheduleModule } from "@nestjs/schedule";
 import { RedisModule } from "@redis/redis.module";
 import { LoggerModule } from "nestjs-pino";
-import { MonitoringModule } from "./monitoring/monitoring.module";
-import { PrismaModule } from "./prisma/prisma.module";
 
 @Module({
   imports: [

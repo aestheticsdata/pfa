@@ -93,14 +93,14 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "moduleNameMapper": {
-      "^@config/(.*)$": "<rootDir>/config/$1",
-      "^@infrastructure/(.*)$": "<rootDir>/infrastructure/$1",
-      "^@redis/redis\\.(.*)$": "<rootDir>/redis/redis.$1",
-      "^@redis/interfaces/(.*)$": "<rootDir>/redis/interfaces/$1",
-      "^@monitoring/(.*)$": "<rootDir>/monitoring/$1",
+      "^@config/(.*)$": "<rootDir>/platform/config/$1",
+      "^@infrastructure/(.*)$": "<rootDir>/platform/infrastructure/$1",
+      "^@redis/redis\\.(.*)$": "<rootDir>/platform/redis/redis.$1",
+      "^@redis/interfaces/(.*)$": "<rootDir>/platform/redis/interfaces/$1",
+      "^@monitoring/(.*)$": "<rootDir>/platform/monitoring/$1",
       "^@shared-kernel/(.*)$": "<rootDir>/shared-kernel/$1",
       "^@contexts/(.*)$": "<rootDir>/contexts/$1",
-      "^@db/(.*)$": "<rootDir>/prisma/$1",
+      "^@db/(.*)$": "<rootDir>/platform/prisma/$1",
       "^@generated/(.*)$": "<rootDir>/../generated/$1"
     },
     "collectCoverageFrom": [

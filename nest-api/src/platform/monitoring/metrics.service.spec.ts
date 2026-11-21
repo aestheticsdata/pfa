@@ -1,8 +1,8 @@
+import type { DbPoolStats } from "@db/db-pool-stats";
+import type { PrismaService } from "@db/prisma.service";
 import { USER_KIND } from "@monitoring/user-kind";
 import type { SessionCounts } from "@redis/interfaces/redisTypes";
 import type { RedisService } from "@redis/redis.service";
-import type { DbPoolStats } from "../prisma/db-pool-stats";
-import type { PrismaService } from "../prisma/prisma.service";
 import { MetricsService } from "./metrics.service";
 import { readReleaseMarker } from "./release-marker";
 

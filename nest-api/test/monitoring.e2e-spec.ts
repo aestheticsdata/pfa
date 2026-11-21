@@ -1,7 +1,7 @@
+import { PrismaService } from "@db/prisma.service";
+import type { HealthReport } from "@monitoring/health.service";
 import type { INestApplication } from "@nestjs/common";
 import request from "supertest";
-import type { HealthReport } from "../src/monitoring/health.service";
-import { PrismaService } from "../src/prisma/prisma.service";
 import { createAuthenticatedSession } from "./auth-session.helper";
 import { createE2eApp } from "./e2e-app";
 

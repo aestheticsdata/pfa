@@ -1,11 +1,11 @@
+import { HttpMetricsMiddleware } from "@monitoring/http-metrics.middleware";
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
+import { RedisService } from "@redis/redis.service";
 import { RedisStore } from "connect-redis";
 import session from "express-session";
 import { AppModule } from "../src/app.module";
 import { ROUTING_OPTIONS } from "../src/app-options";
-import { HttpMetricsMiddleware } from "../src/monitoring/http-metrics.middleware";
-import { RedisService } from "../src/redis/redis.service";
 
 const SESSION_TTL_SECONDS = 10 * 60;
 
