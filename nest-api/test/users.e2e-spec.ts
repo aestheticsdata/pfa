@@ -1,4 +1,4 @@
-import { MAX_SIGN_IN_FAILURES } from "@contexts/identity/infrastructure/sign-in-limiter.service";
+import { MAX_SIGN_IN_FAILURES } from "@contexts/identity/infrastructure/redis-sign-in-throttle";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { PrismaService } from "../src/prisma/prisma.service";

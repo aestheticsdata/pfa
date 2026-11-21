@@ -2,7 +2,7 @@ import { UnknownSyntheticAccount } from "@contexts/identity/domain/identity-erro
 import type { PurgeCounts, SyntheticAccountRef } from "@contexts/identity/domain/interfaces/identityTypes";
 import { AccountRepository } from "@contexts/identity/domain/ports/account.repository";
 import { AccountPurger } from "@contexts/identity/domain/ports/account-purger";
-import { SessionRevoker } from "@contexts/identity/domain/ports/session-revoker";
+import { SessionRegistry } from "@contexts/identity/domain/ports/session-registry";
 import { isSyntheticEmail } from "@contexts/identity/domain/synthetic-email";
 import { Injectable } from "@nestjs/common";
 
@@ -15,7 +15,7 @@ import { Injectable } from "@nestjs/common";
 export class SyntheticAccountsService {
   constructor(
     private readonly accounts: AccountRepository,
-    private readonly sessions: SessionRevoker,
+    private readonly sessions: SessionRegistry,
     private readonly purger: AccountPurger,
   ) {}
 

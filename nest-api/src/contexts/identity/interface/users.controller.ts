@@ -1,8 +1,8 @@
 import { env } from "@config/env";
 import { AccountsService } from "@contexts/identity/application/accounts.service";
-import type { SignInResponse } from "@contexts/identity/domain/interfaces/identityTypes";
+import { SignInFlowService } from "@contexts/identity/application/sign-in-flow.service";
+import type { SignInAttempt, SignInResponse } from "@contexts/identity/domain/interfaces/identityTypes";
 import { isSyntheticEmail } from "@contexts/identity/domain/synthetic-email";
-import { SignInLimiterService } from "@contexts/identity/infrastructure/sign-in-limiter.service";
 import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@contexts/identity/interface/csrf-token";
 import { AddUserDto } from "@contexts/identity/interface/dto/add-user.dto";
 import { SignInDto } from "@contexts/identity/interface/dto/sign-in.dto";
@@ -24,7 +24,6 @@ import {
   Res,
   UseGuards,
 } from "@nestjs/common";
-import { RedisService } from "@redis/redis.service";
 import type { Request, Response } from "express";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
@@ -47,8 +46,7 @@ type AuthEvent = {
 export class UsersController {
   constructor(
     private readonly usersService: AccountsService,
-    private readonly redisService: RedisService,
-    private readonly signInLimiter: SignInLimiterService,
+    private readonly signInFlow: SignInFlowService,
     @InjectPinoLogger(UsersController.name) private readonly logger: PinoLogger,
   ) {}
 
@@ -92,16 +90,14 @@ export class UsersController {
    * Refuses a sign-in or sign-up with a 429 while the address or the email has used up its
    * failures (PFA-260). The bot runner's address is exempt: its daily run must never trip it.
    */
-  private async assertNotLocked(req: Request, email: string): Promise<boolean> {
-    if (isSyntheticIpAllowed(req.ip, env.syntheticAllowedIps)) {
-      return false;
-    }
-    const retryAfter = await this.signInLimiter.retryAfter(req.ip, email);
+  private async attemptOf(req: Request, email: string): Promise<SignInAttempt> {
+    const attempt = { email, ip: req.ip, exempt: isSyntheticIpAllowed(req.ip, env.syntheticAllowedIps) };
+    const retryAfter = await this.signInFlow.lockedFor(attempt);
     if (retryAfter !== null) {
       req.res?.setHeader("Retry-After", String(retryAfter));
       throw new HttpException("Too many attempts, try again later", HttpStatus.TOO_MANY_REQUESTS);
     }
-    return true;
+    return attempt;
   }
 
   @Get("me")
@@ -133,24 +129,18 @@ export class UsersController {
   @Post()
   @HttpCode(HttpStatus.OK)
   async signIn(@Body() dto: SignInDto, @Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
-    const isLimited = await this.assertNotLocked(req, dto.email);
+    const attempt = await this.attemptOf(req, dto.email);
     let result: SignInResponse;
     try {
-      result = await this.usersService.signIn(dto.email, dto.password);
+      result = await this.signInFlow.signIn({ ...attempt, password: dto.password });
     } catch (error) {
       // Logged, then rethrown untouched: the caller's response is exactly what it was before.
       this.auth({ action: "user-login", outcome: "failure", email: dto.email }, req);
-      if (isLimited) {
-        await this.signInLimiter.recordAttempt(req.ip, dto.email);
-      }
       throw error;
-    }
-    if (isLimited) {
-      await this.signInLimiter.clear(req.ip, dto.email);
     }
 
     this.openSession(req, result);
-    await this.redisService.trackSession(result.user.id, req.sessionID);
+    await this.signInFlow.track(result.user.id, req.sessionID);
     this.auth({ action: "user-login", outcome: "success", email: dto.email, userId: result.user.id }, req);
 
     return {
@@ -163,13 +153,9 @@ export class UsersController {
   @UseGuards(SignupGuard)
   @HttpCode(HttpStatus.CREATED)
   async addUser(@Body() dto: AddUserDto, @Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
-    // Every sign-up counts, a created account included: nobody needs ten in a quarter of an hour.
-    if (await this.assertNotLocked(req, dto.email)) {
-      await this.signInLimiter.recordAttempt(req.ip, dto.email);
-    }
-    const result = await this.usersService.register(dto);
+    const result = await this.signInFlow.signUp(await this.attemptOf(req, dto.email), dto);
     this.openSession(req, result);
-    await this.redisService.trackSession(result.user.id, req.sessionID);
+    await this.signInFlow.track(result.user.id, req.sessionID);
     // An account being created on a single-user instance is the one event worth never missing.
     this.auth({ action: "user-signup", outcome: "success", email: dto.email, userId: result.user.id }, req);
 
@@ -189,7 +175,7 @@ export class UsersController {
     this.auth({ action: "user-logout", outcome: "success", userId }, req);
     // Only this device's session goes; the user's other devices stay signed in (PFA-256).
     if (userId) {
-      await this.redisService.untrackSession(userId, req.sessionID);
+      await this.signInFlow.untrack(userId, req.sessionID);
     }
 
     return new Promise((resolve, reject) => {
