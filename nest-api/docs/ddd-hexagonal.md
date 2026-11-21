@@ -1,9 +1,9 @@
 # nest-api — Domain-Driven Design and hexagonal architecture
 
 Reference for epic **PFA-270**. It explains both approaches from scratch, applies them to PFA's real
-code, and fixes the target design the implementation tickets (PFA-272 → PFA-279) follow. Written
-before the work as its map; PFA-272 → PFA-277 have since shipped (see §11), and §11.1 lists where the
-code ended up differing from the map.
+code, and fixes the target design the implementation tickets (PFA-272 → PFA-299) follow. Written
+before the work as its map, then brought up to date once the epic was built (§7 is the real tree, §11
+the status), and §11.1 lists where the code ended up differing from the map.
 
 ---
 
@@ -152,40 +152,52 @@ What this buys, concretely:
 | **Budget planning** | Supporting | Categories, recurring charges, exceptional expenses, monthly budget (initial amount, ceiling) | `categories/`, `recurrings/`, `exceptionals/`, write side of `dashboard/` |
 | **Analytics** | Supporting (read-only) | Yearly stats, trends, heatmap, daily projection, search timeline | `stats/`, read side of `dashboard/` |
 | **Identity and access** | Generic | Users, sessions, CSRF, sign-in limiter, synthetic (bot) accounts | `users/` |
-| *Platform* (not a domain) | — | Logging, metrics, health, DB/SSH backups, Redis, Prisma | `infrastructure/`, `monitoring/`, `redis/`, `prisma/` |
+| *Platform* (not a domain) | — | Config, logging, metrics, health, DB/SSH backups, the event bus, Redis, Prisma | `platform/` |
 
 ### Context map
 
+As built (PFA-278 → PFA-298):
+
 ```
-            ┌──────────────────────┐   UserId only   ┌───────────────────────────┐
-            │ Identity and access  │ ──────────────▶ │ every other context       │
-            └──────────────────────┘                 └───────────────────────────┘
+                       ┌──────────────────────┐
+                       │ Identity and access  │  guards + GetUserId: other contexts get a user ID, nothing more
+                       └──────────┬───────────┘
+                                  │ (HTTP edge only)
+        ┌─────────────────────────┼──────────────────────────────────────────┐
+        ▼                         ▼                                          ▼
+ ┌──────────────────┐  CategoryLookup port  ┌──────────────────┐
+ │ Budget planning  │ ◀──────────────────── │ Spending         │
+ │ categories,      │  (adapter → its       │ spendings,       │
+ │ recurrings,      │   CategoriesService)  │ groups           │
+ │ exceptionals,    │                       └────────┬─────────┘
+ │ month's budget   │                                │ events, after the save:
+ └──────────────────┘                                │ spendingDeleted · groupDeleted ·
+                                                     │ groupLinesRemoved · spendingsMerged
+                                                     ▼ (InProcessEventBus)
+ ┌──────────────────┐ StoreDirectory /      ┌──────────────────────────────┐
+ │ Price comparison │ ProductTypeCatalog    │ Receipt reading              │
+ │ stores, product  │ ◀──────────────────── │ files, OCR, lines, bulk read │
+ │ types, prices    │ (adapters → its       │ releases the receipts the    │
+ └──────────────────┘  services)            │ events let go                │
+                                            └──────────────────────────────┘
 
- ┌──────────────────┐  CategoryLookup (port)  ┌──────────────────┐
- │ Budget planning  │ ◀────────────────────── │ Spending         │
- │ (categories)     │                         │                  │──── events ────┐
- └──────────────────┘                         └──────────────────┘                │
-                                                 ▲         │ SpendingDeleted       ▼
-                               ReceiptLinesRead  │         │ GroupLineRemoved  ┌────────────────────┐
-                                                 │         └─────────────────▶ │ Receipt reading    │
- ┌──────────────────┐   ReceiptLinesConfirmed    │                             │ (files, OCR, lines)│
- │ Price comparison │ ◀──────────────────────────┴──────────────────────────── └────────────────────┘
- └──────────────────┘
-
- ┌──────────────────┐   reads the DB through its own read models (no aggregates, no writes)
+ ┌──────────────────┐   reads the tables directly, per screen (no aggregates, no writes)
  │ Analytics        │ ─────────────────────────────────────────────────────────────▶ MySQL
  └──────────────────┘
 ```
 
 Relationship types, in DDD terms:
 
-- **Identity → everyone**: *Open Host Service* reduced to its minimum — other contexts get a `UserId`
-  value object and nothing else. No context ever loads a `User`.
+- **Identity → everyone**: *Open Host Service* reduced to its minimum — other contexts get the
+  session's user ID (`GetUserId`) and nothing else. No context ever loads an account.
 - **Spending → Budget planning**: *Customer/Supplier*. Spending needs to know "is this category usable by
   this user, or create it from a typed name". It asks through a `CategoryLookup` port; Budget planning
   provides the adapter.
-- **Spending ↔ Receipt reading**: *Published events*. Deleting a spending does not call the file service;
-  it raises `SpendingDeleted`, and Receipt reading decides whether the file is still held by anyone.
+- **Spending → Receipt reading**: *Published events*. Deleting a spending does not call the file service;
+  it records `spendingDeleted` with the receipts it held, and Receipt reading decides whether each file
+  is still held by anyone.
+- **Receipt reading → Price comparison**: *Customer/Supplier* again, behind `StoreDirectory` and
+  `ProductTypeCatalog`: an anti-corruption layer over price comparison's services.
 - **Analytics**: *Conformist read model* — it reads the shared tables directly, read-only, shaped per screen.
 
 ---
@@ -203,7 +215,7 @@ The glossary *is* the naming rule. French UI word → code word.
 | Dégrouper | `ungroup` | Lines become standalone spendings again, keeping the shared receipt. |
 | Ticket de caisse | `Receipt` | The image file. A file held by N spendings is a *shared receipt*. |
 | Ligne de ticket | `ReceiptLine` | One item read on a receipt: label, amount, quantity, size. |
-| Lecture en masse | `BulkRead` | Reading all unread receipts; each result waits as a `ReceiptProposal`. |
+| Lecture en masse | `BulkRead` | Reading all unread receipts; each one waits as a `QueuedReceipt` holding the OCR's `ReceiptProposal`. |
 | Magasin | `Store` | A shop, one per normalised name **and** address. |
 | Type de produit | `ProductType` | A generic product compared across brands and stores ("Savon liquide"). |
 | Prix unitaire | `UnitPrice` | Price per kg, per L, or per piece — never compared across bases. |
@@ -215,60 +227,63 @@ The glossary *is* the naming rule. French UI word → code word.
 
 ---
 
-## 7. Target folder layout
+## 7. Folder layout, as built
 
 ```
 src/
+├── main.ts · app.module.ts            # the composition root of the whole app
 ├── shared-kernel/                     # tiny, stable, used by every context
-│   ├── money.ts                       # Money value object (integer cents + currency)
+│   ├── money.ts                       # Money: integer cents + currency, DECIMAL rounding
 │   ├── calendar-day.ts                # CalendarDay: a day, no time, no zone
 │   ├── calendar-month.ts              # CalendarMonth (UTC-safe)
 │   ├── aggregate-root.ts              # records domain events, pullEvents()
-│   ├── domain-error.ts                # DomainError + notFound/invalidInput/conflict/forbidden kinds
+│   ├── domain-error.ts                # DomainError: notFound / invalidInput / conflict / forbidden / unauthorized
+│   ├── domain-event-publisher.ts      # the event port
 │   └── interfaces/sharedKernelTypes.ts
 │
 ├── contexts/
+│   ├── architecture.spec.ts           # the dependency rule, tested (§7.1)
 │   ├── spending/
 │   │   ├── domain/                    # pure TypeScript — no Nest, no Prisma, no node:fs
-│   │   │   ├── spending.ts            # Spending entity
+│   │   │   ├── spending.ts            # Spending aggregate
 │   │   │   ├── spending-group.ts      # SpendingGroup aggregate root
-│   │   │   ├── group-label.ts         # composeGroupLineLabel (already pure today)
+│   │   │   ├── group-label.ts         # "<group> — <detail>"
 │   │   │   ├── spending-errors.ts     # GroupNotFound, GroupSpansSeveralDays…
-│   │   │   ├── spending-events.ts     # SpendingDeleted, GroupLineRemoved…
+│   │   │   ├── spending-events.ts     # SPENDING_EVENT, the published language
 │   │   │   ├── ports/                 # driven ports, as abstract classes (see §8.3)
-│   │   │   │   ├── spending-group.repository.ts
-│   │   │   │   └── category-lookup.ts
 │   │   │   └── interfaces/spendingTypes.ts
 │   │   ├── application/               # use cases: one class per user intention
-│   │   │   ├── create-spending-group.use-case.ts
-│   │   │   ├── merge-spendings-into-group.use-case.ts
-│   │   │   └── …
-│   │   ├── infrastructure/            # driven adapters
-│   │   │   ├── prisma-spending-group.repository.ts
-│   │   │   ├── spending-group.mapper.ts   # Prisma row ⇄ aggregate
-│   │   │   └── in-memory-spending-group.repository.ts   # for unit tests
-│   │   ├── interface/                 # driving adapters
-│   │   │   ├── spending-groups.controller.ts
-│   │   │   └── dto/
-│   │   └── spending.module.ts         # Nest wiring: port → adapter bindings
-│   ├── receipt-reading/
+│   │   ├── infrastructure/            # driven adapters: Prisma repositories, the category lookup,
+│   │   │   ├── queries/               #   the read side (lists, search, suggestions)
+│   │   │   └── testing/               #   in-memory fakes for unit tests
+│   │   ├── interface/                 # driving adapters: controllers, DTOs
+│   │   └── spending.module.ts         # composition root: port → adapter bindings
+│   ├── receipt-reading/               # + ReleaseReceiptsHandler, subscribed to Spending's events
 │   ├── price-comparison/
 │   ├── budget-planning/
-│   ├── analytics/                     # read side only: queries/, no aggregates
-│   └── identity/
+│   ├── analytics/                     # read side only: infrastructure/queries + pure domain functions
+│   └── identity/                      # accounts, sign-in flow, throttle, sessions, guards
 │
-└── platform/                          # today's infrastructure/, monitoring/, prisma/, redis/
+└── platform/                          # config, infrastructure (logging, HTTP error mapping, event bus,
+                                       # backups), monitoring, prisma, redis
 ```
 
 File names stay kebab-case, like the rest of nest-api (Nest convention). Exported types still go in
 `interfaces/<name>Types.ts`, as everywhere in the repo.
 
-### The dependency rule, enforced by the linter
+### 7.1 The dependency rule, enforced twice
 
-A rule nobody checks is a suggestion. A Biome override (PFA-272) rejects, under `**/domain/**`:
-`@nestjs/*`, `generated/prisma`, `@prisma/*`, `node:fs`, `sharp`, `tesseract.js`, `ioredis`/`redis`,
-and imports from another context's folder. Under `**/application/**`, only `@nestjs/common`'s
-`Injectable` is tolerated (a decorator, no behaviour). Breaking the architecture fails CI, like a type error.
+A rule nobody checks is a suggestion.
+
+- **Biome** (PFA-272, PFA-297) rejects, under `domain/`: Nest, Prisma (`@db`, `@generated`, `@prisma`),
+  Redis, `node:fs`, `sharp`, `tesseract.js`, the platform modules (field limits aside), and any outer layer;
+  under `application/`: persistence and Redis, and any adapter.
+- **`src/contexts/architecture.spec.ts`** (PFA-297) reads every import and checks the layers *and* the
+  context boundaries: the domain is pure; persistence, files and OCR live in adapters only; a use case
+  depends on domains only; the HTTP edge never reaches an adapter or another context's use case; a
+  context crosses into another only through its domain, its HTTP edge, or an adapter. Two deliberate
+  exceptions are listed in the test with their reason (the read-side query classes; multer's storage).
+  It runs in `pnpm test`, so in the deploy's fast checks.
 
 ---
 
@@ -553,8 +568,10 @@ aggregate boundary is probably wrong.
 ### 10.3 Domain events (PFA-278)
 
 - Aggregates **record** events; use cases **publish** them **after** the save commits.
-- Bus: an in-process `DomainEventPublisher` port, Nest adapter (handlers registered per context). One
-  process, one DB — no broker needed.
+- Bus: the `DomainEventPublisher` port (shared kernel) and its `InProcessEventBus` adapter
+  (`platform/infrastructure/events`). A context subscribes at start-up (`SpendingEventSubscriptions` in
+  receipt reading). Handlers are awaited: the request answers once every reaction is done, and a failing
+  handler fails it, as the direct call it replaced did. One process, one DB — no broker needed.
 - Handlers are idempotent (releasing an already-released file is a no-op).
 - Upgrade path, documented not built: if a second process (bots, a worker) ever needs the events,
   switch to a **transactional outbox** — events written in the same transaction as the aggregate, relayed
@@ -585,8 +602,12 @@ Status: ✅ shipped (merged and deployed), ⏳ to do.
 5. ✅ **PFA-275 — Price comparison.** Mostly moving already-pure code into value objects.
 6. ✅ **PFA-276 — Budget planning.** Category logic de-duplicated.
 7. ✅ **PFA-277 — Analytics read side.** Query handlers + pure calculation functions.
-8. ⏳ **PFA-278 — Domain events.** Direct cross-context calls replaced by events.
-9. ⏳ **PFA-279 — Identity and access.** Last: generic, stable, least to gain.
+8. ✅ **PFA-278 — Domain events.** Direct cross-context calls replaced by events.
+9. ✅ **PFA-279 — Identity and access.** Last: generic, stable, least to gain.
+10. ✅ **PFA-296 — Identity edges.** Sign-in throttle and session tracking behind ports.
+11. ✅ **PFA-297 — Architecture fitness tests.** The dependency rule, tested.
+12. ✅ **PFA-298 — Platform folder.** `src/` = contexts, shared kernel, platform.
+13. ✅ **PFA-299 — This doc and the README, as built.**
 
 Constraints that hold at every step:
 
@@ -600,15 +621,21 @@ Constraints that hold at every step:
 
 - **Examples in §8 are condensed.** Signatures in the code take `ownerId: string` (no typed IDs, §10.1)
   and one object past three parameters; the group repository has `save`, `remove` and `dissolve`.
-- **Receipt releases are a port, not yet events.** `ReceiptReleaser` (Spending) hands orphaned files to
-  receipt reading's `ReceiptFileStore`; PFA-278 turns those calls into domain events.
+- **Commands across contexts became events; queries stayed ports.** Releasing receipt files is an
+  event (PFA-278). Checking a category, recognising a store, linking product types need an answer now:
+  those stay synchronous ports with an adapter over the other context (an anti-corruption layer).
+- **The invoice image routes moved to receipt reading** (`InvoiceImagesController`, same URLs), and its
+  module is registered before Spending's so `DELETE /spendings/upload` is never read as `/spendings/:id`.
+- **`ReceiptAttached` was dropped**: the bulk read's candidates are a query over the rows, already the
+  source of truth; an event would only duplicate it.
 - **Thin where the subdomain is thin.** Budget planning and price comparison keep their rules as pure
   domain functions and value objects (`CatalogName`, `storeKeys`, `carriedForward`, `budgetRevision`)
   around repository ports — no aggregate where there is no invariant to guard.
 - **Analytics is query classes in `infrastructure/queries/`**, with no application layer between the
   controller and the read: the projection chain and the day buckets are its domain.
 - **Two path aliases for new code**, `@db/*` and `@generated/*`, so nothing imports Prisma by a relative
-  path.
+  path. `synthetic:purge` runs with `tsconfig-paths` for the same reason.
+- **Identity's domain errors include `unauthorized`**, so a refused sign-in keeps its 401.
 
 ---
 
