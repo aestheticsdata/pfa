@@ -1,6 +1,38 @@
 # PFA Nest API
 
-NestJS API for PFA. Migrated progressively from Express; non-migrated routes are proxied to the legacy API.
+NestJS API for PFA (Prisma on MySQL, Redis sessions), organised by bounded context.
+
+## Architecture
+
+Domain-Driven Design laid out as a hexagonal architecture (ports & adapters). The full explainer —
+why, how, the worked example, the trade-offs — is [docs/ddd-hexagonal.md](docs/ddd-hexagonal.md).
+
+```
+src/
+├── contexts/          # one folder per bounded context
+│   ├── spending/          spendings and groups (core)
+│   ├── receipt-reading/   receipt files, OCR, saved lines, bulk read (core)
+│   ├── price-comparison/  stores, product types, unit prices (core)
+│   ├── budget-planning/   categories, recurrings, exceptionals, the month's budget
+│   ├── analytics/         statistics and the dashboard projection (read side only)
+│   └── identity/          accounts, sign-in, sessions, bot accounts
+├── shared-kernel/     # Money, CalendarDay/Month, AggregateRoot, DomainError, the event port
+└── platform/          # config, logging, event bus, monitoring, Prisma, Redis, backups
+```
+
+Inside each context, dependencies point inwards:
+
+| Layer | Holds | May import |
+| --- | --- | --- |
+| `domain/` | aggregates, value objects, rules, ports (abstract classes), events | the shared kernel, other domains |
+| `application/` | one use case per user intention | domains and their ports |
+| `infrastructure/` | adapters: Prisma repositories, Tesseract, the disk, Redis; `queries/` for reads | anything |
+| `interface/` | controllers and DTOs | its context's application (and read queries) |
+
+The rule is enforced by Biome and by `src/contexts/architecture.spec.ts`, which runs with the unit
+tests. Where to start reading: `contexts/spending/domain/spending-group.ts` (an aggregate and its
+invariants), then `application/merge-spendings-into-group.use-case.ts`, then
+`infrastructure/prisma-spending-group.repository.ts` and `spending.module.ts`.
 
 ## Setup
 
