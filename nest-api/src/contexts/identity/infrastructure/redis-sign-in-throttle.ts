@@ -1,3 +1,5 @@
+import type { SignInAttempt } from "@contexts/identity/domain/interfaces/identityTypes";
+import { SignInThrottle } from "@contexts/identity/domain/ports/sign-in-throttle";
 import { Injectable } from "@nestjs/common";
 import { RedisService } from "@redis/redis.service";
 
@@ -12,8 +14,8 @@ export const SIGN_IN_WINDOW_SECONDS = 15 * 60;
 /** Outside `pfa:`, the session store's keyspace, which the metrics count walks. */
 const KEY_PREFIX = "pfa-sign-in-failures:";
 
-function counterKeys(ip: string | undefined, email: string): string[] {
-  return [`${KEY_PREFIX}ip:${ip ?? "unknown"}`, `${KEY_PREFIX}email:${email.trim().toLowerCase()}`];
+function counterKeys(attempt: SignInAttempt): string[] {
+  return [`${KEY_PREFIX}ip:${attempt.ip ?? "unknown"}`, `${KEY_PREFIX}email:${attempt.email.trim().toLowerCase()}`];
 }
 
 /**
@@ -21,14 +23,16 @@ function counterKeys(ip: string | undefined, email: string): string[] {
  * window from its first failure. A success clears both.
  */
 @Injectable()
-export class SignInLimiterService {
-  constructor(private readonly redis: RedisService) {}
+export class RedisSignInThrottle extends SignInThrottle {
+  constructor(private readonly redis: RedisService) {
+    super();
+  }
 
   /** Seconds until the address or the email may try again, or null when neither is locked. */
-  async retryAfter(ip: string | undefined, email: string): Promise<number | null> {
+  async retryAfter(attempt: SignInAttempt): Promise<number | null> {
     const client = this.redis.getClient();
     let wait = 0;
-    for (const key of counterKeys(ip, email)) {
+    for (const key of counterKeys(attempt)) {
       const failures = Number((await client.get(key)) ?? 0);
       if (failures >= MAX_SIGN_IN_FAILURES) {
         wait = Math.max(wait, await client.ttl(key));
@@ -38,16 +42,16 @@ export class SignInLimiterService {
   }
 
   /** A failed sign-in, or any sign-up. */
-  async recordAttempt(ip: string | undefined, email: string): Promise<void> {
+  async recordAttempt(attempt: SignInAttempt): Promise<void> {
     const client = this.redis.getClient();
-    for (const key of counterKeys(ip, email)) {
+    for (const key of counterKeys(attempt)) {
       if ((await client.incr(key)) === 1) {
         await client.expire(key, SIGN_IN_WINDOW_SECONDS);
       }
     }
   }
 
-  async clear(ip: string | undefined, email: string): Promise<void> {
-    await this.redis.getClient().del(counterKeys(ip, email));
+  async clear(attempt: SignInAttempt): Promise<void> {
+    await this.redis.getClient().del(counterKeys(attempt));
   }
 }

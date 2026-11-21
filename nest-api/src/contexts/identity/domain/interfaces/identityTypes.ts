@@ -63,3 +63,15 @@ export interface NewAccount {
   id: string;
   passwordHash: string;
 }
+
+/** Who is trying to sign in or up, and from where. */
+export interface SignInAttempt {
+  email: string;
+  ip: string | undefined;
+  /** The bot runner's address: its daily run must never trip the throttle. */
+  exempt: boolean;
+}
+
+export interface Credentials extends SignInAttempt {
+  password: string;
+}

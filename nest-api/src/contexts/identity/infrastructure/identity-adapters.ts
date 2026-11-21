@@ -2,7 +2,7 @@ import { AppConfig } from "@config/app.config";
 import type { PurgeCounts, SyntheticAccountRef } from "@contexts/identity/domain/interfaces/identityTypes";
 import { AccountPurger } from "@contexts/identity/domain/ports/account-purger";
 import { PasswordHasher } from "@contexts/identity/domain/ports/password-hasher";
-import { SessionRevoker } from "@contexts/identity/domain/ports/session-revoker";
+import { SessionRegistry } from "@contexts/identity/domain/ports/session-registry";
 import { purgeSyntheticAccounts } from "@contexts/identity/infrastructure/synthetic-purge";
 import { PrismaService } from "@db/prisma.service";
 import { Injectable } from "@nestjs/common";
@@ -24,9 +24,17 @@ export class BcryptPasswordHasher extends PasswordHasher {
 }
 
 @Injectable()
-export class RedisSessionRevoker extends SessionRevoker {
+export class RedisSessionRegistry extends SessionRegistry {
   constructor(private readonly redis: RedisService) {
     super();
+  }
+
+  track(accountId: string, sessionId: string): Promise<void> {
+    return this.redis.trackSession(accountId, sessionId);
+  }
+
+  untrack(accountId: string, sessionId: string): Promise<void> {
+    return this.redis.untrackSession(accountId, sessionId);
   }
 
   async revokeAll(accountId: string): Promise<void> {

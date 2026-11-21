@@ -1,12 +1,12 @@
 import {
   MAX_SIGN_IN_FAILURES,
+  RedisSignInThrottle,
   SIGN_IN_WINDOW_SECONDS,
-  SignInLimiterService,
-} from "@contexts/identity/infrastructure/sign-in-limiter.service";
+} from "@contexts/identity/infrastructure/redis-sign-in-throttle";
 import type { RedisService } from "@redis/redis.service";
 
 /** The sign-in brake (PFA-260): per address and per email, one window from the first failure. */
-describe("SignInLimiterService", () => {
+describe("RedisSignInThrottle", () => {
   const makeLimiter = () => {
     const counts = new Map<string, number>();
     const ttls = new Map<string, number>();
@@ -26,40 +26,48 @@ describe("SignInLimiterService", () => {
         return Promise.resolve(keys.length);
       },
     };
-    const limiter = new SignInLimiterService({ getClient: () => client } as unknown as RedisService);
+    const limiter = new RedisSignInThrottle({ getClient: () => client } as unknown as RedisService);
     return { limiter, ttls };
   };
 
   it("locks the email once its failures are used up, for what is left of the window", async () => {
     const { limiter, ttls } = makeLimiter();
     for (let attempt = 0; attempt < MAX_SIGN_IN_FAILURES - 1; attempt += 1) {
-      await limiter.recordAttempt("1.1.1.1", "Someone@Example.com");
+      await limiter.recordAttempt({ ip: "1.1.1.1", email: "Someone@Example.com", exempt: false });
     }
-    await expect(limiter.retryAfter("2.2.2.2", "someone@example.com")).resolves.toBeNull();
+    await expect(
+      limiter.retryAfter({ ip: "2.2.2.2", email: "someone@example.com", exempt: false }),
+    ).resolves.toBeNull();
 
-    await limiter.recordAttempt("1.1.1.1", "someone@example.com");
+    await limiter.recordAttempt({ ip: "1.1.1.1", email: "someone@example.com", exempt: false });
 
     expect(ttls.get("pfa-sign-in-failures:email:someone@example.com")).toBe(SIGN_IN_WINDOW_SECONDS);
-    await expect(limiter.retryAfter("2.2.2.2", "someone@example.com")).resolves.toBe(SIGN_IN_WINDOW_SECONDS);
+    await expect(limiter.retryAfter({ ip: "2.2.2.2", email: "someone@example.com", exempt: false })).resolves.toBe(
+      SIGN_IN_WINDOW_SECONDS,
+    );
   });
 
   it("locks the address whatever email it rotates", async () => {
     const { limiter } = makeLimiter();
     for (let attempt = 0; attempt < MAX_SIGN_IN_FAILURES; attempt += 1) {
-      await limiter.recordAttempt("1.1.1.1", `guess-${attempt}@example.com`);
+      await limiter.recordAttempt({ ip: "1.1.1.1", email: `guess-${attempt}@example.com`, exempt: false });
     }
 
-    await expect(limiter.retryAfter("1.1.1.1", "fresh@example.com")).resolves.toBe(SIGN_IN_WINDOW_SECONDS);
+    await expect(limiter.retryAfter({ ip: "1.1.1.1", email: "fresh@example.com", exempt: false })).resolves.toBe(
+      SIGN_IN_WINDOW_SECONDS,
+    );
   });
 
   it("forgets both counters on a successful sign-in", async () => {
     const { limiter } = makeLimiter();
     for (let attempt = 0; attempt < MAX_SIGN_IN_FAILURES; attempt += 1) {
-      await limiter.recordAttempt("1.1.1.1", "someone@example.com");
+      await limiter.recordAttempt({ ip: "1.1.1.1", email: "someone@example.com", exempt: false });
     }
 
-    await limiter.clear("1.1.1.1", "someone@example.com");
+    await limiter.clear({ ip: "1.1.1.1", email: "someone@example.com", exempt: false });
 
-    await expect(limiter.retryAfter("1.1.1.1", "someone@example.com")).resolves.toBeNull();
+    await expect(
+      limiter.retryAfter({ ip: "1.1.1.1", email: "someone@example.com", exempt: false }),
+    ).resolves.toBeNull();
   });
 });
