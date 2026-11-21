@@ -1,5 +1,4 @@
 import type { CATEGORY_CHOICE } from "@contexts/budget-planning/domain/category-choice";
-import type { Prisma } from "@generated/prisma/client";
 
 /** A category as GET /categories returns it (PFA-257). */
 export interface CategoryItem {
@@ -16,7 +15,8 @@ export interface RecurringItem {
   dateTo: Date;
   itemType: string;
   label: string;
-  amount: Prisma.Decimal;
+  /** Decimal text, as the column's value serialises: "12.5". */
+  amount: string;
   currency: string | null;
   /** The recurring's receipt, when one was attached from its row (PFA-254). */
   invoicefile: string | null;
@@ -32,7 +32,8 @@ export interface ExceptionalItem {
   itemType: string;
   label: string;
   description: string | null;
-  amount: Prisma.Decimal;
+  /** Decimal text, as the column's value serialises: "12.5". */
+  amount: string;
   currency: string | null;
   categoryName: string | null;
   categoryColor: string | null;

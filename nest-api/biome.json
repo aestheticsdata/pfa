@@ -106,6 +106,33 @@
     },
     {
       "includes": [
+        "src/contexts/*/application/**",
+        "!**/*.spec.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["@db/*", "@generated/*", "@prisma/*", "@redis/*", "**/generated/prisma/**"],
+                    "message": "A use case talks to persistence through a port (PFA-297): the adapter lives in infrastructure/."
+                  },
+                  {
+                    "group": ["@contexts/*/infrastructure/**", "!**/infrastructure/testing/**"],
+                    "message": "A use case depends on ports, never on adapters (PFA-297)."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
         "scripts/**"
       ],
       "linter": {
