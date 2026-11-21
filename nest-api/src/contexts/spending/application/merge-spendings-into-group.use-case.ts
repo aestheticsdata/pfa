@@ -1,17 +1,18 @@
 import { randomUUID } from "node:crypto";
 import type { MergeSpendingsCommand } from "@contexts/spending/application/interfaces/spendingCommandTypes";
 import type { GroupCandidate } from "@contexts/spending/domain/interfaces/spendingTypes";
-import { ReceiptReleaser } from "@contexts/spending/domain/ports/receipt-releaser";
+
 import { SpendingGroupRepository } from "@contexts/spending/domain/ports/spending-group.repository";
 import { DuplicateSpending, SpendingNotFound } from "@contexts/spending/domain/spending-errors";
 import { SpendingGroup } from "@contexts/spending/domain/spending-group";
 import { Injectable } from "@nestjs/common";
+import { DomainEventPublisher } from "@shared-kernel/domain-event-publisher";
 
 @Injectable()
 export class MergeSpendingsIntoGroup {
   constructor(
     private readonly groups: SpendingGroupRepository,
-    private readonly receipts: ReceiptReleaser,
+    private readonly events: DomainEventPublisher,
   ) {}
 
   async execute(command: MergeSpendingsCommand): Promise<{ ID: string; invoicefile: string | null }> {
@@ -32,7 +33,7 @@ export class MergeSpendingsIntoGroup {
       })),
     });
     await this.groups.save(group);
-    await this.receipts.release(command.ownerId, group.releasedReceipts());
+    await this.events.publish(group.pullEvents());
     return { ID: group.id, invoicefile: group.receipt };
   }
 }

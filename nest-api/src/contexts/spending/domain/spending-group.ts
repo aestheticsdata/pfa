@@ -8,6 +8,7 @@ import type {
   SpendingGroupState,
 } from "@contexts/spending/domain/interfaces/spendingTypes";
 import { GroupSpansSeveralDays, LineNotInGroup } from "@contexts/spending/domain/spending-errors";
+import { SPENDING_EVENT } from "@contexts/spending/domain/spending-events";
 import { AggregateRoot } from "@shared-kernel/aggregate-root";
 import { Money } from "@shared-kernel/money";
 
@@ -20,11 +21,12 @@ const trimmedDetail = (detail?: string | null) => detail?.trim() || null;
  * - a line added later joins the group's receipt and currency;
  * - each line's stored label is "<group> — <detail>", recomposed whenever the group is renamed;
  * - a merge keeps the first receipt found and lets the others go.
+ *
+ * Every change that may orphan a receipt file is recorded as an event (PFA-278).
  */
 export class SpendingGroup extends AggregateRoot {
   private removed: GroupLineState[] = [];
   private absorbed: string[] = [];
-  private released: (string | null)[] = [];
 
   private constructor(
     private readonly state: SpendingGroupState,
@@ -65,9 +67,14 @@ export class SpendingGroup extends AggregateRoot {
       { id: input.id, ownerId: input.ownerId, date: first.date, label: input.label.trim(), lines },
       true,
     );
-    // Groups the lines came from are dropped once empty; receipts nobody holds any more go.
+    // Groups the lines came from are dropped once empty; receipts nobody holds any more go (PFA-278).
     group.absorbed = [...new Set(input.candidates.flatMap((candidate) => candidate.groupId ?? []))];
-    group.released = input.candidates.map((candidate) => candidate.receipt);
+    group.record({
+      name: SPENDING_EVENT.spendingsMerged,
+      ownerId: input.ownerId,
+      subjectId: input.id,
+      receipts: input.candidates.map((candidate) => candidate.receipt),
+    });
     return group;
   }
 
@@ -112,7 +119,14 @@ export class SpendingGroup extends AggregateRoot {
       };
     });
     this.removed.push(...removed);
-    this.released.push(...removed.map((line) => line.receipt));
+    if (removed.length > 0) {
+      this.record({
+        name: SPENDING_EVENT.groupLinesRemoved,
+        ownerId: this.state.ownerId,
+        subjectId: this.state.id,
+        receipts: removed.map((line) => line.receipt),
+      });
+    }
   }
 
   /** The group goes, its lines stay as separate spendings sharing the receipt. */
@@ -122,7 +136,12 @@ export class SpendingGroup extends AggregateRoot {
 
   /** The group goes with all its lines. */
   discard(): void {
-    this.released.push(...this.state.lines.map((line) => line.receipt));
+    this.record({
+      name: SPENDING_EVENT.groupDeleted,
+      ownerId: this.state.ownerId,
+      subjectId: this.state.id,
+      receipts: this.state.lines.map((line) => line.receipt),
+    });
   }
 
   get id(): string {
@@ -161,10 +180,5 @@ export class SpendingGroup extends AggregateRoot {
 
   absorbedGroupIds(): string[] {
     return this.absorbed;
-  }
-
-  /** Receipts the change may have orphaned; the receipt store keeps the ones still held. */
-  releasedReceipts(): (string | null)[] {
-    return this.released;
   }
 }

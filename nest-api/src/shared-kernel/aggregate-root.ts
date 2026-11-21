@@ -8,7 +8,7 @@ import type { DomainEvent } from "@shared-kernel/interfaces/sharedKernelTypes";
 export abstract class AggregateRoot {
   private events: DomainEvent[] = [];
 
-  protected record(event: DomainEvent): void {
+  protected record<T extends DomainEvent>(event: T): void {
     this.events.push(event);
   }
 

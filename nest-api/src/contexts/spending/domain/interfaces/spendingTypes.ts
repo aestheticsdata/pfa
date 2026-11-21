@@ -1,4 +1,6 @@
+import type { SPENDING_EVENT } from "@contexts/spending/domain/spending-events";
 import type { CalendarDay } from "@shared-kernel/calendar-day";
+import type { DomainEvent } from "@shared-kernel/interfaces/sharedKernelTypes";
 import type { Money } from "@shared-kernel/money";
 
 export interface SpendingState {
@@ -90,4 +92,14 @@ export interface GroupMerge {
   label: string;
   /** In the order sent: the first receipt found is kept for the whole group. */
   candidates: GroupCandidate[];
+}
+
+export type SpendingEventName = (typeof SPENDING_EVENT)[keyof typeof SPENDING_EVENT];
+
+/** A spending event (PFA-278): what happened, and the receipt files it may have orphaned. */
+export interface ReceiptsLetGo extends DomainEvent {
+  readonly name: SpendingEventName;
+  /** The spending or the group it happened to. */
+  readonly subjectId: string;
+  readonly receipts: (string | null)[];
 }

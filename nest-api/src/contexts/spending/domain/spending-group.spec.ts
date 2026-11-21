@@ -1,5 +1,6 @@
 import type { GroupCandidate } from "@contexts/spending/domain/interfaces/spendingTypes";
 import { GroupSpansSeveralDays, LineNotInGroup } from "@contexts/spending/domain/spending-errors";
+import { SPENDING_EVENT } from "@contexts/spending/domain/spending-events";
 import { SpendingGroup } from "@contexts/spending/domain/spending-group";
 import { CalendarDay } from "@shared-kernel/calendar-day";
 import { Money } from "@shared-kernel/money";
@@ -65,8 +66,10 @@ describe("SpendingGroup", () => {
       expect(group.receipt).toBe("a.jpg");
       expect(group.lines().map((line) => line.receipt)).toEqual(["a.jpg", "a.jpg"]);
       expect(group.storedLabelOf(group.lines()[1])).toBe("Store — Soap");
-      // The release keeps any file still held: a.jpg stays, b.jpg goes if nothing else has it.
-      expect(group.releasedReceipts()).toEqual(["a.jpg", "b.jpg"]);
+      // The receipt context keeps any file still held: a.jpg stays, b.jpg goes if nothing else has it.
+      expect(group.pullEvents()).toEqual([
+        { name: SPENDING_EVENT.spendingsMerged, ownerId: "u1", subjectId: "g2", receipts: ["a.jpg", "b.jpg"] },
+      ]);
     });
 
     it("refuses spendings of different days", () => {
@@ -122,7 +125,9 @@ describe("SpendingGroup", () => {
       expect(added).toMatchObject({ id: "c", receipt: "r1.jpg", isNew: true });
       expect(added.amount.currency).toBe("EUR");
       expect(group.removedLineIds()).toEqual(["b"]);
-      expect(group.releasedReceipts()).toEqual(["r1.jpg"]);
+      expect(group.pullEvents()).toEqual([
+        { name: SPENDING_EVENT.groupLinesRemoved, ownerId: "u1", subjectId: "g1", receipts: ["r1.jpg"] },
+      ]);
     });
 
     it("refuses a line of another group", () => {
@@ -135,10 +140,24 @@ describe("SpendingGroup", () => {
     });
   });
 
-  it("releases every line's receipt when discarded", () => {
+  it("records every line's receipt when discarded", () => {
     const group = storedGroup();
     group.discard();
-    expect(group.releasedReceipts()).toEqual(["r1.jpg", "r1.jpg"]);
+    expect(group.pullEvents()).toEqual([
+      { name: SPENDING_EVENT.groupDeleted, ownerId: "u1", subjectId: "g1", receipts: ["r1.jpg", "r1.jpg"] },
+    ]);
+  });
+
+  it("records nothing for an edit that keeps every line", () => {
+    const group = storedGroup();
+    group.edit({
+      label: "Market",
+      lines: [
+        { id: "a", isNew: false, amount: 4, categoryId: "food" },
+        { id: "b", isNew: false, amount: 6, categoryId: "home" },
+      ],
+    });
+    expect(group.pullEvents()).toEqual([]);
   });
 
   it("hands back its lines when ungrouped", () => {

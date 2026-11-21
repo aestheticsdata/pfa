@@ -13,9 +13,10 @@ import {
   LineNotInGroup,
   SpendingNotFound,
 } from "@contexts/spending/domain/spending-errors";
+import { SPENDING_EVENT } from "@contexts/spending/domain/spending-events";
 import { SpendingGroup } from "@contexts/spending/domain/spending-group";
 import { FakeCategoryLookup } from "@contexts/spending/infrastructure/testing/fake-category-lookup";
-import { FakeReceiptReleaser } from "@contexts/spending/infrastructure/testing/fake-receipt-releaser";
+import { FakeEventPublisher } from "@contexts/spending/infrastructure/testing/fake-event-publisher";
 import { InMemorySpendingRepository } from "@contexts/spending/infrastructure/testing/in-memory-spending.repository";
 import { InMemorySpendingGroupRepository } from "@contexts/spending/infrastructure/testing/in-memory-spending-group.repository";
 import { CalendarDay } from "@shared-kernel/calendar-day";
@@ -100,14 +101,16 @@ describe("ReviseSpending", () => {
 });
 
 describe("DeleteSpending", () => {
-  it("releases the spending's receipt after removing it", async () => {
+  it("tells the other contexts its receipt may be orphaned, after removing it", async () => {
     const spendings = new InMemorySpendingRepository([storedSpending()]);
-    const receipts = new FakeReceiptReleaser();
+    const receipts = new FakeEventPublisher();
 
     await new DeleteSpending(spendings, receipts).execute({ ownerId: "u1", id: "s1" });
 
     expect(spendings.removed).toHaveLength(1);
-    expect(receipts.released).toEqual([["r.jpg"]]);
+    expect(receipts.published).toEqual([
+      { name: SPENDING_EVENT.spendingDeleted, ownerId: "u1", subjectId: "s1", receipts: ["r.jpg"] },
+    ]);
   });
 });
 
@@ -139,7 +142,7 @@ describe("EditSpendingGroup", () => {
     const edit = new EditSpendingGroup(
       new InMemorySpendingGroupRepository([storedGroup()]),
       new FakeCategoryLookup(),
-      new FakeReceiptReleaser(),
+      new FakeEventPublisher(),
     );
 
     await expect(edit.execute({ ownerId: "u2", groupId: "g1", label: "x", lines: [] })).rejects.toBeInstanceOf(
@@ -152,7 +155,7 @@ describe("EditSpendingGroup", () => {
     const edit = new EditSpendingGroup(
       new InMemorySpendingGroupRepository([storedGroup()]),
       categories,
-      new FakeReceiptReleaser(),
+      new FakeEventPublisher(),
     );
 
     const editing = edit.execute({
@@ -191,7 +194,7 @@ describe("MergeSpendingsIntoGroup", () => {
 
   it("keeps the first receipt in the order sent, not the order found", async () => {
     const groups = new InMemorySpendingGroupRepository([], spendingsOfMonday);
-    const receipts = new FakeReceiptReleaser();
+    const receipts = new FakeEventPublisher();
 
     const result = await new MergeSpendingsIntoGroup(groups, receipts).execute({
       ownerId: "u1",
@@ -200,11 +203,13 @@ describe("MergeSpendingsIntoGroup", () => {
     });
 
     expect(result.invoicefile).toBe("b.jpg");
-    expect(receipts.released).toEqual([["b.jpg", "a.jpg"]]);
+    expect(receipts.published).toEqual([
+      expect.objectContaining({ name: SPENDING_EVENT.spendingsMerged, receipts: ["b.jpg", "a.jpg"] }),
+    ]);
   });
 
   it("refuses a spending sent twice", async () => {
-    const merge = new MergeSpendingsIntoGroup(new InMemorySpendingGroupRepository(), new FakeReceiptReleaser());
+    const merge = new MergeSpendingsIntoGroup(new InMemorySpendingGroupRepository(), new FakeEventPublisher());
 
     const merging = merge.execute({ ownerId: "u1", label: "x", lines: [{ spendingID: "a" }, { spendingID: "a" }] });
 
@@ -213,7 +218,7 @@ describe("MergeSpendingsIntoGroup", () => {
 
   it("refuses a spending the user does not own", async () => {
     const groups = new InMemorySpendingGroupRepository([], spendingsOfMonday);
-    const merge = new MergeSpendingsIntoGroup(groups, new FakeReceiptReleaser());
+    const merge = new MergeSpendingsIntoGroup(groups, new FakeEventPublisher());
 
     const merging = merge.execute({ ownerId: "u2", label: "x", lines: [{ spendingID: "a" }, { spendingID: "b" }] });
 
@@ -222,13 +227,15 @@ describe("MergeSpendingsIntoGroup", () => {
 });
 
 describe("DeleteSpendingGroup", () => {
-  it("removes the group and releases its lines' receipts", async () => {
+  it("removes the group and tells which receipts its lines let go", async () => {
     const groups = new InMemorySpendingGroupRepository([storedGroup()]);
-    const receipts = new FakeReceiptReleaser();
+    const receipts = new FakeEventPublisher();
 
     await new DeleteSpendingGroup(groups, receipts).execute({ ownerId: "u1", id: "g1" });
 
     expect(groups.removed).toHaveLength(1);
-    expect(receipts.released).toEqual([["r.jpg"]]);
+    expect(receipts.published).toEqual([
+      { name: SPENDING_EVENT.groupDeleted, ownerId: "u1", subjectId: "g1", receipts: ["r.jpg"] },
+    ]);
   });
 });
