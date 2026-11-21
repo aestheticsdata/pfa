@@ -5,6 +5,9 @@ code, and fixes the target design the implementation tickets (PFA-272 → PFA-29
 before the work as its map, then brought up to date once the epic was built (§7 is the real tree, §11
 the status), and §11.1 lists where the code ended up differing from the map.
 
+An illustrated version, every diagram drawn, is [ddd-hexagonal.pdf](ddd-hexagonal.pdf) (source:
+`docs/pdf/ddd-hexagonal.html`, rendered by headless Chrome — PFA-300).
+
 ---
 
 ## 1. TL;DR

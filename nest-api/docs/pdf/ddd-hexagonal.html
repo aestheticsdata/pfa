@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PFA API — Domain-Driven Design &amp; Hexagonal Architecture</title>
+<!--
+  Source of nest-api/docs/ddd-hexagonal.pdf (PFA-300). Self-contained: inline SVG, system fonts.
+  Render:  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless --no-pdf-header-footer \
+           --print-to-pdf=nest-api/docs/ddd-hexagonal.pdf nest-api/docs/pdf/ddd-hexagonal.html
+  The text reference is nest-api/docs/ddd-hexagonal.md; this guide says nothing it does not.
+-->
+<style>
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  :root {
+    --ink: #0f172a; --muted: #475569; --faint: #94a3b8; --line: #e2e8f0; --paper: #ffffff; --wash: #f8fafc;
+    --spending: #2563eb; --spending-bg: #eff6ff;
+    --receipt: #059669; --receipt-bg: #ecfdf5;
+    --price: #d97706; --price-bg: #fffbeb;
+    --budget: #7c3aed; --budget-bg: #f5f3ff;
+    --analytics: #0891b2; --analytics-bg: #ecfeff;
+    --identity: #db2777; --identity-bg: #fdf2f8;
+    --kernel: #334155; --kernel-bg: #f1f5f9;
+    --accent: #4f46e5;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; color: var(--ink); background: var(--paper);
+    font: 10.2pt/1.5 -apple-system, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  h1, h2, h3 { line-height: 1.2; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 19pt; margin-bottom: 4mm; }
+  h2 .num { color: var(--accent); margin-right: 2.5mm; font-weight: 600; }
+  h3 { font-size: 11.5pt; margin: 5mm 0 2mm; }
+  p { margin: 0 0 2.6mm; }
+  .lead { font-size: 11.4pt; color: var(--muted); margin-bottom: 5mm; }
+  code { font: 8.8pt "SF Mono", Menlo, Consolas, monospace; background: var(--kernel-bg); padding: 0.2mm 1.2mm; border-radius: 1mm; }
+  pre { font: 8.2pt/1.45 "SF Mono", Menlo, Consolas, monospace; background: #0f172a; color: #e2e8f0;
+    padding: 4mm 5mm; border-radius: 2.5mm; margin: 3mm 0; white-space: pre; overflow: hidden; }
+  pre .k { color: #c4b5fd; } pre .t { color: #67e8f9; } pre .s { color: #86efac; } pre .c { color: #94a3b8; font-style: italic; }
+  /* The cover stands alone; sections flow, and nothing that is one picture is ever cut. */
+  .page { position: relative; margin-top: 11mm; }
+  .page.cover { margin-top: 0; break-after: page; }
+  h2 { break-after: avoid; }
+  .lead { break-after: avoid; }
+  figure, pre, table, .card, .callout, .grid2, .keep { break-inside: avoid; }
+  figure { margin: 3mm 0 4mm; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 8.6pt; color: var(--muted); margin-top: 1.5mm; text-align: center; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .card { border: 0.3mm solid var(--line); border-radius: 2.5mm; padding: 3.5mm 4mm; background: var(--wash); break-inside: avoid; }
+  .card h3 { margin-top: 0; }
+  .card p:last-child, .card ul:last-child { margin-bottom: 0; }
+  ul { margin: 0 0 2.6mm; padding-left: 5mm; } li { margin-bottom: 1mm; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 2mm 0 4mm; break-inside: avoid; }
+  th { text-align: left; font-weight: 600; color: var(--muted); border-bottom: 0.4mm solid var(--ink); padding: 1.6mm 2mm; }
+  td { border-bottom: 0.25mm solid var(--line); padding: 1.6mm 2mm; vertical-align: top; }
+  .pill { display: inline-block; font-size: 7.6pt; font-weight: 600; padding: 0.3mm 2mm; border-radius: 10mm; color: #fff; }
+  .callout { border-left: 1.2mm solid var(--accent); background: #eef2ff; padding: 3mm 4mm; border-radius: 0 2mm 2mm 0; margin: 3mm 0; break-inside: avoid; }
+  .footer-note { position: absolute; bottom: -9mm; left: 0; right: 0; font-size: 7.5pt; color: var(--faint); display: flex; justify-content: space-between; }
+
+  /* Cover */
+  .cover { height: 263mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover .eyebrow { font-size: 9pt; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .cover h1 { font-size: 34pt; margin: 4mm 0 3mm; letter-spacing: -0.02em; }
+  .cover .sub { font-size: 13pt; color: var(--muted); max-width: 150mm; }
+  .toc { columns: 2; column-gap: 8mm; font-size: 9.6pt; }
+  .toc div { break-inside: avoid; padding: 1.2mm 0; border-bottom: 0.25mm dotted var(--line); }
+  .toc b { color: var(--accent); display: inline-block; width: 7mm; }
+</style>
+</head>
+<body>
+
+<!-- ───────────────────────────── COVER ───────────────────────────── -->
+<section class="page cover">
+  <div>
+    <div class="eyebrow">PFA · nest-api · Architecture guide</div>
+    <h1>Domain-Driven Design<br>&amp; Hexagonal Architecture</h1>
+    <p class="sub">How a NestJS + Prisma + Redis API in production was restructured into six bounded contexts with
+      aggregates, ports &amp; adapters, a CQRS read side and domain events — explained from scratch, on its own code.</p>
+  </div>
+
+  <figure style="margin: 0 -2mm">
+    <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <defs>
+        <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#eef2ff"/><stop offset="1" stop-color="#f8fafc"/></linearGradient>
+      </defs>
+      <rect x="0" y="0" width="760" height="360" rx="18" fill="url(#cg)"/>
+      <!-- outer hexagon: adapters -->
+      <polygon points="380,22 560,112 560,248 380,338 200,248 200,112" fill="#ffffff" stroke="#c7d2fe" stroke-width="2"/>
+      <!-- middle hexagon: application -->
+      <polygon points="380,72 512,138 512,222 380,288 248,222 248,138" fill="#eef2ff" stroke="#a5b4fc" stroke-width="2"/>
+      <!-- inner hexagon: domain -->
+      <polygon points="380,118 466,161 466,199 380,242 294,199 294,161" fill="#4f46e5"/>
+      <text x="380" y="176" fill="#fff" font-size="17" font-weight="700" text-anchor="middle">Domain</text>
+      <text x="380" y="196" fill="#c7d2fe" font-size="10.5" text-anchor="middle">aggregates · rules · ports</text>
+      <text x="380" y="100" fill="#4338ca" font-size="11" font-weight="600" text-anchor="middle">Application — use cases</text>
+      <text x="380" y="54" fill="#6366f1" font-size="11" font-weight="600" text-anchor="middle">Adapters</text>
+      <!-- left: driving -->
+      <g font-size="11" fill="#0f172a">
+        <rect x="28" y="96" width="140" height="34" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="98" y="117" text-anchor="middle">HTTP controllers</text>
+        <rect x="28" y="163" width="140" height="34" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="98" y="184" text-anchor="middle">Cron · scripts</text>
+        <rect x="28" y="230" width="140" height="34" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="98" y="251" text-anchor="middle">Unit tests</text>
+      </g>
+      <g stroke="#6366f1" stroke-width="2" fill="none" marker-end="url(#ah)">
+        <path d="M168 113 L240 150"/><path d="M168 180 L246 180"/><path d="M168 247 L240 210"/>
+      </g>
+      <!-- right: driven -->
+      <g font-size="11" fill="#0f172a">
+        <rect x="592" y="70" width="140" height="34" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="662" y="91" text-anchor="middle">Prisma · MySQL</text>
+        <rect x="592" y="122" width="140" height="34" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="662" y="143" text-anchor="middle">Redis sessions</text>
+        <rect x="592" y="174" width="140" height="34" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="662" y="195" text-anchor="middle">Tesseract OCR</text>
+        <rect x="592" y="226" width="140" height="34" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="662" y="247" text-anchor="middle">Disk + SSH backup</text>
+        <rect x="592" y="278" width="140" height="34" rx="8" fill="#fff" stroke="#cbd5e1"/><text x="662" y="299" text-anchor="middle">Event bus</text>
+      </g>
+      <g stroke="#94a3b8" stroke-width="2" fill="none" stroke-dasharray="5 4">
+        <path d="M520 150 L592 87"/><path d="M520 165 L592 139"/><path d="M520 180 L592 191"/><path d="M520 200 L592 243"/><path d="M515 215 L592 295"/>
+      </g>
+      <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#6366f1"/></marker></defs>
+      <text x="98" y="300" fill="#64748b" font-size="10" text-anchor="middle">driving side: who calls us</text>
+      <text x="662" y="336" fill="#64748b" font-size="10" text-anchor="middle">driven side: what we call</text>
+    </svg>
+  </figure>
+
+  <div>
+    <div class="toc">
+      <div><b>1</b>The idea in one page</div>
+      <div><b>2</b>DDD: the building blocks</div>
+      <div><b>3</b>Hexagonal: ports &amp; adapters</div>
+      <div><b>4</b>PFA's bounded contexts</div>
+      <div><b>5</b>Layers &amp; the dependency rule</div>
+      <div><b>6</b>The folder tree</div>
+      <div><b>7</b>An aggregate: SpendingGroup</div>
+      <div><b>8</b>One request, every layer</div>
+      <div><b>9</b>Domain events</div>
+      <div><b>10</b>The read side (CQRS)</div>
+      <div><b>11</b>Testing &amp; fitness tests</div>
+      <div><b>12</b>The migration, ticket by ticket</div>
+      <div><b>13</b>Trade-offs</div>
+      <div><b>14</b>Interview cheat sheet</div>
+    </div>
+    <p style="font-size:8.5pt;color:var(--faint);margin-top:6mm">Companion to <code>nest-api/docs/ddd-hexagonal.md</code> — epic PFA-270, tickets PFA-271 → PFA-300.</p>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 1. THE IDEA ───────────────────────────── -->
+<section class="page">
+  <h2><span class="num">1</span>The idea in one page</h2>
+  <p class="lead">Two approaches that answer two different questions — and fit together without friction.</p>
+
+  <div class="grid2">
+    <div class="card" style="border-color:#c7d2fe;background:#eef2ff">
+      <h3>DDD decides <em>what</em> the model is</h3>
+      <p>Which concepts exist, what rules they guard, where one part of the business ends and another begins.
+        The words of the business become the names in the code.</p>
+    </div>
+    <div class="card" style="border-color:#a7f3d0;background:#ecfdf5">
+      <h3>Hexagonal decides <em>where</em> code lives</h3>
+      <p>The domain sits at the centre and knows nothing about NestJS, Prisma, Redis, Tesseract or the disk.
+        Those plug in from outside, through interfaces the domain owns.</p>
+    </div>
+  </div>
+
+  <figure>
+    <svg viewBox="0 0 760 250" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <g font-size="12">
+        <!-- without -->
+        <rect x="10" y="10" width="230" height="230" rx="14" fill="#fff7ed" stroke="#fdba74"/>
+        <text x="125" y="36" text-anchor="middle" font-weight="700" fill="#9a3412">DDD alone</text>
+        <rect x="45" y="60" width="160" height="70" rx="10" fill="#fff" stroke="#fdba74"/>
+        <text x="125" y="90" text-anchor="middle" fill="#0f172a">Rich aggregates…</text>
+        <text x="125" y="108" text-anchor="middle" fill="#9a3412" font-size="11">…calling this.prisma</text>
+        <text x="125" y="170" text-anchor="middle" fill="#7c2d12" font-size="11">model coupled to the DB again</text>
+
+        <rect x="265" y="10" width="230" height="230" rx="14" fill="#fff7ed" stroke="#fdba74"/>
+        <text x="380" y="36" text-anchor="middle" font-weight="700" fill="#9a3412">Hexagonal alone</text>
+        <polygon points="380,60 440,92 440,148 380,180 320,148 320,92" fill="#fff" stroke="#fdba74"/>
+        <text x="380" y="118" text-anchor="middle" fill="#9a3412" font-size="11">anemic model:</text>
+        <text x="380" y="134" text-anchor="middle" fill="#9a3412" font-size="11">ifs + data bags</text>
+        <text x="380" y="210" text-anchor="middle" fill="#7c2d12" font-size="11">clean plumbing, weak centre</text>
+
+        <rect x="520" y="10" width="230" height="230" rx="14" fill="#eef2ff" stroke="#818cf8" stroke-width="2"/>
+        <text x="635" y="36" text-anchor="middle" font-weight="700" fill="#3730a3">Both</text>
+        <polygon points="635,56 705,92 705,156 635,192 565,156 565,92" fill="#e0e7ff" stroke="#818cf8"/>
+        <polygon points="635,84 675,104 675,144 635,164 595,144 595,104" fill="#4f46e5"/>
+        <text x="635" y="128" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">real model</text>
+        <text x="635" y="214" text-anchor="middle" fill="#3730a3" font-size="11">DDD fills the centre,</text>
+        <text x="635" y="230" text-anchor="middle" fill="#3730a3" font-size="11">hexagonal protects it</text>
+      </g>
+    </svg>
+  </figure>
+
+  <h3>Why PFA needed it</h3>
+  <p>The API was organised the standard NestJS way — a folder per feature, a controller, a service. Clean and
+    tested end to end, but the business rules were not a thing you could point at:</p>
+  <table>
+    <tr><th>Symptom</th><th>Why it hurts</th></tr>
+    <tr><td>Services threw HTTP exceptions</td><td>Business code knew it ran behind HTTP.</td></tr>
+    <tr><td>"A line added later joins the group's receipt" lived in one Prisma transaction</td><td>Nothing stopped another path from breaking it.</td></tr>
+    <tr><td>Implicit category creation written twice</td><td>The two copies could drift — one already had.</td></tr>
+    <tr><td>Money as a float</td><td>Sums rounded after the fact.</td></tr>
+    <tr><td>Every delete called <code>receiptFiles.release()</code> by hand</td><td>Forget it once, a file leaks on disk.</td></tr>
+    <tr><td>Rules testable only against MySQL</td><td>Slow feedback, rules hidden in queries.</td></tr>
+  </table>
+  <div class="callout"><b>Pragmatic, not dogmatic.</b> Writes go through aggregates; read-heavy screens stay plain
+    queries. The migration was a strangler — one context per PR, the HTTP contract and the database schema frozen,
+    the e2e suite as the safety net.</div>
+</section>
+
+<!-- ───────────────────────────── 2. DDD BUILDING BLOCKS ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">2</span>DDD: the building blocks</h2>
+  <p class="lead">Two halves. Most people only know the second; the first matters more.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 430" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <defs><marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#64748b"/></marker></defs>
+      <!-- strategic -->
+      <rect x="8" y="8" width="360" height="414" rx="14" fill="#f8fafc" stroke="#e2e8f0"/>
+      <text x="26" y="36" font-size="14" font-weight="700" fill="#4f46e5">Strategic design</text>
+      <text x="26" y="54" font-size="10.5" fill="#64748b">cutting the problem</text>
+      <g font-size="11">
+        <rect x="30" y="72" width="316" height="44" rx="9" fill="#fff" stroke="#c7d2fe"/>
+        <text x="44" y="90" font-weight="700">Domain</text><text x="44" y="106" fill="#475569">the business: personal finance</text>
+        <path d="M188 116 V132" stroke="#64748b" marker-end="url(#a2)"/>
+        <rect x="30" y="136" width="316" height="62" rx="9" fill="#fff" stroke="#c7d2fe"/>
+        <text x="44" y="154" font-weight="700">Subdomains, ranked</text>
+        <rect x="44" y="164" width="88" height="22" rx="11" fill="#4f46e5"/><text x="88" y="179" text-anchor="middle" fill="#fff" font-size="10">core</text>
+        <rect x="140" y="164" width="96" height="22" rx="11" fill="#818cf8"/><text x="188" y="179" text-anchor="middle" fill="#fff" font-size="10">supporting</text>
+        <rect x="244" y="164" width="88" height="22" rx="11" fill="#cbd5e1"/><text x="288" y="179" text-anchor="middle" fill="#0f172a" font-size="10">generic</text>
+        <path d="M188 198 V214" stroke="#64748b" marker-end="url(#a2)"/>
+        <rect x="30" y="218" width="316" height="58" rx="9" fill="#fff" stroke="#c7d2fe"/>
+        <text x="44" y="236" font-weight="700">Bounded context</text>
+        <text x="44" y="252" fill="#475569">one model, one vocabulary, an explicit border.</text>
+        <text x="44" y="267" fill="#475569">"category" ≠ in budget vs. in an exceptional</text>
+        <path d="M188 276 V292" stroke="#64748b" marker-end="url(#a2)"/>
+        <rect x="30" y="296" width="316" height="44" rx="9" fill="#fff" stroke="#c7d2fe"/>
+        <text x="44" y="314" font-weight="700">Ubiquitous language</text><text x="44" y="330" fill="#475569">"Regrouper" in the UI → <tspan font-family="Menlo, monospace">merge</tspan> in the code</text>
+        <path d="M188 340 V356" stroke="#64748b" marker-end="url(#a2)"/>
+        <rect x="30" y="360" width="316" height="44" rx="9" fill="#fff" stroke="#c7d2fe"/>
+        <text x="44" y="378" font-weight="700">Context map</text><text x="44" y="394" fill="#475569">who depends on whom, events, translations</text>
+      </g>
+
+      <!-- tactical -->
+      <rect x="392" y="8" width="360" height="414" rx="14" fill="#f8fafc" stroke="#e2e8f0"/>
+      <text x="410" y="36" font-size="14" font-weight="700" fill="#059669">Tactical design</text>
+      <text x="410" y="54" font-size="10.5" fill="#64748b">building blocks inside a context</text>
+      <!-- aggregate boundary -->
+      <rect x="410" y="70" width="324" height="170" rx="12" fill="#ecfdf5" stroke="#059669" stroke-dasharray="6 4" stroke-width="1.6"/>
+      <text x="424" y="90" font-size="11" font-weight="700" fill="#047857">Aggregate = consistency boundary</text>
+      <rect x="428" y="102" width="132" height="54" rx="9" fill="#059669"/>
+      <text x="494" y="125" font-size="11.5" font-weight="700" fill="#fff" text-anchor="middle">Aggregate root</text>
+      <text x="494" y="143" font-size="9.5" fill="#d1fae5" text-anchor="middle">SpendingGroup</text>
+      <rect x="580" y="102" width="138" height="54" rx="9" fill="#fff" stroke="#6ee7b7"/>
+      <text x="649" y="125" font-size="11" font-weight="700" text-anchor="middle">Entity</text>
+      <text x="649" y="143" font-size="9.5" fill="#475569" text-anchor="middle">identity survives change</text>
+      <rect x="428" y="170" width="132" height="54" rx="9" fill="#fff" stroke="#6ee7b7"/>
+      <text x="494" y="193" font-size="11" font-weight="700" text-anchor="middle">Value object</text>
+      <text x="494" y="211" font-size="9.5" fill="#475569" text-anchor="middle">Money · CalendarDay</text>
+      <rect x="580" y="170" width="138" height="54" rx="9" fill="#fff" stroke="#6ee7b7"/>
+      <text x="649" y="193" font-size="11" font-weight="700" text-anchor="middle">Invariant</text>
+      <text x="649" y="211" font-size="9.5" fill="#475569" text-anchor="middle">"one day, one receipt"</text>
+      <g font-size="11">
+        <rect x="410" y="256" width="156" height="46" rx="9" fill="#fff" stroke="#cbd5e1"/>
+        <text x="424" y="275" font-weight="700">Repository</text><text x="424" y="291" fill="#475569" font-size="9.5">loads / saves a whole aggregate</text>
+        <rect x="578" y="256" width="156" height="46" rx="9" fill="#fff" stroke="#cbd5e1"/>
+        <text x="592" y="275" font-weight="700">Domain service</text><text x="592" y="291" fill="#475569" font-size="9.5">pure logic, no home: compareStores</text>
+        <rect x="410" y="314" width="156" height="46" rx="9" fill="#fff" stroke="#cbd5e1"/>
+        <text x="424" y="333" font-weight="700">Use case</text><text x="424" y="349" fill="#475569" font-size="9.5">load → domain → save → publish</text>
+        <rect x="578" y="314" width="156" height="46" rx="9" fill="#fff" stroke="#cbd5e1"/>
+        <text x="592" y="333" font-weight="700">Domain event</text><text x="592" y="349" fill="#475569" font-size="9.5">past tense: spendingDeleted</text>
+        <rect x="410" y="372" width="324" height="36" rx="9" fill="#fff" stroke="#cbd5e1"/>
+        <text x="424" y="395" font-weight="700">Factory</text><text x="490" y="395" fill="#475569" font-size="9.5">builds a valid aggregate: SpendingGroup.create(…), .merge(…)</text>
+      </g>
+    </svg>
+    <figcaption>The one rule to remember: an aggregate is a consistency boundary. What must be true <i>immediately</i> lives inside one; the rest goes between aggregates, by events.</figcaption>
+  </figure></div>
+</section>
+
+<!-- ───────────────────────────── 3. HEXAGONAL ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">3</span>Hexagonal: ports &amp; adapters</h2>
+  <p class="lead">Alistair Cockburn, 2005. Same family as Onion and Clean Architecture: dependencies point inwards.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <defs>
+        <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4f46e5"/></marker>
+        <marker id="a3g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#059669"/></marker>
+      </defs>
+      <polygon points="380,30 590,130 590,290 380,390 170,290 170,130" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+      <polygon points="380,80 530,152 530,268 380,340 230,268 230,152" fill="#eef2ff" stroke="#a5b4fc" stroke-width="2"/>
+      <polygon points="380,140 458,178 458,242 380,280 302,242 302,178" fill="#4f46e5"/>
+      <text x="380" y="206" fill="#fff" font-size="15" font-weight="700" text-anchor="middle">Domain</text>
+      <text x="380" y="224" fill="#c7d2fe" font-size="9.5" text-anchor="middle">pure TypeScript</text>
+      <text x="380" y="114" fill="#4338ca" font-size="11" font-weight="600" text-anchor="middle">Application: use cases</text>
+      <text x="380" y="60" fill="#64748b" font-size="11" font-weight="600" text-anchor="middle">Adapters</text>
+
+      <!-- driving ports (left) -->
+      <rect x="219" y="185" width="22" height="50" rx="4" fill="#4f46e5"/>
+      <text x="230" y="250" font-size="9" fill="#4338ca" text-anchor="middle">driving</text><text x="230" y="261" font-size="9" fill="#4338ca" text-anchor="middle">port</text>
+      <!-- driven ports (right) -->
+      <rect x="519" y="165" width="22" height="34" rx="4" fill="#059669"/>
+      <rect x="519" y="221" width="22" height="34" rx="4" fill="#059669"/>
+      <text x="530" y="272" font-size="9" fill="#047857" text-anchor="middle">driven</text><text x="530" y="283" font-size="9" fill="#047857" text-anchor="middle">ports</text>
+
+      <g font-size="11">
+        <rect x="14" y="110" width="150" height="40" rx="9" fill="#fff" stroke="#a5b4fc"/><text x="89" y="135" text-anchor="middle">SpendingGroupsController</text>
+        <rect x="14" y="190" width="150" height="40" rx="9" fill="#fff" stroke="#a5b4fc"/><text x="89" y="215" text-anchor="middle">Cron · CLI script</text>
+        <rect x="14" y="270" width="150" height="40" rx="9" fill="#fff" stroke="#a5b4fc"/><text x="89" y="295" text-anchor="middle">Jest unit test</text>
+      </g>
+      <g stroke="#4f46e5" stroke-width="2" fill="none" marker-end="url(#a3)">
+        <path d="M164 130 C190 140 200 190 217 200"/><path d="M164 210 L217 210"/><path d="M164 290 C190 280 200 230 217 222"/>
+      </g>
+
+      <g font-size="10.5">
+        <rect x="604" y="88" width="148" height="38" rx="9" fill="#fff" stroke="#6ee7b7"/><text x="678" y="104" text-anchor="middle" font-weight="600">PrismaSpending…</text><text x="678" y="118" text-anchor="middle" fill="#64748b" font-size="9">GroupRepository</text>
+        <rect x="604" y="140" width="148" height="38" rx="9" fill="#fff" stroke="#6ee7b7"/><text x="678" y="156" text-anchor="middle" font-weight="600">TesseractReceipt…</text><text x="678" y="170" text-anchor="middle" fill="#64748b" font-size="9">TextReader</text>
+        <rect x="604" y="192" width="148" height="38" rx="9" fill="#fff" stroke="#6ee7b7"/><text x="678" y="208" text-anchor="middle" font-weight="600">LocalReceiptFileStore</text><text x="678" y="222" text-anchor="middle" fill="#64748b" font-size="9">disk + SSH backup</text>
+        <rect x="604" y="244" width="148" height="38" rx="9" fill="#fff" stroke="#6ee7b7"/><text x="678" y="260" text-anchor="middle" font-weight="600">BcryptPasswordHasher</text><text x="678" y="274" text-anchor="middle" fill="#64748b" font-size="9">identity</text>
+        <rect x="604" y="296" width="148" height="38" rx="9" fill="#fff" stroke="#6ee7b7"/><text x="678" y="312" text-anchor="middle" font-weight="600">InMemory… fakes</text><text x="678" y="326" text-anchor="middle" fill="#64748b" font-size="9">for unit tests</text>
+      </g>
+      <g stroke="#059669" stroke-width="1.8" fill="none" marker-end="url(#a3g)">
+        <path d="M604 107 C575 120 560 170 543 180"/><path d="M604 159 L543 184"/><path d="M604 211 L543 236"/><path d="M604 263 L543 240"/><path d="M604 315 C575 300 560 255 543 248"/>
+      </g>
+      <text x="380" y="412" font-size="10.5" fill="#475569" text-anchor="middle">Adapters implement the ports (arrows point at the port): Prisma depends on the domain, never the reverse.</text>
+    </svg>
+  </figure></div>
+
+  <div class="grid2" style="grid-template-columns: 1.25fr 0.75fr">
+    <div class="card" style="min-width:0">
+      <div class="keep"><h3>A port is an abstract class</h3>
+      <pre><span class="k">export abstract class</span> <span class="t">SpendingGroupRepository</span> {
+  <span class="k">abstract</span> byId(id, ownerId):
+    <span class="t">Promise</span>&lt;SpendingGroup | <span class="k">null</span>&gt;;
+  <span class="k">abstract</span> save(group): <span class="t">Promise</span>&lt;<span class="k">void</span>&gt;;
+}</pre></div>
+      <p>TypeScript interfaces vanish at runtime. An abstract class is the <b>port</b>, the <b>type</b> and the
+        <b>Nest injection token</b> at once — and holds no code.</p>
+    </div>
+    <div class="card">
+      <h3>What it buys</h3>
+      <ul>
+        <li><b>Testability</b> — the domain runs in a unit test in milliseconds, no DB, no Nest container.</li>
+        <li><b>Replaceability</b> — Tesseract → a cloud OCR, the disk → S3: one adapter class.</li>
+        <li><b>Readability</b> — open <code>domain/</code> and you read the business, not the plumbing.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 4. CONTEXT MAP ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">4</span>PFA's bounded contexts</h2>
+  <p class="lead">Six contexts, one shared kernel, one platform — and every relationship between them named.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 470" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <defs>
+        <marker id="a4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#334155"/></marker>
+        <marker id="a4e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#059669"/></marker>
+      </defs>
+      <!-- identity band -->
+      <rect x="10" y="8" width="740" height="52" rx="12" fill="#fdf2f8" stroke="#db2777" stroke-width="1.6"/>
+      <text x="28" y="30" font-size="13" font-weight="700" fill="#9d174d">Identity &amp; access</text>
+      <text x="28" y="48" font-size="10" fill="#9d174d">generic · accounts, sign-in, sessions, bot accounts</text>
+      <text x="740" y="40" font-size="10.5" fill="#9d174d" text-anchor="end">guards + GetUserId → every other context sees a user ID, nothing more</text>
+
+      <!-- spending -->
+      <rect x="270" y="92" width="220" height="118" rx="14" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+      <rect x="282" y="104" width="44" height="18" rx="9" fill="#2563eb"/><text x="304" y="117" font-size="9" fill="#fff" text-anchor="middle">core</text>
+      <text x="380" y="146" font-size="15" font-weight="700" fill="#1e40af" text-anchor="middle">Spending</text>
+      <text x="380" y="166" font-size="10.5" fill="#1e3a8a" text-anchor="middle">Spending · SpendingGroup</text>
+      <text x="380" y="182" font-size="10.5" fill="#1e3a8a" text-anchor="middle">record · revise · merge · ungroup</text>
+
+      <!-- budget -->
+      <rect x="10" y="92" width="210" height="118" rx="14" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+      <rect x="22" y="104" width="70" height="18" rx="9" fill="#7c3aed"/><text x="57" y="117" font-size="9" fill="#fff" text-anchor="middle">supporting</text>
+      <text x="115" y="146" font-size="14" font-weight="700" fill="#5b21b6" text-anchor="middle">Budget planning</text>
+      <text x="115" y="166" font-size="10" fill="#4c1d95" text-anchor="middle">categories · recurrings</text>
+      <text x="115" y="182" font-size="10" fill="#4c1d95" text-anchor="middle">exceptionals · month's budget</text>
+
+      <!-- receipt -->
+      <rect x="270" y="272" width="220" height="118" rx="14" fill="#ecfdf5" stroke="#059669" stroke-width="2"/>
+      <rect x="282" y="284" width="44" height="18" rx="9" fill="#059669"/><text x="304" y="297" font-size="9" fill="#fff" text-anchor="middle">core</text>
+      <text x="380" y="326" font-size="15" font-weight="700" fill="#065f46" text-anchor="middle">Receipt reading</text>
+      <text x="380" y="346" font-size="10.5" fill="#064e3b" text-anchor="middle">files · OCR · saved lines</text>
+      <text x="380" y="362" font-size="10.5" fill="#064e3b" text-anchor="middle">bulk read (QueuedReceipt)</text>
+
+      <!-- price -->
+      <rect x="540" y="272" width="210" height="118" rx="14" fill="#fffbeb" stroke="#d97706" stroke-width="2"/>
+      <rect x="552" y="284" width="44" height="18" rx="9" fill="#d97706"/><text x="574" y="297" font-size="9" fill="#fff" text-anchor="middle">core</text>
+      <text x="645" y="326" font-size="14" font-weight="700" fill="#92400e" text-anchor="middle">Price comparison</text>
+      <text x="645" y="346" font-size="10" fill="#78350f" text-anchor="middle">stores · product types</text>
+      <text x="645" y="362" font-size="10" fill="#78350f" text-anchor="middle">unit prices · ranking</text>
+
+      <!-- analytics -->
+      <rect x="540" y="92" width="210" height="118" rx="14" fill="#ecfeff" stroke="#0891b2" stroke-width="2"/>
+      <rect x="552" y="104" width="70" height="18" rx="9" fill="#0891b2"/><text x="587" y="117" font-size="9" fill="#fff" text-anchor="middle">read only</text>
+      <text x="645" y="146" font-size="14" font-weight="700" fill="#155e75" text-anchor="middle">Analytics</text>
+      <text x="645" y="166" font-size="10" fill="#164e63" text-anchor="middle">stats · trends · heatmap</text>
+      <text x="645" y="182" font-size="10" fill="#164e63" text-anchor="middle">daily projection</text>
+
+      <!-- relations -->
+      <path d="M270 150 L224 150" stroke="#334155" stroke-width="1.8" marker-end="url(#a4)"/>
+      <rect x="226" y="122" width="42" height="14" rx="3" fill="#fff"/>
+      <text x="245" y="132" font-size="8.5" fill="#334155" text-anchor="middle" font-weight="600">port</text>
+      <text x="245" y="176" font-size="8.5" fill="#334155" text-anchor="middle">Category</text><text x="245" y="186" font-size="8.5" fill="#334155" text-anchor="middle">Lookup</text>
+
+      <path d="M380 210 L380 268" stroke="#059669" stroke-width="3" marker-end="url(#a4e)"/>
+      <rect x="390" y="222" width="150" height="38" rx="7" fill="#fff" stroke="#a7f3d0"/>
+      <text x="398" y="237" font-size="9.5" fill="#047857" font-weight="700">events, after the save</text>
+      <text x="398" y="251" font-size="8.5" fill="#065f46">spendingDeleted · groupDeleted…</text>
+
+      <path d="M490 331 L536 331" stroke="#334155" stroke-width="1.8" marker-end="url(#a4)"/>
+      <text x="513" y="320" font-size="8.5" fill="#334155" text-anchor="middle" font-weight="600">ports</text>
+      <text x="513" y="350" font-size="8" fill="#334155" text-anchor="middle">StoreDirectory</text><text x="513" y="360" font-size="8" fill="#334155" text-anchor="middle">ProductType…</text>
+
+      <path d="M645 210 L645 230 L720 230 L720 412" stroke="#0891b2" stroke-width="1.6" stroke-dasharray="5 4" fill="none"/>
+
+      <!-- kernel + platform -->
+      <rect x="10" y="404" width="345" height="56" rx="12" fill="#f1f5f9" stroke="#334155"/>
+      <text x="26" y="426" font-size="12" font-weight="700" fill="#0f172a">Shared kernel</text>
+      <text x="26" y="444" font-size="9.5" fill="#334155">Money · CalendarDay/Month · AggregateRoot · DomainError · event port</text>
+      <rect x="370" y="404" width="380" height="56" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-dasharray="4 3"/>
+      <text x="386" y="426" font-size="12" font-weight="700" fill="#0f172a">Platform</text>
+      <text x="386" y="444" font-size="9.5" fill="#334155">config · logging · event bus · monitoring · Prisma (MySQL) · Redis · backups</text>
+      <text x="712" y="398" font-size="8.5" fill="#0e7490" text-anchor="end">reads tables directly</text>
+    </svg>
+  </figure></div>
+
+  <table>
+    <tr><th style="width:30%">Relationship</th><th style="width:22%">DDD pattern</th><th>How it is built</th></tr>
+    <tr><td>Identity → everyone</td><td>Open host service</td><td>Guards and <code>GetUserId</code>; no context ever loads an account.</td></tr>
+    <tr><td>Spending → Budget planning</td><td>Customer / supplier</td><td><code>CategoryLookup</code> port, adapter over <code>CategoriesService</code>.</td></tr>
+    <tr><td>Spending → Receipt reading</td><td>Published events</td><td>Four events listing the receipts a change may orphan; receipt reading releases them.</td></tr>
+    <tr><td>Receipt reading → Price comparison</td><td>Anti-corruption layer</td><td><code>StoreDirectory</code>, <code>ProductTypeCatalog</code> ports over its services.</td></tr>
+    <tr><td>Analytics → the tables</td><td>Conformist read model</td><td>Query classes shaped per screen; no writes, no aggregates.</td></tr>
+  </table>
+</section>
+
+<!-- ───────────────────────────── 5. LAYERS ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">5</span>Layers &amp; the dependency rule</h2>
+  <p class="lead">Inside every context, the same four layers — and imports only ever point inwards.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <defs><marker id="a5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#dc2626"/></marker></defs>
+      <circle cx="250" cy="200" r="186" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2"/>
+      <circle cx="250" cy="200" r="128" fill="#eef2ff" stroke="#a5b4fc" stroke-width="2"/>
+      <circle cx="250" cy="200" r="72" fill="#4f46e5"/>
+      <circle cx="250" cy="200" r="30" fill="#312e81"/>
+      <text x="250" y="198" font-size="9" fill="#e0e7ff" text-anchor="middle" font-weight="700">shared</text>
+      <text x="250" y="209" font-size="9" fill="#e0e7ff" text-anchor="middle" font-weight="700">kernel</text>
+      <text x="250" y="152" font-size="13" fill="#fff" text-anchor="middle" font-weight="700">domain/</text>
+      <text x="250" y="96" font-size="13" fill="#3730a3" text-anchor="middle" font-weight="700">application/</text>
+      <text x="138" y="52" font-size="12" fill="#334155" text-anchor="middle" font-weight="700">interface/</text>
+      <text x="364" y="52" font-size="12" fill="#334155" text-anchor="middle" font-weight="700">infrastructure/</text>
+      <line x1="250" y1="14" x2="250" y2="70" stroke="#cbd5e1" stroke-width="2"/>
+      <text x="138" y="70" font-size="9.5" fill="#64748b" text-anchor="middle">controllers · DTOs</text>
+      <text x="364" y="70" font-size="9.5" fill="#64748b" text-anchor="middle">Prisma · Redis · OCR · disk</text>
+      <!-- inward arrows -->
+      <g stroke="#4f46e5" stroke-width="2.4" fill="#4f46e5">
+        <path d="M84 300 L170 252" marker-end="url(#a5i)"/><path d="M416 300 L330 252" marker-end="url(#a5i)"/><path d="M250 380 L250 285" marker-end="url(#a5i)"/>
+      </g>
+      <defs><marker id="a5i" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#4f46e5"/></marker></defs>
+
+      <!-- rules -->
+      <g font-size="10.5">
+        <rect x="470" y="20" width="282" height="82" rx="10" fill="#4f46e5"/>
+        <text x="484" y="42" fill="#fff" font-weight="700">domain/ may import</text>
+        <text x="484" y="60" fill="#e0e7ff">the shared kernel, its own domain,</text>
+        <text x="484" y="76" fill="#e0e7ff">other contexts' domains (published types)</text>
+        <text x="484" y="92" fill="#c7d2fe" font-size="9.5">never Nest, Prisma, Redis, fs, sharp, OCR</text>
+        <rect x="470" y="112" width="282" height="66" rx="10" fill="#eef2ff" stroke="#a5b4fc"/>
+        <text x="484" y="134" fill="#3730a3" font-weight="700">application/ may import</text>
+        <text x="484" y="152" fill="#312e81">domains and their ports</text>
+        <text x="484" y="168" fill="#4338ca" font-size="9.5">never an adapter, never persistence</text>
+        <rect x="470" y="188" width="282" height="66" rx="10" fill="#fff" stroke="#cbd5e1"/>
+        <text x="484" y="210" fill="#0f172a" font-weight="700">interface/ may import</text>
+        <text x="484" y="228" fill="#334155">its own use cases, HTTP things of others</text>
+        <text x="484" y="244" fill="#64748b" font-size="9.5">never an adapter (2 listed exceptions)</text>
+        <rect x="470" y="264" width="282" height="66" rx="10" fill="#fff" stroke="#cbd5e1"/>
+        <text x="484" y="286" fill="#0f172a" font-weight="700">infrastructure/ may import</text>
+        <text x="484" y="304" fill="#334155">anything — it is where adapters live,</text>
+        <text x="484" y="320" fill="#64748b" font-size="9.5">including the other contexts' ports</text>
+        <rect x="470" y="340" width="282" height="46" rx="10" fill="#fef2f2" stroke="#fecaca"/>
+        <text x="484" y="360" fill="#991b1b" font-weight="700">module files: composition roots</text>
+        <text x="484" y="376" fill="#7f1d1d" font-size="9.5">the only place that knows port → adapter</text>
+      </g>
+    </svg>
+  </figure></div>
+
+  <div class="callout"><b>Enforced twice.</b> A Biome rule rejects forbidden imports in <code>domain/</code> and
+    <code>application/</code> as you type. <code>src/contexts/architecture.spec.ts</code> reads every import and checks layers
+    <i>and</i> context borders in <code>pnpm test</code> — so breaking the architecture fails the deploy's fast checks, like a type error.</div>
+</section>
+
+<!-- ───────────────────────────── 6. TREE ───────────────────────────── -->
+<section class="page">
+  <h2><span class="num">6</span>The folder tree</h2>
+  <p class="lead">The architecture is visible from <code>ls</code>: a context is a folder, a layer is a folder.</p>
+
+  <div class="grid2" style="grid-template-columns: 1.15fr 0.85fr">
+<pre><span class="c">src/</span>
+├── main.ts · app.module.ts   <span class="c"># composition root</span>
+├── <span class="t">shared-kernel/</span>
+│   ├── money.ts               <span class="c"># cents + currency</span>
+│   ├── calendar-day.ts · calendar-month.ts
+│   ├── aggregate-root.ts      <span class="c"># record / pullEvents</span>
+│   ├── domain-error.ts        <span class="c"># kinds → HTTP</span>
+│   └── domain-event-publisher.ts
+├── <span class="t">contexts/</span>
+│   ├── architecture.spec.ts   <span class="c"># fitness tests</span>
+│   ├── <span class="k">spending/</span>
+│   │   ├── <span class="s">domain/</span>
+│   │   │   ├── spending-group.ts   <span class="c"># aggregate</span>
+│   │   │   ├── spending-events.ts
+│   │   │   └── ports/              <span class="c"># abstract classes</span>
+│   │   ├── <span class="s">application/</span>        <span class="c"># use cases</span>
+│   │   ├── <span class="s">infrastructure/</span>     <span class="c"># Prisma adapters</span>
+│   │   │   ├── queries/            <span class="c"># read side</span>
+│   │   │   └── testing/            <span class="c"># fakes</span>
+│   │   ├── <span class="s">interface/</span>          <span class="c"># controllers, DTOs</span>
+│   │   └── spending.module.ts
+│   ├── <span class="k">receipt-reading/</span>
+│   ├── <span class="k">price-comparison/</span>
+│   ├── <span class="k">budget-planning/</span>
+│   ├── <span class="k">analytics/</span>
+│   └── <span class="k">identity/</span>
+└── <span class="t">platform/</span>
+    ├── config/ · infrastructure/ · monitoring/
+    └── prisma/ · redis/</pre>
+    <div>
+      <div class="card" style="margin-top:3mm">
+        <h3>Conventions</h3>
+        <ul>
+          <li>One use case per user intention: <code>ls application/</code> is the feature list.</li>
+          <li>Ports are abstract classes in <code>domain/ports/</code>.</li>
+          <li>Exported types in <code>interfaces/&lt;name&gt;Types.ts</code>.</li>
+          <li>Kebab-case files, Nest style.</li>
+          <li>Path aliases only: <code>@contexts</code>, <code>@shared-kernel</code>, <code>@db</code>, <code>@generated</code>…</li>
+        </ul>
+      </div>
+      <div class="card" style="margin-top:4mm">
+        <h3>Where to start reading</h3>
+        <ol style="margin:0;padding-left:5mm">
+          <li><code>spending/domain/spending-group.ts</code></li>
+          <li><code>application/merge-spendings-into-group.use-case.ts</code></li>
+          <li><code>infrastructure/prisma-spending-group.repository.ts</code></li>
+          <li><code>spending.module.ts</code></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 7. AGGREGATE ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">7</span>An aggregate: SpendingGroup</h2>
+  <p class="lead">Several spendings bought on one receipt, each line in its own category. The group is the only way its lines change together — so it is where the rules live.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 330" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <rect x="10" y="10" width="440" height="310" rx="16" fill="#eff6ff" stroke="#2563eb" stroke-width="2" stroke-dasharray="8 5"/>
+      <text x="28" y="36" font-size="11" font-weight="700" fill="#1d4ed8">consistency boundary — saved in one transaction</text>
+      <rect x="140" y="52" width="180" height="70" rx="12" fill="#2563eb"/>
+      <text x="230" y="80" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">SpendingGroup</text>
+      <text x="230" y="98" font-size="10" fill="#dbeafe" text-anchor="middle">root · "Market" · 16 Nov</text>
+      <text x="230" y="112" font-size="9.5" fill="#bfdbfe" text-anchor="middle">receipt r1.jpg</text>
+      <g font-size="10">
+        <rect x="30" y="176" width="124" height="74" rx="10" fill="#fff" stroke="#93c5fd"/>
+        <text x="92" y="198" text-anchor="middle" font-weight="700">GroupLine a</text>
+        <text x="92" y="214" text-anchor="middle" fill="#334155">Money 4.00 EUR</text>
+        <text x="92" y="230" text-anchor="middle" fill="#334155">"Market — Fruit"</text>
+        <rect x="168" y="176" width="124" height="74" rx="10" fill="#fff" stroke="#93c5fd"/>
+        <text x="230" y="198" text-anchor="middle" font-weight="700">GroupLine b</text>
+        <text x="230" y="214" text-anchor="middle" fill="#334155">Money 6.00 EUR</text>
+        <text x="230" y="230" text-anchor="middle" fill="#334155">"Market"</text>
+        <rect x="306" y="176" width="124" height="74" rx="10" fill="#fff" stroke="#93c5fd" stroke-dasharray="4 3"/>
+        <text x="368" y="198" text-anchor="middle" font-weight="700">GroupLine c</text>
+        <text x="368" y="214" text-anchor="middle" fill="#334155">added while editing</text>
+        <text x="368" y="230" text-anchor="middle" fill="#2563eb">joins r1.jpg + EUR</text>
+      </g>
+      <g stroke="#2563eb" stroke-width="1.6"><line x1="190" y1="122" x2="92" y2="176"/><line x1="230" y1="122" x2="230" y2="176"/><line x1="270" y1="122" x2="368" y2="176"/></g>
+      <text x="230" y="282" font-size="10" fill="#1e3a8a" text-anchor="middle">Outside code never changes a line directly:</text>
+      <text x="230" y="298" font-size="10" fill="#1e3a8a" text-anchor="middle">group.edit(…) · group.merge(…) · group.discard()</text>
+
+      <!-- invariants -->
+      <g font-size="10.5">
+        <rect x="470" y="14" width="280" height="62" rx="10" fill="#fff" stroke="#e2e8f0"/>
+        <circle cx="490" cy="45" r="10" fill="#2563eb"/><text x="490" y="49" fill="#fff" font-size="10" text-anchor="middle" font-weight="700">1</text>
+        <text x="508" y="38" font-weight="700">Every line is on the group's day</text>
+        <text x="508" y="56" fill="#475569" font-size="9.5">merge refuses two days: GroupSpansSeveralDays</text>
+        <rect x="470" y="84" width="280" height="62" rx="10" fill="#fff" stroke="#e2e8f0"/>
+        <circle cx="490" cy="115" r="10" fill="#2563eb"/><text x="490" y="119" fill="#fff" font-size="10" text-anchor="middle" font-weight="700">2</text>
+        <text x="508" y="108" font-weight="700">A new line joins receipt &amp; currency</text>
+        <text x="508" y="126" fill="#475569" font-size="9.5">by construction, in edit()</text>
+        <rect x="470" y="154" width="280" height="62" rx="10" fill="#fff" stroke="#e2e8f0"/>
+        <circle cx="490" cy="185" r="10" fill="#2563eb"/><text x="490" y="189" fill="#fff" font-size="10" text-anchor="middle" font-weight="700">3</text>
+        <text x="508" y="178" font-weight="700">Stored label = "group — detail"</text>
+        <text x="508" y="196" fill="#475569" font-size="9.5">recomposed whenever the group is renamed</text>
+        <rect x="470" y="224" width="280" height="62" rx="10" fill="#fff" stroke="#e2e8f0"/>
+        <circle cx="490" cy="255" r="10" fill="#2563eb"/><text x="490" y="259" fill="#fff" font-size="10" text-anchor="middle" font-weight="700">4</text>
+        <text x="508" y="248" font-weight="700">A merge keeps the first receipt</text>
+        <text x="508" y="266" fill="#475569" font-size="9.5">and records the others it lets go</text>
+      </g>
+    </svg>
+  </figure></div>
+
+<pre><span class="k">static</span> merge(input: <span class="t">GroupMerge</span>): <span class="t">SpendingGroup</span> {
+  <span class="k">const</span> [first] = input.candidates;
+  <span class="k">if</span> (input.candidates.some((c) =&gt; !c.date.equals(first.date))) {
+    <span class="k">throw new</span> <span class="t">GroupSpansSeveralDays</span>();                          <span class="c">// invariant 1</span>
+  }
+  <span class="c">// the first receipt found, in the order sent, is the whole group's   (invariant 4)</span>
+  <span class="k">const</span> receipt = input.candidates.find((c) =&gt; c.receipt)?.receipt ?? <span class="k">null</span>;
+  <span class="k">const</span> lines = input.candidates.map((c) =&gt; ({ …c, receipt }));
+  <span class="k">const</span> group = <span class="k">new</span> <span class="t">SpendingGroup</span>({ …, lines }, <span class="k">true</span>);
+  group.record({
+    name: <span class="t">SPENDING_EVENT</span>.spendingsMerged,
+    receipts: input.candidates.map((c) =&gt; c.receipt),             <span class="c">// what may be orphaned</span>
+  });
+  <span class="k">return</span> group;
+}</pre>
+  <p style="font-size:9pt;color:var(--muted)">Errors are domain errors (<code>GroupSpansSeveralDays extends InvalidInputError</code>); one global filter turns them into the exact 400 the route used to send.</p>
+</section>
+
+<!-- ───────────────────────────── 8. REQUEST FLOW ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">8</span>One request, every layer</h2>
+  <p class="lead"><code>POST /api/spendings/groups/merge</code> — three spendings of one day become a group.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 520" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <defs>
+        <marker id="a8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#334155"/></marker>
+        <marker id="a8r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/></marker>
+      </defs>
+      <!-- lanes -->
+      <g font-size="10.5" font-weight="700" text-anchor="middle">
+        <rect x="6" y="6" width="112" height="44" rx="9" fill="#fff" stroke="#cbd5e1"/><text x="62" y="26">Controller</text><text x="62" y="41" font-size="8.5" font-weight="400" fill="#64748b">interface</text>
+        <rect x="132" y="6" width="112" height="44" rx="9" fill="#eef2ff" stroke="#a5b4fc"/><text x="188" y="26">MergeSpendings…</text><text x="188" y="41" font-size="8.5" font-weight="400" fill="#64748b">application</text>
+        <rect x="258" y="6" width="112" height="44" rx="9" fill="#4f46e5"/><text x="314" y="26" fill="#fff">SpendingGroup</text><text x="314" y="41" font-size="8.5" font-weight="400" fill="#c7d2fe">domain</text>
+        <rect x="384" y="6" width="112" height="44" rx="9" fill="#ecfdf5" stroke="#6ee7b7"/><text x="440" y="26">Prisma repo</text><text x="440" y="41" font-size="8.5" font-weight="400" fill="#64748b">infrastructure</text>
+        <rect x="510" y="6" width="112" height="44" rx="9" fill="#f1f5f9" stroke="#94a3b8"/><text x="566" y="26">Event bus</text><text x="566" y="41" font-size="8.5" font-weight="400" fill="#64748b">platform</text>
+        <rect x="636" y="6" width="118" height="44" rx="9" fill="#ecfdf5" stroke="#059669"/><text x="695" y="26">Receipt reading</text><text x="695" y="41" font-size="8.5" font-weight="400" fill="#64748b">other context</text>
+      </g>
+      <g stroke="#e2e8f0" stroke-width="2" stroke-dasharray="4 4">
+        <line x1="62" y1="50" x2="62" y2="510"/><line x1="188" y1="50" x2="188" y2="510"/><line x1="314" y1="50" x2="314" y2="510"/>
+        <line x1="440" y1="50" x2="440" y2="510"/><line x1="566" y1="50" x2="566" y2="510"/><line x1="695" y1="50" x2="695" y2="510"/>
+      </g>
+      <g font-size="9.8" fill="#0f172a">
+        <text x="70" y="76">DTO validated (shape)</text>
+        <path d="M62 92 H184" stroke="#334155" stroke-width="1.6" marker-end="url(#a8)"/><text x="72" y="88">execute(command)</text>
+        <text x="196" y="112" fill="#991b1b">sent twice? → DuplicateSpending</text>
+        <path d="M188 130 H436" stroke="#334155" stroke-width="1.6" marker-end="url(#a8)"/><text x="198" y="126">candidates(ids, ownerId)</text>
+        <path d="M440 152 H192" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#a8r)"/><text x="300" y="148" fill="#64748b">rows → GroupCandidate[] (mapper)</text>
+        <text x="196" y="174" fill="#991b1b">one missing? → SpendingNotFound</text>
+        <path d="M188 192 H310" stroke="#334155" stroke-width="1.6" marker-end="url(#a8)"/><text x="198" y="188">SpendingGroup.merge(…)</text>
+        <rect x="322" y="198" width="120" height="58" rx="8" fill="#eef2ff" stroke="#a5b4fc"/>
+        <text x="330" y="214" font-size="9">same day? (invariant 1)</text>
+        <text x="330" y="228" font-size="9">first receipt kept (4)</text>
+        <text x="330" y="242" font-size="9">labels composed (3)</text>
+        <text x="330" y="253" font-size="9" fill="#047857">records spendingsMerged</text>
+        <path d="M314 270 H192" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#a8r)"/><text x="230" y="266" fill="#64748b">group</text>
+        <path d="M188 292 H436" stroke="#334155" stroke-width="1.6" marker-end="url(#a8)"/><text x="198" y="288">save(group)</text>
+        <rect x="448" y="298" width="112" height="44" rx="8" fill="#ecfdf5" stroke="#6ee7b7"/>
+        <text x="456" y="314" font-size="9">one $transaction:</text>
+        <text x="456" y="327" font-size="9">group + lines + emptied</text>
+        <text x="456" y="339" font-size="9">groups dropped</text>
+        <path d="M188 362 H562" stroke="#059669" stroke-width="2" marker-end="url(#a8)"/><text x="198" y="358" fill="#047857" font-weight="700">publish(group.pullEvents())  — after commit</text>
+        <path d="M566 384 H691" stroke="#059669" stroke-width="2" marker-end="url(#a8)"/><text x="572" y="380" fill="#047857">handler</text>
+        <rect x="604" y="392" width="150" height="58" rx="8" fill="#ecfdf5" stroke="#059669"/>
+        <text x="612" y="408" font-size="9">ReleaseReceiptsHandler</text>
+        <text x="612" y="422" font-size="9">keeps a.jpg (still held),</text>
+        <text x="612" y="436" font-size="9">removes b.jpg + its backup</text>
+        <path d="M188 470 H66" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="4 3" marker-end="url(#a8r)"/><text x="80" y="466" fill="#64748b">{ ID, invoicefile }</text>
+        <text x="70" y="494" fill="#0f172a">201 — same payload as before the refactor</text>
+      </g>
+    </svg>
+  </figure></div>
+  <p style="font-size:9pt;color:var(--muted)">Shape validation is an HTTP concern (DTO + class-validator); business validation is the domain's. Three lines of orchestration in the use case, zero business rules.</p>
+</section>
+
+<!-- ───────────────────────────── 9. EVENTS ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">9</span>Domain events</h2>
+  <p class="lead">Commands across contexts became events; questions that need an answer now stayed ports.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <defs><marker id="a9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#059669"/></marker></defs>
+      <g font-size="10.5">
+        <rect x="10" y="40" width="150" height="96" rx="12" fill="#2563eb"/>
+        <text x="85" y="64" fill="#fff" font-weight="700" text-anchor="middle">Aggregate</text>
+        <text x="85" y="84" fill="#dbeafe" font-size="9.5" text-anchor="middle">record(event)</text>
+        <text x="85" y="100" fill="#dbeafe" font-size="9.5" text-anchor="middle">in memory, nothing</text>
+        <text x="85" y="114" fill="#dbeafe" font-size="9.5" text-anchor="middle">leaves yet</text>
+        <rect x="200" y="40" width="150" height="96" rx="12" fill="#eef2ff" stroke="#a5b4fc"/>
+        <text x="275" y="64" font-weight="700" text-anchor="middle">Use case</text>
+        <text x="275" y="84" fill="#334155" font-size="9.5" text-anchor="middle">1. repository.save()</text>
+        <text x="275" y="100" fill="#334155" font-size="9.5" text-anchor="middle">2. publish(pullEvents())</text>
+        <text x="275" y="116" fill="#4338ca" font-size="9" text-anchor="middle">never a rolled-back change</text>
+        <rect x="390" y="40" width="150" height="96" rx="12" fill="#f1f5f9" stroke="#94a3b8"/>
+        <text x="465" y="64" font-weight="700" text-anchor="middle">InProcessEventBus</text>
+        <text x="465" y="84" fill="#334155" font-size="9.5" text-anchor="middle">DomainEventPublisher</text>
+        <text x="465" y="100" fill="#334155" font-size="9.5" text-anchor="middle">handlers in order,</text>
+        <text x="465" y="114" fill="#334155" font-size="9.5" text-anchor="middle">awaited</text>
+        <rect x="580" y="40" width="170" height="96" rx="12" fill="#ecfdf5" stroke="#059669" stroke-width="1.6"/>
+        <text x="665" y="64" font-weight="700" text-anchor="middle" fill="#065f46">Receipt reading</text>
+        <text x="665" y="84" fill="#065f46" font-size="9.5" text-anchor="middle">ReleaseReceiptsHandler</text>
+        <text x="665" y="100" fill="#065f46" font-size="9.5" text-anchor="middle">a file another row holds</text>
+        <text x="665" y="114" fill="#065f46" font-size="9.5" text-anchor="middle">stays — idempotent</text>
+      </g>
+      <g stroke="#059669" stroke-width="2.4" fill="none" marker-end="url(#a9)"><path d="M160 88 H196"/><path d="M350 88 H386"/><path d="M540 88 H576"/></g>
+      <g font-size="10" font-family="Menlo, monospace">
+        <rect x="10" y="166" width="740" height="94" rx="12" fill="#0f172a"/>
+        <text x="28" y="190" fill="#94a3b8" font-family="-apple-system, Helvetica, sans-serif" font-size="10.5" font-weight="700">SPENDING_EVENT — the published language</text>
+        <text x="28" y="214" fill="#86efac">spending.spendingDeleted</text><text x="260" y="214" fill="#cbd5e1">a spending goes; its receipt may be orphaned</text>
+        <text x="28" y="232" fill="#86efac">spending.groupDeleted</text><text x="260" y="232" fill="#cbd5e1">a group goes with its lines</text>
+        <text x="28" y="250" fill="#86efac">spending.groupLinesRemoved</text><text x="260" y="250" fill="#cbd5e1">an edit drops lines</text>
+        <text x="420" y="250" fill="#86efac">spending.spendingsMerged</text><text x="610" y="250" fill="#cbd5e1">one receipt kept</text>
+      </g>
+    </svg>
+  </figure></div>
+
+  <div class="grid2">
+    <div class="card"><h3>Why not a message broker?</h3>
+      <p>One process, one database. A broker would add a moving part for nothing. If a second process ever needs
+        the events, the upgrade is a <b>transactional outbox</b> — events written in the same transaction as the
+        aggregate, relayed afterwards. Same port, new adapter.</p></div>
+    <div class="card"><h3>What stayed synchronous</h3>
+      <p>"Is this category usable?", "which store is this?", "which product type is this line?" need an answer now.
+        Those are ports with an adapter over the other context — an anti-corruption layer, not an event.</p></div>
+  </div>
+</section>
+
+<!-- ───────────────────────────── 10. CQRS ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">10</span>The read side (CQRS)</h2>
+  <p class="lead">Writes go through aggregates. Reads go straight to the rows, shaped for the screen.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <defs><marker id="a10" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#334155"/></marker></defs>
+      <rect x="10" y="10" width="360" height="280" rx="14" fill="#eff6ff" stroke="#93c5fd"/>
+      <text x="190" y="38" font-size="13" font-weight="700" fill="#1d4ed8" text-anchor="middle">Write side — commands</text>
+      <rect x="390" y="10" width="360" height="280" rx="14" fill="#ecfeff" stroke="#67e8f9"/>
+      <text x="570" y="38" font-size="13" font-weight="700" fill="#0e7490" text-anchor="middle">Read side — queries</text>
+      <g font-size="10.5" text-anchor="middle">
+        <rect x="90" y="56" width="200" height="34" rx="8" fill="#fff" stroke="#93c5fd"/><text x="190" y="77">Controller</text>
+        <rect x="90" y="108" width="200" height="34" rx="8" fill="#fff" stroke="#93c5fd"/><text x="190" y="129">Use case</text>
+        <rect x="90" y="160" width="200" height="34" rx="8" fill="#2563eb"/><text x="190" y="181" fill="#fff">Aggregate (rules)</text>
+        <rect x="90" y="212" width="200" height="34" rx="8" fill="#fff" stroke="#93c5fd"/><text x="190" y="233">Repository port → Prisma</text>
+        <rect x="470" y="56" width="200" height="34" rx="8" fill="#fff" stroke="#67e8f9"/><text x="570" y="77">Controller</text>
+        <rect x="470" y="108" width="200" height="52" rx="8" fill="#0891b2"/><text x="570" y="129" fill="#fff">Query class</text><text x="570" y="146" fill="#cffafe" font-size="9.5">infrastructure/queries</text>
+        <rect x="470" y="178" width="200" height="34" rx="8" fill="#fff" stroke="#67e8f9"/><text x="570" y="199">pure domain functions</text>
+        <rect x="470" y="230" width="200" height="34" rx="8" fill="#fff" stroke="#67e8f9"/><text x="570" y="251">MySQL, per screen</text>
+      </g>
+      <g stroke="#334155" stroke-width="1.6" marker-end="url(#a10)"><line x1="190" y1="90" x2="190" y2="106"/><line x1="190" y1="142" x2="190" y2="158"/><line x1="190" y1="194" x2="190" y2="210"/>
+        <line x1="570" y1="90" x2="570" y2="106"/><line x1="570" y1="160" x2="570" y2="176"/><line x1="570" y1="212" x2="570" y2="228"/></g>
+      <text x="190" y="272" font-size="10" fill="#1e3a8a" text-anchor="middle">create · edit · merge · delete</text>
+      <text x="570" y="282" font-size="10" fill="#155e75" text-anchor="middle">heatmap · trends · projection · search</text>
+    </svg>
+  </figure></div>
+
+  <div class="keep"><h3>The daily projection, as pure functions</h3>
+<pre><span class="k">export function</span> projectionCandidates(viewed: <span class="t">CalendarMonth</span>): <span class="t">ProjectionCandidate</span>[] {
+  <span class="k">return</span> [
+    { source: <span class="t">PROJECTION_SOURCE</span>.sameMonthLastYear,    month: viewed.plusYears(-<span class="s">1</span>) },  <span class="c">// N-1</span>
+    { source: <span class="t">PROJECTION_SOURCE</span>.sameMonthTwoYearsAgo, month: viewed.plusYears(-<span class="s">2</span>) },  <span class="c">// N-2</span>
+    { source: <span class="t">PROJECTION_SOURCE</span>.previousMonth,        month: viewed.plusMonths(-<span class="s">1</span>) }, <span class="c">// M-1</span>
+  ];  <span class="c">// none found → no tail at all. Never an average.</span>
+}</pre></div>
+  <div class="callout"><b>Knowing when not to apply a pattern is the senior part.</b> Loading a year of
+    <code>Spending</code> aggregates to sum them would be slow and pointless. Lightweight CQRS — aggregates for writes,
+    direct queries for reads — is just honest.</div>
+</section>
+
+<!-- ───────────────────────────── 11. TESTING ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">11</span>Testing &amp; fitness tests</h2>
+  <p class="lead">The architecture is what makes the fast tests possible — and a test keeps the architecture.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <polygon points="230,20 330,20 400,90 160,90" fill="#0891b2"/>
+      <text x="280" y="50" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">e2e · 140</text>
+      <text x="280" y="68" fill="#cffafe" font-size="9.5" text-anchor="middle">HTTP contract, MySQL, Redis</text>
+      <polygon points="160,96 400,96 460,166 100,166" fill="#059669"/>
+      <text x="280" y="126" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">Application · in-memory adapters</text>
+      <text x="280" y="144" fill="#d1fae5" font-size="9.5" text-anchor="middle">orchestration, events emitted, not-found paths</text>
+      <polygon points="100,172 460,172 530,252 30,252" fill="#4f46e5"/>
+      <text x="280" y="206" fill="#fff" font-size="12" font-weight="700" text-anchor="middle">Domain · plain Jest, milliseconds</text>
+      <text x="280" y="226" fill="#e0e7ff" font-size="9.5" text-anchor="middle">invariants, calculations, state machines — 487 unit tests in all</text>
+      <rect x="30" y="262" width="500" height="30" rx="8" fill="#fef2f2" stroke="#fecaca"/>
+      <text x="280" y="282" fill="#991b1b" font-size="10.5" font-weight="700" text-anchor="middle">Fitness tests: the dependency rule on every import</text>
+
+      <g font-size="10">
+        <rect x="560" y="20" width="190" height="272" rx="12" fill="#0f172a"/>
+        <text x="576" y="44" fill="#94a3b8" font-weight="700">architecture.spec.ts</text>
+        <text x="576" y="70" fill="#86efac">✓ finds the code it checks</text>
+        <text x="576" y="96" fill="#86efac">✓ keeps the domain pure</text>
+        <text x="576" y="122" fill="#86efac">✓ persistence, files, OCR</text>
+        <text x="590" y="136" fill="#86efac">in adapters only</text>
+        <text x="576" y="162" fill="#86efac">✓ use cases on domains</text>
+        <text x="590" y="176" fill="#86efac">and ports only</text>
+        <text x="576" y="202" fill="#86efac">✓ HTTP edge off adapters</text>
+        <text x="576" y="228" fill="#86efac">✓ contexts cross only via</text>
+        <text x="590" y="242" fill="#86efac">domain · edge · adapter</text>
+        <text x="576" y="272" fill="#cbd5e1">2 exceptions, each with</text>
+        <text x="576" y="286" fill="#cbd5e1">its reason in the test</text>
+      </g>
+    </svg>
+  </figure></div>
+
+<pre><span class="k">it</span>(<span class="s">"refuses to merge spendings from two different days"</span>, () =&gt; {
+  <span class="k">const</span> monday = candidate(<span class="s">"a"</span>);
+  <span class="k">const</span> tuesday = candidate(<span class="s">"b"</span>, { date: <span class="t">CalendarDay</span>.of(<span class="s">"2026-11-17"</span>) });
+  <span class="k">const</span> merge = () =&gt; <span class="t">SpendingGroup</span>.merge({ …, candidates: [monday, tuesday] });
+  expect(merge).toThrow(<span class="t">GroupSpansSeveralDays</span>);
+});
+<span class="c">// no DB, no Nest, no Redis. Before the refactor, only an e2e test against MySQL covered it.</span></pre>
+  <p>When the fitness test first ran it found a real violation: budget planning's domain types imported Prisma's
+    <code>Decimal</code>. Amounts became decimal text — the same JSON on the wire.</p>
+</section>
+
+<!-- ───────────────────────────── 12. MIGRATION ───────────────────────────── -->
+<section class="page">
+  <div class="keep"><h2><span class="num">12</span>The migration, ticket by ticket</h2>
+  <p class="lead">A strangler fig: the new structure grew around the old one until nothing of the old was left.</p>
+
+  <figure>
+    <svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system, Helvetica, Arial, sans-serif">
+      <line x1="60" y1="20" x2="60" y2="405" stroke="#c7d2fe" stroke-width="4"/>
+      <g font-size="10.5">
+        <!-- items -->
+        <g><circle cx="60" cy="32" r="9" fill="#4f46e5"/><text x="80" y="29" font-weight="700">PFA-271</text><text x="150" y="29">Reference doc — the map, before the journey</text></g>
+        <g><circle cx="60" cy="62" r="9" fill="#334155"/><text x="80" y="59" font-weight="700">PFA-272</text><text x="150" y="59">Shared kernel, domain errors → HTTP, Biome rule</text></g>
+        <g><circle cx="60" cy="92" r="9" fill="#2563eb"/><text x="80" y="89" font-weight="700">PFA-273</text><text x="150" y="89">Spending pilot: SpendingGroup, use cases, Prisma adapters</text></g>
+        <g><circle cx="60" cy="122" r="9" fill="#059669"/><text x="80" y="119" font-weight="700">PFA-274</text><text x="150" y="119">Receipt reading: OCR and files behind ports, QueuedReceipt</text></g>
+        <g><circle cx="60" cy="152" r="9" fill="#d97706"/><text x="80" y="149" font-weight="700">PFA-275</text><text x="150" y="149">Price comparison: CatalogName, ranking in the domain</text></g>
+        <g><circle cx="60" cy="182" r="9" fill="#7c3aed"/><text x="80" y="179" font-weight="700">PFA-276</text><text x="150" y="179">Budget planning: categories own their rules</text></g>
+        <g><circle cx="60" cy="212" r="9" fill="#0891b2"/><text x="80" y="209" font-weight="700">PFA-277</text><text x="150" y="209">Analytics read side: query classes + pure projection</text></g>
+        <g><circle cx="60" cy="242" r="9" fill="#059669"/><text x="80" y="239" font-weight="700">PFA-278</text><text x="150" y="239">Domain events between contexts, in-process bus</text></g>
+        <g><circle cx="60" cy="272" r="9" fill="#db2777"/><text x="80" y="269" font-weight="700">PFA-279</text><text x="150" y="269">Identity: accounts, password hashing, sessions</text></g>
+        <g><circle cx="60" cy="302" r="9" fill="#db2777"/><text x="80" y="299" font-weight="700">PFA-296</text><text x="150" y="299">Sign-in throttle and session registry behind ports</text></g>
+        <g><circle cx="60" cy="332" r="9" fill="#dc2626"/><text x="80" y="329" font-weight="700">PFA-297</text><text x="150" y="329">Architecture fitness tests</text></g>
+        <g><circle cx="60" cy="362" r="9" fill="#64748b"/><text x="80" y="359" font-weight="700">PFA-298</text><text x="150" y="359">platform/ folder: src = contexts · shared-kernel · platform</text></g>
+        <g><circle cx="60" cy="392" r="9" fill="#4f46e5"/><text x="80" y="389" font-weight="700">PFA-299/300</text><text x="170" y="389">Doc as built, README, this guide</text></g>
+      </g>
+      <g font-size="10">
+        <rect x="560" y="20" width="190" height="200" rx="12" fill="#f8fafc" stroke="#e2e8f0"/>
+        <text x="576" y="44" font-weight="700" fill="#0f172a">Frozen at every step</text>
+        <text x="576" y="70" fill="#334155">✓ the HTTP contract</text>
+        <text x="590" y="84" fill="#64748b" font-size="9">same routes, same payloads</text>
+        <text x="576" y="108" fill="#334155">✓ the database schema</text>
+        <text x="590" y="122" fill="#64748b" font-size="9">mappers absorb the gap</text>
+        <text x="576" y="146" fill="#334155">✓ the deploy path</text>
+        <text x="590" y="160" fill="#64748b" font-size="9">same build, same PM2 app</text>
+        <text x="576" y="184" fill="#334155">✓ 1 ticket = 1 PR</text>
+        <text x="590" y="198" fill="#64748b" font-size="9">each shipped on its own</text>
+      </g>
+    </svg>
+  </figure></div>
+  <p>Each PR was squash-merged, deployed, and checked in production (health, every route registered) before
+    the next. The e2e suite stayed green throughout and grew three suites along the way: groups, receipts, price comparison.</p>
+</section>
+
+<!-- ───────────────────────────── 13. TRADE-OFFS ───────────────────────────── -->
+<section class="page">
+  <h2><span class="num">13</span>Trade-offs — the honest version</h2>
+  <p class="lead">Every pattern has a price. Saying it out loud is part of using it well.</p>
+  <table>
+    <tr><th style="width:38%">Cost</th><th>Answer</th></tr>
+    <tr><td>More files and indirection (port, adapter, mapper, use case)</td><td>Paid where rules live — Spending, Receipt reading. Analytics and Identity stay thin on purpose.</td></tr>
+    <tr><td>Mappers duplicate shapes</td><td>That duplication <i>is</i> the decoupling. Keep mappers dumb and tested by round-trip.</td></tr>
+    <tr><td>Loading whole aggregates can be heavier than a targeted <code>updateMany</code></td><td>Groups are small (a receipt's lines). Bulk operations get a dedicated repository method, as long as no rule is bypassed.</td></tr>
+    <tr><td>Learning curve</td><td>The doc, this guide, and the fitness test as a guard-rail.</td></tr>
+    <tr><td>"Overkill for a personal-finance app"</td><td>~9k lines of API, OCR, a bulk-read pipeline, price comparison and bots using it daily: past the size where structure pays.</td></tr>
+  </table>
+
+  <div class="keep"><h3>When <em>not</em> to do DDD</h3>
+  <div class="grid2">
+    <div class="card"><ul><li>CRUD with no rules</li><li>A prototype that will be thrown away</li><li>A read-only reporting service</li></ul></div>
+    <div class="card"><p><b>Strategic DDD</b> (contexts, language) is almost always useful.<br><b>Tactical DDD</b> (aggregates…) only where rules live.</p></div>
+  </div></div>
+
+  <div class="keep"><h3>Decisions taken along the way</h3>
+  <table>
+    <tr><th style="width:38%">Decision</th><th>Why</th></tr>
+    <tr><td>Ports as abstract classes</td><td>The port, the type and the Nest token at once.</td></tr>
+    <tr><td>No typed IDs (<code>UserId</code>…)</td><td>Casting at every controller for little gain; ownership is in every port's signature anyway.</td></tr>
+    <tr><td>Events in-process, no broker</td><td>One process, one DB; the outbox is the documented upgrade path.</td></tr>
+    <tr><td><code>ReceiptAttached</code> event dropped</td><td>The bulk read's candidates are a query over the rows — already the source of truth.</td></tr>
+    <tr><td>Thin budget planning &amp; price comparison</td><td>Rules as value objects and pure functions around repository ports; no aggregate where there is no invariant.</td></tr>
+  </table></div>
+</section>
+
+<!-- ───────────────────────────── 14. INTERVIEW ───────────────────────────── -->
+<section class="page">
+  <h2><span class="num">14</span>Interview cheat sheet</h2>
+  <div class="callout" style="font-size:10.4pt"><b>The 30-second pitch.</b> "My personal-finance API is NestJS + Prisma + Redis, in
+    production with synthetic users running daily against it. As it grew — receipt OCR, grouped receipts, price
+    comparison — the business rules were spread across services that also did persistence and HTTP. I restructured
+    it with DDD and a hexagonal architecture: six bounded contexts, aggregates that own their invariants, ports and
+    adapters so the domain is pure TypeScript, CQRS-style read models for the stats, domain events between contexts,
+    and fitness tests that keep the dependency rule. The migration was a strangler, context by context, with the e2e
+    suite as the contract."</div>
+
+  <table>
+    <tr><th style="width:34%">Question</th><th>Short answer</th></tr>
+    <tr><td>DDD vs hexagonal vs clean?</td><td>DDD is modelling (what the domain is); hexagonal / clean / onion are structure (dependencies point inward). Same core idea: dependency inversion.</td></tr>
+    <tr><td>What is an aggregate, how big?</td><td>A consistency boundary changed in one transaction through its root. Sized by what must hold <i>immediately</i>; small by default. SpendingGroup owns its lines; Category is outside.</td></tr>
+    <tr><td>Entity vs value object?</td><td>Identity vs equality by value. Money, UnitPrice, CatalogName: immutable, self-validating, replace primitives.</td></tr>
+    <tr><td>Where does validation go?</td><td>Shape at the edge (DTO); business rules in the domain; DB constraints as the last net.</td></tr>
+    <tr><td>A repository per table?</td><td>Per aggregate. SpendingGroupRepository saves the group <i>and</i> its lines.</td></tr>
+    <tr><td>Transactions across aggregates?</td><td>Avoid them: one aggregate per transaction, events for the rest, an outbox if delivery must survive a crash.</td></tr>
+    <tr><td>Why abstract classes for ports in Nest?</td><td>Interfaces are erased at runtime; an abstract class is type and DI token at once.</td></tr>
+    <tr><td>Isn't CQRS overkill?</td><td>Full CQRS with two stores, yes. Aggregates for writes, direct queries for reads: just honest.</td></tr>
+    <tr><td>How do you keep the architecture?</td><td>A lint rule and fitness tests on every import, in the deploy's checks.</td></tr>
+    <tr><td>How did you migrate safely?</td><td>Strangler, one context per PR, HTTP contract and schema frozen, e2e as the contract, deployed and checked each time.</td></tr>
+  </table>
+
+  <h3>Vocabulary to use naturally</h3>
+  <p style="font-size:9.4pt;color:var(--muted)">bounded context · ubiquitous language · aggregate root · invariant · value object · repository ·
+    domain event · anti-corruption layer · ports &amp; adapters · driving / driven · dependency inversion · composition root ·
+    CQRS · transactional outbox · strangler fig · fitness function</p>
+  <h3>Further reading</h3>
+  <p style="font-size:9.4pt;color:var(--muted)">Eric Evans, <i>Domain-Driven Design</i> (2003) · Vaughn Vernon, <i>DDD Distilled</i> ·
+    Vlad Khononov, <i>Learning Domain-Driven Design</i> (2021) · Alistair Cockburn, "Hexagonal Architecture" (2005) ·
+    Martin Fowler's bliki: BoundedContext, CQRS, StranglerFigApplication.</p>
+</section>
+
+</body>
+</html>
