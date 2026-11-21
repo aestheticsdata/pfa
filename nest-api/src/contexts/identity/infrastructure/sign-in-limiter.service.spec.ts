@@ -1,5 +1,9 @@
+import {
+  MAX_SIGN_IN_FAILURES,
+  SIGN_IN_WINDOW_SECONDS,
+  SignInLimiterService,
+} from "@contexts/identity/infrastructure/sign-in-limiter.service";
 import type { RedisService } from "@redis/redis.service";
-import { MAX_SIGN_IN_FAILURES, SIGN_IN_WINDOW_SECONDS, SignInLimiterService } from "@users/sign-in-limiter.service";
 
 /** The sign-in brake (PFA-260): per address and per email, one window from the first failure. */
 describe("SignInLimiterService", () => {

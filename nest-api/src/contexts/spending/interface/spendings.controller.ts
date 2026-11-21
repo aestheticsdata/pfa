@@ -1,3 +1,6 @@
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { DeleteSpending } from "@contexts/spending/application/delete-spending.use-case";
 import { RecordSpending } from "@contexts/spending/application/record-spending.use-case";
 import { ReviseSpending } from "@contexts/spending/application/revise-spending.use-case";
@@ -11,9 +14,6 @@ import type { UserKind } from "@monitoring/interfaces/monitoringTypes";
 import { MetricsService } from "@monitoring/metrics.service";
 import { GetUserKind } from "@monitoring/user-kind.decorator";
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("spendings")
 @UseGuards(SessionAuthGuard, CsrfGuard)

@@ -1,4 +1,4 @@
-import { isSyntheticEmail } from "./synthetic-email.util";
+import { isSyntheticEmail } from "@contexts/identity/domain/synthetic-email";
 
 describe("isSyntheticEmail", () => {
   it("accepts the reserved domain, whatever the case", () => {

@@ -1,3 +1,4 @@
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { PricesService } from "@contexts/price-comparison/application/prices.service";
 import { ProductTypesService } from "@contexts/price-comparison/application/product-types.service";
 import { StoresService } from "@contexts/price-comparison/application/stores.service";
@@ -11,7 +12,6 @@ import { PricesController } from "@contexts/price-comparison/interface/prices.co
 import { ProductTypesController } from "@contexts/price-comparison/interface/product-types.controller";
 import { StoresController } from "@contexts/price-comparison/interface/stores.controller";
 import { Module } from "@nestjs/common";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 
 /** The price comparison context (PFA-275): stores, product types, unit prices per store. */
 @Module({

@@ -1,4 +1,16 @@
 import { env } from "@config/env";
+import { AccountsService } from "@contexts/identity/application/accounts.service";
+import type { SignInResponse } from "@contexts/identity/domain/interfaces/identityTypes";
+import { isSyntheticEmail } from "@contexts/identity/domain/synthetic-email";
+import { SignInLimiterService } from "@contexts/identity/infrastructure/sign-in-limiter.service";
+import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@contexts/identity/interface/csrf-token";
+import { AddUserDto } from "@contexts/identity/interface/dto/add-user.dto";
+import { SignInDto } from "@contexts/identity/interface/dto/sign-in.dto";
+import { UpdateUserDto } from "@contexts/identity/interface/dto/update-user.dto";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
+import { SignupGuard } from "@contexts/identity/interface/guards/signup.guard";
+import { isSyntheticIpAllowed } from "@contexts/identity/interface/synthetic-ip";
 import {
   Body,
   Controller,
@@ -13,18 +25,6 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { RedisService } from "@redis/redis.service";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { clearCsrfToken, getOrCreateCsrfToken, rotateCsrfToken } from "@users/csrf-token.util";
-import { AddUserDto } from "@users/dto/add-user.dto";
-import { SignInDto } from "@users/dto/sign-in.dto";
-import { UpdateUserDto } from "@users/dto/update-user.dto";
-import { CsrfGuard } from "@users/guards/csrf.guard";
-import { SignupGuard } from "@users/guards/signup.guard";
-import { SignInLimiterService } from "@users/sign-in-limiter.service";
-import { isSyntheticEmail } from "@users/synthetic-email.util";
-import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
-import type { SignInResponse } from "@users/users.service";
-import { UsersService } from "@users/users.service";
 import type { Request, Response } from "express";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
@@ -46,7 +46,7 @@ type AuthEvent = {
 @Controller("users")
 export class UsersController {
   constructor(
-    private readonly usersService: UsersService,
+    private readonly usersService: AccountsService,
     private readonly redisService: RedisService,
     private readonly signInLimiter: SignInLimiterService,
     @InjectPinoLogger(UsersController.name) private readonly logger: PinoLogger,
@@ -108,7 +108,7 @@ export class UsersController {
   @UseGuards(SessionAuthGuard)
   async me(@Req() req: Request): Promise<SignInResponse & { csrfToken: string }> {
     const userId = (req as Request & { user: { id: string } }).user.id;
-    const response = await this.usersService.findById(userId);
+    const response = await this.usersService.profile(userId);
     return {
       ...response,
       csrfToken: getOrCreateCsrfToken(req),
@@ -120,7 +120,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async updateMe(@Body() dto: UpdateUserDto, @Req() req: Request): Promise<SignInResponse> {
     const userId = (req as Request & { user: { id: string } }).user.id;
-    return this.usersService.updateUser(userId, dto);
+    return this.usersService.setLanguage(userId, dto.language);
   }
 
   @Get("csrf")
@@ -167,7 +167,7 @@ export class UsersController {
     if (await this.assertNotLocked(req, dto.email)) {
       await this.signInLimiter.recordAttempt(req.ip, dto.email);
     }
-    const result = await this.usersService.addUser(dto);
+    const result = await this.usersService.register(dto);
     this.openSession(req, result);
     await this.redisService.trackSession(result.user.id, req.sessionID);
     // An account being created on a single-user instance is the one event worth never missing.

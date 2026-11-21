@@ -17,8 +17,8 @@ import {
   WeekdayCategoriesController,
   WeeklyStatsController,
 } from "@contexts/analytics/interface/stats.controller";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { Module } from "@nestjs/common";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 
 /**
  * The analytics context (PFA-277): the read side only. Statistics, trends and the dashboard's

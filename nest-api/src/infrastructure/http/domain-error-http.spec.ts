@@ -1,6 +1,18 @@
 import { toHttpException } from "@infrastructure/http/domain-error-http";
-import { BadRequestException, ConflictException, ForbiddenException, NotFoundException } from "@nestjs/common";
-import { ConflictError, ForbiddenError, InvalidInputError, NotFoundError } from "@shared-kernel/domain-error";
+import {
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
+import {
+  ConflictError,
+  ForbiddenError,
+  InvalidInputError,
+  NotFoundError,
+  UnauthorizedError,
+} from "@shared-kernel/domain-error";
 
 describe("toHttpException", () => {
   it("answers each kind with the status the route used to throw", () => {
@@ -8,6 +20,7 @@ describe("toHttpException", () => {
     expect(toHttpException(new InvalidInputError("x"))).toBeInstanceOf(BadRequestException);
     expect(toHttpException(new ConflictError("x"))).toBeInstanceOf(ConflictException);
     expect(toHttpException(new ForbiddenError("x"))).toBeInstanceOf(ForbiddenException);
+    expect(toHttpException(new UnauthorizedError("x"))).toBeInstanceOf(UnauthorizedException);
   });
 
   it("keeps the body word for word", () => {

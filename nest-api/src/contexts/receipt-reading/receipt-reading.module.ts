@@ -1,3 +1,4 @@
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { PriceComparisonModule } from "@contexts/price-comparison/price-comparison.module";
 import { BulkReceiptReadService } from "@contexts/receipt-reading/application/bulk-receipt-read.service";
 import { InvoiceImagesService } from "@contexts/receipt-reading/application/invoice-images.service";
@@ -26,7 +27,6 @@ import { ReceiptLinesController } from "@contexts/receipt-reading/interface/rece
 import { ReceiptProposalsController } from "@contexts/receipt-reading/interface/receipt-proposals.controller";
 import { SpendingReceiptsController } from "@contexts/receipt-reading/interface/spending-receipts.controller";
 import { Module } from "@nestjs/common";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 
 /**
  * The receipt reading context (PFA-274): receipt files, the OCR, the saved lines and the bulk

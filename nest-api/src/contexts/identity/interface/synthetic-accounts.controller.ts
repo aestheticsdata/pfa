@@ -1,7 +1,7 @@
+import { SyntheticAccountsService } from "@contexts/identity/application/synthetic-accounts.service";
+import type { PurgeCounts } from "@contexts/identity/domain/interfaces/identityTypes";
+import { SyntheticAdminGuard } from "@contexts/identity/interface/guards/synthetic-admin.guard";
 import { Controller, Delete, HttpCode, HttpStatus, Param, Post, UseGuards } from "@nestjs/common";
-import { SyntheticAdminGuard } from "@users/guards/synthetic-admin.guard";
-import { SyntheticAccountsService } from "@users/synthetic-accounts.service";
-import type { PurgeCounts } from "@users/synthetic-purge.util";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 
 /**

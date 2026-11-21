@@ -1,7 +1,7 @@
 import { env } from "@config/env";
+import { isSyntheticEmail } from "@contexts/identity/domain/synthetic-email";
+import { isSyntheticIpAllowed } from "@contexts/identity/interface/synthetic-ip";
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
-import { isSyntheticEmail } from "@users/synthetic-email.util";
-import { isSyntheticIpAllowed } from "@users/synthetic-ip.util";
 import type { Request } from "express";
 import { InjectPinoLogger, PinoLogger } from "nestjs-pino";
 

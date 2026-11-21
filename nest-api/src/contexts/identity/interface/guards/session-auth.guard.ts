@@ -1,9 +1,6 @@
+import type { SessionUser } from "@contexts/identity/domain/interfaces/identityTypes";
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { Request } from "express";
-
-export interface SessionUser {
-  id: string;
-}
 
 @Injectable()
 export class SessionAuthGuard implements CanActivate {

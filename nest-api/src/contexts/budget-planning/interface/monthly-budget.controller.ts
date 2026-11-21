@@ -2,10 +2,10 @@ import { MonthlyBudgetService } from "@contexts/budget-planning/application/mont
 import { CreateDashboardDto } from "@contexts/budget-planning/interface/dto/create-dashboard.dto";
 import { DashboardQueryDto } from "@contexts/budget-planning/interface/dto/dashboard-query.dto";
 import { UpdateDashboardDto } from "@contexts/budget-planning/interface/dto/update-dashboard.dto";
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from "@nestjs/common";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { CsrfGuard } from "@users/guards/csrf.guard";
 import type { Response } from "express";
 
 /** A month's budget (PFA-276), on the `/dashboard` routes it has always had. */

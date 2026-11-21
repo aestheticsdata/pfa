@@ -1,4 +1,4 @@
-import { purgeSyntheticAccounts } from "./synthetic-purge.util";
+import { purgeSyntheticAccounts } from "@contexts/identity/infrastructure/synthetic-purge";
 
 /**
  * Unit tests for purgeSyntheticAccounts (PFA-12): the one function able to

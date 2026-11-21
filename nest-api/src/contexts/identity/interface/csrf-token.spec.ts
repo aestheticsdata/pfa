@@ -1,4 +1,3 @@
-import type { Request } from "express";
 import {
   clearCsrfToken,
   getOrCreateCsrfToken,
@@ -6,7 +5,8 @@ import {
   hasValidCsrfToken,
   isSafeHttpMethod,
   rotateCsrfToken,
-} from "./csrf-token.util";
+} from "@contexts/identity/interface/csrf-token";
+import type { Request } from "express";
 
 /**
  * Unit tests for the CSRF double-submit helpers (PFA-12): the session holds the
