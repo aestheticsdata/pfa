@@ -4,6 +4,9 @@ import { CreateRecurringDto } from "@contexts/budget-planning/interface/dto/crea
 import { RecurringsDrawnQueryDto } from "@contexts/budget-planning/interface/dto/recurrings-drawn-query.dto";
 import { RecurringsQueryDto } from "@contexts/budget-planning/interface/dto/recurrings-query.dto";
 import { UpdateRecurringDto } from "@contexts/budget-planning/interface/dto/update-recurring.dto";
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import {
   Body,
   Controller,
@@ -17,9 +20,6 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("recurrings")
 @UseGuards(SessionAuthGuard, CsrfGuard)

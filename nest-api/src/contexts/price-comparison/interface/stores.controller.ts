@@ -1,10 +1,10 @@
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { StoresService } from "@contexts/price-comparison/application/stores.service";
 import { MergeDto } from "@contexts/price-comparison/interface/dto/merge.dto";
 import { StoreDto } from "@contexts/price-comparison/interface/dto/store.dto";
 import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from "@nestjs/common";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("stores")
 @UseGuards(SessionAuthGuard, CsrfGuard)

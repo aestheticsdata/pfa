@@ -14,8 +14,8 @@ import { CategoriesController } from "@contexts/budget-planning/interface/catego
 import { ExceptionalsController } from "@contexts/budget-planning/interface/exceptionals.controller";
 import { MonthlyBudgetController } from "@contexts/budget-planning/interface/monthly-budget.controller";
 import { RecurringsController } from "@contexts/budget-planning/interface/recurrings.controller";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { Module } from "@nestjs/common";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 
 /** The budget planning context (PFA-276): categories, recurring charges, exceptionals, the month's budget. */
 @Module({

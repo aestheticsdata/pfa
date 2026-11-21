@@ -28,10 +28,10 @@ function loadEnv(): void {
 }
 loadEnv();
 
+import { isSyntheticEmail, SYNTHETIC_ACCOUNTS_WHERE } from "@contexts/identity/domain/synthetic-email";
+import { purgeSyntheticAccounts } from "@contexts/identity/infrastructure/synthetic-purge";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "../generated/prisma/client";
-import { isSyntheticEmail, SYNTHETIC_ACCOUNTS_WHERE } from "../src/users/synthetic-email.util";
-import { purgeSyntheticAccounts } from "../src/users/synthetic-purge.util";
 
 function makePrisma(): PrismaClient {
   const parsed = new URL(process.env.DATABASE_URL as string);

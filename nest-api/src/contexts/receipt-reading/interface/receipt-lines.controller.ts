@@ -1,9 +1,9 @@
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { ReceiptLinesService } from "@contexts/receipt-reading/application/receipt-lines.service";
 import { SaveReceiptLinesDto } from "@contexts/receipt-reading/interface/dto/save-receipt-lines.dto";
 import { Body, Controller, Get, Param, Post, Put, UseGuards } from "@nestjs/common";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("spendings/:id/lines")
 @UseGuards(SessionAuthGuard, CsrfGuard)

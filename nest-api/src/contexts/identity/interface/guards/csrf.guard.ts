@@ -1,5 +1,5 @@
+import { hasAuthenticatedSession, hasValidCsrfToken, isSafeHttpMethod } from "@contexts/identity/interface/csrf-token";
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common";
-import { hasAuthenticatedSession, hasValidCsrfToken, isSafeHttpMethod } from "@users/csrf-token.util";
 import type { Request } from "express";
 
 @Injectable()

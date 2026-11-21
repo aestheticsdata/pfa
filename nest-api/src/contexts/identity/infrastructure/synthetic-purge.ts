@@ -1,22 +1,8 @@
 import { rm } from "node:fs/promises";
 import { join } from "node:path";
-import type { PrismaClient } from "../../generated/prisma/client";
-import { isSyntheticEmail, SYNTHETIC_ACCOUNTS_WHERE } from "./synthetic-email.util";
-
-export interface SyntheticAccountRef {
-  ID: string;
-  email: string;
-}
-
-export interface PurgeCounts {
-  users: number;
-  spendings: number;
-  groups: number;
-  recurrings: number;
-  dashboards: number;
-  exceptionals: number;
-  categories: number;
-}
+import type { PurgeCounts, SyntheticAccountRef } from "@contexts/identity/domain/interfaces/identityTypes";
+import { isSyntheticEmail, SYNTHETIC_ACCOUNTS_WHERE } from "@contexts/identity/domain/synthetic-email";
+import type { PrismaClient } from "@generated/prisma/client";
 
 /**
  * Deletes synthetic accounts and everything they own, in one transaction, then their invoices

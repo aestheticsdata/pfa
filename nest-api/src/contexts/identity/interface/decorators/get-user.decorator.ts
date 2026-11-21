@@ -1,5 +1,5 @@
+import type { SessionUser } from "@contexts/identity/domain/interfaces/identityTypes";
 import { createParamDecorator, ExecutionContext } from "@nestjs/common";
-import { SessionUser } from "@spendings/guards/session-auth.guard";
 
 export const GetUserId = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
   const request = ctx.switchToHttp().getRequest<{ user: SessionUser }>();

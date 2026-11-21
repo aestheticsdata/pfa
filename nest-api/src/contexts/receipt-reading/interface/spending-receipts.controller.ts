@@ -1,11 +1,11 @@
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { ReceiptAttachmentsService } from "@contexts/receipt-reading/application/receipt-attachments.service";
 import { invoiceUploadOptions } from "@contexts/receipt-reading/infrastructure/files/upload.config";
 import { SpendingIdsDto } from "@contexts/receipt-reading/interface/dto/spending-ids.dto";
 import { BadRequestException, Body, Controller, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { CsrfGuard } from "@users/guards/csrf.guard";
 
 @Controller("spendings/receipts")
 @UseGuards(SessionAuthGuard, CsrfGuard)

@@ -4,6 +4,7 @@ import { validate } from "@config/env.validation";
 import sshBackupConfig from "@config/ssh-backup.config";
 import { AnalyticsModule } from "@contexts/analytics/analytics.module";
 import { BudgetPlanningModule } from "@contexts/budget-planning/budget-planning.module";
+import { IdentityModule } from "@contexts/identity/identity.module";
 import { PriceComparisonModule } from "@contexts/price-comparison/price-comparison.module";
 import { ReceiptReadingModule } from "@contexts/receipt-reading/receipt-reading.module";
 import { SpendingModule } from "@contexts/spending/spending.module";
@@ -16,7 +17,6 @@ import { ConfigModule } from "@nestjs/config";
 import { APP_FILTER } from "@nestjs/core";
 import { ScheduleModule } from "@nestjs/schedule";
 import { RedisModule } from "@redis/redis.module";
-import { UsersModule } from "@users/users.module";
 import { LoggerModule } from "nestjs-pino";
 import { MonitoringModule } from "./monitoring/monitoring.module";
 import { PrismaModule } from "./prisma/prisma.module";
@@ -32,7 +32,7 @@ import { PrismaModule } from "./prisma/prisma.module";
     PrismaModule,
     EventsModule,
     MonitoringModule,
-    UsersModule,
+    IdentityModule,
     // Before the Spending context: its `/spendings/upload` routes must win over `/spendings/:id`.
     ReceiptReadingModule,
     SpendingModule,

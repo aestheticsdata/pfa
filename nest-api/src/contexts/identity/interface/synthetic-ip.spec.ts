@@ -1,4 +1,4 @@
-import { isSyntheticIpAllowed } from "./synthetic-ip.util";
+import { isSyntheticIpAllowed } from "@contexts/identity/interface/synthetic-ip";
 
 describe("isSyntheticIpAllowed", () => {
   it("allows an address on the list, IPv4-mapped or not", () => {

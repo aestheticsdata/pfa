@@ -1,4 +1,4 @@
-import { isAllowed } from "@users/guards/synthetic-admin.guard";
+import { isAllowed } from "@contexts/identity/interface/guards/synthetic-admin.guard";
 
 import type { Request } from "express";
 

@@ -1,4 +1,5 @@
 import { BudgetPlanningModule } from "@contexts/budget-planning/budget-planning.module";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { CreateSpendingGroup } from "@contexts/spending/application/create-spending-group.use-case";
 import { DeleteSpending } from "@contexts/spending/application/delete-spending.use-case";
 import { DeleteSpendingGroup } from "@contexts/spending/application/delete-spending-group.use-case";
@@ -18,7 +19,6 @@ import { SpendingGroupsController } from "@contexts/spending/interface/spending-
 import { SpendingsController } from "@contexts/spending/interface/spendings.controller";
 import { MonitoringModule } from "@monitoring/monitoring.module";
 import { Module } from "@nestjs/common";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 
 /**
  * The Spending context (PFA-273), and its composition root: the one place that knows which adapter

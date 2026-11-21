@@ -1,8 +1,8 @@
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { BulkReceiptReadService } from "@contexts/receipt-reading/application/bulk-receipt-read.service";
 import { Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { CsrfGuard } from "@users/guards/csrf.guard";
 
 /** Reading the user's saved receipts in bulk, then reviewing them (PFA-223). */
 @Controller("receipt-proposals")

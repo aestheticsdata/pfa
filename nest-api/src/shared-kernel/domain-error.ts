@@ -9,6 +9,7 @@ export const DOMAIN_ERROR_KIND = {
   invalidInput: "invalidInput",
   conflict: "conflict",
   forbidden: "forbidden",
+  unauthorized: "unauthorized",
 } as const;
 
 /**
@@ -42,4 +43,9 @@ export class ConflictError extends DomainError {
 
 export class ForbiddenError extends DomainError {
   readonly kind = DOMAIN_ERROR_KIND.forbidden;
+}
+
+/** Who is asking is not established: unknown account, wrong password. */
+export class UnauthorizedError extends DomainError {
+  readonly kind = DOMAIN_ERROR_KIND.unauthorized;
 }

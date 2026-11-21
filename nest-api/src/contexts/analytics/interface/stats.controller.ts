@@ -13,9 +13,9 @@ import { SpendingPaceQueryDto } from "@contexts/analytics/interface/dto/spending
 import { StatisticsQueryDto } from "@contexts/analytics/interface/dto/statistics-query.dto";
 import { WeekdayCategoriesQueryDto } from "@contexts/analytics/interface/dto/weekday-categories-query.dto";
 import { WeeklyStatsQueryDto } from "@contexts/analytics/interface/dto/weekly-stats-query.dto";
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
 
 @Controller("weeklystats")
 @UseGuards(SessionAuthGuard)

@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   HttpException,
   NotFoundException,
+  UnauthorizedException,
 } from "@nestjs/common";
 import { DOMAIN_ERROR_KIND, DomainError } from "@shared-kernel/domain-error";
 import type { DomainErrorKind } from "@shared-kernel/interfaces/sharedKernelTypes";
@@ -13,6 +14,7 @@ const HTTP_EXCEPTION_BY_KIND: Record<DomainErrorKind, new (response: string | ob
   [DOMAIN_ERROR_KIND.invalidInput]: BadRequestException,
   [DOMAIN_ERROR_KIND.conflict]: ConflictException,
   [DOMAIN_ERROR_KIND.forbidden]: ForbiddenException,
+  [DOMAIN_ERROR_KIND.unauthorized]: UnauthorizedException,
 };
 
 /**

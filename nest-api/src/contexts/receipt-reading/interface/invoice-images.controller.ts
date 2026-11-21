@@ -1,3 +1,6 @@
+import { GetUserId } from "@contexts/identity/interface/decorators/get-user.decorator";
+import { CsrfGuard } from "@contexts/identity/interface/guards/csrf.guard";
+import { SessionAuthGuard } from "@contexts/identity/interface/guards/session-auth.guard";
 import { InvoiceImagesService } from "@contexts/receipt-reading/application/invoice-images.service";
 import { invoiceUploadOptions } from "@contexts/receipt-reading/infrastructure/files/upload.config";
 import { DeleteInvoiceImageDto } from "@contexts/receipt-reading/interface/dto/delete-invoice-image.dto";
@@ -16,9 +19,6 @@ import {
   UseInterceptors,
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { GetUserId } from "@spendings/decorators/get-user.decorator";
-import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
-import { CsrfGuard } from "@users/guards/csrf.guard";
 import type { Response } from "express";
 
 /**

@@ -10,6 +10,8 @@ import { CreateSpendingCategoryDto } from "@contexts/budget-planning/interface/d
 import { UpdateCategoryDto } from "@contexts/budget-planning/interface/dto/update-category.dto";
 import { UpdateExceptionalDto } from "@contexts/budget-planning/interface/dto/update-exceptional.dto";
 import { UpdateRecurringDto } from "@contexts/budget-planning/interface/dto/update-recurring.dto";
+import { AddUserDto } from "@contexts/identity/interface/dto/add-user.dto";
+import { SignInDto } from "@contexts/identity/interface/dto/sign-in.dto";
 import { GROUP_LABEL_SEPARATOR } from "@contexts/spending/domain/group-label";
 import { CreateSpendingDto } from "@contexts/spending/interface/dto/create-spending.dto";
 import { CreateSpendingGroupDto } from "@contexts/spending/interface/dto/create-spending-group.dto";
@@ -22,8 +24,6 @@ import { UpdateSpendingDto } from "@contexts/spending/interface/dto/update-spend
 import { UpdateSpendingGroupDto } from "@contexts/spending/interface/dto/update-spending-group.dto";
 import { plainToInstance } from "class-transformer";
 import { validate } from "class-validator";
-import { AddUserDto } from "../users/dto/add-user.dto";
-import { SignInDto } from "../users/dto/sign-in.dto";
 
 /**
  * COS-180 — every user-writable text field is bounded on the width of the column
