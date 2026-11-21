@@ -5,7 +5,8 @@ NestJS API for PFA (Prisma on MySQL, Redis sessions), organised by bounded conte
 ## Architecture
 
 Domain-Driven Design laid out as a hexagonal architecture (ports & adapters). The full explainer —
-why, how, the worked example, the trade-offs — is [docs/ddd-hexagonal.md](docs/ddd-hexagonal.md).
+why, how, the worked example, the trade-offs — is [docs/ddd-hexagonal.md](docs/ddd-hexagonal.md). The same, illustrated:
+[docs/ddd-hexagonal.pdf](docs/ddd-hexagonal.pdf).
 
 ```
 src/
