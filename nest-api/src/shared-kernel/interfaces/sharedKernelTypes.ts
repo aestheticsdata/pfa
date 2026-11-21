@@ -8,3 +8,6 @@ export interface DomainEvent {
   readonly name: string;
   readonly ownerId: string;
 }
+
+/** Reacts to one kind of domain event. */
+export type DomainEventHandler = (event: DomainEvent) => Promise<void>;

@@ -1,4 +1,5 @@
 import type { NewSpending, SpendingRevision, SpendingState } from "@contexts/spending/domain/interfaces/spendingTypes";
+import { SPENDING_EVENT } from "@contexts/spending/domain/spending-events";
 import { AggregateRoot } from "@shared-kernel/aggregate-root";
 import { Money } from "@shared-kernel/money";
 
@@ -40,6 +41,16 @@ export class Spending extends AggregateRoot {
     this.state.label = revision.label;
     this.state.amount = Money.of(revision.amount, this.state.amount.currency);
     this.state.categoryId = revision.categoryId;
+  }
+
+  /** The spending goes; its receipt may now be held by nobody. */
+  discard(): void {
+    this.record({
+      name: SPENDING_EVENT.spendingDeleted,
+      ownerId: this.state.ownerId,
+      subjectId: this.state.id,
+      receipts: [this.state.receipt],
+    });
   }
 
   snapshot(): Readonly<SpendingState> {

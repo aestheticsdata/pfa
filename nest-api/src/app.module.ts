@@ -8,6 +8,7 @@ import { PriceComparisonModule } from "@contexts/price-comparison/price-comparis
 import { ReceiptReadingModule } from "@contexts/receipt-reading/receipt-reading.module";
 import { SpendingModule } from "@contexts/spending/spending.module";
 import { DbBackupModule } from "@infrastructure/db-backup/db-backup.module";
+import { EventsModule } from "@infrastructure/events/events.module";
 import { AllExceptionsFilter, buildLoggerParams, TraceIdMiddleware } from "@infrastructure/logger";
 import { SshBackupModule } from "@infrastructure/ssh-backup/ssh-backup.module";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
@@ -29,10 +30,12 @@ import { PrismaModule } from "./prisma/prisma.module";
     ScheduleModule.forRoot(),
     RedisModule,
     PrismaModule,
+    EventsModule,
     MonitoringModule,
     UsersModule,
-    SpendingModule,
+    // Before the Spending context: its `/spendings/upload` routes must win over `/spendings/:id`.
     ReceiptReadingModule,
+    SpendingModule,
     PriceComparisonModule,
     BudgetPlanningModule,
     AnalyticsModule,

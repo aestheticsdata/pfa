@@ -3,6 +3,7 @@ import { BulkReceiptReadService } from "@contexts/receipt-reading/application/bu
 import { InvoiceImagesService } from "@contexts/receipt-reading/application/invoice-images.service";
 import { ReceiptAttachmentsService } from "@contexts/receipt-reading/application/receipt-attachments.service";
 import { ReceiptLinesService } from "@contexts/receipt-reading/application/receipt-lines.service";
+import { ReleaseReceiptsHandler } from "@contexts/receipt-reading/application/release-receipts.handler";
 import { ProductTypeCatalog } from "@contexts/receipt-reading/domain/ports/product-type-catalog";
 import { QueuedReceiptRepository } from "@contexts/receipt-reading/domain/ports/queued-receipt.repository";
 import { ReceiptFileStore } from "@contexts/receipt-reading/domain/ports/receipt-file-store";
@@ -19,6 +20,8 @@ import {
 import { PrismaQueuedReceiptRepository } from "@contexts/receipt-reading/infrastructure/prisma-queued-receipt.repository";
 import { PrismaReceiptHolders } from "@contexts/receipt-reading/infrastructure/prisma-receipt-holders";
 import { PrismaReceiptLinesRepository } from "@contexts/receipt-reading/infrastructure/prisma-receipt-lines.repository";
+import { SpendingEventSubscriptions } from "@contexts/receipt-reading/infrastructure/spending-event-subscriptions";
+import { InvoiceImagesController } from "@contexts/receipt-reading/interface/invoice-images.controller";
 import { ReceiptLinesController } from "@contexts/receipt-reading/interface/receipt-lines.controller";
 import { ReceiptProposalsController } from "@contexts/receipt-reading/interface/receipt-proposals.controller";
 import { SpendingReceiptsController } from "@contexts/receipt-reading/interface/spending-receipts.controller";
@@ -31,12 +34,19 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
  */
 @Module({
   imports: [PriceComparisonModule],
-  controllers: [SpendingReceiptsController, ReceiptLinesController, ReceiptProposalsController],
+  controllers: [
+    InvoiceImagesController,
+    SpendingReceiptsController,
+    ReceiptLinesController,
+    ReceiptProposalsController,
+  ],
   providers: [
     ReceiptLinesService,
     BulkReceiptReadService,
     ReceiptAttachmentsService,
     InvoiceImagesService,
+    ReleaseReceiptsHandler,
+    SpendingEventSubscriptions,
     SessionAuthGuard,
     LocalReceiptFileStore,
     { provide: ReceiptFileStore, useExisting: LocalReceiptFileStore },
@@ -47,7 +57,5 @@ import { SessionAuthGuard } from "@spendings/guards/session-auth.guard";
     { provide: StoreDirectory, useClass: StoresServiceDirectory },
     { provide: ProductTypeCatalog, useClass: ProductTypesServiceCatalog },
   ],
-  // The Spending context releases receipts and serves the invoice image routes through these.
-  exports: [ReceiptFileStore, InvoiceImagesService],
 })
 export class ReceiptReadingModule {}

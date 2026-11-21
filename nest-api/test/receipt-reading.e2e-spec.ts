@@ -1,4 +1,6 @@
+import { existsSync } from "node:fs";
 import { join } from "node:path";
+import { env } from "@config/env";
 import { INestApplication } from "@nestjs/common";
 import request from "supertest";
 import { createAuthenticatedSession } from "./auth-session.helper";
@@ -25,6 +27,7 @@ const FIXTURE_IMAGE = join(__dirname, "fixtures", "galaxy.jpg");
 describe("Receipt reading (e2e)", () => {
   let app: INestApplication;
   let agent: Agent;
+  let userId: string;
   const day = "2018-06-15";
   const tag = `e2e-receipts-${Date.now()}`;
 
@@ -43,7 +46,9 @@ describe("Receipt reading (e2e)", () => {
 
   beforeAll(async () => {
     app = await createE2eApp();
-    agent = (await createAuthenticatedSession(app.getHttpServer() as SupertestApp)).agent;
+    const session = await createAuthenticatedSession(app.getHttpServer() as SupertestApp);
+    agent = session.agent;
+    userId = session.userId;
   });
 
   afterAll(async () => {
@@ -77,6 +82,26 @@ describe("Receipt reading (e2e)", () => {
     const image = await agent.get(`/api/spendings/upload/${b}`).query({ itemType: "spending" }).expect(200);
     const body = image.text ?? (Buffer.isBuffer(image.body) ? image.body.toString() : String(image.body));
     expect(body).toMatch(/^data:image\/\w+;base64,/);
+  }, 20000);
+
+  it("lets a receipt file go once its last spending is deleted, through the Spending events (PFA-278)", async () => {
+    const [a, b] = [await record("evt-a"), await record("evt-b")];
+    const shared = await agent
+      .post("/api/spendings/receipts")
+      .field("spendingIDs", JSON.stringify([a, b]))
+      .field("itemType", "spending")
+      .field("date", day)
+      .field("label", tag)
+      .attach("invoiceImageUpload", FIXTURE_IMAGE)
+      .expect(201);
+    const file = join(env.invoicesPath, userId, shared.body.invoicefile as string);
+    expect(existsSync(file)).toBe(true);
+
+    await agent.delete(`/api/spendings/${a}`).expect(200);
+    expect(existsSync(file)).toBe(true);
+
+    await agent.delete(`/api/spendings/${b}`).expect(200);
+    expect(existsSync(file)).toBe(false);
   }, 20000);
 
   it("refuses to share onto a spending that is not the user's", async () => {
